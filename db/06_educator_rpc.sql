@@ -9,7 +9,7 @@
 -- --------------------------------------------------- yeni istifadeci
 -- Supabase auth.users-e setir elave edende profil ozu yaransin.
 create or replace function app.handle_new_user() returns trigger
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 begin
   insert into public.profiles (id, full_name)
   values (new.id, coalesce(new.raw_user_meta_data->>'full_name', ''))
@@ -25,7 +25,8 @@ create trigger trg_auth_user_created
 -- ------------------------------------------------------- giris kodu
 --  Qarisdirilan simvollar yoxdur: 0/O, 1/I/L teseduf etmir.
 create or replace function app.gen_login_code(p_len int default 8) returns text
-language plpgsql volatile as $$
+language plpgsql volatile
+set search_path = public, extensions, pg_temp as $$
 declare
   alphabet constant text := 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   out text := '';
@@ -42,7 +43,7 @@ end $$;
 --  sagird sayi ve paket heddi.
 create or replace function public.rpc_my_context()
 returns jsonb
-language plpgsql stable security definer set search_path = public, pg_temp as $$
+language plpgsql stable security definer set search_path = public, extensions, pg_temp as $$
 declare v_uid uuid := auth.uid();
 begin
   if v_uid is null then
@@ -81,7 +82,7 @@ end $$;
 --  bu funksiya ile yaranir ki, uzvluk ve rol da eyni anda qurulsun.
 create or replace function public.rpc_create_account(p_type text, p_name text)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_uid  uuid := auth.uid();
   v_acc  uuid;
@@ -119,7 +120,7 @@ create or replace function public.rpc_create_class(
   p_account_id uuid, p_name text, p_kind text default 'tutor_group',
   p_program_slug text default null, p_level_code text default null)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_uid   uuid := auth.uid();
   v_class uuid;
@@ -170,7 +171,7 @@ create or replace function public.rpc_add_student(
   p_class_id uuid, p_full_name text, p_display_name text default null,
   p_birth_year int default null)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_uid     uuid := auth.uid();
   v_class   public.classes%rowtype;
@@ -226,7 +227,7 @@ end $$;
 -- ------------------------------------------------------- kodu yenilemek
 create or replace function public.rpc_reset_student_code(p_student_id uuid)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare v_code text; i int;
 begin
   if not app.can_read_student(p_student_id) then

@@ -3,6 +3,12 @@
 create schema if not exists auth;
 create schema if not exists app;
 
+-- Supabase uzanti funksiyalarini "extensions" sxeminde saxlayir, public-de yox.
+-- Lokal yoxlamani da eyni etmesek, search_path sehvleri yalniz istehsalatda
+-- uze cixir (bir defe bas verdi: gen_random_bytes tapilmadi -> HTTP 404).
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+
 -- Supabase-deki auth.users-in bize lazim olan sutunlari.
 create table if not exists auth.users (
   id                 uuid primary key default gen_random_uuid(),

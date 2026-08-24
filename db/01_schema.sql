@@ -13,6 +13,8 @@
 --      hec vaxt gonderilmir - bax 03_rpc.sql.
 -- =====================================================================
 
+-- Supabase-de pgcrypto artiq "extensions" sxeminde qurulub - bu setir
+-- orada tesirsizdir. Lokal qurulusda ise lazimdir.
 create extension if not exists pgcrypto;
 
 -- Daxili komekci funksiyalar ucun ayrica sxem. PostgREST-e acilmir.
@@ -331,7 +333,7 @@ create index if not exists idx_topics_subject     on public.topics(subject_id, p
 
 -- ------------------------------------------------------------- trigerler
 create or replace function app.touch_updated_at() returns trigger
-language plpgsql as $$
+language plpgsql set search_path = public, extensions, pg_temp as $$
 begin new.updated_at = now(); return new; end $$;
 
 drop trigger if exists trg_profiles_touch on public.profiles;

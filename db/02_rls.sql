@@ -15,7 +15,7 @@ create or replace function app.uid() returns uuid
 language sql stable as $$ select auth.uid() $$;
 
 create or replace function app.is_admin() returns boolean
-language sql stable security definer set search_path = public, pg_temp as $$
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select exists (
     select 1 from public.user_roles
     where user_id = auth.uid() and role = 'admin'
@@ -23,7 +23,7 @@ language sql stable security definer set search_path = public, pg_temp as $$
 $$;
 
 create or replace function app.is_account_member(p_account uuid) returns boolean
-language sql stable security definer set search_path = public, pg_temp as $$
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select exists (
     select 1 from public.account_members
     where account_id = p_account and user_id = auth.uid()
@@ -37,7 +37,7 @@ $$;
 --   - valideyn
 --   - oyrenenin ozu (boyuk istifadeci)
 create or replace function app.can_read_student(p_student uuid) returns boolean
-language sql stable security definer set search_path = public, pg_temp as $$
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select exists (
     select 1
     from public.students s
@@ -56,7 +56,7 @@ $$;
 
 -- Testi kim redakte ede biler: platforma testini admin, muellim testini sahibi.
 create or replace function app.can_manage_test(p_test uuid) returns boolean
-language sql stable security definer set search_path = public, pg_temp as $$
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select exists (
     select 1 from public.tests t
     where t.id = p_test
@@ -66,7 +66,7 @@ $$;
 
 -- Hesabin qüvvede olan abunesi varmi? Odenisli hesabatlarin qapisi.
 create or replace function app.has_active_subscription(p_account uuid) returns boolean
-language sql stable security definer set search_path = public, pg_temp as $$
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select exists (
     select 1 from public.subscriptions
     where account_id = p_account
@@ -262,7 +262,7 @@ create policy p_payments_read on public.payments
 --  olunur - frontend-e etibar edilmir.
 
 create or replace function app.account_student_count(p_account uuid) returns int
-language sql stable security definer set search_path = public, pg_temp as $$
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select count(*)::int from public.students
   where account_id = p_account and is_active
 $$;
@@ -274,7 +274,7 @@ language sql immutable as $$ select 5 $$;
 -- Hesabin ala bileceyi maksimum sagird sayi.
 -- Abune yoxdursa pulsuz hedd tetbiq olunur.
 create or replace function app.account_seat_limit(p_account uuid) returns int
-language sql stable security definer set search_path = public, pg_temp as $$
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select coalesce(
     (select case
               when p.max_students is null then 2147483647
@@ -292,7 +292,7 @@ language sql stable security definer set search_path = public, pg_temp as $$
 $$;
 
 create or replace function app.enforce_seat_limit() returns trigger
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_used  int;
   v_limit int;

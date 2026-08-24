@@ -10,13 +10,17 @@
 -- =====================================================================
 
 -- ----------------------------------------------------------- sessiya
+-- DIQQET: pgcrypto Supabase-de "extensions" sxemindedir, public-de yox.
+-- search_path teyin edilmese digest() tapilmir ve butun sagird terefi
+-- HTTP 404 verir. Bir defe bas verdi - tekrarlanmasin.
 create or replace function app.hash_token(p_token text) returns text
-language sql immutable as $$
+language sql immutable
+set search_path = public, extensions, pg_temp as $$
   select encode(digest(p_token, 'sha256'), 'hex')
 $$;
 
 create or replace function app.session_student(p_token text) returns uuid
-language sql stable security definer set search_path = public, pg_temp as $$
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
   select s.student_id
     from public.student_sessions s
     join public.students st on st.id = s.student_id
@@ -26,14 +30,14 @@ language sql stable security definer set search_path = public, pg_temp as $$
 $$;
 
 create or replace function app.gc_sessions() returns void
-language sql security definer set search_path = public, pg_temp as $$
+language sql security definer set search_path = public, extensions, pg_temp as $$
   delete from public.student_sessions where expires_at < now() - interval '1 day'
 $$;
 
 -- Sagird giris kodu ile daxil olur, qisa omurlu token alir.
 create or replace function public.rpc_student_login(p_code text)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_student public.students%rowtype;
   v_token   text;
@@ -73,7 +77,7 @@ end $$;
 -- + oz sinfine teyin olunmuş muellim/repetitor testleri.
 create or replace function public.rpc_student_tests(p_token text)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_student uuid := app.session_student(p_token);
   v_class   uuid;
@@ -111,7 +115,7 @@ end $$;
 -- Suallari duzgun cavab OLMADAN qaytarir.
 create or replace function public.rpc_start_attempt(p_token text, p_test_id uuid)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_student uuid := app.session_student(p_token);
   v_class   uuid;
@@ -199,7 +203,7 @@ end $$;
 create or replace function public.rpc_submit_attempt(
   p_token text, p_attempt_id uuid, p_answers jsonb)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_student uuid := app.session_student(p_token);
   v_att     public.attempts%rowtype;
@@ -303,7 +307,7 @@ end $$;
 -- Yalniz oz sinfi/qrupu daxilinde, yalniz gorunen ad ve faiz.
 create or replace function public.rpc_leaderboard(p_token text, p_test_id uuid, p_limit int default 20)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   v_student uuid := app.session_student(p_token);
   v_class   uuid;
