@@ -8,6 +8,8 @@ create schema if not exists app;
 -- uze cixir (bir defe bas verdi: gen_random_bytes tapilmadi -> HTTP 404).
 create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
+-- Supabase-de de "extensions" sxemindedir: generatorun oxsarliq suzgeci
+create extension if not exists pg_trgm with schema extensions;
 
 -- Supabase-deki auth.users-in bize lazim olan sutunlari.
 create table if not exists auth.users (

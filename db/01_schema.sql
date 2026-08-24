@@ -16,6 +16,7 @@
 -- Supabase-de pgcrypto artiq "extensions" sxeminde qurulub - bu setir
 -- orada tesirsizdir. Lokal qurulusda ise lazimdir.
 create extension if not exists pgcrypto;
+create extension if not exists pg_trgm;
 
 -- Daxili komekci funksiyalar ucun ayrica sxem. PostgREST-e acilmir.
 create schema if not exists app;
@@ -231,6 +232,10 @@ create table if not exists public.questions (
   --  Platforma seed-i ucun sabit acar: 07_seed_tests.sql tekrar
   --  isledilende sual yeniden yaranmir, UZERINE yazilir.
   ext_key     text unique,
+  --  Herfi tekrarin qarsisini alir (tekrar Word idxali).  Hesab
+  --  daxilinde unikaldir - iki muellimin eyni sualı olmasi normaldir,
+  --  onlar bir-birinin hovuzunda deyil.
+  body_hash   text,
   created_by  uuid references public.profiles(id) on delete set null,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),

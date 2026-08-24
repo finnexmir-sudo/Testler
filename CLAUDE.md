@@ -68,6 +68,7 @@ psql -d tehsil -f test/smoke_reports.sql
 psql -d tehsil -f test/smoke_assign.sql
 psql -d tehsil -f test/smoke_bank.sql
 psql -d tehsil -f test/smoke_bank_rpc.sql
+psql -d tehsil -f test/smoke_generator.sql
 
 # panel uçdan-uca (mock Supabase + Chromium)
 ./test/run_e2e.sh
@@ -93,7 +94,8 @@ Təzə baza: `db/run.sh` bütün faylları düzgün sıra ilə işlədir.
 
 Artıq işləyən Supabase layihəsi üçün isə **miqrasiya faylı** var —
 `db/10_teyinat_migrasiya.sql` (təyinatlar), `db/11_sual_banki.sql`
-(sual bankının strukturu) və `db/12_bank_rpc.sql` (bankın RPC-ləri).
+(sual bankının strukturu) `db/12_bank_rpc.sql` (bankın RPC-ləri) və `db/13_generator.sql`
+(generator).
 Hər biri əvvəlki faylları işlətmiş bazaya tək başına
 əlavə olunur, təkrar işlədilsə zərər vermir və sonda özünü yoxlayır.
 Yeni belə dəyişiklik edəndə eyni qaydada `11_...`, `12_...` yaz —
@@ -116,6 +118,25 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
 - Hesabatlarda səhv sualları **surətdən** oxu, `questions`-dan yox.
 - Platforma seed sualları `ext_key` (`test-slug#sıra`) ilə tanınır —
   `07_seed_tests.sql` təkrar işlədiləndə sual çoxalmır, üzərinə yazılır.
+
+---
+
+## Oxşarlıq həddi — ölçülüb, təxmin deyil
+
+`pg_trgm` **mənanı yox, cümlə qəlibini** ölçür. Ölçmə:
+
+| Cüt | Bal | Reallıq |
+|---|---|---|
+| `6 × 7 neçə edər?` ↔ `7 × 6 neçə edər?` | 1.00 | eyni |
+| `6 × 7 neçə edər?` ↔ `6 × 8 neçə edər?` | 0.75 | **fərqli** |
+| `6 × 7 neçə edər?` ↔ `9 × 4 neçə edər?` | 0.56 | **tamam fərqli** |
+| `Su neçə dərəcədə qaynayır?` ↔ `Suyun qaynama temperaturu neçə dərəcədir?` | 0.40 | eyni |
+
+Ona görə **orta hədd (0.5–0.9) işlətmə** — o zolaq qanuni, fərqli
+suallarla doludur. Yalnız `>= 0.95` etibarlıdır.
+
+Riyaziyyatda əsl təkrar siqnalı mətn yox, **düzgün cavabdır** —
+generator ona görə eyni cavabın təkrarını da məhdudlaşdırır.
 
 ---
 
