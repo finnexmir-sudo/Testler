@@ -81,6 +81,18 @@ təhlükəsizlik iddialarıdır, yalnız «işləyir/işləmir» yoxlaması deyi
 
 ---
 
+## Mövcud bazanı yeniləmək
+
+Təzə baza: `db/run.sh` bütün faylları düzgün sıra ilə işlədir.
+
+Artıq işləyən Supabase layihəsi üçün isə **miqrasiya faylı** var —
+`db/10_teyinat_migrasiya.sql`. O, 01..08-i işlətmiş bazaya tək başına
+əlavə olunur, təkrar işlədilsə zərər vermir və sonda özünü yoxlayır.
+Yeni belə dəyişiklik edəndə eyni qaydada `11_...`, `12_...` yaz —
+istifadəçiyə beş faylı yenidən yapışdırtma.
+
+---
+
 ## Supabase SQL Editor — tələ
 
 **Müvəqqəti cədvəl (`create temporary table`) işlətmə.** Supabase skripti
