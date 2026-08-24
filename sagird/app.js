@@ -57,7 +57,21 @@
   }
   function fail(e) {
     var t = (e && e.message) ? e.message : String(e);
+    if (/failed to fetch|networkerror|load failed/i.test(t)) {
+      return "İnternet bağlantısı yoxdur. Yenidən cəhd et.";
+    }
     return t.replace(/^.*?:\s*/, "");
+  }
+
+  /* Xeta ekrani: yeniden cehd + testlere qayit.
+     Sebeke kesintisinde ekran dalana direnmemelidir. */
+  function errScreen(e, retry) {
+    show(msg("err", fail(e)) +
+      '<button class="btn go wide" id="btnRetry">Yenidən cəhd et</button>' +
+      '<div class="spacer"></div>' +
+      '<button class="btn wide" id="btnHome2">Testlərə qayıt</button>');
+    on("btnRetry", "click", function () { retry(); });
+    on("btnHome2", "click", screenTests);
   }
   function setBusy(id, state, label) {
     var b = $(id);
@@ -203,7 +217,13 @@
           else startTest(id);
         });
       });
-    }).catch(onSessionError);
+    }).catch(function (e) {
+      if (e && (e.status === 403 || /Sessiya/i.test(e.message || ""))) {
+        logout("Sessiya bitdi. Kodu bir də yaz.");
+        return;
+      }
+      errScreen(e, screenTests);
+    });
   }
 
   /* ---------------------------------------------------------- test */
@@ -218,11 +238,7 @@
         if (!S.qs.length) { show(msg("warn", "Bu testdə hələ sual yoxdur.")); return; }
         drawQuestion();
       })
-      .catch(function (e) {
-        show(msg("err", fail(e)) +
-          '<button class="btn wide" id="btnBack2">Testlərə qayıt</button>');
-        on("btnBack2", "click", screenTests);
-      });
+      .catch(function (e) { errScreen(e, function () { startTest(testId); }); });
   }
 
   /* Bitmis testin neticesi - yeni cehd acilmir */
@@ -233,11 +249,7 @@
         S = { test: r.test, attempt: r.attempt_id, done: true };
         screenResult(r, true);
       })
-      .catch(function (e) {
-        show(msg("err", fail(e)) +
-          '<button class="btn wide" id="btnB4">Testlərə qayıt</button>');
-        on("btnB4", "click", screenTests);
-      });
+      .catch(function (e) { errScreen(e, function () { viewResult(testId); }); });
   }
 
   function drawQuestion() {
@@ -307,10 +319,10 @@
     });
     sb.rpc("rpc_submit_attempt", {
       p_token: TOKEN, p_attempt_id: S.attempt, p_answers: payload
-    }).then(screenResult).catch(function (e) {
+    }).then(function (r) { screenResult(r); }).catch(function (e) {
       setBusy("btnNext", false, "Testi bitir");
-      show(msg("err", fail(e)) + '<button class="btn wide" id="btnBack3">Testlərə qayıt</button>');
-      on("btnBack3", "click", screenTests);
+      /* Cavablar hele gonderilmeyib - tekrar cehd eyni cehdi bitirir */
+      errScreen(e, finish);
     });
   }
 
@@ -387,18 +399,10 @@
         show(h);
         on("btnB", "click", function () { screenResult(S.result, review); });
       })
-      .catch(function (e) { show(msg("err", fail(e))); });
+      .catch(function (e) { errScreen(e, function () { screenBoard(review); }); });
   }
 
   /* ----------------------------------------------------------- boot */
-  function onSessionError(e) {
-    if (e && (e.status === 403 || /Sessiya/i.test(e.message || ""))) {
-      logout("Sessiya bitdi. Kodu bir də yaz.");
-      return;
-    }
-    show(msg("err", fail(e)));
-  }
-
   function logout(note) {
     TOKEN = null; ME = null; CLS = null; S = null;
     try { localStorage.removeItem(LS); } catch (e) {}

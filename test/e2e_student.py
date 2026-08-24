@@ -242,7 +242,27 @@ with sync_playwright() as pw:
     pg.reload(); pg.wait_for_selector("#btnIn", timeout=8000)
     ok(True, "cixisdan sonra yeniden giris ekrani")
 
-    print("K · Server balı hesablayır (saxtakarlıq yoxlaması)")
+    print("K · Şəbəkə kəsintisi")
+    # Onceki bolme cixisla bitir - evvelce yeniden daxil oluruq
+    pg.fill("#code", "AYSUKOD1"); pg.click("#btnIn")
+    pg.wait_for_selector(".test", timeout=8000)
+    # Sonra butun Supabase sorgularini kesirik - telefonda internetin
+    # kesilmesi ile eyni veziyyet
+    pg.route("**/rest/v1/rpc/**", lambda r: r.abort())
+    pg.locator(".test").first.click(); pg.wait_for_timeout(2500)
+    t = pg.inner_text("#main")
+    ok("İnternet" in t, "sebeke xetasi anlasilan dilde", t.split("\n")[0][:55])
+    ok("Failed to fetch" not in t, "xam brauzer xetasi gorunmur")
+    ok(pg.is_visible("#btnRetry"), "'Yeniden cehd et' duymesi var")
+    ok(pg.is_visible("#btnHome2"), "'Testlere qayit' duymesi var")
+
+    # Sebeke qayidir - tekrar cehd islemelidir
+    pg.unroute("**/rest/v1/rpc/**")
+    pg.click("#btnRetry"); pg.wait_for_timeout(1200)
+    ok("İnternet" not in pg.inner_text("#main"),
+       "sebeke qayidanda tekrar cehd isleyir")
+
+    print("L · Server balı hesablayır (saxtakarlıq yoxlaması)")
     row = db("""select score, max_score, percent from public.attempts
                  where student_id='d1d1d1d1-0000-0000-0000-000000000001'
                    and status='submitted' order by finished_at limit 1""", one=True)

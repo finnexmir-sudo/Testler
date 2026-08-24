@@ -141,6 +141,14 @@ başqa müəllimin təcridi, yanlış parol — 33 yoxlama.
   Yarımçıq cəhd bazada `in_progress` qalır və geri qayıdanda davam edir.
 - Liderlər lövhəsi yalnız öz qrupu daxilindədir.
 
+## Şəbəkə kəsintisi
+
+Telefonda internet kəsiləndə `fetch` «Failed to fetch» atır — bu, uşağa
+heç nə demir və ekran dalana dirənir. `sb.js` indi bir dəfə **avtomatik
+təkrar cəhd** edir (0.9 san sonra), alınmasa anlaşılan mesaj verir:
+«İnternet bağlantısı yoxdur». Xəta ekranında **«Yenidən cəhd et»**
+düyməsi var — həmin əməliyyatı yenidən işə salır, sıfırdan başlamır.
+
 ## Test məzmunu
 
 `db/07_seed_tests.sql` — 3-cü sinif üçün 4 test, 23 sual:

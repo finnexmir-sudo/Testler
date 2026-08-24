@@ -49,10 +49,25 @@
     return msg;
   }
 
+  /* Sebeke xetasi (telefon internetı kesilende) fetch "Failed to fetch"
+     atir - bu, istifadeciye hec ne demir. Bir defe tekrar cehd edirik,
+     alinmasa anlasilan mesaj veririk. */
+  function netFetch(url, init, tried) {
+    return fetch(url, init).catch(function (e) {
+      if (!tried) {
+        return new Promise(function (res) { setTimeout(res, 900); })
+          .then(function () { return netFetch(url, init, true); });
+      }
+      var err = new Error("İnternet bağlantısı yoxdur. Yenidən cəhd et.");
+      err.offline = true;
+      throw err;
+    });
+  }
+
   function request(path, opt, retry) {
     opt = opt || {};
     var c = cfg();
-    return fetch(c.SUPABASE_URL + path, {
+    return netFetch(c.SUPABASE_URL + path, {
       method: opt.method || "GET",
       headers: headers(opt.auth !== false),
       body: opt.body ? JSON.stringify(opt.body) : undefined
