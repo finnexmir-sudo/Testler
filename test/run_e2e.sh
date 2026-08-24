@@ -34,5 +34,8 @@ echo
 echo "5/6  sagird tetbiqi"
 python3 test/e2e_student.py
 echo
-echo "6/6  tapsiriq axini"
+echo "6/7  tapsiriq axini"
 python3 test/e2e_assign.py
+echo
+echo "7/7  sual banki"
+python3 test/e2e_bank.py

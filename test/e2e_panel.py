@@ -76,7 +76,7 @@ with sync_playwright() as pw:
     pg.fill("#gname", "Cume qrupu")
     pg.select_option("#glevel", "3")
     pg.click("#btnGroup")
-    pg.wait_for_selector(".item", timeout=8000)
+    pg.wait_for_selector("#groups .item", timeout=8000)
     txt = pg.inner_text("#groups")
     ok("Cume qrupu" in txt, "qrup siyahida gorunur")
     ok("3-cü sinif" in txt, "SINIF siyahida gorunur", txt.replace("\n", " ")[:70])
@@ -86,7 +86,7 @@ with sync_playwright() as pw:
        code.group(1) if code else txt[:80])
 
     print("C · Şagird əlavə etmək")
-    pg.click(".item")
+    pg.click("#groups .item")
     pg.wait_for_selector("#btnStu", timeout=8000)
     ok("Cume qrupu" in pg.inner_text("h1"), "qrup ekrani acilir")
     ok("3-cü sinif" in pg.inner_text("#gMeta"), "sinif qrup ekraninda da gorunur",
@@ -145,7 +145,7 @@ with sync_playwright() as pw:
     ok("dolub" in pg.inner_text("#main").lower(), "limit xeberdarligi gorunur")
 
     print("F · Kodu yeniləmək")
-    pg.click(".item"); pg.wait_for_selector(".stu", timeout=8000)
+    pg.click("#groups .item"); pg.wait_for_selector(".stu", timeout=8000)
     pg.on("dialog", lambda d: d.accept())
     # Kod yenilemek siyahida yox, qelemin altindadir (nadir + geri donusu yox)
     ok(pg.locator(".stu [data-reset]").count() == 0,
@@ -176,12 +176,12 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".seat", timeout=8000)
     ok("5 / 5" in pg.inner_text(".seat"), "yenidən girişdə melumat yerindedir")
 
-    pg.reload(); pg.wait_for_selector(".item", timeout=8000)
+    pg.reload(); pg.wait_for_selector("#groups .item", timeout=8000)
     ok("Cume qrupu" in pg.inner_text("#groups"), "sessiya sehife yenilenmesinden sonra qalir",
        pg.inner_text("#groups").replace("\n", " ")[:50])
 
     print("H · Ad dəyişmək")
-    pg.click(".item"); pg.wait_for_selector("#btnRen", timeout=8000)
+    pg.click("#groups .item"); pg.wait_for_selector("#btnRen", timeout=8000)
     pg.click("#btnRen"); pg.wait_for_selector("#gNew", timeout=8000)
     ok(pg.input_value("#gNew") == "Cume qrupu", "hazirki ad forma dolur",
        pg.input_value("#gNew"))

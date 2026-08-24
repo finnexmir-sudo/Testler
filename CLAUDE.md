@@ -123,6 +123,15 @@ bir bazada işləyir, o birində «operator class does not exist» verir.
 
 ---
 
+## CSS sinif adları — toqquşma
+
+`assets/base.css` ortaq sistemdir. Yeni sinif adı verəndə **əvvəlcə
+axtar** — bir dəfə `.mark` adını verdim, o ad artıq başlıqdakı loqo
+nişanınındır (`.top .mark`) və onu sındırdı. Testlərdə də `.item` kimi
+ümumi seçicilər `#groups .item` şəklində dəqiqləşdirilməlidir.
+
+---
+
 ## Sual bankı — qayda
 
 Sual **testin içində deyil, bankdadır**. `test_questions` hansı testin

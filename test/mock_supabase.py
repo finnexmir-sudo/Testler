@@ -147,6 +147,30 @@ class H(BaseHTTPRequestHandler):
                 cur.execute("select set_config('request.jwt.claim.sub', %s, true)", (uid,))
             return fn(cur, *a)
 
+    _ARGT = {}
+
+    def arg_types(self, name):
+        """Funksiyanin parametr adi -> tip adi.  Bir defe oxunub saxlanilir."""
+        if name in self._ARGT:
+            return self._ARGT[name]
+        def go(cur):
+            cur.execute("""
+                select p.proargnames, array(
+                         select format_type(t, null)
+                           from unnest(coalesce(p.proallargtypes, p.proargtypes::oid[])) t
+                       ) as tt
+                  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+                 where n.nspname = 'public' and p.proname = %s
+                 limit 1""", (name,))
+            return cur.fetchone()
+        try:
+            r = self.run(go)
+            m = dict(zip(r["proargnames"] or [], r["tt"] or [])) if r else {}
+        except Exception:
+            m = {}
+        self._ARGT[name] = m
+        return m
+
     def rpc(self, name, args):
         if not name.startswith("rpc_"):
             return self.send(404, {"message": "Bele funksiya yoxdur."})
@@ -156,14 +180,23 @@ class H(BaseHTTPRequestHandler):
             sql.SQL(", ").join(
                 sql.SQL("{} => %s").format(sql.Identifier(k)) for k in keys))
 
-        # dict/list deyerler jsonb kimi gonderilmelidir - eks halda
-        # psycopg2 onlari Postgres ARRAY kimi uygunlasdirir ve funksiya
-        # "jsonb gozleyirdim" deyib xeta verir. PostgREST bunu ozu edir.
-        def val(v):
-            return psycopg2.extras.Json(v) if isinstance(v, (dict, list)) else v
+        # PostgREST parametrin TIPINE baxir: jsonb-dirse JSON kimi,
+        # text[]-dirse ARRAY kimi gonderir.  Hamisini Json()-a bukmek
+        # text[] parametrde "malformed array literal" verir - ve bu sehv
+        # yalniz burda gorunerdi, canli Supabase-de yox.  Ona gore biz de
+        # tipe baxiriq: eks halda mock hequiqetden ferqli davranir.
+        types = self.arg_types(name)
+
+        def val(k, v):
+            if not isinstance(v, (dict, list)):
+                return v
+            t = types.get(k, "")
+            if t.endswith("[]"):
+                return v          # psycopg2 python siyahisini ARRAY-e cevirir
+            return psycopg2.extras.Json(v)
 
         def go(cur):
-            cur.execute(stmt, [val(args[k]) for k in keys])
+            cur.execute(stmt, [val(k, args[k]) for k in keys])
             return cur.fetchone()["r"]
 
         try:
