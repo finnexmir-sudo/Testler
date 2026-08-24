@@ -79,6 +79,7 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".item", timeout=8000)
     txt = pg.inner_text("#groups")
     ok("Cume qrupu" in txt, "qrup siyahida gorunur")
+    ok("3-cü sinif" in txt, "SINIF siyahida gorunur", txt.replace("\n", " ")[:70])
     ok("0 şagird" in txt, "sagird sayi 0")
     code = re.search(r"\b([A-Z2-9]{8})\b", txt.replace("\n", " "))
     ok(code is not None, "qosulma kodu 8 simvol, qarisiq simvolsuz",
@@ -88,6 +89,8 @@ with sync_playwright() as pw:
     pg.click(".item")
     pg.wait_for_selector("#btnStu", timeout=8000)
     ok("Cume qrupu" in pg.inner_text("h1"), "qrup ekrani acilir")
+    ok("3-cü sinif" in pg.inner_text("#gMeta"), "sinif qrup ekraninda da gorunur",
+       pg.inner_text("#gMeta").replace("\n", " "))
 
     pg.fill("#sname", "Aysu Məmmədova")
     pg.click("#btnStu")
@@ -168,14 +171,21 @@ with sync_playwright() as pw:
        pg.input_value("#gNew"))
     pg.fill("#gNew", "   "); pg.click("#gSave"); pg.wait_for_timeout(400)
     ok("boş ola bilməz" in pg.inner_text("#gRenErr"), "bos ad qebul edilmir")
-    pg.fill("#gNew", "Bazar ertəsi qrupu"); pg.click("#gSave")
-    pg.wait_for_timeout(900)
+    ok(pg.locator("#gLev").count() == 1, "ad formasinda sinif secimi de var")
+    ok(pg.input_value("#gLev") == "3", "hazirki sinif secili gelir",
+       pg.input_value("#gLev"))
+    pg.fill("#gNew", "Bazar ertəsi qrupu")
+    pg.select_option("#gLev", "4")
+    pg.click("#gSave"); pg.wait_for_timeout(900)
     ok(pg.locator("#gRen").count() == 0, "yadda saxlayandan sonra forma baglanir")
     ok("Bazar ertəsi qrupu" in pg.inner_text("#gName"), "yeni ad ekranda",
        pg.inner_text("#gName"))
     ok("Bazar ertəsi qrupu" in pg.inner_text("#topTitle"), "ustlukde de yenilenir")
+    ok("4-cü sinif" in pg.inner_text("#gMeta"), "sinif derhal yenilenir",
+       pg.inner_text("#gMeta").replace("\n", " "))
     pg.reload(); pg.wait_for_selector("#gName", timeout=10000)
     ok("Bazar ertəsi qrupu" in pg.inner_text("#gName"), "ad bazada saxlanildi")
+    ok("4-cü sinif" in pg.inner_text("#gMeta"), "sinif de bazada saxlanildi")
 
     # Sagirdin adi
     pg.locator("[data-edit]").first.click(); pg.wait_for_selector(".edit", timeout=8000)

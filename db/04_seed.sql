@@ -25,23 +25,34 @@ insert into public.subjects (slug, name, sort) values
   ('kurikulum',    'Kurikulum',       110)
 on conflict (slug) do update set name = excluded.name, sort = excluded.sort;
 
+-- Azerbaycanca sira sayi sekilcisi sait ahengine gore deyisir:
+-- 1-ci · 2-ci · 3-cü · 4-cü · 5-ci · 6-cı · 7-ci · 8-ci · 9-cu · 10-cu · 11-ci
+create or replace function app.ordinal_az(n int) returns text
+language sql immutable as $$
+  select n::text || case n
+    when 1 then '-ci' when 2 then '-ci' when 3 then '-cü' when 4 then '-cü'
+    when 5 then '-ci' when 6 then '-cı' when 7 then '-ci' when 8 then '-ci'
+    when 9 then '-cu' when 10 then '-cu' when 11 then '-ci'
+    else '-ci' end
+$$;
+
 -- Ibtidai: 1-4 sinif
 insert into public.levels (program_id, code, name, sort)
-select p.id, g::text, g::text || '-ci sinif', g * 10
+select p.id, g::text, app.ordinal_az(g) || ' sinif', g * 10
   from public.programs p, generate_series(1, 4) g
  where p.slug = 'ibtidai'
 on conflict (program_id, code) do nothing;
 
 -- Orta: 5-8
 insert into public.levels (program_id, code, name, sort)
-select p.id, g::text, g::text || '-ci sinif', g * 10
+select p.id, g::text, app.ordinal_az(g) || ' sinif', g * 10
   from public.programs p, generate_series(5, 8) g
  where p.slug = 'orta'
 on conflict (program_id, code) do nothing;
 
 -- Buraxilis: 9-11
 insert into public.levels (program_id, code, name, sort)
-select p.id, g::text, g::text || '-ci sinif', g * 10
+select p.id, g::text, app.ordinal_az(g) || ' sinif', g * 10
   from public.programs p, generate_series(9, 11) g
  where p.slug = 'buraxilis'
 on conflict (program_id, code) do nothing;

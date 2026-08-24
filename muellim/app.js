@@ -45,6 +45,7 @@
       'aria-hidden="true">' + (ICON[name] || "") + "</svg>";
   }
 
+  var LEVELS = null;   // ibtidai sinif siyahisi - bir defe yuklenir
   var CTX = null;      // rpc_my_context() neticesi
   var ACC = null;      // aktiv hesab
   var busy = false;
@@ -226,26 +227,11 @@
       "</div>";
     show(html);
 
-    // ibtidai sinifleri doldururuq (iki sade sorgu - embedding yoxdur)
-    sb.select("programs", { select: "id,slug", eq: { slug: "ibtidai" } })
-      .then(function (ps) {
-        if (!ps || !ps.length) return null;
-        return sb.select("levels", {
-          select: "id,code,name", eq: { program_id: ps[0].id }, order: "sort"
-        });
-      })
-      .then(function (rows) {
-        var sel = $("glevel");
-        if (!sel || !rows) return;
-        rows.forEach(function (r) {
-          var o = document.createElement("option");
-          o.value = r.code; o.textContent = r.name;
-          sel.appendChild(o);
-        });
-      })
-      .catch(function () {});
-
-    loadGroups();
+    loadLevels().then(function () {
+      var sel = $("glevel");
+      if (sel) sel.innerHTML = levelOptions(null);
+      loadGroups();
+    });
 
     on("btnGroup", "click", function () {
       if (busy) return;
@@ -273,7 +259,7 @@
   function loadGroups() {
     var groups = null;
     sb.select("classes", {
-      select: "id,name,join_code,kind",
+      select: "id,name,join_code,kind,level_id",
       eq: { account_id: ACC.id },
       order: "name"
     }).then(function (rows) {
@@ -297,10 +283,12 @@
       }
       box.innerHTML = rows.map(function (g) {
         var n = cnt[g.id] || 0;
+        var lv = levelName(g.level_id);
         return '<button class="item" data-g="' + esc(g.id) + '">' +
           '<div class="ic">' + ic("group") + "</div>" +
           '<div class="g"><b>' + esc(g.name) + "</b>" +
-          "<i><span>" + n + " şagird</span><span>·</span>" +
+          "<i>" + (lv ? "<span>" + esc(lv) + "</span><span>·</span>" : "") +
+          "<span>" + n + " şagird</span><span>·</span>" +
           '<span class="code">' + esc(g.join_code) + "</span></i></div>" +
           '<span class="arrow">' + ic("right") + "</span></button>";
       }).join("");
@@ -317,9 +305,13 @@
   function screenGroup(id) {
     var live = guard();
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
-    sb.select("classes", { select: "id,name,join_code,account_id", eq: { id: id } })
-      .then(function (rows) {
+    Promise.all([
+      sb.select("classes", { select: "id,name,join_code,account_id,level_id", eq: { id: id } }),
+      loadLevels()
+    ])
+      .then(function (res) {
         if (!live()) return;
+        var rows = res[0];
         if (!rows || !rows.length) throw new Error("Qrup tapılmadı.");
         drawGroup(rows[0]);
       })
@@ -335,7 +327,10 @@
         '<div class="ttl"><h1 id="gName">' + esc(g.name) + "</h1>" +
           '<button class="btn sm ghost icon" id="btnRen" title="Adı dəyiş" ' +
             'aria-label="Adı dəyiş">' + ic("pen") + "</button></div>" +
-        '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:8px">' +
+        '<div class="muted" style="display:flex;align-items:center;gap:7px;' +
+          'margin-top:8px;flex-wrap:wrap" id="gMeta">' +
+          (levelName(g.level_id)
+            ? "<span>" + esc(levelName(g.level_id)) + "</span><span>·</span>" : "") +
           "<span>Qoşulma kodu</span>" +
           '<span class="code key">' + esc(g.join_code) + "</span></div>" +
         '<div class="spacer"></div>' +
@@ -385,8 +380,12 @@
     var card = $("gCard");
     if (!card || card.querySelector("#gRen")) return;
     card.insertAdjacentHTML("afterbegin",
-      '<div id="gRen"><label for="gNew">Qrupun adı</label>' +
-      '<input id="gNew" maxlength="80">' +
+      '<div id="gRen"><div class="fieldrow">' +
+        '<div><label for="gNew">Qrupun adı</label>' +
+          '<input id="gNew" maxlength="80"></div>' +
+        '<div style="flex:0 0 148px"><label for="gLev">Sinif</label>' +
+          '<select id="gLev">' + levelOptions(g.level_id) + "</select></div>" +
+      "</div>" +
       '<div id="gRenErr"></div>' +
       '<div class="row"><button class="btn go" id="gSave">Yadda saxla</button>' +
       '<button class="btn ghost" id="gCancel">Ləğv et</button></div>' +
@@ -406,14 +405,25 @@
     function save() {
       var nm = (inp.value || "").trim();
       if (!nm) { $("gRenErr").innerHTML = msg("err", "Ad boş ola bilməz."); return; }
-      if (nm === g.name) { close(); return; }
+      var code = $("gLev") ? $("gLev").value : "";
+      var lv = (LEVELS || []).filter(function (x) { return x.code === code; })[0];
+      var newLevel = lv ? lv.id : null;
+      if (nm === g.name && newLevel === g.level_id) { close(); return; }
       $("gRenErr").innerHTML = "";
       setBusy("gSave", true, "Yadda saxla");
-      sb.update("classes", { id: g.id }, { name: nm })
+      sb.update("classes", { id: g.id }, { name: nm, level_id: newLevel })
         .then(function () {
-          g.name = nm;
+          g.name = nm; g.level_id = newLevel;
           topTitle.textContent = nm;
           if ($("gName")) $("gName").textContent = nm;
+          var meta = $("gMeta");
+          if (meta) {
+            meta.innerHTML =
+              (levelName(newLevel)
+                ? "<span>" + esc(levelName(newLevel)) + "</span><span>·</span>" : "") +
+              "<span>Qoşulma kodu</span>" +
+              '<span class="code key">' + esc(g.join_code) + "</span>";
+          }
           close();
         })
         .catch(function (e) {
@@ -683,6 +693,35 @@
     el.style.cssText = "text-align:center;margin:14px 0 0";
     el.textContent = "Son yenilənmə: " + t;
     main.appendChild(el);
+  }
+
+  /* Sinif siyahisi hem qrup yaratmaqda, hem de gostermekde lazimdir -
+     bir defe yuklenib yaddasda saxlanilir. */
+  function loadLevels() {
+    if (LEVELS) return Promise.resolve(LEVELS);
+    return sb.select("programs", { select: "id,slug", eq: { slug: "ibtidai" } })
+      .then(function (ps) {
+        if (!ps || !ps.length) return [];
+        return sb.select("levels", {
+          select: "id,code,name", eq: { program_id: ps[0].id }, order: "sort"
+        });
+      })
+      .then(function (rows) { LEVELS = rows || []; return LEVELS; })
+      .catch(function () { LEVELS = []; return LEVELS; });
+  }
+
+  function levelName(id) {
+    if (!id || !LEVELS) return "";
+    var l = LEVELS.filter(function (x) { return x.id === id; })[0];
+    return l ? l.name : "";
+  }
+
+  function levelOptions(sel) {
+    return '<option value="">Sinif seçilməyib</option>' +
+      (LEVELS || []).map(function (l) {
+        return '<option value="' + esc(l.code) + '"' +
+          (l.id === sel ? " selected" : "") + ">" + esc(l.name) + "</option>";
+      }).join("");
   }
 
   function statTile(val, lbl) {
