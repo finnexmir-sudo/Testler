@@ -1119,12 +1119,18 @@
               '" data-d="' + d + '">' + DIFF[d] + "</button>";
           }).join("") +
         "</div>" +
-        ((FAC.topics || []).length
-          ? '<div class="chips" id="bTop">' + FAC.topics.map(function (t) {
-              return '<button class="chip' + (f.topics.indexOf(t.id) >= 0 ? " on" : "") +
-                '" data-t="' + esc(t.id) + '">' + esc(t.name) + "</button>";
-            }).join("") + "</div>"
-          : "") +
+        /* Movzular YALNIZ fenn secilende.  Fennsiz 110 nisan cixir -
+           suzgec ekrani udur. */
+        (!f.subject
+          ? '<p class="muted" style="margin:12px 0 0">Mövzuları görmək üçün ' +
+            "fənn seçin.</p>"
+          : ((FAC.topics || []).length
+              ? '<div class="chips" id="bTop">' + FAC.topics.map(function (t) {
+                  return '<button class="chip' + (f.topics.indexOf(t.id) >= 0 ? " on" : "") +
+                    '" data-t="' + esc(t.id) + '">' +
+                    esc(topLabel(t, f.level)) + "</button>";
+                }).join("") + "</div>"
+              : '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>')) +
         "</details>" +
       "</div>" +
       '<div class="spacer"></div>' +
@@ -1386,7 +1392,7 @@
     on("btnBack", "click", function () { nav("#/b"); });
     drawOptions();
     kindNote();
-    loadTopics(q.subject);
+    loadTopics(q.subject, q.level);
 
     on("qkind", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
@@ -1416,9 +1422,11 @@
     /* Fenn deyisende movzular da deyismelidir - riyaziyyat sualina
        "Sait ve samit" teklif etmek olmaz. */
     on("qsub", "change", function () {
-      collect();
-      QD.topic_id = "";
-      loadTopics(QD.subject);
+      collect(); QD.topic_id = ""; loadTopics(QD.subject, QD.level);
+    });
+    /* Sinif deyisende de - 3-cu sinif sualina 1-ci sinif movzusu olmaz */
+    on("qlev", "change", function () {
+      collect(); QD.topic_id = ""; loadTopics(QD.subject, QD.level);
     });
 
     /* Oxsar sual xeberdarligi - BLOKLAMIR, yalniz gosterir */
@@ -1429,12 +1437,18 @@
     });
   }
 
-  /* Movzu siyahisi: yalniz secilen fennin movzulari */
-  function loadTopics(subject) {
+  /* Movzu adi.  Sinif secilmeyibse ada sinifi de yaziriq - eks halda
+     "Bolme" iki defe gorunur ve hansini sectiyin bilinmir. */
+  function topLabel(t, lev) {
+    return t.name + (!lev && t.level_name ? " · " + t.level_name : "");
+  }
+
+  /* Movzu siyahisi: secilen FENN ve SINIF uzre */
+  function loadTopics(subject, level) {
     var sel = $("qtop");
     if (!sel) return;
     sel.disabled = true;
-    sb.rpc("rpc_bank_facets", { p_subject: subject || null, p_level: null })
+    sb.rpc("rpc_bank_facets", { p_subject: subject || null, p_level: level || null })
       .then(function (fac) {
         var el = $("qtop");
         if (!el) return;
@@ -1442,7 +1456,8 @@
         el.innerHTML = '<option value="">Seçilməyib</option>' +
           FAC.topics.map(function (t) {
             return '<option value="' + esc(t.id) + '"' +
-              (QD.topic_id === t.id ? " selected" : "") + ">" + esc(t.name) + "</option>";
+              (QD.topic_id === t.id ? " selected" : "") + ">" +
+              esc(topLabel(t, level)) + "</option>";
           }).join("");
         el.disabled = false;
         if (!FAC.topics.length) {

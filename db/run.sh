@@ -14,6 +14,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 09_assignments.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 12_bank_rpc.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 13_generator.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 04_seed.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 14_movzular.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 08_reports.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin

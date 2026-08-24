@@ -145,6 +145,11 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   şagirdin gördüyü sualı göstərir. Yeni cavab yolu yazırsansa
   `question_body` və `question_explanation` sütunlarını doldur.
 - Hesabatlarda səhv sualları **surətdən** oxu, `questions`-dan yox.
+- Mövzular **mərkəzdən** gəlir (`db/14_movzular.sql`), müəllim özü
+  yaza bilmir — hər müəllim «Vurma» / «Vurma cədvəli» / «vurma» yazsaydı
+  zəif nöqtə hesabatı üç yerə bölünərdi. Çatışmayan yer üçün `tags`.
+  Slug qaydası: `<fənn>-<sinif>-<mövzu>` — `topics`-də
+  `unique(subject_id, slug)` var, sinif slug-in içində olmalıdır.
 - Platforma seed sualları `ext_key` (`test-slug#sıra`) ilə tanınır —
   `07_seed_tests.sql` təkrar işlədiləndə sual çoxalmır, üzərinə yazılır.
 

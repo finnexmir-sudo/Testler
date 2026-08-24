@@ -100,7 +100,7 @@ with sync_playwright() as pw:
     ok(pg.locator(".opt-row").count() == 3, "variant elave olunur")
     pg.locator(".obody").nth(2).fill("48")
     pg.select_option("#qlev", "3")
-    tp = db("select id::text i from public.topics where slug='vurma-cedveli'", one=True)
+    tp = db("select id::text i from public.topics where slug='riy-3-vurma-cedveli'", one=True)
     if tp: pg.select_option("#qtop", tp["i"])
     pg.locator("#qdiff .seg", has_text="Çətin").click()
     pg.wait_for_timeout(200)
@@ -137,6 +137,16 @@ with sync_playwright() as pw:
     if pg.locator("details.filt:not([open])").count():
         pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
     ok(pg.is_visible("#bDiff"), "suzgec acilir")
+    ok(pg.locator("#bTop").count() == 0,
+       "fenn secilmeyibse movzu nisanlari cixmir")
+    pg.select_option("#bsub", "riyaziyyat"); pg.wait_for_timeout(900)
+    if pg.locator("details.filt:not([open])").count():
+        pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
+    nt = pg.locator("#bTop .chip").count()
+    ok(0 < nt <= 40, "fenn secilende yalniz onun movzulari cixir", nt)
+    pg.select_option("#bsub", ""); pg.wait_for_timeout(900)
+    if pg.locator("details.filt:not([open])").count():
+        pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
     pg.locator("#bDiff .chip", has_text="Asan").click(); pg.wait_for_timeout(500)
     ok(pg.locator(".qrow").count() == 0, "cetinlik suzgeci isleyir")
     ok(pg.locator("details.filt").get_attribute("open") is not None,
@@ -200,13 +210,25 @@ with sync_playwright() as pw:
     pg.click("#btnNewQ"); pg.wait_for_selector("#qtop", timeout=8000)
     pg.wait_for_timeout(800)
     riy = pg.locator("#qtop option").all_inner_texts()
-    ok("Vurma cədvəli" in riy, "riyaziyyat movzulari gorunur", riy[:4])
-    ok("Sait və samit" not in riy,
-       "BASQA fennin movzusu teklif olunmur", riy)
+    ok(any("Vurma cədvəli" in x for x in riy), "riyaziyyat movzulari gorunur", riy[:3])
+    ok(not any("Sait və samit" in x for x in riy),
+       "BASQA fennin movzusu teklif olunmur", riy[:3])
+    # sinif secilmeyib -> ada sinif de yazilmalidir
+    ok(any(" · " in x and "sinif" in x for x in riy),
+       "sinif secilmeyende movzunun sinfi gorunur",
+       [x for x in riy if " · " in x][:2])
+    # sinif secilende yalniz onun movzulari, ad tekrarsiz
+    pg.select_option("#qlev", "3"); pg.wait_for_timeout(900)
+    r3 = [x for x in pg.locator("#qtop option").all_inner_texts() if x != "Seçilməyib"]
+    ok(len(r3) == len(set(r3)), "sinif secilende ad tekrarlanmir", r3)
+    ok(all(" · " not in x for x in r3), "sinif secilibse ada tekrar yazilmir", r3[:3])
+    ok(0 < len(r3) <= 12, "yalniz o sinifin movzulari", len(r3))
     pg.select_option("#qsub", "az-dili"); pg.wait_for_timeout(900)
     az = pg.locator("#qtop option").all_inner_texts()
-    ok("Sait və samit" in az, "fenn deyisende movzular da deyisir", az[:4])
-    ok("Vurma cədvəli" not in az, "kohne fennin movzulari qalmir", az)
+    ok(any("Sait və samit" in x for x in az),
+       "fenn deyisende movzular da deyisir", az[:3])
+    ok(not any("Vurma cədvəli" in x for x in az),
+       "kohne fennin movzulari qalmir", az[:3])
 
     print("F · Yazılı sual")
     pg.click("#btnBack"); pg.wait_for_selector("#btnNewQ", timeout=8000)

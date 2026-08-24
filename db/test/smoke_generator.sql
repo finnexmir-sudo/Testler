@@ -32,7 +32,7 @@ begin
   select id into v_s from public.subjects where slug='riyaziyyat';
   select l.id into v_l from public.levels l join public.programs p on p.id=l.program_id
    where p.slug='ibtidai' and l.code='3';
-  foreach tp in array array['vurma-cedveli','toplama-cixma','bolme'] loop
+  foreach tp in array array['riy-3-vurma-cedveli','riy-3-toplama-cixma','riy-3-bolme'] loop
     select id into v_t from public.topics where slug = tp and subject_id = v_s;
     for i in 1..8 loop
       k := k + 1;
@@ -99,7 +99,7 @@ end $$;
 do $$
 declare v jsonb; tp uuid; n int;
 begin
-  select id into tp from public.topics where slug='bolme';
+  select id into tp from public.topics where slug='riy-3-bolme';
   v := public.rpc_generate_test(
         format('{"pool":"mine","topics":["%s"],"count":5}', tp)::jsonb, 'Tek movzu');
   select count(*) into n from public.test_questions tq

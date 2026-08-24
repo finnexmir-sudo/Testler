@@ -396,10 +396,17 @@ begin
       select jsonb_agg(distinct jsonb_build_object('code', l.code, 'name', l.name))
         from public.levels l
         join public.programs p on p.id = l.program_id and p.slug = 'ibtidai'), '[]'::jsonb),
+    --  Sinif de qaytarilir: eyni ad bir nece sinifde ola biler
+    --  ("Bolme" 2-ci ve 3-cu sinifde).  Onsuz muellim hansini
+    --  sectiyini bilmir.
     'topics', coalesce((
-      select jsonb_agg(jsonb_build_object('id', t.id, 'name', t.name) order by t.sort, t.name)
+      select jsonb_agg(jsonb_build_object(
+               'id', t.id, 'name', t.name,
+               'level', l.code, 'level_name', l.name)
+             order by l.sort nulls first, t.sort, t.name)
         from public.topics t
         join public.subjects s on s.id = t.subject_id
+        left join public.levels l on l.id = t.level_id
        where (p_subject is null or s.slug = p_subject)
          and (p_level is null or t.level_id is null
               or t.level_id in (select id from public.levels where code = p_level))
