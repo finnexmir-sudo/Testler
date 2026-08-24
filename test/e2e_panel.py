@@ -5,6 +5,9 @@ import re, sys, time
 from playwright.sync_api import sync_playwright
 
 PANEL = "http://127.0.0.1:8010/muellim/index.html"
+# Tehlukesizlik kilidi: yoxlama YALNIZ yerli mock-a getmelidir.
+# Bir defe ?v=N nisani route qalibini pozdu ve test heqiqi layiheye getdi.
+BLOCK = "**://*.supabase.co/**"
 CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
 TEST_CFG = """window.CFG = {
   SUPABASE_URL: "http://127.0.0.1:54321",
@@ -19,9 +22,10 @@ def ok(cond, label, extra=""):
 
 def new_page(ctx):
     pg = ctx.new_page()
-    pg.route("**/config.js", lambda r: r.fulfill(
+    pg.route("**/config.js*", lambda r: r.fulfill(
         status=200, content_type="application/javascript", body=TEST_CFG))
     pg.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)))
+    pg.route(BLOCK, lambda r: (fails.append("XARICI SORGU: " + r.request.url), r.abort()))
     return pg
 
 def signup(pg, email, name, pw="parol1234"):
