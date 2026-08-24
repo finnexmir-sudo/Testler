@@ -1,4 +1,4 @@
-# Layihə: Pillə
+# Layihə: Anlaq
 
 İbtidai siniflər (1–4) üçün onlayn test platforması. Gələcəkdə yuxarı
 siniflər, MİQ və sertifikasiya da əlavə olunacaq.

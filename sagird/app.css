@@ -181,3 +181,11 @@ input{min-height:52px;font-size:17px}
 /* Muellimin tapsirigi - sol kenarda incə nisan */
 .test.asg{box-shadow:inset 3px 0 0 var(--brand)}
 .test.asg.done{box-shadow:inset 3px 0 0 var(--ok)}
+
+/* Yazılı sual: şagird cavabı yazır */
+.tans{
+  width:100%;min-height:52px;padding:0 16px;font-size:17px;
+  border:1.5px solid var(--n-300);border-radius:var(--r-lg);
+  background:var(--surface);color:var(--fg);font-family:inherit;
+}
+.tans:focus{outline:none;border-color:var(--brand);box-shadow:var(--ring)}

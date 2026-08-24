@@ -304,14 +304,18 @@
         '<button class="spk' + (VOICE ? "" : " hide") + '" id="spk" ' +
           'title="Sualı dinlə" aria-label="Sualı dinlə">' + ic("sound") + "</button>" +
       "</div>" +
-      '<div class="opts" id="opts">' +
-        (q.options || []).map(function (o, k) {
-          return '<button class="opt' + (o.id === picked ? " sel" : "") + '" ' +
-            'data-o="' + esc(o.id) + '">' +
-            '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
-            '<span class="t">' + esc(o.body) + "</span></button>";
-        }).join("") +
-      "</div>" +
+      (q.kind === "text"
+        ? '<div class="opts"><input id="ans" class="tans" maxlength="120" ' +
+            'autocomplete="off" placeholder="Cavabı yaz" value="' +
+            esc(picked || "") + '"></div>'
+        : '<div class="opts" id="opts">' +
+            (q.options || []).map(function (o, k) {
+              return '<button class="opt' + (o.id === picked ? " sel" : "") + '" ' +
+                'data-o="' + esc(o.id) + '">' +
+                '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
+                '<span class="t">' + esc(o.body) + "</span></button>";
+            }).join("") +
+          "</div>") +
       '<div class="spacer"></div>' +
       /* Cavabsiz da kecmek olar - bilmediyi sualda ilisib qalmasin.
          Duymenin adi niyyeti aydin gosterir: "Keç" ve ya "Növbəti". */
@@ -322,6 +326,18 @@
     );
 
     on("spk", "click", function () { say(q.body, $("spk")); });
+
+    /* Yazili sual: yazdiqca saxlanilir, duymenin adi da deyisir */
+    on("ans", "input", function () {
+      var v = ($("ans").value || "").trim();
+      if (v) S.answers[q.id] = v; else delete S.answers[q.id];
+      var nx = $("btnNext");
+      if (!nx) return;
+      nx.classList.toggle("go", !!v);
+      nx.textContent = (S.i + 1 >= S.qs.length)
+        ? (v ? "Testi bitir" : "Cavabsız bitir")
+        : (v ? "Növbəti sual" : "Bilmirəm, keç");
+    });
 
     Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (b) {
       b.addEventListener("click", function () {
@@ -365,7 +381,10 @@
   function finish() {
     setBusy("btnNext", true, "Testi bitir");
     var payload = S.qs.map(function (q) {
-      return { q: q.id, o: S.answers[q.id] ? [S.answers[q.id]] : [] };
+      var a = S.answers[q.id];
+      /* Yazili sualda cavab METNDIR, variant id-si deyil */
+      if (q.kind === "text") return { q: q.id, t: a || "" };
+      return { q: q.id, o: a ? [a] : [] };
     });
     sb.rpc("rpc_submit_attempt", {
       p_token: TOKEN, p_attempt_id: S.attempt, p_answers: payload

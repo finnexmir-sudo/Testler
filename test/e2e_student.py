@@ -217,9 +217,12 @@ with sync_playwright() as pw:
     naz = db("""select count(*) n from public.test_questions tq join public.tests t
                  on t.id=tq.test_id and t.slug='az-3-dil-1'""", one=True)["n"]
     for i in range(naz):
+        # Her suala MUTLEQ cavab veririk - eks halda bitirende
+        # "cavabsiz sual qalib" xeberdarligi cixir ve axin dayanir
+        pg.wait_for_selector(".opt", timeout=6000)
         pg.locator(".opt").first.click()      # hemise birinci variant
-        pg.wait_for_timeout(100)
-        pg.click("#btnNext"); pg.wait_for_timeout(300)
+        pg.wait_for_timeout(120)
+        pg.click("#btnNext"); pg.wait_for_timeout(400)
     pg.wait_for_selector(".ring", timeout=8000)
     ok("səhv suallar" in pg.inner_text("#main").lower(),
        "sehv suallar siyahisi cixir")

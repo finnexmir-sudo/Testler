@@ -303,6 +303,71 @@ with sync_playwright() as pw:
     r = db("select kind from public.questions where body='5 x 5 = ?'", one=True)
     ok(r and r["kind"] == "text", "yazili sual duzgun tipde saxlanildi", r and r["kind"])
 
+    print("F2 · Yazılı sual şagird tərəfində işləyir")
+    # Muellim "Yazili" sual yaza bilirdise, sagird onu CAVABLANDIRA
+    # bilmelidir - eks halda dalan olur.
+    # Asililiqlari OZUMUZ yaradiriq: sessizce atlanan yoxlama yoxlama deyil.
+    acc = db("select id::text i from public.accounts limit 1", one=True)
+    ok(acc is not None, "hesab var")
+    # OZ sualini yaradiriq - G bolmesi silmek ucun basqa sualdan istifade
+    # edir, onun veziyyetini pozmayaq.
+    q = db("""insert into public.questions
+                (id, owner_type, owner_id, account_id, subject_id, kind, body, status)
+              select '7777aaaa-0000-0000-0000-00000000000f', 'educator',
+                     a.owner_id, a.id, s.id, 'text', '9 + 9 = ?', 'published'
+                from public.accounts a, public.subjects s
+               where a.id = %s and s.slug = 'riyaziyyat'
+              returning id::text i""", (acc["i"],), one=True)
+    db("""insert into public.question_options (question_id, ord, body, is_correct)
+          values (%s, 1, '18', true)""", (q["i"],))
+    ok(q is not None, "yazili sual yaradildi")
+
+    db("""insert into public.classes (id, account_id, teacher_id, kind, name, join_code)
+          select '7777cccc-0000-0000-0000-00000000000f', a.id, a.owner_id,
+                 'tutor_group', 'Yazi qrupu', 'YAZIQRUP'
+            from public.accounts a where a.id = %s
+          on conflict (id) do nothing""", (acc["i"],))
+    db("""insert into public.students
+            (id, account_id, class_id, created_by, full_name, display_name, login_code)
+          select '7777000a-0000-0000-0000-00000000000f', c.account_id, c.id,
+                 c.teacher_id, 'Yazi Sagird', 'Yazi S.', 'YAZIKOD1'
+            from public.classes c where c.id = '7777cccc-0000-0000-0000-00000000000f'
+          on conflict (id) do nothing""")
+    t = db("""insert into public.tests
+                (owner_type, owner_id, program_id, subject_id, title, status)
+              select 'educator', c.teacher_id, p.id, s.id, 'Yazili sinaq', 'published'
+                from public.classes c, public.programs p, public.subjects s
+               where c.id = '7777cccc-0000-0000-0000-00000000000f'
+                 and p.slug='ibtidai' and s.slug='riyaziyyat'
+              returning id::text i""", one=True)["i"]
+    db("insert into public.test_questions (test_id, question_id, ord) values (%s,%s,1)",
+       (t, q["i"]))
+    db("insert into public.assignments (class_id, test_id) values "
+       "('7777cccc-0000-0000-0000-00000000000f', %s)", (t,))
+
+    sp = ctx.new_page()
+    sp.route("**/config.js*", lambda r: r.fulfill(
+        status=200, content_type="application/javascript", body=TEST_CFG))
+    sp.on("pageerror", lambda e: fails.append("JS xetasi (sagird): " + str(e)))
+    sp.goto("http://127.0.0.1:8010/sagird/index.html")
+    sp.wait_for_selector("#btnIn", timeout=8000)
+    sp.fill("#code", "YAZIKOD1"); sp.click("#btnIn")
+    sp.wait_for_selector(".test", timeout=8000)
+    sp.locator(".test", has_text="Yazili").first.click()
+    sp.wait_for_selector("#ans", timeout=8000)
+    ok(True, "yazili sualda cavab sahesi var")
+    ok(sp.locator(".opt").count() == 0, "yazili sualda variant gorunmur")
+    correct = db("""select o.body b from public.question_options o
+                     where o.question_id = %s and o.is_correct limit 1""",
+                 (q["i"],), one=True)["b"]
+    sp.fill("#ans", correct); sp.wait_for_timeout(350)
+    ok("bitir" in sp.inner_text("#btnNext").lower(),
+       "cavab yazilanda duyme deyisir", sp.inner_text("#btnNext"))
+    sp.click("#btnNext"); sp.wait_for_selector(".ring", timeout=8000)
+    ok("100" in sp.inner_text(".ring .val"),
+       "yazili cavab SERVERDE duzgun sayilir", sp.inner_text(".ring .val"))
+    sp.close()
+
     print("G · Silmək")
     pg.on("dialog", lambda d: d.accept())
     pg.locator(".qrow", has_text="5 x 5").first.click()
