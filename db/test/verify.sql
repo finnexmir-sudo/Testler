@@ -52,7 +52,7 @@ leak as (
                         'attempts','attempt_answers','student_sessions','consents'))
 select * from (
   select 1 ord, 'Cedvel sayi'          k, tabs.n::text v,
-         case when tabs.n=22 then 'OK' else 'GOZLENILEN 22' end d from tabs
+         case when tabs.n=23 then 'OK' else 'GOZLENILEN 23' end d from tabs
   union all select 2, 'RLS acilmayan',   norls.s,
          case when norls.s='-' then 'OK' else 'PROBLEM' end from norls
   union all select 3, 'RLS siyaseti',    pol.n::text,
