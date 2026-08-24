@@ -49,6 +49,14 @@ begin
     raise exception 'Son tarix kecmisde ola bilmez.' using errcode = '22023';
   end if;
 
+  --  Odenisli test abunesiz teyin olunsa DALAN yaranir: muellim teyin
+  --  edir, sagird acanda "abune lazimdir" gorur ve ise dusmur.
+  --  Ona gore teyin anindaca dayandiririq.
+  if not v_test.is_free and not app.has_active_subscription(v_class.account_id) then
+    raise exception 'Bu test abune paketine daxildir. Sagird onu aca bilmeyecek - once paketi genislendirin.'
+      using errcode = '42501';
+  end if;
+
   insert into public.assignments (class_id, test_id, assigned_by, closes_at, max_attempts)
   values (p_class_id, p_test_id, v_uid, p_closes_at, p_max_attempts)
   on conflict (class_id, test_id) do update

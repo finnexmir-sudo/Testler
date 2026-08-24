@@ -319,7 +319,7 @@ begin
     declare
       v_sel  uuid[] := '{}';
       v_txt  text;
-      v_ok   boolean := false;
+      v_ok   boolean := false;   -- null = cavab verilmeyib
     begin
       v_max := v_max + r.points;
 
@@ -332,14 +332,18 @@ begin
         v_txt := nullif(btrim(coalesce(r.ans->>'t','')), '');
       end if;
 
-      if r.kind = 'text' then
+      if r.ans is null or (array_length(v_sel,1) is null and v_txt is null) then
+        --  Sagird bu suala HEC TOXUNMAYIB.  "Sehv cavab verdi" ile eyni
+        --  sey deyil - hesabatda ayrilsin deye null yazilir.  Bal yene 0.
+        v_ok := null;
+      elsif r.kind = 'text' then
         v_ok := v_txt is not null and lower(v_txt) = any (r.correct_texts);
       else
         v_ok := array_length(r.correct_ids,1) is not null
                 and v_sel @> r.correct_ids and r.correct_ids @> v_sel;
       end if;
 
-      if v_ok then v_score := v_score + r.points; end if;
+      if v_ok is true then v_score := v_score + r.points; end if;
 
       --  Sualin metni de yazilir: muellim sonradan sual redakte etse,
       --  bu hesabat hele de sagirdin GORDUYU sual gosterecek.
@@ -348,7 +352,7 @@ begin
          is_correct, points, question_body, question_explanation)
       values
         (p_attempt_id, r.id, r.topic_id, v_sel, v_txt, v_ok,
-         case when v_ok then r.points else 0 end, r.q_body, r.q_expl)
+         case when v_ok is true then r.points else 0 end, r.q_body, r.q_expl)
       on conflict (attempt_id, question_id) do update
         set selected_option_ids = excluded.selected_option_ids,
             text_answer         = excluded.text_answer,

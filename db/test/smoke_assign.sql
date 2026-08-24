@@ -33,7 +33,7 @@ values ('5555000a-0000-0000-0000-000000000001','aaaa0000-0000-0000-0000-00000000
 drop table if exists public.test_fixtures;
 create table public.test_fixtures (k text primary key, v uuid);
 insert into public.test_fixtures select slug, id from public.tests where slug in
-  ('riy-3-vurma-1','riy-3-qarisiq-1','az-3-dil-1');
+  ('riy-3-vurma-1','riy-3-qarisiq-1','az-3-dil-1','riy-3-analiz');
 grant select on public.test_fixtures to anon, authenticated;
 
 -- Duzgun cavab acari: anon rolu questions/question_options oxuya bilmir
@@ -279,7 +279,46 @@ begin
 end $$;
 \echo 'OK 10 · teyinat silinir'
 
-reset role;
+
+-- =====================================================================
+-- 11. Odenisli testi ABUNESIZ teyin etmek olmaz
+--     Eks halda DALAN yaranir: muellim teyin edir, sagird "abune
+--     lazimdir" gorur ve testi ise dusmur.
+-- =====================================================================
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-000000000001';
+do $$
+declare t uuid; ok boolean := false;
+begin
+  select f.v into t from public.test_fixtures f where f.k = 'riy-3-analiz';
+  begin
+    perform public.rpc_assign_test('cccc0000-0000-0000-0000-000000000001', t);
+    assert false, 'odenisli test abunesiz teyin olundu - sagird aca bilmeyecek';
+  exception when insufficient_privilege then ok := true; end;
+  assert ok, 'abune yoxlanisi islemedi';
+end $$;
+\echo 'OK 11 · odenisli testi abunesiz teyin etmek olmur'
+
+-- =====================================================================
+-- 12. Abune ile teyin olunur
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+insert into public.subscriptions (account_id, plan_id, status, started_at, current_period_end)
+select 'aaaa0000-0000-0000-0000-000000000001', p.id, 'active', now(), now() + interval '30 days'
+  from public.plans p where p.slug = 'repetitor-25';
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-000000000001';
+do $$
+declare t uuid; v jsonb;
+begin
+  select f.v into t from public.test_fixtures f where f.k = 'riy-3-analiz';
+  v := public.rpc_assign_test('cccc0000-0000-0000-0000-000000000001', t);
+  assert v->>'id' is not null, 'abune ile de teyin olunmadi';
+end $$;
+\echo 'OK 12 · abune ile odenisli test teyin olunur'
+
+reset role; reset request.jwt.claim.sub;
+
 drop table if exists public.test_fixtures;
 drop table if exists public.answer_fixtures;
 

@@ -111,7 +111,11 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".opt", timeout=8000)
     ok("1 / " + str(NQ) in pg.inner_text(".prog"), "irelileyis gostericisi",
        pg.inner_text(".prog").replace("\n", " "))
-    ok(pg.is_disabled("#btnNext"), "cavab secilmeden novbeti duymesi bagli")
+    # Cavabsiz da kecmek olar - usaq bilmediyi sualda ilisib qalmasin.
+    # Duymenin adi niyyeti gosterir.
+    ok(not pg.is_disabled("#btnNext"), "cavabsiz da kecmek olur")
+    ok("keç" in pg.inner_text("#btnNext").lower(),
+       "duyme 'bilmirem, keç' yazir", pg.inner_text("#btnNext"))
 
     body = pg.inner_text(".q .body")
     ok(len(body) > 3, "sual metni gorunur", body[:40])
@@ -143,7 +147,8 @@ with sync_playwright() as pw:
         pg.wait_for_timeout(120)
         if i == 0:
             ok(pg.locator(".opt.sel").count() == 1, "secilen variant isaretlenir")
-            ok(not pg.is_disabled("#btnNext"), "cavabdan sonra duyme acilir")
+            ok("növbəti" in pg.inner_text("#btnNext").lower(),
+               "cavab secilende duyme 'Novbeti sual' olur", pg.inner_text("#btnNext"))
         pg.click("#btnNext")
         pg.wait_for_timeout(350)
 
@@ -278,6 +283,37 @@ with sync_playwright() as pw:
        "%s / %s" % (row["score"], row["max_score"]))
     n_ans = db("""select count(*) n from public.attempt_answers""", one=True)["n"]
     ok(n_ans >= NQ, "cavablar bazaya yazilib", n_ans)
+
+    print("G2 · Sualı keçmək")
+    # Muveqqeti: bu bolme testi BITIRIR, ona gore en sondadir -
+    # eks halda sonraki bolmeler hemin testi aca bilmir.
+    pg.goto(APP); pg.evaluate("localStorage.clear()")
+    pg.reload(); pg.wait_for_selector("#btnIn", timeout=8000)
+    pg.fill("#code", "AYSUKOD1"); pg.click("#btnIn")
+    pg.wait_for_selector(".test", timeout=8000)
+    pg.locator(".test:not(.lock)", has_text="Qarışıq").first.click()
+    pg.wait_for_selector(".opt", timeout=8000)
+    nq2 = int(pg.inner_text(".prog .cnt").split("/")[1])
+    # hec bir suala toxunmadan sonadek kecirik
+    for i in range(nq2 - 1):
+        ok_lbl = "keç" in pg.inner_text("#btnNext").lower()
+        if not ok_lbl:
+            ok(False, "her cavabsiz sualda 'keç' yazir", pg.inner_text("#btnNext")); break
+        pg.click("#btnNext"); pg.wait_for_timeout(250)
+    else:
+        ok(True, "cavabsiz suallari kecmek olur", "%d sual" % (nq2 - 1))
+    ok("cavabsız bitir" in pg.inner_text("#btnNext").lower(),
+       "sonuncuda 'Cavabsiz bitir' yazir", pg.inner_text("#btnNext"))
+    pg.on("dialog", lambda d: d.accept())
+    pg.click("#btnNext"); pg.wait_for_selector(".ring", timeout=8000)
+    ok("0" in pg.inner_text(".ring .val"), "hamisi cavabsiz -> 0%",
+       pg.inner_text(".ring .val").replace("\n", ""))
+    nn = db("""select count(*) n from public.attempt_answers aa
+                 join public.attempts a on a.id = aa.attempt_id
+                 join public.tests t on t.id = a.test_id and t.slug = 'riy-3-qarisiq-1'
+                where aa.is_correct is null""", one=True)["n"]
+    ok(nn == nq2, "cavabsiz suallar bazada 'sehv' YOX, bos yazilir",
+       "%d / %d" % (nn, nq2))
 
     ctx.close(); br.close()
 

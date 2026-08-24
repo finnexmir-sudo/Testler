@@ -313,8 +313,12 @@
         }).join("") +
       "</div>" +
       '<div class="spacer"></div>' +
-      '<button class="btn go wide" id="btnNext"' + (picked ? "" : " disabled") + ">" +
-        (S.i + 1 >= n ? "Testi bitir" : "Növbəti sual") + "</button>"
+      /* Cavabsiz da kecmek olar - bilmediyi sualda ilisib qalmasin.
+         Duymenin adi niyyeti aydin gosterir: "Keç" ve ya "Növbəti". */
+      '<button class="btn ' + (picked ? "go" : "") + ' wide" id="btnNext">' +
+        (S.i + 1 >= n
+          ? (picked ? "Testi bitir" : "Cavabsız bitir")
+          : (picked ? "Növbəti sual" : "Bilmirəm, keç")) + "</button>"
     );
 
     on("spk", "click", function () { say(q.body, $("spk")); });
@@ -327,7 +331,10 @@
         b.classList.add("sel");
         S.answers[q.id] = b.getAttribute("data-o");
         var nx = $("btnNext");
-        if (nx) nx.disabled = false;
+        if (nx) {
+          nx.classList.add("go");
+          nx.textContent = (S.i + 1 >= S.qs.length) ? "Testi bitir" : "Növbəti sual";
+        }
       });
     });
 
@@ -343,9 +350,15 @@
 
     on("btnNext", "click", function () {
       if (busy) return;
-      if (!S.answers[q.id]) return;
-      if (S.i + 1 >= S.qs.length) finish();
-      else { S.i++; drawQuestion(); }
+      if (S.i + 1 >= S.qs.length) {
+        /* Bitirmeden EVVEL xeberdarliq: cavabsiz sual varsa geri
+           qayidib baxmaq olar - tesadufen bitirmesin. */
+        var bos = S.qs.filter(function (x) { return !S.answers[x.id]; }).length;
+        if (bos > 0 && !confirm(
+              bos + " sual cavabsız qalıb.\n\nTesti indi bitirmək istəyirsən?\n" +
+              "«Ləğv et» desən geri qayıdıb baxa bilərsən.")) return;
+        finish();
+      } else { S.i++; drawQuestion(); }
     });
   }
 

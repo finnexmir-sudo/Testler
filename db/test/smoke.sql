@@ -330,6 +330,44 @@ end $$;
 \echo 'OK  9 · lovhe yalniz oz sinfi, yalniz gorunen ad'
 
 -- =====================================================================
+-- 9b. Cavabsiz qalan sual "sehv" sayilmir - hesabatda ayrilir
+-- =====================================================================
+reset role;
+delete from public.attempt_answers aa using public.attempts a
+ where a.id = aa.attempt_id and a.student_id = '55555555-0000-0000-0000-000000000001';
+delete from public.attempts where student_id = '55555555-0000-0000-0000-000000000001';
+
+set role anon;
+do $$
+declare tok text; att uuid; v jsonb;
+begin
+  tok := public.rpc_student_login('AYSU2024')->>'token';
+  att := (public.rpc_start_attempt(tok,'ffffffff-0000-0000-0000-000000000001')->>'attempt_id')::uuid;
+
+  --  Yalniz BIR suala cavab veririk, qalan ikisi cavabsiz qalir
+  v := public.rpc_submit_attempt(tok, att, jsonb_build_array(
+         jsonb_build_object('q','99999999-0000-0000-0000-000000000002',
+                            'o', jsonb_build_array(
+                              (select f.v from public.test_fixtures f where f.k='bad2')))));
+  assert (v->>'score')::numeric = 0, 'cavabsiz sual bal qazandirdi';
+end $$;
+reset role;
+
+do $$
+declare n_null int; n_false int;
+begin
+  select count(*) filter (where is_correct is null),
+         count(*) filter (where is_correct is false)
+    into n_null, n_false
+    from public.attempt_answers aa
+    join public.attempts a on a.id = aa.attempt_id
+   where a.student_id = '55555555-0000-0000-0000-000000000001';
+  assert n_null = 2, format('cavabsiz sual sayi: %s (2 olmali)', n_null);
+  assert n_false = 1, format('sehv cavab sayi: %s (1 olmali)', n_false);
+end $$;
+\echo 'OK  9b · cavabsiz sual "sehv" deyil, ayrica yazilir'
+
+-- =====================================================================
 -- 10. Repetitor paketi: yer limiti bazada tetbiq olunur
 -- =====================================================================
 reset role;
@@ -401,6 +439,7 @@ end $$;
 
 reset role;
 drop table if exists public.test_fixtures;
+
 
 \echo ''
 \echo '=============================='
