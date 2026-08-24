@@ -15,6 +15,12 @@ TEST_CFG = """window.CFG = {
   STUDENT_URL: "https://example.test/Testler/"
 };"""
 
+def empty_icons(pg):
+    """Terif olunmayan ikon: <svg> var, icinde hec ne yoxdur."""
+    return pg.evaluate(
+        "() => [...document.querySelectorAll('svg')]"
+        ".filter(s => s.innerHTML.trim() === '').length")
+
 fails = []
 def ok(cond, label, extra=""):
     print(("  OK   " if cond else "  FAIL ") + label + (("  " + str(extra)) if extra else ""), flush=True)
@@ -66,6 +72,8 @@ with sync_playwright() as pw:
     ok(True, "hesab yaranir, esas ekran acilir")
     ok("0 / 5" in pg.inner_text(".seat"), "yer gostericisi 0 / 5", pg.inner_text(".seat").replace("\n"," "))
     ok("Leyla Muellim" in pg.inner_text("#topWho"), "ustlukde ad gorunur")
+
+    ok(empty_icons(pg) == 0, "esas ekranda bos ikon yoxdur", empty_icons(pg))
 
     print("B · Qrup yaratmaq")
     # siniflər ayrıca sorğu ilə gəlir - dolmasını gözləyirik

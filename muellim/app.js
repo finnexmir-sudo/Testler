@@ -41,7 +41,9 @@
     star:   '<path d="M9.5 3l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 ' +
             '4.3-.6L9.5 3z"/>',
     clock:  '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/>',
-    pen:    '<path d="M12.4 3.6a1.7 1.7 0 0 1 2.4 2.4L6.6 14.2l-3.1.7.7-3.1 8.2-8.2z"/>'
+    pen:    '<path d="M12.4 3.6a1.7 1.7 0 0 1 2.4 2.4L6.6 14.2l-3.1.7.7-3.1 8.2-8.2z"/>',
+    doc:    '<path d="M11 2.5H6a1.8 1.8 0 0 0-1.8 1.8v10.4A1.8 1.8 0 0 0 6 16.5h7a1.8 1.8 0 0 0 1.8-1.8V6.3L11 2.5z"/>' +
+            '<path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/>'
   };
   function ic(name, cls) {
     return '<svg class="' + (cls || "") + '" viewBox="0 0 19 19" fill="none" ' +
@@ -216,11 +218,11 @@
           : "") +
       "</div>" +
       '<div class="spacer"></div>' +
-      '<button class="item" id="btnBank">' +
+      '<div class="card pad0"><button class="item" id="btnBank">' +
         '<div class="ic">' + ic("doc") + "</div>" +
         '<div class="g"><b>Sual bankı</b><i><span>Öz suallarınızı yazın, ' +
           "testlərə yığın</span></i></div>" +
-        '<span class="arrow">' + ic("right") + "</span></button>" +
+        '<span class="arrow">' + ic("right") + "</span></button></div>" +
       '<div class="spacer"></div>' +
       "<h2>Qruplar</h2>" +
       '<div id="groups" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
@@ -1249,6 +1251,7 @@
     Promise.all([
       loadLevels(),
       sb.rpc("rpc_bank_facets", { p_subject: null, p_level: null }),
+      /* movzular AYRICA, secilen fenne gore */
       id === "new" ? Promise.resolve(null) : sb.rpc("rpc_bank_question", { p_id: id })
     ]).then(function (res) {
       if (!live()) return;
@@ -1383,6 +1386,7 @@
     on("btnBack", "click", function () { nav("#/b"); });
     drawOptions();
     kindNote();
+    loadTopics(q.subject);
 
     on("qkind", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
@@ -1409,12 +1413,43 @@
     on("qSave", "click", saveQuestion);
     if (!isNew) on("qDel", "click", delQuestion);
 
+    /* Fenn deyisende movzular da deyismelidir - riyaziyyat sualina
+       "Sait ve samit" teklif etmek olmaz. */
+    on("qsub", "change", function () {
+      collect();
+      QD.topic_id = "";
+      loadTopics(QD.subject);
+    });
+
     /* Oxsar sual xeberdarligi - BLOKLAMIR, yalniz gosterir */
     var t = null;
     on("qbody", "input", function () {
       clearTimeout(t);
       t = setTimeout(checkSimilar, 600);
     });
+  }
+
+  /* Movzu siyahisi: yalniz secilen fennin movzulari */
+  function loadTopics(subject) {
+    var sel = $("qtop");
+    if (!sel) return;
+    sel.disabled = true;
+    sb.rpc("rpc_bank_facets", { p_subject: subject || null, p_level: null })
+      .then(function (fac) {
+        var el = $("qtop");
+        if (!el) return;
+        FAC.topics = (fac || {}).topics || [];
+        el.innerHTML = '<option value="">Seçilməyib</option>' +
+          FAC.topics.map(function (t) {
+            return '<option value="' + esc(t.id) + '"' +
+              (QD.topic_id === t.id ? " selected" : "") + ">" + esc(t.name) + "</option>";
+          }).join("");
+        el.disabled = false;
+        if (!FAC.topics.length) {
+          el.innerHTML = '<option value="">Bu fənn üçün mövzu yoxdur</option>';
+        }
+      })
+      .catch(function () { var el = $("qtop"); if (el) el.disabled = false; });
   }
 
   function seg2(v, label, cur) {

@@ -15,6 +15,12 @@ TEST_CFG = """window.CFG = {
   STUDENT_URL: "https://example.test/Testler/"
 };"""
 
+def empty_icons(pg):
+    """Terif olunmayan ikon: <svg> var, icinde hec ne yoxdur."""
+    return pg.evaluate(
+        "() => [...document.querySelectorAll('svg')]"
+        ".filter(s => s.innerHTML.trim() === '').length")
+
 fails = []
 def ok(cond, label, extra=""):
     print(("  OK   " if cond else "  FAIL ") + label + (("  " + str(extra)) if extra else ""),
@@ -62,12 +68,18 @@ with sync_playwright() as pw:
 
     print("A · Bank ekranı")
     ok(True, "esas sehifede 'Sual banki' var")
+    # Terif olunmayan ikon BOS svg verir - gozle gorunmur, ona gore yoxlanilir
+    ok(empty_icons(pg) == 0, "esas sehifede bos ikon yoxdur", empty_icons(pg))
+    ok(pg.locator("#btnBank").evaluate(
+        "e => getComputedStyle(e.closest('.card')).backgroundColor") != "rgba(0, 0, 0, 0)",
+       "bank kecidi kart icindedir")
     pg.click("#btnBank"); pg.wait_for_selector("#btnNewQ", timeout=8000)
     ok("/b" in pg.url, "bankin oz unvani var", pg.url.split("#")[-1])
     ok("0" in pg.inner_text(".seat .num"), "istifade gostericisi 0-dan baslayir",
        pg.inner_text(".seat .num").replace("\n", " "))
     pg.wait_for_selector("#bList .empty", timeout=8000)
     ok("Sual tapılmadı" in pg.inner_text("#bList"), "bos veziyyet aydindir")
+    ok(empty_icons(pg) == 0, "bank ekraninda bos ikon yoxdur", empty_icons(pg))
 
     print("B · Yeni sual yazmaq")
     pg.click("#btnNewQ"); pg.wait_for_selector("#qbody", timeout=8000)
@@ -182,6 +194,19 @@ with sync_playwright() as pw:
        pg.inner_text("#qErr").strip()[:50])
     ok(db("select count(*) n from public.questions where owner_type='educator'",
           one=True)["n"] == 2, "tekrar sual bazaya dusmedi")
+
+    print("F0 · Mövzu fənnə görə süzülür")
+    pg.click("#btnBack"); pg.wait_for_selector("#btnNewQ", timeout=8000)
+    pg.click("#btnNewQ"); pg.wait_for_selector("#qtop", timeout=8000)
+    pg.wait_for_timeout(800)
+    riy = pg.locator("#qtop option").all_inner_texts()
+    ok("Vurma cədvəli" in riy, "riyaziyyat movzulari gorunur", riy[:4])
+    ok("Sait və samit" not in riy,
+       "BASQA fennin movzusu teklif olunmur", riy)
+    pg.select_option("#qsub", "az-dili"); pg.wait_for_timeout(900)
+    az = pg.locator("#qtop option").all_inner_texts()
+    ok("Sait və samit" in az, "fenn deyisende movzular da deyisir", az[:4])
+    ok("Vurma cədvəli" not in az, "kohne fennin movzulari qalmir", az)
 
     print("F · Yazılı sual")
     pg.click("#btnBack"); pg.wait_for_selector("#btnNewQ", timeout=8000)
