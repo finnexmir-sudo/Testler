@@ -302,6 +302,11 @@ begin
     'percent',      v_att.percent,
     'passed',       v_att.percent >= v_test.pass_percent,
     'duration_sec', v_att.duration_sec,
+    -- "Bir de cehd ede bilersen" yazisi ucun: hele cehd qalibmi?
+    'can_retry',    v_test.max_attempts = 0 or
+                    (select count(*) from public.attempts a2
+                      where a2.student_id = v_student and a2.test_id = v_att.test_id
+                        and a2.status = 'submitted') < v_test.max_attempts,
     'wrong', coalesce((
       select jsonb_agg(jsonb_build_object('question_id', aa.question_id, 'body', q.body,
                                           'explanation', q.explanation))
@@ -345,6 +350,7 @@ begin
     'passed',       v_att.percent >= v_test.pass_percent,
     'duration_sec', v_att.duration_sec,
     'finished_at',  v_att.finished_at,
+    'can_retry',    false,   -- baxis rejimi: cehd bitib
     'test', jsonb_build_object('id', v_test.id, 'title', v_test.title,
                                'pass_percent', v_test.pass_percent),
     'wrong', coalesce((

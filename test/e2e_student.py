@@ -175,13 +175,17 @@ with sync_playwright() as pw:
     row = pg.locator(".test", has_text="Vurma cədvəli").first
     ok("100%" in row.inner_text(), "siyahida onceki netice gorunur",
        row.inner_text().replace("\n", " "))
-    ok("nəticəyə bax" in row.inner_text().lower(),
-       "islenmis test 'neticeye bax' kimi isarelenir")
+    ok("nəticəni gör" in row.inner_text().lower(),
+       "islenmis test aydin isarelenir", row.inner_text().replace("\n", " ")[-40:])
 
     row.click(); pg.wait_for_timeout(900)
     ok(pg.locator(".opt").count() == 0, "yeni cehd ACILMIR - sual gorunmur")
     ok(pg.locator(".ring").count() == 1, "evezine netice ekrani acilir")
-    ok("yenidən işləmək olmaz" in pg.inner_text("#main"), "sagirde sebeb izah olunur")
+    t = pg.inner_text("#main")
+    ok("yenidən işləmək olmaz" in t, "sagirde sebeb izah olunur")
+    ok("yuxarıda nəticən" in t, "netice ekranin harasinda oldugu gosterilir")
+    ok("Bir də cəhd edə bilərsən" not in t,
+       "cehd qalmayanda 'bir de cehd ede bilersen' YAZILMIR")
     ok("100" in pg.inner_text(".ring .val"), "kohne netice gosterilir")
 
     # Frontend-e etibar etmirik: birbasa sorgu da bloklanmalidir

@@ -141,6 +141,19 @@ başqa müəllimin təcridi, yanlış parol — 33 yoxlama.
   Yarımçıq cəhd bazada `in_progress` qalır və geri qayıdanda davam edir.
 - Liderlər lövhəsi yalnız öz qrupu daxilindədir.
 
+## Panel — marşrut və yenilənmə
+
+Ekran ünvanın hash hissəsində saxlanılır: `#/`, `#/g/<qrup>`,
+`#/r/<qrup>` (hesabat), `#/s/<şagird>/<qrup>`.
+
+- Səhifə yenilənəndə müəllim **yerini itirmir**
+- Brauzerin «geri» düyməsi işləyir
+- Hesabatda **«Yenilə»** düyməsi var — səhifəni yükləmədən məlumatı gətirir
+- Müəllim başqa tətbiqə keçib qayıdanda hesabat **özü yenilənir**
+  (`visibilitychange`)
+- Sürətlə keçid edəndə köhnə sorğunun cavabı yeni ekranın üstünə
+  yazılmır — hər ekran `guard()` ilə ünvanın dəyişmədiyini yoxlayır
+
 ## Şəbəkə kəsintisi
 
 Telefonda internet kəsiləndə `fetch` «Failed to fetch» atır — bu, uşağa

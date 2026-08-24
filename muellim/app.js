@@ -304,9 +304,7 @@
           '<span class="arrow">' + ic("right") + "</span></button>";
       }).join("");
       Array.prototype.forEach.call(box.querySelectorAll("[data-g]"), function (b) {
-        b.addEventListener("click", function () {
-          screenGroup(b.getAttribute("data-g"));
-        });
+        b.addEventListener("click", function () { nav("#/g/" + b.getAttribute("data-g")); });
       });
     }).catch(function (e) {
       var box = $("groups");
@@ -316,13 +314,15 @@
 
   /* ------------------------------------------------------- qrup detali */
   function screenGroup(id) {
+    var live = guard();
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.select("classes", { select: "id,name,join_code,account_id", eq: { id: id } })
       .then(function (rows) {
+        if (!live()) return;
         if (!rows || !rows.length) throw new Error("Qrup tapılmadı.");
         drawGroup(rows[0]);
       })
-      .catch(function (e) { show(msg("err", fail(e))); });
+      .catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
   function drawGroup(g) {
@@ -354,8 +354,8 @@
       "</div>"
     );
 
-    on("btnBack", "click", function () { screenHome(); });
-    on("btnRep", "click", function () { screenReport(g); });
+    on("btnBack", "click", function () { nav("#/"); });
+    on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("snick", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("btnStu", "click", addStudent);
@@ -426,7 +426,7 @@
       });
       Array.prototype.forEach.call(box.querySelectorAll("[data-rep]"), function (b) {
         b.addEventListener("click", function () {
-          screenStudent(b.getAttribute("data-rep"), classId);
+          nav("#/s/" + b.getAttribute("data-rep") + "/" + classId);
         });
       });
       Array.prototype.forEach.call(box.querySelectorAll("[data-reset]"), function (b) {
@@ -499,14 +499,19 @@
       "təkrar səhv edilən suallar və tam irəliləyiş tarixçəsi.</span></div></div>";
   }
 
-  function screenReport(g) {
-    topTitle.textContent = g.name;
-    show('<div class="card"><div class="skel">Hesabat hazırlanır…</div></div>');
+  function screenReport(gid, quiet) {
+    var live = guard();
+    if (!quiet) show('<div class="card"><div class="skel">Hesabat hazırlanır…</div></div>');
 
-    sb.rpc("rpc_class_report", { p_class_id: g.id }).then(function (r) {
+    sb.rpc("rpc_class_report", { p_class_id: gid }).then(function (r) {
+      if (!live()) return;
+      topTitle.textContent = (r.class && r.class.name) || "Hesabat";
       var sm = r.summary || {};
       var h =
-        '<button class="btn sm ghost" id="btnB">' + ic("back") + "Qrup</button>" +
+        '<div class="row" style="justify-content:space-between;align-items:center">' +
+          '<button class="btn sm ghost" id="btnB">' + ic("back") + "Qrup</button>" +
+          '<button class="btn sm ghost" id="btnRef" title="Yenilə">' +
+            ic("refresh") + "Yenilə</button></div>" +
         '<div class="spacer"></div>' +
         '<div class="stats">' +
           statTile(sm.active + " / " + sm.students, "aktiv şagird") +
@@ -562,16 +567,30 @@
       }
 
       show(h);
-      on("btnB", "click", function () { screenGroup(g.id); });
+      stamp();
+      on("btnB", "click", function () { nav("#/g/" + gid); });
+      on("btnRef", "click", function () { screenReport(gid); });
       Array.prototype.forEach.call(main.querySelectorAll("[data-s]"), function (b) {
         b.addEventListener("click", function () {
-          screenStudent(b.getAttribute("data-s"), g.id);
+          nav("#/s/" + b.getAttribute("data-s") + "/" + gid);
         });
       });
     }).catch(function (e) {
+      if (quiet || !live()) return;           // sessiz yenilemede ekrani pozma
       show(msg("err", fail(e)) + '<button class="btn wide" id="btnB2">Geri</button>');
-      on("btnB2", "click", function () { screenGroup(g.id); });
+      on("btnB2", "click", function () { nav("#/g/" + gid); });
     });
+  }
+
+  /* Son yenilenme vaxti - muellim melumatin teze oldugunu bilsin */
+  function stamp() {
+    var d = new Date();
+    var t = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+    var el = document.createElement("p");
+    el.className = "muted";
+    el.style.cssText = "text-align:center;margin:14px 0 0";
+    el.textContent = "Son yenilənmə: " + t;
+    main.appendChild(el);
   }
 
   function statTile(val, lbl) {
@@ -579,10 +598,12 @@
   }
 
   function screenStudent(id, classId) {
+    var live = guard();
     topTitle.textContent = "Şagird hesabatı";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
 
     sb.rpc("rpc_student_report", { p_student_id: id }).then(function (r) {
+      if (!live()) return;
       var s = r.student || {}, sm = r.summary || {};
       var h =
         '<button class="btn sm ghost" id="btnB">' + ic("back") + "Geri</button>" +
@@ -635,12 +656,50 @@
       }
 
       show(h);
-      on("btnB", "click", function () { screenGroup(classId); });
+      on("btnB", "click", function () { nav("#/r/" + classId); });
     }).catch(function (e) {
+      if (!live()) return;
       show(msg("err", fail(e)) + '<button class="btn wide" id="btnB3">Geri</button>');
-      on("btnB3", "click", function () { screenGroup(classId); });
+      on("btnB3", "click", function () { nav("#/r/" + classId); });
     });
   }
+
+  /* --------------------------------------------------------- marsrut */
+  /* Ekran unvanin hash hissesinde saxlanilir: sehife yenilenende muellim
+     yerini itirmir, "geri" duymesi de brauzerde isleyir. */
+  /* Sürətlə keçid edəndə köhnə sorğunun cavabı yeni ekranın üstünə
+     yazıla bilər. Hər ekran başlayanda hansı ünvanda olduğunu yadda
+     saxlayır; cavab gələndə ünvan dəyişibsə heç nə çizmir. */
+  function guard() {
+    var at = location.hash || "#/";
+    return function () { return (location.hash || "#/") === at; };
+  }
+
+  function nav(h) {
+    if (location.hash === h) route();
+    else location.hash = h;
+  }
+
+  function route() {
+    if (!ACC) { screenSetup(); return; }
+    var m = (location.hash || "#/").replace(/^#/, "").split("/").filter(Boolean);
+    if (m[0] === "g" && m[1]) return screenGroup(m[1]);
+    if (m[0] === "r" && m[1]) return screenReport(m[1]);
+    if (m[0] === "s" && m[1] && m[2]) return screenStudent(m[1], m[2]);
+    screenHome();
+  }
+
+  window.addEventListener("hashchange", function () {
+    if (sb.session() && CTX) route();
+  });
+
+  /* Muellim basqa tetbiqe kecib qayidanda hesabat ozu yenilenir -
+     sehifeni yeniden yukleməye ehtiyac qalmir. */
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden || !sb.session() || !CTX) return;
+    var m = (location.hash || "").replace(/^#/, "").split("/").filter(Boolean);
+    if (m[0] === "r" && m[1]) screenReport(m[1], true);
+  });
 
   /* ------------------------------------------------------------- boot */
   function refreshContext() {
@@ -668,8 +727,7 @@
     refreshContext().then(function () {
       btnOut.classList.remove("hide");
       topWho.textContent = (CTX.profile && CTX.profile.full_name) || "";
-      if (!ACC) screenSetup();
-      else screenHome();
+      route();
     }).catch(function (e) {
       if (e && e.status === 401) { sb.signOut().then(function () { screenAuth("in"); }); return; }
       show(msg("err", fail(e)));
@@ -677,7 +735,11 @@
   }
 
   btnOut.addEventListener("click", function () {
-    sb.signOut().then(function () { CTX = null; ACC = null; screenAuth("in"); });
+    sb.signOut().then(function () {
+      CTX = null; ACC = null;
+      try { history.replaceState(null, "", location.pathname); } catch (e) {}
+      screenAuth("in");
+    });
   });
 
   boot();

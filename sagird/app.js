@@ -203,7 +203,7 @@
               "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
               "<span>" + (t.questions || 0) + " sual</span>" +
               (lock ? "<span>·</span><span>abunə lazımdır</span>" : "") +
-              (over ? "<span>·</span><span>işlənib — nəticəyə bax</span>" : "") +
+              (over ? "<span>·</span><span>işlənib — toxun, nəticəni gör</span>" : "") +
             "</i></div>" +
             (done ? '<span class="best">' + Math.round(t.best) + "%</span>" : "") +
             (lock ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
@@ -345,13 +345,17 @@
           '<span class="val">' + pct + "<s>%</s></span></div>" +
         '<div class="lbl">' + r.score + " / " + r.max_score + " düzgün</div>" +
         '<div class="sub">' + fmtTime(r.duration_sec) + " · " +
-          (passed ? "Keçdin, afərin" : "Bir də cəhd edə bilərsən") + "</div>" +
+          (passed
+            ? "Keçdin, afərin"
+            : (r.can_retry
+                ? "Bir də cəhd edə bilərsən"
+                : "Səhvlərinə bax və mövzunu təkrarla")) + "</div>" +
       "</div></div>" +
 
       (review
         ? '<div class="warn" style="margin-bottom:12px">' + ic("info") +
-          "<span>Bu testi artıq işləmisən. Nəticəyə baxa bilərsən, " +
-          "amma yenidən işləmək olmaz.</span></div>"
+          "<span>Bu testi artıq işləmisən — yuxarıda nəticən, aşağıda isə " +
+          "səhv suallar və izahları var. Testi yenidən işləmək olmaz.</span></div>"
         : '<div class="ok" style="margin-bottom:12px">' + ic("check") +
           "<span>Nəticə yadda saxlanıldı. Müəllimin onu panelində görür.</span></div>") +
       '<div class="row"><button class="btn go" id="btnHome" style="flex:1">Testlər</button>' +

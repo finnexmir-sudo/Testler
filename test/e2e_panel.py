@@ -147,7 +147,35 @@ with sync_playwright() as pw:
     ok("Cume qrupu" in pg.inner_text("#groups"), "sessiya sehife yenilenmesinden sonra qalir",
        pg.inner_text("#groups").replace("\n", " ")[:50])
 
-    print("H · Başqa müəllim heç nə görmür")
+    print("H · Hesabat və marşrut")
+    pg.click(".item"); pg.wait_for_selector("#btnRep", timeout=8000)
+    pg.click("#btnRep"); pg.wait_for_selector(".stats", timeout=8000)
+    ok("#/r/" in pg.url, "hesabat unvanda gorunur", pg.url.split("#")[-1])
+    ok(pg.is_visible("#btnRef"), "'Yenile' duymesi var")
+    ok("Son yenilənmə" in pg.inner_text("#main"), "son yenilenme vaxti yazilir")
+    ok("5 / 5" in pg.inner_text(".stats") or "0 / 5" in pg.inner_text(".stats"),
+       "xulase kartlari dolur", pg.inner_text(".stats").replace("\n", " ")[:40])
+
+    # Sehife yenilenende muellim yerini itirmemelidir
+    url = pg.url
+    pg.reload(); pg.wait_for_selector(".stats", timeout=10000)
+    ok(pg.url == url, "sehife yenilendikde HESABATDA qalir", pg.url.split("#")[-1])
+    ok("Son yenilənmə" in pg.inner_text("#main"), "hesabat yeniden yuklendi")
+
+    # "Yenile" sehifeni yeniden yuklemeden melumati getirir
+    pg.click("#btnRef"); pg.wait_for_timeout(900)
+    ok(pg.url == url, "'Yenile' unvani deyismir")
+    ok(pg.is_visible(".stats"), "'Yenile'-den sonra hesabat yerindedir")
+
+    # Sagird hesabatina kecid ve geri
+    pg.locator("[data-s]").first.click(); pg.wait_for_selector(".stats", timeout=8000)
+    ok("#/s/" in pg.url, "sagird hesabati unvanda", pg.url.split("#")[-1])
+    pg.go_back(); pg.wait_for_selector("#btnRef", timeout=8000)
+    ok("#/r/" in pg.url, "brauzerin 'geri' duymesi isleyir", pg.url.split("#")[-1])
+    pg.click("#btnB"); pg.wait_for_selector("#btnStu", timeout=8000)
+    pg.click("#btnBack"); pg.wait_for_selector("#btnGroup", timeout=8000)
+
+    print("I · Başqa müəllim heç nə görmür")
     pg2 = new_page(ctx)
     pg2.goto(PANEL)
     pg2.evaluate("localStorage.clear()")
@@ -163,7 +191,7 @@ with sync_playwright() as pw:
     ok("qrup yoxdur" in pg2.inner_text("#groups"), "yeni muellim basqasinin qrupunu gormur",
        pg2.inner_text("#groups").replace("\n", " ")[:60])
 
-    print("I · Yanlış parol")
+    print("J · Yanlış parol")
     pg3 = new_page(ctx)
     pg3.goto(PANEL); pg3.evaluate("localStorage.clear()"); pg3.reload()
     pg3.wait_for_selector("#btnAuth", timeout=8000)
