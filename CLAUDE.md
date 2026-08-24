@@ -131,6 +131,19 @@ bir bazada işləyir, o birində «operator class does not exist» verir.
 
 ---
 
+## Dinləyici yığılması — tələ
+
+`innerHTML` dəyişdirmək elementin ÖZÜNÜ dəyişmir. Ona görə hər yenidən
+çəkilişdə `addEventListener` çağırsan, dinləyicilər **üst-üstə yığılır**:
+iki klik → 4 dinləyici → bir klikdə 4 əməliyyat. Bir dəfə belə oldu —
+«Variant əlavə et» bir klikdə 19 variant yaratdı.
+
+Qayda: dinləyici **ekran çəkiləndə bir dəfə** bağlanır (`show()` yeni
+düyün yaradır), yenidən çəkilişdə yox. Şübhəlisənsə `dataset.bound`
+nişanı qoy.
+
+---
+
 ## CSS sinif adları — toqquşma
 
 `assets/base.css` ortaq sistemdir. Yeni sinif adı verəndə **əvvəlcə

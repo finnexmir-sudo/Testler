@@ -1391,6 +1391,7 @@
 
     on("btnBack", "click", function () { nav("#/b"); });
     drawOptions();
+    bindOptions();
     kindNote();
     loadTopics(q.subject, q.level);
 
@@ -1511,6 +1512,14 @@
           (txt ? "Başqa cavab" : "Variant əlavə et") + "</button>"
         : "");
 
+  }
+
+  /* Dinleyici EKRAN uzre bir defe baglanir - drawOptions-da yox.
+     Eks halda her yeniden cizilisde ustune bir dinleyici de qalir. */
+  function bindOptions() {
+    var box = $("qopts");
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = "1";
     box.addEventListener("click", function (e) {
       var m = e.target.closest ? e.target.closest("[data-c]") : null;
       if (m) {
@@ -1534,6 +1543,7 @@
       }
       if (e.target.id === "qAdd" || (e.target.closest && e.target.closest("#qAdd"))) {
         collect();
+        if (QD.options.length >= 8) return;   // sert hedd
         QD.options.push({ body: "", correct: QD.kind === "text" });
         drawOptions();
         var last = box.querySelectorAll(".obody");

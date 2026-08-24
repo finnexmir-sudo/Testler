@@ -98,6 +98,28 @@ with sync_playwright() as pw:
     # ucuncu variant
     pg.click("#qAdd"); pg.wait_for_timeout(200)
     ok(pg.locator(".opt-row").count() == 3, "variant elave olunur")
+
+    # Her klik DEQIQ bir variant elave etmelidir.  Bir defe dinleyici
+    # her cizilisde ustune yigildi: iki klik 4 variant verdi, sonra 8, 16...
+    for expect in (4, 5, 6, 7, 8):
+        pg.click("#qAdd"); pg.wait_for_timeout(200)
+        n = pg.locator(".opt-row").count()
+        if n != expect:
+            ok(False, "her klik BIR variant elave edir", "gozlenilen %d, alinan %d" % (expect, n))
+            break
+    else:
+        ok(True, "her klik BIR variant elave edir", "3 -> 8")
+    ok(pg.locator("#qAdd").count() == 0, "8 variantdan sonra duyme gizlenir",
+       pg.locator(".opt-row").count())
+    # 8-den yuxari qalxmasin
+    for i in range(3):
+        if pg.locator("#qAdd").count(): pg.click("#qAdd"); pg.wait_for_timeout(120)
+    ok(pg.locator(".opt-row").count() == 8, "hedd asilmir",
+       pg.locator(".opt-row").count())
+    # geri 3-e qayidiriq
+    while pg.locator(".opt-row").count() > 3:
+        pg.locator("[data-rm]").last.click(); pg.wait_for_timeout(150)
+    ok(pg.locator(".opt-row").count() == 3, "silmek de bir-bir isleyir")
     pg.locator(".obody").nth(2).fill("48")
     pg.select_option("#qlev", "3")
     tp = db("select id::text i from public.topics where slug='riy-3-vurma-cedveli'", one=True)
