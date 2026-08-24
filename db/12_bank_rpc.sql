@@ -415,12 +415,15 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------- huquq
-revoke all on function public.rpc_bank_save_question(uuid, text, text, jsonb, text, text, uuid, text, int, int, int, text[], uuid) from public;
-revoke all on function public.rpc_bank_delete_question(uuid)        from public;
-revoke all on function public.rpc_bank_question(uuid)               from public;
-revoke all on function public.rpc_bank_list(jsonb, int, int, uuid)  from public;
-revoke all on function public.rpc_bank_count(jsonb, uuid)           from public;
-revoke all on function public.rpc_bank_facets(text, text, uuid)     from public;
+--  DIQQET: "from public" KIFAYET DEYIL.  Supabase yeni funksiyalara
+--  anon ucun EXECUTE-u BIRBASA verir; PUBLIC-den geri almaq onu
+--  toxunmadan buraxir.  Ona gore anon da acıq yazilir.
+revoke all on function public.rpc_bank_save_question(uuid, text, text, jsonb, text, text, uuid, text, int, int, int, text[], uuid) from public, anon;
+revoke all on function public.rpc_bank_delete_question(uuid)        from public, anon;
+revoke all on function public.rpc_bank_question(uuid)               from public, anon;
+revoke all on function public.rpc_bank_list(jsonb, int, int, uuid)  from public, anon;
+revoke all on function public.rpc_bank_count(jsonb, uuid)           from public, anon;
+revoke all on function public.rpc_bank_facets(text, text, uuid)     from public, anon;
 
 grant execute on function public.rpc_bank_save_question(uuid, text, text, jsonb, text, text, uuid, text, int, int, int, text[], uuid) to authenticated;
 grant execute on function public.rpc_bank_delete_question(uuid)       to authenticated;

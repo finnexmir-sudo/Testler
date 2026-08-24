@@ -223,8 +223,11 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------- huquq
-revoke all on function public.rpc_class_report(uuid)   from public;
-revoke all on function public.rpc_student_report(uuid) from public;
+--  DIQQET: "from public" KIFAYET DEYIL.  Supabase yeni funksiyalara
+--  anon ucun EXECUTE-u BIRBASA verir; PUBLIC-den geri almaq onu
+--  toxunmadan buraxir.  Ona gore anon da acıq yazilir.
+revoke all on function public.rpc_class_report(uuid)   from public, anon;
+revoke all on function public.rpc_student_report(uuid) from public, anon;
 grant execute on function public.rpc_class_report(uuid)   to authenticated;
 grant execute on function public.rpc_student_report(uuid) to authenticated;
 

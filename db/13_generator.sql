@@ -375,11 +375,14 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------- huquq
-revoke all on function public.rpc_bank_similar(text, uuid, uuid)          from public;
-revoke all on function public.rpc_generate_preview(jsonb, uuid)           from public;
-revoke all on function public.rpc_generate_test(jsonb, text, uuid, uuid)  from public;
-revoke all on function public.rpc_regenerate_test(uuid)                   from public;
-revoke all on function public.rpc_test_preview(uuid)                      from public;
+--  DIQQET: "from public" KIFAYET DEYIL.  Supabase yeni funksiyalara
+--  anon ucun EXECUTE-u BIRBASA verir; PUBLIC-den geri almaq onu
+--  toxunmadan buraxir.  Ona gore anon da acıq yazilir.
+revoke all on function public.rpc_bank_similar(text, uuid, uuid)          from public, anon;
+revoke all on function public.rpc_generate_preview(jsonb, uuid)           from public, anon;
+revoke all on function public.rpc_generate_test(jsonb, text, uuid, uuid)  from public, anon;
+revoke all on function public.rpc_regenerate_test(uuid)                   from public, anon;
+revoke all on function public.rpc_test_preview(uuid)                      from public, anon;
 
 grant execute on function public.rpc_bank_similar(text, uuid, uuid)         to authenticated;
 grant execute on function public.rpc_generate_preview(jsonb, uuid)          to authenticated;

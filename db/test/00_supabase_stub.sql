@@ -39,3 +39,10 @@ grant usage on schema public to anon, authenticated, service_role;
 grant usage on schema app    to anon, authenticated, service_role;
 alter default privileges in schema public
   grant select, insert, update, delete on tables to anon, authenticated;
+
+--  DIQQET: Supabase yeni FUNKSIYALARA da anon ucun EXECUTE-u birbasa
+--  verir.  Bunu tekrarlamasaq "revoke ... from public" kifayet edirmis
+--  kimi gorunur - halbuki anon-un BIRBASA huququ qalir ve sehv yalniz
+--  canli Supabase-de uze cixir.  Bir defe bele oldu.
+alter default privileges in schema public
+  grant execute on functions to anon, authenticated;

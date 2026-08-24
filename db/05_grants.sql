@@ -66,6 +66,28 @@ grant update          on public.accounts to authenticated;
 --  subscriptions/payments yazmaq - yalniz service_role (shluz webhook-u)
 --  anon ucun HEC BIR cedvel - sagird terefi tamamile RPC ile isleyir
 
+-- ============================================================ funksiyalar
+--  Sagird tetbiqi ALTI funksiya cagirir - basqa hec ne.  Supabase yeni
+--  funksiyalara anon ucun EXECUTE-u avtomatik verdiyi ucun burda hamisi
+--  geri alinir, sonra 03_rpc.sql-in verdiyi alti dene yerinde qalir.
+--  Beleliklə sonradan yazilan her yeni muellim funksiyasi OZ-OZUNE
+--  bagli olur - unudulsa da sizmir.
+do $$
+declare fn text;
+begin
+  for fn in
+    select p.oid::regprocedure::text
+      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public'
+       and has_function_privilege('anon', p.oid, 'EXECUTE')
+       and p.proname not in ('rpc_student_login','rpc_student_tests',
+                             'rpc_start_attempt','rpc_submit_attempt',
+                             'rpc_leaderboard','rpc_test_result')
+  loop
+    execute format('revoke all on function %s from anon', fn);
+  end loop;
+end $$;
+
 -- ------------------------------------------------------------ 6. hesabat
 do $$
 declare leak text;
@@ -78,5 +100,16 @@ begin
   if leak is not null then
     raise exception 'anon-a hele de aciq cedveller var: %', leak;
   end if;
-  raise notice 'Huquqlar quruldu: anon yalniz kataloqu gorur.';
+  select string_agg(p.oid::regprocedure::text, ', ') into leak
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public'
+     and has_function_privilege('anon', p.oid, 'EXECUTE')
+     and p.proname not in ('rpc_student_login','rpc_student_tests',
+                           'rpc_start_attempt','rpc_submit_attempt',
+                           'rpc_leaderboard','rpc_test_result');
+  if leak is not null then
+    raise exception 'anon bu funksiyalari cagira bilir: %', leak;
+  end if;
+
+  raise notice 'Huquqlar quruldu: anon yalniz kataloqu ve 6 sagird RPC-sini gorur.';
 end $$;

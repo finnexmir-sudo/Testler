@@ -109,6 +109,13 @@ qaranlıq xəta çıxır və səbəb görünmür.
 Baza harada qaldığını bilmək üçün: `db/test/hardayam.sql` — heç nə
 dəyişmir, hansı faylın işlədildiyini və növbəti faylı deyir.
 
+**`revoke ... from public` funksiya üçün kifayət deyil.** Supabase yeni
+funksiyalara `anon` üçün EXECUTE-u **birbaşa** verir — PUBLIC-dən geri
+almaq ona toxunmur. Müəllim funksiyası yazanda mütləq
+`revoke all on function ... from public, anon` yaz.
+İkinci qat: `05_grants.sql` sonda `anon`-dan bütün funksiyaları geri
+alır və yalnız 6 şagird RPC-sini saxlayır — unudulsa da sızmır.
+
 **Uzantının sxemini sərt yazma.** `pg_trgm` bəzi bazalarda `public`,
 bəzilərində `extensions` sxemindədir. `extensions.gin_trgm_ops` yazsan
 bir bazada işləyir, o birində «operator class does not exist» verir.

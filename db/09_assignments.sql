@@ -175,10 +175,13 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------- huquq
-revoke all on function public.rpc_assign_test(uuid, uuid, timestamptz, int) from public;
-revoke all on function public.rpc_unassign_test(uuid)                       from public;
-revoke all on function public.rpc_available_tests(uuid)                     from public;
-revoke all on function public.rpc_class_assignments(uuid)                   from public;
+--  DIQQET: "from public" KIFAYET DEYIL.  Supabase yeni funksiyalara
+--  anon ucun EXECUTE-u BIRBASA verir; PUBLIC-den geri almaq onu
+--  toxunmadan buraxir.  Ona gore anon da acıq yazilir.
+revoke all on function public.rpc_assign_test(uuid, uuid, timestamptz, int) from public, anon;
+revoke all on function public.rpc_unassign_test(uuid)                       from public, anon;
+revoke all on function public.rpc_available_tests(uuid)                     from public, anon;
+revoke all on function public.rpc_class_assignments(uuid)                   from public, anon;
 
 grant execute on function public.rpc_assign_test(uuid, uuid, timestamptz, int) to authenticated;
 grant execute on function public.rpc_unassign_test(uuid)                       to authenticated;

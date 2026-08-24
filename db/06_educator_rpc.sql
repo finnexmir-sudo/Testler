@@ -260,7 +260,10 @@ begin
     'public.rpc_add_student(uuid, text, text, int)',
     'public.rpc_reset_student_code(uuid)']
   loop
-    execute format('revoke all on function %s from public', fn);
+    --  DIQQET: "from public" KIFAYET DEYIL.  Supabase yeni funksiyalara
+    --  anon ucun EXECUTE-u BIRBASA verir; PUBLIC-den geri almaq onu
+    --  toxunmadan buraxir.  Ona gore anon da acıq yazilir.
+    execute format('revoke all on function %s from public, anon', fn);
     execute format('grant execute on function %s to authenticated', fn);
   end loop;
 
