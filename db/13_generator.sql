@@ -17,7 +17,36 @@
 --  Yalniz >= 0.95 etibarlidir: yerdeyismis tekrari tutur, ferqli suala
 --  toxunmur.  Riyaziyyatda esl tekrar siqnali ise DUZGUN CAVABDIR.
 -- =====================================================================
-create extension if not exists pg_trgm;
+-- ------------------------------------------------------- on sert
+do $$
+begin
+  if not exists (select 1 from information_schema.columns
+                  where table_schema='public' and table_name='questions'
+                    and column_name='account_id') then
+    raise exception E'ONCE 11_sual_banki.sql isledilmelidir.\n'
+      'Sira: 11_sual_banki.sql -> 12_bank_rpc.sql -> 13_generator.sql';
+  end if;
+  if to_regprocedure('public.rpc_bank_list(jsonb, int, int, uuid)') is null then
+    raise exception E'ONCE 12_bank_rpc.sql isledilmelidir.\n'
+      'Sira: 11_sual_banki.sql -> 12_bank_rpc.sql -> 13_generator.sql';
+  end if;
+end $$;
+
+--  pg_trgm bezi bazalarda "public", bezilerinde "extensions" sxeminde
+--  olur.  Sxemi sert yazmaq olmaz - operator sinifi tapilmir.
+do $$
+begin
+  if not exists (select 1 from pg_extension where extname = 'pg_trgm') then
+    if exists (select 1 from pg_namespace where nspname = 'extensions') then
+      execute 'create extension pg_trgm with schema extensions';
+    else
+      execute 'create extension pg_trgm';
+    end if;
+  end if;
+end $$;
+
+--  Asagidaki indeks ve funksiyalar pg_trgm-i hansi sxemde olsa tapsin
+set search_path = public, extensions;
 
 -- =====================================================================
 --  1. TEKRARIN QARSISI
@@ -50,7 +79,7 @@ create unique index if not exists questions_dup_account
   where account_id is not null and status <> 'archived';
 
 create index if not exists idx_q_body_trgm
-  on public.questions using gin (body extensions.gin_trgm_ops);
+  on public.questions using gin (body gin_trgm_ops);
 
 --  Yazanda hash ozu qurulur
 create or replace function app.questions_set_hash() returns trigger

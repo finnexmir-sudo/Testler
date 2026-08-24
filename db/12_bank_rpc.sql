@@ -11,6 +11,20 @@
 --    · Paketden asili sual limiti bazada tetbiq olunur
 -- =====================================================================
 
+-- ------------------------------------------------------- on sert
+--  Bu fayl 11_sual_banki.sql-in qurdugu sutunlar uzerinde isleyir.
+--  O islemeyibse ASAGIDA qaranliq xetalar cixir - ona gore burda,
+--  daha bir sey deyismeden, aydin desin.
+do $$
+begin
+  if not exists (select 1 from information_schema.columns
+                  where table_schema='public' and table_name='questions'
+                    and column_name='account_id') then
+    raise exception E'ONCE 11_sual_banki.sql isledilmelidir.\n'
+      'Sira: 11_sual_banki.sql -> 12_bank_rpc.sql -> 13_generator.sql';
+  end if;
+end $$;
+
 -- ------------------------------------------------------------ hedler
 --  Pulsuz hesab bankı sonsuz doldura bilmez.
 create or replace function app.free_question_limit() returns int

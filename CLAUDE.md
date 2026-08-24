@@ -98,8 +98,21 @@ Artıq işləyən Supabase layihəsi üçün isə **miqrasiya faylı** var —
 (generator).
 Hər biri əvvəlki faylları işlətmiş bazaya tək başına
 əlavə olunur, təkrar işlədilsə zərər vermir və sonda özünü yoxlayır.
-Yeni belə dəyişiklik edəndə eyni qaydada `11_...`, `12_...` yaz —
+Yeni belə dəyişiklik edəndə eyni qaydada `14_...`, `15_...` yaz —
 istifadəçiyə beş faylı yenidən yapışdırtma.
+
+**Hər miqrasiya faylı öz ön şərtini yoxlamalıdır.** Əvvəlki fayl
+işlədilməyibsə, faylın başında aydın desin (`ÖNCƏ 11_... işlədilməlidir`)
+— yoxsa 300-cü sətirdə `column "account_id" does not exist` kimi
+qaranlıq xəta çıxır və səbəb görünmür.
+
+Baza harada qaldığını bilmək üçün: `db/test/hardayam.sql` — heç nə
+dəyişmir, hansı faylın işlədildiyini və növbəti faylı deyir.
+
+**Uzantının sxemini sərt yazma.** `pg_trgm` bəzi bazalarda `public`,
+bəzilərində `extensions` sxemindədir. `extensions.gin_trgm_ops` yazsan
+bir bazada işləyir, o birində «operator class does not exist» verir.
+`set search_path = public, extensions` qoy, adı qısa yaz.
 
 ---
 
