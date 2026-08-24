@@ -146,8 +146,13 @@ başqa müəllimin təcridi, yanlış parol — 33 yoxlama.
 Müəllim qrupun və şagirdin adını dəyişə bilir (qələm işarəsi). Boş ad
 bazada da bloklanır — `classes_name_ck` və `students_name_ck`.
 
-Şagirdin ləqəbi boş buraxılsa adın ilk sözü götürülür. Ləqəb liderlər
-lövhəsində görünən addır.
+**Ləqəb sahəsi yoxdur.** Müəllim yalnız tam adı yazır; `display_name`
+avtomatik qısa formadır (Aysu Məmmədova → Aysu M.) və yalnız liderlər
+lövhəsində görünür. Panel və hesabatlar həmişə tam adı göstərir.
+
+Sütun saxlanılıb, çünki lövhə uşağın soyadını sinif yoldaşlarına
+göstərməməlidir — bu, valideynə və məktəbə danışılan məxfilik
+arqumentidir. Amma müəllimə iş çıxarmır.
 
 ## Panel — marşrut və yenilənmə
 

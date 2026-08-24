@@ -346,12 +346,9 @@
       '<div class="spacer"></div>' +
       '<div class="card">' +
         '<label for="sname">Yeni şagird</label>' +
-        '<div class="fieldrow">' +
-          '<div><input id="sname" placeholder="Ad və soyad"></div>' +
-          '<div><input id="snick" placeholder="Ləqəb (istəyə bağlı)"></div>' +
-        "</div>" +
-        '<p class="muted" style="margin:-8px 0 14px">Ləqəb liderlər lövhəsində görünür. ' +
-          "Boş buraxsanız avtomatik qısaldılır: Aysu Məmmədova → Aysu M.</p>" +
+        '<input id="sname" placeholder="Ad və soyad">' +
+        '<p class="muted" style="margin:-8px 0 14px">Liderlər lövhəsində qısa forma ' +
+          "görünür: Aysu Məmmədova → Aysu M. Sinif yoldaşları tam soyadı görmür.</p>" +
         '<div id="sErr"></div>' +
         '<button class="btn go" id="btnStu">' + ic("plus") + "Şagird əlavə et</button>" +
       "</div>"
@@ -361,7 +358,6 @@
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("btnRen", "click", function () { renameGroup(g); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
-    on("snick", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("btnStu", "click", addStudent);
 
     loadStudents(g.id);
@@ -372,12 +368,9 @@
       if (!nm) { $("sErr").innerHTML = msg("err", "Şagirdin adını yazın."); return; }
       $("sErr").innerHTML = "";
       setBusy("btnStu", true, "Şagird əlavə et");
-      sb.rpc("rpc_add_student", {
-        p_class_id: g.id,
-        p_full_name: nm,
-        p_display_name: ($("snick").value || "").trim() || null
-      }).then(function () {
-        $("sname").value = ""; $("snick").value = "";
+      sb.rpc("rpc_add_student", { p_class_id: g.id, p_full_name: nm })
+        .then(function () {
+        $("sname").value = "";
         setBusy("btnStu", false, "Şagird əlavə et");
         return refreshContext().then(function () { loadStudents(g.id); });
       }).catch(function (e) {
@@ -430,34 +423,40 @@
     }
   }
 
-  /* Sagirdin adini/leqebini deyismek */
+  /* Lovhede gorunen qisa ad: "Aysu Məmmədova" -> "Aysu M."
+     Serverdeki rpc_add_student() ile eyni qayda. */
+  function shortName(full) {
+    var parts = String(full || "").trim().split(/\s+/);
+    if (!parts[0]) return "";
+    if (parts.length < 2) return parts[0];
+    return parts[0] + " " + parts[1].charAt(0).toUpperCase() + ".";
+  }
+
+  /* Sagirdin adini deyismek */
   function renameStudent(s, classId) {
     var row = document.querySelector('[data-row="' + s.id + '"]');
     if (!row || row.querySelector(".edit")) return;
     row.insertAdjacentHTML("beforeend",
-      '<div class="edit"><div class="fieldrow">' +
-        '<div><label>Ad və soyad</label><input class="eName" maxlength="120"></div>' +
-        '<div><label>Ləqəb</label><input class="eNick" maxlength="60"></div>' +
-      "</div><div class=\"eErr\"></div>" +
+      '<div class="edit"><label>Ad və soyad</label>' +
+      '<input class="eName" maxlength="120">' +
+      '<div class="eErr"></div>' +
       '<div class="row"><button class="btn go sm eSave">Yadda saxla</button>' +
       '<button class="btn ghost sm eCancel">Ləğv et</button></div></div>');
     var box = row.querySelector(".edit");
-    var n1 = box.querySelector(".eName"), n2 = box.querySelector(".eNick");
-    n1.value = s.full_name; n2.value = s.display_name;
+    var n1 = box.querySelector(".eName");
+    n1.value = s.full_name;
     n1.focus(); n1.select();
     box.querySelector(".eCancel").addEventListener("click", function () { box.remove(); });
     box.querySelector(".eSave").addEventListener("click", save);
-    [n1, n2].forEach(function (i) {
-      i.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") save();
-        if (e.key === "Escape") box.remove();
-      });
+    n1.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") save();
+      if (e.key === "Escape") box.remove();
     });
 
     function save() {
-      var full = (n1.value || "").trim(), nick = (n2.value || "").trim();
+      var full = (n1.value || "").trim();
       if (!full) { box.querySelector(".eErr").innerHTML = msg("err", "Ad boş ola bilməz."); return; }
-      if (!nick) nick = full.split(" ")[0];
+      var nick = shortName(full);
       var b = box.querySelector(".eSave");
       b.disabled = true; b.textContent = "Gözləyin…";
       sb.update("students", { id: s.id }, { full_name: full, display_name: nick })
@@ -485,7 +484,6 @@
       box.innerHTML = rows.map(function (s) {
         return '<div class="stu" data-row="' + esc(s.id) + '">' +
           '<div class="l1"><b>' + esc(s.full_name) + "</b>" +
-          '<span class="muted">' + esc(s.display_name) + "</span>" +
           '<button class="btn sm ghost icon" data-edit="' + esc(s.id) + '" ' +
             'title="Adı dəyiş" aria-label="Adı dəyiş">' + ic("pen") + "</button></div>" +
           '<div class="l2">' +

@@ -20,6 +20,16 @@ def ok(cond, label, extra=""):
     print(("  OK   " if cond else "  FAIL ") + label + (("  " + str(extra)) if extra else ""), flush=True)
     if not cond: fails.append(label)
 
+def db_nick(full):
+    """Bazadan qisa formani oxuyur - lovhede gorunen addir."""
+    import psycopg2, psycopg2.extras
+    with psycopg2.connect("host=/tmp port=55432 user=postgres dbname=panel_e2e",
+                          cursor_factory=psycopg2.extras.RealDictCursor) as c, c.cursor() as cur:
+        cur.execute("select display_name d from public.students where full_name = %s", (full,))
+        r = cur.fetchone()
+        return r["d"] if r else None
+
+
 def new_page(ctx):
     pg = ctx.new_page()
     pg.route("**/config.js*", lambda r: r.fulfill(
@@ -84,15 +94,19 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".stu", timeout=8000)
     s = pg.inner_text(".stu")
     ok("Aysu Məmmədova" in s, "sagird siyahiya dusur")
-    ok("Aysu M." in s, "leqeb avtomatik qisaldilir", s.replace("\n", " ")[:60])
+    ok("Aysu M." not in s, "muellim yalniz tam adi gorur", s.replace("\n", " ")[:60])
     scode = re.search(r"\b([A-Z2-9]{8})\b", s)
     ok(scode is not None, "giris kodu gorunur", scode.group(1) if scode else s[:60])
     first_code = scode.group(1) if scode else None
 
-    pg.fill("#sname", "Kənan Əliyev"); pg.fill("#snick", "Pələng")
+    ok(pg.locator("#snick").count() == 0,
+       "leqeb sahesi yoxdur - qisa forma avtomatik yaranir")
+    pg.fill("#sname", "Kənan Əliyev")
     pg.click("#btnStu"); pg.wait_for_timeout(900)
     ok(pg.locator(".stu").count() == 2, "ikinci sagird elave olunur")
-    ok("Pələng" in pg.inner_text("#stu"), "verilen leqeb istifade olunur")
+    ok("Kənan Əliyev" in pg.inner_text("#stu"), "siyahida TAM ad gorunur")
+    ok("Kənan Ə." not in pg.inner_text("#stu"),
+       "qisa forma siyahida gorunmur - muellim ancaq tam adi gorur")
 
     print("D · WhatsApp və kopyalama")
     pg.evaluate("window.__opened=null; window.open = (u)=>{ window.__opened=u; return null; }")
@@ -109,7 +123,7 @@ with sync_playwright() as pw:
 
     print("E · Paket limiti panel içində")
     for nm in ["Sagird 3", "Sagird 4", "Sagird 5"]:
-        pg.fill("#sname", nm); pg.fill("#snick", "")
+        pg.fill("#sname", nm)
         pg.click("#btnStu"); pg.wait_for_timeout(700)
     ok(pg.locator(".stu").count() == 5, "5 sagird elave olundu",
        pg.locator(".stu").count())
@@ -167,13 +181,15 @@ with sync_playwright() as pw:
     pg.locator("[data-edit]").first.click(); pg.wait_for_selector(".edit", timeout=8000)
     ok(pg.locator(".eName").first.input_value() == "Aysu Məmmədova",
        "sagirdin hazirki adi forma dolur")
+    ok(pg.locator(".eNick").count() == 0, "redaktede de leqeb sahesi yoxdur")
     pg.locator(".eName").first.fill("Aysel Məmmədova")
-    pg.locator(".eNick").first.fill("Aysel M.")
     pg.locator(".eSave").first.click(); pg.wait_for_timeout(1000)
     t = pg.inner_text("#stu")
     ok("Aysel Məmmədova" in t, "sagirdin adi deyisdi")
-    ok("Aysel M." in t, "leqeb de deyisdi")
     ok("Aysu Məmmədova" not in t, "kohne ad qalmadi")
+    # Qisa forma da OZU yenilenmelidir - lovhede o gorunur
+    nick = db_nick("Aysel Məmmədova")
+    ok(nick == "Aysel M.", "qisa forma avtomatik yenilendi", nick)
 
     print("I · Hesabat və marşrut")
     pg.click("#btnRep"); pg.wait_for_selector(".stats", timeout=8000)

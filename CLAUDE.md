@@ -29,6 +29,10 @@ cədvəlinə yazmaq hüququ yoxdur. Bunu pozan dəyişiklik saxtakarlığa qapı
 açır.
 
 **2 · Şəxsi məlumat yalnız `students` cədvəlində.**
+`display_name` müəllimin yazdığı bir şey deyil — tam addan avtomatik
+qısaldılır (Aysu Məmmədova → Aysu M.) və yalnız liderlər lövhəsində
+işlənir. Panelə ləqəb sahəsi qaytarma: müəllimə iş çıxarır və eyni
+şagirdin iki adı olduğu üçün çaşdırır.
 Ad-soyad başqa heç bir cədvəldə olmamalıdır. Liderlər lövhəsi
 `display_name` göstərir. Tam doğum tarixi saxlanılmır — yalnız
 `birth_year`. Yeni cədvəl əlavə edəndə ora ad yazma.
