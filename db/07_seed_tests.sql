@@ -37,7 +37,7 @@ insert into public.tests (owner_type, program_id, subject_id, level_id, slug,
                           title, description, is_free, status, pass_percent,
                           time_limit_sec, max_attempts)
 select 'platform', p.id, s.id, l.id, v.slug, v.title, v.descr,
-       v.is_free, 'published', 60, v.tlimit, 0
+       v.is_free, 'published', 60, v.tlimit, 1   -- bir cehd
   from (values
          ('riy-3-vurma-1', 'riyaziyyat', 'Vurma cədvəli — 1',
           '2, 3, 4 və 5-ə vurma', true,  600),
@@ -54,7 +54,8 @@ select 'platform', p.id, s.id, l.id, v.slug, v.title, v.descr,
 on conflict (slug) do update
   set title = excluded.title, description = excluded.description,
       is_free = excluded.is_free, status = excluded.status,
-      time_limit_sec = excluded.time_limit_sec;
+      time_limit_sec = excluded.time_limit_sec,
+      max_attempts = excluded.max_attempts;
 
 -- Suallari her defe temiz yaziriq (yalniz platforma testlerinde)
 delete from public.questions q

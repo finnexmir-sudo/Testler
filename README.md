@@ -131,9 +131,14 @@ başqa müəllimin təcridi, yanlış parol — 33 yoxlama.
   müəllim görməyəcək).
 - Səsləndirmə düyməsi **yalnız `az` və ya `tr` səsi olanda** görünür.
   İngilis səsi Azərbaycanca mətni oxuyanda anlaşılmaz çıxır.
-- Eyni testi təkrar işləmək olar (məşq üçün faydalıdır). Siyahıda əvvəlki
-  ən yaxşı nəticə görünür. Lövhədə hər şagird **bir dəfə** — ən yaxşı
-  nəticəsi ilə. `tests.max_attempts > 0` olsa limit tətbiq olunur.
+- **Bir test — bir cəhd.** Platforma testlərində `max_attempts = 1`.
+  İşlənmiş testə toxunanda yeni cəhd açılmır — əvvəlki nəticə göstərilir
+  (`rpc_test_result`). Limit **serverdə** tətbiq olunur: birbaşa sorğu ilə
+  də yeni cəhd açmaq mümkün deyil (403).
+  Müəllim öz testində `max_attempts` dəyərini dəyişə bilər; 0 = limitsiz.
+- Lövhədə hər şagird **bir dəfə** görünür — ən yaxşı nəticəsi ilə.
+- Test yarımçıq qalanda çıxış və səhifə bağlama **xəbərdarlıq verir**.
+  Yarımçıq cəhd bazada `in_progress` qalır və geri qayıdanda davam edir.
 - Liderlər lövhəsi yalnız öz qrupu daxilindədir.
 
 ## Test məzmunu

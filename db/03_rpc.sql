@@ -311,6 +311,51 @@ begin
   );
 end $$;
 
+-- --------------------------------------------------- bitmis testin neticesi
+--  Sagird bitirdiyi teste tekrar girende yeni cehd yox, EVVELKI neticesi
+--  acilir. Cavab acari yene getmir - yalniz sehv suallar ve izahlar.
+create or replace function public.rpc_test_result(p_token text, p_test_id uuid)
+returns jsonb
+language plpgsql stable security definer
+set search_path = public, extensions, pg_temp as $$
+declare
+  v_student uuid := app.session_student(p_token);
+  v_att  public.attempts%rowtype;
+  v_test public.tests%rowtype;
+begin
+  if v_student is null then
+    raise exception 'Sessiya bitib. Yeniden daxil ol.' using errcode = '28000';
+  end if;
+
+  select * into v_att from public.attempts
+   where student_id = v_student and test_id = p_test_id and status = 'submitted'
+   order by percent desc, finished_at desc
+   limit 1;
+  if not found then
+    raise exception 'Bu testin neticesi tapilmadi.' using errcode = '22023';
+  end if;
+
+  select * into v_test from public.tests where id = p_test_id;
+
+  return jsonb_build_object(
+    'attempt_id',   v_att.id,
+    'score',        v_att.score,
+    'max_score',    v_att.max_score,
+    'percent',      v_att.percent,
+    'passed',       v_att.percent >= v_test.pass_percent,
+    'duration_sec', v_att.duration_sec,
+    'finished_at',  v_att.finished_at,
+    'test', jsonb_build_object('id', v_test.id, 'title', v_test.title,
+                               'pass_percent', v_test.pass_percent),
+    'wrong', coalesce((
+      select jsonb_agg(jsonb_build_object('question_id', aa.question_id, 'body', q.body,
+                                          'explanation', q.explanation))
+        from public.attempt_answers aa
+        join public.questions q on q.id = aa.question_id
+       where aa.attempt_id = v_att.id and aa.is_correct is not true), '[]'::jsonb)
+  );
+end $$;
+
 -- ------------------------------------------------------- liderler lovhesi
 -- Yalniz oz sinfi/qrupu daxilinde, yalniz gorunen ad ve faiz.
 create or replace function public.rpc_leaderboard(p_token text, p_test_id uuid, p_limit int default 20)
@@ -364,12 +409,14 @@ revoke all on function public.rpc_student_tests(text)                     from p
 revoke all on function public.rpc_start_attempt(text, uuid)               from public;
 revoke all on function public.rpc_submit_attempt(text, uuid, jsonb)       from public;
 revoke all on function public.rpc_leaderboard(text, uuid, int)            from public;
+revoke all on function public.rpc_test_result(text, uuid)                 from public;
 
 grant execute on function public.rpc_student_login(text)               to anon, authenticated;
 grant execute on function public.rpc_student_tests(text)               to anon, authenticated;
 grant execute on function public.rpc_start_attempt(text, uuid)         to anon, authenticated;
 grant execute on function public.rpc_submit_attempt(text, uuid, jsonb) to anon, authenticated;
 grant execute on function public.rpc_leaderboard(text, uuid, int)      to anon, authenticated;
+grant execute on function public.rpc_test_result(text, uuid)           to anon, authenticated;
 
 do $$
 declare bad text;
@@ -379,7 +426,8 @@ begin
     'public.rpc_student_tests(text)',
     'public.rpc_start_attempt(text, uuid)',
     'public.rpc_submit_attempt(text, uuid, jsonb)',
-    'public.rpc_leaderboard(text, uuid, int)']) f
+    'public.rpc_leaderboard(text, uuid, int)',
+    'public.rpc_test_result(text, uuid)']) f
    where not has_function_privilege('anon', f, 'EXECUTE');
   if bad is not null then
     raise exception 'anon bu funksiyalari cagira bilmir: %', bad;

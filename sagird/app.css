@@ -171,6 +171,8 @@ input{min-height:52px;font-size:17px}
   font-variant-numeric:tabular-nums;letter-spacing:-.015em;
 }
 .test.lock .best{color:var(--fg-3)}
+/* Islenmis test - kilidli deyil, neticeye acilir */
+.test.done .ic{background:var(--ok-tint);color:var(--ok)}
 .test .ic svg{stroke-width:1.75}
 
 /* Lovhede cehd sayi */

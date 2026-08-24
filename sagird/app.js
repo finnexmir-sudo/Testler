@@ -178,23 +178,30 @@
         h += '<div class="card pad0">' + rows.map(function (t, k) {
           var lock = !!t.locked;
           var done = Number(t.done) || 0;
-          var full = !lock && t.max_attempts > 0 && done >= t.max_attempts;
-          return '<button class="test' + (lock ? " lock" : "") + (full ? " lock" : "") +
-            '" data-t="' + esc(t.id) + '"' + ((lock || full) ? " disabled" : "") + ">" +
-            '<div class="ic">' + ic((lock || full) ? "lock" : (done ? "check" : "doc")) + "</div>" +
+          /* Bitmis testi TEKRAR ISLEMEK olmur - neticeye baxmaq olur.
+             Serverde de max_attempts limiti var; bura yalniz gorunusdur. */
+          var over = !lock && done > 0 && t.max_attempts > 0 && done >= t.max_attempts;
+          return '<button class="test' + (lock ? " lock" : "") + (over ? " done" : "") +
+            '" data-t="' + esc(t.id) + '" data-mode="' + (over ? "view" : "start") + '"' +
+            (lock ? " disabled" : "") + ">" +
+            '<div class="ic">' + ic(lock ? "lock" : (over ? "check" : "doc")) + "</div>" +
             '<div class="g"><b>' + esc(t.title) + "</b><i>" +
               "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
               "<span>" + (t.questions || 0) + " sual</span>" +
               (lock ? "<span>·</span><span>abunə lazımdır</span>" : "") +
-              (full ? "<span>·</span><span>cəhd bitib</span>" : "") +
+              (over ? "<span>·</span><span>işlənib — nəticəyə bax</span>" : "") +
             "</i></div>" +
             (done ? '<span class="best">' + Math.round(t.best) + "%</span>" : "") +
-            ((lock || full) ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
+            (lock ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
         }).join("") + "</div>";
       }
       show(h);
       Array.prototype.forEach.call(main.querySelectorAll("[data-t]"), function (b) {
-        b.addEventListener("click", function () { startTest(b.getAttribute("data-t")); });
+        b.addEventListener("click", function () {
+          var id = b.getAttribute("data-t");
+          if (b.getAttribute("data-mode") === "view") viewResult(id);
+          else startTest(id);
+        });
       });
     }).catch(onSessionError);
   }
@@ -215,6 +222,21 @@
         show(msg("err", fail(e)) +
           '<button class="btn wide" id="btnBack2">Testlərə qayıt</button>');
         on("btnBack2", "click", screenTests);
+      });
+  }
+
+  /* Bitmis testin neticesi - yeni cehd acilmir */
+  function viewResult(testId) {
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_test_result", { p_token: TOKEN, p_test_id: testId })
+      .then(function (r) {
+        S = { test: r.test, attempt: r.attempt_id, done: true };
+        screenResult(r, true);
+      })
+      .catch(function (e) {
+        show(msg("err", fail(e)) +
+          '<button class="btn wide" id="btnB4">Testlərə qayıt</button>');
+        on("btnB4", "click", screenTests);
       });
   }
 
@@ -293,7 +315,7 @@
   }
 
   /* --------------------------------------------------------- netice */
-  function screenResult(r) {
+  function screenResult(r, review) {
     var pct = Math.round(Number(r.percent) || 0);
     var C = 2 * Math.PI * 58;
     var dash = (C * pct / 100).toFixed(1) + " " + C.toFixed(1);
@@ -314,8 +336,12 @@
           (passed ? "Keçdin, afərin" : "Bir də cəhd edə bilərsən") + "</div>" +
       "</div></div>" +
 
-      '<div class="ok" style="margin-bottom:12px">' + ic("check") +
-        "<span>Nəticə yadda saxlanıldı. Müəllimin onu panelində görür.</span></div>" +
+      (review
+        ? '<div class="warn" style="margin-bottom:12px">' + ic("info") +
+          "<span>Bu testi artıq işləmisən. Nəticəyə baxa bilərsən, " +
+          "amma yenidən işləmək olmaz.</span></div>"
+        : '<div class="ok" style="margin-bottom:12px">' + ic("check") +
+          "<span>Nəticə yadda saxlanıldı. Müəllimin onu panelində görür.</span></div>") +
       '<div class="row"><button class="btn go" id="btnHome" style="flex:1">Testlər</button>' +
         '<button class="btn" id="btnLb" style="flex:1">' + ic("cup") + "Lövhə</button></div>" +
 
@@ -329,7 +355,7 @@
     );
 
     on("btnHome", "click", screenTests);
-    on("btnLb", "click", function () { screenBoard(); });
+    on("btnLb", "click", function () { screenBoard(review); });
   }
 
   function fmtTime(sec) {
@@ -339,7 +365,7 @@
   }
 
   /* ---------------------------------------------------------- lovhe */
-  function screenBoard() {
+  function screenBoard(review) {
     topTitle.textContent = "Lövhə";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_leaderboard", { p_token: TOKEN, p_test_id: S.test.id })
@@ -359,7 +385,7 @@
           }).join("") + "</div>";
         }
         show(h);
-        on("btnB", "click", function () { screenResult(S.result); });
+        on("btnB", "click", function () { screenResult(S.result, review); });
       })
       .catch(function (e) { show(msg("err", fail(e))); });
   }
@@ -379,7 +405,25 @@
     screenLogin(note ? msg("warn", note) : "");
   }
 
-  btnOut.addEventListener("click", function () { logout(); });
+  /* Test yarimciq qalibsa cixis/senifelenme xeberdarliq verir.
+     Yarimciq cehd serverde "in_progress" qalir ve geri qayidanda davam edir. */
+  function testInProgress() {
+    return !!(S && S.qs && S.qs.length && !S.done && !S.result);
+  }
+
+  btnOut.addEventListener("click", function () {
+    if (testInProgress() &&
+        !confirm("Test yarımçıqdır.\n\nÇıxsan cavabların göndərilməyəcək. " +
+                 "Yenə də çıxmaq istəyirsən?")) return;
+    logout();
+  });
+
+  window.addEventListener("beforeunload", function (e) {
+    if (!testInProgress()) return;
+    e.preventDefault();
+    e.returnValue = "";
+    return "";
+  });
 
   function boot() {
     if (!window.CFG || !window.CFG.SUPABASE_URL || !window.CFG.SUPABASE_ANON_KEY) {

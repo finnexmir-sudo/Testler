@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Sagird tetbiqini real brauzerde, real sxem uzerinde surur."""
-import re, sys, json
+import json, re, sys
 import psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright
 
@@ -105,6 +105,7 @@ with sync_playwright() as pw:
     ok(pg.locator(".test.lock").first.is_disabled(), "kilidli teste toxunmaq olmur")
 
     print("C · Testi işləmək")
+    pg.evaluate("window.__tid = " + json.dumps(db("select id::text i from public.tests where slug=\'riy-3-vurma-1\'", one=True)["i"]))
     pg.locator(".test:not(.lock)", has_text="Vurma cədvəli").first.click()
     pg.wait_for_selector(".opt", timeout=8000)
     ok("1 / " + str(NQ) in pg.inner_text(".prog"), "irelileyis gostericisi",
@@ -168,26 +169,33 @@ with sync_playwright() as pw:
     ok("Aysu M." in pg.inner_text(".lb"), "leqeb gorunur")
     ok("Məmmədova" not in pg.inner_text("#main"), "lovhede tam ad yoxdur")
 
-    print("G · Təkrar cəhd")
+    print("G · Bitmiş test təkrar işlənmir")
     pg.click("#btnB"); pg.wait_for_selector(".ring", timeout=8000)
     pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
     row = pg.locator(".test", has_text="Vurma cədvəli").first
     ok("100%" in row.inner_text(), "siyahida onceki netice gorunur",
        row.inner_text().replace("\n", " "))
-    row.click(); pg.wait_for_selector(".opt", timeout=8000)
-    for i in range(NQ):
-        pg.locator(".opt").first.click(); pg.wait_for_timeout(100)
-        pg.click("#btnNext"); pg.wait_for_timeout(300)
-    pg.wait_for_selector(".ring", timeout=8000)
-    ok(True, "eyni testi yeniden islemek olur")
-    pg.click("#btnLb"); pg.wait_for_selector(".lb", timeout=8000)
-    ok(pg.locator(".lb").count() == 1,
-       "lovhede sagird BIR defe gorunur (tekrar cehde baxmayaraq)",
-       pg.locator(".lb").count())
-    ok("100%" in pg.inner_text(".lb"), "lovhede EN YAXSI netice qalir",
-       pg.inner_text(".lb").replace("\n", " "))
-    ok("2 cəhd" in pg.inner_text(".lb"), "cehd sayi gosterilir")
-    pg.click("#btnB"); pg.wait_for_selector(".ring", timeout=8000)
+    ok("nəticəyə bax" in row.inner_text().lower(),
+       "islenmis test 'neticeye bax' kimi isarelenir")
+
+    row.click(); pg.wait_for_timeout(900)
+    ok(pg.locator(".opt").count() == 0, "yeni cehd ACILMIR - sual gorunmur")
+    ok(pg.locator(".ring").count() == 1, "evezine netice ekrani acilir")
+    ok("yenidən işləmək olmaz" in pg.inner_text("#main"), "sagirde sebeb izah olunur")
+    ok("100" in pg.inner_text(".ring .val"), "kohne netice gosterilir")
+
+    # Frontend-e etibar etmirik: birbasa sorgu da bloklanmalidir
+    st = pg.evaluate("""(async () => {
+      const t = JSON.parse(localStorage.getItem('sagird_ses')).t;
+      const r = await fetch(window.CFG.SUPABASE_URL + '/rest/v1/rpc/rpc_start_attempt', {
+        method: 'POST',
+        headers: {apikey: window.CFG.SUPABASE_ANON_KEY,
+                  Authorization: 'Bearer ' + window.CFG.SUPABASE_ANON_KEY,
+                  'Content-Type': 'application/json'},
+        body: JSON.stringify({p_token: t, p_test_id: window.__tid})});
+      return r.status;
+    })()""")
+    ok(st in (400, 403), "birbasa sorgu ile de yeni cehd acilmir (server bloklayir)", st)
 
     print("H · Səhv cavab yolu")
     pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
@@ -207,7 +215,26 @@ with sync_playwright() as pw:
     ok(len(pg.locator(".wrong i").first.inner_text()) > 5,
        "sehv sualda izah gosterilir", pg.locator(".wrong i").first.inner_text()[:45])
 
-    print("I · Sessiya")
+    print("I · Yarımçıq testdə çıxış xəbərdarlığı")
+    pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
+    pg.locator(".test:not(.lock)", has_text="Qarışıq").first.click()
+    pg.wait_for_selector(".opt", timeout=8000)
+    asked = {"v": False}
+    def on_dialog(d):
+        asked["v"] = True
+        d.dismiss()                      # "Yox" - testde qalmaq
+    pg.once("dialog", on_dialog)
+    pg.click("#btnOut"); pg.wait_for_timeout(700)
+    ok(asked["v"], "yarimciq testde cixis xeberdarliq verir")
+    ok(pg.locator(".opt").count() > 0, "imtina edende testde qalir")
+
+    pg.once("dialog", lambda d: d.accept())
+    pg.click("#btnOut"); pg.wait_for_selector("#btnIn", timeout=8000)
+    ok(True, "tesdiq edende cixis olur")
+    pg.fill("#code", "AYSUKOD1"); pg.click("#btnIn")
+    pg.wait_for_selector(".test", timeout=8000)
+
+    print("J · Sessiya")
     pg.reload(); pg.wait_for_selector(".test", timeout=8000)
     ok(True, "sehife yenilendikde sessiya qalir")
     pg.click("#btnOut"); pg.wait_for_selector("#btnIn", timeout=8000)
@@ -215,7 +242,7 @@ with sync_playwright() as pw:
     pg.reload(); pg.wait_for_selector("#btnIn", timeout=8000)
     ok(True, "cixisdan sonra yeniden giris ekrani")
 
-    print("J · Server balı hesablayır (saxtakarlıq yoxlaması)")
+    print("K · Server balı hesablayır (saxtakarlıq yoxlaması)")
     row = db("""select score, max_score, percent from public.attempts
                  where student_id='d1d1d1d1-0000-0000-0000-000000000001'
                    and status='submitted' order by finished_at limit 1""", one=True)
