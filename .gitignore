@@ -1,0 +1,6 @@
+# yerli yoxlama artefaktlari
+*.pyc
+__pycache__/
+.DS_Store
+pgdata/
+*.log

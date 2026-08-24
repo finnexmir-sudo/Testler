@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Test platforması</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--line:#e3e6eb;--fg:#161a20;--soft:#697386;
+        --accent:#1f6f5c;--accent-deep:#155444}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:24px;
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  .box{max-width:440px;width:100%}
+  h1{font-size:24px;margin:0 0 6px;letter-spacing:-.02em}
+  p.sub{color:var(--soft);font-size:14.5px;margin:0 0 22px}
+  a.card{display:flex;align-items:center;gap:14px;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:10px;
+    text-decoration:none;color:inherit}
+  a.card:hover{border-color:var(--accent)}
+  a.card s{text-decoration:none;font-size:24px}
+  a.card b{display:block;font-size:15.5px}
+  a.card i{display:block;font-style:normal;font-size:13px;color:var(--soft);margin-top:2px}
+  a.card.soon{opacity:.55;pointer-events:none}
+  .foot{color:var(--soft);font-size:12.5px;margin-top:18px;text-align:center}
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>Test platforması</h1>
+    <p class="sub">İbtidai siniflər üçün onlayn testlər.</p>
+
+    <a class="card" href="muellim/">
+      <s>👩‍🏫</s>
+      <span><b>Müəllim / repetitor paneli</b>
+      <i>Qrup yarat, şagird əlavə et, giriş kodu ver</i></span>
+    </a>
+
+    <a class="card soon" href="sagird/">
+      <s>🧒</s>
+      <span><b>Şagird girişi</b>
+      <i>Tezliklə</i></span>
+    </a>
+
+    <p class="foot">Bu səhifə hazırlıq mərhələsindədir.</p>
+  </div>
+</body>
+</html>
