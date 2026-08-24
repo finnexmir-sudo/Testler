@@ -63,14 +63,13 @@ delete from public.questions q
    and t.slug in ('riy-3-vurma-1','riy-3-qarisiq-1','az-3-dil-1','riy-3-analiz');
 
 -- ------------------------------------------------------- suallar yazilir
---  Format: (test slug, sira, movzu slug, sual, izah, variantlar, duzgun sira)
-drop table if exists _q;
-create temporary table _q (
-  test text, ord int, topic text, body text, why text,
-  opts text[], correct int
-);
-
-insert into _q values
+--  DIQQET: muveqqeti cedvel ISLETMIRIK. Supabase SQL Editor skripti
+--  havuzlanmis baglanti uzerinden isledir - "create temporary table"
+--  novbeti emrde artiq movcud olmur (relation "_q" does not exist).
+--  Bunun evezine melumat CTE-dedir ve iki insert bir emrde gedir:
+--  birinci suallari yazir ve RETURNING ile id-leri verir, ikinci hemin
+--  id-lere variantlari baglayir.
+with d(test, ord, topic, body, why, opts, correct) as (values
 -- Vurma cedveli
 ('riy-3-vurma-1',1,'vurma-cedveli','6 × 7 neçə edər?',
  'Altı dəfə yeddi qırx iki edər.', array['42','36','48','54'],1),
@@ -134,23 +133,24 @@ insert into _q values
 ('riy-3-analiz',3,'mesele',
  'Sinifdə 28 şagird var. Onların yarısı qızdır. Neçə qız var?',
  'Yarısını tapmaq üçün 2-yə bölürük: 28 : 2 = 14.',
- array['12','14','16','18'],2);
-
-insert into public.questions (test_id, topic_id, ord, kind, body, explanation, points)
-select t.id, tp.id, q.ord, 'single', q.body, q.why, 1
-  from _q q
-  join public.tests t on t.slug = q.test
-  join public.subjects s on s.id = t.subject_id
-  join public.topics tp on tp.subject_id = s.id and tp.slug = q.topic;
-
+ array['12','14','16','18'],2)
+),
+ins as (
+  insert into public.questions
+    (test_id, topic_id, ord, kind, body, explanation, points)
+  select t.id, tp.id, d.ord, 'single', d.body, d.why, 1
+    from d
+    join public.tests    t  on t.slug = d.test
+    join public.subjects s  on s.id = t.subject_id
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  returning id, test_id, ord
+)
 insert into public.question_options (question_id, ord, body, is_correct)
-select qq.id, o.ord, o.body, o.ord = q.correct
-  from _q q
-  join public.tests t on t.slug = q.test
-  join public.questions qq on qq.test_id = t.id and qq.ord = q.ord,
-  lateral unnest(q.opts) with ordinality as o(body, ord);
-
-drop table if exists _q;
+select ins.id, o.ord, o.body, o.ord = d.correct
+  from ins
+  join public.tests t on t.id = ins.test_id
+  join d on d.test = t.slug and d.ord = ins.ord,
+  lateral unnest(d.opts) with ordinality as o(body, ord);
 
 -- ------------------------------------------------------------- hesabat
 do $$

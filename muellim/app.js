@@ -30,7 +30,13 @@
     info:   '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 9v3.6"/><path d="M9.5 6.6h.01"/>',
     check:  '<path d="M4 10l3.6 3.6L15 5.8"/>',
     key:    '<circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/>' +
-            '<path d="M13 6l2 2"/>'
+            '<path d="M13 6l2 2"/>',
+    chart:  '<path d="M3.5 15.5h12"/><rect x="5" y="9" width="2.6" height="4.5" rx=".7"/>' +
+            '<rect x="9" y="5.5" width="2.6" height="8" rx=".7"/>' +
+            '<rect x="13" y="11" width="2.6" height="2.5" rx=".7"/>',
+    star:   '<path d="M9.5 3l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 ' +
+            '4.3-.6L9.5 3z"/>',
+    clock:  '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/>'
   };
   function ic(name, cls) {
     return '<svg class="' + (cls || "") + '" viewBox="0 0 19 19" fill="none" ' +
@@ -329,6 +335,8 @@
         '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:8px">' +
           "<span>Qoşulma kodu</span>" +
           '<span class="code key">' + esc(g.join_code) + "</span></div>" +
+        '<div class="spacer"></div>' +
+        '<button class="btn wide" id="btnRep">' + ic("chart") + "Hesabat</button>" +
       "</div>" +
       "<h2>Şagirdlər</h2>" +
       '<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
@@ -347,6 +355,7 @@
     );
 
     on("btnBack", "click", function () { screenHome(); });
+    on("btnRep", "click", function () { screenReport(g); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("snick", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("btnStu", "click", addStudent);
@@ -397,6 +406,8 @@
               ic("copy") + "Kopyala</button>" +
             '<button class="btn sm" data-wa="' + esc(s.id) + '">' +
               ic("send") + "Göndər</button>" +
+            '<button class="btn sm" data-rep="' + esc(s.id) + '">' +
+              ic("chart") + "Hesabat</button>" +
             '<button class="btn sm ghost icon" data-reset="' + esc(s.id) + '" ' +
               'title="Kodu yenilə" aria-label="Kodu yenilə">' + ic("refresh") + "</button>" +
           "</div></div>";
@@ -411,6 +422,11 @@
         b.addEventListener("click", function () {
           var s = rows.filter(function (x) { return x.id === b.getAttribute("data-wa"); })[0];
           if (s) window.open(waLink(s), "_blank", "noopener");
+        });
+      });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-rep]"), function (b) {
+        b.addEventListener("click", function () {
+          screenStudent(b.getAttribute("data-rep"), classId);
         });
       });
       Array.prototype.forEach.call(box.querySelectorAll("[data-reset]"), function (b) {
@@ -456,6 +472,174 @@
       try { document.execCommand("copy"); done(); } catch (e) { alert(t); }
       document.body.removeChild(ta);
     }
+  }
+
+  /* ------------------------------------------------------- hesabatlar */
+  function pct(v) { return Math.round(Number(v) || 0); }
+
+  function dateAz(iso) {
+    if (!iso) return "—";
+    var d = new Date(iso);
+    if (isNaN(d)) return "—";
+    var ay = ["yan","fev","mar","apr","may","iyn","iyl","avq","sen","okt","noy","dek"];
+    return d.getDate() + " " + ay[d.getMonth()];
+  }
+
+  /* Menimseme zolagi: 0-49 zeif, 50-74 orta, 75+ yaxsi */
+  function meter(ratio) {
+    var r = pct(ratio);
+    var cls = r >= 75 ? "ok" : (r >= 50 ? "mid" : "low");
+    return '<div class="meter ' + cls + '"><i style="width:' + r + '%"></i></div>';
+  }
+
+  function upsell(what) {
+    return '<div class="upsell">' + ic("star") +
+      "<div><b>" + esc(what) + "</b>" +
+      "<span>Abunə paketində açılır: mövzu üzrə zəif nöqtələr, " +
+      "təkrar səhv edilən suallar və tam irəliləyiş tarixçəsi.</span></div></div>";
+  }
+
+  function screenReport(g) {
+    topTitle.textContent = g.name;
+    show('<div class="card"><div class="skel">Hesabat hazırlanır…</div></div>');
+
+    sb.rpc("rpc_class_report", { p_class_id: g.id }).then(function (r) {
+      var sm = r.summary || {};
+      var h =
+        '<button class="btn sm ghost" id="btnB">' + ic("back") + "Qrup</button>" +
+        '<div class="spacer"></div>' +
+        '<div class="stats">' +
+          statTile(sm.active + " / " + sm.students, "aktiv şagird") +
+          statTile(pct(sm.avg) + "%", "orta nəticə") +
+          statTile(sm.attempts || 0, "işlənmiş test") +
+        "</div>";
+
+      if (!r.paid) {
+        h += '<p class="muted" style="margin:2px 0 16px">' + ic("clock") +
+             " Son " + 7 + " günün məlumatı göstərilir.</p>";
+      }
+
+      h += "<h2>Şagirdlər</h2>";
+      var st = r.students || [];
+      if (!st.length) {
+        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("person") +
+             "</div><b>Şagird yoxdur</b></div></div>";
+      } else {
+        h += '<div class="card pad0">' + st.map(function (s) {
+          return '<button class="item" data-s="' + esc(s.id) + '">' +
+            '<div class="g"><b>' + esc(s.full_name) + "</b>" +
+            "<i><span>" + (s.attempts || 0) + " test</span><span>·</span>" +
+            "<span>son: " + dateAz(s.last_at) + "</span></i>" +
+            meter(s.avg) + "</div>" +
+            '<span class="pctv">' + (s.attempts ? pct(s.avg) + "%" : "—") + "</span>" +
+            '<span class="arrow">' + ic("right") + "</span></button>";
+        }).join("") + "</div>";
+      }
+
+      h += "<h2>Mövzular</h2>";
+      if (r.topics === null) {
+        h += upsell("Mövzu üzrə analiz");
+      } else if (!r.topics.length) {
+        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("chart") +
+             "</div><b>Hələ kifayət qədər cavab yoxdur</b>" +
+             "Mövzu üzrə nəticə üçün ən azı 3 cavab lazımdır.</div></div>";
+      } else {
+        h += '<div class="card pad0">' + r.topics.map(function (t) {
+          return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
+            "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
+            meter(t.ratio) + "</div>" +
+            '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
+        }).join("") + "</div>";
+      }
+
+      if (r.recent && r.recent.length) {
+        h += "<h2>Son fəaliyyət</h2><div class=\"card pad0\">" +
+          r.recent.map(function (x) {
+            return '<div class="trow"><div class="g"><b>' + esc(x.student) + "</b>" +
+              "<i>" + esc(x.test) + " · " + dateAz(x.at) + "</i></div>" +
+              '<span class="pctv">' + pct(x.percent) + "%</span></div>";
+          }).join("") + "</div>";
+      }
+
+      show(h);
+      on("btnB", "click", function () { screenGroup(g.id); });
+      Array.prototype.forEach.call(main.querySelectorAll("[data-s]"), function (b) {
+        b.addEventListener("click", function () {
+          screenStudent(b.getAttribute("data-s"), g.id);
+        });
+      });
+    }).catch(function (e) {
+      show(msg("err", fail(e)) + '<button class="btn wide" id="btnB2">Geri</button>');
+      on("btnB2", "click", function () { screenGroup(g.id); });
+    });
+  }
+
+  function statTile(val, lbl) {
+    return '<div class="stat"><b>' + esc(String(val)) + "</b><span>" + esc(lbl) + "</span></div>";
+  }
+
+  function screenStudent(id, classId) {
+    topTitle.textContent = "Şagird hesabatı";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+
+    sb.rpc("rpc_student_report", { p_student_id: id }).then(function (r) {
+      var s = r.student || {}, sm = r.summary || {};
+      var h =
+        '<button class="btn sm ghost" id="btnB">' + ic("back") + "Geri</button>" +
+        '<div class="spacer"></div>' +
+        '<div class="card tight"><h1>' + esc(s.full_name) + "</h1>" +
+          '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:8px">' +
+            "<span>" + esc(s.display_name) + "</span>" +
+            '<span class="code key">' + esc(s.login_code) + "</span></div></div>" +
+        '<div class="stats">' +
+          statTile(sm.attempts || 0, "test") +
+          statTile(pct(sm.avg) + "%", "orta") +
+          statTile(pct(sm.best) + "%", "ən yaxşı") +
+        "</div>";
+
+      h += "<h2>Mövzu üzrə mənimsəmə</h2>";
+      if (r.topics === null) {
+        h += upsell("Mövzu üzrə mənimsəmə");
+      } else if (!r.topics.length) {
+        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("chart") +
+             "</div><b>Hələ kifayət qədər cavab yoxdur</b></div></div>";
+      } else {
+        h += '<div class="card pad0">' + r.topics.map(function (t) {
+          return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
+            "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
+            meter(t.ratio) + "</div>" +
+            '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
+        }).join("") + "</div>";
+      }
+
+      if (r.weak !== null && r.weak && r.weak.length) {
+        h += "<h2>Təkrar səhv edilən suallar</h2><div class=\"card pad0\">" +
+          r.weak.map(function (w) {
+            return '<div class="trow col"><b>' + esc(w.body) + "</b>" +
+              (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
+              '<span class="tag">' + w.wrong + " dəfə səhv</span></div>";
+          }).join("") + "</div>";
+      }
+
+      h += "<h2>Test tarixçəsi</h2>";
+      var at = r.attempts || [];
+      if (!at.length) {
+        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("clock") +
+             "</div><b>Hələ test işləməyib</b></div></div>";
+      } else {
+        h += '<div class="card pad0">' + at.map(function (a) {
+          return '<div class="trow"><div class="g"><b>' + esc(a.test) + "</b>" +
+            "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max + "</i></div>" +
+            '<span class="pctv">' + pct(a.percent) + "%</span></div>";
+        }).join("") + "</div>";
+      }
+
+      show(h);
+      on("btnB", "click", function () { screenGroup(classId); });
+    }).catch(function (e) {
+      show(msg("err", fail(e)) + '<button class="btn wide" id="btnB3">Geri</button>');
+      on("btnB3", "click", function () { screenGroup(classId); });
+    });
   }
 
   /* ------------------------------------------------------------- boot */

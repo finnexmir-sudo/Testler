@@ -16,7 +16,7 @@ Bu qovluq **yeni məhsulun** baza təməlidir. İngilis Dili tətbiqinə heç bi
 
 ## Supabase-də qurmaq
 
-SQL Editor-da: `01` → `02` → `03` → `06` → `04` → `07` → `05`.
+SQL Editor-da: `01` → `02` → `03` → `06` → `08` → `04` → `07` → `05`.
 
 `test/` qovluğundakı fayllar Supabase-də **işlədilmir** — onlar `auth` sxemini
 təqlid edir, Supabase-də isə o artıq var.
@@ -136,6 +136,19 @@ vurma cədvəli · qarışıq riyaziyyat · Azərbaycan dili · ödənişli anal
 Hər sual bir **mövzuya** bağlıdır (`topics`) — zəif nöqtə analizi bunun
 üzərində qurulacaq. Fayl özünü yoxlayır: hər sualın dəqiq bir düzgün
 cavabı olmalıdır və mövzusuz sual qalmamalıdır.
+
+## Hesabatlar
+
+`db/08_reports.sql` — `rpc_class_report()` və `rpc_student_report()`.
+
+**Ödəniş həddi bazada tətbiq olunur.** Pulsuz hesabda funksiya mövzu
+analizini ümumiyyətlə qaytarmır (`topics: null`) və tarixçə son 7 günlə
+məhdudlaşır. Frontend yalnız `null` görüb abunə təklifi göstərir — həddi
+frontend qoymur.
+
+Mövzu üzrə nəticə üçün ən azı **3 cavab** lazımdır
+(`app.min_topic_answers()`) — bir səhv cavab «zəif mövzu» kimi görünüb
+müəllimi çaşdırmasın.
 
 ## Hələ edilməyənlər
 

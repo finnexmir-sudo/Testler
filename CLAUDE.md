@@ -70,6 +70,22 @@ təhlükəsizlik iddialarıdır, yalnız «işləyir/işləmir» yoxlaması deyi
 
 ---
 
+## Supabase SQL Editor — tələ
+
+**Müvəqqəti cədvəl (`create temporary table`) işlətmə.** Supabase skripti
+hovuzlanmış bağlantı üzərindən işlədir, ona görə müvəqqəti cədvəl növbəti
+əmrdə artıq mövcud olmur:
+
+```
+ERROR: 42P01: relation "_q" does not exist
+```
+
+Lokal `psql`-də işləyir, Supabase-də işləmir — ona görə testlərdə tutulmur.
+Əvəzinə **CTE** işlət: `with d as (values ...), ins as (insert ... returning ...) insert ...`
+`db/07_seed_tests.sql` bunun nümunəsidir.
+
+---
+
 ## Keş — vacib
 
 GitHub Pages CSS/JS-i **10 dəqiqə** keşdə saxlayır (`max-age=600`). Nişan
