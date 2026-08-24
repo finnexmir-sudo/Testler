@@ -66,7 +66,7 @@ with sync_playwright() as pw:
     txt = pg.inner_text("#groups")
     ok("Cume qrupu" in txt, "qrup siyahida gorunur")
     ok("0 şagird" in txt, "sagird sayi 0")
-    code = re.search(r"qoşulma kodu\s*([A-Z2-9]{8})", txt.replace("\n", " "))
+    code = re.search(r"\b([A-Z2-9]{8})\b", txt.replace("\n", " "))
     ok(code is not None, "qosulma kodu 8 simvol, qarisiq simvolsuz",
        code.group(1) if code else txt[:80])
 
@@ -156,7 +156,7 @@ with sync_playwright() as pw:
     ok("0 / 5" in pg2.inner_text(".seat"), "yeni muellimde 0 sagird")
     pg2.wait_for_function(
         "!/Yüklənir/.test(document.getElementById('groups').textContent)", timeout=8000)
-    ok("Hələ qrup yoxdur" in pg2.inner_text("#groups"), "yeni muellim basqasinin qrupunu gormur",
+    ok("qrup yoxdur" in pg2.inner_text("#groups"), "yeni muellim basqasinin qrupunu gormur",
        pg2.inner_text("#groups").replace("\n", " ")[:60])
 
     print("I · Yanlış parol")

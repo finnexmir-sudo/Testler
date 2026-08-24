@@ -11,6 +11,33 @@
   var topTitle = document.getElementById("topTitle");
   var btnOut = document.getElementById("btnOut");
 
+  /* Minimal xetli ikonlar. Emoji yerine SVG: her platformada eyni
+     gorunur ve interfeysin tonu ciddi qalir. */
+  var ICON = {
+    group:  '<circle cx="7.4" cy="7.4" r="2.3"/><path d="M3.4 15.1a4 4 0 0 1 8 0"/>' +
+            '<path d="M12.4 6.1a2.3 2.3 0 0 1 0 4.5"/><path d="M13.4 12.3a4 4 0 0 1 2.2 2.8"/>',
+    person: '<circle cx="9.5" cy="7" r="2.8"/><path d="M4.5 16a5 5 0 0 1 10 0"/>',
+    plus:   '<path d="M9.5 4v11M4 9.5h11"/>',
+    copy:   '<rect x="6.5" y="6.5" width="8" height="8" rx="1.6"/>' +
+            '<path d="M11.5 4.5H5a1.5 1.5 0 0 0-1.5 1.5v6.5"/>',
+    send:   '<path d="M16 3 8.5 10.5"/><path d="M16 3l-4.8 13-2.7-5.5L3 7.8 16 3z"/>',
+    refresh:'<path d="M15.5 8A6 6 0 0 0 4.8 5.4"/><path d="M4 3v3h3"/>' +
+            '<path d="M3.5 11a6 6 0 0 0 10.7 2.6"/><path d="M15 16v-3h-3"/>',
+    back:   '<path d="M11.5 4.5 6 10l5.5 5.5"/>',
+    right:  '<path d="M7.5 4.5 13 10l-5.5 5.5"/>',
+    warn:   '<path d="M9.5 3.2 2.8 15.2h13.4L9.5 3.2z"/><path d="M9.5 7.8v3.4"/>' +
+            '<path d="M9.5 13.4h.01"/>',
+    info:   '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 9v3.6"/><path d="M9.5 6.6h.01"/>',
+    check:  '<path d="M4 10l3.6 3.6L15 5.8"/>',
+    key:    '<circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/>' +
+            '<path d="M13 6l2 2"/>'
+  };
+  function ic(name, cls) {
+    return '<svg class="' + (cls || "") + '" viewBox="0 0 19 19" fill="none" ' +
+      'stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" ' +
+      'aria-hidden="true">' + (ICON[name] || "") + "</svg>";
+  }
+
   var CTX = null;      // rpc_my_context() neticesi
   var ACC = null;      // aktiv hesab
   var busy = false;
@@ -28,7 +55,8 @@
   function on(id, ev, fn) { var e = $(id); if (e) e.addEventListener(ev, fn); }
 
   function msg(kind, text) {
-    return '<div class="' + kind + '">' + esc(text) + "</div>";
+    var i = kind === "ok" ? "check" : (kind === "warn" ? "warn" : "info");
+    return '<div class="' + kind + '">' + ic(i) + "<span>" + esc(text) + "</span></div>";
   }
   function fail(e) {
     var t = (e && e.message) ? e.message : String(e);
@@ -55,10 +83,10 @@
     var isUp = mode === "up";
     show(
       '<div class="card" style="margin-top:22px">' +
-        "<h1>" + (isUp ? "Qeydiyyat" : "Daxil ol") + "</h1>" +
+        "<h1>" + (isUp ? "Hesab yaradın" : "Daxil olun") + "</h1>" +
         '<p class="note">' + (isUp
-          ? "Müəllim və ya repetitor hesabı yaradın. Şagirdlərin hesabı olmur — onlara kod verirsiniz."
-          : "Hesabınıza daxil olun.") + "</p>" +
+          ? "Müəllim və ya repetitor hesabı. Şagirdlərin hesabı olmur — onlara giriş kodu verirsiniz."
+          : "Panelə davam etmək üçün hesabınıza daxil olun.") + "</p>" +
         (note || "") +
         '<div id="authErr"></div>' +
         (isUp ? '<label for="fname">Ad, soyad</label><input id="fname" autocomplete="name">' : "") +
@@ -67,11 +95,11 @@
         '<label for="pass">Parol</label>' +
         '<input id="pass" type="password" autocomplete="' +
           (isUp ? "new-password" : "current-password") + '">' +
-        '<button class="btn go" id="btnAuth" style="width:100%">' +
+        '<button class="btn go wide" id="btnAuth">' +
           (isUp ? "Hesab yarat" : "Daxil ol") + "</button>" +
         '<div class="spacer"></div>' +
-        '<button class="btn ghost" id="btnSwap" style="width:100%">' +
-          (isUp ? "Hesabım var — daxil ol" : "Hesabım yoxdur — qeydiyyat") + "</button>" +
+        '<button class="btn ghost wide" id="btnSwap">' +
+          (isUp ? "Hesabım var — daxil ol" : "Hesabınız yoxdur? Yaradın") + "</button>" +
       "</div>"
     );
 
@@ -120,8 +148,8 @@
     topTitle.textContent = "Hesab quraşdırılması";
     show(
       '<div class="card" style="margin-top:22px">' +
-        "<h1>Bir addım qaldı</h1>" +
-        '<p class="note">Necə işlədiyinizi seçin. Bunu sonra dəyişmək olar.</p>' +
+        "<h1>Hesabı quraşdırın</h1>" +
+        '<p class="note">Necə işlədiyinizi seçin. Sonradan dəyişmək olar.</p>' +
         '<div id="setupErr"></div>' +
         '<label for="atype">Hesab tipi</label>' +
         '<select id="atype">' +
@@ -130,7 +158,7 @@
         "</select>" +
         '<label for="aname">Hesabın adı</label>' +
         '<input id="aname" placeholder="məsələn: Leyla müəllim — riyaziyyat">' +
-        '<button class="btn go" id="btnSetup" style="width:100%">Davam et</button>' +
+        '<button class="btn go wide" id="btnSetup">Davam et</button>' +
       "</div>"
     );
 
@@ -161,27 +189,33 @@
 
     var html =
       '<div class="card">' +
-        '<div class="seat"><b>' + used + " / " + (lim > 1000000 ? "∞" : lim) + "</b>" +
-        "<i>şagird · " + esc(ACC.plan ? ACC.plan.name : "paketsiz") + "</i></div>" +
+        '<div class="seat">' +
+          '<div><div class="num">' + used +
+            ' <s>/ ' + (lim > 1000000 ? "∞" : lim) + "</s></div>" +
+            '<div class="lbl">şagird yeri</div></div>' +
+          '<span class="pill' + (ACC.plan ? " on" : "") + '">' +
+            esc(ACC.plan ? ACC.plan.name : "Paketsiz") + "</span>" +
+        "</div>" +
         '<div class="' + cls + '"><i style="width:' + pct + '%"></i></div>' +
         (pct >= 100
-          ? '<div class="warn" style="margin-top:12px;margin-bottom:0">Paketin limiti dolub. ' +
-            "Yeni şagird əlavə etmək üçün paketi genişləndirin.</div>"
+          ? '<div class="warn" style="margin:14px 0 0">' + ic("warn") +
+            "<span>Paketin limiti dolub. Yeni şagird əlavə etmək üçün " +
+            "paketi genişləndirin.</span></div>"
           : "") +
       "</div>" +
       "<h2>Qruplar</h2>" +
-      '<div id="groups" class="card pad0"><div class="empty">Yüklənir…</div></div>' +
+      '<div id="groups" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
       '<div class="card">' +
         '<label for="gname">Yeni qrup</label>' +
         '<div class="fieldrow">' +
           '<div><input id="gname" placeholder="məsələn: Cümə qrupu"></div>' +
-          '<div style="flex:0 0 140px"><select id="glevel">' +
-            '<option value="">sinif seçilməyib</option>' +
+          '<div style="flex:0 0 148px"><select id="glevel">' +
+            '<option value="">Sinif seçilməyib</option>' +
           "</select></div>" +
         "</div>" +
         '<div id="gErr"></div>' +
-        '<button class="btn go" id="btnGroup">Qrup yarat</button>' +
+        '<button class="btn go" id="btnGroup">' + ic("plus") + "Qrup yarat</button>" +
       "</div>";
     show(html);
 
@@ -250,17 +284,18 @@
       var box = $("groups");
       if (!box) return;
       if (!rows || !rows.length) {
-        box.innerHTML = '<div class="empty"><s>👥</s>Hələ qrup yoxdur.<br>' +
-                        "Aşağıdan birincisini yaradın.</div>";
+        box.innerHTML = '<div class="empty"><div class="ic">' + ic("group") + "</div>" +
+          "<b>Hələ qrup yoxdur</b>Aşağıdan birincisini yaradın.</div>";
         return;
       }
       box.innerHTML = rows.map(function (g) {
         var n = cnt[g.id] || 0;
         return '<button class="item" data-g="' + esc(g.id) + '">' +
+          '<div class="ic">' + ic("group") + "</div>" +
           '<div class="g"><b>' + esc(g.name) + "</b>" +
-          "<i>" + n + " şagird · qoşulma kodu " +
-          '<span class="code sm">' + esc(g.join_code) + "</span></i></div>" +
-          '<span class="arrow">›</span></button>';
+          "<i><span>" + n + " şagird</span><span>·</span>" +
+          '<span class="code">' + esc(g.join_code) + "</span></i></div>" +
+          '<span class="arrow">' + ic("right") + "</span></button>";
       }).join("");
       Array.prototype.forEach.call(box.querySelectorAll("[data-g]"), function (b) {
         b.addEventListener("click", function () {
@@ -269,13 +304,13 @@
       });
     }).catch(function (e) {
       var box = $("groups");
-      if (box) box.innerHTML = '<div class="empty">' + esc(fail(e)) + "</div>";
+      if (box) box.innerHTML = '<div class="skel">' + esc(fail(e)) + "</div>";
     });
   }
 
   /* ------------------------------------------------------- qrup detali */
   function screenGroup(id) {
-    show('<div class="card"><div class="empty">Yüklənir…</div></div>');
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.select("classes", { select: "id,name,join_code,account_id", eq: { id: id } })
       .then(function (rows) {
         if (!rows || !rows.length) throw new Error("Qrup tapılmadı.");
@@ -287,15 +322,16 @@
   function drawGroup(g) {
     topTitle.textContent = g.name;
     show(
-      '<button class="btn sm ghost" id="btnBack">‹ Qruplar</button>' +
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Qruplar</button>" +
       '<div class="spacer"></div>' +
-      '<div class="card">' +
+      '<div class="card tight">' +
         "<h1>" + esc(g.name) + "</h1>" +
-        '<p class="note" style="margin-bottom:0">Qoşulma kodu: ' +
-          '<span class="code">' + esc(g.join_code) + "</span></p>" +
+        '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:8px">' +
+          "<span>Qoşulma kodu</span>" +
+          '<span class="code key">' + esc(g.join_code) + "</span></div>" +
       "</div>" +
       "<h2>Şagirdlər</h2>" +
-      '<div id="stu" class="card pad0"><div class="empty">Yüklənir…</div></div>' +
+      '<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
       '<div class="card">' +
         '<label for="sname">Yeni şagird</label>' +
@@ -303,10 +339,10 @@
           '<div><input id="sname" placeholder="Ad və soyad"></div>' +
           '<div><input id="snick" placeholder="Ləqəb (istəyə bağlı)"></div>' +
         "</div>" +
-        '<p class="muted" style="margin:-6px 0 12px">Ləqəb liderlər lövhəsində görünür. ' +
-          "Boş buraxsanız avtomatik qısaldılacaq (Aysu Məmmədova → Aysu M.).</p>" +
+        '<p class="muted" style="margin:-8px 0 14px">Ləqəb liderlər lövhəsində görünür. ' +
+          "Boş buraxsanız avtomatik qısaldılır: Aysu Məmmədova → Aysu M.</p>" +
         '<div id="sErr"></div>' +
-        '<button class="btn go" id="btnStu">Şagird əlavə et</button>' +
+        '<button class="btn go" id="btnStu">' + ic("plus") + "Şagird əlavə et</button>" +
       "</div>"
     );
 
@@ -347,7 +383,8 @@
       var box = $("stu");
       if (!box) return;
       if (!rows || !rows.length) {
-        box.innerHTML = '<div class="empty"><s>🧒</s>Hələ şagird yoxdur.</div>';
+        box.innerHTML = '<div class="empty"><div class="ic">' + ic("person") + "</div>" +
+          "<b>Hələ şagird yoxdur</b>Aşağıdan əlavə edin.</div>";
         return;
       }
       box.innerHTML = rows.map(function (s) {
@@ -355,10 +392,13 @@
           '<div class="l1"><b>' + esc(s.full_name) + "</b>" +
           '<span class="muted">' + esc(s.display_name) + "</span></div>" +
           '<div class="l2">' +
-            '<span class="code">' + esc(s.login_code) + "</span>" +
-            '<button class="btn sm" data-copy="' + esc(s.login_code) + '">Kopyala</button>' +
-            '<button class="btn sm" data-wa="' + esc(s.id) + '">WhatsApp</button>' +
-            '<button class="btn sm ghost" data-reset="' + esc(s.id) + '">Kodu yenilə</button>' +
+            '<span class="code key">' + esc(s.login_code) + "</span>" +
+            '<button class="btn sm" data-copy="' + esc(s.login_code) + '">' +
+              ic("copy") + "Kopyala</button>" +
+            '<button class="btn sm" data-wa="' + esc(s.id) + '">' +
+              ic("send") + "Göndər</button>" +
+            '<button class="btn sm ghost icon" data-reset="' + esc(s.id) + '" ' +
+              'title="Kodu yenilə" aria-label="Kodu yenilə">' + ic("refresh") + "</button>" +
           "</div></div>";
       }).join("");
 
@@ -385,7 +425,7 @@
       });
     }).catch(function (e) {
       var box = $("stu");
-      if (box) box.innerHTML = '<div class="empty">' + esc(fail(e)) + "</div>";
+      if (box) box.innerHTML = '<div class="skel">' + esc(fail(e)) + "</div>";
     });
   }
 
@@ -400,9 +440,9 @@
 
   function copyText(t, btn) {
     var done = function () {
-      var old = btn.textContent;
-      btn.textContent = "Kopyalandı";
-      setTimeout(function () { btn.textContent = old; }, 1400);
+      var old = btn.innerHTML;
+      btn.innerHTML = ic("check") + "Kopyalandı";
+      setTimeout(function () { btn.innerHTML = old; }, 1500);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(t).then(done, function () { fallback(); });
@@ -440,7 +480,7 @@
     }
     if (!sb.session()) { screenAuth("in"); return; }
 
-    show('<div class="card"><div class="empty">Yüklənir…</div></div>');
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     refreshContext().then(function () {
       btnOut.classList.remove("hide");
       topWho.textContent = (CTX.profile && CTX.profile.full_name) || "";
