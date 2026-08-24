@@ -147,8 +147,35 @@ with sync_playwright() as pw:
     ok("Cume qrupu" in pg.inner_text("#groups"), "sessiya sehife yenilenmesinden sonra qalir",
        pg.inner_text("#groups").replace("\n", " ")[:50])
 
-    print("H · Hesabat və marşrut")
-    pg.click(".item"); pg.wait_for_selector("#btnRep", timeout=8000)
+    print("H · Ad dəyişmək")
+    pg.click(".item"); pg.wait_for_selector("#btnRen", timeout=8000)
+    pg.click("#btnRen"); pg.wait_for_selector("#gNew", timeout=8000)
+    ok(pg.input_value("#gNew") == "Cume qrupu", "hazirki ad forma dolur",
+       pg.input_value("#gNew"))
+    pg.fill("#gNew", "   "); pg.click("#gSave"); pg.wait_for_timeout(400)
+    ok("boş ola bilməz" in pg.inner_text("#gRenErr"), "bos ad qebul edilmir")
+    pg.fill("#gNew", "Bazar ertəsi qrupu"); pg.click("#gSave")
+    pg.wait_for_timeout(900)
+    ok(pg.locator("#gRen").count() == 0, "yadda saxlayandan sonra forma baglanir")
+    ok("Bazar ertəsi qrupu" in pg.inner_text("#gName"), "yeni ad ekranda",
+       pg.inner_text("#gName"))
+    ok("Bazar ertəsi qrupu" in pg.inner_text("#topTitle"), "ustlukde de yenilenir")
+    pg.reload(); pg.wait_for_selector("#gName", timeout=10000)
+    ok("Bazar ertəsi qrupu" in pg.inner_text("#gName"), "ad bazada saxlanildi")
+
+    # Sagirdin adi
+    pg.locator("[data-edit]").first.click(); pg.wait_for_selector(".edit", timeout=8000)
+    ok(pg.locator(".eName").first.input_value() == "Aysu Məmmədova",
+       "sagirdin hazirki adi forma dolur")
+    pg.locator(".eName").first.fill("Aysel Məmmədova")
+    pg.locator(".eNick").first.fill("Aysel M.")
+    pg.locator(".eSave").first.click(); pg.wait_for_timeout(1000)
+    t = pg.inner_text("#stu")
+    ok("Aysel Məmmədova" in t, "sagirdin adi deyisdi")
+    ok("Aysel M." in t, "leqeb de deyisdi")
+    ok("Aysu Məmmədova" not in t, "kohne ad qalmadi")
+
+    print("I · Hesabat və marşrut")
     pg.click("#btnRep"); pg.wait_for_selector(".stats", timeout=8000)
     ok("#/r/" in pg.url, "hesabat unvanda gorunur", pg.url.split("#")[-1])
     ok(pg.is_visible("#btnRef"), "'Yenile' duymesi var")
@@ -175,7 +202,7 @@ with sync_playwright() as pw:
     pg.click("#btnB"); pg.wait_for_selector("#btnStu", timeout=8000)
     pg.click("#btnBack"); pg.wait_for_selector("#btnGroup", timeout=8000)
 
-    print("I · Başqa müəllim heç nə görmür")
+    print("J · Başqa müəllim heç nə görmür")
     pg2 = new_page(ctx)
     pg2.goto(PANEL)
     pg2.evaluate("localStorage.clear()")
@@ -191,7 +218,7 @@ with sync_playwright() as pw:
     ok("qrup yoxdur" in pg2.inner_text("#groups"), "yeni muellim basqasinin qrupunu gormur",
        pg2.inner_text("#groups").replace("\n", " ")[:60])
 
-    print("J · Yanlış parol")
+    print("K · Yanlış parol")
     pg3 = new_page(ctx)
     pg3.goto(PANEL); pg3.evaluate("localStorage.clear()"); pg3.reload()
     pg3.wait_for_selector("#btnAuth", timeout=8000)

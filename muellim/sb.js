@@ -161,6 +161,15 @@
       return request("/rest/v1/" + encodeURIComponent(table) + "?" + q.join("&"));
     },
 
+    /* update("classes", {id: x}, {name: "Yeni ad"}) */
+    update: function (table, eq, patch) {
+      var q = Object.keys(eq).map(function (k) {
+        return encodeURIComponent(k) + "=eq." + encodeURIComponent(eq[k]);
+      });
+      return request("/rest/v1/" + encodeURIComponent(table) + "?" + q.join("&"),
+                     { method: "PATCH", body: patch });
+    },
+
     del: function (table, eq) {
       var q = Object.keys(eq).map(function (k) {
         return encodeURIComponent(k) + "=eq." + encodeURIComponent(eq[k]);

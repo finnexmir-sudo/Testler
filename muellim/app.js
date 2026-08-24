@@ -36,7 +36,8 @@
             '<rect x="13" y="11" width="2.6" height="2.5" rx=".7"/>',
     star:   '<path d="M9.5 3l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 ' +
             '4.3-.6L9.5 3z"/>',
-    clock:  '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/>'
+    clock:  '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/>',
+    pen:    '<path d="M12.4 3.6a1.7 1.7 0 0 1 2.4 2.4L6.6 14.2l-3.1.7.7-3.1 8.2-8.2z"/>'
   };
   function ic(name, cls) {
     return '<svg class="' + (cls || "") + '" viewBox="0 0 19 19" fill="none" ' +
@@ -330,8 +331,10 @@
     show(
       '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Qruplar</button>" +
       '<div class="spacer"></div>' +
-      '<div class="card tight">' +
-        "<h1>" + esc(g.name) + "</h1>" +
+      '<div class="card tight" id="gCard">' +
+        '<div class="ttl"><h1 id="gName">' + esc(g.name) + "</h1>" +
+          '<button class="btn sm ghost icon" id="btnRen" title="Adı dəyiş" ' +
+            'aria-label="Adı dəyiş">' + ic("pen") + "</button></div>" +
         '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:8px">' +
           "<span>Qoşulma kodu</span>" +
           '<span class="code key">' + esc(g.join_code) + "</span></div>" +
@@ -356,6 +359,7 @@
 
     on("btnBack", "click", function () { nav("#/"); });
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
+    on("btnRen", "click", function () { renameGroup(g); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("snick", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("btnStu", "click", addStudent);
@@ -383,6 +387,88 @@
     }
   }
 
+  /* Qrupun adini yerinde deyismek */
+  function renameGroup(g) {
+    var card = $("gCard");
+    if (!card || card.querySelector("#gRen")) return;
+    card.insertAdjacentHTML("afterbegin",
+      '<div id="gRen"><label for="gNew">Qrupun adı</label>' +
+      '<input id="gNew" maxlength="80">' +
+      '<div id="gRenErr"></div>' +
+      '<div class="row"><button class="btn go" id="gSave">Yadda saxla</button>' +
+      '<button class="btn ghost" id="gCancel">Ləğv et</button></div>' +
+      '<div class="spacer"></div></div>');
+    var inp = $("gNew");
+    inp.value = g.name;
+    inp.focus(); inp.select();
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") save();
+      if (e.key === "Escape") close();
+    });
+    on("gCancel", "click", close);
+    on("gSave", "click", save);
+
+    function close() { var el = $("gRen"); if (el) el.remove(); }
+
+    function save() {
+      var nm = (inp.value || "").trim();
+      if (!nm) { $("gRenErr").innerHTML = msg("err", "Ad boş ola bilməz."); return; }
+      if (nm === g.name) { close(); return; }
+      $("gRenErr").innerHTML = "";
+      setBusy("gSave", true, "Yadda saxla");
+      sb.update("classes", { id: g.id }, { name: nm })
+        .then(function () {
+          g.name = nm;
+          topTitle.textContent = nm;
+          if ($("gName")) $("gName").textContent = nm;
+          close();
+        })
+        .catch(function (e) {
+          setBusy("gSave", false, "Yadda saxla");
+          $("gRenErr").innerHTML = msg("err", fail(e));
+        });
+    }
+  }
+
+  /* Sagirdin adini/leqebini deyismek */
+  function renameStudent(s, classId) {
+    var row = document.querySelector('[data-row="' + s.id + '"]');
+    if (!row || row.querySelector(".edit")) return;
+    row.insertAdjacentHTML("beforeend",
+      '<div class="edit"><div class="fieldrow">' +
+        '<div><label>Ad və soyad</label><input class="eName" maxlength="120"></div>' +
+        '<div><label>Ləqəb</label><input class="eNick" maxlength="60"></div>' +
+      "</div><div class=\"eErr\"></div>" +
+      '<div class="row"><button class="btn go sm eSave">Yadda saxla</button>' +
+      '<button class="btn ghost sm eCancel">Ləğv et</button></div></div>');
+    var box = row.querySelector(".edit");
+    var n1 = box.querySelector(".eName"), n2 = box.querySelector(".eNick");
+    n1.value = s.full_name; n2.value = s.display_name;
+    n1.focus(); n1.select();
+    box.querySelector(".eCancel").addEventListener("click", function () { box.remove(); });
+    box.querySelector(".eSave").addEventListener("click", save);
+    [n1, n2].forEach(function (i) {
+      i.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") save();
+        if (e.key === "Escape") box.remove();
+      });
+    });
+
+    function save() {
+      var full = (n1.value || "").trim(), nick = (n2.value || "").trim();
+      if (!full) { box.querySelector(".eErr").innerHTML = msg("err", "Ad boş ola bilməz."); return; }
+      if (!nick) nick = full.split(" ")[0];
+      var b = box.querySelector(".eSave");
+      b.disabled = true; b.textContent = "Gözləyin…";
+      sb.update("students", { id: s.id }, { full_name: full, display_name: nick })
+        .then(function () { loadStudents(classId); })
+        .catch(function (e) {
+          b.disabled = false; b.textContent = "Yadda saxla";
+          box.querySelector(".eErr").innerHTML = msg("err", fail(e));
+        });
+    }
+  }
+
   function loadStudents(classId) {
     sb.select("students", {
       select: "id,full_name,display_name,login_code,is_active",
@@ -397,9 +483,11 @@
         return;
       }
       box.innerHTML = rows.map(function (s) {
-        return '<div class="stu">' +
+        return '<div class="stu" data-row="' + esc(s.id) + '">' +
           '<div class="l1"><b>' + esc(s.full_name) + "</b>" +
-          '<span class="muted">' + esc(s.display_name) + "</span></div>" +
+          '<span class="muted">' + esc(s.display_name) + "</span>" +
+          '<button class="btn sm ghost icon" data-edit="' + esc(s.id) + '" ' +
+            'title="Adı dəyiş" aria-label="Adı dəyiş">' + ic("pen") + "</button></div>" +
           '<div class="l2">' +
             '<span class="code key">' + esc(s.login_code) + "</span>" +
             '<button class="btn sm" data-copy="' + esc(s.login_code) + '">' +
@@ -422,6 +510,12 @@
         b.addEventListener("click", function () {
           var s = rows.filter(function (x) { return x.id === b.getAttribute("data-wa"); })[0];
           if (s) window.open(waLink(s), "_blank", "noopener");
+        });
+      });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-edit]"), function (b) {
+        b.addEventListener("click", function () {
+          var st = rows.filter(function (x) { return x.id === b.getAttribute("data-edit"); })[0];
+          if (st) renameStudent(st, classId);
         });
       });
       Array.prototype.forEach.call(box.querySelectorAll("[data-rep]"), function (b) {

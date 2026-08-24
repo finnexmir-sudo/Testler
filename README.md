@@ -141,6 +141,14 @@ başqa müəllimin təcridi, yanlış parol — 33 yoxlama.
   Yarımçıq cəhd bazada `in_progress` qalır və geri qayıdanda davam edir.
 - Liderlər lövhəsi yalnız öz qrupu daxilindədir.
 
+## Ad dəyişmək
+
+Müəllim qrupun və şagirdin adını dəyişə bilir (qələm işarəsi). Boş ad
+bazada da bloklanır — `classes_name_ck` və `students_name_ck`.
+
+Şagirdin ləqəbi boş buraxılsa adın ilk sözü götürülür. Ləqəb liderlər
+lövhəsində görünən addır.
+
 ## Panel — marşrut və yenilənmə
 
 Ekran ünvanın hash hissəsində saxlanılır: `#/`, `#/g/<qrup>`,

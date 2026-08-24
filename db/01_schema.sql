@@ -331,6 +331,21 @@ create index if not exists idx_sessions_expiry    on public.student_sessions(exp
 create index if not exists idx_subs_account       on public.subscriptions(account_id, status);
 create index if not exists idx_topics_subject     on public.topics(subject_id, parent_id);
 
+-- ------------------------------------------------------- ad mehdudiyyeti
+--  Muellim adi redakte ede bilir - bos ad bazaya dusmemelidir.
+--  "add constraint if not exists" Postgres-de yoxdur, ona gore DO blok.
+do $$ begin
+  alter table public.classes
+    add constraint classes_name_ck check (length(btrim(name)) between 1 and 80);
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  alter table public.students
+    add constraint students_name_ck
+      check (length(btrim(full_name)) between 1 and 120
+         and length(btrim(display_name)) between 1 and 60);
+exception when duplicate_object then null; end $$;
+
 -- ------------------------------------------------------------- trigerler
 create or replace function app.touch_updated_at() returns trigger
 language plpgsql set search_path = public, extensions, pg_temp as $$

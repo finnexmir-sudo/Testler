@@ -60,7 +60,8 @@ class H(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers",
                          "authorization, apikey, content-type, prefer")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods",
+                         "GET, POST, PATCH, DELETE, OPTIONS")
         self.end_headers()
         self.wfile.write(body)
 
@@ -167,6 +168,46 @@ class H(BaseHTTPRequestHandler):
 
         try:
             return self.send(200, self.run(go))
+        except psycopg2.Error as e:
+            code = 403 if e.pgcode in ("42501", "28000") else 400
+            return self.send(code, {"message": (e.diag.message_primary or str(e)),
+                                    "code": e.pgcode})
+        except Exception as e:
+            return self.send(400, {"message": str(e)})
+
+    def do_PATCH(self):
+        """PostgREST-in setir yenilemesi: PATCH /rest/v1/<cedvel>?id=eq.<x>"""
+        u = urlparse(self.path)
+        if not u.path.startswith("/rest/v1/"):
+            return self.send(404, {"message": "Yoxdur"})
+        table = unquote(u.path[len("/rest/v1/"):])
+        patch = self.body()
+        if not patch:
+            return self.send(400, {"message": "Bos govde"})
+
+        where, vals = [], []
+        for k, v in parse_qs(u.query).items():
+            if k in ("select", "order"):
+                continue
+            if v[0].startswith("eq."):
+                where.append(sql.SQL("{} = %s").format(sql.Identifier(k)))
+                vals.append(v[0][3:])
+        if not where:
+            return self.send(400, {"message": "Filtr yoxdur"})
+
+        keys = list(patch.keys())
+        stmt = (sql.SQL("update {} set ").format(sql.Identifier("public", table)) +
+                sql.SQL(", ").join(sql.SQL("{} = %s").format(sql.Identifier(k)) for k in keys) +
+                sql.SQL(" where ") + sql.SQL(" and ").join(where))
+
+        def go(cur):
+            cur.execute(stmt, [patch[k] for k in keys] + vals)
+            return cur.rowcount
+
+        try:
+            n = self.run(go)
+            return self.send(200 if n else 404,
+                             {} if n else {"message": "Setir tapilmadi"})
         except psycopg2.Error as e:
             code = 403 if e.pgcode in ("42501", "28000") else 400
             return self.send(code, {"message": (e.diag.message_primary or str(e)),

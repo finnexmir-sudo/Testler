@@ -110,3 +110,13 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
   .stat b{font-size:19px}
   .stat span{font-size:11px}
 }
+
+/* Ad redaktesi */
+.ttl{display:flex;align-items:flex-start;gap:8px}
+.ttl h1{flex:1;min-width:0}
+.stu .l1 .btn.icon{flex:0 0 28px;width:28px;min-height:28px}
+.stu .l1 .btn.icon svg{width:13px;height:13px}
+.stu .edit{margin-top:12px;padding-top:12px;border-top:1px solid var(--n-100)}
+.stu .edit label{font-size:12px;margin-bottom:4px}
+.stu .edit input{min-height:36px;font-size:14px;margin-bottom:10px}
+#gRen label{margin-bottom:6px}

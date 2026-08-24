@@ -164,6 +164,9 @@ with sync_playwright() as pw:
 
     print("F · Lövhə")
     pg.click("#btnLb"); pg.wait_for_selector(".lb", timeout=8000)
+    ok("Vurma cədvəli" in pg.inner_text("#main"),
+       "lovhede hansi testin oldugu yazilir")
+    ok("qrupundan" in pg.inner_text("#main"), "qrup adi da gorunur")
     ok(pg.locator(".lb").count() == 1, "lovhede bir netice var")
     ok(pg.locator(".lb.me").count() == 1, "oz setri isaretlenib")
     ok("Aysu M." in pg.inner_text(".lb"), "leqeb gorunur")

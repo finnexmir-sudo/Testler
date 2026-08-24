@@ -387,7 +387,11 @@
     sb.rpc("rpc_leaderboard", { p_token: TOKEN, p_test_id: S.test.id })
       .then(function (rows) {
         var h = '<button class="btn sm ghost" id="btnB">' + ic("back") + "Geri</button>" +
-                '<div class="spacer"></div>';
+          '<div class="card tight" style="margin-top:12px">' +
+            "<h1>" + esc(S.test ? S.test.title : "Lövhə") + "</h1>" +
+            '<p class="muted" style="margin:6px 0 0">' +
+              (CLS ? esc(CLS.name) + " qrupundan " : "") +
+              "bu testi işləyənlər</p></div>";
         if (!rows || !rows.length) {
           h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("cup") +
                "</div><b>Lövhə boşdur</b>Bu testi hələ kimsə işləməyib.</div></div>";
