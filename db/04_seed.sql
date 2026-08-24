@@ -4,24 +4,24 @@
 -- =====================================================================
 
 insert into public.programs (slug, name, sort) values
-  ('ibtidai',       'Ibtidai sinifler (1-4)',        10),
-  ('orta',          'Orta mekteb (5-8)',             20),
-  ('buraxilis',     'Buraxilis imtahani (9-11)',     30),
-  ('miq',           'MIQ - muellimlerin ise qebulu', 40),
-  ('sertifikasiya', 'Muellim sertifikasiyasi',       50)
+  ('ibtidai',       'İbtidai siniflər (1-4)',        10),
+  ('orta',          'Orta məktəb (5-8)',             20),
+  ('buraxilis',     'Buraxılış imtahanı (9-11)',     30),
+  ('miq',           'MİQ - müəllimlərin işə qəbulu', 40),
+  ('sertifikasiya', 'Müəllim sertifikasiyası',       50)
 on conflict (slug) do update set name = excluded.name, sort = excluded.sort;
 
 insert into public.subjects (slug, name, sort) values
   ('riyaziyyat',   'Riyaziyyat',       10),
-  ('az-dili',      'Azerbaycan dili',  20),
-  ('ingilis-dili', 'Ingilis dili',     30),
-  ('hayat-bilgisi','Heyat bilgisi',    40),
-  ('informatika',  'Informatika',      50),
+  ('az-dili',      'Azərbaycan dili',  20),
+  ('ingilis-dili', 'İngilis dili',     30),
+  ('hayat-bilgisi','Həyat bilgisi',    40),
+  ('informatika',  'İnformatika',      50),
   ('fizika',       'Fizika',           60),
   ('kimya',        'Kimya',            70),
   ('biologiya',    'Biologiya',        80),
   ('tarix',        'Tarix',            90),
-  ('cografiya',    'Cografiya',       100),
+  ('cografiya',    'Coğrafiya',       100),
   ('kurikulum',    'Kurikulum',       110)
 on conflict (slug) do update set name = excluded.name, sort = excluded.sort;
 
@@ -61,10 +61,10 @@ on conflict (program_id, code) do nothing;
 insert into public.levels (program_id, code, name, sort)
 select p.id, v.code, v.name, v.sort
   from public.programs p,
-       (values ('ibtidai-muellimi','Ibtidai sinif muellimi',10),
-               ('riyaziyyat',      'Riyaziyyat muellimi',   20),
-               ('az-dili',         'Azerbaycan dili muellimi',30),
-               ('ingilis-dili',    'Ingilis dili muellimi', 40)) as v(code,name,sort)
+       (values ('ibtidai-muellimi','İbtidai sinif müəllimi',10),
+               ('riyaziyyat',      'Riyaziyyat müəllimi',   20),
+               ('az-dili',         'Azərbaycan dili müəllimi',30),
+               ('ingilis-dili',    'İngilis dili müəllimi', 40)) as v(code,name,sort)
  where p.slug in ('miq','sertifikasiya')
 on conflict (program_id, code) do nothing;
 
@@ -85,22 +85,22 @@ insert into public.plans (slug, name, audience, price_minor, price_per_seat_mino
   ('pulsuz', 'Pulsuz', 'parent', 0, 0, 2, 'month', 10,
    '{"reports":false,"history_days":7,"weak_topics":false}'::jsonb),
 
-  ('valideyn-aylik', 'Valideyn - aylik', 'parent', 990, 0, 3, 'month', 20,
+  ('valideyn-aylik', 'Valideyn - aylıq', 'parent', 990, 0, 3, 'month', 20,
    '{"reports":true,"history_days":365,"weak_topics":true}'::jsonb),
 
   ('valideyn-illik', 'Valideyn - illik', 'parent', 9900, 0, 3, 'year', 30,
    '{"reports":true,"history_days":null,"weak_topics":true}'::jsonb),
 
-  ('repetitor-25', 'Repetitor - 25 sagird', 'tutor', 2900, 0, 25, 'month', 40,
+  ('repetitor-25', 'Repetitor - 25 şagird', 'tutor', 2900, 0, 25, 'month', 40,
    '{"reports":true,"own_tests":true,"weak_topics":true,"class_analytics":true}'::jsonb),
 
-  ('repetitor-60', 'Repetitor - 60 sagird', 'tutor', 5900, 0, 60, 'month', 50,
+  ('repetitor-60', 'Repetitor - 60 şagird', 'tutor', 5900, 0, 60, 'month', 50,
    '{"reports":true,"own_tests":true,"weak_topics":true,"class_analytics":true}'::jsonb),
 
-  ('repetitor-acik', 'Repetitor - sagird sayina gore', 'tutor', 1500, 120, null, 'month', 60,
+  ('repetitor-acik', 'Repetitor - şagird sayına görə', 'tutor', 1500, 120, null, 'month', 60,
    '{"reports":true,"own_tests":true,"weak_topics":true,"class_analytics":true}'::jsonb),
 
-  ('mekteb', 'Mekteb lisenziyasi', 'school', 0, 90, null, 'year', 70,
+  ('mekteb', 'Məktəb lisenziyası', 'school', 0, 90, null, 'year', 70,
    '{"reports":true,"own_tests":true,"weak_topics":true,"class_analytics":true,"multi_teacher":true}'::jsonb)
 on conflict (slug) do update
   set name = excluded.name, audience = excluded.audience,

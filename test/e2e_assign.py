@@ -94,6 +94,10 @@ with sync_playwright() as pw:
                          timeout=8000)
     n = pg.locator("#aTest option").count()
     ok(n >= 3, "teyin edile bilen testler yuklenir", n)
+    labels = pg.locator("#aTest option").all_inner_texts()
+    dup = [t for t in labels
+           if t.count("Azərbaycan dili") > 1 or t.count("Riyaziyyat") > 1]
+    ok(not dup, "fenn adi siyahida tekrarlanmir", dup[:1] or labels[0])
 
     print("B · Tapşırıq vermək")
     lbl = [t for t in pg.locator("#aTest option").all_inner_texts()

@@ -948,8 +948,13 @@
       box.innerHTML =
         '<label for="aTest">Test</label>' +
         '<select id="aTest">' + free.map(function (t) {
-          return '<option value="' + esc(t.id) + '">' + esc(t.subject) + " — " +
-            esc(t.title) + " (" + (Number(t.questions) || 0) + " sual)" +
+          /* Testin adi onsuz da fennle baslayirsa fenni tekrar yazmiriq:
+             "Azerbaycan dili - Azerbaycan dili - 1" cirkin cixirdi. */
+          var sub = String(t.subject || "");
+          var ttl = String(t.title || "");
+          var lbl = (sub && ttl.indexOf(sub) !== 0) ? sub + " — " + ttl : ttl;
+          return '<option value="' + esc(t.id) + '">' + esc(lbl) +
+            " (" + (Number(t.questions) || 0) + " sual)" +
             (t.is_free ? "" : " · abunə") + "</option>";
         }).join("") + "</select>" +
         '<div class="fieldrow">' +

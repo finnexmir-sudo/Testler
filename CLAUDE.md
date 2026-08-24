@@ -74,6 +74,10 @@ psql -d tehsil -f test/smoke_assign.sql
 Sxem və ya RLS dəyişəndə **mütləq** hamısını işlət. Bu testlər
 təhlükəsizlik iddialarıdır, yalnız «işləyir/işləmir» yoxlaması deyil.
 
+Hər test faylı **öz təmiz bazasında** işlədilməlidir — bir-birinin
+arxasınca eyni bazada işlətsən sonrakılar uğursuz olur (`run_e2e.sh`
+elə edir). 
+
 `anon` rolu altında işləyən yoxlamalarda `public.tests`, `questions` və
 `question_options` **oxunmur** — `05_grants.sql` bunu qadağan edir. Test
 üçün lazım olan id-ləri rol dəyişməzdən əvvəl `test_fixtures` /
