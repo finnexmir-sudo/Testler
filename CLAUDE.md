@@ -67,6 +67,7 @@ psql -d tehsil -f test/smoke_educator.sql
 psql -d tehsil -f test/smoke_reports.sql
 psql -d tehsil -f test/smoke_assign.sql
 psql -d tehsil -f test/smoke_bank.sql
+psql -d tehsil -f test/smoke_bank_rpc.sql
 
 # panel uçdan-uca (mock Supabase + Chromium)
 ./test/run_e2e.sh
@@ -91,8 +92,9 @@ elə edir).
 Təzə baza: `db/run.sh` bütün faylları düzgün sıra ilə işlədir.
 
 Artıq işləyən Supabase layihəsi üçün isə **miqrasiya faylı** var —
-`db/10_teyinat_migrasiya.sql` (təyinatlar) və `db/11_sual_banki.sql`
-(sual bankı). Hər biri əvvəlki fayllları işlətmiş bazaya tək başına
+`db/10_teyinat_migrasiya.sql` (təyinatlar), `db/11_sual_banki.sql`
+(sual bankının strukturu) və `db/12_bank_rpc.sql` (bankın RPC-ləri).
+Hər biri əvvəlki faylları işlətmiş bazaya tək başına
 əlavə olunur, təkrar işlədilsə zərər vermir və sonda özünü yoxlayır.
 Yeni belə dəyişiklik edəndə eyni qaydada `11_...`, `12_...` yaz —
 istifadəçiyə beş faylı yenidən yapışdırtma.

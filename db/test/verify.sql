@@ -25,7 +25,16 @@ expected(fn, who) as (values
   ('public.rpc_create_account(text, text)',              'authenticated'),
   ('public.rpc_create_class(uuid, text, text, text, text)', 'authenticated'),
   ('public.rpc_add_student(uuid, text, text, int)',      'authenticated'),
-  ('public.rpc_reset_student_code(uuid)',                'authenticated')),
+  ('public.rpc_reset_student_code(uuid)',                'authenticated'),
+  ('public.rpc_bank_save_question(uuid, text, text, jsonb, text, text, uuid, text, int, int, int, text[], uuid)',
+                                                         'authenticated'),
+  ('public.rpc_bank_list(jsonb, int, int, uuid)',        'authenticated'),
+  ('public.rpc_bank_question(uuid)',                     'authenticated'),
+  ('public.rpc_bank_delete_question(uuid)',              'authenticated'),
+  ('public.rpc_bank_facets(text, text, uuid)',           'authenticated'),
+  ('public.rpc_assign_test(uuid, uuid, timestamptz, int)','authenticated'),
+  ('public.rpc_available_tests(uuid)',                   'authenticated'),
+  ('public.rpc_class_assignments(uuid)',                 'authenticated')),
 missing as (
   select coalesce(string_agg(split_part(fn, '(', 1), ', '), '-') s
     from expected
