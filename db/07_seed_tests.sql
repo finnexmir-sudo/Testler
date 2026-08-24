@@ -8,6 +8,26 @@
 --  qurulacaq.
 -- =====================================================================
 
+-- ------------------------------------------------------- on hazirliq
+--  Asagidaki "on conflict (ext_key)" TAM unikal indeks teleb edir.
+--  Kohne miqrasiya QISMEN indeks yaradirdi (where ext_key is not null)
+--  ve ON CONFLICT ona uygun gelmirdi (42P10).  Duzeldirik.
+do $$
+begin
+  if exists (select 1 from pg_indexes
+              where schemaname='public' and tablename='questions'
+                and indexname='questions_ext_key_key'
+                and indexdef ilike '%where%') then
+    drop index public.questions_ext_key_key;
+    raise notice 'Qismen ext_key indeksi tam indeksle evez olundu.';
+  end if;
+  if not exists (select 1 from pg_indexes
+                  where schemaname='public' and tablename='questions'
+                    and indexdef ilike '%ext_key%') then
+    create unique index questions_ext_key_key on public.questions(ext_key);
+  end if;
+end $$;
+
 -- ------------------------------------------------------------ movzular
 --  Movzular artiq burda YARANMIR - 14_movzular.sql-dedir.
 --  Sebeb: movzu agaci butun sinifler ucundur, bir testin seed-ine

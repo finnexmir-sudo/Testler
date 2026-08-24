@@ -108,8 +108,14 @@ update public.questions q
  where tq.question_id = q.id and q.owner_type = 'platform'
    and q.ext_key is null and t.slug is not null;
 
+--  DIQQET: QISMEN indeks olmamalidir.  01_schema.sql-de bu sutun
+--  "unique"-dir; qismen indeks yaratsaq 07_seed_tests.sql-in
+--  "on conflict (ext_key)" ifadesi ona uygun gelmir:
+--    ERROR 42P10: there is no unique or exclusion constraint matching
+--  Tam unikal indeksde NULL-lar onsuz da serbestdir.
+drop index if exists public.questions_ext_key_key;
 create unique index if not exists questions_ext_key_key
-  on public.questions(ext_key) where ext_key is not null;
+  on public.questions(ext_key);
 
 -- =====================================================================
 --  4. MEHDUDIYYETLER

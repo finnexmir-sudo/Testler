@@ -69,6 +69,7 @@ psql -d tehsil -f test/smoke_assign.sql
 psql -d tehsil -f test/smoke_bank.sql
 psql -d tehsil -f test/smoke_bank_rpc.sql
 psql -d tehsil -f test/smoke_generator.sql
+./db/test/miqrasiya.sh          # teze vs miqrasiya olunmus sxem
 
 # panel uçdan-uca (mock Supabase + Chromium)
 ./test/run_e2e.sh
@@ -115,6 +116,13 @@ almaq ona toxunmur. Müəllim funksiyası yazanda mütləq
 `revoke all on function ... from public, anon` yaz.
 İkinci qat: `05_grants.sql` sonda `anon`-dan bütün funksiyaları geri
 alır və yalnız 6 şagird RPC-sini saxlayır — unudulsa da sızmır.
+
+**Miqrasiya təzə sxemlə EYNİ nəticə verməlidir.** Bir dəfə `11` qismən
+unikal indeks yaratdı (`where ext_key is not null`), `01` isə tam
+`unique` — və `on conflict (ext_key)` yalnız canlı bazada sındı
+(`42P10`). `db/test/miqrasiya.sh` köhnə bazanı qurub bütün miqrasiyaları
+işlədir və sxemi təzə baza ilə tutuşdurur — yeni miqrasiya yazanda onu
+işlət.
 
 **Uzantının sxemini sərt yazma.** `pg_trgm` bəzi bazalarda `public`,
 bəzilərində `extensions` sxemindədir. `extensions.gin_trgm_ops` yazsan

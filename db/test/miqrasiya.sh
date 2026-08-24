@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#  Teze qurulmus baza ile MIQRASIYA olunmus baza eyni netice vermelidir.
+#  Bir defe ferqli oldu: 11 qismen unikal indeks yaradirdi, 01 ise tam -
+#  ve "on conflict (ext_key)" yalniz canli bazada sindi (42P10).
+set -euo pipefail
+cd "$(dirname "$0")/.."
+export PGHOST=${PGHOST:-/tmp} PGPORT=${PGPORT:-55432} PGUSER=${PGUSER:-postgres}
+OLD=${1:-HEAD~12}
+WT=$(mktemp -d)
+trap 'git worktree remove --force "$WT" >/dev/null 2>&1 || true' EXIT
+
+git -C .. worktree add -q -f "$WT" "$OLD" 2>/dev/null || \
+  git worktree add -q -f "$WT" "$OLD"
+
+dropdb --if-exists miq_test 2>/dev/null || true; createdb miq_test
+( cd "$WT/db" && ./run.sh miq_test >/dev/null 2>&1 )
+echo "kohne baza quruldu ($OLD)"
+
+for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
+         07_seed_tests.sql 05_grants.sql; do
+  printf "  %-22s" "$f"
+  if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then
+    echo "OK"
+  else
+    echo "XETA"; tail -3 /tmp/miq.err; exit 1
+  fi
+done
+
+echo "--- sxem teze baza ile eynidirmi ---"
+dropdb --if-exists miq_teze 2>/dev/null || true; createdb miq_teze
+./run.sh miq_teze >/dev/null 2>&1
+for db in miq_teze miq_test; do
+  psql -Atq -d "$db" -c "
+    select 'IDX '||indexdef from pg_indexes
+     where schemaname='public' and tablename='questions'
+     union all select 'COL '||table_name||'.'||column_name||':'||data_type
+       from information_schema.columns
+      where table_schema='public' and table_name in ('questions','test_questions','attempt_answers')
+     order by 1" > "/tmp/$db.txt"
+done
+if diff -q /tmp/miq_teze.txt /tmp/miq_test.txt >/dev/null; then
+  echo "  OK   teze ve miqrasiya olunmus sxem eynidir"
+else
+  echo "  FERQ:"; diff /tmp/miq_teze.txt /tmp/miq_test.txt | head -20; exit 1
+fi
