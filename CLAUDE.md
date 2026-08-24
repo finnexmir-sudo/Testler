@@ -70,6 +70,24 @@ təhlükəsizlik iddialarıdır, yalnız «işləyir/işləmir» yoxlaması deyi
 
 ---
 
+## Keş — vacib
+
+GitHub Pages CSS/JS-i **10 dəqiqə** keşdə saxlayır (`max-age=600`). Nişan
+olmadan istifadəçi dəyişiklikdən sonra köhnə nüsxəni görür — səhifə
+yarımçıq stilləşmiş kimi görünür.
+
+Ona görə `index.html` fayllarında bütün CSS/JS linkləri `?v=N` nişanı
+daşıyır. **Dizayn və ya kod dəyişikliyindən sonra, commit-dən əvvəl:**
+
+```bash
+./bump.sh
+```
+
+Unutsan, dəyişiklik canlıda 10 dəqiqə görünməyəcək və sən onu «işləmir»
+sanacaqsan.
+
+---
+
 ## Üslub
 
 - İnterfeys mətnləri Azərbaycan dilində, düzgün diakritiklərlə (ə, ş, ğ, ı, ö, ü, ç)
