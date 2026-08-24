@@ -340,7 +340,7 @@
         '<div class="spacer"></div>' +
         '<div class="row two">' +
           '<button class="btn wide" id="btnAsgs">' + ic("clip") + "Tapşırıqlar</button>" +
-          '<button class="btn wide ghost" id="btnRep">' + ic("chart") + "Hesabat</button>" +
+          '<button class="btn wide" id="btnRep">' + ic("chart") + "Hesabat</button>" +
         "</div>" +
       "</div>" +
       "<h2>Şagirdlər</h2>" +
@@ -349,8 +349,8 @@
       '<div class="card">' +
         '<label for="sname">Yeni şagird</label>' +
         '<input id="sname" placeholder="Ad və soyad">' +
-        '<p class="muted" style="margin:-8px 0 14px">Liderlər lövhəsində qısa forma ' +
-          "görünür: Aysu Məmmədova → Aysu M. Sinif yoldaşları tam soyadı görmür.</p>" +
+        '<p class="muted" style="margin:-8px 0 14px">Lövhədə qısa ad: ' +
+          "Aysu Məmmədova → Aysu M.</p>" +
         '<div id="sErr"></div>' +
         '<button class="btn go" id="btnStu">' + ic("plus") + "Şagird əlavə et</button>" +
       "</div>"
@@ -459,13 +459,28 @@
       '<input class="eName" maxlength="120">' +
       '<div class="eErr"></div>' +
       '<div class="row"><button class="btn go sm eSave">Yadda saxla</button>' +
-      '<button class="btn ghost sm eCancel">Ləğv et</button></div></div>');
+      '<button class="btn ghost sm eCancel">Ləğv et</button></div>' +
+      /* Kod yenilemek nadir ve geri qaytarilmazdir - siyahida yer
+         tutmasin deye burdadir, ayrica ve seyrek gorunusde. */
+      '<div class="danger"><button class="btn sm ghost" data-reset="' +
+        esc(s.id) + '">' + ic("refresh") + "Giriş kodunu yenilə</button>" +
+      '<span class="muted">Köhnə kod etibarsız olur.</span></div>' +
+      "</div>");
     var box = row.querySelector(".edit");
     var n1 = box.querySelector(".eName");
     n1.value = s.full_name;
     n1.focus(); n1.select();
     box.querySelector(".eCancel").addEventListener("click", function () { box.remove(); });
     box.querySelector(".eSave").addEventListener("click", save);
+    box.querySelector("[data-reset]").addEventListener("click", function () {
+      var b = this;
+      if (!confirm("Kod yenilənsin?\n\nKöhnə kod dərhal etibarsız olacaq və " +
+                   "şagird yenidən daxil olmalıdır.")) return;
+      b.disabled = true;
+      sb.rpc("rpc_reset_student_code", { p_student_id: s.id })
+        .then(function () { loadStudents(classId); })
+        .catch(function (e) { b.disabled = false; alert(fail(e)); });
+    });
     n1.addEventListener("keydown", function (e) {
       if (e.key === "Enter") save();
       if (e.key === "Escape") box.remove();
@@ -500,20 +515,23 @@
         return;
       }
       box.innerHTML = rows.map(function (s) {
+        /* Telefonda bes duymenin hamisi eyni cekide idi ve setir
+           dord sətirə dagilirdi.  Indi ierarxiya var: kodu GONDERMEK
+           esas isdir, kopyalamaq ikinci, ad ve kod ise qelemin altinda. */
         return '<div class="stu" data-row="' + esc(s.id) + '">' +
+          /* «Hesabat» kecid oldugu ucun ADIN yanindadir - asagida yer
+             qalsin deye.  Asagida yalniz kodla bagli isler var. */
           '<div class="l1"><b>' + esc(s.full_name) + "</b>" +
-          '<button class="btn sm ghost icon" data-edit="' + esc(s.id) + '" ' +
-            'title="Adı dəyiş" aria-label="Adı dəyiş">' + ic("pen") + "</button></div>" +
+            '<button class="btn sm ghost link" data-rep="' + esc(s.id) + '">' +
+              "Hesabat" + ic("right") + "</button>" +
+            '<button class="btn sm ghost icon" data-edit="' + esc(s.id) + '" ' +
+              'title="Redaktə et" aria-label="Redaktə et">' + ic("pen") + "</button></div>" +
           '<div class="l2">' +
             '<span class="code key">' + esc(s.login_code) + "</span>" +
-            '<button class="btn sm" data-copy="' + esc(s.login_code) + '">' +
-              ic("copy") + "Kopyala</button>" +
+            '<button class="btn sm ghost icon" data-copy="' + esc(s.login_code) + '" ' +
+              'title="Kodu kopyala" aria-label="Kodu kopyala">' + ic("copy") + "</button>" +
             '<button class="btn sm" data-wa="' + esc(s.id) + '">' +
               ic("send") + "Göndər</button>" +
-            '<button class="btn sm" data-rep="' + esc(s.id) + '">' +
-              ic("chart") + "Hesabat</button>" +
-            '<button class="btn sm ghost icon" data-reset="' + esc(s.id) + '" ' +
-              'title="Kodu yenilə" aria-label="Kodu yenilə">' + ic("refresh") + "</button>" +
           "</div></div>";
       }).join("");
 
@@ -537,16 +555,6 @@
       Array.prototype.forEach.call(box.querySelectorAll("[data-rep]"), function (b) {
         b.addEventListener("click", function () {
           nav("#/s/" + b.getAttribute("data-rep") + "/" + classId);
-        });
-      });
-      Array.prototype.forEach.call(box.querySelectorAll("[data-reset]"), function (b) {
-        b.addEventListener("click", function () {
-          if (!confirm("Kod yenilənsin?\n\nKöhnə kod dərhal etibarsız olacaq və " +
-                       "şagird yenidən daxil olmalıdır.")) return;
-          b.disabled = true;
-          sb.rpc("rpc_reset_student_code", { p_student_id: b.getAttribute("data-reset") })
-            .then(function () { loadStudents(classId); })
-            .catch(function (e) { b.disabled = false; alert(fail(e)); });
         });
       });
     }).catch(function (e) {

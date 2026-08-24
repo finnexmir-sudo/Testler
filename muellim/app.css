@@ -45,10 +45,10 @@
 /* ------------------------------------------------------ sagird setri */
 .stu{padding:14px 16px;border-bottom:1px solid var(--n-100)}
 .stu:last-child{border-bottom:0}
-.stu .l1{display:flex;align-items:baseline;gap:9px}
-.stu .l1 b{flex:1;font-size:14.5px;font-weight:570;letter-spacing:-.008em;
+.stu .l1{display:flex;align-items:center;gap:6px}
+.stu .l1 b{flex:1;min-width:0;font-size:14.5px;font-weight:570;letter-spacing:-.008em;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.stu .l2{display:flex;align-items:center;gap:7px;margin-top:10px;flex-wrap:wrap}
+.stu .l2{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
 
 
 /* ======================================================== hesabatlar */
@@ -149,3 +149,27 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 .switch>span:last-child b{display:block;font-weight:570;margin-bottom:2px}
 .switch .muted{display:block}
 .row.two>.btn{flex:1 1 0;width:auto;min-width:0}
+
+
+/* ================================== sagird setri - telefonda seliqe */
+/* «Hesabat» duyme deyil, sag kenara siginan kecid kimi gorunur:
+   bes eyni cekili duyme telefonda setri dord setre dagidirdi. */
+.btn.link{
+  border-color:transparent;background:none;color:var(--brand);
+  padding:0 4px;gap:2px;margin-left:auto;font-weight:530;
+}
+.btn.link:hover{background:var(--brand-tint);border-color:transparent}
+.btn.link svg{width:14px;height:14px;stroke-width:2}
+.stu .l2 .btn.icon{flex:0 0 30px;width:30px;min-height:30px}
+/* Kopyalama ikonu KODA aiddir - ona yaxin dayanmalidir, yoxsa
+   «Gönder» ile arasinda havada asili qalir. */
+.stu .l2 .code + .btn.icon{margin-left:-4px}
+
+/* Kod yenilemek - nadir ve geri qaytarilmazdir */
+.stu .edit .danger{
+  margin-top:12px;padding-top:11px;border-top:1px solid var(--n-100);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.stu .edit .danger .btn{color:var(--err);border-color:var(--n-200)}
+.stu .edit .danger .btn:hover{background:var(--err-tint);border-color:var(--err-line)}
+.stu .edit .danger .muted{flex:1;min-width:140px}

@@ -147,10 +147,26 @@ with sync_playwright() as pw:
     print("F · Kodu yeniləmək")
     pg.click(".item"); pg.wait_for_selector(".stu", timeout=8000)
     pg.on("dialog", lambda d: d.accept())
-    pg.locator("[data-reset]").first.click(); pg.wait_for_timeout(1000)
+    # Kod yenilemek siyahida yox, qelemin altindadir (nadir + geri donusu yox)
+    ok(pg.locator(".stu [data-reset]").count() == 0,
+       "kod yenileme siyahini doldurmur")
+    pg.locator("[data-edit]").first.click()
+    pg.wait_for_selector(".edit [data-reset]", timeout=8000)
+    ok(True, "kod yenileme redakte panelindedir")
+    pg.locator(".edit [data-reset]").first.click(); pg.wait_for_timeout(1000)
     new_code = re.search(r"\b([A-Z2-9]{8})\b", pg.inner_text(".stu"))
     ok(new_code and new_code.group(1) != first_code, "kod deyisdi",
        (first_code or "?") + " -> " + (new_code.group(1) if new_code else "?"))
+
+    print("F2 · Telefonda şagird sətri")
+    pg.set_viewport_size({"width": 360, "height": 780})
+    pg.click("#groups .item") if pg.locator("#groups .item").count() else None
+    pg.wait_for_selector(".stu", timeout=8000)
+    h = pg.locator(".stu").first.evaluate("e => e.getBoundingClientRect().height")
+    ok(h <= 120, "sagird setri telefonda yigcamdir", str(round(h)) + "px")
+    ok(pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"),
+       "telefonda yana surusme yoxdur")
+    pg.set_viewport_size({"width": 430, "height": 900})
 
     print("G · Çıxış və yenidən giriş")
     pg.click("#btnOut"); pg.wait_for_selector("#btnAuth", timeout=8000)
