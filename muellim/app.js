@@ -818,8 +818,9 @@
     var live = guard();
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     Promise.all([
-      sb.select("classes", { select: "id,name", eq: { id: gid } }),
-      sb.rpc("rpc_class_assignments", { p_class_id: gid })
+      sb.select("classes", { select: "id,name,level_id", eq: { id: gid } }),
+      sb.rpc("rpc_class_assignments", { p_class_id: gid }),
+      loadLevels()
     ]).then(function (res) {
       if (!live()) return;
       var rows = res[0];
@@ -929,6 +930,16 @@
       if (!box) return;
       list = list || [];
       var free = list.filter(function (t) { return !t.assigned; });
+      /* Iki ayri hal - eyni mesaji vermek olmaz:
+         siyahi tamam bosdursa bu sinif ucun hele test YAZILMAYIB. */
+      if (!list.length) {
+        box.innerHTML = '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
+          "<b>Bu sinif üçün hələ test yoxdur</b>" +
+          "Test bazasına " + esc(levelName(g.level_id) || "bu sinif") +
+          " materialları hələ əlavə olunmayıb. Qrupun sinfini dəyişsəniz " +
+          "(yuxarıdakı qələm düyməsi) mövcud testlər açılacaq.</div>";
+        return;
+      }
       if (!free.length) {
         box.innerHTML = '<div class="empty"><div class="ic">' + ic("check") + "</div>" +
           "<b>Bütün testlər verilib</b>Bu sinif üçün başqa test qalmayıb.</div>";
