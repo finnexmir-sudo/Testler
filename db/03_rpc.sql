@@ -40,14 +40,14 @@ declare
   v_class   public.classes%rowtype;
 begin
   if p_code is null or length(btrim(p_code)) < 6 then
-    raise exception 'Kod yanlisdir.' using errcode = '22023';
+    return jsonb_build_object('ok', false, 'error', 'Kod qisadir.');
   end if;
 
   select * into v_student from public.students
    where login_code = upper(btrim(p_code)) and is_active;
 
   if not found then
-    raise exception 'Bele kod tapilmadi.' using errcode = 'no_data_found';
+    return jsonb_build_object('ok', false, 'error', 'Bele kod tapilmadi.');
   end if;
 
   select * into v_class from public.classes where id = v_student.class_id;
@@ -57,6 +57,7 @@ begin
   values (app.hash_token(v_token), v_student.id, now() + interval '12 hours');
 
   return jsonb_build_object(
+    'ok',      true,
     'token',   v_token,
     'student', jsonb_build_object(
                  'id',           v_student.id,
@@ -127,7 +128,7 @@ begin
 
   select * into v_test from public.tests where id = p_test_id and status = 'published';
   if not found then
-    raise exception 'Test tapilmadi.' using errcode = 'no_data_found';
+    raise exception 'Test tapilmadi.' using errcode = '22023';
   end if;
 
   -- Elcatanliq: platforma testi ve ya oz sinfinin testi
@@ -214,7 +215,7 @@ begin
   select * into v_att from public.attempts
    where id = p_attempt_id and student_id = v_student;
   if not found then
-    raise exception 'Cehd tapilmadi.' using errcode = 'no_data_found';
+    raise exception 'Cehd tapilmadi.' using errcode = '22023';
   end if;
   if v_att.status <> 'in_progress' then
     raise exception 'Bu cehd artiq baglanib.' using errcode = '42501';
@@ -331,18 +332,33 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------- huquq
+--  DIQQET: PostgREST EXECUTE huququ olmayan funksiyani "yoxdur" kimi
+--  gosterir (HTTP 404, kod 42883). Yeni bu blok isləməzsə butun sagird
+--  terefi yox olur - ona gore sertsizdir ve sonda ozunu yoxlayir.
 revoke all on function public.rpc_student_login(text)                     from public;
 revoke all on function public.rpc_student_tests(text)                     from public;
 revoke all on function public.rpc_start_attempt(text, uuid)               from public;
 revoke all on function public.rpc_submit_attempt(text, uuid, jsonb)       from public;
 revoke all on function public.rpc_leaderboard(text, uuid, int)            from public;
 
-do $$ begin
-  if exists (select 1 from pg_roles where rolname = 'anon') then
-    grant execute on function public.rpc_student_login(text)               to anon, authenticated;
-    grant execute on function public.rpc_student_tests(text)               to anon, authenticated;
-    grant execute on function public.rpc_start_attempt(text, uuid)         to anon, authenticated;
-    grant execute on function public.rpc_submit_attempt(text, uuid, jsonb) to anon, authenticated;
-    grant execute on function public.rpc_leaderboard(text, uuid, int)      to anon, authenticated;
+grant execute on function public.rpc_student_login(text)               to anon, authenticated;
+grant execute on function public.rpc_student_tests(text)               to anon, authenticated;
+grant execute on function public.rpc_start_attempt(text, uuid)         to anon, authenticated;
+grant execute on function public.rpc_submit_attempt(text, uuid, jsonb) to anon, authenticated;
+grant execute on function public.rpc_leaderboard(text, uuid, int)      to anon, authenticated;
+
+do $$
+declare bad text;
+begin
+  select string_agg(f, ', ') into bad from unnest(array[
+    'public.rpc_student_login(text)',
+    'public.rpc_student_tests(text)',
+    'public.rpc_start_attempt(text, uuid)',
+    'public.rpc_submit_attempt(text, uuid, jsonb)',
+    'public.rpc_leaderboard(text, uuid, int)']) f
+   where not has_function_privilege('anon', f, 'EXECUTE');
+  if bad is not null then
+    raise exception 'anon bu funksiyalari cagira bilmir: %', bad;
   end if;
+  raise notice 'Sagird RPC-leri anon ucun acildi.';
 end $$;

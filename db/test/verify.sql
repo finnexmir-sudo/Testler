@@ -12,16 +12,29 @@ norls as (
     from pg_class c join pg_namespace n on n.oid=c.relnamespace
    where n.nspname='public' and c.relkind='r' and not c.relrowsecurity),
 pol as (select count(*)::int n from pg_policies where schemaname='public'),
-expected(fn) as (values
-  ('rpc_student_login'),('rpc_student_tests'),('rpc_start_attempt'),
-  ('rpc_submit_attempt'),('rpc_leaderboard'),
-  ('rpc_my_context'),('rpc_create_account'),('rpc_create_class'),
-  ('rpc_add_student'),('rpc_reset_student_code')),
+-- Funksiyanin MOVCUD olmasi kifayet deyil: PostgREST EXECUTE huququ
+-- olmayan funksiyani "yoxdur" kimi gosterir (404 / 42883). Ona gore
+-- hem movcudluq, hem de cagirila bilme yoxlanilir.
+expected(fn, who) as (values
+  ('public.rpc_student_login(text)',                     'anon'),
+  ('public.rpc_student_tests(text)',                     'anon'),
+  ('public.rpc_start_attempt(text, uuid)',               'anon'),
+  ('public.rpc_submit_attempt(text, uuid, jsonb)',       'anon'),
+  ('public.rpc_leaderboard(text, uuid, int)',            'anon'),
+  ('public.rpc_my_context()',                            'authenticated'),
+  ('public.rpc_create_account(text, text)',              'authenticated'),
+  ('public.rpc_create_class(uuid, text, text, text, text)', 'authenticated'),
+  ('public.rpc_add_student(uuid, text, text, int)',      'authenticated'),
+  ('public.rpc_reset_student_code(uuid)',                'authenticated')),
 missing as (
-  select coalesce(string_agg(fn, ', '), '-') s from expected
-   where fn not in (select p.proname from pg_proc p
-                      join pg_namespace n on n.oid=p.pronamespace
-                     where n.nspname='public')),
+  select coalesce(string_agg(split_part(fn, '(', 1), ', '), '-') s
+    from expected
+   where to_regprocedure(fn) is null),
+noexec as (
+  select coalesce(string_agg(split_part(fn, '(', 1) || ' (' || who || ')', ', '), '-') s
+    from expected
+   where to_regprocedure(fn) is not null
+     and not has_function_privilege(who, fn, 'EXECUTE')),
 trg as (
   select count(*)::int n from pg_trigger
    where tgname in ('trg_auth_user_created','trg_students_seat_limit')
@@ -46,12 +59,15 @@ select * from (
          case when pol.n>=38 then 'OK' else 'AZDIR - 02 islenmeyib?' end from pol
   union all select 4, 'Catismayan RPC',  missing.s,
          case when missing.s='-' then 'OK' else 'PROBLEM - 03/06 islenmeyib?' end from missing
-  union all select 5, 'Trigerler',       trg.n::text,
+  union all select 5, 'Cagirila bilmeyen RPC', noexec.s,
+         case when noexec.s='-' then 'OK'
+              else 'PROBLEM - huquq yoxdur, 03/06 yeniden islet' end from noexec
+  union all select 6, 'Trigerler',       trg.n::text,
          case when trg.n=2 then 'OK' else 'PROBLEM - 06 islenmeyib?' end from trg
-  union all select 6, 'Seed: proqram/fenn/seviyye/paket',
+  union all select 7, 'Seed: proqram/fenn/seviyye/paket',
          seed.p||' / '||seed.s||' / '||seed.l||' / '||seed.pl,
          case when seed.p>=5 and seed.s>=10 and seed.l>=15 and seed.pl>=7
               then 'OK' else 'PROBLEM - 04 islenmeyib?' end from seed
-  union all select 7, 'anon-a acilan hessas cedvel', leak.s,
+  union all select 8, 'anon-a acilan hessas cedvel', leak.s,
          case when leak.s='-' then 'OK' else 'TEHLUKE - 05 EN SONDA islenmelidir' end from leak
 ) z order by ord;

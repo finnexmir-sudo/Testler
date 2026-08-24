@@ -190,7 +190,12 @@ declare
 begin
   v_login := public.rpc_student_login('AYSU2024');
   v_token := v_login->>'token';
+  assert (v_login->>'ok')::boolean, 'ok bayragi gelmedi';
   assert v_token is not null and length(v_token) = 64, 'Token alinmadi';
+  assert (public.rpc_student_login('YOXDUR99')->>'ok')::boolean is not true,
+         'Uydurma kod qebul edildi';
+  assert public.rpc_student_login('YOXDUR99')->>'error' is not null,
+         'Yanlis kodda izah mesaji yoxdur';
   assert v_login->'student'->>'display_name' = 'Aysu', 'Sehv sagird';
 
   v_start := public.rpc_start_attempt(v_token, 'ffffffff-0000-0000-0000-000000000001');

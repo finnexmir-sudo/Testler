@@ -185,7 +185,7 @@ begin
 
   select * into v_class from public.classes where id = p_class_id;
   if not found then
-    raise exception 'Qrup tapilmadi.' using errcode = 'no_data_found';
+    raise exception 'Qrup tapilmadi.' using errcode = '22023';
   end if;
   if v_class.teacher_id <> v_uid and not app.is_account_member(v_class.account_id) then
     raise exception 'Bu qrupa sagird elave ede bilmezsiniz.' using errcode = '42501';
@@ -250,7 +250,7 @@ end $$;
 
 -- ---------------------------------------------------------------- huquq
 do $$
-declare fn text;
+declare fn text; bad text;
 begin
   foreach fn in array array[
     'public.rpc_my_context()',
@@ -260,8 +260,18 @@ begin
     'public.rpc_reset_student_code(uuid)']
   loop
     execute format('revoke all on function %s from public', fn);
-    if exists (select 1 from pg_roles where rolname = 'authenticated') then
-      execute format('grant execute on function %s to authenticated', fn);
-    end if;
+    execute format('grant execute on function %s to authenticated', fn);
   end loop;
+
+  select string_agg(f, ', ') into bad from unnest(array[
+    'public.rpc_my_context()',
+    'public.rpc_create_account(text, text)',
+    'public.rpc_create_class(uuid, text, text, text, text)',
+    'public.rpc_add_student(uuid, text, text, int)',
+    'public.rpc_reset_student_code(uuid)']) f
+   where not has_function_privilege('authenticated', f, 'EXECUTE');
+  if bad is not null then
+    raise exception 'authenticated bu funksiyalari cagira bilmir: %', bad;
+  end if;
+  raise notice 'Muellim RPC-leri authenticated ucun acildi.';
 end $$;

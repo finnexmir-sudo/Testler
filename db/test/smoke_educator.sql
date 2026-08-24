@@ -175,7 +175,7 @@ end $$;
 
 -- 11. Kod yenilenende kohne sessiya baglanir
 do $$
-declare st uuid; old_code text; new_code text; tok text; ok boolean := false;
+declare st uuid; old_code text; new_code text; tok text; ok boolean;
 begin
   select id, login_code into st, old_code from public.students
    where full_name = 'Aysu Memmedova';
@@ -187,12 +187,13 @@ begin
   assert new_code <> old_code, 'Kod deyismedi';
   assert app.session_student(tok) is null, 'Kohne sessiya hele de qüvvededir!';
 
-  begin
-    perform public.rpc_student_login(old_code);
-    assert false, 'Kohne kodla giris hele de isleyir!';
-  exception when no_data_found then ok := true;
-  end;
-  assert ok, 'Kohne kod ret edilmedi';
+  -- Yanlis kod normal haldir: istisna yox, {"ok":false} qaytarilir
+  -- (PostgREST istisnani 500-e cevirirdi - usaq kodu sehv yazanda
+  --  serverde xeta gorunmemelidir).
+  ok := (public.rpc_student_login(old_code)->>'ok')::boolean is not true;
+  assert ok, 'Kohne kodla giris hele de isleyir!';
+  assert public.rpc_student_login(new_code)->>'token' is not null,
+         'Yeni kodla giris isləmir';
 end $$;
 \echo 'OK 11 · kod yenilenende kohne kod ve sessiya derhal baglanir'
 
