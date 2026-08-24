@@ -174,41 +174,78 @@
   }
 
   /* --------------------------------------------------- test siyahisi */
+
+  /* Bir test setri. isAsg = muellimin tapsirigidir (son tarix gorunur). */
+  function testRow(t, isAsg) {
+    var lock = !!t.locked;
+    var done = Number(t.done) || 0;
+    var lim  = Number(t.max_attempts) || 0;
+    /* Cehd bitibse test acilmir - neticeye baxmaq olur.
+       Serverde de eyni limit var; bura yalniz gorunusdur. */
+    var over = !lock && done > 0 && lim > 0 && done >= lim;
+    var left = !lock && !over && lim > 0 && done > 0 ? lim - done : 0;
+    return '<button class="test' + (lock ? " lock" : "") + (over ? " done" : "") +
+      (isAsg ? " asg" : "") +
+      '" data-t="' + esc(t.id) + '" data-mode="' + (over ? "view" : "start") + '"' +
+      (lock ? " disabled" : "") + ">" +
+      '<div class="ic">' + ic(lock ? "lock" : (over ? "check" : "doc")) + "</div>" +
+      '<div class="g"><b>' + esc(t.title) + "</b><i>" +
+        "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
+        "<span>" + (t.questions || 0) + " sual</span>" +
+        (isAsg && t.closes_at
+          ? "<span>·</span><span>son tarix " + esc(dateAz(t.closes_at)) + "</span>" : "") +
+        (left > 0 ? "<span>·</span><span>" + left + " cəhd qalıb</span>" : "") +
+        (lock ? "<span>·</span><span>abunə lazımdır</span>" : "") +
+        (over ? "<span>·</span><span>işlənib — toxun, nəticəni gör</span>" : "") +
+      "</i></div>" +
+      (done ? '<span class="best">' + Math.round(t.best) + "%</span>" : "") +
+      (lock ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
+  }
+
+  /* Son tarix: "4 okt" */
+  function dateAz(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    if (isNaN(d)) return "";
+    var ay = ["yan","fev","mar","apr","may","iyn","iyl","avq","sen","okt","noy","dek"];
+    return d.getDate() + " " + ay[d.getMonth()];
+  }
+
   function screenTests() {
     topBar.classList.remove("hide");
     topTitle.textContent = ME ? ME.display_name : "Testlər";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
 
-    sb.rpc("rpc_student_tests", { p_token: TOKEN }).then(function (rows) {
+    sb.rpc("rpc_student_tests", { p_token: TOKEN }).then(function (d) {
+      d = d || {};
+      var asg  = d.assigned || [];
+      var prac = d.practice || [];
       var h = "";
       if (CLS) {
         h += '<p class="note" style="margin-bottom:14px">Qrup: <b>' + esc(CLS.name) + "</b></p>";
       }
-      h += "<h2>Testlər</h2>";
-      if (!rows || !rows.length) {
-        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("doc") + "</div>" +
-             "<b>Hələ test yoxdur</b>Müəllimin test əlavə etməsini gözlə.</div></div>";
+
+      /* 1. Muellimin verdiyi tapsiriqlar - hemise yuxarida */
+      h += "<h2>Tapşırıqlar</h2>";
+      if (!asg.length) {
+        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
+             "</div><b>Tapşırıq yoxdur</b>" +
+             (prac.length ? "Aşağıdakı testlərlə məşq edə bilərsən."
+                          : "Müəllimin tapşırıq verməsini gözlə.") + "</div></div>";
       } else {
-        h += '<div class="card pad0">' + rows.map(function (t, k) {
-          var lock = !!t.locked;
-          var done = Number(t.done) || 0;
-          /* Bitmis testi TEKRAR ISLEMEK olmur - neticeye baxmaq olur.
-             Serverde de max_attempts limiti var; bura yalniz gorunusdur. */
-          var over = !lock && done > 0 && t.max_attempts > 0 && done >= t.max_attempts;
-          return '<button class="test' + (lock ? " lock" : "") + (over ? " done" : "") +
-            '" data-t="' + esc(t.id) + '" data-mode="' + (over ? "view" : "start") + '"' +
-            (lock ? " disabled" : "") + ">" +
-            '<div class="ic">' + ic(lock ? "lock" : (over ? "check" : "doc")) + "</div>" +
-            '<div class="g"><b>' + esc(t.title) + "</b><i>" +
-              "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
-              "<span>" + (t.questions || 0) + " sual</span>" +
-              (lock ? "<span>·</span><span>abunə lazımdır</span>" : "") +
-              (over ? "<span>·</span><span>işlənib — toxun, nəticəni gör</span>" : "") +
-            "</i></div>" +
-            (done ? '<span class="best">' + Math.round(t.best) + "%</span>" : "") +
-            (lock ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
+        h += '<div class="card pad0">' + asg.map(function (t) {
+          return testRow(t, true);
         }).join("") + "</div>";
       }
+
+      /* 2. Serbest mesq - muellim baglaya biler */
+      if (prac.length) {
+        h += '<div class="spacer"></div><h2>Sərbəst məşq</h2>' +
+             '<div class="card pad0">' + prac.map(function (t) {
+               return testRow(t, false);
+             }).join("") + "</div>";
+      }
+
       show(h);
       Array.prototype.forEach.call(main.querySelectorAll("[data-t]"), function (b) {
         b.addEventListener("click", function () {
@@ -346,7 +383,8 @@
         '<div class="lbl">' + r.score + " / " + r.max_score + " düzgün</div>" +
         '<div class="sub">' + fmtTime(r.duration_sec) + " · " +
           (passed
-            ? "Keçdin, afərin"
+            ? (r.can_retry ? "Keçdin, afərin — bir də cəhd edə bilərsən"
+                           : "Keçdin, afərin")
             : (r.can_retry
                 ? "Bir də cəhd edə bilərsən"
                 : "Səhvlərinə bax və mövzunu təkrarla")) + "</div>" +

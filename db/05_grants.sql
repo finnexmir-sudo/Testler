@@ -38,10 +38,13 @@ grant select on public.profiles, public.user_roles, public.accounts,
                 public.students, public.consents, public.tests,
                 public.questions, public.question_options,
                 public.attempts, public.attempt_answers,
+                public.assignments,
                 public.subscriptions, public.payments
   to authenticated;
 
 -- ------------------------------------------- 4. muellim - yazmaq huququ
+grant insert, update, delete on public.assignments to authenticated;
+
 grant insert, update, delete on public.classes, public.schools,
                                 public.tests, public.questions,
                                 public.question_options

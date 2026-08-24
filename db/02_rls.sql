@@ -257,6 +257,31 @@ create policy p_payments_read on public.payments
   for select using (app.is_account_member(account_id) or app.is_admin());
 -- Abune ve odenis yazmaq yalniz service_role ile (shluz webhook-u).
 
+-- --------------------------------------------------------- teyinatlar
+alter table public.assignments enable row level security;
+
+drop policy if exists p_assign_read on public.assignments;
+create policy p_assign_read on public.assignments
+  for select using (exists (
+    select 1 from public.classes c
+     where c.id = class_id
+       and (c.teacher_id = auth.uid() or app.is_account_member(c.account_id)
+            or app.is_admin())));
+
+drop policy if exists p_assign_write on public.assignments;
+create policy p_assign_write on public.assignments
+  for all using (exists (
+    select 1 from public.classes c
+     where c.id = class_id
+       and (c.teacher_id = auth.uid() or app.is_account_member(c.account_id)
+            or app.is_admin())))
+  with check (exists (
+    select 1 from public.classes c
+     where c.id = class_id
+       and (c.teacher_id = auth.uid() or app.is_account_member(c.account_id)
+            or app.is_admin())));
+
+
 -- ============================================================= yer limiti
 --  Repetitor paketleri sagird sayina gore satilir. Limit bazada tetbiq
 --  olunur - frontend-e etibar edilmir.

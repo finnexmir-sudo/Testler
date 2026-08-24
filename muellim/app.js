@@ -18,6 +18,10 @@
             '<path d="M12.4 6.1a2.3 2.3 0 0 1 0 4.5"/><path d="M13.4 12.3a4 4 0 0 1 2.2 2.8"/>',
     person: '<circle cx="9.5" cy="7" r="2.8"/><path d="M4.5 16a5 5 0 0 1 10 0"/>',
     plus:   '<path d="M9.5 4v11M4 9.5h11"/>',
+    x:      '<path d="M5 5l9 9M14 5l-9 9"/>',
+    clip:   '<rect x="4.5" y="3.5" width="10" height="13" rx="2"/>' +
+            '<path d="M7.5 3.5V2.6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v.9"/>' +
+            '<path d="M7 9.5l1.6 1.6L12 7.6"/>',
     copy:   '<rect x="6.5" y="6.5" width="8" height="8" rx="1.6"/>' +
             '<path d="M11.5 4.5H5a1.5 1.5 0 0 0-1.5 1.5v6.5"/>',
     send:   '<path d="M16 3 8.5 10.5"/><path d="M16 3l-4.8 13-2.7-5.5L3 7.8 16 3z"/>',
@@ -334,7 +338,10 @@
           "<span>Qoşulma kodu</span>" +
           '<span class="code key">' + esc(g.join_code) + "</span></div>" +
         '<div class="spacer"></div>' +
-        '<button class="btn wide" id="btnRep">' + ic("chart") + "Hesabat</button>" +
+        '<div class="row two">' +
+          '<button class="btn wide" id="btnAsgs">' + ic("clip") + "Tapşırıqlar</button>" +
+          '<button class="btn wide ghost" id="btnRep">' + ic("chart") + "Hesabat</button>" +
+        "</div>" +
       "</div>" +
       "<h2>Şagirdlər</h2>" +
       '<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
@@ -351,6 +358,7 @@
 
     on("btnBack", "click", function () { nav("#/"); });
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
+    on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
     on("btnRen", "click", function () { renameGroup(g); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("btnStu", "click", addStudent);
@@ -801,6 +809,185 @@
   /* Sürətlə keçid edəndə köhnə sorğunun cavabı yeni ekranın üstünə
      yazıla bilər. Hər ekran başlayanda hansı ünvanda olduğunu yadda
      saxlayır; cavab gələndə ünvan dəyişibsə heç nə çizmir. */
+
+  /* ================================================================
+     TAPSIRIQLAR  -  muellim teste "son tarix" qoyub qrupa verir.
+     Sagird panelinde bu testler "Tapsiriqlar" bolmesinde gorunur.
+     ================================================================ */
+  function screenAssign(gid) {
+    var live = guard();
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    Promise.all([
+      sb.select("classes", { select: "id,name", eq: { id: gid } }),
+      sb.rpc("rpc_class_assignments", { p_class_id: gid })
+    ]).then(function (res) {
+      if (!live()) return;
+      var rows = res[0];
+      if (!rows || !rows.length) throw new Error("Qrup tapılmadı.");
+      drawAssign(rows[0], res[1] || {});
+    }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+
+  function drawAssign(g, d) {
+    topTitle.textContent = g.name;
+    var items = d.items || [];
+    var free  = d.free_practice !== false;
+
+    show(
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") + esc(g.name) + "</button>" +
+      '<div class="spacer"></div>' +
+      '<div class="card tight">' +
+        "<h1>Tapşırıqlar</h1>" +
+        '<p class="muted" style="margin:8px 0 0">Seçdiyiniz test şagirdin ' +
+          "səhifəsində «Tapşırıqlar» bölməsində görünür. Son tarix keçəndə " +
+          "avtomatik bağlanır.</p>" +
+        '<div class="spacer"></div>' +
+        '<div class="swrap"><label class="switch" for="fp">' +
+          '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
+          '<span class="track"><i></i></span>' +
+          "<span><b>Sərbəst məşq</b>" +
+            '<span class="muted">Şagird platformanın digər testlərini də ' +
+              "istədiyi vaxt işləyə bilər.</span></span></label>" +
+        '<div id="fpErr"></div></div>' +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      "<h2>Verilmiş tapşırıqlar</h2>" +
+      '<div id="asgList" class="card pad0">' + asgRows(items, d.students || 0) + "</div>" +
+      '<div class="spacer"></div>' +
+      "<h2>Yeni tapşırıq</h2>" +
+      '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>'
+    );
+
+    on("btnBack", "click", function () { nav("#/g/" + g.id); });
+    on("fp", "change", function () {
+      var el = $("fp");
+      var val = el.checked;
+      el.disabled = true;
+      $("fpErr").innerHTML = "";
+      sb.update("classes", { id: g.id }, { free_practice: val })
+        .then(function () { el.disabled = false; })
+        .catch(function (e) {
+          el.disabled = false; el.checked = !val;
+          $("fpErr").innerHTML = msg("err", fail(e));
+        });
+    });
+
+    bindAsgRows(g);
+    loadPick(g);
+  }
+
+  function asgRows(items, students) {
+    if (!items.length) {
+      return '<div class="empty"><div class="ic">' + ic("clip") + "</div>" +
+        "<b>Hələ tapşırıq verilməyib</b>" +
+        "Aşağıdan test seçin — şagirdlər dərhal görəcək.</div>";
+    }
+    return items.map(function (a) {
+      var open = a.open !== false;
+      var done = Number(a.done) || 0;
+      var tries = Number(a.max_attempts) === 0 ? "limitsiz cəhd"
+                : (Number(a.max_attempts) || 1) + " cəhd";
+      return '<div class="asg">' +
+        '<div class="l1"><b>' + esc(a.title) + "</b>" +
+          '<span class="pill' + (open ? " on" : "") + '">' +
+            (open ? "Aktiv" : "Bağlı") + "</span>" +
+          '<button class="btn sm ghost icon" data-del="' + esc(a.id) + '" ' +
+            'title="Tapşırığı götür" aria-label="Tapşırığı götür">' + ic("x") + "</button>" +
+        "</div>" +
+        '<div class="l2">' + esc(a.subject || "") + " · " +
+          (Number(a.questions) || 0) + " sual · " + tries +
+          (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : "") + "</div>" +
+        '<div class="l2">' + done + "/" + students + " şagird bitirib" +
+          (a.avg != null ? " · orta " + pct(a.avg) + "%" : "") + "</div>" +
+      "</div>";
+    }).join("");
+  }
+
+  function bindAsgRows(g) {
+    var box = $("asgList");
+    if (!box) return;
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-del]") : null;
+      if (!b || busy) return;
+      var id = b.getAttribute("data-del");
+      busy = true; b.disabled = true;
+      sb.rpc("rpc_unassign_test", { p_assignment_id: id })
+        .then(function () { busy = false; screenAssign(g.id); })
+        .catch(function (e) {
+          busy = false; b.disabled = false;
+          box.insertAdjacentHTML("afterend", msg("err", fail(e)));
+        });
+    });
+  }
+
+  /* Teyin edile bilen testler: sinife uygun olanlar */
+  function loadPick(g) {
+    var live = guard();
+    sb.rpc("rpc_available_tests", { p_class_id: g.id }).then(function (list) {
+      if (!live()) return;
+      var box = $("pick");
+      if (!box) return;
+      list = list || [];
+      var free = list.filter(function (t) { return !t.assigned; });
+      if (!free.length) {
+        box.innerHTML = '<div class="empty"><div class="ic">' + ic("check") + "</div>" +
+          "<b>Bütün testlər verilib</b>Bu sinif üçün başqa test qalmayıb.</div>";
+        return;
+      }
+      box.innerHTML =
+        '<label for="aTest">Test</label>' +
+        '<select id="aTest">' + free.map(function (t) {
+          return '<option value="' + esc(t.id) + '">' + esc(t.subject) + " — " +
+            esc(t.title) + " (" + (Number(t.questions) || 0) + " sual)" +
+            (t.is_free ? "" : " · abunə") + "</option>";
+        }).join("") + "</select>" +
+        '<div class="fieldrow">' +
+          '<div><label for="aDate">Son tarix</label>' +
+            '<input type="date" id="aDate"></div>' +
+          '<div style="flex:0 0 148px"><label for="aTry">Cəhd sayı</label>' +
+            '<select id="aTry"><option value="1">1 cəhd</option>' +
+              '<option value="2">2 cəhd</option><option value="3">3 cəhd</option>' +
+              '<option value="0">Limitsiz</option></select></div>' +
+        "</div>" +
+        '<p class="muted" style="margin:-8px 0 14px">Son tarix boş qalsa, ' +
+          "tapşırıq siz götürənə qədər açıq qalır.</p>" +
+        '<div id="aErr"></div>' +
+        '<button class="btn go" id="btnAsg">' + ic("plus") + "Tapşırıq ver</button>";
+      on("btnAsg", "click", function () { doAssign(g); });
+    }).catch(function (e) {
+      if (!live()) return;
+      var box = $("pick");
+      if (box) box.innerHTML = msg("err", fail(e));
+    });
+  }
+
+  function doAssign(g) {
+    if (busy) return;
+    var tid = ($("aTest") || {}).value;
+    if (!tid) return;
+    var day = ($("aDate") || {}).value || "";
+    var closes = null;
+    if (day) {
+      /* Gunun sonu - saat 23:59 yerli vaxtla */
+      var d = new Date(day + "T23:59:00");
+      if (isNaN(d)) { $("aErr").innerHTML = msg("err", "Tarix düzgün deyil."); return; }
+      if (d.getTime() <= Date.now()) {
+        $("aErr").innerHTML = msg("err", "Son tarix bu gündən sonra olmalıdır."); return;
+      }
+      closes = d.toISOString();
+    }
+    $("aErr").innerHTML = "";
+    setBusy("btnAsg", true, "Tapşırıq ver");
+    sb.rpc("rpc_assign_test", {
+      p_class_id: g.id, p_test_id: tid,
+      p_closes_at: closes, p_max_attempts: Number(($("aTry") || {}).value || 1)
+    }).then(function () { screenAssign(g.id); })
+      .catch(function (e) {
+        setBusy("btnAsg", false, "Tapşırıq ver");
+        $("aErr").innerHTML = msg("err", fail(e));
+      });
+  }
+
   function guard() {
     var at = location.hash || "#/";
     return function () { return (location.hash || "#/") === at; };
@@ -816,6 +1003,7 @@
     var m = (location.hash || "#/").replace(/^#/, "").split("/").filter(Boolean);
     if (m[0] === "g" && m[1]) return screenGroup(m[1]);
     if (m[0] === "r" && m[1]) return screenReport(m[1]);
+    if (m[0] === "a" && m[1]) return screenAssign(m[1]);
     if (m[0] === "s" && m[1] && m[2]) return screenStudent(m[1], m[2]);
     screenHome();
   }

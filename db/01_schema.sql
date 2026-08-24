@@ -331,6 +331,46 @@ create index if not exists idx_sessions_expiry    on public.student_sessions(exp
 create index if not exists idx_subs_account       on public.subscriptions(account_id, status);
 create index if not exists idx_topics_subject     on public.topics(subject_id, parent_id);
 
+-- ------------------------------------------------------------ teyinatlar
+--  Muellim testi QRUPA teyin edir. Sagird oz daimi kodu ile girib aktiv
+--  tapsiriqlari gorur - her test ucun ayrica kod paylanmir.
+--  tests.class_id kifayet deyildi: platforma testini qrupa teyin etmek
+--  olmurdu, eyni testi iki qrupa vermek olmurdu, son tarix yox idi.
+-- Qrup ayari: sagird pulsuz platforma testlerini serbest gore bilsinmi?
+do $$ begin
+  alter table public.classes
+    add column free_practice boolean not null default true;
+exception when duplicate_column then null; end $$;
+
+comment on column public.classes.free_practice is
+  'true: sagird teyinatdan elave pulsuz platforma testlerini de gorur';
+
+create table if not exists public.assignments (
+  id           uuid primary key default gen_random_uuid(),
+  class_id     uuid not null references public.classes(id) on delete cascade,
+  test_id      uuid not null references public.tests(id)   on delete cascade,
+  assigned_by  uuid references public.profiles(id) on delete set null,
+  opens_at     timestamptz not null default now(),
+  closes_at    timestamptz,                    -- null = son tarix yoxdur
+  max_attempts smallint not null default 1,    -- 0 = limitsiz
+  note         text not null default '',
+  created_at   timestamptz not null default now(),
+  unique (class_id, test_id),
+  constraint assignments_window_ck check (closes_at is null or closes_at > opens_at),
+  constraint assignments_attempts_ck check (max_attempts between 0 and 20)
+);
+
+create index if not exists idx_assign_class on public.assignments(class_id);
+create index if not exists idx_assign_test  on public.assignments(test_id);
+create index if not exists idx_assign_open  on public.assignments(class_id, opens_at, closes_at);
+
+-- Teyinat aktivdirmi?
+create or replace function app.assignment_open(a public.assignments) returns boolean
+language sql immutable as $$
+  select a.opens_at <= now() and (a.closes_at is null or a.closes_at > now())
+$$;
+
+
 -- ------------------------------------------------------- ad mehdudiyyeti
 --  Muellim adi redakte ede bilir - bos ad bazaya dusmemelidir.
 --  "add constraint if not exists" Postgres-de yoxdur, ona gore DO blok.

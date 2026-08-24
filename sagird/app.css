@@ -177,3 +177,7 @@ input{min-height:52px;font-size:17px}
 
 /* Lovhede cehd sayi */
 .lb .nm s{text-decoration:none;font-size:11.5px;color:var(--fg-3);font-weight:500}
+
+/* Muellimin tapsirigi - sol kenarda incə nisan */
+.test.asg{box-shadow:inset 3px 0 0 var(--brand)}
+.test.asg.done{box-shadow:inset 3px 0 0 var(--ok)}

@@ -83,6 +83,7 @@ declare
   v_class   uuid;
   v_account uuid;
   v_paid    boolean;
+  v_free    boolean;
 begin
   if v_student is null then
     raise exception 'Sessiya bitib. Yeniden daxil ol.' using errcode = '28000';
@@ -91,32 +92,63 @@ begin
     from public.students where id = v_student;
   v_paid := app.has_active_subscription(v_account);
 
-  return coalesce((
-    select jsonb_agg(x order by x->>'title')
-    from (
-      select jsonb_build_object(
-               'id',      t.id,
-               'title',   t.title,
-               'subject', sub.name,
-               'is_free', t.is_free,
-               'locked',  (not t.is_free and not v_paid),
-               'questions', (select count(*) from public.questions q where q.test_id = t.id),
-               'time_limit_sec', t.time_limit_sec,
-               'max_attempts',   t.max_attempts,
-               -- Sagird bu testi nece defe isleyib ve en yaxsi neticesi
-               'done', (select count(*) from public.attempts a
-                         where a.test_id = t.id and a.student_id = v_student
-                           and a.status = 'submitted'),
-               'best', (select round(max(a.percent), 0) from public.attempts a
-                         where a.test_id = t.id and a.student_id = v_student
-                           and a.status = 'submitted')
-             ) as x
-        from public.tests t
-        join public.subjects sub on sub.id = t.subject_id
-       where t.status = 'published'
-         and (t.owner_type = 'platform' or t.class_id = v_class)
-    ) z
-  ), '[]'::jsonb);
+  select free_practice into v_free from public.classes where id = v_class;
+
+  return jsonb_build_object(
+    -- Muellimin teyin etdikleri
+    'assigned', coalesce((
+      select jsonb_agg(x order by (x->>'closes_at') nulls last, x->>'title')
+      from (
+        select jsonb_build_object(
+                 'id',      t.id,
+                 'title',   t.title,
+                 'subject', sub.name,
+                 'locked',  (not t.is_free and not v_paid),
+                 'questions', (select count(*) from public.questions q where q.test_id = t.id),
+                 'time_limit_sec', t.time_limit_sec,
+                 'max_attempts',   a.max_attempts,
+                 'closes_at',      a.closes_at,
+                 'done', (select count(*) from public.attempts at
+                           where at.test_id = t.id and at.student_id = v_student
+                             and at.status = 'submitted'),
+                 'best', (select round(max(at.percent), 0) from public.attempts at
+                           where at.test_id = t.id and at.student_id = v_student
+                             and at.status = 'submitted')
+               ) as x
+          from public.assignments a
+          join public.tests t     on t.id = a.test_id and t.status = 'published'
+          join public.subjects sub on sub.id = t.subject_id
+         where a.class_id = v_class and app.assignment_open(a.*)
+      ) z), '[]'::jsonb),
+
+    -- Serbest mesq: yalniz qrup ayari acıq olanda
+    'practice', case when not coalesce(v_free, true) then '[]'::jsonb else coalesce((
+      select jsonb_agg(x order by x->>'subject', x->>'title')
+      from (
+        select jsonb_build_object(
+                 'id',      t.id,
+                 'title',   t.title,
+                 'subject', sub.name,
+                 'locked',  (not t.is_free and not v_paid),
+                 'questions', (select count(*) from public.questions q where q.test_id = t.id),
+                 'time_limit_sec', t.time_limit_sec,
+                 'max_attempts',   t.max_attempts,
+                 'done', (select count(*) from public.attempts at
+                           where at.test_id = t.id and at.student_id = v_student
+                             and at.status = 'submitted'),
+                 'best', (select round(max(at.percent), 0) from public.attempts at
+                           where at.test_id = t.id and at.student_id = v_student
+                             and at.status = 'submitted')
+               ) as x
+          from public.tests t
+          join public.subjects sub on sub.id = t.subject_id
+         where t.status = 'published' and t.owner_type = 'platform'
+           -- Teyin olunmuşdursa "Tapsiriqlar"da gorunur, burada tekrarlanmasin
+           and not exists (select 1 from public.assignments a
+                            where a.class_id = v_class and a.test_id = t.id
+                              and app.assignment_open(a.*))
+      ) z), '[]'::jsonb) end
+  );
 end $$;
 
 -- --------------------------------------------------------- cehde baslamaq
@@ -129,6 +161,9 @@ declare
   v_class   uuid;
   v_account uuid;
   v_test    public.tests%rowtype;
+  v_asg     public.assignments%rowtype;
+  v_free    boolean;
+  v_limit   int;
   v_done    int;
   v_attempt uuid;
 begin
@@ -143,9 +178,34 @@ begin
     raise exception 'Test tapilmadi.' using errcode = '22023';
   end if;
 
-  -- Elcatanliq: platforma testi ve ya oz sinfinin testi
-  if v_test.owner_type = 'educator' and v_test.class_id is distinct from v_class then
-    raise exception 'Bu test sizin sinif ucun deyil.' using errcode = '42501';
+  -- ACIQ teyinat varsa onun qaydalari isleyir.
+  -- Vaxti bitmis teyinat testi bloklamir: test yeniden serbest mesq
+  -- hovuzuna qayidir (rpc_student_tests de onu orada gosterir).
+  select a.* into v_asg from public.assignments a
+   where a.class_id = v_class and a.test_id = p_test_id
+     and app.assignment_open(a.*);
+
+  if v_asg.id is not null then
+    v_limit := v_asg.max_attempts;
+  else
+    -- Acıq teyinat yoxdur: serbest mesq yolu
+    select free_practice into v_free from public.classes where id = v_class;
+    if v_test.owner_type <> 'platform' then
+      -- Muellimin oz testi yalniz teyinatla acilir
+      if exists (select 1 from public.assignments a
+                  where a.class_id = v_class and a.test_id = p_test_id) then
+        raise exception 'Bu tapsirigin vaxti bitib.' using errcode = '42501';
+      end if;
+      raise exception 'Bu test sizin qrup ucun teyin olunmayib.' using errcode = '42501';
+    end if;
+    if not coalesce(v_free, true) then
+      if exists (select 1 from public.assignments a
+                  where a.class_id = v_class and a.test_id = p_test_id) then
+        raise exception 'Bu tapsirigin vaxti bitib.' using errcode = '42501';
+      end if;
+      raise exception 'Muelliminiz serbest mesqi baglayib.' using errcode = '42501';
+    end if;
+    v_limit := v_test.max_attempts;
   end if;
 
   -- Odenis heddi
@@ -154,10 +214,10 @@ begin
   end if;
 
   -- Cehd limiti
-  if v_test.max_attempts > 0 then
+  if v_limit > 0 then
     select count(*) into v_done from public.attempts
      where student_id = v_student and test_id = p_test_id and status = 'submitted';
-    if v_done >= v_test.max_attempts then
+    if v_done >= v_limit then
       raise exception 'Bu testi artiq % defe islemisiniz.', v_done using errcode = '42501';
     end if;
   end if;
@@ -218,6 +278,7 @@ declare
   v_test    public.tests%rowtype;
   v_score   numeric(7,2) := 0;
   v_max     numeric(7,2) := 0;
+  v_limit   int;
   r         record;
 begin
   if v_student is null then
@@ -234,6 +295,11 @@ begin
   end if;
 
   select * into v_test from public.tests where id = v_att.test_id;
+  -- Cehd limiti teyinatdan gelir; teyinat yoxdursa testin ozunden
+  select coalesce((select a.max_attempts from public.assignments a
+                    where a.class_id = v_att.class_id and a.test_id = v_att.test_id
+                      and app.assignment_open(a.*)),
+                  v_test.max_attempts) into v_limit;
 
   -- Her sual uzre serverde yoxlanis
   for r in
@@ -303,10 +369,10 @@ begin
     'passed',       v_att.percent >= v_test.pass_percent,
     'duration_sec', v_att.duration_sec,
     -- "Bir de cehd ede bilersen" yazisi ucun: hele cehd qalibmi?
-    'can_retry',    v_test.max_attempts = 0 or
+    'can_retry',    v_limit = 0 or
                     (select count(*) from public.attempts a2
                       where a2.student_id = v_student and a2.test_id = v_att.test_id
-                        and a2.status = 'submitted') < v_test.max_attempts,
+                        and a2.status = 'submitted') < v_limit,
     'wrong', coalesce((
       select jsonb_agg(jsonb_build_object('question_id', aa.question_id, 'body', q.body,
                                           'explanation', q.explanation))

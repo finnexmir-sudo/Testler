@@ -64,13 +64,20 @@ Sonra `db/test/verify.sql` işlət — 7 sətir, hamısı `OK` olmalıdır.
 createdb tehsil && cd db && ./run.sh tehsil --local
 psql -d tehsil -f test/smoke.sql
 psql -d tehsil -f test/smoke_educator.sql
+psql -d tehsil -f test/smoke_reports.sql
+psql -d tehsil -f test/smoke_assign.sql
 
 # panel uçdan-uca (mock Supabase + Chromium)
 ./test/run_e2e.sh
 ```
 
-Sxem və ya RLS dəyişəndə **mütləq** hər üçünü işlət. Bu testlər
+Sxem və ya RLS dəyişəndə **mütləq** hamısını işlət. Bu testlər
 təhlükəsizlik iddialarıdır, yalnız «işləyir/işləmir» yoxlaması deyil.
+
+`anon` rolu altında işləyən yoxlamalarda `public.tests`, `questions` və
+`question_options` **oxunmur** — `05_grants.sql` bunu qadağan edir. Test
+üçün lazım olan id-ləri rol dəyişməzdən əvvəl `test_fixtures` /
+`answer_fixtures` cədvəlinə yığ (`smoke_assign.sql` nümunədir).
 
 ---
 
