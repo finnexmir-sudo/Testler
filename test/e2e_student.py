@@ -67,7 +67,8 @@ KEY = {}
 for r in db("""
   select q.id::text qid, o.id::text oid
     from public.questions q
-    join public.tests t on t.id = q.test_id and t.slug = 'riy-3-vurma-1'
+    join public.test_questions tq on tq.question_id = q.id
+    join public.tests t on t.id = tq.test_id and t.slug = 'riy-3-vurma-1'
     join public.question_options o on o.question_id = q.id and o.is_correct"""):
     KEY[r["qid"]] = r["oid"]
 NQ = len(KEY)
@@ -208,8 +209,8 @@ with sync_playwright() as pw:
     pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
     pg.locator(".test:not(.lock)", has_text="Azərbaycan dili").first.click()
     pg.wait_for_selector(".opt", timeout=8000)
-    naz = db("""select count(*) n from public.questions q join public.tests t
-                 on t.id=q.test_id and t.slug='az-3-dil-1'""", one=True)["n"]
+    naz = db("""select count(*) n from public.test_questions tq join public.tests t
+                 on t.id=tq.test_id and t.slug='az-3-dil-1'""", one=True)["n"]
     for i in range(naz):
         pg.locator(".opt").first.click()      # hemise birinci variant
         pg.wait_for_timeout(100)

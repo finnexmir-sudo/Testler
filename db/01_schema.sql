@@ -190,6 +190,9 @@ create table if not exists public.tests (
   shuffle_options   boolean not null default true,
   pass_percent      smallint not null default 60,
   max_attempts      smallint not null default 0,   -- 0 = limitsiz
+  --  Avtomatik yigilmis testin QAYDASI.  "Yenile" bunu tekrar isledir.
+  --  null = suallar el ile secilib.
+  gen_rule          jsonb,
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now(),
   constraint tests_owner_ck check (
@@ -199,19 +202,58 @@ create table if not exists public.tests (
   constraint tests_pass_ck check (pass_percent between 0 and 100)
 );
 
+--  SUAL BANKI
+--  Sual testin icinde YASAMIR - musteqil yasayir ve bir nece testde
+--  islenile biler.  Hansi testin hansi suallari goturduyu asagidaki
+--  test_questions cedvelindedir.
+--
+--  Nece ki bu ayrilmasa: generator "100 sualdan 20 sec" ede bilmez
+--  (hovuz yoxdur), ve testi "yenilemek" suallari silmek demek olar -
+--  attempt_answers onlara baglidir, butun tarixce oler.
 create table if not exists public.questions (
   id          uuid primary key default gen_random_uuid(),
-  test_id     uuid not null references public.tests(id) on delete cascade,
-  topic_id    uuid references public.topics(id) on delete set null,
-  ord         int  not null default 0,
+  owner_type  test_owner not null default 'platform',
+  owner_id    uuid references public.profiles(id) on delete cascade,
+  account_id  uuid references public.accounts(id) on delete cascade,
+  subject_id  uuid not null references public.subjects(id) on delete restrict,
+  level_id    uuid references public.levels(id)   on delete set null,
+  topic_id    uuid references public.topics(id)   on delete set null,
+  tags        text[] not null default '{}',
+  quarter     smallint,                      -- 1..4, null = ferqi yoxdur
+  month       smallint,                      -- 1..12
   kind        question_kind not null default 'single',
   body        text not null,
   media_url   text,
   explanation text not null default '',
-  difficulty  smallint not null default 2,
+  difficulty  smallint not null default 2,   -- 1 asan · 2 orta · 3 cetin
   points      numeric(5,2) not null default 1,
+  status      content_status not null default 'published',
+  --  Platforma seed-i ucun sabit acar: 07_seed_tests.sql tekrar
+  --  isledilende sual yeniden yaranmir, UZERINE yazilir.
+  ext_key     text unique,
+  created_by  uuid references public.profiles(id) on delete set null,
   created_at  timestamptz not null default now(),
-  constraint questions_difficulty_ck check (difficulty between 1 and 5),
+  updated_at  timestamptz not null default now(),
+  constraint questions_difficulty_ck check (difficulty between 1 and 3),
+  constraint questions_quarter_ck    check (quarter is null or quarter between 1 and 4),
+  constraint questions_month_ck      check (month   is null or month   between 1 and 12),
+  constraint questions_body_ck       check (length(btrim(body)) between 1 and 2000),
+  constraint questions_owner_ck check (
+       (owner_type = 'platform' and owner_id is null and account_id is null)
+    or (owner_type = 'educator' and owner_id is not null and account_id is not null)
+  )
+);
+
+--  TESTIN TERKIBI
+--  on delete restrict qesdendir: testde islenmis sual SILINMIR.
+--  Gizletmek ucun status = 'archived' - generator onu gormur, amma
+--  kohne neticeler yerinde qalir.
+create table if not exists public.test_questions (
+  test_id     uuid not null references public.tests(id)     on delete cascade,
+  question_id uuid not null references public.questions(id) on delete restrict,
+  ord         int  not null,
+  points      numeric(5,2),                  -- null = sualin oz bali
+  primary key (test_id, question_id),
   unique (test_id, ord)
 );
 
@@ -250,6 +292,11 @@ create table if not exists public.attempt_answers (
   text_answer         text,
   is_correct          boolean,
   points              numeric(5,2) not null default 0,
+  --  Cavab verilen anda sualin SURETI.  Muellim sonradan sualin
+  --  metnini deyisse, kohne hesabat hele de sagirdin GORDUYU sual
+  --  gosterir - eks halda hesabat sessizce yalan danisir.
+  question_body       text not null default '',
+  question_explanation text not null default '',
   answered_at         timestamptz not null default now(),
   unique (attempt_id, question_id)
 );
@@ -321,7 +368,7 @@ create index if not exists idx_classes_account    on public.classes(account_id);
 create index if not exists idx_tests_catalog      on public.tests(program_id, subject_id, level_id) where status = 'published';
 create index if not exists idx_tests_owner        on public.tests(owner_id) where owner_type = 'educator';
 create index if not exists idx_tests_class        on public.tests(class_id);
-create index if not exists idx_questions_test     on public.questions(test_id, ord);
+create index if not exists idx_tq_test            on public.test_questions(test_id, ord);
 create index if not exists idx_options_question   on public.question_options(question_id, ord);
 create index if not exists idx_attempts_student   on public.attempts(student_id, test_id);
 create index if not exists idx_attempts_class     on public.attempts(class_id) where status = 'submitted';
@@ -330,6 +377,15 @@ create index if not exists idx_answers_topic      on public.attempt_answers(topi
 create index if not exists idx_sessions_expiry    on public.student_sessions(expires_at);
 create index if not exists idx_subs_account       on public.subscriptions(account_id, status);
 create index if not exists idx_topics_subject     on public.topics(subject_id, parent_id);
+
+-- Sual banki: generatorun suzgeci
+create index if not exists idx_q_bank on public.questions
+  (subject_id, level_id, difficulty, status);
+create index if not exists idx_q_topic    on public.questions(topic_id);
+create index if not exists idx_q_account  on public.questions(account_id);
+create index if not exists idx_q_period   on public.questions(quarter, month);
+create index if not exists idx_q_tags     on public.questions using gin (tags);
+create index if not exists idx_tq_question on public.test_questions(question_id);
 
 -- ------------------------------------------------------------ teyinatlar
 --  Muellim testi QRUPA teyin edir. Sagird oz daimi kodu ile girib aktiv
@@ -393,6 +449,10 @@ begin new.updated_at = now(); return new; end $$;
 
 drop trigger if exists trg_profiles_touch on public.profiles;
 create trigger trg_profiles_touch before update on public.profiles
+  for each row execute function app.touch_updated_at();
+
+drop trigger if exists trg_questions_touch on public.questions;
+create trigger trg_questions_touch before update on public.questions
   for each row execute function app.touch_updated_at();
 
 drop trigger if exists trg_tests_touch on public.tests;

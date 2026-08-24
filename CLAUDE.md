@@ -66,6 +66,7 @@ psql -d tehsil -f test/smoke.sql
 psql -d tehsil -f test/smoke_educator.sql
 psql -d tehsil -f test/smoke_reports.sql
 psql -d tehsil -f test/smoke_assign.sql
+psql -d tehsil -f test/smoke_bank.sql
 
 # panel uçdan-uca (mock Supabase + Chromium)
 ./test/run_e2e.sh
@@ -90,10 +91,29 @@ elə edir).
 Təzə baza: `db/run.sh` bütün faylları düzgün sıra ilə işlədir.
 
 Artıq işləyən Supabase layihəsi üçün isə **miqrasiya faylı** var —
-`db/10_teyinat_migrasiya.sql`. O, 01..08-i işlətmiş bazaya tək başına
+`db/10_teyinat_migrasiya.sql` (təyinatlar) və `db/11_sual_banki.sql`
+(sual bankı). Hər biri əvvəlki fayllları işlətmiş bazaya tək başına
 əlavə olunur, təkrar işlədilsə zərər vermir və sonda özünü yoxlayır.
 Yeni belə dəyişiklik edəndə eyni qaydada `11_...`, `12_...` yaz —
 istifadəçiyə beş faylı yenidən yapışdırtma.
+
+---
+
+## Sual bankı — qayda
+
+Sual **testin içində deyil, bankdadır**. `test_questions` hansı testin
+hansı sualı hansı sıra ilə götürdüyünü saxlayır.
+
+- `questions` sətrini **silmə** — `test_questions` `restrict` ilə imtina
+  edir (təsadüfən tarixçə silinməsin deyə). Gizlətmək üçün
+  `status = 'archived'` — generator onu görmür, köhnə nəticələr qalır.
+- Cavab yazılanda sualın mətni `attempt_answers.question_body`-ə
+  **surət** kimi düşür. Sual sonradan redaktə olunsa da köhnə hesabat
+  şagirdin gördüyü sualı göstərir. Yeni cavab yolu yazırsansa
+  `question_body` və `question_explanation` sütunlarını doldur.
+- Hesabatlarda səhv sualları **surətdən** oxu, `questions`-dan yox.
+- Platforma seed sualları `ext_key` (`test-slug#sıra`) ilə tanınır —
+  `07_seed_tests.sql` təkrar işlədiləndə sual çoxalmır, üzərinə yazılır.
 
 ---
 

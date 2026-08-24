@@ -104,7 +104,7 @@ begin
                  'title',   t.title,
                  'subject', sub.name,
                  'locked',  (not t.is_free and not v_paid),
-                 'questions', (select count(*) from public.questions q where q.test_id = t.id),
+                 'questions', (select count(*) from public.test_questions tq where tq.test_id = t.id),
                  'time_limit_sec', t.time_limit_sec,
                  'max_attempts',   a.max_attempts,
                  'closes_at',      a.closes_at,
@@ -130,7 +130,7 @@ begin
                  'title',   t.title,
                  'subject', sub.name,
                  'locked',  (not t.is_free and not v_paid),
-                 'questions', (select count(*) from public.questions q where q.test_id = t.id),
+                 'questions', (select count(*) from public.test_questions tq where tq.test_id = t.id),
                  'time_limit_sec', t.time_limit_sec,
                  'max_attempts',   t.max_attempts,
                  'done', (select count(*) from public.attempts at
@@ -246,7 +246,7 @@ begin
                  'id',   q.id,
                  'ord',  case when v_test.shuffle_questions
                               then lpad((row_number() over (order by md5(q.id::text || v_attempt::text)))::text, 4, '0')
-                              else lpad(q.ord::text, 4, '0') end,
+                              else lpad(tq.ord::text, 4, '0') end,
                  'kind', q.kind,
                  'body', q.body,
                  'media_url', q.media_url,
@@ -258,8 +258,9 @@ begin
                       from public.question_options o
                      where o.question_id = q.id), '[]'::jsonb)
                ) as qq
-          from public.questions q
-         where q.test_id = p_test_id
+          from public.test_questions tq
+          join public.questions q on q.id = tq.question_id
+         where tq.test_id = p_test_id
       ) z), '[]'::jsonb)
   );
 end $$;
@@ -303,15 +304,17 @@ begin
 
   -- Her sual uzre serverde yoxlanis
   for r in
-    select q.id, q.kind, q.points, q.topic_id,
+    select q.id, q.kind, coalesce(tq.points, q.points) as points, q.topic_id,
+           q.body as q_body, q.explanation as q_expl,
            coalesce((select array_agg(o.id order by o.id) from public.question_options o
                       where o.question_id = q.id and o.is_correct), '{}') as correct_ids,
            coalesce((select array_agg(lower(btrim(o.body))) from public.question_options o
                       where o.question_id = q.id and o.is_correct), '{}') as correct_texts,
            (select a from jsonb_array_elements(coalesce(p_answers,'[]'::jsonb)) a
              where a->>'q' = q.id::text limit 1) as ans
-      from public.questions q
-     where q.test_id = v_att.test_id
+      from public.test_questions tq
+      join public.questions q on q.id = tq.question_id
+     where tq.test_id = v_att.test_id
   loop
     declare
       v_sel  uuid[] := '{}';
@@ -338,15 +341,21 @@ begin
 
       if v_ok then v_score := v_score + r.points; end if;
 
+      --  Sualin metni de yazilir: muellim sonradan sual redakte etse,
+      --  bu hesabat hele de sagirdin GORDUYU sual gosterecek.
       insert into public.attempt_answers
-        (attempt_id, question_id, topic_id, selected_option_ids, text_answer, is_correct, points)
+        (attempt_id, question_id, topic_id, selected_option_ids, text_answer,
+         is_correct, points, question_body, question_explanation)
       values
-        (p_attempt_id, r.id, r.topic_id, v_sel, v_txt, v_ok, case when v_ok then r.points else 0 end)
+        (p_attempt_id, r.id, r.topic_id, v_sel, v_txt, v_ok,
+         case when v_ok then r.points else 0 end, r.q_body, r.q_expl)
       on conflict (attempt_id, question_id) do update
         set selected_option_ids = excluded.selected_option_ids,
             text_answer         = excluded.text_answer,
             is_correct          = excluded.is_correct,
             points              = excluded.points,
+            question_body        = excluded.question_body,
+            question_explanation = excluded.question_explanation,
             answered_at         = now();
     end;
   end loop;
@@ -374,10 +383,12 @@ begin
                       where a2.student_id = v_student and a2.test_id = v_att.test_id
                         and a2.status = 'submitted') < v_limit,
     'wrong', coalesce((
-      select jsonb_agg(jsonb_build_object('question_id', aa.question_id, 'body', q.body,
-                                          'explanation', q.explanation))
+      --  Suret: sagird hansi sual gorubse, onu gosteririk.
+      --  Sual sonradan redakte olunsa da bu netice deyismir.
+      select jsonb_agg(jsonb_build_object('question_id', aa.question_id,
+                                          'body', aa.question_body,
+                                          'explanation', aa.question_explanation))
         from public.attempt_answers aa
-        join public.questions q on q.id = aa.question_id
        where aa.attempt_id = v_att.id and aa.is_correct is not true), '[]'::jsonb)
   );
 end $$;
@@ -420,10 +431,12 @@ begin
     'test', jsonb_build_object('id', v_test.id, 'title', v_test.title,
                                'pass_percent', v_test.pass_percent),
     'wrong', coalesce((
-      select jsonb_agg(jsonb_build_object('question_id', aa.question_id, 'body', q.body,
-                                          'explanation', q.explanation))
+      --  Suret: sagird hansi sual gorubse, onu gosteririk.
+      --  Sual sonradan redakte olunsa da bu netice deyismir.
+      select jsonb_agg(jsonb_build_object('question_id', aa.question_id,
+                                          'body', aa.question_body,
+                                          'explanation', aa.question_explanation))
         from public.attempt_answers aa
-        join public.questions q on q.id = aa.question_id
        where aa.attempt_id = v_att.id and aa.is_correct is not true), '[]'::jsonb)
   );
 end $$;

@@ -206,17 +206,16 @@ begin
       select jsonb_agg(y order by (y->>'wrong')::int desc)
       from (
         select jsonb_build_object(
-                 'body',        q.body,
-                 'explanation', q.explanation,
+                 'body',        aa.question_body,
+                 'explanation', aa.question_explanation,
                  'wrong',       count(*)) as y
           from public.attempt_answers aa
           join public.attempts a on a.id = aa.attempt_id
                                 and a.student_id = p_student_id
                                 and a.status = 'submitted'
                                 and a.finished_at >= v_since
-          join public.questions q on q.id = aa.question_id
          where aa.is_correct is not true
-         group by q.id, q.body, q.explanation
+         group by aa.question_id, aa.question_body, aa.question_explanation
          order by count(*) desc
          limit 10
       ) z), '[]'::jsonb) end

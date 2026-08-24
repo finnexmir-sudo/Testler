@@ -104,7 +104,7 @@ begin
                'level',     lv.name,
                'is_free',   t.is_free,
                'mine',      t.owner_type = 'educator',
-               'questions', (select count(*) from public.questions q where q.test_id = t.id),
+               'questions', (select count(*) from public.test_questions tq where tq.test_id = t.id),
                'assigned',  (select a.id from public.assignments a
                               where a.class_id = p_class_id and a.test_id = t.id)
              ) as x
@@ -148,7 +148,7 @@ begin
                  'test_id',   t.id,
                  'title',     t.title,
                  'subject',   sub.name,
-                 'questions', (select count(*) from public.questions q where q.test_id = t.id),
+                 'questions', (select count(*) from public.test_questions tq where tq.test_id = t.id),
                  'closes_at', a.closes_at,
                  'max_attempts', a.max_attempts,
                  'open',      app.assignment_open(a.*),

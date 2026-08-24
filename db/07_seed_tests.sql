@@ -57,11 +57,15 @@ on conflict (slug) do update
       time_limit_sec = excluded.time_limit_sec,
       max_attempts = excluded.max_attempts;
 
--- Suallari her defe temiz yaziriq (yalniz platforma testlerinde)
-delete from public.questions q
- using public.tests t
- where q.test_id = t.id and t.owner_type = 'platform'
-   and t.slug in ('riy-3-vurma-1','riy-3-qarisiq-1','az-3-dil-1','riy-3-analiz');
+-- Suallar SILINMIR - ext_key uzre uzerine yazilir.  Silmek olmaz:
+-- sagird artiq cavab veribse test_questions restrict ile imtina edir,
+-- ve her isletmede bank suallarla dolardi.
+-- Yalniz variantlar temizlenir (asagida yeniden yazilir).
+delete from public.question_options o
+ using public.questions q
+ where o.question_id = q.id and q.owner_type = 'platform'
+   and q.ext_key like any (array['riy-3-vurma-1#%','riy-3-qarisiq-1#%',
+                                 'az-3-dil-1#%','riy-3-analiz#%']);
 
 -- ------------------------------------------------------- suallar yazilir
 --  DIQQET: muveqqeti cedvel ISLETMIRIK. Supabase SQL Editor skripti
@@ -137,20 +141,35 @@ with d(test, ord, topic, body, why, opts, correct) as (values
  array['12','14','16','18'],2)
 ),
 ins as (
+  -- Sual BANKA yazilir: hansi testde islendiyi burda deyil
   insert into public.questions
-    (test_id, topic_id, ord, kind, body, explanation, points)
-  select t.id, tp.id, d.ord, 'single', d.body, d.why, 1
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind, body,
+     explanation, difficulty, points, status)
+  select d.test || '#' || d.ord, 'platform', t.subject_id, t.level_id, tp.id,
+         'single', d.body, d.why, 2, 1, 'published'
     from d
     join public.tests    t  on t.slug = d.test
     join public.subjects s  on s.id = t.subject_id
     join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
-  returning id, test_id, ord
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        topic_id = excluded.topic_id, subject_id = excluded.subject_id,
+        level_id = excluded.level_id, status = excluded.status
+  returning id, ext_key
+),
+tq as (
+  -- Terkib: hansi test hansi sualı hansi sira ile goturur
+  insert into public.test_questions (test_id, question_id, ord)
+  select t.id, ins.id, d.ord
+    from ins join d on ins.ext_key = d.test || '#' || d.ord
+    join public.tests t on t.slug = d.test
+  on conflict (test_id, question_id) do update set ord = excluded.ord
+  returning question_id
 )
 insert into public.question_options (question_id, ord, body, is_correct)
 select ins.id, o.ord, o.body, o.ord = d.correct
   from ins
-  join public.tests t on t.id = ins.test_id
-  join d on d.test = t.slug and d.ord = ins.ord,
+  join d on ins.ext_key = d.test || '#' || d.ord,
   lateral unnest(d.opts) with ordinality as o(body, ord);
 
 -- ------------------------------------------------------------- hesabat
@@ -158,16 +177,15 @@ do $$
 declare n_t int; n_q int; n_o int; bad text;
 begin
   select count(*) into n_t from public.tests where owner_type = 'platform';
-  select count(*) into n_q from public.questions q join public.tests t on t.id = q.test_id
-   where t.owner_type = 'platform';
+  select count(*) into n_q from public.questions where owner_type = 'platform';
   select count(*) into n_o from public.question_options o
     join public.questions q on q.id = o.question_id
-    join public.tests t on t.id = q.test_id where t.owner_type = 'platform';
+   where q.owner_type = 'platform';
 
   -- Her sualin DEQIQ bir duzgun cavabi olmalidir
   select string_agg(x.body, ' | ') into bad from (
     select q.body from public.questions q
-      join public.tests t on t.id = q.test_id and t.owner_type = 'platform'
+     where q.owner_type = 'platform'
      group by q.id, q.body
     having count(*) filter (where exists (
              select 1 from public.question_options o
@@ -181,8 +199,7 @@ begin
 
   -- Movzusuz sual qalmasin
   select count(*)::text into bad from public.questions q
-    join public.tests t on t.id = q.test_id and t.owner_type = 'platform'
-   where q.topic_id is null;
+   where q.owner_type = 'platform' and q.topic_id is null;
   if bad <> '0' then
     raise exception '% sual movzuya baglanmayib', bad;
   end if;

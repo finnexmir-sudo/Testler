@@ -39,6 +39,13 @@ trg as (
   select count(*)::int n from pg_trigger
    where tgname in ('trg_auth_user_created','trg_students_seat_limit')
      and not tgisinternal),
+bank as (
+  select (select count(*) from public.questions)::int q,
+         (select count(*) from public.test_questions)::int tq,
+         (select count(*) from public.attempt_answers where question_body = '')::int nosnap,
+         (select count(*) from information_schema.columns
+           where table_schema='public' and table_name='questions'
+             and column_name='test_id')::int oldcol),
 seed as (
   select (select count(*) from public.programs)::int p,
          (select count(*) from public.subjects)::int s,
@@ -52,7 +59,7 @@ leak as (
                         'attempts','attempt_answers','student_sessions','consents'))
 select * from (
   select 1 ord, 'Cedvel sayi'          k, tabs.n::text v,
-         case when tabs.n=23 then 'OK' else 'GOZLENILEN 23' end d from tabs
+         case when tabs.n=24 then 'OK' else 'GOZLENILEN 24' end d from tabs
   union all select 2, 'RLS acilmayan',   norls.s,
          case when norls.s='-' then 'OK' else 'PROBLEM' end from norls
   union all select 3, 'RLS siyaseti',    pol.n::text,
@@ -70,4 +77,9 @@ select * from (
               then 'OK' else 'PROBLEM - 04 islenmeyib?' end from seed
   union all select 8, 'anon-a acilan hessas cedvel', leak.s,
          case when leak.s='-' then 'OK' else 'TEHLUKE - 05 EN SONDA islenmelidir' end from leak
+  union all select 9, 'Sual banki (sual / terkib)',
+         bank.q::text || ' / ' || bank.tq::text,
+         case when bank.oldcol > 0 then 'PROBLEM - 11 islenmeyib'
+              when bank.nosnap > 0 then 'PROBLEM - ' || bank.nosnap || ' cavabda suret yoxdur'
+              else 'OK' end from bank
 ) z order by ord;

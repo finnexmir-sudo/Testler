@@ -45,7 +45,8 @@ if not db("select 1 from public.tests where owner_type='platform' limit 1", one=
 KEY = {r["qid"]: r["oid"] for r in db("""
   select q.id::text qid, o.id::text oid
     from public.questions q
-    join public.tests t on t.id = q.test_id and t.slug = 'riy-3-vurma-1'
+    join public.test_questions tq on tq.question_id = q.id
+    join public.tests t on t.id = tq.test_id and t.slug = 'riy-3-vurma-1'
     join public.question_options o on o.question_id = q.id and o.is_correct""")}
 
 with sync_playwright() as pw:

@@ -39,8 +39,9 @@ begin
   att := (public.rpc_start_attempt(tok,
            (select id from public.tests where slug='riy-3-vurma-1'))->>'attempt_id')::uuid;
   for r in select q.id from public.questions q
-             join public.tests t on t.id=q.test_id and t.slug='riy-3-vurma-1'
-            order by q.ord loop
+             join public.test_questions tq on tq.question_id=q.id
+             join public.tests t on t.id=tq.test_id and t.slug='riy-3-vurma-1'
+            order by tq.ord loop
     k := k + 1;
     -- ilk 4 sual duzgun, qalani sehv
     select o.id into oid from public.question_options o
@@ -58,7 +59,8 @@ begin
   att := (public.rpc_start_attempt(tok,
            (select id from public.tests where slug='riy-3-vurma-1'))->>'attempt_id')::uuid;
   for r in select q.id from public.questions q
-             join public.tests t on t.id=q.test_id and t.slug='riy-3-vurma-1' loop
+             join public.test_questions tq on tq.question_id=q.id
+             join public.tests t on t.id=tq.test_id and t.slug='riy-3-vurma-1' loop
     select o.id into oid from public.question_options o
      where o.question_id = r.id and o.is_correct limit 1;
     ans := ans || jsonb_build_array(jsonb_build_object('q', r.id, 'o', jsonb_build_array(oid)));

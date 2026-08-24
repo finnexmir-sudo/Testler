@@ -221,18 +221,65 @@ drop policy if exists p_tests_del on public.tests;
 create policy p_tests_del on public.tests
   for delete using (app.can_manage_test(id));
 
--- Suallar ve variantlar: YALNIZ testin sahibi. Sagird bunlari gormur -
--- cunki duzgun cavab burdadir. Sagird suallari RPC ile alir.
-drop policy if exists p_questions_all on public.questions;
-create policy p_questions_all on public.questions
-  for all using (app.can_manage_test(test_id)) with check (app.can_manage_test(test_id));
+-- ------------------------------------------------------------ sual banki
+--  Sual artiq teste bagli deyil - oz sahibi var.
+--    · platformanin suallari: HAMI oxuya biler (generator hovuzu),
+--      amma yalniz admin deyise biler
+--    · muellimin suallari: yalniz oz hesabi gorur ve deyisir
+--  Sagird HEC BIRINI birbasa oxuya bilmir - duzgun cavab burdadir,
+--  suallar yalniz RPC ile, acar olmadan verilir (05_grants.sql).
+create or replace function app.can_manage_question(p_q uuid) returns boolean
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
+  select exists (
+    select 1 from public.questions q
+    where q.id = p_q
+      and (app.is_admin()
+           or (q.owner_type = 'educator' and app.is_account_member(q.account_id)))
+  )
+$$;
 
+drop policy if exists p_questions_read on public.questions;
+create policy p_questions_read on public.questions
+  for select using (
+       app.is_admin()
+    or owner_type = 'platform'
+    or app.is_account_member(account_id)
+  );
+
+drop policy if exists p_questions_ins on public.questions;
+create policy p_questions_ins on public.questions
+  for insert with check (
+       app.is_admin()
+    or (owner_type = 'educator' and owner_id = auth.uid()
+        and app.is_account_member(account_id))
+  );
+
+drop policy if exists p_questions_upd on public.questions;
+create policy p_questions_upd on public.questions
+  for update using (app.can_manage_question(id))
+  with check (app.can_manage_question(id));
+
+drop policy if exists p_questions_del on public.questions;
+create policy p_questions_del on public.questions
+  for delete using (app.can_manage_question(id));
+
+--  Variantlar sualin taleyini paylasir - AMMA oxumaq baglidir:
+--  is_correct burdadir.  Muellim oz sualinin variantlarini gorur,
+--  basqasinin (platformanin da) variantlarini GORMUR.
 drop policy if exists p_options_all on public.question_options;
 create policy p_options_all on public.question_options
-  for all using (exists (select 1 from public.questions q
-                         where q.id = question_id and app.can_manage_test(q.test_id)))
-  with check  (exists (select 1 from public.questions q
-                       where q.id = question_id and app.can_manage_test(q.test_id)));
+  for all using (app.can_manage_question(question_id))
+  with check  (app.can_manage_question(question_id));
+
+-- ------------------------------------------------------- testin terkibi
+drop policy if exists p_tq_read on public.test_questions;
+create policy p_tq_read on public.test_questions
+  for select using (app.can_manage_test(test_id));
+
+drop policy if exists p_tq_write on public.test_questions;
+create policy p_tq_write on public.test_questions
+  for all using (app.can_manage_test(test_id))
+  with check (app.can_manage_test(test_id));
 
 -- ---------------------------------------------------------------- cehdler
 -- Yalniz oxumaq. Yazmaq RPC-nin isidir.
@@ -258,6 +305,7 @@ create policy p_payments_read on public.payments
 -- Abune ve odenis yazmaq yalniz service_role ile (shluz webhook-u).
 
 -- --------------------------------------------------------- teyinatlar
+alter table public.test_questions enable row level security;
 alter table public.assignments enable row level security;
 
 drop policy if exists p_assign_read on public.assignments;

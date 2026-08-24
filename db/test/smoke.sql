@@ -93,10 +93,20 @@ select 'ffffffff-0000-0000-0000-000000000003','educator',
   from public.programs p, public.subjects s
  where p.slug='ibtidai' and s.slug='riyaziyyat';
 
-insert into public.questions (id, test_id, ord, kind, body, explanation, points) values
-  ('99999999-0000-0000-0000-000000000001','ffffffff-0000-0000-0000-000000000001',1,'single','6 x 7 = ?','Alti defe yeddi qirx iki eder.',1),
-  ('99999999-0000-0000-0000-000000000002','ffffffff-0000-0000-0000-000000000001',2,'single','9 x 8 = ?','Doqquz defe sekkiz yetmis iki eder.',1),
-  ('99999999-0000-0000-0000-000000000003','ffffffff-0000-0000-0000-000000000001',3,'text','5 x 5 = ?','',1);
+-- Sual BANKA yazilir, sonra teste baglanir
+insert into public.questions (id, owner_type, subject_id, kind, body, explanation, points)
+select v.id, 'platform', s.id, v.kind::question_kind, v.body, v.why, 1
+  from public.subjects s,
+       (values ('99999999-0000-0000-0000-000000000001'::uuid,'single','6 x 7 = ?','Alti defe yeddi qirx iki eder.'),
+               ('99999999-0000-0000-0000-000000000002'::uuid,'single','9 x 8 = ?','Doqquz defe sekkiz yetmis iki eder.'),
+               ('99999999-0000-0000-0000-000000000003'::uuid,'text','5 x 5 = ?','')
+       ) as v(id, kind, body, why)
+ where s.slug = 'riyaziyyat';
+
+insert into public.test_questions (test_id, question_id, ord) values
+  ('ffffffff-0000-0000-0000-000000000001','99999999-0000-0000-0000-000000000001',1),
+  ('ffffffff-0000-0000-0000-000000000001','99999999-0000-0000-0000-000000000002',2),
+  ('ffffffff-0000-0000-0000-000000000001','99999999-0000-0000-0000-000000000003',3);
 
 insert into public.question_options (question_id, ord, body, is_correct) values
   ('99999999-0000-0000-0000-000000000001',1,'42',true),

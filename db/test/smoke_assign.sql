@@ -44,7 +44,9 @@ select t.slug,
        (select jsonb_agg(jsonb_build_object('q', q.id, 'o', jsonb_build_array(
                  (select o.id from public.question_options o
                    where o.question_id = q.id and o.is_correct limit 1))))
-          from public.questions q where q.test_id = t.id)
+          from public.test_questions tq
+          join public.questions q on q.id = tq.question_id
+         where tq.test_id = t.id)
   from public.tests t
  where t.slug in ('riy-3-vurma-1','riy-3-qarisiq-1','az-3-dil-1');
 grant select on public.answer_fixtures to anon, authenticated;
