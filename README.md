@@ -16,7 +16,7 @@ Bu qovluq **yeni məhsulun** baza təməlidir. İngilis Dili tətbiqinə heç bi
 
 ## Supabase-də qurmaq
 
-SQL Editor-da: `01` → `02` → `03` → `06` → `04` → `05`.
+SQL Editor-da: `01` → `02` → `03` → `06` → `04` → `07` → `05`.
 
 `test/` qovluğundakı fayllar Supabase-də **işlədilmir** — onlar `auth` sxemini
 təqlid edir, Supabase-də isə o artıq var.
@@ -114,6 +114,28 @@ WhatsApp linki, kopyalama, paket limiti, kod yeniləmə, çıxış/giriş,
 başqa müəllimin təcridi, yanlış parol — 33 yoxlama.
 
 `test/mock_supabase.py` **yalnız yoxlama üçündür**, istehsalata getmir.
+
+## Şagird tətbiqi
+
+`sagird/` — kodla giriş → test siyahısı → suallar → nəticə → WhatsApp.
+
+- **Düzgün cavab bu kodda yoxdur.** Suallar `rpc_start_attempt()` ilə
+  cavabsız gəlir, bal `rpc_submit_attempt()` içində serverdə hesablanır.
+  Testlər bunu yoxlayır: səhifədə `is_correct` yoxdur, uydurma variant
+  id-ləri sıfır bal verir.
+- Səsləndirmə: sual mətni Azərbaycancadır, səs seçimi `az → tr → yox`
+  sırası ilədir. Türk səsi ingilis səsindən qat-qat anlaşıqlıdır.
+- WhatsApp mesajında **yalnız ləqəb** gedir, tam ad yox.
+- Liderlər lövhəsi yalnız öz qrupu daxilindədir.
+
+## Test məzmunu
+
+`db/07_seed_tests.sql` — 3-cü sinif üçün 4 test, 23 sual:
+vurma cədvəli · qarışıq riyaziyyat · Azərbaycan dili · ödənişli analiz testi.
+
+Hər sual bir **mövzuya** bağlıdır (`topics`) — zəif nöqtə analizi bunun
+üzərində qurulacaq. Fayl özünü yoxlayır: hər sualın dəqiq bir düzgün
+cavabı olmalıdır və mövzusuz sual qalmamalıdır.
 
 ## Hələ edilməyənlər
 

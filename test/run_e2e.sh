@@ -30,3 +30,6 @@ sleep 2
 
 echo "4/4  brauzer yoxlamasi"
 python3 test/e2e_panel.py
+echo
+echo "5/5  sagird tetbiqi"
+python3 test/e2e_student.py

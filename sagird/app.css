@@ -1,0 +1,166 @@
+/* =====================================================================
+   Sagird tetbiqine xas hisseler.
+   Ortaq dizayn sistemi: ../assets/base.css
+
+   Ferq: usaq ucun daha iri yazi ve toxunma sahesi, daha yumsaq ton.
+   Renk sistemi eynidir - proqram bir mehsul kimi gorunmelidir.
+   ===================================================================== */
+
+/* Usaq barmagi ucun her sey bir qeder iri */
+body{font-size:16px}
+.wrap{max-width:600px}
+.btn{min-height:48px;font-size:15.5px;border-radius:10px}
+.btn.sm{min-height:38px;font-size:14px}
+input{min-height:52px;font-size:17px}
+
+/* ------------------------------------------------------------- giris */
+.hero{text-align:center;padding:26px 0 10px}
+.hero .mark{
+  width:52px;height:52px;border-radius:14px;margin:0 auto 16px;
+  background:linear-gradient(140deg,var(--brand) 0%,var(--teal) 100%);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  font-size:22px;font-weight:700;letter-spacing:-.02em;
+}
+.hero h1{font-size:23px;letter-spacing:-.022em;margin-bottom:7px}
+.hero p{color:var(--fg-2);font-size:14.5px;margin:0}
+
+/* Giris kodu - iri, mono, aralikli */
+#code{
+  font-family:var(--mono);font-size:26px;font-weight:600;
+  letter-spacing:.22em;text-align:center;text-transform:uppercase;
+  min-height:62px;padding:0 10px;
+}
+#code::placeholder{letter-spacing:.12em;font-size:17px;font-weight:400}
+
+/* --------------------------------------------------------- test karti */
+.test{
+  display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  padding:16px;background:none;border:0;
+  border-bottom:1px solid var(--n-100);transition:background .12s;
+}
+.test:last-child{border-bottom:0}
+.test:hover{background:var(--n-25)}
+.test[disabled]{opacity:.55;pointer-events:none}
+.test .ic{
+  width:38px;height:38px;flex:0 0 38px;border-radius:10px;
+  background:var(--brand-tint);color:var(--brand);
+  display:flex;align-items:center;justify-content:center;
+}
+.test .ic svg{width:19px;height:19px;stroke-width:1.75}
+.test.lock .ic{background:var(--n-100);color:var(--n-400)}
+.test .g{flex:1;min-width:0}
+.test .g b{display:block;font-size:15.5px;font-weight:570;letter-spacing:-.008em}
+.test .g i{display:flex;gap:7px;align-items:center;flex-wrap:wrap;
+  font-style:normal;font-size:13px;color:var(--fg-2);margin-top:3px}
+.test .arrow{color:var(--n-300);display:flex}
+.test .arrow svg{width:18px;height:18px;stroke-width:2}
+
+/* ------------------------------------------------------- irelileyis */
+.prog{display:flex;align-items:center;gap:11px;margin:0 0 18px}
+.prog .bar{flex:1;height:7px;border-radius:999px;background:var(--n-150);overflow:hidden}
+.prog .bar i{display:block;height:100%;border-radius:999px;background:var(--brand);
+  transition:width .3s cubic-bezier(.4,0,.2,1)}
+.prog .cnt{font-size:13px;color:var(--fg-2);font-variant-numeric:tabular-nums;
+  white-space:nowrap;font-weight:550}
+
+/* ------------------------------------------------------------- sual */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:22px 20px;margin:0 0 14px;position:relative}
+.q .body{font-size:19px;line-height:1.45;font-weight:550;letter-spacing:-.012em;
+  padding-right:44px}
+.q .spk{
+  position:absolute;top:16px;right:16px;
+  width:36px;height:36px;border-radius:10px;border:1px solid var(--n-300);
+  background:var(--surface);color:var(--n-600);
+  display:flex;align-items:center;justify-content:center;
+}
+.q .spk:hover{background:var(--n-50)}
+.q .spk.on{background:var(--brand-tint);border-color:var(--brand-line);color:var(--brand)}
+.q .spk svg{width:17px;height:17px;stroke-width:1.75}
+
+/* -------------------------------------------------------- variantlar */
+.opt{
+  display:flex;align-items:center;gap:13px;width:100%;text-align:left;
+  min-height:58px;padding:12px 15px;margin:0 0 9px;
+  border:1.5px solid var(--n-300);border-radius:11px;
+  background:var(--surface);color:var(--fg);
+  font-size:16px;line-height:1.35;font-weight:500;
+  transition:border-color .12s,background .12s;
+}
+.opt:hover{border-color:var(--brand);background:var(--brand-tint)}
+.opt .k{
+  width:28px;height:28px;flex:0 0 28px;border-radius:8px;
+  background:var(--n-100);color:var(--n-600);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13.5px;font-weight:650;
+}
+.opt .t{flex:1}
+.opt .m{display:none;flex:0 0 20px}
+.opt .m svg{width:20px;height:20px;stroke-width:2.2}
+
+.opt.sel{border-color:var(--brand);background:var(--brand-tint);
+  color:var(--brand);font-weight:560}
+.opt.sel .k{background:var(--brand);color:#fff}
+
+.opt.ok{border-color:var(--ok);background:var(--ok-tint);color:#05603a}
+.opt.ok .k{background:var(--ok);color:#fff}
+.opt.ok .m{display:flex;color:var(--ok)}
+.opt.no{border-color:var(--err);background:var(--err-tint);color:#912018}
+.opt.no .k{background:var(--err);color:#fff}
+.opt.no .m{display:flex;color:var(--err)}
+.opt.dim{opacity:.5}
+.opts.locked .opt{pointer-events:none}
+
+/* Cavabdan sonra izah */
+.why{
+  display:flex;gap:9px;align-items:flex-start;
+  background:var(--n-50);border:1px solid var(--line);border-radius:10px;
+  padding:12px 14px;margin:12px 0 0;font-size:14px;line-height:1.55;color:var(--n-700);
+}
+.why svg{width:16px;height:16px;flex:0 0 16px;margin-top:2px;stroke-width:1.75;color:var(--fg-3)}
+
+/* ----------------------------------------------------------- netice */
+.score{text-align:center;padding:8px 0 4px}
+.ring{
+  width:132px;height:132px;margin:0 auto 16px;position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.ring svg{position:absolute;inset:0;width:132px;height:132px;transform:rotate(-90deg)}
+.ring .track{stroke:var(--n-150)}
+.ring .fill{stroke:var(--brand);stroke-linecap:round;
+  transition:stroke-dasharray .7s cubic-bezier(.4,0,.2,1)}
+.ring.pass .fill{stroke:var(--ok)}
+.ring .val{position:relative;font-size:32px;font-weight:680;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+.ring .val s{text-decoration:none;font-size:16px;color:var(--fg-3);font-weight:550}
+.score .lbl{font-size:15px;color:var(--fg-2);margin-bottom:2px}
+.score .sub{font-size:13px;color:var(--fg-3)}
+
+/* Sehv suallarin siyahisi */
+.wrong{padding:14px 16px;border-bottom:1px solid var(--n-100);font-size:14.5px;line-height:1.5}
+.wrong:last-child{border-bottom:0}
+.wrong b{display:block;font-weight:550;margin-bottom:4px}
+.wrong i{font-style:normal;color:var(--fg-2);font-size:13.5px}
+
+/* ------------------------------------------------------------ lovhe */
+.lb{display:flex;align-items:center;gap:13px;padding:13px 16px;
+  border-bottom:1px solid var(--n-100)}
+.lb:last-child{border-bottom:0}
+.lb.me{background:var(--brand-tint)}
+.lb .rk{
+  width:28px;height:28px;flex:0 0 28px;border-radius:999px;
+  background:var(--n-100);color:var(--n-600);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:650;font-variant-numeric:tabular-nums;
+}
+.lb.me .rk{background:var(--brand);color:#fff}
+.lb .nm{flex:1;font-size:15px;font-weight:520;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb .pc{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+
+@media (max-width:420px){
+  .q .body{font-size:17.5px}
+  #code{font-size:22px;letter-spacing:.16em}
+}
+
+#btnPrev{margin-top:9px}

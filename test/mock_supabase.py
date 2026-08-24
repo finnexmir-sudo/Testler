@@ -155,8 +155,14 @@ class H(BaseHTTPRequestHandler):
             sql.SQL(", ").join(
                 sql.SQL("{} => %s").format(sql.Identifier(k)) for k in keys))
 
+        # dict/list deyerler jsonb kimi gonderilmelidir - eks halda
+        # psycopg2 onlari Postgres ARRAY kimi uygunlasdirir ve funksiya
+        # "jsonb gozleyirdim" deyib xeta verir. PostgREST bunu ozu edir.
+        def val(v):
+            return psycopg2.extras.Json(v) if isinstance(v, (dict, list)) else v
+
         def go(cur):
-            cur.execute(stmt, [args[k] for k in keys])
+            cur.execute(stmt, [val(args[k]) for k in keys])
             return cur.fetchone()["r"]
 
         try:

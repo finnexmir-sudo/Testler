@@ -6,8 +6,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 V=$(( $(git rev-list --count HEAD) + 1 ))
-sed -i -E "s|(href=\"muellim/app\.css)(\?v=[0-9]+)?\"|\1?v=$V\"|" index.html
-sed -i -E "s|(href=\"app\.css)(\?v=[0-9]+)?\"|\1?v=$V\"|" muellim/index.html
-sed -i -E "s|(src=\"(config\|sb\|app)\.js)(\?v=[0-9]+)?\"|\1?v=$V\"|g" muellim/index.html
+for f in index.html muellim/index.html sagird/index.html; do
+  [ -f "$f" ] || continue
+  sed -i -E "s|(href=\"[^\"]*\.css)(\?v=[0-9]+)?\"|\1?v=$V\"|g" "$f"
+  sed -i -E "s|(src=\"[^\"]*\.js)(\?v=[0-9]+)?\"|\1?v=$V\"|g"  "$f"
+done
 echo "versiya -> $V"
-grep -o 'app\.css?v=[0-9]*' index.html muellim/index.html
+grep -ho '[a-z]*\.\(css\|js\)?v=[0-9]*' index.html muellim/index.html sagird/index.html 2>/dev/null | sort -u
