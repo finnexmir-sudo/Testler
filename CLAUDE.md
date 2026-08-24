@@ -1,4 +1,4 @@
-# Layihə: Test platforması
+# Layihə: Pillə
 
 İbtidai siniflər (1–4) üçün onlayn test platforması. Gələcəkdə yuxarı
 siniflər, MİQ və sertifikasiya da əlavə olunacaq.
@@ -162,8 +162,10 @@ nişanı qoy.
 ## CSS sinif adları — toqquşma
 
 `assets/base.css` ortaq sistemdir. Yeni sinif adı verəndə **əvvəlcə
-axtar** — bir dəfə `.mark` adını verdim, o ad artıq başlıqdakı loqo
-nişanınındır (`.top .mark`) və onu sındırdı. Testlərdə də `.item` kimi
+axtar** — iki dəfə toqquşdu: `.mark` (başlıqdakı loqo nişanı) və `.top`
+(tətbiqin başlıq zolağı, `display:flex` — ilk səhifəni yan-yana düzdü).
+İkisi də yalnız gözlə göründü, ona görə `e2e_panel` artıq ilk səhifəni
+də yoxlayır: yana sürüşmə, boş ikon, üstlüyün yeri. Testlərdə də `.item` kimi
 ümumi seçicilər `#groups .item` şəklində dəqiqləşdirilməlidir.
 
 ---

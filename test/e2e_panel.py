@@ -56,6 +56,27 @@ with sync_playwright() as pw:
                          permissions=["clipboard-read", "clipboard-write"])
     pg = new_page(ctx)
 
+    print("0 · İlk səhifə")
+    # Iki defe CSS sinif adi toqqusdu (.mark, .top) - ikisi de yalniz
+    # gozle goruldu.  Ilk sehife artiq YOXLANILIR.
+    for w, h, lbl in ((1280, 900, "masaustu"), (390, 844, "telefon")):
+        pg.set_viewport_size({"width": w, "height": h})
+        pg.goto("http://127.0.0.1:8010/index.html"); pg.wait_for_timeout(400)
+        ok(not pg.evaluate("document.documentElement.scrollWidth > window.innerWidth+1"),
+           "ilk sehife " + lbl + ": yana surusme yoxdur")
+        ok(pg.evaluate("[...document.querySelectorAll('svg')]"
+                       ".filter(s=>!s.innerHTML.trim()).length") == 0,
+           "ilk sehife " + lbl + ": bos ikon yoxdur")
+        ok(pg.evaluate("""() => {
+             const h = document.querySelector('.site'), r = h.getBoundingClientRect();
+             const l = document.querySelector('.logo').getBoundingClientRect();
+             return r.width > window.innerWidth * 0.5 && l.left < window.innerWidth * 0.4;
+           }"""), "ilk sehife " + lbl + ": ustluk duzgun yerlesir")
+    ok(pg.locator('a[href="muellim/"]').count() >= 1, "muellim kecidi var")
+    ok(pg.locator('a[href="sagird/"]').count() == 1, "sagird kecidi var")
+    ok("Pillə" in pg.inner_text(".logo"), "ad gorunur", pg.inner_text(".logo").replace("\n"," "))
+    pg.set_viewport_size({"width": 430, "height": 900})
+
     print("A · Qeydiyyat və hesab quraşdırması")
     pg.goto(PANEL); pg.wait_for_timeout(400)
     ok(pg.is_visible("#btnAuth"), "giris ekrani acilir")

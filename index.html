@@ -4,71 +4,322 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>Test platforması</title>
-<link rel="stylesheet" href="assets/base.css?v=36">
+<meta name="description" content="Pillə — repetitor və müəllimlər üçün onlayn test sistemi. Qrup yaradın, tapşırıq təyin edin, nəticələr avtomatik yığılsın.">
+<title>Pillə — onlayn test sistemi</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232b4acb'/%3E%3Cg fill='%23fff'%3E%3Crect x='7' y='19' width='5.5' height='6' rx='1.6'/%3E%3Crect x='13.2' y='14' width='5.5' height='11' rx='1.6'/%3E%3Crect x='19.4' y='8' width='5.5' height='17' rx='1.6'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/base.css?v=37">
 <style>
-  body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:28px}
-  .box{max-width:420px;width:100%}
-  .brand{display:flex;align-items:center;gap:10px;margin-bottom:26px}
-  .brand .mark{width:30px;height:30px;border-radius:8px;flex:0 0 30px;
-    background:linear-gradient(140deg,var(--brand) 0%,var(--teal) 100%);
-    display:flex;align-items:center;justify-content:center;color:#fff;
-    font-size:13px;font-weight:700;letter-spacing:-.02em}
-  .brand span{font-size:15px;font-weight:600;letter-spacing:-.012em}
-  h1{font-size:24px;letter-spacing:-.024em;margin:0 0 7px}
-  .lead{color:var(--fg-2);font-size:14.5px;line-height:1.55;margin:0 0 24px}
-  a.nav{display:flex;align-items:center;gap:13px;background:var(--surface);
-    border:1px solid var(--line);border-radius:var(--r-lg);padding:15px 16px;
-    margin-bottom:10px;text-decoration:none;color:inherit;
-    transition:border-color .12s,background .12s}
-  a.nav:hover{border-color:var(--n-400);background:var(--n-25)}
-  a.nav .ic{width:34px;height:34px;flex:0 0 34px;border-radius:9px;
+  /* ---------------------------------------------------------- karkas */
+  body{background:var(--surface)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  @media (max-width:600px){ .wrap{padding:0 18px} }
+
+  /* --------------------------------------------------------- ustluk */
+  .site{
+    display:flex;align-items:center;justify-content:space-between;
+    height:68px;
+  }
+  .logo{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}
+  .logo .m{width:34px;height:34px;flex:0 0 34px;border-radius:9px;
+    background:linear-gradient(140deg,var(--brand) 0%,var(--teal) 115%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 1px 2px rgba(21,26,36,.16)}
+  .logo .m svg{width:20px;height:20px}
+  .logo b{font-size:18px;font-weight:640;letter-spacing:-.026em}
+  .logo s{text-decoration:none;color:var(--fg-3);font-size:12.5px;font-weight:500;
+    letter-spacing:0;display:block;margin-top:-2px}
+  .site .enter{font-size:14px;font-weight:530;color:var(--fg-2);text-decoration:none}
+  .site .enter:hover{color:var(--brand)}
+
+  /* ----------------------------------------------------------- hero */
+  /*  Fon USTLUK + hero-nu birlikde ehate edir.  Yalniz hero-ya versek,
+      ust kenari kesik xett kimi gorunur. */
+  /*  Ad "top" OLA BILMEZ: base.css-de tetbiqin basliq zolagidir
+      (display:flex) ve seedeni yan-yana duzurdu. */
+  .topband{
+    background:
+      radial-gradient(60% 68% at 12% 2%,  rgba(43,74,203,.085), transparent 62%),
+      radial-gradient(54% 60% at 88% -6%, rgba(14,147,132,.075), transparent 60%);
+  }
+  .hero{position:relative;padding:56px 0 76px}
+  .kicker{
+    display:inline-flex;align-items:center;gap:7px;margin:0 0 20px;
+    padding:5px 12px 5px 8px;border-radius:999px;
+    background:var(--brand-tint);border:1px solid var(--brand-line);
+    color:var(--brand);font-size:12.5px;font-weight:550;
+  }
+  .kicker svg{width:14px;height:14px;stroke-width:2}
+  h1{
+    font-size:clamp(30px,5.2vw,48px);line-height:1.1;letter-spacing:-.035em;
+    font-weight:660;margin:0 0 18px;max-width:16ch;
+  }
+  h1 em{font-style:normal;
+    background:linear-gradient(96deg,var(--brand) 10%,var(--teal) 95%);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{font-size:clamp(15px,1.9vw,17.5px);line-height:1.6;color:var(--fg-2);
+    margin:0 0 34px;max-width:52ch}
+
+  /* --------------------------------------------------- giris kartlari */
+  .doors{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:760px;
+    align-items:stretch}
+  @media (max-width:640px){ .doors{grid-template-columns:1fr} }
+  .door{
+    display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r-lg);padding:18px;
+    transition:border-color .14s,box-shadow .14s,transform .14s;
+  }
+  .door:hover{border-color:var(--brand-line);box-shadow:0 6px 20px rgba(21,26,36,.07);
+    transform:translateY(-1px)}
+  .door .ic{width:40px;height:40px;flex:0 0 40px;border-radius:11px;
     background:var(--brand-tint);color:var(--brand);
     display:flex;align-items:center;justify-content:center}
-  a.nav .ic svg{width:17px;height:17px;stroke-width:1.75}
-  a.nav .g{flex:1;min-width:0}
-  a.nav b{display:block;font-size:14.5px;font-weight:570;letter-spacing:-.008em}
-  a.nav i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-2);margin-top:3px}
-  a.nav .arrow{color:var(--n-300);display:flex}
-  a.nav .arrow svg{width:16px;height:16px;stroke-width:2}
-  a.nav.soon{opacity:.6;pointer-events:none}
-  a.nav.soon .ic{background:var(--n-100);color:var(--n-400)}
-  .foot{color:var(--fg-3);font-size:12.5px;margin-top:22px;text-align:center}
+  .door.b .ic{background:var(--teal-tint);color:var(--teal)}
+  .door .ic svg{width:20px;height:20px;stroke-width:1.7}
+  .door .g{flex:1;min-width:0}
+  .door b{display:block;font-size:15px;font-weight:590;letter-spacing:-.012em}
+  .door i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-2);
+    margin-top:3px;line-height:1.45}
+  .door .ar{color:var(--n-300);display:flex;flex:0 0 auto}
+  .door .ar svg{width:17px;height:17px;stroke-width:2}
+  .door:hover .ar{color:var(--brand)}
+
+  /* -------------------------------------------------------- bolmeler */
+  section{padding:64px 0;border-top:1px solid var(--n-100)}
+  section:first-of-type{border-top:0}
+  .stitle{font-size:clamp(21px,3vw,28px);line-height:1.2;letter-spacing:-.028em;
+    font-weight:640;margin:0 0 10px;
+    text-transform:none;color:var(--fg)}   /* base.css-de h2 boz+CAPS-dir */
+  .ssub{color:var(--fg-2);font-size:15px;line-height:1.6;margin:0 0 36px;max-width:56ch}
+
+  /* addimlar */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:760px){ .steps{grid-template-columns:1fr} }
+  .step{background:var(--n-25);border:1px solid var(--line);
+    border-radius:var(--r-lg);padding:22px 20px}
+  .step .n{width:28px;height:28px;border-radius:8px;background:var(--brand);
+    color:#fff;font-size:13px;font-weight:640;display:flex;
+    align-items:center;justify-content:center;margin-bottom:14px}
+  .step b{display:block;font-size:15.5px;font-weight:590;letter-spacing:-.012em;
+    margin-bottom:6px}
+  .step p{margin:0;color:var(--fg-2);font-size:13.5px;line-height:1.6}
+
+  /* xususiyyetler */
+  .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:860px){ .feat{grid-template-columns:1fr 1fr} }
+  @media (max-width:560px){ .feat{grid-template-columns:1fr} }
+  .f{border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;
+    background:var(--surface)}
+  .f .ic{width:34px;height:34px;border-radius:9px;background:var(--n-100);
+    color:var(--n-600);display:flex;align-items:center;justify-content:center;
+    margin-bottom:13px}
+  .f .ic svg{width:17px;height:17px;stroke-width:1.75}
+  .f b{display:block;font-size:14.5px;font-weight:580;letter-spacing:-.01em;
+    margin-bottom:5px}
+  .f p{margin:0;color:var(--fg-2);font-size:13px;line-height:1.6}
+
+  /* sagird zolagi */
+  .free{
+    background:linear-gradient(135deg,var(--n-900) 0%,#1b2438 60%,#14304a 100%);
+    border-radius:16px;padding:34px 32px;color:#fff;
+    display:flex;align-items:center;gap:26px;flex-wrap:wrap;
+  }
+  .free .t{flex:1;min-width:250px}
+  .free h3{margin:0 0 8px;font-size:21px;letter-spacing:-.022em;font-weight:620}
+  .free p{margin:0;color:rgba(255,255,255,.72);font-size:14px;line-height:1.6;
+    max-width:46ch}
+  .free .badge{
+    flex:0 0 auto;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+    border-radius:999px;padding:9px 18px;font-size:13.5px;font-weight:560;
+  }
+
+  /* ---------------------------------------------------------- altliq */
+  footer{border-top:1px solid var(--n-100);padding:30px 0 44px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:14px;flex-wrap:wrap}
+  footer .c{color:var(--fg-3);font-size:12.5px}
+  footer .note{
+    display:inline-flex;align-items:center;gap:7px;color:var(--warn);
+    background:var(--warn-tint);border:1px solid var(--warn-line);
+    border-radius:999px;padding:5px 12px;font-size:12px;font-weight:530;
+  }
+  footer .note svg{width:13px;height:13px;stroke-width:2}
 </style>
 </head>
 <body>
-  <div class="box">
-    <div class="brand"><span class="mark">T</span><span>Test platforması</span></div>
 
-    <h1>İbtidai siniflər üçün onlayn testlər</h1>
-    <p class="lead">Müəllim qrup yaradır, şagirdə giriş kodu verir.
-      Nəticələr avtomatik yığılır.</p>
-
-    <a class="nav" href="muellim/">
-      <span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M13 15.5a3.5 3.5 0 0 0-7 0"/><circle cx="9.5" cy="8" r="2.4"/>
-        <path d="M15.5 14.5a3 3 0 0 0-2.2-2.9"/><path d="M13.2 6.2a2.2 2.2 0 0 1 0 4.2"/>
+<div class="topband">
+<div class="wrap">
+  <header class="site">
+    <a class="logo" href="./">
+      <span class="m"><svg viewBox="0 0 32 32" fill="#fff" aria-hidden="true">
+        <rect x="7" y="19" width="5.5" height="6" rx="1.6" opacity=".72"/>
+        <rect x="13.2" y="14" width="5.5" height="11" rx="1.6" opacity=".88"/>
+        <rect x="19.4" y="8" width="5.5" height="17" rx="1.6"/>
       </svg></span>
-      <span class="g"><b>Müəllim / repetitor paneli</b>
-        <i>Qrup yarat, şagird əlavə et, giriş kodu ver</i></span>
-      <span class="arrow"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-        stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/>
-      </svg></span>
+      <span><b>Pillə</b><s>onlayn test sistemi</s></span>
     </a>
+    <a class="enter" href="muellim/">Panelə keç →</a>
+  </header>
+</div>
 
-    <a class="nav" href="sagird/">
-      <span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/><path d="M13 6l2 2"/>
-      </svg></span>
-      <span class="g"><b>Şagird girişi</b><i>Müəllimin verdiyi kodla daxil ol</i></span>
-      <span class="arrow"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-        stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/>
-      </svg></span>
-    </a>
+<div class="wrap">
+  <div class="hero">
+    <span class="kicker">
+      <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+        stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg>
+      Şagird üçün tamamilə pulsuz
+    </span>
 
-    <p class="foot">Hazırlıq mərhələsindədir.</p>
+    <h1>Testi verin, <em>qalanını sistem etsin</em></h1>
+
+    <p class="lead">Qrup yaradın, şagirdə bir giriş kodu verin.
+      Nəticələr özü yığılır, bal serverdə hesablanır, hansı mövzunun
+      axsadığı hesabatda görünür.</p>
+
+    <div class="doors">
+      <a class="door" href="muellim/">
+        <span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 15.5a3.5 3.5 0 0 0-7 0"/><circle cx="9.5" cy="8" r="2.4"/>
+          <path d="M15.5 14.5a3 3 0 0 0-2.2-2.9"/><path d="M13.2 6.2a2.2 2.2 0 0 1 0 4.2"/>
+        </svg></span>
+        <span class="g"><b>Müəllim / repetitor</b>
+          <i>Qrup yarat, tapşırıq təyin et, hesabata bax</i></span>
+        <span class="ar"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/>
+        </svg></span>
+      </a>
+
+      <a class="door b" href="sagird/">
+        <span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/>
+          <path d="M13 6l2 2"/>
+        </svg></span>
+        <span class="g"><b>Şagird</b>
+          <i>Müəllimin verdiyi kodla daxil ol</i></span>
+        <span class="ar"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/>
+        </svg></span>
+      </a>
+    </div>
   </div>
+</div>
+</div>
+
+<div class="wrap">
+  <section>
+    <h2 class="stitle">Üç addım</h2>
+    <p class="ssub">Qurmaq bir dəfəlik işdir. Sonra hər həftə eyni axınla gedir.</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div>
+        <b>Qrup yaradın</b>
+        <p>Şagirdləri əlavə edin. Hər birinə daimi giriş kodu yaranır —
+           WhatsApp ilə bir toxunuşla göndərilir.</p></div>
+      <div class="step"><div class="n">2</div>
+        <b>Tapşırıq təyin edin</b>
+        <p>Testi seçin, son tarix və cəhd sayı qoyun. Şagird girəndə
+           tapşırığı dərhal görür.</p></div>
+      <div class="step"><div class="n">3</div>
+        <b>Nəticəyə baxın</b>
+        <p>Kim işlədi, kim işləmədi, orta bal nədir, hansı mövzu
+           axsayır — hamısı hazır.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="stitle">Nə edir</h2>
+    <p class="ssub">Repetitorun həftəlik vaxtını yeyən işlər.</p>
+    <div class="feat">
+
+      <div class="f">
+        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 2.5H6a1.8 1.8 0 0 0-1.8 1.8v10.4A1.8 1.8 0 0 0 6 16.5h7a1.8 1.8 0 0 0 1.8-1.8V6.3L11 2.5z"/>
+          <path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/></svg></div>
+        <b>Sual bankı</b>
+        <p>Öz suallarınızı yazın — fənn, sinif, mövzu və çətinliyə görə.
+           Bir dəfə yazılır, dəfələrlə işlənir.</p>
+      </div>
+
+      <div class="f">
+        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10l3.6 3.6L15 5.8"/></svg></div>
+        <b>Bal serverdə hesablanır</b>
+        <p>Doğru cavab şagirdin cihazına heç vaxt getmir. Köçürmək və
+           nəticəni dəyişmək mümkün deyil.</p>
+      </div>
+
+      <div class="f">
+        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3.5 15.5h12"/><rect x="5" y="9" width="2.6" height="4.5" rx=".7"/>
+          <rect x="9" y="5.5" width="2.6" height="8" rx=".7"/>
+          <rect x="13" y="11" width="2.6" height="2.5" rx=".7"/></svg></div>
+        <b>Zəif mövzu hesabatı</b>
+        <p>«Vurmada 92%, mətn məsələsində 41%» — dərsi hara yönəldəcəyiniz
+           özü görünür.</p>
+      </div>
+
+      <div class="f">
+        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/></svg></div>
+        <b>Son tarix və cəhd limiti</b>
+        <p>Tapşırıq vaxtında bağlanır. Neçə dəfə işləyə biləcəyini
+           siz təyin edirsiniz.</p>
+      </div>
+
+      <div class="f">
+        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9.5 3l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6L9.5 3z"/>
+        </svg></div>
+        <b>Liderlər lövhəsi</b>
+        <p>Qrup daxilində sağlam yarış. Şagird tam soyadı görmür —
+           yalnız qısa ad.</p>
+      </div>
+
+      <div class="f">
+        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4.5" y="3.5" width="10" height="13" rx="2"/>
+          <path d="M7.5 3.5V2.6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v.9"/>
+          <path d="M7 9.5l1.6 1.6L12 7.6"/></svg></div>
+        <b>Səhvin izahı</b>
+        <p>Şagird səhv edəndə qaydanı orada görür — hər dəfə sizdən
+           soruşmur.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="free">
+      <div class="t">
+        <h3>Şagird heç nə ödəmir</h3>
+        <p>Qeydiyyat yoxdur, e-poçt yoxdur, ödəniş yoxdur. Müəllimin
+           verdiyi kodu yazır, testi işləyir, nəticəsini görür. Hamısı bu.</p>
+      </div>
+      <span class="badge">Həmişə pulsuz</span>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <footer>
+    <span class="c">Pillə · onlayn test sistemi</span>
+    <span class="note">
+      <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+        stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 9v3.6"/><path d="M9.5 6.6h.01"/>
+      </svg>
+      Hazırlıq mərhələsindədir
+    </span>
+  </footer>
+</div>
+
 </body>
 </html>
