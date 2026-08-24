@@ -131,6 +131,21 @@ bir bazada işləyir, o birində «operator class does not exist» verir.
 
 ---
 
+## Sürüşmə qaçır — tələ
+
+Formada bir düymə basılanda **bütün ekranı yenidən çəkmə** — səhifə
+yuxarı atılır və müəllim yerini itirir. Yalnız dəyişən hissəni yenilə
+(nişanı `classList.toggle`, siyahını `drawOptions`).
+
+DOM qısalanda brauzer sürüşməni kəsir. Ona görə `keepY()` dəyəri
+**əməliyyatdan əvvəl** tutur — sonra oxusan artıq sıfırlanmış olur.
+
+Testdə ölçü mənalı olmalıdır: səhifə sıfırdan fərqli yerdə dayanmalı və
+Playwright-in öz «scroll into view»-si ölçünü pozmamalıdır — düyməni
+əvvəlcə görünən yerə gətir. «0 → 0» heç nə sübut etmir.
+
+---
+
 ## Dinləyici yığılması — tələ
 
 `innerHTML` dəyişdirmək elementin ÖZÜNÜ dəyişmir. Ona görə hər yenidən

@@ -1398,6 +1398,7 @@
     on("qkind", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
+      var y0 = keepY();
       collect();
       QD.kind = b.getAttribute("data-v");
       if (QD.kind === "text" && QD.options.length > 1) {
@@ -1410,12 +1411,22 @@
           if (o.correct) seen = true;
         });
       }
-      drawQuestion();
+      Array.prototype.forEach.call($("qkind").children, function (x) {
+        x.classList.toggle("on", x === b);
+      });
+      drawOptions();   /* butun forma YOX - yalniz variantlar */
+      kindNote();
+      y0();            /* sehife yerinde qalsin */
     });
+    /* Cetinlik: butun formani yeniden cizmek olmaz - sehife yuxari
+       atilir ve muellim yerini itirir.  Yalniz nisan deyisir. */
     on("qdiff", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
-      collect(); QD.difficulty = Number(b.getAttribute("data-v")); drawQuestion();
+      QD.difficulty = Number(b.getAttribute("data-v"));
+      Array.prototype.forEach.call($("qdiff").children, function (x) {
+        x.classList.toggle("on", x === b);
+      });
     });
     on("qSave", "click", saveQuestion);
     if (!isNew) on("qDel", "click", delQuestion);
@@ -1514,6 +1525,28 @@
 
   }
 
+  /*  Sehifenin yerini saxlayir.
+      DIQQET: deyeri EMELIYYATDAN EVVEL tutmaq lazimdir - DOM deyisenden
+      sonra oxusan artiq sifirlanmis olur.  Berpa hem derhal, hem de
+      novbeti kadrda olur: brauzer klampi bir kadr gecikdire biler. */
+  function keepY() {
+    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+    return function () {
+      if (!y) return;
+      window.scrollTo(0, y);
+      if (window.requestAnimationFrame) {
+        requestAnimationFrame(function () { window.scrollTo(0, y); });
+      }
+    };
+  }
+
+  /* Variantlari yeniden cizir, sehifenin YERINI saxlayir */
+  function redrawOptions() {
+    var back = keepY();
+    drawOptions();
+    back();
+  }
+
   /* Dinleyici EKRAN uzre bir defe baglanir - drawOptions-da yox.
      Eks halda her yeniden cizilisde ustune bir dinleyici de qalir. */
   function bindOptions() {
@@ -1530,7 +1563,7 @@
         } else {
           QD.options[i].correct = !QD.options[i].correct;
         }
-        drawOptions(); return;
+        redrawOptions(); return;
       }
       var r = e.target.closest ? e.target.closest("[data-rm]") : null;
       if (r) {
@@ -1539,13 +1572,13 @@
         if (QD.kind !== "text" && !QD.options.some(function (o) { return o.correct; })) {
           QD.options[0].correct = true;
         }
-        drawOptions(); return;
+        redrawOptions(); return;
       }
       if (e.target.id === "qAdd" || (e.target.closest && e.target.closest("#qAdd"))) {
         collect();
         if (QD.options.length >= 8) return;   // sert hedd
         QD.options.push({ body: "", correct: QD.kind === "text" });
-        drawOptions();
+        redrawOptions();
         var last = box.querySelectorAll(".obody");
         if (last.length) last[last.length - 1].focus();
       }

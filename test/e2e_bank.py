@@ -124,8 +124,44 @@ with sync_playwright() as pw:
     pg.select_option("#qlev", "3")
     tp = db("select id::text i from public.topics where slug='riy-3-vurma-cedveli'", one=True)
     if tp: pg.select_option("#qtop", tp["i"])
+    # Sehife QACMAMALIDIR: cetinlik/tip secmek butun formani yeniden
+    # cizirdi ve surusme yuxari atilirdi - muellim yerini itirirdi.
+    pg.locator("#qdiff").scroll_into_view_if_needed(); pg.wait_for_timeout(200)
+    y0 = pg.evaluate("window.scrollY")
     pg.locator("#qdiff .seg", has_text="Çətin").click()
-    pg.wait_for_timeout(200)
+    pg.wait_for_timeout(300)
+    y1 = pg.evaluate("window.scrollY")
+    ok(abs(y1 - y0) < 40, "cetinlik secende sehife qacmir",
+       "%d -> %d" % (y0, y1))
+    ok(pg.locator("#qdiff .seg.on").inner_text() == "Çətin", "nisan kecdi")
+
+    # Olcu MENALI olmalidir: sehife SIFIRDAN FERQLI yerde dayanmalidir,
+    # yoxsa "0 -> 0" hec ne subut etmir.  Tip secicisi ekranin ortasina
+    # dusecek qeder asagi surusduruk.
+    pg.evaluate("""() => {
+      const t = document.getElementById('qkind').getBoundingClientRect().top
+                + window.scrollY;
+      window.scrollTo(0, Math.max(0, t - 150));
+    }""")
+    pg.wait_for_timeout(300)
+    ykind0 = pg.evaluate("window.scrollY")
+    ok(ykind0 > 80, "olcu menalidir - sehife asagidadir", ykind0)
+    pg.locator("#qkind .seg", has_text="Çox cavab").click(); pg.wait_for_timeout(400)
+    ok(abs(pg.evaluate("window.scrollY") - ykind0) < 40,
+       "tip secende de sehife qacmir",
+       "%d -> %d" % (ykind0, pg.evaluate("window.scrollY")))
+    # Yazili -> bir cavab: setir sayi 3-den 1-e dusur, sehife QISALIR.
+    # Klamp burda bas verirdi.
+    pg.locator("#qkind .seg", has_text="Yazılı").click(); pg.wait_for_timeout(400)
+    y2 = pg.evaluate("window.scrollY")
+    ok(abs(y2 - ykind0) < 60, "setir sayi azalanda da qacmir",
+       "%d -> %d" % (ykind0, y2))
+    pg.locator("#qkind .seg", has_text="Bir cavab").click(); pg.wait_for_timeout(400)
+    while pg.locator(".opt-row").count() < 3:
+        pg.click("#qAdd"); pg.wait_for_timeout(150)
+    for i, v in enumerate(["42", "36", "48"]):
+        pg.locator(".obody").nth(i).fill(v)
+    pg.locator(".okmark").first.click(); pg.wait_for_timeout(200)
     ok(pg.inner_text("#qbody") or pg.input_value("#qbody") == "6 x 7 neçə edər?",
        "cetinlik deyisende sual metni ITMIR", pg.input_value("#qbody"))
     ok(pg.locator(".obody").nth(0).input_value() == "42",
