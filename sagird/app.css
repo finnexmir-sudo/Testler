@@ -164,3 +164,14 @@ input{min-height:52px;font-size:17px}
 }
 
 #btnPrev{margin-top:9px}
+
+/* Onceki netice - test siyahisinda */
+.test .best{
+  flex:0 0 auto;font-size:14px;font-weight:620;color:var(--ok);
+  font-variant-numeric:tabular-nums;letter-spacing:-.015em;
+}
+.test.lock .best{color:var(--fg-3)}
+.test .ic svg{stroke-width:1.75}
+
+/* Lovhede cehd sayi */
+.lb .nm s{text-decoration:none;font-size:11.5px;color:var(--fg-3);font-weight:500}

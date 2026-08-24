@@ -101,7 +101,15 @@ begin
                'is_free', t.is_free,
                'locked',  (not t.is_free and not v_paid),
                'questions', (select count(*) from public.questions q where q.test_id = t.id),
-               'time_limit_sec', t.time_limit_sec
+               'time_limit_sec', t.time_limit_sec,
+               'max_attempts',   t.max_attempts,
+               -- Sagird bu testi nece defe isleyib ve en yaxsi neticesi
+               'done', (select count(*) from public.attempts a
+                         where a.test_id = t.id and a.student_id = v_student
+                           and a.status = 'submitted'),
+               'best', (select round(max(a.percent), 0) from public.attempts a
+                         where a.test_id = t.id and a.student_id = v_student
+                           and a.status = 'submitted')
              ) as x
         from public.tests t
         join public.subjects sub on sub.id = t.subject_id
@@ -318,18 +326,30 @@ begin
   select class_id into v_class from public.students where id = v_student;
   if v_class is null then return '[]'::jsonb; end if;
 
+  -- Her sagird lovhede BIR defe gorunur: en yaxsi neticesi ile.
+  -- Eks halda testi iki defe islayen sagird iki setirde cixirdi.
   return coalesce((
     select jsonb_agg(jsonb_build_object(
              'rank',    z.rn,
              'name',    z.display_name,
              'percent', z.percent,
+             'tries',   z.tries,
              'is_me',   z.student_id = v_student) order by z.rn)
     from (
-      select st.display_name, a.student_id, a.percent,
-             row_number() over (order by a.percent desc, a.duration_sec asc) as rn
-        from public.attempts a
-        join public.students st on st.id = a.student_id
-       where a.test_id = p_test_id and a.class_id = v_class and a.status = 'submitted'
+      select b.display_name, b.student_id, b.percent, b.seconds, b.tries,
+             row_number() over (order by b.percent desc, b.seconds asc) as rn
+        from (
+          select st.display_name,
+                 a.student_id,
+                 max(a.percent)                                   as percent,
+                 min(a.duration_sec)                              as seconds,
+                 count(*)                                         as tries
+            from public.attempts a
+            join public.students st on st.id = a.student_id
+           where a.test_id = p_test_id and a.class_id = v_class
+             and a.status = 'submitted'
+           group by st.display_name, a.student_id
+        ) b
     ) z
     where z.rn <= least(greatest(p_limit, 1), 100)
   ), '[]'::jsonb);

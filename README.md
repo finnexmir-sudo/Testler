@@ -125,7 +125,15 @@ başqa müəllimin təcridi, yanlış parol — 33 yoxlama.
   id-ləri sıfır bal verir.
 - Səsləndirmə: sual mətni Azərbaycancadır, səs seçimi `az → tr → yox`
   sırası ilədir. Türk səsi ingilis səsindən qat-qat anlaşıqlıdır.
-- WhatsApp mesajında **yalnız ləqəb** gedir, tam ad yox.
+- **Nəticə göndərmək düyməsi yoxdur.** Nəticə bazaya düşür, müəllim
+  panelində görür. Əvvəl WhatsApp düyməsi var idi — o, backend olmayan
+  dövrdən qalmışdı və yanlış təsəvvür yaradırdı (sanki göndərməsən
+  müəllim görməyəcək).
+- Səsləndirmə düyməsi **yalnız `az` və ya `tr` səsi olanda** görünür.
+  İngilis səsi Azərbaycanca mətni oxuyanda anlaşılmaz çıxır.
+- Eyni testi təkrar işləmək olar (məşq üçün faydalıdır). Siyahıda əvvəlki
+  ən yaxşı nəticə görünür. Lövhədə hər şagird **bir dəfə** — ən yaxşı
+  nəticəsi ilə. `tests.max_attempts > 0` olsa limit tətbiq olunur.
 - Liderlər lövhəsi yalnız öz qrupu daxilindədir.
 
 ## Test məzmunu

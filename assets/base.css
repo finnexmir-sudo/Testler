@@ -144,7 +144,7 @@ select{appearance:none;
 
 /* --------------------------------------------------------- ehtiyat */
 .spacer{height:12px}
-.hide{display:none}
+.hide{display:none !important}
 .skel{color:var(--fg-3);font-size:13.5px;padding:36px 20px;text-align:center}
 
 @media (max-width:480px){

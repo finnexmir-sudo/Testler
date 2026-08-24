@@ -113,7 +113,14 @@ with sync_playwright() as pw:
 
     body = pg.inner_text(".q .body")
     ok(len(body) > 3, "sual metni gorunur", body[:40])
-    ok(pg.is_visible("#spk"), "seslendirme duymesi var")
+    # Brauzerde az/tr sesi yoxdur -> duyme gizli olmalidir.
+    # Ingilis sesi ile azerbaycanca oxumaq anlasilmaz cixir.
+    has_voice = pg.evaluate(
+        "(()=>{try{return (speechSynthesis.getVoices()||[])"
+        ".some(v=>/^(az|tr)/i.test(v.lang||''));}catch(e){return false}})()")
+    ok(pg.is_visible("#spk") == bool(has_voice),
+       "seslendirme duymesi yalniz uygun ses olanda gorunur",
+       "ses var" if has_voice else "ses yoxdur -> gizli")
 
     # Cavab acari sehifeye sizmayibmi?
     html = pg.content()
@@ -146,17 +153,13 @@ with sync_playwright() as pw:
        pg.inner_text(".score").replace("\n", " "))
     ok("səhv suallar" not in pg.inner_text("#main").lower(), "sehv siyahisi gorunmur")
 
-    print("E · WhatsApp")
-    pg.evaluate("window.__o=null; window.open=(u)=>{window.__o=u; return null;}")
-    pg.click("#btnWa"); pg.wait_for_timeout(250)
-    wa = pg.evaluate("window.__o")
-    ok(wa and wa.startswith("https://wa.me/?text="), "wa.me linki acilir")
-    txt = __import__("urllib.parse", fromlist=["unquote"]).unquote(wa.split("text=")[1])
-    ok("Aysu M." in txt, "mesajda leqeb var")
-    ok("3-B qrupu" in txt, "mesajda qrup var")
-    ok("Vurma cədvəli" in txt, "mesajda test adi var")
-    ok("%s / %s" % (NQ, NQ) in txt, "mesajda bal var", txt.replace("\n", " · ")[:90])
-    ok("Məmmədova" not in txt, "tam ad mesaja dusmur (yalniz leqeb)")
+    print("E · Nəticə ekranı")
+    ok("yadda saxlanıldı" in pg.inner_text("#main"),
+       "netice bazaya yazildigi bildirilir")
+    ok(pg.locator("#btnWa").count() == 0,
+       "WhatsApp duymesi yoxdur (netice onsuz da bazadadir)")
+    ok(pg.is_visible("#btnHome") and pg.is_visible("#btnLb"),
+       "Testler ve Lovhe duymeleri var")
 
     print("F · Lövhə")
     pg.click("#btnLb"); pg.wait_for_selector(".lb", timeout=8000)
@@ -165,8 +168,28 @@ with sync_playwright() as pw:
     ok("Aysu M." in pg.inner_text(".lb"), "leqeb gorunur")
     ok("Məmmədova" not in pg.inner_text("#main"), "lovhede tam ad yoxdur")
 
-    print("G · Səhv cavab yolu")
+    print("G · Təkrar cəhd")
     pg.click("#btnB"); pg.wait_for_selector(".ring", timeout=8000)
+    pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
+    row = pg.locator(".test", has_text="Vurma cədvəli").first
+    ok("100%" in row.inner_text(), "siyahida onceki netice gorunur",
+       row.inner_text().replace("\n", " "))
+    row.click(); pg.wait_for_selector(".opt", timeout=8000)
+    for i in range(NQ):
+        pg.locator(".opt").first.click(); pg.wait_for_timeout(100)
+        pg.click("#btnNext"); pg.wait_for_timeout(300)
+    pg.wait_for_selector(".ring", timeout=8000)
+    ok(True, "eyni testi yeniden islemek olur")
+    pg.click("#btnLb"); pg.wait_for_selector(".lb", timeout=8000)
+    ok(pg.locator(".lb").count() == 1,
+       "lovhede sagird BIR defe gorunur (tekrar cehde baxmayaraq)",
+       pg.locator(".lb").count())
+    ok("100%" in pg.inner_text(".lb"), "lovhede EN YAXSI netice qalir",
+       pg.inner_text(".lb").replace("\n", " "))
+    ok("2 cəhd" in pg.inner_text(".lb"), "cehd sayi gosterilir")
+    pg.click("#btnB"); pg.wait_for_selector(".ring", timeout=8000)
+
+    print("H · Səhv cavab yolu")
     pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
     pg.locator(".test:not(.lock)", has_text="Azərbaycan dili").first.click()
     pg.wait_for_selector(".opt", timeout=8000)
@@ -184,7 +207,7 @@ with sync_playwright() as pw:
     ok(len(pg.locator(".wrong i").first.inner_text()) > 5,
        "sehv sualda izah gosterilir", pg.locator(".wrong i").first.inner_text()[:45])
 
-    print("H · Sessiya")
+    print("I · Sessiya")
     pg.reload(); pg.wait_for_selector(".test", timeout=8000)
     ok(True, "sehife yenilendikde sessiya qalir")
     pg.click("#btnOut"); pg.wait_for_selector("#btnIn", timeout=8000)
@@ -192,7 +215,7 @@ with sync_playwright() as pw:
     pg.reload(); pg.wait_for_selector("#btnIn", timeout=8000)
     ok(True, "cixisdan sonra yeniden giris ekrani")
 
-    print("I · Server balı hesablayır (saxtakarlıq yoxlaması)")
+    print("J · Server balı hesablayır (saxtakarlıq yoxlaması)")
     row = db("""select score, max_score, percent from public.attempts
                  where student_id='d1d1d1d1-0000-0000-0000-000000000001'
                    and status='submitted' order by finished_at limit 1""", one=True)

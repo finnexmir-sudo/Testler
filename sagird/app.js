@@ -77,15 +77,22 @@
     var v = [];
     try { v = speechSynthesis.getVoices() || []; } catch (e) { return; }
     var by = function (re) { return v.filter(function (x) { return re.test(x.lang || ""); })[0]; };
+    /* YALNIZ az ve ya tr. Ingilis sesi azerbaycanca metni oxuyanda
+       anlasilmaz cixir - o halda duyme umumiyyetle gosterilmir.
+       Turk sesi az-a cox yaxindir, ona gore qebul edilir. */
     VOICE = by(/^az/i) || by(/^tr/i) || null;
+    if (VOICE && document.getElementById("spk")) {
+      document.getElementById("spk").classList.remove("hide");
+    }
   }
   if ("speechSynthesis" in window) {
     pickVoice();
+    /* Seslerin siyahisi gec yuklenir - hazir olanda duymeni acirig */
     speechSynthesis.onvoiceschanged = pickVoice;
   }
   function stopSay() { try { speechSynthesis.cancel(); } catch (e) {} }
   function say(text, btn) {
-    if (!("speechSynthesis" in window)) return;
+    if (!("speechSynthesis" in window) || !VOICE) return;
     stopSay();
     try {
       var u = new SpeechSynthesisUtterance(String(text));
@@ -170,15 +177,19 @@
       } else {
         h += '<div class="card pad0">' + rows.map(function (t, k) {
           var lock = !!t.locked;
-          return '<button class="test' + (lock ? " lock" : "") + '" data-t="' + esc(t.id) + '"' +
-            (lock ? " disabled" : "") + ">" +
-            '<div class="ic">' + ic(lock ? "lock" : "doc") + "</div>" +
+          var done = Number(t.done) || 0;
+          var full = !lock && t.max_attempts > 0 && done >= t.max_attempts;
+          return '<button class="test' + (lock ? " lock" : "") + (full ? " lock" : "") +
+            '" data-t="' + esc(t.id) + '"' + ((lock || full) ? " disabled" : "") + ">" +
+            '<div class="ic">' + ic((lock || full) ? "lock" : (done ? "check" : "doc")) + "</div>" +
             '<div class="g"><b>' + esc(t.title) + "</b><i>" +
               "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
               "<span>" + (t.questions || 0) + " sual</span>" +
               (lock ? "<span>·</span><span>abunə lazımdır</span>" : "") +
+              (full ? "<span>·</span><span>cəhd bitib</span>" : "") +
             "</i></div>" +
-            (lock ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
+            (done ? '<span class="best">' + Math.round(t.best) + "%</span>" : "") +
+            ((lock || full) ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
         }).join("") + "</div>";
       }
       show(h);
@@ -219,8 +230,8 @@
       '<div class="prog"><div class="bar"><i style="width:' + pct + '%"></i></div>' +
         '<span class="cnt">' + (S.i + 1) + " / " + n + "</span></div>" +
       '<div class="q"><div class="body">' + esc(q.body) + "</div>" +
-        '<button class="spk" id="spk" title="Sualı dinlə" aria-label="Sualı dinlə">' +
-          ic("sound") + "</button>" +
+        '<button class="spk' + (VOICE ? "" : " hide") + '" id="spk" ' +
+          'title="Sualı dinlə" aria-label="Sualı dinlə">' + ic("sound") + "</button>" +
       "</div>" +
       '<div class="opts" id="opts">' +
         (q.options || []).map(function (o, k) {
@@ -303,11 +314,10 @@
           (passed ? "Keçdin, afərin" : "Bir də cəhd edə bilərsən") + "</div>" +
       "</div></div>" +
 
-      '<button class="btn go wide" id="btnWa">' + ic("send") + "Müəlliməyə göndər</button>" +
-      '<div class="spacer"></div>' +
-      '<div class="row"><button class="btn" id="btnLb" style="flex:1">' + ic("cup") +
-        "Lövhə</button>" +
-        '<button class="btn" id="btnHome" style="flex:1">Testlər</button></div>' +
+      '<div class="ok" style="margin-bottom:12px">' + ic("check") +
+        "<span>Nəticə yadda saxlanıldı. Müəllimin onu panelində görür.</span></div>" +
+      '<div class="row"><button class="btn go" id="btnHome" style="flex:1">Testlər</button>' +
+        '<button class="btn" id="btnLb" style="flex:1">' + ic("cup") + "Lövhə</button></div>" +
 
       ((r.wrong && r.wrong.length)
         ? "<h2>Səhv suallar</h2><div class=\"card pad0\">" + r.wrong.map(function (w) {
@@ -320,22 +330,6 @@
 
     on("btnHome", "click", screenTests);
     on("btnLb", "click", function () { screenBoard(); });
-    on("btnWa", "click", function () {
-      window.open("https://wa.me/?text=" + encodeURIComponent(resultText(r)), "_blank", "noopener");
-    });
-  }
-
-  function resultText(r) {
-    var lines = [
-      "Test nəticəsi",
-      "Şagird: " + (ME ? ME.display_name : ""),
-      "Test: " + (S.test ? S.test.title : ""),
-      "Nəticə: " + r.score + " / " + r.max_score + " (" + Math.round(r.percent) + "%)",
-      "Vaxt: " + fmtTime(r.duration_sec)
-    ];
-    if (CLS) lines.splice(2, 0, "Qrup: " + CLS.name);
-    if (r.wrong && r.wrong.length) lines.push("Səhv sual sayı: " + r.wrong.length);
-    return lines.join("\n");
   }
 
   function fmtTime(sec) {
@@ -359,7 +353,8 @@
           h += '<div class="card pad0">' + rows.map(function (x) {
             return '<div class="lb' + (x.is_me ? " me" : "") + '">' +
               '<span class="rk">' + x.rank + "</span>" +
-              '<span class="nm">' + esc(x.name) + "</span>" +
+              '<span class="nm">' + esc(x.name) +
+                (x.tries > 1 ? ' <s>' + x.tries + " cəhd</s>" : "") + "</span>" +
               '<span class="pc">' + Math.round(x.percent) + "%</span></div>";
           }).join("") + "</div>";
         }
