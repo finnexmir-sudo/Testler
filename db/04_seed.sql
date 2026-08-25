@@ -72,7 +72,7 @@ on conflict (program_id, code) do nothing;
 insert into public.program_subjects (program_id, subject_id)
 select p.id, s.id from public.programs p, public.subjects s
  where (p.slug = 'ibtidai'  and s.slug in ('riyaziyyat','az-dili','ingilis-dili','hayat-bilgisi'))
-    or (p.slug = 'orta'     and s.slug in ('riyaziyyat','az-dili','ingilis-dili','informatika','fizika','biologiya','tarix','cografiya'))
+    or (p.slug = 'orta'     and s.slug in ('riyaziyyat','az-dili','ingilis-dili','informatika','fizika','kimya','biologiya','tarix','cografiya'))
     or (p.slug = 'buraxilis'and s.slug in ('riyaziyyat','az-dili','ingilis-dili','fizika','kimya','biologiya','tarix','cografiya','informatika'))
     or (p.slug in ('miq','sertifikasiya') and s.slug in ('kurikulum','riyaziyyat','az-dili','ingilis-dili'))
 on conflict do nothing;

@@ -1,0 +1,44 @@
+# biologiya 7 I hisse
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=863
+# səhifə: 88 · bölmə: 4 · mövzu: 32
+
+== Giriş
+     7  Biologiya nəyi öyrənir
+    11  Biologiyanı öyrənmək bizə nə verir
+
+== Bölmə 1. Hüceyrə və orqanizm
+    16  1.1 Canlıların əsas xüsusiyyətləri
+    19  1.2 İşıq mikroskopunun quruluşu
+    21  1.3 İşıq mikroskopundan istifadə
+    23  1.4 Hüceyrənin ümumi quruluşu
+    25  1.5 Bitki və heyvan hüceyrələrinin quruluşu
+    28  1.6 Bakteriyalar
+    30  1.7 İxtisaslaşmış hüceyrələr
+    33  Elm, texnologiya, həyat
+    34  Xülasə
+    35  Ümumiləşdirici tapşırıqlar
+
+== Bölmə 2. Bitki orqanizmi
+    38  2.1 Orqanizmin təşkili səviyyələri
+    40  2.2 Çiçəkli bitkilərin orqanları. Kök
+    43  2.3 Çiçəkli bitkilərin orqanları. Gövdə
+    46  2.4 Çiçəkli bitkilərin orqanları. Yarpaq
+    49  Elm, texnologiya, həyat
+    50  Xülasə
+    51  Ümumiləşdirici tapşırıqlar
+
+== Bölmə 3. Bitkilərdə çoxalma
+    54  3.1 Çiçək və onun quruluşu.
+    57  3.2 Tozlanma.
+    61  3.3 Çiçəkli bitkilərdə cinsiyyətli çoxalma. Mayalanma
+    64  3.4 Toxumun quruluşu
+    67  3.5 Toxumların cücərməsi
+    70  3.6 Meyvə
+    73  3.7 Meyvə və toxumların yayılması
+    76  3.8 Çiçəkli bitkilərdə qeyri-cinsi çoxalma
+    80  3.9 Bitkilərin həyat dövrü
+    83  Elm, texnologiya, həyat
+    84  Xülasə
+    85  Ümumiləşdirici tapşırıqlar
+    87  Sözlük
+
