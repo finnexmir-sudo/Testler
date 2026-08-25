@@ -229,7 +229,21 @@
         '<div class="ic">' + ic("gen") + "</div>" +
         '<div class="g"><b>Test yığ</b><i><span>Mövzu və çətinliyə görə ' +
           "avtomatik test</span></i></div>" +
-        '<span class="arrow">' + ic("right") + "</span></button></div>" +
+        '<span class="arrow">' + ic("right") + "</span></button>" +
+      '<button class="item" id="btnPkt">' +
+        '<div class="ic">' + ic("star") + "</div>" +
+        '<div class="g"><b>Paket</b><i><span>' +
+          (ACC.plan ? "Abunə paketiniz və müddəti" :
+                      "Qiymətlər və abunə") + "</span></i></div>" +
+        '<span class="arrow">' + ic("right") + "</span></button>" +
+      (isAdmin()
+        ? '<button class="item" id="btnAdm">' +
+          '<div class="ic">' + ic("group") + "</div>" +
+          '<div class="g"><b>İdarəetmə</b><i><span>Hesablar və ' +
+            "abunələr (admin)</span></i></div>" +
+          '<span class="arrow">' + ic("right") + "</span></button>"
+        : "") +
+      "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Qruplar</h2>" +
       '<div id="groups" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
@@ -255,6 +269,8 @@
 
     on("btnBank", "click", function () { nav("#/b"); });
     on("btnGen", "click", function () { nav("#/gen"); });
+    on("btnPkt", "click", function () { nav("#/p"); });
+    on("btnAdm", "click", function () { nav("#/adm"); });
 
     on("btnGroup", "click", function () {
       if (busy) return;
@@ -1208,6 +1224,188 @@
         setBusy("btnAsg", false, "Tapşırıq ver");
         $("aErr").innerHTML = msg("err", fail(e));
       });
+  }
+
+
+  /* ================================================================
+     PAKET - qiymetler ve el ile satis (merhele 1)
+     Odenis provayderi yoxdur: muellim WhatsApp-la yazir, pulu
+     kocurur, admin abunesini acir.  Duyme CFG.CONTACT_WHATSAPP
+     nomresine acilir - config.js-de teyin olunur.
+     ================================================================ */
+  function isAdmin() {
+    return !!(CTX && CTX.roles && CTX.roles.indexOf("admin") >= 0);
+  }
+
+  function azn(minor) {
+    var m = Number(minor) || 0;
+    return (m % 100 === 0 ? String(m / 100) : (m / 100).toFixed(2)) + " ₼";
+  }
+
+  function screenPaket() {
+    var live = guard();
+    topTitle.textContent = "Paket";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_paket", {}).then(function (v) {
+      if (!live()) return;
+      drawPaket(v || {});
+    }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+
+  function drawPaket(v) {
+    var cur = v.current;
+    var wa = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
+    var mail = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    var h =
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
+      '<div class="spacer"></div>' +
+      '<div class="card tight">' +
+        "<h1>Abunə</h1>" +
+        (cur
+          ? '<p class="muted" style="margin:8px 0 0">Hazırkı paket: <b>' +
+            esc(cur.plan) + "</b>" +
+            (cur.ends ? " · bitmə tarixi: " + dateAz(cur.ends) : "") + "</p>"
+          : '<p class="muted" style="margin:8px 0 0">Hazırda abunəniz yoxdur. ' +
+            "Öz suallarınız və əsas hesabat pulsuzdur; platforma sual bankı, " +
+            "avtomatik test, dərin analitika və siqnallar paketə daxildir.</p>") +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      "<h2>Paketlər</h2>" +
+      (v.plans || []).map(function (p) {
+        var price = azn(p.price_minor) + (p.period === "year" ? " / il" : " / ay") +
+          (Number(p.price_per_seat_minor)
+            ? " + " + azn(p.price_per_seat_minor) + " hər şagird" : "");
+        return '<div class="card tight pkt' +
+          (cur && cur.slug === p.slug ? " on" : "") + '">' +
+          '<div class="seat"><div>' +
+            "<b>" + esc(p.name) + "</b>" +
+            '<div class="lbl">' +
+              (p.max_students ? p.max_students + " şagird yeri · " : "") +
+              "platforma bankı · generator · analitika · siqnallar</div>" +
+          "</div>" +
+          '<span class="pctv">' + esc(price) + "</span></div>" +
+        "</div>";
+      }).join("") +
+      '<div class="spacer"></div>' +
+      '<div class="card">' +
+        "<b>Necə almaq olar?</b>" +
+        '<p class="muted" style="margin:8px 0 14px">Hələlik ödəniş əl ilə ' +
+          "qəbul olunur: bizə yazın, paketi seçin, köçürmə ilə ödəyin — " +
+          "abunəniz dərhal açılsın.</p>" +
+        (wa
+          ? '<a class="btn go" id="btnWa" target="_blank" rel="noopener" href="' +
+            esc("https://wa.me/" + wa.replace(/[^0-9]/g, "") +
+                "?text=" + encodeURIComponent(
+                  "Salam! Bil10-da paket almaq istəyirəm." +
+                  (mail ? " Hesab: " + mail : ""))) +
+            '">WhatsApp-la yazın</a>'
+          : '<p class="muted">Əlaqə nömrəsi hələ təyin olunmayıb ' +
+            "(config.js → CONTACT_WHATSAPP).</p>") +
+      "</div>";
+    show(h);
+    on("btnBack", "click", function () { nav("#/"); });
+  }
+
+  /* ---------------------------------------------------------- admin */
+  function screenAdmin() {
+    var live = guard();
+    topTitle.textContent = "İdarəetmə";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_admin_accounts", { p_q: null }).then(function (rows) {
+      if (!live()) return;
+      drawAdmin(rows || []);
+    }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+
+  function drawAdmin(rows) {
+    show(
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
+      '<div class="spacer"></div>' +
+      '<div class="card tight">' +
+        "<h1>Hesablar</h1>" +
+        '<p class="muted" style="margin:8px 0 0">Abunə açmaq: sətirdəki ' +
+          "«+1 ay / +6 ay» düymələri seçilmiş planla işləyir. Eyni plan " +
+          "aktivdirsə, müddət üstünə əlavə olunur.</p>" +
+        '<div class="fieldrow" style="margin-top:12px">' +
+          '<div><input id="admQ" placeholder="Ad və ya e-poçtla axtar…"></div>' +
+          '<div style="flex:0 0 210px"><select id="admPlan">' +
+            '<option value="repetitor-25">Repetitor — 25 şagird</option>' +
+            '<option value="repetitor-60">Repetitor — 60 şagird</option>' +
+          "</select></div>" +
+        "</div>" +
+        '<div id="admMsg"></div>' +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      '<div id="admList" class="card pad0">' + admRows(rows) + "</div>"
+    );
+    on("btnBack", "click", function () { nav("#/"); });
+    var t = null;
+    on("admQ", "input", function () {
+      clearTimeout(t);
+      t = setTimeout(function () {
+        sb.rpc("rpc_admin_accounts", { p_q: ($("admQ").value || "").trim() || null })
+          .then(function (rows2) {
+            var box = $("admList");
+            if (box) { box.innerHTML = admRows(rows2 || []); bindAdm(); }
+          }).catch(function () {});
+      }, 350);
+    });
+    bindAdm();
+  }
+
+  function admRows(rows) {
+    if (!rows.length) {
+      return '<div class="empty"><div class="ic">' + ic("group") + "</div>" +
+        "<b>Hesab tapılmadı</b></div>";
+    }
+    return rows.map(function (a) {
+      var pl = a.plan;
+      return '<div class="admr" data-em="' + esc(a.email || "") + '">' +
+        '<div class="g"><b>' + esc(a.name) + "</b>" +
+        "<i><span>" + esc(a.email || "") + "</span><span>·</span>" +
+        "<span>" + (a.students || 0) + " şagird</span>" +
+        (pl
+          ? '<span>·</span><span class="okt">' + esc(pl.name) +
+            (pl.ends ? " → " + dateAz(pl.ends) : "") + "</span>"
+          : '<span>·</span><span>paketsiz</span>') +
+        "</i></div>" +
+        '<div class="btns">' +
+          '<button class="btn sm" data-m="1">+1 ay</button>' +
+          '<button class="btn sm" data-m="6">+6 ay</button>' +
+          (pl ? '<button class="btn sm ghost" data-stop="1">Dayandır</button>' : "") +
+        "</div></div>";
+    }).join("");
+  }
+
+  function bindAdm() {
+    var box = $("admList");
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = "1";
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b || busy) return;
+      var row = b.closest(".admr");
+      if (!row) return;
+      var em = row.getAttribute("data-em");
+      var call, args;
+      if (b.getAttribute("data-stop")) {
+        if (!confirm(em + " — abunəni dayandırmaq?")) return;
+        call = "rpc_admin_stop"; args = { p_email: em };
+      } else {
+        call = "rpc_admin_grant";
+        args = { p_email: em, p_plan: ($("admPlan") || {}).value || "repetitor-25",
+                 p_months: Number(b.getAttribute("data-m")) || 1 };
+      }
+      busy = true; b.disabled = true;
+      sb.rpc(call, args).then(function () {
+        busy = false;
+        $("admMsg").innerHTML = msg("ok", em + " — yerinə yetirildi.");
+        screenAdmin();
+      }).catch(function (e) {
+        busy = false; b.disabled = false;
+        $("admMsg").innerHTML = msg("err", fail(e));
+      });
+    });
   }
 
 
@@ -2266,6 +2464,8 @@
     if (m[0] === "b") return screenBank();
     if (m[0] === "gen") return screenGen();
     if (m[0] === "t" && m[1]) return screenPaper(m[1]);
+    if (m[0] === "p") return screenPaket();
+    if (m[0] === "adm") return screenAdmin();
     if (m[0] === "q" && m[1]) return screenQuestion(m[1]);
     if (m[0] === "s" && m[1] && m[2]) return screenStudent(m[1], m[2]);
     screenHome();

@@ -61,7 +61,12 @@ Sonra `db/test/verify.sql` işlət — 7 sətir, hamısı `OK` olmalıdır.
 
 Sıra ilə (istifadəçi ilə razılaşdırılıb):
 
-1. **Ödəniş axını** — «Paket al» səhifəsi + ödəniş qəbulu. Satışın açarı.
+1. ~~Ödəniş axını (mərhələ 1)~~ — hazırdır: «Paket» səhifəsi
+   (`#/p`, WhatsApp satışı, `CONTACT_WHATSAPP` config-də) + admin
+   idarəetməsi (`#/adm`, `db/21_paket.sql`). İlk admin SQL ilə:
+   `insert into user_roles (user_id, role) select id,'admin' from
+   auth.users where email='...'`. Mərhələ 2 (kart ödənişi,
+   Payriff/Epoint) müştəri sayı artanda.
 2. **Sual bankının davamı** — 3-4-cü siniflər hazır; qalır 1-2-ci
    siniflər və ingilis dili.
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
