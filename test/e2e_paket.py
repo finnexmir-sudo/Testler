@@ -92,15 +92,27 @@ with sync_playwright() as pw:
     ok(True, "admin rolunda Idareetme bendi gorunur")
     pg.click("#btnAdm")
     pg.wait_for_selector(".admr", timeout=8000)
+    ok(pg.locator(".tile").count() == 4, "gosterici lovheleri gorunur",
+       pg.locator(".tile").count())
+    tl = pg.inner_text(".tiles").replace("\n", " ")
+    ok("hesab" in tl and "abun" in tl and "gəlir" in tl,
+       "lovhelerde hesab/abune/gelir var", tl[:70])
+    npo = pg.locator("#admPlan option").count()
+    ok(npo >= 2, "plan secimi bazadan dolur", npo)
     row = pg.inner_text(".admr").replace("\n", " ")
     ok("pkt@t.az" in row, "hesab siyahida e-poctla gorunur", row[:60])
-    ok("paketsiz" in row, "paketsiz statusu gorunur")
+    ok("paketsiz" in row, "paketsiz nisani gorunur")
+    ok("aktivlik" in row, "son aktivlik gorunur", row[:80])
 
     print("D · Bir kliklə abunə açmaq")
+    pg.on("dialog", lambda d: d.accept())
     pg.locator(".admr [data-m='6']").click()
-    pg.wait_for_selector(".admr .okt", timeout=8000)
-    ok("Repetitor" in pg.inner_text(".admr .okt"), "abune setirde gorunur",
-       pg.inner_text(".admr .okt")[:40])
+    pg.wait_for_selector(".admr .pb.y", timeout=8000)
+    ok("Repetitor" in pg.inner_text(".admr .pb.y"), "abune nisani setirde gorunur",
+       pg.inner_text(".admr .pb.y")[:40])
+    ok("yerinə yetirildi" in pg.inner_text("#admMsg"), "netice mesaji gorunur")
+    ok("1" in pg.inner_text(".tile.b"), "aktiv abune lovhesi yenilenir",
+       pg.inner_text(".tile.b").replace("\n", " "))
     a = db("""select s.status, s.provider from public.subscriptions s""", one=True)
     ok(a and a["status"] == "active" and a["provider"] == "manual",
        "bazada active/manual abune var")
@@ -114,7 +126,6 @@ with sync_playwright() as pw:
     print("F · Dayandırmaq")
     pg.goto(PANEL + "#/adm"); pg.reload()
     pg.wait_for_selector(".admr", timeout=8000)
-    pg.on("dialog", lambda d: d.accept())
     pg.locator(".admr [data-stop]").click()
     pg.wait_for_timeout(900)
     pg.wait_for_selector(".admr", timeout=8000)

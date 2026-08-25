@@ -107,8 +107,10 @@ begin
   assert jsonb_array_length(v) = 1, format('axtaris neticesi: %s', jsonb_array_length(v));
   assert v->0->>'email' = 'muellim@t.az', 'e-poct gorunmur';
   assert v->0->'plan'->>'status' = 'active', 'plan statusu gorunmur';
+  assert v->0 ? 'groups' and v->0 ? 'attempts' and v->0 ? 'last_active',
+         'aktivlik sutunlari yoxdur';
 end $$;
-\echo 'OK  5 · admin siyahisi: axtaris, e-poct, plan statusu'
+\echo 'OK  5 · admin siyahisi: axtaris, e-poct, plan statusu, aktivlik'
 
 -- =====================================================================
 --  6. Dayandirmaq - abune derhal kecersizdir
@@ -152,3 +154,32 @@ begin
          'anon abune aca bilir';
 end $$;
 \echo 'OK  8 · anon paket/admin funksiyalarini gormur'
+
+-- =====================================================================
+--  9. Gostericiler: yalniz admin, saylar duzgun
+-- =====================================================================
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e2';
+do $$
+declare ok boolean := false;
+begin
+  begin
+    perform public.rpc_admin_stats();
+  exception when insufficient_privilege then ok := true; end;
+  assert ok, 'adi muellim gostericileri gordu!';
+end $$;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
+do $$
+declare v jsonb;
+begin
+  v := public.rpc_admin_stats();
+  assert (v->>'accounts')::int = 1, 'hesab sayi sehvdir';
+  --  6-ci addimda abune dayandirilib - aktiv abune qalmamalidir
+  assert (v->>'active_subs')::int = 0, 'dayandirilmis abune sayilir';
+  assert (v->>'mrr_minor')::int = 0, 'gelir sifir olmalidir';
+  assert jsonb_array_length(v->'plans') >= 2, 'plan siyahisi bosdur';
+  assert not exists (select 1 from jsonb_array_elements(v->'plans') p
+                      where p->>'slug' = 'pulsuz'), 'pulsuz plan satis siyahisindadir';
+end $$;
+reset role; reset request.jwt.claim.sub;
+\echo 'OK  9 · gostericiler: yalniz admin, saylar duzgun'

@@ -88,6 +88,22 @@ begin
                'type',  a.type,
                'email', u.email,
                'students', app.account_student_count(a.id),
+               'groups', (select count(*) from public.classes c
+                           where c.account_id = a.id),
+               'tests', (select count(*) from public.tests t
+                           join public.classes c on c.id = t.class_id
+                          where c.account_id = a.id),
+               'attempts', (select count(*) from public.attempts att
+                             join public.students st on st.id = att.student_id
+                            where st.account_id = a.id
+                              and att.status = 'submitted'),
+               'last_active', greatest(
+                 (select max(att.finished_at) from public.attempts att
+                   join public.students st on st.id = att.student_id
+                  where st.account_id = a.id),
+                 (select max(t.created_at) from public.tests t
+                   join public.classes c on c.id = t.class_id
+                  where c.account_id = a.id)),
                'created', a.created_at,
                'plan', (select jsonb_build_object(
                           'name', pl.name, 'status', s.status,
@@ -109,6 +125,45 @@ begin
        order by a.created_at desc
        limit 50
     ) z), '[]'::jsonb);
+end $$;
+
+-- ------------------------------------------------- admin: gostericiler
+--  Panelin bas hissesi: hesab/abune/sagird saylari, teqribi ayliq
+--  gelir (aktiv planlarin qiymet cemi) ve satis ucun plan siyahisi.
+create or replace function public.rpc_admin_stats()
+returns jsonb
+language plpgsql stable security definer
+set search_path = public, extensions, pg_temp as $$
+begin
+  if not app.is_admin() then
+    raise exception 'Bu emeliyyat yalniz admin ucundur.' using errcode = '42501';
+  end if;
+
+  return jsonb_build_object(
+    'accounts', (select count(*) from public.accounts),
+    'accounts_week', (select count(*) from public.accounts
+                       where created_at > now() - interval '7 days'),
+    'active_subs', (select count(*) from public.subscriptions s
+                     where s.status in ('trialing','active')
+                       and (s.current_period_end is null
+                            or s.current_period_end > now())),
+    'mrr_minor', coalesce((
+      select sum(pl.price_minor
+                 + pl.price_per_seat_minor * greatest(s.seats, 0))
+        from public.subscriptions s
+        join public.plans pl on pl.id = s.plan_id
+       where s.status in ('trialing','active')
+         and (s.current_period_end is null
+              or s.current_period_end > now())), 0),
+    'students', (select count(*) from public.students where is_active),
+    'attempts_week', (select count(*) from public.attempts
+                       where status = 'submitted'
+                         and finished_at > now() - interval '7 days'),
+    'plans', coalesce((
+      select jsonb_agg(jsonb_build_object('slug', p.slug, 'name', p.name)
+                       order by (p.audience <> 'tutor'), p.sort)
+        from public.plans p
+       where p.is_active and p.slug <> 'pulsuz'), '[]'::jsonb));
 end $$;
 
 -- ------------------------------------------------- admin: abune acmaq
@@ -192,11 +247,13 @@ end $$;
 -- ---------------------------------------------------------------- huquq
 revoke all on function public.rpc_paket(uuid)                    from public, anon;
 revoke all on function public.rpc_admin_accounts(text)           from public, anon;
+revoke all on function public.rpc_admin_stats()                  from public, anon;
 revoke all on function public.rpc_admin_grant(text, text, int)   from public, anon;
 revoke all on function public.rpc_admin_stop(text)               from public, anon;
 
 grant execute on function public.rpc_paket(uuid)                  to authenticated;
 grant execute on function public.rpc_admin_accounts(text)         to authenticated;
+grant execute on function public.rpc_admin_stats()                to authenticated;
 grant execute on function public.rpc_admin_grant(text, text, int) to authenticated;
 grant execute on function public.rpc_admin_stop(text)             to authenticated;
 

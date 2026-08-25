@@ -758,6 +758,18 @@
     return d.getDate() + " " + ay[d.getMonth()];
   }
 
+  /* Nisbi vaxt: siyahilarda "3 gun evvel" tarixden tez oxunur */
+  function agoAz(iso) {
+    if (!iso) return "heç vaxt";
+    var d = new Date(iso);
+    if (isNaN(d)) return "heç vaxt";
+    var g = Math.floor((Date.now() - d.getTime()) / 86400000);
+    if (g <= 0) return "bu gün";
+    if (g === 1) return "dünən";
+    if (g < 30) return g + " gün əvvəl";
+    return dateAz(iso);
+  }
+
   /* Menimseme zolagi: 0-49 zeif, 50-74 orta, 75+ yaxsi */
   function meter(ratio) {
     var r = pct(ratio);
@@ -1400,37 +1412,59 @@
   }
 
   /* ---------------------------------------------------------- admin */
+  var admFlash = "";   // redraw-dan sonra bir defe gosterilen netice mesaji
+
   function screenAdmin() {
     var live = guard();
     topTitle.textContent = "İdarəetmə";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
-    sb.rpc("rpc_admin_accounts", { p_q: null }).then(function (rows) {
+    Promise.all([
+      sb.rpc("rpc_admin_stats", {}),
+      sb.rpc("rpc_admin_accounts", { p_q: null })
+    ]).then(function (r) {
       if (!live()) return;
-      drawAdmin(rows || []);
+      drawAdmin(r[0] || {}, r[1] || []);
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
-  function drawAdmin(rows) {
+  function drawAdmin(st, rows) {
+    var plans = (st.plans && st.plans.length) ? st.plans
+      : [{ slug: "repetitor-25", name: "Repetitor — 25 şagird" }];
     show(
       '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
       '<div class="spacer"></div>' +
+      '<div class="tiles">' +
+        '<div class="tile a"><b>' + (st.accounts || 0) + "</b><span>hesab" +
+          ((st.accounts_week || 0) > 0 ? " · +" + st.accounts_week + " bu həftə" : "") +
+          "</span></div>" +
+        '<div class="tile b"><b>' + (st.active_subs || 0) + "</b><span>aktiv abunə</span></div>" +
+        '<div class="tile c"><b>' + azn(st.mrr_minor || 0) + "</b><span>aylıq gəlir</span></div>" +
+        '<div class="tile d"><b>' + (st.attempts_week || 0) + "</b><span>cəhd · son 7 gün</span></div>" +
+      "</div>" +
       '<div class="card tight">' +
         "<h1>Hesablar</h1>" +
-        '<p class="muted" style="margin:8px 0 0">Abunə açmaq: sətirdəki ' +
-          "«+1 ay / +6 ay» düymələri seçilmiş planla işləyir. Eyni plan " +
-          "aktivdirsə, müddət üstünə əlavə olunur.</p>" +
+        '<p class="muted" style="margin:8px 0 0">«+1 ay / +6 ay» seçilmiş planı ' +
+          "həmin hesaba açır. Eyni plan aktivdirsə, müddət " +
+          "üstünə əlavə olunur.</p>" +
         '<div class="fieldrow" style="margin-top:12px">' +
           '<div><input id="admQ" placeholder="Ad və ya e-poçtla axtar…"></div>' +
-          '<div style="flex:0 0 210px"><select id="admPlan">' +
-            '<option value="repetitor-25">Repetitor — 25 şagird</option>' +
-            '<option value="repetitor-60">Repetitor — 60 şagird</option>' +
+          '<div style="flex:0 0 230px"><select id="admPlan">' +
+            plans.map(function (pl) {
+              return '<option value="' + esc(pl.slug) + '">' + esc(pl.name) + "</option>";
+            }).join("") +
           "</select></div>" +
         "</div>" +
-        '<div id="admMsg"></div>' +
+        '<div id="admMsg">' + admFlash + "</div>" +
       "</div>" +
       '<div class="spacer"></div>' +
       '<div id="admList" class="card pad0">' + admRows(rows) + "</div>"
     );
+    admFlash = "";
+    //  standart secim - en cox satilan repetitor paketi
+    var sel0 = $("admPlan");
+    if (sel0 && sel0.querySelector('option[value="repetitor-25"]')) {
+      sel0.value = "repetitor-25";
+    }
     on("btnBack", "click", function () { nav("#/"); });
     var t = null;
     on("admQ", "input", function () {
@@ -1439,7 +1473,7 @@
         sb.rpc("rpc_admin_accounts", { p_q: ($("admQ").value || "").trim() || null })
           .then(function (rows2) {
             var box = $("admList");
-            if (box) { box.innerHTML = admRows(rows2 || []); bindAdm(); }
+            if (box) box.innerHTML = admRows(rows2 || []);
           }).catch(function () {});
       }, 350);
     });
@@ -1452,15 +1486,24 @@
         "<b>Hesab tapılmadı</b></div>";
     }
     return rows.map(function (a) {
-      var pl = a.plan;
+      var pl = a.plan, badge;
+      if (pl) {
+        //  bitmesine 7 gunden az qalibsa narinci - uzatmaq vaxtidir
+        var az7 = pl.ends && (new Date(pl.ends).getTime() - Date.now()) < 7 * 86400000;
+        badge = '<span class="pb ' + (az7 ? "z" : "y") + '">' + esc(pl.name) +
+          (pl.ends ? " → " + dateAz(pl.ends) : "") + "</span>";
+      } else {
+        badge = '<span class="pb n">paketsiz</span>';
+      }
       return '<div class="admr" data-em="' + esc(a.email || "") + '">' +
-        '<div class="g"><b>' + esc(a.name) + "</b>" +
-        "<i><span>" + esc(a.email || "") + "</span><span>·</span>" +
-        "<span>" + (a.students || 0) + " şagird</span>" +
-        (pl
-          ? '<span>·</span><span class="okt">' + esc(pl.name) +
-            (pl.ends ? " → " + dateAz(pl.ends) : "") + "</span>"
-          : '<span>·</span><span>paketsiz</span>') +
+        av(a.name) +
+        '<div class="g"><b>' + esc(a.name) + "</b>" + badge +
+        "<i>" +
+          "<span>" + esc(a.email || "") + "</span><span>·</span>" +
+          "<span>" + (a.students || 0) + " şagird</span><span>·</span>" +
+          "<span>" + (a.tests || 0) + " test</span><span>·</span>" +
+          "<span>" + (a.attempts || 0) + " cəhd</span><span>·</span>" +
+          "<span>aktivlik: " + agoAz(a.last_active) + "</span>" +
         "</i></div>" +
         '<div class="btns">' +
           '<button class="btn sm" data-m="1">+1 ay</button>' +
@@ -1485,14 +1528,20 @@
         if (!confirm(em + " — abunəni dayandırmaq?")) return;
         call = "rpc_admin_stop"; args = { p_email: em };
       } else {
+        var sel = $("admPlan");
+        var ay = Number(b.getAttribute("data-m")) || 1;
+        var ad = (sel && sel.selectedIndex >= 0)
+          ? sel.options[sel.selectedIndex].text : "";
+        if (!confirm(em + " → " + ad + " (+" + ay + " ay). Açılsın?")) return;
         call = "rpc_admin_grant";
-        args = { p_email: em, p_plan: ($("admPlan") || {}).value || "repetitor-25",
-                 p_months: Number(b.getAttribute("data-m")) || 1 };
+        args = { p_email: em, p_plan: (sel || {}).value || "repetitor-25",
+                 p_months: ay };
       }
       busy = true; b.disabled = true;
-      sb.rpc(call, args).then(function () {
+      sb.rpc(call, args).then(function (res) {
         busy = false;
-        $("admMsg").innerHTML = msg("ok", em + " — yerinə yetirildi.");
+        admFlash = msg("ok", em + " — yerinə yetirildi" +
+          (res && res.ends ? ". Qüvvədədir: " + dateAz(res.ends) : "") + ".");
         screenAdmin();
       }).catch(function (e) {
         busy = false; b.disabled = false;

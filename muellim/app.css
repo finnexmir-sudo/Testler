@@ -344,8 +344,18 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .admr b{font-size:13.5px;font-weight:580}
 .admr i{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
   font-style:normal;font-size:12px;color:var(--fg-2);margin-top:3px}
-.admr .okt{color:var(--ok);font-weight:560}
+.admr:hover{background:var(--n-25)}
 .admr .btns{display:flex;gap:6px;flex:0 0 auto}
+/*  plan nisani: y=aktiv, z=bitmeye az qalib, n=paketsiz  */
+.admr .pb{display:inline-block;margin-left:8px;padding:2px 9px;
+  border-radius:999px;font-size:10.5px;font-weight:620;
+  vertical-align:1.5px;white-space:nowrap}
+.admr .pb.y{background:var(--ok-tint);color:var(--ok);
+  border:1px solid var(--ok-line)}
+.admr .pb.z{background:var(--warn-tint);color:var(--warn);
+  border:1px solid var(--warn-line)}
+.admr .pb.n{background:var(--n-25);color:var(--fg-3);
+  border:1px solid var(--n-100)}
 
 /* esas sehife - salam ve stat lovheleri */
 .hi{font-size:20px;font-weight:650;letter-spacing:-.02em;margin:2px 0 14px}
