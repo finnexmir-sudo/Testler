@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Generator axini: suzgec -> onizleme -> test yig -> veraq -> teyin et.
+
+Ayrica: suzgec fenn siyahisinda SUALI OLMAYAN fenn cixmir (menasizdir),
+sual formasinda ise hamisi qalir (ilk suali yazmaq ucun).
+"""
+import sys, datetime
+import psycopg2, psycopg2.extras
+from playwright.sync_api import sync_playwright
+
+PANEL   = "http://127.0.0.1:8010/muellim/index.html"
+STUDENT = "http://127.0.0.1:8010/sagird/index.html"
+CHROME  = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
+DSN     = "host=/tmp port=55432 user=postgres dbname=panel_e2e"
+BLOCK   = "**://*.supabase.co/**"
+TEST_CFG = """window.CFG = {
+  SUPABASE_URL: "http://127.0.0.1:54321",
+  SUPABASE_ANON_KEY: "test-anon-key",
+  STUDENT_URL: "https://example.test/Testler/"
+};"""
+
+fails = []
+def ok(cond, label, extra=""):
+    print(("  OK   " if cond else "  FAIL ") + label + (("  " + str(extra)) if extra else ""),
+          flush=True)
+    if not cond: fails.append(label)
+
+def db(sql, args=None, one=False):
+    with psycopg2.connect(DSN, cursor_factory=psycopg2.extras.RealDictCursor) as c, c.cursor() as cur:
+        cur.execute(sql, args or ())
+        if cur.description:
+            return cur.fetchone() if one else cur.fetchall()
+
+db("""
+delete from public.attempt_answers; delete from public.attempts;
+delete from public.assignments;     delete from public.student_sessions;
+delete from public.students;        delete from public.classes;
+delete from public.subscriptions;
+-- evvelki suite-lerin muellim testleri/suallari da getsin - yoxsa
+-- auth.users silinende questions cascade-i test_questions-a ilisir
+delete from public.test_questions tq using public.tests t
+ where t.id = tq.test_id and t.owner_type = 'educator';
+delete from public.tests where owner_type = 'educator';
+delete from public.question_options o using public.questions q
+ where q.id = o.question_id and q.owner_type = 'educator';
+delete from public.questions where owner_type = 'educator';
+delete from public.account_members; delete from public.accounts;
+delete from public.user_roles;      delete from auth.users;
+""")
+
+with sync_playwright() as pw:
+    br  = pw.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
+    ctx = br.new_context(viewport={"width": 430, "height": 900})
+
+    def new_page():
+        pg = ctx.new_page()
+        pg.route("**/config.js*", lambda r: r.fulfill(
+            status=200, content_type="application/javascript", body=TEST_CFG))
+        pg.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)))
+        pg.route(BLOCK, lambda r: (fails.append("XARICI SORGU: " + r.request.url), r.abort()))
+        return pg
+
+    # ------------------------------------------------ muellim + qrup
+    pg = new_page()
+    pg.goto(PANEL); pg.wait_for_timeout(400)
+    pg.click("#btnSwap")
+    pg.fill("#fname", "Gen Muellim"); pg.fill("#email", "gen@t.az")
+    pg.fill("#pass", "parol1234"); pg.click("#btnAuth")
+    pg.wait_for_selector("#btnSetup", timeout=8000)
+    pg.select_option("#atype", "tutor")
+    pg.fill("#aname", "Gen qrupu"); pg.click("#btnSetup")
+    pg.wait_for_function("document.querySelectorAll('#glevel option').length > 1",
+                         timeout=8000)
+    pg.fill("#gname", "4-A qrupu"); pg.select_option("#glevel", "4")
+    pg.click("#btnGroup")
+    pg.wait_for_selector("#groups .item", timeout=8000)
+    pg.click("#groups .item")
+    pg.wait_for_selector("#btnStu", timeout=8000)
+    pg.fill("#sname", "Kənan Əliyev"); pg.click("#btnStu")
+    pg.wait_for_selector(".stu", timeout=8000)
+
+    UID  = db("select id::text i from auth.users", one=True)["i"]
+    AID  = db("select id::text i from public.accounts", one=True)["i"]
+    GID  = db("select id::text i from public.classes", one=True)["i"]
+    CODE = db("select login_code c from public.students", one=True)["c"]
+
+    # Muellimin oz banki: 2 movzu x 6 sual (metnler ve cavablar ferqli -
+    # oxsarliq suzgeci tekrar saymasin)
+    db("""
+    do $$
+    declare v_s uuid; v_l uuid; v_t uuid; i int; j int; v_q uuid; tp text;
+    begin
+      select id into v_s from public.subjects where slug='riyaziyyat';
+      select l.id into v_l from public.levels l
+        join public.programs p on p.id=l.program_id
+       where p.slug='ibtidai' and l.code='4';
+      for j in 1..2 loop
+        tp := case j when 1 then 'riy-4-vurma-bolme' else 'riy-4-toplama-cixma' end;
+        select id into v_t from public.topics
+         where slug = tp and subject_id = v_s;
+        for i in 1..6 loop
+          insert into public.questions
+            (owner_type, owner_id, account_id, subject_id, level_id, topic_id,
+             kind, body, difficulty, status)
+          values ('educator', %(uid)s, %(aid)s, v_s, v_l, v_t, 'single',
+                  case j when 1 then 'Vurma hesabi numune ' else 'Toplama calismasi numune ' end
+                    || i || ' movzu ' || j,
+                  (i %% 3) + 1, 'published')
+          returning id into v_q;
+          insert into public.question_options (question_id, ord, body, is_correct)
+          values (v_q, 1, 'duz cavab ' || j || '-' || i, true),
+                 (v_q, 2, 'sehv cavab ' || j || '-' || i, false);
+        end loop;
+      end loop;
+    end $$;
+    """, {"uid": UID, "aid": AID})
+
+    print("A · Süzgəc yalnız sualı olan fənni göstərir")
+    pg.goto(PANEL + "#/b"); pg.wait_for_selector("#bFilt", timeout=8000)
+    if pg.locator("details.filt:not([open])").count():
+        pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
+    subs = pg.locator("#bsub option").all_inner_texts()
+    ok("Fizika" not in " ".join(subs), "bank suzgecinde sualsiz fenn yoxdur", subs)
+    ok(any("Riyaziyyat" in x for x in subs), "sualli fenn var")
+    pg.goto(PANEL + "#/q/new"); pg.wait_for_selector("#qsub", timeout=8000)
+    pg.wait_for_function("document.querySelectorAll('#qsub option').length > 3", timeout=8000)
+    subs = pg.locator("#qsub option").all_inner_texts()
+    ok(any("Fizika" in x for x in subs),
+       "sual FORMASINDA butun fennler qalir (ilk sual ucun)", len(subs))
+
+    print("B · Generator ekranı")
+    pg.goto(PANEL + "#/gen"); pg.wait_for_selector("#gPool", timeout=8000)
+    ok(pg.locator("#gPool .seg.on").inner_text() == "Öz suallarım",
+       "abunesiz hesabda hovuz «öz suallarım»dır")
+    subs = pg.locator("#gsub option").all_inner_texts()
+    ok("Fizika" not in " ".join(subs), "generatorda da sualsiz fenn yoxdur")
+    # "Hovuz yoxlanılır..." da metndir - cavabin GELMESINI gozle
+    pg.wait_for_function(
+        "document.querySelector('#gPrev') && "
+        "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
+        "document.querySelector('#gPrev').innerText.length > 5",
+        timeout=8000)
+    ok("kifayət qədər" in pg.inner_text("#gPrev"),
+       "onizleme: 12 oz suali 10-a catir", pg.inner_text("#gPrev")[:60])
+
+    # sayi hovuzdan boyuk edek - durust xeberdarliq
+    pg.fill("#gCnt", "50"); pg.wait_for_timeout(700)
+    ok("yalnız 12" in pg.inner_text("#gPrev"),
+       "onizleme durust: hovuzda yalniz 12 sual", pg.inner_text("#gPrev")[:70])
+
+    print("C · Abunəsiz platforma hovuzu")
+    pg.locator("#gPool .seg", has_text="Platforma").click()
+    pg.wait_for_selector("#gPool .seg.on", timeout=4000)
+    ok("abunə paketinə daxildir" in pg.inner_text("#main"),
+       "platforma secilende abune xeberdarligi cixir")
+    pg.click("#btnMake"); pg.wait_for_timeout(900)
+    ok(pg.inner_text("#gErr").strip() != "" or "yalnız" in pg.inner_text("#gPrev"),
+       "abunesiz platforma testi yigilmir - acıq mesaj",
+       (pg.inner_text("#gErr") or pg.inner_text("#gPrev"))[:60])
+    ok(db("select count(*) n from public.tests where owner_type='educator'",
+          one=True)["n"] == 0, "bazada yarimciq test qalmadi")
+
+    print("D · Öz hovuzundan test yığılır")
+    pg.locator("#gPool .seg", has_text="Öz suallarım").click()
+    pg.wait_for_timeout(400)
+    pg.fill("#gCnt", "8"); pg.wait_for_timeout(700)
+    pg.fill("#gTitle", "Sınaq — öz suallarım")
+    pg.click("#btnMake")
+    pg.wait_for_selector(".paper", timeout=8000)
+    ok("/t/" in pg.url, "veraq ekranina kecid", pg.url.split("#")[-1][:20])
+    n = pg.locator(".paper .pq").count()
+    ok(n == 8, "veraqda 8 sual var", n)
+    ok(pg.locator(".popt.ok").count() == 8, "her sualda duzgun cavab isarelidir",
+       pg.locator(".popt.ok").count())
+    ok("öz sualınız" in pg.inner_text(".paper"), "sualin mensubiyyeti gorunur")
+    TID = db("select id::text i from public.tests where owner_type='educator'",
+             one=True)["i"]
+    ok(db("select count(*) n from public.test_questions where test_id=%s",
+          (TID,), one=True)["n"] == 8, "bazada 8 sual baglanib")
+
+    print("E · Yenidən yığmaq")
+    before = sorted(r["q"] for r in db(
+        "select question_id::text q from public.test_questions where test_id=%s", (TID,)))
+    pg.click("#btnRegen")
+    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_timeout(300)
+    ok(pg.locator(".paper .pq").count() == 8, "yeniden yigilan testde de 8 sual")
+    after = sorted(r["q"] for r in db(
+        "select question_id::text q from public.test_questions where test_id=%s", (TID,)))
+    ok(len(after) == 8, "bazada yene 8 sual", len(after))
+    ok(db("select count(*) n from public.tests where owner_type='educator'",
+          one=True)["n"] == 1, "yeni test YARANMADI - eynisi yenilendi")
+
+    print("F · Vərəqdən qrupa təyin etmək")
+    day = (datetime.date.today() + datetime.timedelta(days=5)).isoformat()
+    pg.fill("#pDate", day)
+    pg.select_option("#pTry", "2")
+    pg.click("#btnPAsg")
+    pg.wait_for_function(
+        "document.querySelector('#pAsgMsg') && document.querySelector('#pAsgMsg').innerText.length > 3",
+        timeout=8000)
+    ok("verildi" in pg.inner_text("#pAsgMsg"), "teyinat tesdiqi gorunur",
+       pg.inner_text("#pAsgMsg")[:50])
+    a = db("select class_id::text c, max_attempts m from public.assignments", one=True)
+    ok(a is not None and a["c"] == GID and a["m"] == 2, "bazada teyinat duzgundur")
+
+    print("G · Şagird tapşırığı görür")
+    sp = new_page()
+    sp.goto(STUDENT); sp.wait_for_selector("#btnIn", timeout=8000)
+    sp.fill("#code", CODE); sp.click("#btnIn")
+    sp.wait_for_selector(".test", timeout=8000)
+    ok("Sınaq — öz suallarım" in sp.inner_text("#main"),
+       "yigilan test sagirdin tapsiriqlarindadir")
+    sp.close()
+
+    print("H · İşlənmiş test yenilənmir")
+    db("""insert into public.attempts (test_id, student_id, status, finished_at)
+          select %s, s.id, 'submitted', now() from public.students s limit 1""", (TID,))
+    # Unvan onsuz da #/t/<id>-dir - goto hec ne etmir, reload lazimdir
+    pg.goto(PANEL + "#/t/" + TID); pg.reload()
+    pg.wait_for_selector(".paper", timeout=8000)
+    ok(pg.locator("#btnRegen").count() == 0, "yenile duymesi gizlenir")
+    ok("yeniləmək olmaz" in pg.inner_text("#main"), "sebeb yazilir")
+
+    print("I · Abunə ilə platforma hovuzu")
+    db("""insert into public.subscriptions (account_id, plan_id, status, started_at, current_period_end)
+          select %s, p.id, 'active', now(), now() + interval '30 days'
+            from public.plans p where p.slug='repetitor-25'""", (AID,))
+    pg.goto(PANEL); pg.wait_for_timeout(300)
+    pg.reload(); pg.wait_for_selector("#btnGen", timeout=8000)
+    pg.click("#btnGen"); pg.wait_for_selector("#gPool", timeout=8000)
+    pg.locator("#gPool .seg", has_text="Platforma").click()
+    pg.wait_for_timeout(500)
+    ok("abunə paketinə daxildir" not in pg.inner_text("#main"),
+       "abune ile xeberdarliq itir")
+    pg.select_option("#gsub", "riyaziyyat")
+    pg.wait_for_selector("#gTop", timeout=8000)
+    pg.select_option("#glev", "4"); pg.wait_for_selector("#gTop", timeout=8000)
+    pg.fill("#gCnt", "12"); pg.wait_for_timeout(700)
+    ok("kifayət qədər" in pg.inner_text("#gPrev"),
+       "platforma hovuzunda riy-4 suallari tapilir")
+    pg.fill("#gTitle", "Riyaziyyat 4 — platforma sınağı")
+    pg.click("#btnMake")
+    pg.wait_for_selector(".paper", timeout=8000)
+    ok(pg.locator(".paper .pq").count() == 12, "12 sualliq platforma testi yigildi")
+    ok("platforma" in pg.inner_text(".paper"), "platforma nisani gorunur")
+    # movzular arasinda beraberlik: 12 movzudan 12 sual - hersinden 1
+    tt = db("""select count(distinct q.topic_id) n
+                 from public.test_questions tq
+                 join public.questions q on q.id = tq.question_id
+                 join public.tests t on t.id = tq.test_id
+                where t.title = 'Riyaziyyat 4 — platforma sınağı'""", one=True)["n"]
+    ok(tt >= 10, "suallar movzular arasinda paylanib", "%d movzu" % tt)
+
+    br.close()
+
+print()
+if fails:
+    print("UGURSUZ: %d" % len(fails))
+    for f in fails: print("  - " + f)
+    sys.exit(1)
+print("GENERATOR: BUTUN YOXLAMALAR KECDI")

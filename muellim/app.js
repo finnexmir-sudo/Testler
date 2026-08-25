@@ -33,6 +33,8 @@
             '<path d="M9.5 13.4h.01"/>',
     info:   '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 9v3.6"/><path d="M9.5 6.6h.01"/>',
     check:  '<path d="M4 10l3.6 3.6L15 5.8"/>',
+    gen:    '<path d="M9.5 3l1.5 3.8L14.8 8.3l-3.8 1.5L9.5 13.6 8 9.8 4.2 8.3 8 6.8 9.5 3z"/>' +
+            '<path d="M15 12l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/>',
     key:    '<circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/>' +
             '<path d="M13 6l2 2"/>',
     chart:  '<path d="M3.5 15.5h12"/><rect x="5" y="9" width="2.6" height="4.5" rx=".7"/>' +
@@ -222,6 +224,11 @@
         '<div class="ic">' + ic("doc") + "</div>" +
         '<div class="g"><b>Sual bankı</b><i><span>Öz suallarınızı yazın, ' +
           "testlərə yığın</span></i></div>" +
+        '<span class="arrow">' + ic("right") + "</span></button>" +
+      '<button class="item" id="btnGen">' +
+        '<div class="ic">' + ic("gen") + "</div>" +
+        '<div class="g"><b>Test yığ</b><i><span>Mövzu və çətinliyə görə ' +
+          "avtomatik test</span></i></div>" +
         '<span class="arrow">' + ic("right") + "</span></button></div>" +
       '<div class="spacer"></div>' +
       "<h2>Qruplar</h2>" +
@@ -247,6 +254,7 @@
     });
 
     on("btnBank", "click", function () { nav("#/b"); });
+    on("btnGen", "click", function () { nav("#/gen"); });
 
     on("btnGroup", "click", function () {
       if (busy) return;
@@ -1025,6 +1033,325 @@
 
 
   /* ================================================================
+     GENERATOR - suzgece gore avtomatik test
+     Secimi SERVER edir (13_generator.sql): movzular arasinda beraber
+     boluslur, yerdeyismis tekrarlar ve eyni cavab yigini atilir.
+     Burda yalniz suzgec, onizleme ve veraq var.
+     ================================================================ */
+  var GF = null;
+
+  function genFilter() {
+    if (!GF) GF = { pool: (ACC && ACC.plan) ? "all" : "mine",
+                    subject: "", level: "", topics: [], difficulty: [],
+                    count: 10, title: "" };
+    return GF;
+  }
+
+  function genRule(f) {
+    var r = { pool: f.pool, count: f.count };
+    if (f.subject) r.subject = f.subject;
+    if (f.level) r.level = f.level;
+    if (f.topics.length) r.topics = f.topics;
+    if (f.difficulty.length) r.difficulty = f.difficulty;
+    return r;
+  }
+
+  function screenGen() {
+    var live = guard();
+    var f = genFilter();
+    topTitle.textContent = "Test yığ";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null, p_level: f.level || null })
+      .then(function (fac) { if (!live()) return; FAC = fac || {}; drawGen(); })
+      .catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+
+  function drawGen() {
+    var f = genFilter();
+    show(
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
+      '<div class="spacer"></div>' +
+      '<div class="card">' +
+        "<h1>Avtomatik test</h1>" +
+        '<p class="muted" style="margin:8px 0 0">Süzgəci seçin — sistem ' +
+          "hovuzdan balanslı test yığacaq: mövzular arasında bərabər, " +
+          "təkrarsız.</p>" +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      '<div class="card tight">' +
+        '<div class="segs" id="gPool">' +
+          seg("mine", "Öz suallarım", f.pool) +
+          seg("platform", "Platforma", f.pool) +
+          seg("all", "Hamısı", f.pool) +
+        "</div>" +
+        (f.pool !== "mine" && !(ACC && ACC.plan)
+          ? '<div class="warn" style="margin:12px 0 0">' + ic("warn") +
+            "<span>Platforma hovuzu abunə paketinə daxildir. " +
+            "Öz suallarınızdan yığa bilərsiniz.</span></div>"
+          : "") +
+        '<div class="fieldrow" style="margin-top:12px">' +
+          '<div><label for="gsub">Fənn</label>' +
+            '<select id="gsub"><option value="">Bütün fənlər</option>' +
+            (FAC.subjects || []).filter(function (x) {
+              return Number(x.n) > 0 || f.subject === x.slug;
+            }).map(function (x) {
+              return '<option value="' + esc(x.slug) + '"' +
+                (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
+            }).join("") + "</select></div>" +
+          '<div style="flex:0 0 140px"><label for="glev">Sinif</label>' +
+            '<select id="glev"><option value="">Hamısı</option>' +
+            (FAC.levels || []).map(function (l) {
+              return '<option value="' + esc(l.code) + '"' +
+                (f.level === l.code ? " selected" : "") + ">" + esc(l.name) + "</option>";
+            }).join("") + "</select></div>" +
+        "</div>" +
+        '<div class="chips" id="gDiff">' +
+          [1, 2, 3].map(function (d) {
+            return '<button class="chip' + (f.difficulty.indexOf(d) >= 0 ? " on" : "") +
+              '" data-d="' + d + '">' + DIFF[d] + "</button>";
+          }).join("") +
+        "</div>" +
+        (!f.subject
+          ? '<p class="muted" style="margin:12px 0 0">Mövzu seçmək üçün fənn seçin. ' +
+            "Mövzu seçilməsə, hamısından götürüləcək.</p>"
+          : ((FAC.topics || []).length
+              ? '<div class="chips" id="gTop">' + FAC.topics.map(function (t) {
+                  return '<button class="chip' + (f.topics.indexOf(t.id) >= 0 ? " on" : "") +
+                    '" data-t="' + esc(t.id) + '">' +
+                    esc(topLabel(t, f.level)) + "</button>";
+                }).join("") + "</div>"
+              : '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>')) +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      '<div class="card">' +
+        '<div class="fieldrow">' +
+          '<div><label for="gTitle">Testin adı</label>' +
+            '<input id="gTitle" maxlength="120" placeholder="məsələn: Riyaziyyat — 1-ci rüb" value="' +
+            esc(f.title) + '"></div>' +
+          '<div style="flex:0 0 140px"><label for="gCnt">Sual sayı</label>' +
+            '<input id="gCnt" type="number" min="1" max="100" inputmode="numeric" value="' +
+            f.count + '"></div>' +
+        "</div>" +
+        '<div id="gPrev"><div class="skel">Hovuz yoxlanılır…</div></div>' +
+        '<div id="gErr"></div>' +
+        '<button class="btn go" id="btnMake">' + ic("gen") + "Testi yığ</button>" +
+      "</div>"
+    );
+
+    on("btnBack", "click", function () { nav("#/"); });
+    on("gPool", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-v]") : null;
+      if (!b) return;
+      f.pool = b.getAttribute("data-v"); drawGen();
+    });
+    on("gDiff", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-d]") : null;
+      if (!b) return;
+      var d = Number(b.getAttribute("data-d"));
+      var i = f.difficulty.indexOf(d);
+      if (i >= 0) f.difficulty.splice(i, 1); else f.difficulty.push(d);
+      drawGen();
+    });
+    on("gTop", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-t]") : null;
+      if (!b) return;
+      var t = b.getAttribute("data-t");
+      var i = f.topics.indexOf(t);
+      if (i >= 0) f.topics.splice(i, 1); else f.topics.push(t);
+      drawGen();
+    });
+    on("gsub", "change", function () {
+      f.subject = $("gsub").value; f.topics = []; screenGen();
+    });
+    on("glev", "change", function () {
+      f.level = $("glev").value; f.topics = []; screenGen();
+    });
+    on("gTitle", "input", function () { f.title = $("gTitle").value; });
+
+    var t = null;
+    on("gCnt", "input", function () {
+      var n = Number($("gCnt").value);
+      if (n >= 1 && n <= 100) f.count = Math.round(n);
+      clearTimeout(t);
+      t = setTimeout(genPreview, 350);
+    });
+
+    on("btnMake", "click", makeTest);
+    genPreview();
+  }
+
+  /* Onizleme durust danisir: hovuzda o suzgecle HEQIQETEN nece
+     ferqli sual var.  Az cixsa, muellim duymeni basmamis bilir. */
+  function genPreview() {
+    var live = guard();
+    var f = genFilter();
+    var my = JSON.stringify(genRule(f));
+    sb.rpc("rpc_generate_preview", { p_rule: genRule(f) })
+      .then(function (v) {
+        if (!live()) return;
+        var box = $("gPrev");
+        /* Cavab gelene qeder suzgec deyisibse, kohne cavabi atiriq */
+        if (!box || JSON.stringify(genRule(genFilter())) !== my) return;
+        v = v || {};
+        var found = Number(v.found) || 0, want = Number(v.want) || f.count;
+        box.innerHTML = v.enough
+          ? msg("ok", "Hovuzda kifayət qədər sual var — " + want +
+                " sual yığılacaq.")
+          : msg("err", "Bu süzgəclə yalnız " + found + " fərqli sual tapıldı (" +
+                want + " istənilir). Süzgəci genişləndirin və ya sayı azaldın.");
+      })
+      .catch(function (e) {
+        if (!live()) return;
+        var box = $("gPrev");
+        if (box) box.innerHTML = msg("err", fail(e));
+      });
+  }
+
+  function makeTest() {
+    if (busy) return;
+    var f = genFilter();
+    $("gErr").innerHTML = "";
+    setBusy("btnMake", true, "Testi yığ");
+    sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: f.title || "" })
+      .then(function (v) {
+        busy = false;
+        nav("#/t/" + v.test_id);
+      })
+      .catch(function (e) {
+        setBusy("btnMake", false, "Testi yığ");
+        var el = $("gErr");
+        if (el) el.innerHTML = msg("err", fail(e));
+      });
+  }
+
+  /* ---------------------------------------------------------- veraq */
+  function screenPaper(id) {
+    var live = guard();
+    topTitle.textContent = "Test vərəqi";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    Promise.all([
+      sb.rpc("rpc_test_preview", { p_test_id: id }),
+      sb.select("classes", { select: "id,name", eq: { account_id: ACC.id }, order: "name" })
+    ]).then(function (res) {
+      if (!live()) return;
+      drawPaper(res[0] || {}, res[1] || []);
+    }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+
+  function drawPaper(t, classes) {
+    var qs = t.questions || [];
+    var done = Number(t.done) || 0;
+    topTitle.textContent = t.title || "Test vərəqi";
+
+    show(
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Test yığ</button>" +
+      '<div class="spacer"></div>' +
+      '<div class="card">' +
+        "<h1>" + esc(t.title || "") + "</h1>" +
+        '<p class="muted" style="margin:8px 0 0">' +
+          esc(t.subject || "") + (t.level ? " · " + esc(t.level) : "") +
+          " · " + qs.length + " sual" +
+          (done ? " · " + done + " şagird işləyib" : "") + "</p>" +
+        '<div class="spacer"></div>' +
+        (t.gen_rule
+          ? (done
+              ? '<p class="muted">Bu testi artıq şagird işlədiyi üçün ' +
+                "yeniləmək olmaz — yeni test yığın.</p>"
+              : '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
+                "Bəyənmədim — yenidən yığ</button>")
+          : "") +
+        '<div id="pErr"></div>' +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      "<h2>Qrupa təyin et</h2>" +
+      '<div class="card">' +
+        (classes.length
+          ? '<div class="fieldrow">' +
+              '<div><label for="pCls">Qrup</label><select id="pCls">' +
+                classes.map(function (c) {
+                  return '<option value="' + esc(c.id) + '">' + esc(c.name) + "</option>";
+                }).join("") + "</select></div>" +
+              '<div><label for="pDate">Son tarix</label>' +
+                '<input type="date" id="pDate"></div>' +
+              '<div style="flex:0 0 132px"><label for="pTry">Cəhd sayı</label>' +
+                '<select id="pTry"><option value="1">1 cəhd</option>' +
+                '<option value="2">2 cəhd</option><option value="3">3 cəhd</option>' +
+                '<option value="0">Limitsiz</option></select></div>' +
+            "</div>" +
+            '<div id="pAsgMsg"></div>' +
+            '<button class="btn go" id="btnPAsg">' + ic("plus") + "Tapşırıq ver</button>"
+          : '<p class="muted">Əvvəlcə əsas səhifədə qrup yaradın — sonra bu ' +
+            "testi ona təyin edə biləcəksiniz.</p>") +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      "<h2>Suallar</h2>" +
+      '<div class="card pad0 paper">' +
+        qs.map(function (q) {
+          return '<div class="pq">' +
+            '<div class="qh"><b>' + q.ord + ". " + esc(q.body) + "</b></div>" +
+            '<div class="qm">' +
+              (q.topic ? "<span>" + esc(q.topic) + "</span><span>·</span>" : "") +
+              '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
+                DIFF[Number(q.difficulty) || 2] + "</span>" +
+              "<span>·</span><span>" + (q.mine ? "öz sualınız" : "platforma") + "</span>" +
+            "</div>" +
+            (q.options || []).map(function (o) {
+              return '<div class="popt' + (o.correct ? " ok" : "") + '">' +
+                (o.correct ? ic("check") : "") + "<span>" + esc(o.body) + "</span></div>";
+            }).join("") +
+            (q.explanation
+              ? '<div class="pex">' + esc(q.explanation) + "</div>" : "") +
+          "</div>";
+        }).join("") +
+      "</div>"
+    );
+
+    on("btnBack", "click", function () { nav("#/gen"); });
+
+    on("btnRegen", "click", function () {
+      if (busy) return;
+      setBusy("btnRegen", true, "Bəyənmədim — yenidən yığ");
+      sb.rpc("rpc_regenerate_test", { p_test_id: t.id })
+        .then(function () { busy = false; screenPaper(t.id); })
+        .catch(function (e) {
+          setBusy("btnRegen", false, "Bəyənmədim — yenidən yığ");
+          var el = $("pErr");
+          if (el) el.innerHTML = msg("err", fail(e));
+        });
+    });
+
+    on("btnPAsg", "click", function () {
+      if (busy) return;
+      var cls = ($("pCls") || {}).value;
+      if (!cls) return;
+      var day = ($("pDate") || {}).value || "";
+      var closes = null;
+      if (day) {
+        var d = new Date(day + "T23:59:00");
+        if (isNaN(d)) { $("pAsgMsg").innerHTML = msg("err", "Tarix düzgün deyil."); return; }
+        if (d.getTime() <= Date.now()) {
+          $("pAsgMsg").innerHTML = msg("err", "Son tarix bu gündən sonra olmalıdır."); return;
+        }
+        closes = d.toISOString();
+      }
+      $("pAsgMsg").innerHTML = "";
+      setBusy("btnPAsg", true, "Tapşırıq ver");
+      sb.rpc("rpc_assign_test", {
+        p_class_id: cls, p_test_id: t.id,
+        p_closes_at: closes, p_max_attempts: Number(($("pTry") || {}).value || 1)
+      }).then(function () {
+        setBusy("btnPAsg", false, "Tapşırıq ver");
+        $("pAsgMsg").innerHTML = msg("ok",
+          "Tapşırıq verildi — şagirdlər testi artıq görür.");
+      }).catch(function (e) {
+        setBusy("btnPAsg", false, "Tapşırıq ver");
+        $("pAsgMsg").innerHTML = msg("err", fail(e));
+      });
+    });
+  }
+
+
+  /* ================================================================
      SUAL BANKI
      Sual testden asilı deyil - burda yasayir, sonra generator onu
      testlere yigir.  Ekran iki hissedir: suzgecli siyahi ve forma.
@@ -1102,7 +1429,11 @@
           "</summary>" +
         '<div class="fieldrow" style="margin-top:10px">' +
           '<div><select id="bsub"><option value="">Bütün fənlər</option>' +
-            (FAC.subjects || []).map(function (s) {
+            /* Suali olmayan fenn siyahida cixmir - onu secmek menasizdir.
+               Sual FORMASINDA ise butun fennler qalir. */
+            (FAC.subjects || []).filter(function (s) {
+              return Number(s.n) > 0 || f.subject === s.slug;
+            }).map(function (s) {
               return '<option value="' + esc(s.slug) + '"' +
                 (f.subject === s.slug ? " selected" : "") + ">" + esc(s.name) + "</option>";
             }).join("") + "</select></div>" +
@@ -1702,6 +2033,8 @@
     if (m[0] === "r" && m[1]) return screenReport(m[1]);
     if (m[0] === "a" && m[1]) return screenAssign(m[1]);
     if (m[0] === "b") return screenBank();
+    if (m[0] === "gen") return screenGen();
+    if (m[0] === "t" && m[1]) return screenPaper(m[1]);
     if (m[0] === "q" && m[1]) return screenQuestion(m[1]);
     if (m[0] === "s" && m[1] && m[2]) return screenStudent(m[1], m[2]);
     screenHome();

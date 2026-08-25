@@ -389,9 +389,19 @@ language plpgsql stable security definer set search_path = public, extensions, p
 declare v_acc uuid := app.pick_account(p_account);
 begin
   return jsonb_build_object(
+    --  Her fennin gorunen sual sayi da qaytarilir ('n').  Suzgec
+    --  ekranlari n=0 fenni GIZLEDIR - bos fenni secmek menasizdir.
+    --  Sual FORMASI ise hamisini gosterir (ilk suali yazmaq ucun).
     'subjects', coalesce((
-      select jsonb_agg(jsonb_build_object('slug', s.slug, 'name', s.name) order by s.sort)
-        from public.subjects s), '[]'::jsonb),
+      select jsonb_agg(jsonb_build_object('slug', z.slug, 'name', z.name, 'n', z.n)
+                       order by z.sort)
+        from (
+          select s.slug, s.name, s.sort,
+                 (select count(*) from public.questions q
+                   where q.subject_id = s.id
+                     and (q.account_id = v_acc
+                          or (q.owner_type = 'platform' and q.status = 'published'))) as n
+            from public.subjects s) z), '[]'::jsonb),
     'levels', coalesce((
       select jsonb_agg(distinct jsonb_build_object('code', l.code, 'name', l.name))
         from public.levels l

@@ -37,5 +37,8 @@ echo
 echo "6/7  tapsiriq axini"
 python3 test/e2e_assign.py
 echo
-echo "7/7  sual banki"
+echo "7/8  sual banki"
 python3 test/e2e_bank.py
+echo
+echo "8/8  generator"
+python3 test/e2e_gen.py
