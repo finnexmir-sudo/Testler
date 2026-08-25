@@ -235,8 +235,14 @@ with sync_playwright() as pw:
     ok("abunə paketinə daxildir" not in pg.inner_text("#main"),
        "abune ile xeberdarliq itir")
     pg.select_option("#gsub", "riyaziyyat")
-    pg.wait_for_selector("#gTop", timeout=8000)
+    pg.wait_for_selector("#gsub", timeout=8000); pg.wait_for_timeout(400)
+    # Sinifsiz movzu nisani CIXMIR - dord sinfin 40+ nisani telefonda
+    # gozu yorurdu.  Sinif secilenden sonra en coxu ~12 nisan gelir.
+    ok(pg.locator("#gTop").count() == 0, "sinifsiz movzu nisanlari gizlidir")
+    ok("sinif də seçin" in pg.inner_text("#main"), "sebeb yazilir - sinif secilsin")
     pg.select_option("#glev", "4"); pg.wait_for_selector("#gTop", timeout=8000)
+    nt = pg.locator("#gTop .chip").count()
+    ok(0 < nt <= 15, "sinifle movzu nisanlari yigcamdir", nt)
     pg.fill("#gCnt", "12"); pg.wait_for_timeout(700)
     ok("kifayət qədər" in pg.inner_text("#gPrev"),
        "platforma hovuzunda riy-4 suallari tapilir")

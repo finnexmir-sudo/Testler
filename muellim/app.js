@@ -1111,8 +1111,14 @@
               '" data-d="' + d + '">' + DIFF[d] + "</button>";
           }).join("") +
         "</div>" +
-        (!f.subject
-          ? '<p class="muted" style="margin:12px 0 0">Mövzu seçmək üçün fənn seçin. ' +
+        /* Movzu nisanlari yalniz FENN + SINIF secilende cixir.  Sinifsiz
+           fennin DORD sinfinin movzulari tokulur - telefonda 40+ nisan
+           gozu yorurdu.  Sinifle en coxu ~12 nisan olur. */
+        (!f.subject || !f.level
+          ? '<p class="muted" style="margin:12px 0 0">' +
+            (!f.subject
+              ? "Mövzu seçmək üçün fənn və sinif seçin. "
+              : "Mövzu seçmək üçün sinif də seçin. ") +
             "Mövzu seçilməsə, hamısından götürüləcək.</p>"
           : ((FAC.topics || []).length
               ? '<div class="chips" id="gTop">' + FAC.topics.map(function (t) {
