@@ -281,6 +281,21 @@ with sync_playwright() as pw:
                     from public.questions where owner_type='platform'
                    order by id limit 6) q(id, rn)""", (SID, TOPIC))
 
+    # Esas sehife: lovheler dolur, hesab-boyu tehluke zonasi gorunur
+    pg.goto(PANEL + "#/"); pg.reload()
+    pg.wait_for_selector(".tiles", timeout=8000)
+    pg.wait_for_function(
+        "document.querySelector('.tile b') && document.querySelector('.tile b').innerText !== '—'",
+        timeout=8000)
+    ok("Xoş gəlmisiniz" in pg.inner_text("#main"), "salamlasma var")
+    ok(pg.locator(".tile").count() == 4, "4 stat lovhesi var")
+    ok(pg.inner_text(".tile.c b") == "1", "sagird sayi lovhede",
+       pg.inner_text(".tile.c b"))
+    pg.wait_for_selector("#hAlerts .al", timeout=8000)
+    ok("geriləyir" in pg.inner_text("#hAlerts"), "ev sehifesinde de siqnal var")
+    ok(pg.locator("#hRecent .trow").count() >= 1, "son neticeler lenti dolur",
+       pg.locator("#hRecent .trow").count())
+
     pg.goto(PANEL + "#/g/" + GID); pg.reload()
     pg.wait_for_selector("#alerts .al", timeout=8000)
     al = pg.inner_text("#alerts")

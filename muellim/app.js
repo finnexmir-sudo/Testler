@@ -202,8 +202,19 @@
     var used = ACC.students_used, lim = ACC.students_limit;
     var pct = lim > 0 ? Math.min(100, Math.round(used * 100 / lim)) : 0;
     var cls = pct >= 100 ? "bar full" : (pct >= 80 ? "bar warn" : "bar");
+    var ad = ((CTX.profile && CTX.profile.full_name) || "").split(" ")[0];
 
     var html =
+      '<h1 class="hi">Xoş gəlmisiniz' + (ad ? ", " + esc(ad) : "") + "! 👋</h1>" +
+      /* Reqemler bir baxisda - "Fealiyyet merkezi"nin ust lovheleri */
+      '<div class="tiles" id="hTiles">' +
+        '<div class="tile a"><b>—</b><span>qrup</span></div>' +
+        '<div class="tile b"><b>—</b><span>test</span></div>' +
+        '<div class="tile c"><b>—</b><span>şagird</span></div>' +
+        '<div class="tile d"><b>—</b><span>orta bal</span></div>' +
+      "</div>" +
+      '<div id="hAlerts"></div>' +
+      '<div class="spacer"></div>' +
       '<div class="card">' +
         '<div class="seat">' +
           '<div><div class="num">' + used +
@@ -247,6 +258,7 @@
       '<div class="spacer"></div>' +
       "<h2>Qruplar</h2>" +
       '<div id="groups" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
+      '<div id="hRecent"></div>' +
       '<div class="spacer"></div>' +
       '<div class="card">' +
         '<label for="gname">Yeni qrup</label>' +
@@ -266,6 +278,7 @@
       if (sel) sel.innerHTML = levelOptions(null);
       loadGroups();
     });
+    loadHome();
 
     on("btnBank", "click", function () { nav("#/b"); });
     on("btnGen", "click", function () { nav("#/gen"); });
@@ -293,6 +306,68 @@
         $("gErr").innerHTML = msg("err", fail(e));
       });
     });
+  }
+
+  /* Fealiyyet merkezi: reqemler, hesab-boyu siqnallar, son neticeler.
+     Yardimci melumatdir - xetasi esas ekrani pozmasin. */
+  function loadHome() {
+    var live = guard();
+    sb.rpc("rpc_home", {}).then(function (v) {
+      if (!live() || !v) return;
+      var st = v.stats || {};
+      var t = $("hTiles");
+      if (t) {
+        t.innerHTML =
+          '<div class="tile a"><b>' + (st.groups || 0) + "</b><span>qrup</span></div>" +
+          '<div class="tile b"><b>' + (st.tests || 0) + "</b><span>öz testiniz</span></div>" +
+          '<div class="tile c"><b>' + (st.students || 0) + "</b><span>şagird</span></div>" +
+          '<div class="tile d"><b>' +
+            (st.attempts ? pct(st.avg) + "%" : "—") + "</b><span>orta bal</span></div>";
+      }
+
+      var ab = $("hAlerts");
+      if (ab && v.alerts && v.alerts.length) {
+        ab.innerHTML = '<div class="spacer"></div>' +
+          "<h2>Təhlükə zonası</h2>" +
+          '<div class="card pad0">' + v.alerts.map(function (a) {
+            var tx;
+            if (a.kind === "risk") {
+              tx = "son testlərdə geriləyir (" + pct(a.prev3) + "% → " +
+                   pct(a.last3) + "%)" +
+                   (a.topic ? " · zəif: " + esc(a.topic) : "");
+            } else if (a.kind === "weak") {
+              tx = "zəif mövzu: " + esc(a.topic || "") +
+                   " (" + pct(a.topic_ratio) + "%)";
+            } else {
+              tx = "son 3 testdə sabit " + pct(a.last3) + "% — əla gedir";
+            }
+            return '<button class="al ' + a.kind + '" data-al="' +
+              esc(a.student_id) + '" data-g="' + esc(a.class_id) + '">' +
+              ic(a.kind === "star" ? "check" : "warn") +
+              "<span><b>" + esc(a.name) + "</b> <span class=\"muted\">(" +
+                esc(a.class || "") + ")</span> " + tx + "</span>" +
+              '<span class="arrow">' + ic("right") + "</span></button>";
+          }).join("") + "</div>";
+        Array.prototype.forEach.call(ab.querySelectorAll("[data-al]"), function (b) {
+          b.addEventListener("click", function () {
+            nav("#/s/" + b.getAttribute("data-al") + "/" + b.getAttribute("data-g"));
+          });
+        });
+      }
+
+      var rc = $("hRecent");
+      if (rc && v.recent && v.recent.length) {
+        rc.innerHTML = '<div class="spacer"></div>' +
+          "<h2>Son nəticələr</h2>" +
+          '<div class="card pad0">' + v.recent.map(function (x) {
+            return '<div class="trow"><div class="g"><b>' + esc(x.student || "") +
+              "</b><i>" + esc(x.test || "") +
+              (x["class"] ? " · " + esc(x["class"]) : "") +
+              " · " + dateAz(x.at) + "</i></div>" +
+              '<span class="pctv">' + pct(x.percent) + "%</span></div>";
+          }).join("") + "</div>";
+      }
+    }).catch(function () {});
   }
 
   function loadGroups() {

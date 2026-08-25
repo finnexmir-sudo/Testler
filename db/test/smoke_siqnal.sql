@@ -255,6 +255,39 @@ end $$;
 \echo 'OK  7 · qaydadaki qrup da yoxlanilir - ozgeninki islemir'
 
 -- =====================================================================
+--  9. Esas sehife: stats + hesab-boyu siqnallar + lent
+-- =====================================================================
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000c1';
+do $$
+declare v jsonb;
+begin
+  v := public.rpc_home();
+  assert (v->'stats'->>'students')::int = 3, 'sagird sayi sehvdir';
+  assert (v->'stats'->>'attempts')::int >= 11, 'cehd sayi sehvdir';
+  assert (v->'stats'->>'avg')::numeric > 0, 'orta bal bosdur';
+  assert jsonb_array_length(v->'alerts') >= 2, 'hesab-boyu siqnallar gelmedi';
+  assert v->'alerts'->0->>'kind' = 'risk', 'risk birinci deyil';
+  assert v->'alerts'->0->>'class' is not null, 'siqnalda qrup adi yoxdur';
+  assert jsonb_array_length(v->'recent') >= 5, 'son neticeler lenti bosdur';
+end $$;
+\echo 'OK  9 · esas sehife: stats, siqnallar, lent'
+
+-- =====================================================================
+--  10. Pulsuz hesabda esas sehifenin siqnallari bagli
+-- =====================================================================
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000c2';
+do $$
+declare v jsonb;
+begin
+  v := public.rpc_home();
+  assert v->'alerts' = 'null'::jsonb, 'pulsuz hesabda siqnal acildi';
+  assert v->'stats' is not null, 'stats pulsuzda da gorunmelidir';
+end $$;
+\echo 'OK  10 · pulsuz hesabda siqnallar bagli, stats acıq'
+reset role; reset request.jwt.claim.sub;
+
+-- =====================================================================
 --  8. Veraqda "sehve benzer" bayragi gorunur
 -- =====================================================================
 set role authenticated;
