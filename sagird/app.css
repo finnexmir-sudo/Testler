@@ -207,8 +207,8 @@ input{min-height:52px;font-size:17px}
 
 /* xos detallar - sagird */
 body{background:
-  radial-gradient(52% 30% at 50% 0, rgba(43,74,203,.05), transparent 70%),
-  var(--surface-2, var(--n-25))}
+  radial-gradient(52% 30% at 50% 0, rgba(43,74,203,.05), transparent 70%)
+  no-repeat, var(--n-25)}
 .test{transition:background .12s}
 .test .arrow{transition:transform .15s,color .15s}
 .test:hover .arrow{transform:translateX(3px);color:var(--brand)}

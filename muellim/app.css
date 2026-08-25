@@ -65,9 +65,9 @@
 /* Menimseme zolagi */
 .meter{height:5px;border-radius:999px;background:var(--n-150);overflow:hidden;margin-top:8px}
 .meter i{display:block;height:100%;border-radius:999px;transition:width .35s}
-.meter.ok  i{background:var(--ok)}
-.meter.mid i{background:var(--warn)}
-.meter.low i{background:var(--err)}
+.meter.m-ok  i{background:var(--ok)}
+.meter.m-mid i{background:var(--warn)}
+.meter.m-low i{background:var(--err)}
 
 /* Movzu / tarixce setri */
 .trow{display:flex;align-items:center;gap:12px;padding:13px 16px;
@@ -367,9 +367,9 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .stat:nth-child(1)::before{background:var(--brand)}
 .stat:nth-child(2)::before{background:var(--teal)}
 .stat:nth-child(3)::before{background:#175d97}
-.meter.ok  i{background:linear-gradient(90deg,#0e9384,#18b8a6)}
-.meter.mid i{background:linear-gradient(90deg,#b54708,#e08a2e)}
-.meter.low i{background:linear-gradient(90deg,#b42318,#e05b51)}
+.meter.m-ok  i{background:linear-gradient(90deg,#0e9384,#18b8a6)}
+.meter.m-mid i{background:linear-gradient(90deg,#b54708,#e08a2e)}
+.meter.m-low i{background:linear-gradient(90deg,#b42318,#e05b51)}
 .qrow{transition:background .12s}
 .trow{transition:background .12s}
 .trow:hover{background:var(--n-25)}

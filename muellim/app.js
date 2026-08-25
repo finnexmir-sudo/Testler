@@ -761,7 +761,9 @@
   /* Menimseme zolagi: 0-49 zeif, 50-74 orta, 75+ yaxsi */
   function meter(ratio) {
     var r = pct(ratio);
-    var cls = r >= 75 ? "ok" : (r >= 50 ? "mid" : "low");
+    /*  DIQQET: "ok" YAZMA - base.css-de umumi mesaj qutusudur;
+        meter-i mint renge boyayib zolagi gizledirdi (3-cu toqqusma!) */
+    var cls = r >= 75 ? "m-ok" : (r >= 50 ? "m-mid" : "m-low");
     return '<div class="meter ' + cls + '"><i style="width:' + r + '%"></i></div>';
   }
 
@@ -994,8 +996,9 @@
   function av(name) {
     var n = String(name || "?").trim();
     var ch = n.charAt(0).toUpperCase() || "?";
-    var k = 0;
-    for (var i = 0; i < n.length; i++) k = (k + n.charCodeAt(i)) % 6;
+    var k = 7;
+    for (var i = 0; i < n.length; i++) k = (k * 31 + n.charCodeAt(i)) % 100003;
+    k = k % 6;
     return '<span class="av c' + k + '">' + esc(ch) + "</span>";
   }
 

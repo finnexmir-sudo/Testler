@@ -266,6 +266,13 @@ with sync_playwright() as pw:
     ok("Son yenilənmə" in pg.inner_text("#main"), "son yenilenme vaxti yazilir")
     ok("5 / 5" in pg.inner_text(".stats") or "0 / 5" in pg.inner_text(".stats"),
        "xulase kartlari dolur", pg.inner_text(".stats").replace("\n", " ")[:40])
+    # Menimseme zolagi GORUNUR olmalidir: "ok" sinfi base.css-in mesaj
+    # qutusu ile toqqusub zolagi gizledirdi (ucuncu bele toqqusma) -
+    # meter artiq m-ok/m-mid/m-low isledir, kohne adlar qayitmasin
+    ok(pg.evaluate(
+        "!document.querySelector('.meter.ok') && !document.querySelector('.meter.mid')"
+        " && !document.querySelector('.meter.low')"),
+       "meter koehne toqqusan sinifleri islemir")
 
     # Sehife yenilenende muellim yerini itirmemelidir
     url = pg.url
