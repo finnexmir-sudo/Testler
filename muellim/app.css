@@ -378,3 +378,10 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .al.weak{border-left-color:#e08a2e}
 .al.star{border-left-color:var(--ok)}
 .stu .l1 .av{width:30px;height:30px;flex:0 0 30px;font-size:13px;margin-right:2px}
+
+/* hesabat stat kartlari - ev lovheleri ile eyni dil */
+.stat.g1{background:linear-gradient(135deg,#2b4acb,#4a63e0);border:0;color:#fff}
+.stat.g2{background:linear-gradient(135deg,#0e9384,#18b8a6);border:0;color:#fff}
+.stat.g3{background:linear-gradient(135deg,#1c2a52,#31437a);border:0;color:#fff}
+.stat.g1::before,.stat.g2::before,.stat.g3::before{display:none}
+.stat.g1 span,.stat.g2 span,.stat.g3 span{color:rgba(255,255,255,.85)}

@@ -16,11 +16,10 @@ input{min-height:52px;font-size:17px}
 /* ------------------------------------------------------------- giris */
 .hero{text-align:center;padding:26px 0 10px}
 .hero .mark{
-  width:52px;height:52px;border-radius:14px;margin:0 auto 16px;
-  background:linear-gradient(140deg,var(--brand) 0%,var(--teal) 100%);
-  display:flex;align-items:center;justify-content:center;color:#fff;
-  font-size:22px;font-weight:700;letter-spacing:-.02em;
+  width:56px;height:56px;margin:0 auto 14px;
+  display:flex;align-items:center;justify-content:center;
 }
+.hero .mark svg{width:56px;height:56px;filter:drop-shadow(0 4px 10px rgba(43,74,203,.25))}
 .hero h1{font-size:23px;letter-spacing:-.022em;margin-bottom:7px}
 .hero p{color:var(--fg-2);font-size:14.5px;margin:0}
 

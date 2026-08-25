@@ -486,7 +486,9 @@
           (levelName(g.level_id)
             ? "<span>" + esc(levelName(g.level_id)) + "</span><span>·</span>" : "") +
           "<span>Qoşulma kodu</span>" +
-          '<span class="code key">' + esc(g.join_code) + "</span></div>" +
+          '<span class="code key">' + esc(g.join_code) + "</span>" +
+          '<button class="btn sm ghost icon" id="gCopy" title="Kodu kopyala" ' +
+            'aria-label="Kodu kopyala">' + ic("copy") + "</button></div>" +
         '<div class="spacer"></div>' +
         '<div class="row two">' +
           '<button class="btn wide" id="btnAsgs">' + ic("clip") + "Tapşırıqlar</button>" +
@@ -510,6 +512,7 @@
     on("btnBack", "click", function () { nav("#/"); });
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
+    on("gCopy", "click", function () { copyText(g.join_code, $("gCopy")); });
     loadAlerts(g.id);
     on("btnRen", "click", function () { renameGroup(g); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
@@ -784,9 +787,9 @@
             ic("refresh") + "Yenilə</button></div>" +
         '<div class="spacer"></div>' +
         '<div class="stats">' +
-          statTile(sm.active + " / " + sm.students, "aktiv şagird") +
-          statTile(pct(sm.avg) + "%", "orta nəticə") +
-          statTile(sm.attempts || 0, "işlənmiş test") +
+          statTile(sm.active + " / " + sm.students, "aktiv şagird", "g1") +
+          statTile(pct(sm.avg) + "%", "orta nəticə", "g2") +
+          statTile(sm.attempts || 0, "işlənmiş test", "g3") +
         "</div>";
 
       if (!r.paid) {
@@ -996,8 +999,9 @@
     return '<span class="av c' + k + '">' + esc(ch) + "</span>";
   }
 
-  function statTile(val, lbl) {
-    return '<div class="stat"><b>' + esc(String(val)) + "</b><span>" + esc(lbl) + "</span></div>";
+  function statTile(val, lbl, cls) {
+    return '<div class="stat ' + (cls || "") + '"><b>' + esc(String(val)) +
+      "</b><span>" + esc(lbl) + "</span></div>";
   }
 
   function screenStudent(id, classId) {
@@ -1016,9 +1020,9 @@
             "<span>" + esc(s.display_name) + "</span>" +
             '<span class="code key">' + esc(s.login_code) + "</span></div></div>" +
         '<div class="stats">' +
-          statTile(sm.attempts || 0, "test") +
-          statTile(pct(sm.avg) + "%", "orta") +
-          statTile(pct(sm.best) + "%", "ən yaxşı") +
+          statTile(sm.attempts || 0, "test", "g1") +
+          statTile(pct(sm.avg) + "%", "orta", "g2") +
+          statTile(pct(sm.best) + "%", "ən yaxşı", "g3") +
         "</div>";
 
       if (r.topics !== null) {
