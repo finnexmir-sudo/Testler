@@ -327,6 +327,14 @@ with sync_playwright() as pw:
     print("L · Valideyn xülasəsi")
     pg.goto(PANEL + "#/s/" + SID + "/" + GID); pg.reload()
     pg.wait_for_selector("#vTxt", timeout=8000)
+    # Tekrar sehv siyahisi QATLIDIR - sehifeni yemesin
+    ok(pg.locator("details.wrongbox").count() == 1, "sehv siyahisi qatlanandir")
+    ok(pg.locator("details.wrongbox[open]").count() == 0, "ilkin halda baglidir")
+    ok(pg.locator("details.wrongbox .fn").inner_text().strip().isdigit(),
+       "basliqda say gorunur", pg.locator("details.wrongbox .fn").inner_text())
+    pg.locator("details.wrongbox summary").click(); pg.wait_for_timeout(200)
+    ok(pg.locator(".wq").count() >= 1, "acilanda setirler gorunur",
+       pg.locator(".wq").count())
     t = pg.input_value("#vTxt")
     ok("Kənan" in t, "sagirdin adi metndedir", t.split("\n")[0][:40])
     ok("📊" in t and "▰" in t, "semimi uslubda emoji ve zolaqlar var")

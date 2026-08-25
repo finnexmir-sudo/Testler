@@ -955,12 +955,18 @@
       }
 
       if (r.weak !== null && r.weak && r.weak.length) {
-        h += "<h2>Təkrar səhv edilən suallar</h2><div class=\"card pad0\">" +
+        /* Uzun siyahi sehifeni yeyirdi - indi QATLANIR: bagli halda
+           yalniz basliq + say gorunur, klikle acilir.  Setirler de
+           yigcamdir: sual bir-iki setir, izah bir setir. */
+        h += '<details class="more filt wrongbox">' +
+          "<summary>Təkrar səhv edilən suallar " +
+            '<span class="fn">' + r.weak.length + "</span></summary>" +
+          '<div class="card pad0" style="margin-top:10px">' +
           r.weak.map(function (w) {
-            return '<div class="trow col"><b>' + esc(w.body) + "</b>" +
+            return '<div class="wq"><div class="g"><b>' + esc(w.body) + "</b>" +
               (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
-              '<span class="tag">' + w.wrong + " dəfə səhv</span></div>";
-          }).join("") + "</div>";
+              '</div><span class="wn">' + w.wrong + "×</span></div>";
+          }).join("") + "</div></details>";
       }
 
       h += "<h2>Test tarixçəsi</h2>";
