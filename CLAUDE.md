@@ -194,6 +194,15 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   bankı üçün qrammatika oxu (isim, sifət, durğu işarələri) saxlanılır.
   Riyaziyyat 2 də istisnadır: portaldakı nəşr köhnədir (yalnız 20-yə
   qədər gedir).
+- Təhlükə zonası (`db/18_siqnal.sql`): qrup ekranı özü xəbər verir —
+  gerileyən (son 3 vs əvvəlki 3, ≥10 bənd), zəif mövzu (≥5 cavab, <60%),
+  ulduz (son 3-ün hamısı ≥90%). **Az məlumatda susur** — hədlər
+  `app.alert_*()` funksiyalarındadır. Abunəsiz `alerts=null`.
+- Səhv cütləşdirmə: generator qaydasında `class` açarı — həmin qrupun
+  səhv cavablandığı sualların **surətdəki mətninə** qəlibcə bənzəyənlər
+  (`similarity ≥ app.rem_similarity()` = 0.5) mövzu daxilində önə keçir;
+  vərəqdə «səhvə bənzər» nişanı. Qrup hökmən çağıranın hesabına aid
+  olmalıdır — yoxlanılır.
 - Mövzu slug-u dəyişəndə **testlər də dəyişməlidir** —
   `07_seed_tests.sql`, `test/smoke_generator.sql`, `test/e2e_bank.py`
   slug-a görə axtarır. Tapılmayanda **susmasın, sınsın**: `if tp:` yox,

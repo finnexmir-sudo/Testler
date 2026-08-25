@@ -185,6 +185,7 @@ begin
       select jsonb_agg(y order by (y->>'ratio')::numeric, y->>'name')
       from (
         select jsonb_build_object(
+                 'id',      t.id,
                  'name',    t.name,
                  'subject', sub.name,
                  'total',   count(*),
@@ -197,7 +198,7 @@ begin
                                 and a.finished_at >= v_since
           join public.topics t   on t.id = aa.topic_id
           join public.subjects sub on sub.id = t.subject_id
-         group by t.name, sub.name
+         group by t.id, t.name, sub.name
         having count(*) >= app.min_topic_answers()
       ) z), '[]'::jsonb) end,
 

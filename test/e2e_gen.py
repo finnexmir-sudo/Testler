@@ -259,6 +259,62 @@ with sync_playwright() as pw:
                 where t.title = 'Riyaziyyat 4 — platforma sınağı'""", one=True)["n"]
     ok(tt >= 10, "suallar movzular arasinda paylanib", "%d movzu" % tt)
 
+    print("J · Təhlükə zonası və düzəliş testi")
+    SID = db("select id::text i from public.students limit 1", one=True)["i"]
+    TOPIC = db("""select t.id::text i from public.topics t
+                   join public.subjects s on s.id = t.subject_id
+                  where s.slug='riyaziyyat' and t.slug='riy-4-vurma-bolme'""",
+               one=True)["i"]
+    # temiz tarixce: gerileyen sagird (88,85,82 -> 60,55,50) + zeif movzu
+    db("delete from public.attempt_answers; delete from public.attempts;")
+    for i, p_ in enumerate([88, 85, 82, 60, 55, 50]):
+        db("""insert into public.attempts (test_id, student_id, status, percent, finished_at)
+              values (%s, %s, 'submitted', %s, now() - interval '20 days' + (%s || ' days')::interval)""",
+           (TID, SID, p_, i))
+    db("""insert into public.attempt_answers
+            (attempt_id, question_id, topic_id, is_correct, question_body)
+          select (select id from public.attempts where student_id = %s
+                   order by finished_at desc limit 1),
+                 q.id, %s, rn = 1, 'Vurma hesabi numune ' || (rn + 20) || ' movzu 1'
+            from (select id, row_number() over (order by id) rn
+                    from public.questions where owner_type='platform'
+                   order by id limit 6) q(id, rn)""", (SID, TOPIC))
+
+    pg.goto(PANEL + "#/g/" + GID); pg.reload()
+    pg.wait_for_selector("#alerts .al", timeout=8000)
+    al = pg.inner_text("#alerts")
+    ok("geriləyir" in al, "qrup ekrani OZU xeber verir - gerileme", al[:70].replace("\n", " "))
+    ok("zəif" in al, "zeif movzu siqnala baglidir")
+    ok(pg.locator("#alerts .al.risk").count() == 1, "qirmizi siqnal siniflidir")
+    pg.locator("#alerts .al").first.click()
+    pg.wait_for_selector("#btnRem", timeout=8000)
+    ok("/s/" in pg.url, "siqnala klik sagird hesabatina aparir")
+
+    print("K · Hesabatdan bir klikle düzəliş testi")
+    pg.click("#btnRem")
+    pg.wait_for_selector("#gPool", timeout=8000)
+    ok("zəif mövzular seçilib" in pg.inner_text("#main"),
+       "generator zeif movzularla acilir")
+    ok("Vurma və bölmə" in pg.inner_text("#main"), "movzunun adi gorunur")
+    pg.wait_for_function(
+        "document.querySelector('#gPrev') && "
+        "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
+        "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
+    ok("kifayət qədər" in pg.inner_text("#gPrev"), "duzelis hovuzu kifayetdir")
+    pg.click("#btnMake")
+    pg.wait_for_selector(".paper", timeout=8000)
+    ok(pg.locator(".paper .rem").count() >= 1,
+       "veraqda «səhvə bənzər» nisani var", pg.locator(".paper .rem").count())
+    ok("səhvə bənzər" in pg.inner_text(".paper"), "nisan metni duzgundur")
+    RID = pg.url.split("/t/")[1]
+    ok(db("select (gen_rule->>'class') c from public.tests where id=%s",
+          (RID,), one=True)["c"] == GID, "qayda qrupu yadda saxlayir")
+
+    # qrup hesabatinda da eyni duyme
+    pg.goto(PANEL + "#/r/" + GID); pg.reload()
+    pg.wait_for_selector("#btnRem", timeout=8000)
+    ok(True, "qrup hesabatinda da duzelis duymesi var")
+
     br.close()
 
 print()

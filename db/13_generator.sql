@@ -125,6 +125,14 @@ end $$;
 --         "quarter":1, "month":9, "tags":[...],
 --         "pool":"mine|platform|all", "count":20 }
 -- =====================================================================
+--  "Sehve benzer" heddi.  pg_trgm MENANI yox, cumle QELIBINI olcur -
+--  riyaziyyatda "6 x 7 nece eder?" sehvine "9 x 4 nece eder?" 0.56 verir
+--  (eyni qelib, ferqli reqemler) - mehz axtardigimiz budur.  Dil
+--  fennlerinde qelib nadir hallarda ust-uste dusur - orada esas siqnal
+--  onsuz da MOVZUdur.
+create or replace function app.rem_similarity() returns real
+language sql immutable as $$ select 0.5::real $$;
+
 create or replace function app.generate_pick(p_rule jsonb, p_account uuid)
 returns uuid[]
 language plpgsql stable security definer set search_path = public, extensions, pg_temp as $$
@@ -139,10 +147,33 @@ declare
   r        record;
   v_dup    boolean;
   i        int;
+  --  SEHV CUTLESDIRME: qayda "class" veribse, hemin qrupun sehv
+  --  cavablandigi suallarin metnleri yigilir; hovuzda onlara QELIBCE
+  --  benzeyen suallar movzu daxilinde one kecir.  Muellim gorur ki,
+  --  sistem uşagin buraxdigi sehvleri teqib edir.
+  v_class  uuid   := nullif(p_rule->>'class', '')::uuid;
+  v_wrongs text[] := null;
 begin
   --  Platformanin hovuzu abune telebidir; oz suallarin her zaman acıq
   if v_pool in ('platform','all') and not v_paid then
     v_pool := 'mine';
+  end if;
+
+  if v_class is not null then
+    if not exists (select 1 from public.classes c
+                    where c.id = v_class and c.account_id = p_account) then
+      raise exception 'Bu qrup sizin deyil.' using errcode = '42501';
+    end if;
+    select array_agg(w.b) into v_wrongs from (
+      --  Cavab aninda saxlanan SURET esasdir - sual sonradan deyisse de
+      --  sagirdin gorduyu metn qalir
+      select distinct app.norm_body(coalesce(nullif(aa.question_body, ''), q.body)) b
+        from public.attempt_answers aa
+        join public.attempts a   on a.id = aa.attempt_id and a.status = 'submitted'
+        join public.students st  on st.id = a.student_id and st.class_id = v_class
+        left join public.questions q on q.id = aa.question_id
+       where aa.is_correct = false
+       limit 300) w;
   end if;
 
   --  Eyni cavab en coxu bu qeder tekrarlana biler (20 sualda 3)
@@ -153,12 +184,21 @@ begin
     --  eks halda tesaduf 20 sualin 19-unu bir movzudan gotura biler.
     select z.id, z.body, z.answer
       from (
-        select q.id, q.body,
+        select m.id, m.body, m.answer,
+               --  Movzu daxilinde sehve benzeyenler ONE kecir; balans
+               --  yene movzular arasindadir (rn_topic novbesi qalir)
+               row_number() over (partition by m.topic_id
+                                  order by m.rem desc, random()) as rn_topic,
+               random() as rnd, m.rem
+        from (
+        select q.id, q.body, q.topic_id,
                coalesce((select string_agg(lower(btrim(o.body)), '|' order by o.body)
                            from public.question_options o
                           where o.question_id = q.id and o.is_correct), '') as answer,
-               row_number() over (partition by q.topic_id order by random()) as rn_topic,
-               random() as rnd
+               (v_wrongs is not null and exists (
+                  select 1 from unnest(v_wrongs) w
+                   where similarity(app.norm_body(q.body), w) >= app.rem_similarity()
+                )) as rem
           from public.questions q
           join public.subjects s on s.id = q.subject_id
           left join public.levels l on l.id = q.level_id
@@ -181,8 +221,9 @@ begin
            --  Sualsiz test olmaz
            and exists (select 1 from public.question_options o
                         where o.question_id = q.id and o.is_correct)
+        ) m
       ) z
-     order by z.rn_topic, z.rnd
+     order by z.rn_topic, z.rem desc, z.rnd
   loop
     exit when array_length(v_out, 1) >= v_want;
 
@@ -335,10 +376,33 @@ end $$;
 create or replace function public.rpc_test_preview(p_test_id uuid)
 returns jsonb
 language plpgsql stable security definer set search_path = public, extensions, pg_temp as $$
-declare v jsonb;
+declare
+  v jsonb;
+  v_acc    uuid;
+  v_class  uuid;
+  v_wrongs text[] := null;
 begin
   if not app.can_manage_test(p_test_id) then
     raise exception 'Bu test sizin deyil.' using errcode = '42501';
+  end if;
+
+  --  Test sehv-cutlesdirme ile yigilibsa, veraqda "sehve benzer"
+  --  nisani gosterilir.  Qrup yeniden yoxlanir - qayda kohne ola biler.
+  select nullif(t.gen_rule->>'class', '')::uuid into v_class
+    from public.tests t where t.id = p_test_id;
+  if v_class is not null then
+    v_acc := app.pick_account(null);
+    if exists (select 1 from public.classes c
+                where c.id = v_class and c.account_id = v_acc) then
+      select array_agg(w.b) into v_wrongs from (
+        select distinct app.norm_body(coalesce(nullif(aa.question_body, ''), q.body)) b
+          from public.attempt_answers aa
+          join public.attempts a  on a.id = aa.attempt_id and a.status = 'submitted'
+          join public.students st on st.id = a.student_id and st.class_id = v_class
+          left join public.questions q on q.id = aa.question_id
+         where aa.is_correct = false
+         limit 300) w;
+    end if;
   end if;
 
   select jsonb_build_object(
@@ -356,6 +420,9 @@ begin
                'topic', tp.name,
                'explanation', q.explanation,
                'mine', q.owner_type = 'educator',
+               'remedial', (v_wrongs is not null and exists (
+                  select 1 from unnest(v_wrongs) w
+                   where similarity(app.norm_body(q.body), w) >= app.rem_similarity())),
                'options', coalesce((
                   select jsonb_agg(jsonb_build_object(
                            'body', o.body, 'correct', o.is_correct) order by o.ord)

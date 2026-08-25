@@ -324,6 +324,46 @@
     });
   }
 
+  /* ----------------------------------------------- tehluke zonasi
+     Sistem OZU deyir: kim gerileyir, kim zeif movzudadir, kim
+     sabitdir.  Muellim tek-tek hesabat acmaga mecbur deyil.
+     Az melumatda server susur - yalan siqnal inami oldurur. */
+  function loadAlerts(gid) {
+    var live = guard();
+    sb.rpc("rpc_class_alerts", { p_class_id: gid }).then(function (v) {
+      if (!live()) return;
+      var box = $("alerts");
+      if (!box || !v) return;
+      if (v.alerts === null) return;              // pulsuz hesab - sessiz
+      var list = v.alerts || [];
+      if (!list.length) return;                   // siqnal yoxdursa sakitlik
+      box.innerHTML = '<div class="spacer"></div>' +
+        '<div class="card pad0">' + list.map(function (a) {
+          var t;
+          if (a.kind === "risk") {
+            t = "son testlərdə geriləyir (" + pct(a.prev3) + "% → " +
+                pct(a.last3) + "%)" +
+                (a.topic ? " · zəif: " + esc(a.topic) : "");
+          } else if (a.kind === "weak") {
+            t = "zəif mövzu: " + esc(a.topic || "") +
+                " (" + pct(a.topic_ratio) + "%)";
+          } else {
+            t = "son 3 testdə sabit " + pct(a.last3) + "% — əla gedir";
+          }
+          return '<button class="al ' + a.kind + '" data-al="' +
+            esc(a.student_id) + '">' +
+            ic(a.kind === "star" ? "check" : "warn") +
+            '<span><b>' + esc(a.name) + "</b> " + t + "</span>" +
+            '<span class="arrow">' + ic("right") + "</span></button>";
+        }).join("") + "</div>";
+      Array.prototype.forEach.call(box.querySelectorAll("[data-al]"), function (b) {
+        b.addEventListener("click", function () {
+          nav("#/s/" + b.getAttribute("data-al") + "/" + gid);
+        });
+      });
+    }).catch(function () {});   /* siqnal yardimcidir - xetasi ekrani pozmasin */
+  }
+
   /* ------------------------------------------------------- qrup detali */
   function screenGroup(id) {
     var live = guard();
@@ -362,6 +402,7 @@
           '<button class="btn wide" id="btnRep">' + ic("chart") + "Hesabat</button>" +
         "</div>" +
       "</div>" +
+      '<div id="alerts"></div>' +
       "<h2>Şagirdlər</h2>" +
       '<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
@@ -378,6 +419,7 @@
     on("btnBack", "click", function () { nav("#/"); });
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
+    loadAlerts(g.id);
     on("btnRen", "click", function () { renameGroup(g); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("btnStu", "click", addStudent);
@@ -692,6 +734,15 @@
             meter(t.ratio) + "</div>" +
             '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
         }).join("") + "</div>";
+        /* Dovreni baglayan duyme: zeif movzular -> hazir test.
+           Generator qrupun SEHV ETDIYI suallara benzeyenleri de
+           avtomatik one cekir (rule.class). */
+        var weak = r.topics.filter(function (t) { return Number(t.ratio) < 60; });
+        if (weak.length) {
+          h += '<div class="spacer"></div>' +
+            '<button class="btn go wide" id="btnRem">' + ic("gen") +
+            "Zəif mövzulardan test yığ (" + weak.length + ")</button>";
+        }
       }
 
       if (r.recent && r.recent.length) {
@@ -707,6 +758,10 @@
       stamp();
       on("btnB", "click", function () { nav("#/g/" + gid); });
       on("btnRef", "click", function () { screenReport(gid); });
+      on("btnRem", "click", function () {
+        var weak = (r.topics || []).filter(function (t) { return Number(t.ratio) < 60; });
+        remedialGen(gid, weak);
+      });
       Array.prototype.forEach.call(main.querySelectorAll("[data-s]"), function (b) {
         b.addEventListener("click", function () {
           nav("#/s/" + b.getAttribute("data-s") + "/" + gid);
@@ -797,6 +852,12 @@
             meter(t.ratio) + "</div>" +
             '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
         }).join("") + "</div>";
+        var sweak = r.topics.filter(function (t) { return Number(t.ratio) < 60 && t.id; });
+        if (sweak.length) {
+          h += '<div class="spacer"></div>' +
+            '<button class="btn go wide" id="btnRem">' + ic("gen") +
+            "Zəif mövzulardan test yığ (" + sweak.length + ")</button>";
+        }
       }
 
       if (r.weak !== null && r.weak && r.weak.length) {
@@ -823,6 +884,10 @@
 
       show(h);
       on("btnB", "click", function () { nav("#/r/" + classId); });
+      on("btnRem", "click", function () {
+        var sweak = (r.topics || []).filter(function (t) { return Number(t.ratio) < 60 && t.id; });
+        remedialGen(classId, sweak);
+      });
     }).catch(function (e) {
       if (!live()) return;
       show(msg("err", fail(e)) + '<button class="btn wide" id="btnB3">Geri</button>');
@@ -1043,7 +1108,8 @@
   function genFilter() {
     if (!GF) GF = { pool: (ACC && ACC.plan) ? "all" : "mine",
                     subject: "", level: "", topics: [], difficulty: [],
-                    count: 10, title: "" };
+                    count: 10, title: "",
+                    cls: "", remNames: [] };
     return GF;
   }
 
@@ -1053,7 +1119,22 @@
     if (f.level) r.level = f.level;
     if (f.topics.length) r.topics = f.topics;
     if (f.difficulty.length) r.difficulty = f.difficulty;
+    if (f.cls) r["class"] = f.cls;
     return r;
+  }
+
+  /* Hesabatdan gelen "duzelis testi" niyyeti: zeif movzular secili,
+     qrup qeyd olunub - generator hemin qrupun sehvlerine benzeyen
+     suallari one cekecek. */
+  function remedialGen(gid, weak) {
+    var f = genFilter();
+    f.subject = ""; f.level = ""; f.difficulty = [];
+    f.topics = weak.map(function (t) { return t.id; });
+    f.remNames = weak.map(function (t) { return t.name; });
+    f.cls = gid;
+    f.count = Math.min(10, Math.max(5, f.topics.length * 3));
+    f.title = "Düzəliş testi";
+    nav("#/gen");
   }
 
   function screenGen() {
@@ -1084,6 +1165,13 @@
           seg("platform", "Platforma", f.pool) +
           seg("all", "Hamısı", f.pool) +
         "</div>" +
+        (f.cls && f.topics.length
+          ? '<div class="ok" style="margin:12px 0 0">' + ic("check") +
+            "<span>Hesabatdan gələn zəif mövzular seçilib: " +
+            esc(f.remNames.join(", ")) +
+            ". Qrupun səhv etdiyi suallara bənzəyənlər önə çəkiləcək. " +
+            '<a href="#" id="gRemOff">Təmizlə</a></span></div>'
+          : "") +
         (f.pool !== "mine" && !(ACC && ACC.plan)
           ? '<div class="warn" style="margin:12px 0 0">' + ic("warn") +
             "<span>Platforma hovuzu abunə paketinə daxildir. " +
@@ -1145,6 +1233,11 @@
     );
 
     on("btnBack", "click", function () { nav("#/"); });
+    on("gRemOff", "click", function (e) {
+      e.preventDefault();
+      f.cls = ""; f.remNames = []; f.topics = [];
+      drawGen();
+    });
     on("gPool", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
@@ -1304,6 +1397,8 @@
               '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
                 DIFF[Number(q.difficulty) || 2] + "</span>" +
               "<span>·</span><span>" + (q.mine ? "öz sualınız" : "platforma") + "</span>" +
+              (q.remedial
+                ? '<span class="rem">səhvə bənzər</span>' : "") +
             "</div>" +
             (q.options || []).map(function (o) {
               return '<div class="popt' + (o.correct ? " ok" : "") + '">' +
