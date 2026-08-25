@@ -200,8 +200,10 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   `assert tp`.
 - Platforma seed sualları `ext_key` (`test-slug#sıra`) ilə tanınır —
   `07_seed_tests.sql` təkrar işlədiləndə sual çoxalmır, üzərinə yazılır.
-- Platforma sual bankı `db/16_bank_riy4.sql`-dədir (Riyaziyyat 4:
-  12 mövzu × 10 sual) və **əllə yazılmır** — `python3 tools/riy4.py`
+- Platforma sual bankı: `db/16_bank_riy4.sql` (Riyaziyyat 4,
+  12 mövzu × 10) və `db/17_bank_sinif4.sql` (Az dili 8 + Həyat bilgisi 5 +
+  İnformatika 3 mövzu × 10). **Əllə yazılmır** — `python3 tools/riy4.py` və
+  `python3 tools/sinif4.py`
   yaradır. Skript hər riyazi cavabı yenidən hesablayıb düzgün variantla
   tutuşdurur; düzəliş skriptdə edilir, sonra SQL yenidən çıxarılır.
   Yeni fənn/sinif bankı üçün eyni qəlibi izlə: `tools/<fənn><sinif>.py`
