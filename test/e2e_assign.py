@@ -157,7 +157,9 @@ with sync_playwright() as pw:
         want = next((o for o in ids if o in KEY.values()), None)
         sp.locator("[data-o='%s']" % want).click()
         sp.wait_for_timeout(100)
-        sp.click("#btnNext"); sp.wait_for_timeout(300)
+        if i + 1 < nq: sp.click("#btnNext")
+        else: sp.click("#btnFinish")
+        sp.wait_for_timeout(300)
     sp.wait_for_selector(".ring", timeout=8000)
     ok("100" in sp.inner_text(".ring .val"), "netice 100%")
     ok("bir də cəhd edə bilərsən" in sp.inner_text("#main"),

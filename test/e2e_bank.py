@@ -370,9 +370,11 @@ with sync_playwright() as pw:
                      where o.question_id = %s and o.is_correct limit 1""",
                  (q["i"],), one=True)["b"]
     sp.fill("#ans", correct); sp.wait_for_timeout(350)
-    ok("bitir" in sp.inner_text("#btnNext").lower(),
-       "cavab yazilanda duyme deyisir", sp.inner_text("#btnNext"))
-    sp.click("#btnNext"); sp.wait_for_selector(".ring", timeout=8000)
+    # Tek sualliq testde "Növbəti" yoxdur - yalniz "Testi bitir"
+    ok(sp.locator("#btnNext").count() == 0, "tek sualda 'Novbeti' yoxdur")
+    ok("bitir" in sp.inner_text("#btnFinish").lower(),
+       "'Testi bitir' duymesi var", sp.inner_text("#btnFinish"))
+    sp.click("#btnFinish"); sp.wait_for_selector(".ring", timeout=8000)
     ok("100" in sp.inner_text(".ring .val"),
        "yazili cavab SERVERDE duzgun sayilir", sp.inner_text(".ring .val"))
     sp.close()

@@ -316,13 +316,23 @@
                 '<span class="t">' + esc(o.body) + "</span></button>";
             }).join("") +
           "</div>") +
+      /* Sual xeritesi: hansi cavablanib, hansi yox - klikle kecid.
+         Sagird sonda cavabsiz qalani buradan tapir. */
+      '<div class="qnav" id="qnav">' +
+        S.qs.map(function (x, k) {
+          return '<button data-j="' + k + '" class="' +
+            (k === S.i ? "cur" : (S.answers[x.id] ? "done" : "")) +
+            '" aria-label="Sual ' + (k + 1) + '">' + (k + 1) + "</button>";
+        }).join("") + "</div>" +
       '<div class="spacer"></div>' +
       /* Cavabsiz da kecmek olar - bilmediyi sualda ilisib qalmasin.
-         Duymenin adi niyyeti aydin gosterir: "Keç" ve ya "Növbəti". */
-      '<button class="btn ' + (picked ? "go" : "") + ' wide" id="btnNext">' +
-        (S.i + 1 >= n
-          ? (picked ? "Testi bitir" : "Cavabsız bitir")
-          : (picked ? "Növbəti sual" : "Bilmirəm, keç")) + "</button>"
+         Bitirmek AYRI duymedir: "Növbəti" hec vaxt testi bitirmir. */
+      (S.i + 1 < n
+        ? '<button class="btn ' + (picked ? "go" : "") + ' wide" id="btnNext">' +
+            (picked ? "Növbəti sual" : "Bilmirəm, keç") + "</button>"
+        : "") +
+      '<button class="btn wide ' + (S.i + 1 >= n ? "go" : "ghost") +
+        '" id="btnFinish">Testi bitir</button>'
     );
 
     on("spk", "click", function () { say(q.body, $("spk")); });
@@ -332,11 +342,11 @@
       var v = ($("ans").value || "").trim();
       if (v) S.answers[q.id] = v; else delete S.answers[q.id];
       var nx = $("btnNext");
-      if (!nx) return;
-      nx.classList.toggle("go", !!v);
-      nx.textContent = (S.i + 1 >= S.qs.length)
-        ? (v ? "Testi bitir" : "Cavabsız bitir")
-        : (v ? "Növbəti sual" : "Bilmirəm, keç");
+      if (nx) {
+        nx.classList.toggle("go", !!v);
+        nx.textContent = v ? "Növbəti sual" : "Bilmirəm, keç";
+      }
+      markNav(v);
     });
 
     Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (b) {
@@ -347,10 +357,8 @@
         b.classList.add("sel");
         S.answers[q.id] = b.getAttribute("data-o");
         var nx = $("btnNext");
-        if (nx) {
-          nx.classList.add("go");
-          nx.textContent = (S.i + 1 >= S.qs.length) ? "Testi bitir" : "Növbəti sual";
-        }
+        if (nx) { nx.classList.add("go"); nx.textContent = "Növbəti sual"; }
+        markNav(true);
       });
     });
 
@@ -366,20 +374,37 @@
 
     on("btnNext", "click", function () {
       if (busy) return;
-      if (S.i + 1 >= S.qs.length) {
-        /* Bitirmeden EVVEL xeberdarliq: cavabsiz sual varsa geri
-           qayidib baxmaq olar - tesadufen bitirmesin. */
-        var bos = S.qs.filter(function (x) { return !S.answers[x.id]; }).length;
-        if (bos > 0 && !confirm(
-              bos + " sual cavabsız qalıb.\n\nTesti indi bitirmək istəyirsən?\n" +
-              "«Ləğv et» desən geri qayıdıb baxa bilərsən.")) return;
-        finish();
-      } else { S.i++; drawQuestion(); }
+      S.i++; drawQuestion();
+    });
+
+    on("btnFinish", "click", function () {
+      if (busy) return;
+      /* Bitirmeden EVVEL xeberdarliq: cavabsiz sual varsa geri
+         qayidib baxmaq olar - tesadufen bitirmesin. */
+      var bos = S.qs.filter(function (x) { return !S.answers[x.id]; }).length;
+      if (bos > 0 && !confirm(
+            bos + " sual cavabsız qalıb.\n\nTesti indi bitirmək istəyirsən?\n" +
+            "«Ləğv et» desən geri qayıdıb baxa bilərsən.")) return;
+      finish();
+    });
+
+    on("qnav", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-j]") : null;
+      if (!b || busy) return;
+      S.i = Number(b.getAttribute("data-j"));
+      drawQuestion();
     });
   }
 
+  /* Hazirki sualin xeritedeki xanasini yenileyir - tam yeniden
+     cizmeden.  Xana "cur" qalir; cavab varsa "done" de elave olunur. */
+  function markNav(hasAns) {
+    var c = document.querySelector('#qnav [data-j="' + S.i + '"]');
+    if (c) c.classList.toggle("done", !!hasAns);
+  }
+
   function finish() {
-    setBusy("btnNext", true, "Testi bitir");
+    setBusy("btnFinish", true, "Testi bitir");
     var payload = S.qs.map(function (q) {
       var a = S.answers[q.id];
       /* Yazili sualda cavab METNDIR, variant id-si deyil */
@@ -389,7 +414,7 @@
     sb.rpc("rpc_submit_attempt", {
       p_token: TOKEN, p_attempt_id: S.attempt, p_answers: payload
     }).then(function (r) { screenResult(r); }).catch(function (e) {
-      setBusy("btnNext", false, "Testi bitir");
+      setBusy("btnFinish", false, "Testi bitir");
       /* Cavablar hele gonderilmeyib - tekrar cehd eyni cehdi bitirir */
       errScreen(e, finish);
     });
@@ -432,7 +457,7 @@
         '<button class="btn" id="btnLb" style="flex:1">' + ic("cup") + "Lövhə</button></div>" +
 
       ((r.wrong && r.wrong.length)
-        ? "<h2>Səhv suallar</h2><div class=\"card pad0\">" + r.wrong.map(function (w) {
+        ? "<h2>Səhv cavablar</h2><div class=\"card pad0\">" + r.wrong.map(function (w) {
             return '<div class="wrong"><b>' + esc(w.body) + "</b>" +
               (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") + "</div>";
           }).join("") + "</div>"

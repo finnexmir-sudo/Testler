@@ -117,6 +117,22 @@ with sync_playwright() as pw:
     ok("keç" in pg.inner_text("#btnNext").lower(),
        "duyme 'bilmirem, keç' yazir", pg.inner_text("#btnNext"))
 
+    # Sual xeritesi: nomreli xanalar, klikle kecid
+    ok(pg.locator("#qnav button").count() == NQ, "xeritede her suala xana var",
+       pg.locator("#qnav button").count())
+    ok(pg.locator("#qnav .cur").inner_text() == "1", "hazirki sual isarelidir")
+    ok(pg.locator("#qnav .done").count() == 0, "hele cavablanan yoxdur")
+    pg.locator(".opt").first.click(); pg.wait_for_timeout(150)
+    ok(pg.locator("#qnav [data-j='0']").get_attribute("class").find("done") >= 0,
+       "cavab verilende xana dolur")
+    pg.locator("#qnav [data-j='2']").click(); pg.wait_for_timeout(250)
+    ok("3 / " + str(NQ) in pg.inner_text(".prog"), "xanaya klik hemin suala aparir",
+       pg.inner_text(".prog").replace("\n", " "))
+    pg.locator("#qnav [data-j='0']").click(); pg.wait_for_timeout(250)
+    ok(pg.locator(".opt.sel").count() == 1, "qayidanda secim yerindedir")
+    # secimi sifirlayaq ki, novbeti dovr temiz baslasin
+    # (secim qalsa da dovr duzgun variant secir - problem deyil)
+
     body = pg.inner_text(".q .body")
     ok(len(body) > 3, "sual metni gorunur", body[:40])
     # Brauzerde az/tr sesi yoxdur -> duyme gizli olmalidir.
@@ -149,7 +165,9 @@ with sync_playwright() as pw:
             ok(pg.locator(".opt.sel").count() == 1, "secilen variant isaretlenir")
             ok("növbəti" in pg.inner_text("#btnNext").lower(),
                "cavab secilende duyme 'Novbeti sual' olur", pg.inner_text("#btnNext"))
-        pg.click("#btnNext")
+        # Sonuncu sualda "Növbəti" YOXDUR - bitirme ayri duymedir
+        if i + 1 < NQ: pg.click("#btnNext")
+        else: pg.click("#btnFinish")
         pg.wait_for_timeout(350)
 
     print("D · Nəticə")
@@ -222,10 +240,12 @@ with sync_playwright() as pw:
         pg.wait_for_selector(".opt", timeout=6000)
         pg.locator(".opt").first.click()      # hemise birinci variant
         pg.wait_for_timeout(120)
-        pg.click("#btnNext"); pg.wait_for_timeout(400)
+        if i + 1 < naz: pg.click("#btnNext")
+        else: pg.click("#btnFinish")
+        pg.wait_for_timeout(400)
     pg.wait_for_selector(".ring", timeout=8000)
-    ok("səhv suallar" in pg.inner_text("#main").lower(),
-       "sehv suallar siyahisi cixir")
+    ok("səhv cavablar" in pg.inner_text("#main").lower(),
+       "sehv cavablar siyahisi cixir")
     ok(pg.locator(".wrong").count() >= 1, "sehv sual sayilir",
        pg.locator(".wrong").count())
     ok(len(pg.locator(".wrong i").first.inner_text()) > 5,
@@ -305,10 +325,12 @@ with sync_playwright() as pw:
         pg.click("#btnNext"); pg.wait_for_timeout(250)
     else:
         ok(True, "cavabsiz suallari kecmek olur", "%d sual" % (nq2 - 1))
-    ok("cavabsız bitir" in pg.inner_text("#btnNext").lower(),
-       "sonuncuda 'Cavabsiz bitir' yazir", pg.inner_text("#btnNext"))
+    # Sonuncu sualda "Növbəti" gorunmur - bitirmek AYRI duymedir,
+    # tesadufen "novbeti" basib testi bitirmek mumkun deyil
+    ok(pg.locator("#btnNext").count() == 0, "sonuncuda 'Novbeti' duymesi yoxdur")
+    ok(pg.locator("#btnFinish").count() == 1, "'Testi bitir' ayri duymedir")
     pg.on("dialog", lambda d: d.accept())
-    pg.click("#btnNext"); pg.wait_for_selector(".ring", timeout=8000)
+    pg.click("#btnFinish"); pg.wait_for_selector(".ring", timeout=8000)
     ok("0" in pg.inner_text(".ring .val"), "hamisi cavabsiz -> 0%",
        pg.inner_text(".ring .val").replace("\n", ""))
     nn = db("""select count(*) n from public.attempt_answers aa

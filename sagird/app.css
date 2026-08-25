@@ -189,3 +189,19 @@ input{min-height:52px;font-size:17px}
   background:var(--surface);color:var(--fg);font-family:inherit;
 }
 .tans:focus{outline:none;border-color:var(--brand);box-shadow:var(--ring)}
+
+/* ------------------------------------------------- sual xeritesi
+   Variantlarin altinda nomreli xanalar: cavablanan dolu, hazirki
+   cerciveli.  Klikle hemin suala kecid. */
+.qnav{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.qnav button{
+  width:36px;height:36px;border-radius:9px;flex:0 0 36px;
+  border:1px solid var(--line);background:var(--surface);
+  font-size:13px;font-weight:600;color:var(--fg-2);cursor:pointer;
+}
+.qnav button.done{
+  background:var(--brand-tint);border-color:var(--brand-line);color:var(--brand);
+}
+.qnav button.cur{
+  border-color:var(--brand);box-shadow:0 0 0 1px var(--brand);color:var(--brand);
+}
