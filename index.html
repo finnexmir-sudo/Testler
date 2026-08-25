@@ -7,7 +7,7 @@
 <meta name="description" content="Bil10 — repetitor və müəllimlər üçün onlayn test sistemi. Qrup yaradın, tapşırıq təyin edin, nəticələr avtomatik yığılsın.">
 <title>Bil10 — onlayn test sistemi</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20aria-hidden%3D%22true%22%3E%20%3Cdefs%3E%3ClinearGradient%20id%3D%22fvG%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232b4acb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230e9384%22%2F%3E%20%3C%2FlinearGradient%3E%3C%2Fdefs%3E%20%3Cpath%20d%3D%22M12.5%203.5%20H18%20A8.4%208.4%200%200%201%2026.4%2011.9%20A8.4%208.4%200%200%201%2018%2020.3%20H13.1%20L8.3%2024.6%20Q7.1%2025.6%207.1%2024%20V19.1%20A8.4%208.4%200%200%201%204.1%2011.9%20A8.4%208.4%200%200%201%2012.5%203.5%20Z%22%20fill%3D%22url%28%23fvG%29%22%2F%3E%20%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M10.2%2010.2%2012.5%208.4%20V16%22%2F%3E%20%3Cellipse%20cx%3D%2218.4%22%20cy%3D%2212%22%20rx%3D%223.1%22%20ry%3D%224.1%22%2F%3E%20%3C%2Fg%3E%20%3Cpath%20d%3D%22M22.5%2019.5%20h4.2%20a3.6%203.6%200%200%201%203.6%203.6%20a3.6%203.6%200%200%201-3.6%203.6%20h-1%20l2%203.4%20-4.6-3.5%20a3.6%203.6%200%200%201-4.2-3.5%20a3.6%203.6%200%200%201%203.6-3.6%20Z%22%20fill%3D%22%23ffc94d%22%2F%3E%20%3Cpath%20d%3D%22M23.4%2023.2%20l1.5%201.5%202.6-3%22%20fill%3D%22none%22%20stroke%3D%22%231a2233%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3C%2Fsvg%3E">
-<link rel="stylesheet" href="assets/base.css?v=56">
+<link rel="stylesheet" href="assets/base.css?v=57">
 <style>
   /* ---------------------------------------------------------- karkas */
   body{background:var(--surface)}
@@ -31,8 +31,13 @@
     -webkit-background-clip:text;background-clip:text;color:transparent}
   .logo s{text-decoration:none;color:var(--fg-3);font-size:12.5px;font-weight:500;
     letter-spacing:0;display:block;margin-top:-2px}
-  .site .enter{font-size:14px;font-weight:530;color:var(--fg-2);text-decoration:none}
-  .site .enter:hover{color:var(--brand)}
+  .site .enter{font-size:14px;font-weight:560;color:#fff;text-decoration:none;
+    background:var(--brand);border-radius:9px;padding:9px 16px}
+  .site .enter:hover{filter:brightness(1.08)}
+  .mnav{display:flex;gap:22px;margin-left:auto;margin-right:22px}
+  .mnav a{font-size:13.5px;font-weight:530;color:var(--fg-2);text-decoration:none}
+  .mnav a:hover{color:var(--brand)}
+  @media (max-width:720px){ .mnav{display:none} }
 
   /* ----------------------------------------------------------- hero */
   /*  Fon USTLUK + hero-nu birlikde ehate edir.  Yalniz hero-ya versek,
@@ -44,7 +49,7 @@
       radial-gradient(60% 68% at 12% 2%,  rgba(43,74,203,.085), transparent 62%),
       radial-gradient(54% 60% at 88% -6%, rgba(14,147,132,.075), transparent 60%);
   }
-  .hero{position:relative;padding:56px 0 76px}
+  .hero{position:relative;padding:46px 0 58px}
   .kicker{
     display:inline-flex;align-items:center;gap:7px;margin:0 0 20px;
     padding:5px 12px 5px 8px;border-radius:999px;
@@ -53,8 +58,8 @@
   }
   .kicker svg{width:14px;height:14px;stroke-width:2}
   h1{
-    font-size:clamp(30px,5.2vw,48px);line-height:1.1;letter-spacing:-.035em;
-    font-weight:660;margin:0 0 18px;max-width:16ch;
+    font-size:clamp(30px,5.2vw,52px);line-height:1.08;letter-spacing:-.036em;
+    font-weight:680;margin:0 0 18px;max-width:16ch;
   }
   h1 em{font-style:normal;
     background:linear-gradient(96deg,var(--brand) 10%,var(--teal) 95%);
@@ -70,13 +75,15 @@
     align-items:stretch}
   @media (max-width:640px){ .doors{grid-template-columns:1fr} }
   .door{
-    display:flex;flex-direction:column;gap:9px;text-decoration:none;color:inherit;
+    display:flex;flex-direction:column;gap:10px;text-decoration:none;color:inherit;
     background:var(--surface);border:1px solid var(--line);
-    border-radius:var(--r-lg);padding:18px;
+    border-radius:14px;padding:20px;
+    box-shadow:0 4px 16px rgba(21,26,36,.05);
     transition:border-color .14s,box-shadow .14s,transform .14s;
   }
-  .door:hover{border-color:var(--brand-line);box-shadow:0 6px 20px rgba(21,26,36,.07);
-    transform:translateY(-1px)}
+  .door:hover{border-color:var(--brand-line);box-shadow:0 12px 30px rgba(21,26,36,.10);
+    transform:translateY(-2px)}
+  .door.b:hover{border-color:var(--teal)}
   .door .dh{display:flex;align-items:center;gap:11px;margin-bottom:3px}
   .door .ic{width:38px;height:38px;flex:0 0 38px;border-radius:11px;
     background:var(--brand-tint);color:var(--brand);
@@ -99,7 +106,7 @@
   .door:hover .dbtn{filter:brightness(1.08)}
 
   /* ------------------------------------------------- panel onizlemesi */
-  .hright{position:relative;min-height:380px}
+  .hright{align-self:center}
   .shot{
     background:var(--surface);border:1px solid var(--line);
     border-radius:14px;padding:16px;
@@ -110,7 +117,11 @@
   .sdots i:first-child{background:#f6a5a0}
   .sdots i:nth-child(2){background:#f7d08a}
   .sdots i:nth-child(3){background:#9fd8b4}
-  .sdots span{margin-left:8px;font-size:12px;font-weight:600;color:var(--fg-2)}
+  .sdots span{margin-left:8px;font-size:12px;font-weight:600;color:var(--fg-2);
+    display:inline-flex;align-items:center;gap:6px}
+  .sdots span::after{content:"";width:7px;height:7px;border-radius:50%;
+    background:var(--ok);animation:puls 2s ease-in-out infinite}
+  @keyframes puls{0%,100%{opacity:1}50%{opacity:.35}}
   .stiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
   .st{background:var(--n-25);border:1px solid var(--n-100);border-radius:9px;
     padding:8px 6px;text-align:center}
@@ -126,10 +137,13 @@
     background:linear-gradient(90deg,var(--brand),var(--teal))}
   .srow b{flex:0 0 34px;text-align:right;font-size:12px;font-weight:620;
     color:var(--fg)}
+  /*  Sual karti panelin ALTINDAN cixir - yalniz kunc ust-uste dusur,
+      panelin mezmununu ortmur.  Yungul meyil derinlik hissi verir. */
   .shot.q{
-    position:absolute;right:-10px;bottom:-24px;width:250px;
+    width:248px;margin:-26px -12px 0 auto;position:relative;
     padding:14px;border-radius:12px;
-    box-shadow:0 14px 34px rgba(21,26,36,.14);
+    box-shadow:0 14px 34px rgba(21,26,36,.16);
+    transform:rotate(1.6deg);
   }
   .sq{font-size:10.5px;font-weight:640;color:var(--fg-3);
     letter-spacing:.05em;text-transform:uppercase;margin-bottom:7px}
@@ -175,9 +189,10 @@
   @media (max-width:560px){ .feat{grid-template-columns:1fr} }
   .f{border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;
     background:var(--surface)}
-  .f .ic{width:34px;height:34px;border-radius:9px;background:var(--n-100);
-    color:var(--n-600);display:flex;align-items:center;justify-content:center;
+  .f .ic{width:34px;height:34px;border-radius:9px;background:var(--brand-tint);
+    color:var(--brand);display:flex;align-items:center;justify-content:center;
     margin-bottom:13px}
+  .f:nth-child(even) .ic{background:var(--teal-tint);color:var(--teal)}
   .f .ic svg{width:17px;height:17px;stroke-width:1.75}
   .f b{display:block;font-size:14.5px;font-weight:580;letter-spacing:-.01em;
     margin-bottom:5px}
@@ -257,6 +272,10 @@
       </svg></span>
       <span><b>Bil<em>10</em></b><s>onlayn test sistemi</s></span>
     </a>
+    <nav class="mnav">
+      <a href="#addimlar">Necə işləyir</a>
+      <a href="#imkanlar">İmkanlar</a>
+    </nav>
     <a class="enter" href="muellim/">Panelə keç →</a>
   </header>
 </div>
@@ -356,7 +375,7 @@
 </div>
 
 <div class="wrap">
-  <section>
+  <section id="addimlar">
     <h2 class="stitle">Üç addım</h2>
     <p class="ssub">Qurmaq bir dəfəlik işdir. Sonra hər həftə eyni axınla gedir.</p>
     <div class="steps">
@@ -375,7 +394,7 @@
     </div>
   </section>
 
-  <section>
+  <section id="imkanlar">
     <h2 class="stitle">Nə edir</h2>
     <p class="ssub">Repetitorun həftəlik vaxtını yeyən işlər.</p>
     <div class="feat">
