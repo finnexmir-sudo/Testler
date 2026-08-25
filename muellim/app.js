@@ -1264,7 +1264,7 @@
               ? '<p class="muted">Bu testi artıq şagird işlədiyi üçün ' +
                 "yeniləmək olmaz — yeni test yığın.</p>"
               : '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
-                "Bəyənmədim — yenidən yığ</button>")
+                "Yenidən yığ</button>")
           : "") +
         '<div id="pErr"></div>' +
       "</div>" +
@@ -1316,11 +1316,11 @@
 
     on("btnRegen", "click", function () {
       if (busy) return;
-      setBusy("btnRegen", true, "Bəyənmədim — yenidən yığ");
+      setBusy("btnRegen", true, "Yenidən yığ");
       sb.rpc("rpc_regenerate_test", { p_test_id: t.id })
         .then(function () { busy = false; screenPaper(t.id); })
         .catch(function (e) {
-          setBusy("btnRegen", false, "Bəyənmədim — yenidən yığ");
+          setBusy("btnRegen", false, "Yenidən yığ");
           var el = $("pErr");
           if (el) el.innerHTML = msg("err", fail(e));
         });
