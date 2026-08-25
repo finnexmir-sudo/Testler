@@ -23,7 +23,7 @@ import urllib.request
 BASE = "https://www.e-derslik.edu.az"
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "mundericat")
 
-# 1-4 sinif, dord fennimiz. e-derslik portal id-leri.
+# 1-4 sinif dord fennimiz + 5-ci sinif (orta). e-derslik portal id-leri.
 KITABLAR = [
     # (id, fenn, sinif, qeyd)
     (419, "riyaziyyat", 1, "I hisse"),
@@ -50,6 +50,14 @@ KITABLAR = [
     (520, "informatika", 2, ""),
     (676, "informatika", 3, ""),
     (360, "informatika", 4, ""),
+    # ------- 5-ci sinif (orta mekteb) -------
+    (840, "riyaziyyat", 5, "I hisse"),
+    (841, "riyaziyyat", 5, "II hisse"),
+    (837, "azerbaycan-dili", 5, "I hisse"),
+    (838, "azerbaycan-dili", 5, "II hisse"),
+    (850, "ingilis-dili", 5, "esas xarici dil"),
+    (846, "informatika", 5, ""),
+    (844, "tarix", 5, "Azerbaycan tarixi"),
 ]
 
 TEG = re.compile(r"<[^>]*>")
