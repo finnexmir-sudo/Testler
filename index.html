@@ -7,7 +7,7 @@
 <meta name="description" content="Anlaq — repetitor və müəllimlər üçün onlayn test sistemi. Qrup yaradın, tapşırıq təyin edin, nəticələr avtomatik yığılsın.">
 <title>Anlaq — onlayn test sistemi</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232b4acb'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 23 16 9l6 14'/%3E%3Cpath d='M12.6 18.4h6.8'/%3E%3C/g%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/base.css?v=38">
+<link rel="stylesheet" href="assets/base.css?v=40">
 <style>
   /* ---------------------------------------------------------- karkas */
   body{background:var(--surface)}
@@ -144,6 +144,32 @@
     border-radius:999px;padding:5px 12px;font-size:12px;font-weight:530;
   }
   footer .note svg{width:13px;height:13px;stroke-width:2}
+
+  /* ------------------------------------------------- telefonda seliqe
+     360px-de sehife "bos" gorunurdu.  Sebeb: masaustu ucun secilmis
+     dikine olculer telefonda oldugu kimi qalirdi - hero-nun alti (76px)
+     bolmenin ustu (64px) ile toplanib 140px bosluq verirdi.  Sutunlar
+     bir-birinin altina dusende yan bosluq gedir, dikine ise qalir. */
+  @media (max-width:600px){
+    .site{height:56px}
+    .hero{padding:24px 0 32px}
+    .kicker{margin-bottom:13px}
+    h1{margin-bottom:11px;max-width:20ch}
+    .lead{margin-bottom:20px}
+    .doors{gap:10px}
+    .door{padding:15px;gap:12px}
+    section{padding:32px 0}
+    .stitle{margin-bottom:7px}
+    .ssub{margin-bottom:18px;font-size:14.5px}
+    .steps{gap:10px}
+    .step{padding:16px 15px}
+    .step .n{margin-bottom:11px}
+    .feat{gap:10px}
+    .f{padding:16px}
+    .f .ic{margin-bottom:10px}
+    .free{padding:24px 20px;gap:16px}
+    footer{padding:20px 0 28px}
+  }
 </style>
 </head>
 <body>

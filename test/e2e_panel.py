@@ -72,6 +72,19 @@ with sync_playwright() as pw:
              const l = document.querySelector('.logo').getBoundingClientRect();
              return r.width > window.innerWidth * 0.5 && l.left < window.innerWidth * 0.4;
            }"""), "ilk sehife " + lbl + ": ustluk duzgun yerlesir")
+    # Telefonda dikine bosluq.  Masaustu ucun secilmis olculer oldugu kimi
+    # qalanda sehife "bos" gorunurdu: hero-nun alti (76px) bolmenin ustu
+    # (64px) ile toplanib 140px bosluq verirdi.  Yan bosluq sutunlar
+    # birlesende gedir, dikine ise ozu-ozune azalmir - olculmelidir.
+    pg.set_viewport_size({"width": 360, "height": 740})
+    pg.goto("http://127.0.0.1:8010/index.html"); pg.wait_for_timeout(400)
+    ara = pg.evaluate("""() => {
+        const d = document.querySelector('.doors').getBoundingClientRect();
+        const s = document.querySelector('.stitle').getBoundingClientRect();
+        return Math.round(s.top - d.bottom);
+      }""")
+    ok(ara <= 80, "telefonda bolmeler arasi bosluq olculudur", "%dpx" % ara)
+
     ok(pg.locator('a[href="muellim/"]').count() >= 1, "muellim kecidi var")
     ok(pg.locator('a[href="sagird/"]').count() == 1, "sagird kecidi var")
     ok("Anlaq" in pg.inner_text(".logo"), "ad gorunur", pg.inner_text(".logo").replace("\n"," "))
