@@ -22,7 +22,7 @@ echo "kohne baza quruldu ($OLD)"
 for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          15_movzular_ederslik.sql \
          07_seed_tests.sql 16_bank_riy4.sql 17_bank_sinif4.sql 19_bank_riy3.sql \
-         20_bank_sinif3.sql 23_bank_sinif1.sql \
+         20_bank_sinif3.sql 23_bank_sinif1.sql 24_bank_sinif2.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql 05_grants.sql; do
   printf "  %-22s" "$f"
   if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then
