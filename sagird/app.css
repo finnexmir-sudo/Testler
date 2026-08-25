@@ -205,3 +205,22 @@ input{min-height:52px;font-size:17px}
 .qnav button.cur{
   border-color:var(--brand);box-shadow:0 0 0 1px var(--brand);color:var(--brand);
 }
+
+/* xos detallar - sagird */
+body{background:
+  radial-gradient(52% 30% at 50% 0, rgba(43,74,203,.05), transparent 70%),
+  var(--surface-2, var(--n-25))}
+.test{transition:background .12s}
+.test .arrow{transition:transform .15s,color .15s}
+.test:hover .arrow{transform:translateX(3px);color:var(--brand)}
+.opt{transition:border-color .12s,background .12s,transform .08s}
+.opt:active{transform:scale(.985)}
+.qnav button{transition:border-color .12s,background .12s,color .12s}
+.qnav button:hover{border-color:var(--brand)}
+.ring.pass .fill{filter:drop-shadow(0 0 6px rgba(14,147,132,.45))}
+/* lovhede ilk ucluk - medal rengleri */
+.lb:nth-child(1) .rk{background:linear-gradient(135deg,#f5c343,#e8a417);color:#5b3d00}
+.lb:nth-child(2) .rk{background:linear-gradient(135deg,#d7dde7,#aeb8c8);color:#3c4657}
+.lb:nth-child(3) .rk{background:linear-gradient(135deg,#e2a06b,#c77b3f);color:#5a3010}
+.lb.me:nth-child(n+4) .rk{background:var(--brand);color:#fff}
+.tans:focus{border-color:var(--brand)}

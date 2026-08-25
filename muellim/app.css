@@ -359,3 +359,22 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .tile.b{background:linear-gradient(135deg,#0e9384,#18b8a6)}
 .tile.c{background:linear-gradient(135deg,#175d97,#2f86c8)}
 .tile.d{background:linear-gradient(135deg,#1c2a52,#31437a)}
+
+/* xos detallar - panel */
+.stats{gap:10px}
+.stat{position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;inset:0 auto 0 0;width:3px}
+.stat:nth-child(1)::before{background:var(--brand)}
+.stat:nth-child(2)::before{background:var(--teal)}
+.stat:nth-child(3)::before{background:#175d97}
+.meter.ok  i{background:linear-gradient(90deg,#0e9384,#18b8a6)}
+.meter.mid i{background:linear-gradient(90deg,#b54708,#e08a2e)}
+.meter.low i{background:linear-gradient(90deg,#b42318,#e05b51)}
+.qrow{transition:background .12s}
+.trow{transition:background .12s}
+.trow:hover{background:var(--n-25)}
+.al{border-left:3px solid transparent}
+.al.risk{border-left-color:var(--err)}
+.al.weak{border-left-color:#e08a2e}
+.al.star{border-left-color:var(--ok)}
+.stu .l1 .av{width:30px;height:30px;flex:0 0 30px;font-size:13px;margin-right:2px}

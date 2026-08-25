@@ -673,7 +673,7 @@
         return '<div class="stu" data-row="' + esc(s.id) + '">' +
           /* «Hesabat» kecid oldugu ucun ADIN yanindadir - asagida yer
              qalsin deye.  Asagida yalniz kodla bagli isler var. */
-          '<div class="l1"><b>' + esc(s.full_name) + "</b>" +
+          '<div class="l1">' + av(s.full_name) + "<b>" + esc(s.full_name) + "</b>" +
             '<button class="btn sm ghost link" data-rep="' + esc(s.id) + '">' +
               "Hesabat" + ic("right") + "</button>" +
             '<button class="btn sm ghost icon" data-edit="' + esc(s.id) + '" ' +
@@ -802,6 +802,7 @@
       } else {
         h += '<div class="card pad0">' + st.map(function (s) {
           return '<button class="item" data-s="' + esc(s.id) + '">' +
+            av(s.full_name) +
             '<div class="g"><b>' + esc(s.full_name) + "</b>" +
             "<i><span>" + (s.attempts || 0) + " test</span><span>·</span>" +
             "<span>son: " + dateAz(s.last_at) + "</span></i>" +
@@ -983,6 +984,16 @@
       if (teacher) { L.push(""); L.push(teacher); }
     }
     return L.join("\n");
+  }
+
+  /* Ad avatari: bas herf + sabit reng (ada gore) - siyahilar cansiz
+     gorunmesin */
+  function av(name) {
+    var n = String(name || "?").trim();
+    var ch = n.charAt(0).toUpperCase() || "?";
+    var k = 0;
+    for (var i = 0; i < n.length; i++) k = (k + n.charCodeAt(i)) % 6;
+    return '<span class="av c' + k + '">' + esc(ch) + "</span>";
   }
 
   function statTile(val, lbl) {
