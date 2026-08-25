@@ -1,0 +1,297 @@
+-- =====================================================================
+--  35_bank_sinif7.sql : 7-CI SINIF - AZ DILI, INGILIS DILI,
+--                       INFORMATIKA, UMUMI TARIX
+--
+--  BU FAYL ELLE YAZILMIR - tools/sinif7.py yaradir:
+--      python3 tools/sinif7.py
+--
+--  Az dili 8 + Ingilis dili 6 + Informatika 5 + Tarix 2
+--  = 21 movzu x 10 = 210.  ext_key: az7-/ing7-/inf7-/tarix7-...
+--  ON SERT: 33_movzular_orta7.sql islenmis olmalidir.
+--  SONRA:   05_grants.sql yeniden islet.
+-- =====================================================================
+
+do $$
+begin
+  if not exists (select 1 from public.topics t join public.subjects s
+      on s.id = t.subject_id
+     where (s.slug, t.slug) in (('az-dili','az-7-feil-sekil'),
+                                ('ingilis-dili','ing-7-travel'),
+                                ('informatika','inf-7-internet'),
+                                ('tarix','tarix-7-orta-esrler'))
+     having count(*) = 4) then
+    raise exception 'ONCE 33_movzular_orta7.sql isledilmelidir.';
+  end if;
+end $$;
+
+delete from public.question_options o
+ using public.questions q
+ where o.question_id = q.id
+   and q.owner_type = 'platform'
+   and (q.ext_key like 'az7-%' or q.ext_key like 'ing7-%'
+        or q.ext_key like 'inf7-%' or q.ext_key like 'tarix7-%');
+
+with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
+('az7-feil-zaman#1','az-dili','az-7-feil-zaman',1,1,'Feilin neçə zamanı var?','Üç zaman: keçmiş, indiki, gələcək.',array['3','2','6','4'],1),
+('az7-feil-zaman#2','az-dili','az-7-feil-zaman',1,1,'«Oxuyur» feili hansı zamandadır?','-ur şəkilçisi indiki zamanı bildirir.',array['İndiki','Keçmiş','Gələcək','Zaman bildirmir'],1),
+('az7-feil-zaman#3','az-dili','az-7-feil-zaman',2,1,'İndiki zamanın şəkilçiləri hansılardır?','İndiki zaman: -ır, -ir, -ur, -ür.',array['-ır, -ir, -ur, -ür','-dı, -di','-acaq, -əcək','-mış, -miş'],1),
+('az7-feil-zaman#4','az-dili','az-7-feil-zaman',3,1,'«Gedəcəyik» feilində zaman və şəxs hansıdır?','-əcək gələcək zaman, -ik I şəxsin cəmi.',array['Gələcək zaman, I şəxs cəm','Keçmiş zaman, II şəxs tək','İndiki zaman, III şəxs','Zaman yoxdur'],1),
+('az7-feil-zaman#5','az-dili','az-7-feil-zaman',2,1,'Şühudi keçmiş zaman hansı şəkilçi ilə düzəlir?','Şühudi keçmiş: -dı, -di, -du, -dü.',array['-dı, -di, -du, -dü','-mış, -miş','-ır, -ir','-ar, -ər'],1),
+('az7-feil-zaman#6','az-dili','az-7-feil-zaman',2,1,'Nəqli keçmiş zamanın şəkilçisi hansıdır?','Nəqli keçmiş: -mış, -miş, -muş, -müş.',array['-mış, -miş, -muş, -müş','-dı, -di','-sa, -sə','-malı, -məli'],1),
+('az7-feil-zaman#7','az-dili','az-7-feil-zaman',3,1,'«Yazmışam» feili hansı keçmiş zamandadır?','-mış şəkilçisi nəqli keçmişi bildirir.',array['Nəqli keçmiş','Şühudi keçmiş','İndiki','Gələcək'],1),
+('az7-feil-zaman#8','az-dili','az-7-feil-zaman',3,1,'Qeyri-qəti gələcək zaman hansı şəkilçi ilə düzəlir?','Qeyri-qəti gələcək: -ar, -ər.',array['-ar, -ər','-acaq, -əcək','-ır, -ir','-dı, -di'],1),
+('az7-feil-zaman#9','az-dili','az-7-feil-zaman',3,1,'«Gələr» feili hansı zamandadır?','-ər şəkilçisi qeyri-qəti gələcəyi bildirir.',array['Qeyri-qəti gələcək','Qəti gələcək','İndiki','Şühudi keçmiş'],1),
+('az7-feil-zaman#10','az-dili','az-7-feil-zaman',2,1,'Feil zamana görə nəyə əsasən dəyişir?','Hərəkətin icra vaxtına görə dəyişir.',array['Hərəkətin icra vaxtına görə','Sözün uzunluğuna görə','Hecaların sayına görə','Cümlənin yerinə görə'],1),
+('az7-feil-sekil#1','az-dili','az-7-feil-sekil',2,1,'Feilin neçə şəkli var?','Altı şəkil: xəbər, əmr, arzu, vacib, lazım, şərt.',array['6','3','4','10'],1),
+('az7-feil-sekil#2','az-dili','az-7-feil-sekil',2,1,'«Yazsa» feili hansı şəkildədir?','-sa şəkilçisi şərt şəklini bildirir.',array['Şərt','Əmr','Arzu','Vacib'],1),
+('az7-feil-sekil#3','az-dili','az-7-feil-sekil',2,1,'Şərt şəklinin şəkilçisi hansıdır?','Şərt şəkli -sa, -sə ilə düzəlir.',array['-sa, -sə','-malı, -məli','-a, -ə','-ası, -əsi'],1),
+('az7-feil-sekil#4','az-dili','az-7-feil-sekil',3,1,'«Oxumalıyam» feili hansı şəkildədir?','-malı şəkilçisi vacib şəklini bildirir.',array['Vacib','Lazım','Arzu','Şərt'],1),
+('az7-feil-sekil#5','az-dili','az-7-feil-sekil',3,1,'«Kaş yazaydım» cümləsindəki feil hansı şəkildədir?','Arzu şəkli -a, -ə (+ ydı) ilə düzəlir, «kaş» sözü ilə işlənir.',array['Arzu','Əmr','Xəbər','Şərt'],1),
+('az7-feil-sekil#6','az-dili','az-7-feil-sekil',2,1,'Əmr şəklində feil nəyi bildirir?','Əmr, xahiş, məsləhət bildirir.',array['Əmri və xahişi','Yalnız keçmişi','Yalnız arzunu','Şərti'],1),
+('az7-feil-sekil#7','az-dili','az-7-feil-sekil',1,1,'«Get!» feili hansı şəkildədir?','Şəkilçisiz əmr forması II şəxsin təkinə aiddir.',array['Əmr','Xəbər','Lazım','Vacib'],1),
+('az7-feil-sekil#8','az-dili','az-7-feil-sekil',2,1,'Vacib şəklinin şəkilçisi hansıdır?','Vacib şəkli: -malı, -məli.',array['-malı, -məli','-sa, -sə','-ar, -ər','-ıb, -ib'],1),
+('az7-feil-sekil#9','az-dili','az-7-feil-sekil',3,1,'Lazım şəklinin şəkilçisi hansıdır?','Lazım şəkli: -ası, -əsi.',array['-ası, -əsi','-malı, -məli','-a, -ə','-dı, -di'],1),
+('az7-feil-sekil#10','az-dili','az-7-feil-sekil',3,1,'Xəbər şəkli nəyi bildirir?','Hərəkətin üç zamandan birində icrasını bildirir.',array['Hərəkətin zamanla icrasını','Yalnız əmri','Yalnız şərti','Yalnız arzunu'],1),
+('az7-feil-qurulus#1','az-dili','az-7-feil-qurulus',2,2,'Quruluşca sadə feil hansıdır?','«Yaz» yalnız kökdən ibarətdir.',array['yaz','yazdırmaq','söz vermək','başa düşmək'],1),
+('az7-feil-qurulus#2','az-dili','az-7-feil-qurulus',2,2,'Düzəltmə feillər necə yaranır?','Ad və feillərə leksik şəkilçi artırmaqla.',array['Şəkilçi artırmaqla','Sözü təkrarlamaqla','Vurğunu dəyişməklə','Yaranmır'],1),
+('az7-feil-qurulus#3','az-dili','az-7-feil-qurulus',3,2,'«Başa düşmək» quruluşca hansı feildir?','İki sözdən ibarətdir — mürəkkəb (tərkibi) feildir.',array['Mürəkkəb','Sadə','Düzəltmə','Feil deyil'],1),
+('az7-feil-qurulus#4','az-dili','az-7-feil-qurulus',3,2,'«Gözləmək» feili hansı nitq hissəsindən düzəlib?','«Göz» ismindən -lə şəkilçisi ilə düzəlib.',array['İsimdən','Sifətdən','Saydan','Zərfdən'],1),
+('az7-feil-qurulus#5','az-dili','az-7-feil-qurulus',3,2,'Təsirli feil hansı sualı tələb edir?','Təsirli feil «kimi? nəyi?» sualını tələb edir.',array['Kimi? Nəyi?','Harada?','Nə vaxt?','Necə?'],1),
+('az7-feil-qurulus#6','az-dili','az-7-feil-qurulus',3,2,'«Kitab oxudu» cümləsində «oxumaq» feili təsirli, yoxsa təsirsizdir?','Nəyi oxudu? — obyekt tələb edir, təsirlidir.',array['Təsirli','Təsirsiz','Heç biri','Köməkçi'],1),
+('az7-feil-qurulus#7','az-dili','az-7-feil-qurulus',3,2,'«Yatmaq» feili təsirlidir, yoxsa təsirsiz?','Obyekt tələb etmir — təsirsizdir.',array['Təsirsiz','Təsirli','Hər ikisi','Feil deyil'],1),
+('az7-feil-qurulus#8','az-dili','az-7-feil-qurulus',2,2,'«Bilmək» feilinin inkar forması hansıdır?','İnkar -mə şəkilçisi ilə: bilməmək.',array['bilməmək','bilmək yox','nabilmək','bilməzlik'],1),
+('az7-feil-qurulus#9','az-dili','az-7-feil-qurulus',3,2,'«Ağarmaq» feili hansı nitq hissəsindən düzəlib?','«Ağ» sifətindən -ar şəkilçisi ilə düzəlib.',array['Sifətdən','İsimdən','Saydan','Nidadan'],1),
+('az7-feil-qurulus#10','az-dili','az-7-feil-qurulus',2,2,'Feillər şəxsə görə dəyişirmi?','Bəli, feillər şəxsə və kəmiyyətə görə təsriflənir.',array['Bəli, təsriflənir','Xeyr, heç vaxt','Yalnız cəmdə','Yalnız keçmişdə'],1),
+('az7-zerf#1','az-dili','az-7-zerf',2,2,'Zərfin məna növləri hansılardır?','Tərzi-hərəkət, zaman, yer və miqdar zərfləri.',array['Tərzi-hərəkət, zaman, yer, miqdar','Yalnız zaman','Ad, əlamət, hərəkət','Sadə və mürəkkəb'],1),
+('az7-zerf#2','az-dili','az-7-zerf',2,2,'«Astaca» sözü hansı zərf növüdür?','Necə? — tərzi-hərəkət zərfidir.',array['Tərzi-hərəkət','Zaman','Yer','Miqdar'],1),
+('az7-zerf#3','az-dili','az-7-zerf',2,2,'«İrəli» sözü hansı zərf növüdür?','Haraya? — yer zərfidir.',array['Yer','Zaman','Miqdar','Tərzi-hərəkət'],1),
+('az7-zerf#4','az-dili','az-7-zerf',2,2,'«Çox» sözü hansı zərf növünə aiddir?','Nə qədər? — miqdar zərfidir.',array['Miqdar','Yer','Zaman','Səbəb'],1),
+('az7-zerf#5','az-dili','az-7-zerf',2,2,'«Axşamüstü» sözü hansı zərf növüdür?','Nə vaxt? — zaman zərfidir.',array['Zaman','Yer','Miqdar','Tərzi-hərəkət'],1),
+('az7-zerf#6','az-dili','az-7-zerf',3,2,'Zərflər cümlədə əsasən hansı üzv olur?','Zərflər cümlədə zərflik olur.',array['Zərflik','Mübtəda','Təyin','Xəbər olmur'],1),
+('az7-zerf#7','az-dili','az-7-zerf',3,2,'«Qaça-qaça» sözü hansı nitq hissəsidir?','Necə? — tərzi-hərəkət zərfidir.',array['Zərf','Feil','İsim','Qoşma'],1),
+('az7-zerf#8','az-dili','az-7-zerf',2,2,'Zərf əsasən hansı nitq hissəsi ilə bağlı olur?','Zərf hərəkətin əlamətini bildirir — feillə bağlıdır.',array['Feillə','Yalnız isimlə','Bağlayıcı ilə','Nida ilə'],1),
+('az7-zerf#9','az-dili','az-7-zerf',2,2,'«Az-az» zərfi nəyi bildirir?','Miqdar bildirir.',array['Miqdarı','Yeri','Zamanı','Rəngi'],1),
+('az7-zerf#10','az-dili','az-7-zerf',3,2,'Hansı sırada yalnız zərflər verilib?','Tez, gec, indi — hamısı zərfdir.',array['tez, gec, indi','tez, qaçmaq, yol','gec, gecə, gecikmək','indi, in, san'],1),
+('az7-qosma-baglayici#1','az-dili','az-7-qosma-baglayici',2,3,'«Üçün» qoşması sözə necə yazılır?','Qoşmalar əsasən ayrı yazılır: vətən üçün.',array['Ayrı','Bitişik','Defislə','Dırnaqda'],1),
+('az7-qosma-baglayici#2','az-dili','az-7-qosma-baglayici',3,3,'«İlə» qoşması samitlə bitən sözlərdə necə işlənir?','Qısalaraq -la, -lə şəklində bitişik yazılır: qatarla.',array['-la, -lə şəklində bitişik','Həmişə ayrı','Defislə','İşlənmir'],1),
+('az7-qosma-baglayici#3','az-dili','az-7-qosma-baglayici',2,3,'Hansı söz tabesizlik bağlayıcısıdır?','«Və» tabesizlik bağlayıcısıdır.',array['və','çünki','əgər','ona görə ki'],1),
+('az7-qosma-baglayici#4','az-dili','az-7-qosma-baglayici',2,3,'«Çünki» bağlayıcısı hansı məna əlaqəsini bildirir?','Səbəb bildirir.',array['Səbəb','Şərt','Zaman','Məkan'],1),
+('az7-qosma-baglayici#5','az-dili','az-7-qosma-baglayici',2,3,'«Əgər» bağlayıcısı nə bildirir?','Şərt bildirir.',array['Şərt','Səbəb','Nəticə','Sadalanma'],1),
+('az7-qosma-baglayici#6','az-dili','az-7-qosma-baglayici',3,3,'«Həm … həm də» hansı bağlayıcı növüdür?','İştirak bildirən tabesizlik bağlayıcısıdır.',array['İştirak bağlayıcısı','Səbəb bağlayıcısı','Qoşma','Ədat'],1),
+('az7-qosma-baglayici#7','az-dili','az-7-qosma-baglayici',3,3,'Qoşma cümlədə necə iştirak edir?','Qoşulduğu sözlə birlikdə bir üzv olur.',array['Qoşulduğu sözlə birlikdə üzv olur','Ayrıca üzv olur','Üzv olmur, atılır','Yalnız xəbər olur'],1),
+('az7-qosma-baglayici#8','az-dili','az-7-qosma-baglayici',3,3,'«Bilirəm ki, gələcəksən» cümləsindəki «ki» nədir?','«Ki» bağlayıcıdır və ayrı yazılır.',array['Bağlayıcı','Qoşma','Ədat kimi bitişik yazılır','Şəkilçi'],1),
+('az7-qosma-baglayici#9','az-dili','az-7-qosma-baglayici',3,3,'«Doğru», «sarı» sözləri qoşma kimi hansı halda olan sözlərlə işlənir?','Yönlük halla işlənir: evə doğru, dağa sarı.',array['Yönlük halda','Yiyəlik halda','Adlıq halda','Çıxışlıq halda'],1),
+('az7-qosma-baglayici#10','az-dili','az-7-qosma-baglayici',2,3,'«Amma» bağlayıcısından əvvəl hansı durğu işarəsi qoyulur?','Qarşılaşdırma bağlayıcısından əvvəl vergül qoyulur.',array['Vergül','Nöqtə','İki nöqtə','Heç nə'],1),
+('az7-edat-modal#1','az-dili','az-7-edat-modal',2,3,'Ədat hansı vəzifəni daşıyır?','Sözün və cümlənin təsir gücünü artırır.',array['Mənanı qüvvətləndirir','Əşya adlandırır','Hərəkət bildirir','Say bildirir'],1),
+('az7-edat-modal#2','az-dili','az-7-edat-modal',2,3,'«Ən» ədatı nə üçün işlənir?','Əlamətin üstünlük dərəcəsini yaradır: ən gözəl.',array['Üstünlük dərəcəsi yaratmaq üçün','Sual vermək üçün','İnkar üçün','Sadalamaq üçün'],1),
+('az7-edat-modal#3','az-dili','az-7-edat-modal',3,3,'«Məgər» sözü hansı ədat növünə aiddir?','Sual ədatıdır.',array['Sual ədatı','Əmr ədatı','Məhdudlaşdırma','Qüvvətləndirmə'],1),
+('az7-edat-modal#4','az-dili','az-7-edat-modal',3,3,'«Yalnız, ancaq, təkcə» ədatları nəyi bildirir?','Məhdudlaşdırma bildirir.',array['Məhdudlaşdırma','Sual','Təsdiq','İnkar'],1),
+('az7-edat-modal#5','az-dili','az-7-edat-modal',2,3,'Modal sözlər nəyi ifadə edir?','Danışanın fikrə münasibətini bildirir.',array['Danışanın münasibətini','Əşyanın rəngini','Hərəkətin yerini','Sayı'],1),
+('az7-edat-modal#6','az-dili','az-7-edat-modal',2,3,'«Əlbəttə» modal sözü hansı münasibəti bildirir?','Yəqinlik (əminlik) bildirir.',array['Yəqinlik','Şübhə','Kədər','Qəzəb'],1),
+('az7-edat-modal#7','az-dili','az-7-edat-modal',2,3,'«Bəlkə» sözü nəyi ifadə edir?','Güman, ehtimal bildirir.',array['Güman (ehtimal)','Dəqiqlik','Nəticə','Sevinc'],1),
+('az7-edat-modal#8','az-dili','az-7-edat-modal',3,3,'«Deməli» modal sözü nə bildirir?','Nəticə bildirir.',array['Nəticə','Şübhə','Sual','İnkar'],1),
+('az7-edat-modal#9','az-dili','az-7-edat-modal',2,3,'Modal sözlər yazıda necə ayrılır?','Vergüllə ayrılır: Əlbəttə, gələcəyəm.',array['Vergüllə','Nöqtə ilə','Defislə','Ayrılmır'],1),
+('az7-edat-modal#10','az-dili','az-7-edat-modal',3,3,'«Hətta» ədatı nəyi bildirir?','Qüvvətləndirmə bildirir.',array['Qüvvətləndirmə','Məhdudlaşdırma','Sual','Şərt'],1),
+('az7-nida#1','az-dili','az-7-nida',1,4,'Nida nəyi ifadə edir?','Hiss və həyəcanı ifadə edir.',array['Hiss və həyəcanı','Əşyanın adını','Hərəkəti','Miqdarı'],1),
+('az7-nida#2','az-dili','az-7-nida',1,4,'«Ay!, Of!, Vay!» sözləri hansı nitq hissəsidir?','Bunlar nidalardır.',array['Nida','Ədat','Qoşma','Zərf'],1),
+('az7-nida#3','az-dili','az-7-nida',2,4,'«Of» nidası adətən nəyi bildirir?','Narazılıq, yorğunluq, ağrı bildirir.',array['Narazılıq və ağrını','Sevinci','Təəccübü','Heç nəyi'],1),
+('az7-nida#4','az-dili','az-7-nida',3,4,'Nidadan sonra hansı işarələr qoyula bilər?','Nida işarəsi və ya vergül qoyulur.',array['Nida işarəsi və ya vergül','Yalnız nöqtə','Sual işarəsi','Heç nə'],1),
+('az7-nida#5','az-dili','az-7-nida',2,4,'Yamsılamalar hansı sözlərdir?','Təbiət səslərini təqlid edən sözlərdir.',array['Səsləri təqlid edən sözlər','Rəng bildirən sözlər','Say bildirən sözlər','Adlar'],1),
+('az7-nida#6','az-dili','az-7-nida',2,4,'«Şırıl-şırıl» sözü nəyə misaldır?','Suyun səsini təqlid edir — yamsılamadır.',array['Yamsılamaya','Nidaya','Ədata','Modal sözə'],1),
+('az7-nida#7','az-dili','az-7-nida',3,4,'«Miyoldamaq» feili nədən yaranıb?','«Miyo» yamsılamasından yaranıb.',array['Yamsılamadan','Sifətdən','Saydan','Qoşmadan'],1),
+('az7-nida#8','az-dili','az-7-nida',2,4,'«Urra!» nidası hansı hissi bildirir?','Sevinc və coşqu bildirir.',array['Sevinc','Qorxu','Kədər','Narazılıq'],1),
+('az7-nida#9','az-dili','az-7-nida',3,4,'Nidalar cümlə üzvü olurmu?','Nidalar cümlə üzvü olmur.',array['Xeyr, olmur','Bəli, mübtəda olur','Bəli, xəbər olur','Yalnız təyin olur'],1),
+('az7-nida#10','az-dili','az-7-nida',3,4,'«Şaqqıltı» sözü necə yaranıb?','«Şaqq» yamsılamasına şəkilçi artırılıb.',array['Yamsılamaya şəkilçi artırmaqla','İki kökün birləşməsi ilə','Alınma sözdən','Nidasız yaranıb'],1),
+('az7-uslub#1','az-dili','az-7-uslub',2,4,'Bədii üslubun əsas xüsusiyyəti nədir?','Bədii üslub obrazlılığa əsaslanır.',array['Obrazlılıq','Quru faktlar','Rəsmi müraciət','Terminlərin çoxluğu'],1),
+('az7-uslub#2','az-dili','az-7-uslub',2,4,'Elmi üslubda nədən geniş istifadə olunur?','Terminlərdən və dəqiq faktlardan.',array['Terminlərdən','Bədii təsvirlərdən','Nidalardan','Dialektlərdən'],1),
+('az7-uslub#3','az-dili','az-7-uslub',2,4,'Rəsmi üslub harada işlənir?','Sənədlərdə: ərizə, protokol, əmr.',array['Rəsmi sənədlərdə','Nağıllarda','Şeirlərdə','Dostlarla söhbətdə'],1),
+('az7-uslub#4','az-dili','az-7-uslub',2,4,'Məişət (danışıq) üslubu harada istifadə olunur?','Gündəlik ünsiyyətdə işlənir.',array['Gündəlik ünsiyyətdə','Elmi məqalədə','Dövlət sənədində','Dərslikdə'],1),
+('az7-uslub#5','az-dili','az-7-uslub',3,4,'Publisistik üslub hansı sahəyə xasdır?','Mətbuat və televiziyaya xasdır.',array['Mətbuata','Riyaziyyata','Məişətə','Nağıllara'],1),
+('az7-uslub#6','az-dili','az-7-uslub',2,4,'Ərizə hansı üslubda yazılır?','Ərizə rəsmi üslubda yazılır.',array['Rəsmi','Bədii','Məişət','Elmi'],1),
+('az7-uslub#7','az-dili','az-7-uslub',2,4,'Nitq mədəniyyəti nəyi tələb edir?','Düzgün, aydın və nəzakətli danışığı.',array['Düzgün və nəzakətli danışığı','Ucadan danışmağı','Çox danışmağı','Sözləri qısaltmağı'],1),
+('az7-uslub#8','az-dili','az-7-uslub',2,4,'Şeir və hekayələr hansı üsluba aiddir?','Bədii üsluba aiddir.',array['Bədii','Elmi','Rəsmi','Publisistik'],1),
+('az7-uslub#9','az-dili','az-7-uslub',3,4,'«Molekul», «reaksiya» kimi sözlər hansı üslubun əlamətidir?','Terminlər elmi üslubun əlamətidir.',array['Elmi','Məişət','Bədii','Rəsmi'],1),
+('az7-uslub#10','az-dili','az-7-uslub',3,4,'Auditoriya qarşısında çıxışda nəyə diqqət edilməlidir?','Aydın tələffüzə və fikrin ardıcıllığına.',array['Aydın tələffüzə və ardıcıllığa','Sürətli danışmağa','Uzun cümlələrə','Səsi qısmağa'],1),
+('ing7-schools#1','ingilis-dili','ing-7-schools',2,1,'Which subject teaches about the past?','Keçmişi tarix (History) öyrədir.',array['History','Maths','Music','PE'],1),
+('ing7-schools#2','ingilis-dili','ing-7-schools',2,1,'«Science» dərsində nə öyrənilir?','Science — təbiət elmləri.',array['Təbiət elmləri','Rəsm','Musiqi','İdman'],1),
+('ing7-schools#3','ingilis-dili','ing-7-schools',2,1,'«We ___ to do our homework every day.» (məcburiyyət)','Have to — məcburiyyət bildirir.',array['have','has','are','do'],1),
+('ing7-schools#4','ingilis-dili','ing-7-schools',2,1,'«Timetable» sözünün mənası nədir?','Timetable — dərs cədvəli.',array['Dərs cədvəli','Yemək menyusu','Xəritə','Lüğət'],1),
+('ing7-schools#5','ingilis-dili','ing-7-schools',2,1,'«Break» sözü məktəb kontekstində nəyi bildirir?','Break — tənəffüs.',array['Tənəffüsü','İmtahanı','Dərsi','Jurnal'],1),
+('ing7-schools#6','ingilis-dili','ing-7-schools',1,1,'Which is a school subject?','Geography — coğrafiya dərsidir.',array['Geography','Sandwich','Window','Garden'],1),
+('ing7-schools#7','ingilis-dili','ing-7-schools',2,1,'«Primary school» hansı məktəbdir?','Primary school — ibtidai məktəb.',array['İbtidai məktəb','Universitet','Uşaq bağçası','Peşə məktəbi'],1),
+('ing7-schools#8','ingilis-dili','ing-7-schools',3,1,'«Learn» və «teach» feillərinin fərqi nədir?','Learn — öyrənmək, teach — öyrətmək.',array['Learn öyrənmək, teach öyrətmək','Eyni mənadadırlar','Hər ikisi oxumaqdır','Hər ikisi yazmaqdır'],1),
+('ing7-schools#9','ingilis-dili','ing-7-schools',3,1,'«Do you have to wear a uniform?» sualı nəyi soruşur?','Forma geyinmə məcburiyyətini soruşur.',array['Forma geymək məcburiyyətini','Formanın rəngini','Formanın qiymətini','Dərsin vaxtını'],1),
+('ing7-schools#10','ingilis-dili','ing-7-schools',1,1,'«Exam» sözünün mənası nədir?','Exam — imtahan.',array['İmtahan','Tətil','Oyun','Mahnı'],1),
+('ing7-technology#1','ingilis-dili','ing-7-technology',1,1,'«Screen», «keyboard», «mouse» sözləri nəyə aiddir?','Bunlar kompüterin hissələridir.',array['Kompüterə','Mətbəxə','İdmana','Təbiətə'],1),
+('ing7-technology#2','ingilis-dili','ing-7-technology',2,1,'«Turn on» ifadəsi nə deməkdir?','Turn on — qoşmaq, yandırmaq.',array['Qoşmaq','Söndürmək','Sındırmaq','Satmaq'],1),
+('ing7-technology#3','ingilis-dili','ing-7-technology',2,1,'«Turn off» nə deməkdir?','Turn off — söndürmək.',array['Söndürmək','Qoşmaq','Yükləmək','Silmək'],1),
+('ing7-technology#4','ingilis-dili','ing-7-technology',2,1,'«I am texting my friend.» — Danışan nə edir?','Text — mesaj yazmaq.',array['Mesaj yazır','Kitab oxuyur','Yemək bişirir','Velosiped sürür'],1),
+('ing7-technology#5','ingilis-dili','ing-7-technology',2,1,'«Download» feili nə bildirir?','Download — interneti yükləmək (endirmək).',array['Yükləmək (endirmək)','Çap etmək','Silmək','Rəngləmək'],1),
+('ing7-technology#6','ingilis-dili','ing-7-technology',2,1,'«Charge the phone» nə deməkdir?','Telefonu enerji ilə doldurmaq.',array['Telefonu enerji ilə doldurmaq','Telefonu satmaq','Telefonu sındırmaq','Telefon almaq'],1),
+('ing7-technology#7','ingilis-dili','ing-7-technology',3,1,'«She ___ a video now.» boşluğunu doldurun.','İndiki davamedici: is watching.',array['is watching','watch','watches','watched'],1),
+('ing7-technology#8','ingilis-dili','ing-7-technology',2,1,'«Gadget» sözü nəyi bildirir?','Gadget — kiçik texniki cihaz.',array['Kiçik texniki cihazı','Meyvəni','Geyimi','Oyunu'],1),
+('ing7-technology#9','ingilis-dili','ing-7-technology',2,1,'«Password» nə üçündür?','Parol hesabı qoruyur.',array['Hesabı qorumaq üçün','Səsi artırmaq üçün','Ekranı silmək üçün','Şəkil çəkmək üçün'],1),
+('ing7-technology#10','ingilis-dili','ing-7-technology',2,1,'«Online» sözünün mənası nədir?','Online — şəbəkəyə qoşulu.',array['Şəbəkəyə qoşulu','Söndürülmüş','Tək','Yavaş'],1),
+('ing7-talent#1','ingilis-dili','ing-7-talent',1,2,'«Talent» sözünün mənası nədir?','Talent — istedad.',array['İstedad','Tənbəllik','Yorğunluq','Qorxu'],1),
+('ing7-talent#2','ingilis-dili','ing-7-talent',3,2,'«She sings beautifully.» — «beautifully» hansı nitq hissəsidir?','-ly şəkilçili söz zərfdir (adverb).',array['Zərf (adverb)','İsim','Feil','Say'],1),
+('ing7-talent#3','ingilis-dili','ing-7-talent',3,2,'İngilis dilində zərf adətən necə düzəlir?','Sifətə -ly artırmaqla: slow — slowly.',array['Sifətə -ly artırmaqla','Feilə -ed artırmaqla','İsmə -s artırmaqla','Düzəlmir'],1),
+('ing7-talent#4','ingilis-dili','ing-7-talent',3,2,'«Good» sifətinin zərf forması hansıdır?','Good qaydasızdır: well.',array['well','goodly','gooder','best'],1),
+('ing7-talent#5','ingilis-dili','ing-7-talent',3,2,'«She dances ___ than me.» (daha yaxşı)','Well zərfinin müqayisəsi: better.',array['better','weller','good','well'],1),
+('ing7-talent#6','ingilis-dili','ing-7-talent',3,2,'«Play ___ piano» ifadəsində hansı artikl işlənir?','Musiqi alətləri ilə «the» işlənir: play the piano.',array['the','a','an','Artikl işlənmir'],1),
+('ing7-talent#7','ingilis-dili','ing-7-talent',2,2,'«Competition» nə deməkdir?','Competition — yarışma, müsabiqə.',array['Yarışma','İstirahət','Dərs','Səyahət'],1),
+('ing7-talent#8','ingilis-dili','ing-7-talent',2,2,'«Win» feilinin mənası nədir?','Win — qalib gəlmək.',array['Qalib gəlmək','Uduzmaq','Başlamaq','Gözləmək'],1),
+('ing7-talent#9','ingilis-dili','ing-7-talent',2,2,'«Prize» sözü nəyi bildirir?','Prize — mükafat.',array['Mükafatı','Cəzanı','Qiyməti','Biletdir'],1),
+('ing7-talent#10','ingilis-dili','ing-7-talent',3,2,'«What are you good at?» sualı nəyi soruşur?','Nədə yaxşı (bacarıqlı) olduğunu soruşur.',array['Nədə bacarıqlı olduğunu','Yaşını','Ünvanını','Adını'],1),
+('ing7-travel#1','ingilis-dili','ing-7-travel',2,2,'«Abroad» sözü nə deməkdir?','Abroad — xaricdə.',array['Xaricdə','Evdə','Yaxında','Aşağıda'],1),
+('ing7-travel#2','ingilis-dili','ing-7-travel',3,2,'«Book a ticket» ifadəsi nə bildirir?','Book — sifariş etmək: bilet sifariş etmək.',array['Bilet sifariş etmək','Kitab oxumaq','Bilet itirmək','Bilet satmaq'],1),
+('ing7-travel#3','ingilis-dili','ing-7-travel',3,2,'«We are going to visit Paris.» cümləsi nəyi bildirir?','Going to — yaxın gələcək planı bildirir.',array['Gələcək planı','Keçmiş hadisəni','Əmri','Peşmançılığı'],1),
+('ing7-travel#4','ingilis-dili','ing-7-travel',2,2,'«Luggage» nə deməkdir?','Luggage — baqaj, yük.',array['Baqaj','Sərnişin','Sürücü','Yol'],1),
+('ing7-travel#5','ingilis-dili','ing-7-travel',1,2,'«Airport» nədir?','Airport — hava limanı.',array['Hava limanı','Dəmiryol vağzalı','Liman','Körpü'],1),
+('ing7-travel#6','ingilis-dili','ing-7-travel',1,2,'«Map» nə üçün istifadə olunur?','Xəritə yolu tapmağa kömək edir.',array['Yol tapmaq üçün','Yemək bişirmək üçün','Paltar yumaq üçün','Mahnı oxumaq üçün'],1),
+('ing7-travel#7','ingilis-dili','ing-7-travel',2,2,'«Foreign country» ifadəsi nə deməkdir?','Foreign — xarici: xarici ölkə.',array['Xarici ölkə','Doğma şəhər','Kiçik kənd','Qonşu küçə'],1),
+('ing7-travel#8','ingilis-dili','ing-7-travel',3,2,'«How long did the journey take?» sualı nəyi soruşur?','Səyahətin nə qədər çəkdiyini soruşur.',array['Səyahətin müddətini','Biletin qiymətini','Yolun rəngini','Sürücünün adını'],1),
+('ing7-travel#9','ingilis-dili','ing-7-travel',2,2,'«Guide» kimdir?','Guide — bələdçi.',array['Bələdçi','Aşpaz','Həkim','Müəllim'],1),
+('ing7-travel#10','ingilis-dili','ing-7-travel',2,2,'«Souvenir» sözünün mənası nədir?','Souvenir — xatirə hədiyyəsi.',array['Xatirə hədiyyəsi','Yol çantası','Xəritə','Bilet'],1),
+('ing7-friends#1','ingilis-dili','ing-7-friends',1,3,'«Friendship» sözünün mənası nədir?','Friendship — dostluq.',array['Dostluq','Düşmənçilik','Qonşuluq','Səyahət'],1),
+('ing7-friends#2','ingilis-dili','ing-7-friends',2,3,'«Trust» feili nə deməkdir?','Trust — etibar etmək.',array['Etibar etmək','Aldatmaq','Unutmaq','Qorxmaq'],1),
+('ing7-friends#3','ingilis-dili','ing-7-friends',3,3,'«A friend in need is a friend indeed» atalar sözünün mənası nədir?','Əsl dost dar gündə tanınar.',array['Əsl dost dar gündə tanınar','Dostlar çox olmalıdır','Dostsuz yaşamaq olar','Dostlar həmişə gülür'],1),
+('ing7-friends#4','ingilis-dili','ing-7-friends',2,3,'«Share» feilinin mənası nədir?','Share — bölüşmək.',array['Bölüşmək','Gizlətmək','Almaq','Atmaq'],1),
+('ing7-friends#5','ingilis-dili','ing-7-friends',2,3,'«We have known each other for five years.» — Onlar nə qədərdir tanışdırlar?','For five years — beş ildir.',array['5 il','5 ay','5 gün','5 saat'],1),
+('ing7-friends#6','ingilis-dili','ing-7-friends',3,3,'«Get on well with somebody» ifadəsi nə deməkdir?','Kiminləsə yaxşı yola getmək.',array['Yaxşı yola getmək','Mübahisə etmək','Küsmək','Yarışmaq'],1),
+('ing7-friends#7','ingilis-dili','ing-7-friends',2,3,'«Support» feili dostluqda nəyi bildirir?','Support — dəstək olmaq.',array['Dəstək olmağı','Tərk etməyi','Gülməyi','Danlamağı'],1),
+('ing7-friends#8','ingilis-dili','ing-7-friends',2,3,'«Loyal friend» necə dostdur?','Loyal — sadiq.',array['Sadiq','Yalançı','Tənbəl','Paxıl'],1),
+('ing7-friends#9','ingilis-dili','ing-7-friends',2,3,'«Argue» feilinin mənası nədir?','Argue — mübahisə etmək.',array['Mübahisə etmək','Barışmaq','Gülmək','Oxumaq'],1),
+('ing7-friends#10','ingilis-dili','ing-7-friends',2,3,'«Make friends» ifadəsi nə deməkdir?','Make friends — dostlaşmaq.',array['Dostlaşmaq','Dost itirmək','Ev tikmək','Hədiyyə almaq'],1),
+('ing7-future#1','ingilis-dili','ing-7-future',2,4,'Will ilə gələcək zaman necə qurulur?','Will + feilin əsas forması: will go.',array['will + feilin əsas forması','will + feil-ed','will + feil-ing','will işlənmir'],1),
+('ing7-future#2','ingilis-dili','ing-7-future',2,4,'«People ___ live on Mars one day.» (proqnoz)','Proqnoz üçün will işlənir.',array['will','did','was','have'],1),
+('ing7-future#3','ingilis-dili','ing-7-future',2,4,'«Robots will help people.» cümləsi hansı zamandadır?','Will — gələcək zaman.',array['Gələcək','Keçmiş','İndiki','Davamedici keçmiş'],1),
+('ing7-future#4','ingilis-dili','ing-7-future',2,4,'«Will you come with us?» sualına qısa cavab hansıdır?','Qısa cavab: Yes, I will.',array['Yes, I will.','Yes, I did.','Yes, I am.','Yes, I have.'],1),
+('ing7-future#5','ingilis-dili','ing-7-future',1,4,'«In the future» ifadəsi nə deməkdir?','In the future — gələcəkdə.',array['Gələcəkdə','Keçmişdə','İndi','Dünən'],1),
+('ing7-future#6','ingilis-dili','ing-7-future',3,4,'«Prediction» sözü nəyi bildirir?','Prediction — proqnoz, öncəgörmə.',array['Proqnozu','Xatirəni','Sualı','Cavabı'],1),
+('ing7-future#7','ingilis-dili','ing-7-future',2,4,'«Flying cars» ifadəsi nə deməkdir?','Uçan maşınlar.',array['Uçan maşınlar','Sürətli qatarlar','Köhnə maşınlar','Oyuncaq maşınlar'],1),
+('ing7-future#8','ingilis-dili','ing-7-future',1,4,'«Space» sözünün mənası nədir?','Space — kosmos.',array['Kosmos','Dəniz','Meşə','Səhra'],1),
+('ing7-future#9','ingilis-dili','ing-7-future',2,4,'«Life in the future will be different.» — Söhbət nədən gedir?','Gələcək həyatın fərqli olacağından.',array['Gələcək həyatdan','Keçmiş əsrlərdən','Bu günki dərsdən','Yeməkdən'],1),
+('ing7-future#10','ingilis-dili','ing-7-future',3,4,'«I think it will rain» cümləsində «I think» nəyi bildirir?','Danışanın fikrini (proqnozunu).',array['Danışanın fikrini','Dəqiq faktı','Əmri','Keçmiş hadisəni'],1),
+('inf7-kompyuter#1','informatika','inf-7-kompyuter',2,1,'Hansı qurğu giriş qurğusudur?','Klaviatura məlumatı kompüterə daxil edir.',array['Klaviatura','Monitor','Printer','Dinamik'],1),
+('inf7-kompyuter#2','informatika','inf-7-kompyuter',2,1,'Hansı qurğu çıxış qurğusudur?','Monitor məlumatı istifadəçiyə göstərir.',array['Monitor','Klaviatura','Maus','Skaner'],1),
+('inf7-kompyuter#3','informatika','inf-7-kompyuter',3,1,'Prosessorun iş sürətini xarakterizə edən kəmiyyət hansıdır?','Takt tezliyi prosessorun sürətini göstərir.',array['Takt tezliyi','Çəkisi','Rəngi','Ölçüsü'],1),
+('inf7-kompyuter#4','informatika','inf-7-kompyuter',3,1,'Skaner hansı qurğular qrupuna aiddir?','Skaner məlumatı daxil edir — giriş qurğusudur.',array['Giriş','Çıxış','Yaddaş','Heç biri'],1),
+('inf7-kompyuter#5','informatika','inf-7-kompyuter',2,1,'Printer hansı qurğular qrupuna aiddir?','Printer nəticəni kağıza çıxarır — çıxış qurğusudur.',array['Çıxış','Giriş','Emal','Şəbəkə'],1),
+('inf7-kompyuter#6','informatika','inf-7-kompyuter',2,1,'Fayl adı hansı hissələrdən ibarətdir?','Addan və genişlənmədən: sekil.png.',array['Ad və genişlənmə','Yalnız rəqəmlər','Parol və ad','Tarix və saat'],1),
+('inf7-kompyuter#7','informatika','inf-7-kompyuter',2,1,'Qovluğun içində nələr yerləşə bilər?','Fayllar və digər qovluqlar.',array['Fayllar və digər qovluqlar','Yalnız şəkillər','Yalnız musiqi','Heç nə'],1),
+('inf7-kompyuter#8','informatika','inf-7-kompyuter',2,1,'Faylı başqa qovluğa hansı əməllə aparmaq olar?','Köçürmə (daşıma) əməli ilə.',array['Köçürmə (daşıma) ilə','Silmə ilə','Çap ilə','Rəngləmə ilə'],1),
+('inf7-kompyuter#9','informatika','inf-7-kompyuter',3,1,'Sistem proqram təminatına nə daxildir?','Əməliyyat sistemi sistem proqram təminatıdır.',array['Əməliyyat sistemi','Oyunlar','Mətn redaktoru','Kalkulyator'],1),
+('inf7-kompyuter#10','informatika','inf-7-kompyuter',3,1,'Tətbiqi proqrama misal hansıdır?','Mətn redaktoru tətbiqi proqramdır.',array['Mətn redaktoru','Əməliyyat sistemi','Drayver','BIOS'],1),
+('inf7-tetbiqi#1','informatika','inf-7-tetbiqi',2,2,'Mətn redaktorunda cədvəl hansı elementlərdən qurulur?','Sətir, sütun və xanalardan.',array['Sətir, sütun və xanalardan','Yalnız şəkillərdən','Səhifələrdən','Düymələrdən'],1),
+('inf7-tetbiqi#2','informatika','inf-7-tetbiqi',2,2,'Cədvəldə sətirlə sütunun kəsişməsi necə adlanır?','Kəsişmə xana adlanır.',array['Xana','Blok','Slayd','Sahə'],1),
+('inf7-tetbiqi#3','informatika','inf-7-tetbiqi',2,2,'Mətn redaktorunda diaqram nə üçün qurulur?','Ədədi məlumatı əyani göstərmək üçün.',array['Ədədi məlumatı əyani göstərmək üçün','Mətni silmək üçün','Səhifəni bağlamaq üçün','Şrift dəyişmək üçün'],1),
+('inf7-tetbiqi#4','informatika','inf-7-tetbiqi',3,2,'Şəklin atributlarına nə daxildir?','Ölçüsü və səhifədə yerləşməsi.',array['Ölçüsü və yerləşməsi','Qiyməti','Çəkisi','Müəllifin yaşı'],1),
+('inf7-tetbiqi#5','informatika','inf-7-tetbiqi',2,2,'Slaydlararası keçid effektləri nə üçündür?','Nümayişi daha cəlbedici etmək üçün.',array['Nümayişi cəlbedici etmək üçün','Faylı silmək üçün','Mətni gizlətmək üçün','Kompüteri sürətləndirmək üçün'],1),
+('inf7-tetbiqi#6','informatika','inf-7-tetbiqi',2,2,'Cədvələ yeni sətir əlavə etmək mümkündürmü?','Bəli, istənilən yerə sətir əlavə etmək olar.',array['Bəli, istənilən yerə','Xeyr, heç vaxt','Yalnız sona','Yalnız çap zamanı'],1),
+('inf7-tetbiqi#7','informatika','inf-7-tetbiqi',3,2,'Diaqramın tipini seçərkən nə nəzərə alınır?','Məlumatın xarakteri (müqayisə, pay, dəyişmə).',array['Məlumatın xarakteri','Kompüterin rəngi','Günün vaxtı','Faylın adı'],1),
+('inf7-tetbiqi#8','informatika','inf-7-tetbiqi',3,2,'Şəklin mətnlə «axını» nəyi müəyyən edir?','Mətnin şəkli necə əhatə etdiyini.',array['Mətnin şəkli əhatə etməsini','Şəklin rəngini','Mətnin dilini','Səhifənin sayını'],1),
+('inf7-tetbiqi#9','informatika','inf-7-tetbiqi',2,2,'Slayd-şou rejimi nə üçündür?','Təqdimatı tam ekranda nümayiş etdirmək üçün.',array['Təqdimatı nümayiş etdirmək üçün','Fayl silmək üçün','Cədvəl qurmaq üçün','Səs yazmaq üçün'],1),
+('inf7-tetbiqi#10','informatika','inf-7-tetbiqi',2,2,'Cədvəlin xanasına nə daxil etmək olar?','Mətn və ədədlər daxil etmək olar.',array['Mətn və ədədlər','Yalnız şəkil','Heç nə','Yalnız düymələr'],1),
+('inf7-informasiya#1','informatika','inf-7-informasiya',2,3,'İnformasiyanın əsas xassələrindən biri hansıdır?','Doğruluq (etibarlılıq) əsas xassədir.',array['Doğruluq','Rənglilik','Ağırlıq','Şirinlik'],1),
+('inf7-informasiya#2','informatika','inf-7-informasiya',2,3,'Aktual informasiya necə informasiyadır?','Hazırkı vaxt üçün əhəmiyyətli olan.',array['Vaxtında və əhəmiyyətli','Köhnəlmiş','Yalan','Gizli'],1),
+('inf7-informasiya#3','informatika','inf-7-informasiya',2,3,'Onluq say sistemində neçə rəqəmdən istifadə olunur?','0-dan 9-a qədər — 10 rəqəm.',array['10','2','8','16'],1),
+('inf7-informasiya#4','informatika','inf-7-informasiya',3,3,'İkilik «11» ədədinin onluq qarşılığı neçədir?','1·2 + 1·1 = 3.',array['3','11','2','4'],1),
+('inf7-informasiya#5','informatika','inf-7-informasiya',3,3,'Bütün mərtəbələri 1 olan üçrəqəmli ikilik ədəd (111) onluq sistemdə hansı ədədə bərabərdir?','1·4 + 1·2 + 1·1 = 7.',array['7','111','6','8'],1),
+('inf7-informasiya#6','informatika','inf-7-informasiya',3,3,'Tam informasiya nə deməkdir?','Qərar üçün kifayət qədər dolğun olması.',array['Kifayət qədər dolğun olması','Ən qısa olması','Şəkilli olması','Səsli olması'],1),
+('inf7-informasiya#7','informatika','inf-7-informasiya',2,3,'Hər simvol 1 bayt olarsa, 25 simvolluq mətn neçə bayt tutar?','25 · 1 = 25 bayt.',array['25','8','200','1'],1),
+('inf7-informasiya#8','informatika','inf-7-informasiya',3,3,'Səkkizlik say sistemində hansı rəqəmlər işlənir?','0-dan 7-yə qədər rəqəmlər.',array['0-dan 7-yə qədər','0-dan 9-a qədər','1-dən 8-ə qədər','Yalnız 0 və 1'],1),
+('inf7-informasiya#9','informatika','inf-7-informasiya',2,3,'Say sistemi nədir?','Ədədlərin yazılması qaydaları toplusudur.',array['Ədədlərin yazılış qaydaları','Hərflərin siyahısı','Proqram adı','Qurğu növü'],1),
+('inf7-informasiya#10','informatika','inf-7-informasiya',2,3,'2 bayt neçə bitdir?','2 · 8 = 16 bit.',array['16','2','8','1024'],1),
+('inf7-proqramlasdirma#1','informatika','inf-7-proqramlasdirma',3,3,'Altproqram nədir?','Proqramın ad verilmiş ayrıca hissəsidir.',array['Proqramın ad verilmiş hissəsi','Kompüter qurğusu','Fayl növü','Şəkil formatı'],1),
+('inf7-proqramlasdirma#2','informatika','inf-7-proqramlasdirma',3,3,'Altproqram nə üçün istifadə olunur?','Təkrarlanan hissəni bir dəfə yazıb dəfələrlə çağırmaq üçün.',array['Təkrarlanan hissəni bir dəfə yazmaq üçün','Proqramı uzatmaq üçün','Kompüteri söndürmək üçün','Şrift dəyişmək üçün'],1),
+('inf7-proqramlasdirma#3','informatika','inf-7-proqramlasdirma',2,3,'«Riyaziyyatçı Bağa» hansı işi görə bilir?','Hesablamalar aparıb nəticəni ekrana yazır.',array['Hesablayıb nəticəni yazır','Yalnız yatır','Mahnı oxuyur','Fayl silir'],1),
+('inf7-proqramlasdirma#4','informatika','inf-7-proqramlasdirma',3,3,'Altproqramda dəyişən nə üçün lazımdır?','Eyni altproqramı müxtəlif qiymətlərlə işlətmək üçün.',array['Müxtəlif qiymətlərlə işləmək üçün','Yaddaşı silmək üçün','Rəng seçmək üçün','Lazım deyil'],1),
+('inf7-proqramlasdirma#5','informatika','inf-7-proqramlasdirma',2,3,'Kompüterdə məsələ həllinin mərhələlərindən biri hansıdır?','Alqoritmin qurulması əsas mərhələdir.',array['Alqoritmin qurulması','Kompüterin satılması','Ekranın silinməsi','Qələmin itilənməsi'],1),
+('inf7-proqramlasdirma#6','informatika','inf-7-proqramlasdirma',3,3,'ALPLogo-da «qələmi qaldır» əmri nə edir?','Bağa iz qoymadan (xətt çəkmədən) hərəkət edir.',array['Bağa xətt çəkmədən hərəkət edir','Bağa dayanır','Xətt qalınlaşır','Ekran təmizlənir'],1),
+('inf7-proqramlasdirma#7','informatika','inf-7-proqramlasdirma',3,3,'Eyni fiquru müxtəlif ölçüdə çəkmək üçün nədən istifadə etmək əlverişlidir?','Dəyişənli altproqramdan.',array['Dəyişənli altproqramdan','Yeni kompüterdən','Başqa proqramdan','Silgidən'],1),
+('inf7-proqramlasdirma#8','informatika','inf-7-proqramlasdirma',3,3,'«təkrar 8 [irəli 40 sağa 45]» proqramı hansı fiquru çəkər?','360 : 45 = 8 dönüş — səkkizbucaqlı.',array['Səkkizbucaqlı','Kvadrat','Üçbucaq','Dairə'],1),
+('inf7-proqramlasdirma#9','informatika','inf-7-proqramlasdirma',2,3,'Proqramı icra etməzdən əvvəl nə etmək faydalıdır?','Əmrlərin düzgünlüyünü yoxlamaq.',array['Əmrləri yoxlamaq','Kompüteri silkələmək','Ekranı bağlamaq','Heç nə'],1),
+('inf7-proqramlasdirma#10','informatika','inf-7-proqramlasdirma',3,3,'Proqramın müxtəlif qiymətlərlə yoxlanması necə adlanır?','Bu, test etmə mərhələsidir.',array['Test etmə','Çap etmə','Silmə','Rəngləmə'],1),
+('inf7-internet#1','informatika','inf-7-internet',2,4,'İnternetə qoşulmaq üçün nə lazımdır?','Provayderin xidməti və şəbəkə avadanlığı.',array['Provayder xidməti və avadanlıq','Yalnız televizor','Yalnız printer','Heç nə'],1),
+('inf7-internet#2','informatika','inf-7-internet',3,4,'E-poçtla böyük faylı göndərərkən nə nəzərə alınmalıdır?','Qoşma faylın ölçü limiti.',array['Faylın ölçü limiti','Faylın rəngi','Günün vaxtı','Kompüterin markası'],1),
+('inf7-internet#3','informatika','inf-7-internet',2,4,'İKT nəyin qısaltmasıdır?','İnformasiya-kommunikasiya texnologiyaları.',array['İnformasiya-kommunikasiya texnologiyaları','İdman komandası','Kitab seriyası','Kompüter oyunu'],1),
+('inf7-internet#4','informatika','inf-7-internet',2,4,'Daxil olan e-məktublar hansı qovluğa düşür?','Gələnlər (Inbox) qovluğuna.',array['Gələnlər (Inbox)','Zibil qutusuna','Göndərilənlərə','İş masasına'],1),
+('inf7-internet#5','informatika','inf-7-internet',2,4,'Spam nədir?','Arzuolunmaz kütləvi reklam məktublarıdır.',array['Arzuolunmaz kütləvi məktublar','Vacib sənədlər','Dost məktubları','Dərs cədvəli'],1),
+('inf7-internet#6','informatika','inf-7-internet',2,4,'E-məktubu bir neçə ünvana göndərmək olarmı?','Bəli, ünvanları ayıraraq göndərmək olar.',array['Bəli, olar','Xeyr, olmaz','Yalnız gecə olar','Yalnız şəkilsiz olar'],1),
+('inf7-internet#7','informatika','inf-7-internet',3,4,'İKT tibb sahəsində nəyə imkan verir?','Uzaqdan müayinə və elektron qeydiyyata.',array['Uzaqdan müayinəyə','Xəstəliyi artırmağa','Növbələri uzatmağa','Heç nəyə'],1),
+('inf7-internet#8','informatika','inf-7-internet',2,4,'Onlayn təhsil nədir?','İnternet vasitəsilə aparılan təhsildir.',array['İnternetlə təhsil','Yalnız kitabla təhsil','Təhsilin dayandırılması','İdman növü'],1),
+('inf7-internet#9','informatika','inf-7-internet',2,4,'Videozəng üçün hansı qurğular lazımdır?','Kamera və mikrofon lazımdır.',array['Kamera və mikrofon','Printer və skaner','Xətkeş və qələm','Tərəzi'],1),
+('inf7-internet#10','informatika','inf-7-internet',3,4,'Müəllif hüququ internetdə nəyi qadağan edir?','Başqasının əsərini icazəsiz yaymağı.',array['Əsəri icazəsiz yaymağı','Öz şəklini çəkməyi','Kitab oxumağı','Məktub yazmağı'],1),
+('tarix7-erken-orta-esrler#1','tarix','tarix-7-erken-orta-esrler',3,1,'Qərbi Roma imperiyası neçənci ildə süqut etdi?','476-cı ildə süqut etdi — orta əsrlərin başlanğıcı sayılır.',array['476','1453','1492','622'],1),
+('tarix7-erken-orta-esrler#2','tarix','tarix-7-erken-orta-esrler',3,1,'Xalqların böyük köçü zamanı Avropaya gələn türk tayfaları hansılar idi?','Hunlar Avropaya gələrək dövlət qurdular.',array['Hunlar','Vikinqlər','Romalılar','Misirlilər'],1),
+('tarix7-erken-orta-esrler#3','tarix','tarix-7-erken-orta-esrler',2,1,'İslam dini neçənci əsrdə yaranmışdır?','İslam VII əsrdə Ərəbistanda yaranıb.',array['VII əsrdə','III əsrdə','XV əsrdə','XIX əsrdə'],1),
+('tarix7-erken-orta-esrler#4','tarix','tarix-7-erken-orta-esrler',2,1,'Müsəlmanların müqəddəs kitabı hansıdır?','«Quran» müsəlmanların müqəddəs kitabıdır.',array['«Quran»','«İliada»','«Avesta»','«Odisseya»'],1),
+('tarix7-erken-orta-esrler#5','tarix','tarix-7-erken-orta-esrler',2,1,'Göytürk xaqanlığı hansı xalqın dövləti idi?','Göytürk xaqanlığını türklər qurmuşdular.',array['Türklərin','Romalıların','Frankların','Ərəblərin'],1),
+('tarix7-erken-orta-esrler#6','tarix','tarix-7-erken-orta-esrler',3,1,'Frank dövlətinin ən məşhur hökmdarı kim idi?','Böyük Karl Frank dövlətini imperiyaya çevirdi.',array['Böyük Karl','Çingiz xan','Osman bəy','Atropat'],1),
+('tarix7-erken-orta-esrler#7','tarix','tarix-7-erken-orta-esrler',2,1,'Bizans imperiyasının paytaxtı hansı şəhər idi?','Paytaxt Konstantinopol idi.',array['Konstantinopol','Roma','Paris','Bağdad'],1),
+('tarix7-erken-orta-esrler#8','tarix','tarix-7-erken-orta-esrler',3,1,'Xəzər xaqanlığı hansı ərazidə yerləşirdi?','Xəzər dənizi ətrafında — Şimali Qafqaz və Volqaboyunda.',array['Xəzər dənizi ətrafında','Afrikada','Amerikada','Skandinaviyada'],1),
+('tarix7-erken-orta-esrler#9','tarix','tarix-7-erken-orta-esrler',2,1,'Orta əsrlərdə Avropada hansı din hakim idi?','Avropada xristianlıq hakim din idi.',array['Xristianlıq','Buddizm','Şintoizm','Heç bir din'],1),
+('tarix7-erken-orta-esrler#10','tarix','tarix-7-erken-orta-esrler',3,1,'Sasani dövləti uzun müharibələri hansı imperiya ilə aparırdı?','Sasanilər Bizansla uzun müharibələr aparırdılar.',array['Bizansla','Osmanlı ilə','Monqollarla','Franklarla'],1),
+('tarix7-orta-esrler#1','tarix','tarix-7-orta-esrler',3,2,'Böyük Səlcuq dövlətinin banisi kimdir?','Dövlətin əsasını Toğrul bəy qoymuşdur.',array['Toğrul bəy','Osman bəy','Çingiz xan','Böyük Karl'],1),
+('tarix7-orta-esrler#2','tarix','tarix-7-orta-esrler',2,2,'Monqol imperiyasının banisi kimdir?','İmperiyanı Çingiz xan yaratmışdır.',array['Çingiz xan','Əmir Teymur','Toğrul bəy','Atilla'],1),
+('tarix7-orta-esrler#3','tarix','tarix-7-orta-esrler',2,2,'Osmanlı dövlətinin banisi kimdir?','Dövləti Osman bəy (Osman Qazi) qurmuşdur.',array['Osman bəy','II Mehmet','Səlim','Süleyman'],1),
+('tarix7-orta-esrler#4','tarix','tarix-7-orta-esrler',3,2,'Konstantinopol neçənci ildə osmanlılar tərəfindən fəth edildi?','1453-cü ildə fəth edildi.',array['1453','476','1492','1918'],1),
+('tarix7-orta-esrler#5','tarix','tarix-7-orta-esrler',3,2,'Konstantinopolu fəth edən sultan kimdir?','II Mehmet (Fateh) şəhəri fəth etdi.',array['II Mehmet (Fateh)','Osman bəy','Toğrul bəy','Çingiz xan'],1),
+('tarix7-orta-esrler#6','tarix','tarix-7-orta-esrler',3,2,'Xaçlı yürüşləri hansı istiqamətə təşkil olunurdu?','Şərqə — Yerusəlim istiqamətinə.',array['Şərqə (Yerusəlimə)','Şimala (Skandinaviyaya)','Amerikaya','Avstraliyaya'],1),
+('tarix7-orta-esrler#7','tarix','tarix-7-orta-esrler',3,2,'Teymuri dövlətinin banisi kimdir?','Dövləti Əmir Teymur qurmuşdur.',array['Əmir Teymur','Çingiz xan','Osman bəy','Toğrul bəy'],1),
+('tarix7-orta-esrler#8','tarix','tarix-7-orta-esrler',2,2,'Amerika qitəsini 1492-ci ildə kim kəşf etdi?','Xristofor Kolumb Amerikaya çatdı.',array['Xristofor Kolumb','Magellan','Vasko da Qama','Marko Polo'],1),
+('tarix7-orta-esrler#9','tarix','tarix-7-orta-esrler',3,2,'Avropada kitab çapı dəzgahını kim ixtira etdi?','İohan Qutenberq çap dəzgahını ixtira etdi.',array['İohan Qutenberq','Nyuton','Kolumb','Leonardo'],1),
+('tarix7-orta-esrler#10','tarix','tarix-7-orta-esrler',3,2,'Reformasiya hərəkatı hansı sahədə dəyişiklik tələb edirdi?','Kilsənin (dini qaydaların) islahatını tələb edirdi.',array['Kilsədə islahat','İdmanda dəyişiklik','Geyimdə dəyişiklik','Yeməkdə dəyişiklik'],1)
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, d.diff, d.rub, 'published'
+    from d
+    join public.subjects s on s.slug = d.fenn
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '7'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(d.opts) with ordinality as o(txt, ord);
+
+do $$
+declare n int; k int;
+begin
+  select count(*) into n from public.questions
+   where owner_type = 'platform'
+     and (ext_key like 'az7-%' or ext_key like 'ing7-%'
+          or ext_key like 'inf7-%' or ext_key like 'tarix7-%');
+  if n <> 210 then
+    raise exception 'sinif7 suallari: 210 gozlenilirdi, % tapildi', n;
+  end if;
+  select count(*) into k from public.questions q
+   where (q.ext_key like 'az7-%' or q.ext_key like 'ing7-%'
+          or q.ext_key like 'inf7-%' or q.ext_key like 'tarix7-%')
+     and ((select count(*) from public.question_options o
+            where o.question_id = q.id) <> 4
+       or (select count(*) from public.question_options o
+            where o.question_id = q.id and o.is_correct) <> 1);
+  if k > 0 then
+    raise exception '% sualda variant qurulusu sehvdir', k;
+  end if;
+  select count(distinct topic_id) into k from public.questions
+   where ext_key like 'az7-%' or ext_key like 'ing7-%'
+      or ext_key like 'inf7-%' or ext_key like 'tarix7-%';
+  if k <> 21 then
+    raise exception 'movzu sayi 21 deyil: %', k;
+  end if;
+  raise notice '7-ci sinif banki: % sual, 21 movzu (az, ing, inf, tarix).', n;
+end $$;
