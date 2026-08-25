@@ -1,0 +1,103 @@
+# riyaziyyat 8
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=393
+# səhifə: 240 · bölmə: 11 · mövzu: 77
+
+== 1 Kvadrat kök. Həqiqi ədədlər
+     7  Kvadrat köklər. Hesabi kvadrat kök
+    11  Həqiqi ədədlər
+    18  y = x və y = √x funksiyaları
+    21  Hesabi kvadrat kökün xassələri
+    24  Hesabi kvadrat kökün xassələrinin tətbiqi
+    28  Tam üstlü qüvvət
+    32  Ümumiləşdirici tapşırıqlar
+
+== 2 Pifaqor teoremi
+    34  Pifaqor teoremi
+    38  Pifaqor teoreminin tətbiqi
+    45  Ümumiləşdirici tapşırıqlar
+
+== 3 Kvadrat tənliklər
+    47  Kvadrat tənliklər
+    50  Kvadrat tənliklərin vuruqlara ayırma üsulu ilə həlli
+    55  Tam kvadrat ayırmaqla kvadrat tənliklərin həlli
+    57  Kvadrat tənliyin qrafik üsulla həlli
+    59  Kvadrat tənliklərin həlli.Kvadrat tənliyin kökləri düsturu
+    63  Viyet teoremi
+    66  Kvadrat tənliyə gətirilən tənliklər
+    67  Kvadrat tənliklərin tətbiqi ilə məsələ həlli
+    69  Ümumiləşdirici tapşırıqlar
+
+== 4 Dördbucaqlılar
+    71  Dördbucaqlılar
+    72  Dördbucaqlının daxili və xarici bucaqları
+    75  Paraleloqram
+    79  Paraleloqramın növləri
+    83  Paraleloqramın xassələrinin tətbiqi
+    85  Üçbucağın orta xətti
+    86  Trapesiya
+    87  Trapesiyanın orta xətti
+    90  Ümumiləşdirici tapşırıqlar
+
+== 5 Rasional ifadələr
+    93  Rasional ifadələr
+    95  Rasional ifadələrin sadələşdirilməsi
+   100  Rasional ifadələrin vurulması,bölünməsi və qüvvətə yüksəldilməsi
+   103  Rasional ifadələrin toplanması və çıxılması
+   109  Rasional ifadələr üzərində əməllər
+   111  y = k / x funksiyası və onun qrafiki
+   114  Ümumiləşdirici tapşırıqlar
+
+== 6 Fiqurların sahəsi
+   116  Sahə aksiomları
+   117  Paraleloqramın sahəsi
+   120  Üçbucağın sahəsi
+   123  Trapesiyanın sahəsi
+   126  Rombun sahəsi
+   128  Ümumiləşdirici tapşırıqlar
+
+== 7 Rasional tənliklər
+   131  Rasional tənliklər
+   133  Rasional tənliklərin tətbiqi ilə məsələ həlli
+   137  Ümumiləşdirici tapşırıqlar
+
+== 8 Fiqurların oxşarlığı
+   139  Nisbət, tənasüb, miqyas
+   142  Mütənasib parçalar
+   146  Oxşar dördbucaqlılar,oxşar üçbucaqlar
+   148  Üçbucaqların oxşarlıq əlamətləri
+   153  Düzbucaqlı üçbucaqların oxşarlığı
+   156  Üçbucaqların oxşarlığının tətbiqi.
+   159  Oxşar fiqurların sahəsi
+   161  Ümumiləşdirici tapşırıqlar
+
+== 9 Bərabərsizliklər
+   163  Bərabərsizliklər
+   166  Bərabərsizliklərin xassələri
+   171  Bərabərsizliklərin toplanması və vurulması
+   173  Ədədi aralıqlar
+   175  Birdəyişənli xətti bərabərsizliklərin həlli
+   179  İkiqat bərabərsizliklərin həlli
+   182  Dəyişəni modul işarəsi daxilində olan sadə bərabərsizliklər
+   184  Ümumiləşdirici tapşırıqlar
+
+== 10 Triqonometrik nisbətlər. Koordinatlar üsulu. Fiqurların çevrilməsi
+   187  Düzbucaqlı üçbucaq və triqonometrik nisbətlər
+   190  Triqonometrik nisbətlərin tətbiqi ilə məsələ həlli
+   193  Triqonometrik eyniliklər
+   195  Parçanın orta nöqtəsinin koordinatları
+   196  İki nöqtədən keçən düz xəttin tənliyi
+   199  Fiqurların çevrilməsi.Dönmə
+   203  Oxşarlıq çevrilməsi.Homotetiya
+   205  Ümumiləşdirici tapşırıqlar
+
+== 11 Məlumatın toplanması və təqdimi. Ehtimalın hesablanması
+   207  Məlumatın toplanması və təqdim
+   215  Mərkəzə meyilli ölçülər
+   217  Ümumiləşdirici tapşırıqlar
+   218  Ehtimalın hesablanması
+   222  Asılı olmayan və asılı hadisələr
+   225  Ümumiləşdirici tapşırıqlar
+   227  Bölmələr üzrə ümumiləşdirici tapşırıqlar
+   232  Özünüzü yoxlayın
+   234  Cavabla
+

@@ -27,6 +27,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          28_bank_ing.sql 29_movzular_orta6.sql 30_bank_riy6.sql \
          31_bank_sinif6.sql 32_bank_fenn6.sql 33_movzular_orta7.sql \
          34_bank_riy7.sql 35_bank_sinif7.sql 36_bank_fenn7.sql \
+         37_movzular_orta8.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql 05_grants.sql; do
   printf "  %-22s" "$f"
   if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then

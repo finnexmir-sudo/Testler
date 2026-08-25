@@ -1,0 +1,84 @@
+# cografiya 8
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=799
+# səhifə: 192 · bölmə: 10 · mövzu: 60
+
+== I. Coğrafi kəşflərdən tədqiqatlara doğru
+     7  1. Coğrafi kəşflərin yeni mərhələsi
+    10  2. Coğrafiya elminin inkişafı
+    13  3. Müasir coğrafiya elminin yeni sahələri
+    16  4. Coğrafiyada yeni biliklərin toplanması yolları
+    20  5. Azərbaycanda coğrafiya elminin inkişafı
+    23  6. Ümumiləşdirici tapşırıqlar. Coğrafiyanın yeni sahələri və tədqiqat üsulları
+
+== II. Xəritələr və onların üzərində təsvir üsulları
+    26  1. Kartoqrafik təsvirlərin əhəmiyyəti
+    29  2. Kartoqrafik təsvirlər məlumat mənbəyidir
+    32  3. Xəritələrdə təsvir üsulları
+    35  4. Xəritələrin təsnifatı
+    38  5. Xəritələrdə məsafələrin və sahələrin hesablanması
+    41  6. Ümumiləşdirici tapşırıqlar. Xəritə üzərində iş və hesablama aparılması
+
+== III. Yerin hərəkəti və onun coğrafi nəticələri
+    43  1. Qurşaq vaxtı
+    45  2. Yerin illik hərəkəti
+    48  3. Qütb gecə və gündüzləri
+    51  4. İşıqlanma qurşaqları
+    53  5. Günəş şüalarının düşmə bucağının hesablanması
+    56  6. Ümumiləşdirici tapşırıqlar. Qurşaq vaxtı və günəş şüalarının düşmə bucağının hesablanması
+
+== IV. Yerin fəal tektonik təbəqəsi
+    58  1. Yerin müasir üfüqi və şaquli hərəkət sahələri
+    61  2. Litosfer tavaları
+    66  3. Litosfer tavalarının hərəkətinin nəticələri
+    70  4. Qədim quru və su sahələri
+    72  5. Ümumiləşdirici tapşırıqlar. Litosfer tavalarının hərəkətinin nəticələri
+
+== V. Atmosfer
+    76  1. Hava kütlələri və atmosfer cəbhələri
+    79  2. Daimi və mövsümi cəbhələri
+    82  3. Siklon və antisiklonlar
+    86  4. Yağıntıların paylanması
+    90  5. İqlim və onun yaranması
+    94  6. Ümumiləşdirici tapşırıqlar. Temperatur və yağıntıların illik gedişi
+
+== VI. Yerin su təbəqəsi
+    97  1. Dünya okeanının yaranması
+   100  2. Okeanların öyrənilməsi
+   103  3. Okean suyunun temperaturu
+   106  4. Okean suyunun duzluluğu və şəffaflığı
+   109  5. Okeanlarda suyun hərəkəti
+   113  6. Ümumiləşdirici tapşırıqlar. Okean suyunun temperaturu və duzluluğunun təyin olunması
+
+== VII. Biosfer
+   114  1. Biosfer Yerin təbəqələri sistemində
+   116  2. Coğrafi təbəqə
+   119  3. Bitki və heyvanların yaşayış mühiti
+   123  4. Təbii zonalar
+   127  5. Azərbaycanın bitki və heyvanlar aləmi
+   130  6. Ümumiləşdirici tapşırıqlar. "Coğrafi qurşaqlar və təbii zonalar" xəritəsi üzərində iş
+
+== VIII. Dünya ölkələrinin təsnifatı
+   132  1. Ölkələrin inkişaf səviyyəsinə görə təsnifatı
+   135  2. İnkişaf etmiş ölkələr (İEÖ)
+   137  3. İnkişaf etməkdə olan ölkələr (İEOÖ)
+   140  4. İnsan İnkişafı İndeksi
+   142  5. Ümumiləşdirici tapşırıqlar. Ölkələrin inkişaf səviyyəsinin müqayisə edilməsi
+
+== IX. Əhali və təsərrüfatın ərazi təşkili
+   146  1. Əhalinin sayı
+   150  2. Əhalinin təbii artımı və miqrasiyası
+   153  3. Təbii ehtiyatlar
+   156  4. Təbii ehtiyatların təsərrüfat əhəmiyyəti
+   160  5. İstehsalın təşkili formaları
+   162  6. Təsərrüfatın iqtisadi inkişaf yolları
+   164  7. Ümumiləşdirici tapşırıqlar. Təbii ehtiyatların təsnifatı və təsərrüfat əhəmiyyəti
+
+== X. Ekoloji mühit və onun mühafizəsi
+   165  1. Ətraf mühiti çirkləndirən mənbələr
+   168  2. Təsərrüfat sahələri və ekoloji mühit
+   171  3. Ətraf mühitin mühafizəsi yolları
+   175  4. Ətraf mühit və insanların sağlamlığının qorunması
+   178  5. Azərbaycanın ekoloji vəziyyəti və turizm-rekreasiya ehtiyatları
+   182  6. Ümumiləşdirici tapşırıqlar. Ekoloji problemlər və onların aradan qaldırılması yolları
+   184  Terminlərin izahlı lüğəti
+
