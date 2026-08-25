@@ -58,6 +58,18 @@ KITABLAR = [
     (850, "ingilis-dili", 5, "esas xarici dil"),
     (846, "informatika", 5, ""),
     (844, "tarix", 5, "Azerbaycan tarixi"),
+    # ------- 6-ci sinif -------
+    (906, "riyaziyyat", 6, "I hisse"),
+    (907, "riyaziyyat", 6, "II hisse"),
+    (903, "azerbaycan-dili", 6, "I hisse"),
+    (904, "azerbaycan-dili", 6, "II hisse"),
+    (916, "ingilis-dili", 6, "esas xarici dil"),
+    (912, "informatika", 6, ""),
+    (910, "tarix", 6, "Azerbaycan tarixi"),
+    (546, "fizika", 6, ""),
+    (538, "biologiya", 6, ""),
+    (859, "cografiya", 6, "I hisse"),
+    (860, "cografiya", 6, "II hisse"),
 ]
 
 TEG = re.compile(r"<[^>]*>")

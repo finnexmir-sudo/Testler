@@ -1,0 +1,62 @@
+# riyaziyyat 6 II hisse
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=907
+# səhifə: 128 · bölmə: 6 · mövzu: 46
+
+== Bölmə 5. Çoxluqlar və onlar üzərində əməllər
+     6  İlkin yoxlama
+     7  5.1. Çoxluq
+    11  5.2. Çoxluqlar üzərində əməllər
+    16  5.3. Eyler-Venn diaqramının köməyi ilə məsələ həlli
+    21  Xülasə
+    22  Ümumiləşdirici tapşırıqlar
+    24  STEAM. "Axtarış sistemləri"
+
+== Bölmə 6. Dəyişəni olan ifadələr. Tənlik. Bərabərsizlik
+    26  İlkin yoxlama
+    27  6.1. Dəyişəni olan ifadələr
+    31  6.2. Riyazi ifadələrdə mötərizələrin açılması
+    34  6.3. Dəyişənli ifadələrin sadələşdirilməsi
+    37  6.4. Tənliklər
+    41  6.5. Tənlik qurmaqla məsələ həlli
+    44  6.6. Bərabərsizliklər
+    47  Xülasə
+    48  Ümumiləşdirici tapşırıqlar
+    50  STEAM. "Riyazi modelləşdirmə"
+
+== Bölmə 7. Üçbucaqlar
+    52  İlkin yoxlama
+    53  7.1. Üçbucağın medianı, tənböləni və hündürlüyü
+    57  7.2. Üçbucaqların konqruyentlik əlamətləri
+    64  7.3. Düz xətlərin paralelliyi
+    68  7.4. Üçbucağın bucaqlarının cəmi
+    72  7.5. Üç tərəfinə görə üçbucağın qurulması
+    75  Xülasə
+    76  Ümumiləşdirici tapşırıqlar
+    78  STEAM. "Geodeziya qübbələri"
+
+== Bölmə 8. Həndəsi fiqurların sahəsi və həcmi
+    80  İlkin yoxlama
+    81  8.1. Üçbucağın sahəsi
+    83  8.2. Paraleloqram və rombun sahəsi
+    86  8.3. Çevrənin uzunluğu. Dairənin sahəsi
+    89  Məsələlər
+    90  8.4. Düz üçbucaqlı prizmanın və silindrin səthinin sahəsi
+    93  8.5. Düz üçbucaqlı prizmanın və silindrin həcmi
+    95  Xülasə
+    96  Ümumiləşdirici tapşırıqlar
+    98  STEAM. "Mars şəhərciyi"
+
+== Bölmə 9. Statistika və ehtimal
+   100  İlkin yoxlama
+   101  9.1. Median və moda
+   105  9.2. Təsadüfi hadisə
+   108  9.3. Hadisənin ehtimalı
+   111  9.4. Məlumatların təsviri
+   115  Xülasə
+   116  Ümumiləşdirici tapşırıqlar
+   118  STEAM. "Genealoji DNT testi və ehtimal nəzəriyyəsi"
+
+== 6-cı sinif üzrə ümumiləşdirici tapşırıqlar
+   125  Sözlük
+   127  Cavablar
+
