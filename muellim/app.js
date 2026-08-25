@@ -1284,6 +1284,10 @@
                 '<option value="2">2 cəhd</option><option value="3">3 cəhd</option>' +
                 '<option value="0">Limitsiz</option></select></div>' +
             "</div>" +
+            '<p class="muted" style="margin:-8px 0 14px">Son tarix boş qalsa, ' +
+              "tapşırıq siz götürənə qədər açıq qalır. Cəhd sayı — şagirdin " +
+              "testi neçə dəfə işləyə biləcəyidir; hesabatda həm orta, həm də " +
+              "ən yaxşı nəticə görünür.</p>" +
             '<div id="pAsgMsg"></div>' +
             '<button class="btn go" id="btnPAsg">' + ic("plus") + "Tapşırıq ver</button>"
           : '<p class="muted">Əvvəlcə əsas səhifədə qrup yaradın — sonra bu ' +
