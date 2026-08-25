@@ -814,6 +814,86 @@
       }).join("");
   }
 
+  /* ---------------------------------------------- valideyn xulasesi
+     Repetitorun agrisi: pulu valideyn odeyir, amma neticeni gormur.
+     Hazir metn - kopyala, WhatsApp-a yapisdir.  Iki uslub: semimi
+     (emoji + zolaqlar) ve resmi.  Metn EKRANDAKI melumatdan qurulur -
+     ayri sorgu yoxdur, yalan da yoxdur. */
+  var VSTY = "isti";
+
+  function velBar(ratio) {
+    var k = Math.max(0, Math.min(5, Math.round(Number(ratio) / 20)));
+    return new Array(k + 1).join("▰") + new Array(5 - k + 1).join("▱");
+  }
+
+  function velText(style, r) {
+    var st = r.student || {};
+    var name = (st.full_name || "").split(" ")[0] || "Şagird";
+    var atts = r.attempts || [];
+    var cut = Date.now() - 30 * 864e5;
+    var use = atts.filter(function (a) {
+      return new Date(a.at).getTime() >= cut;
+    });
+    var dovr = "son 30 gün";
+    if (!use.length) { use = atts; dovr = "ümumi"; }
+    var n = use.length;
+    var sum = 0, best = 0;
+    use.forEach(function (a) {
+      var p = Number(a.percent) || 0;
+      sum += p; if (p > best) best = p;
+    });
+    var avg = n ? Math.round(sum / n) : 0;
+
+    /* Tereqqi: son 3 vs evvelki 3 - hesabatdaki qayda ile eyni */
+    var tr = "";
+    if (use.length >= 4) {
+      var la = 0, pa = 0, l3 = use.slice(0, 3), p3 = use.slice(3, 6);
+      l3.forEach(function (a) { la += (Number(a.percent) || 0) / l3.length; });
+      p3.forEach(function (a) { pa += (Number(a.percent) || 0) / p3.length; });
+      tr = la - pa >= 5 ? "up" : (pa - la >= 5 ? "down" : "flat");
+    }
+
+    var tops = (r.topics || []).slice().sort(function (a, b) {
+      return Number(b.ratio) - Number(a.ratio);
+    });
+    var strong = tops.filter(function (t) { return Number(t.ratio) >= 80; }).slice(0, 2);
+    var weak = tops.filter(function (t) { return Number(t.ratio) < 60; }).slice(-2);
+    var teacher = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    var L = [];
+
+    if (style === "resmi") {
+      L.push("Hörmətli valideyn,");
+      L.push("");
+      L.push(name + " üzrə " + dovr + " nəticələri:");
+      L.push("• İşlənən test: " + n);
+      L.push("• Ortalama nəticə: " + avg + "% (ən yaxşısı " + best + "%)");
+      if (tr === "up")   L.push("• Son testlərdə irəliləyiş müşahidə olunur.");
+      if (tr === "down") L.push("• Son testlərdə nəticə enməyə meyllidir — birlikdə işləyirik.");
+      if (strong.length) L.push("Güclü mövzular: " + strong.map(function (t) {
+        return t.name + " (" + pct(t.ratio) + "%)"; }).join(", "));
+      if (weak.length) L.push("Üzərində işlədiyimiz mövzular: " + weak.map(function (t) {
+        return t.name + " (" + pct(t.ratio) + "%)"; }).join(", "));
+      L.push("");
+      L.push("Hörmətlə," + (teacher ? " " + teacher : ""));
+    } else {
+      L.push("📊 " + name + " — " + dovr + " (Bil10)");
+      L.push("");
+      L.push("✅ İşlənən test: " + n);
+      L.push("📈 Ortalama: " + avg + "% · Ən yaxşısı: " + best + "%");
+      if (tr === "up")   L.push("↗ Son testlərdə irəliləyiş var");
+      if (tr === "down") L.push("↘ Son testlərdə enmə var — üzərində işləyirik");
+      if (strong.length || weak.length) L.push("");
+      strong.forEach(function (t) {
+        L.push("💪 " + t.name + "  " + velBar(t.ratio) + " " + pct(t.ratio) + "%");
+      });
+      weak.forEach(function (t) {
+        L.push("🎯 " + t.name + "  " + velBar(t.ratio) + " " + pct(t.ratio) + "%");
+      });
+      if (teacher) { L.push(""); L.push(teacher); }
+    }
+    return L.join("\n");
+  }
+
   function statTile(val, lbl) {
     return '<div class="stat"><b>' + esc(String(val)) + "</b><span>" + esc(lbl) + "</span></div>";
   }
@@ -838,6 +918,20 @@
           statTile(pct(sm.avg) + "%", "orta") +
           statTile(pct(sm.best) + "%", "ən yaxşı") +
         "</div>";
+
+      if (r.topics !== null) {
+        h += "<h2>Valideyn üçün xülasə</h2>" +
+          '<div class="card">' +
+            '<div class="segs" id="vSty">' +
+              seg("isti",  "Səmimi", VSTY) +
+              seg("resmi", "Rəsmi",  VSTY) +
+            "</div>" +
+            '<textarea id="vTxt" class="veltxt" readonly rows="12"></textarea>' +
+            '<p class="muted" style="margin:0 0 12px">Mətni kopyalayıb ' +
+              "WhatsApp-da valideynə göndərin.</p>" +
+            '<button class="btn go" id="vCopy">' + ic("clip") + "Kopyala</button>" +
+          "</div>";
+      }
 
       h += "<h2>Mövzu üzrə mənimsəmə</h2>";
       if (r.topics === null) {
@@ -883,6 +977,20 @@
       }
 
       show(h);
+      if ($("vTxt")) {
+        $("vTxt").value = velText(VSTY, r);
+        on("vSty", "click", function (e) {
+          var b = e.target.closest ? e.target.closest("[data-v]") : null;
+          if (!b) return;
+          VSTY = b.getAttribute("data-v");
+          Array.prototype.forEach.call(
+            document.querySelectorAll("#vSty .seg"), function (x) {
+              x.classList.toggle("on", x.getAttribute("data-v") === VSTY);
+            });
+          $("vTxt").value = velText(VSTY, r);
+        });
+        on("vCopy", "click", function () { copyText($("vTxt").value, $("vCopy")); });
+      }
       on("btnB", "click", function () { nav("#/r/" + classId); });
       on("btnRem", "click", function () {
         var sweak = (r.topics || []).filter(function (t) { return Number(t.ratio) < 60 && t.id; });
@@ -1128,12 +1236,24 @@
      suallari one cekecek. */
   function remedialGen(gid, weak) {
     var f = genFilter();
-    f.subject = ""; f.level = ""; f.difficulty = [];
+    f.difficulty = [];
     f.topics = weak.map(function (t) { return t.id; });
     f.remNames = weak.map(function (t) { return t.name; });
     f.cls = gid;
     f.count = Math.min(10, Math.max(5, f.topics.length * 3));
     f.title = "Düzəliş testi";
+    /* Fenn ve sinif de avtomatik secilir - muellim yalniz "Testi yig"
+       basir.  Amma YALNIZ butun zeif movzular eyni fenn/sinifdedirse:
+       qarisiq siyahida fenn suzgeci movzularin bir hissesini keserdi
+       (qayda fenn VE movzu ile suzur). */
+    var subs = {}, levs = {};
+    weak.forEach(function (t) {
+      if (t.subject_slug) subs[t.subject_slug] = 1;
+      if (t.level) levs[t.level] = 1;
+    });
+    var sk = Object.keys(subs), lk = Object.keys(levs);
+    f.subject = sk.length === 1 ? sk[0] : "";
+    f.level   = lk.length === 1 ? lk[0] : "";
     nav("#/gen");
   }
 

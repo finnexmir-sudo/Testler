@@ -88,10 +88,15 @@ begin
     'topics', case when not v_paid then null else coalesce((
       select jsonb_agg(y order by (y->>'ratio')::numeric, y->>'name')
       from (
+        --  subject_slug ve level "duzelis testi" duymesi ucundur:
+        --  generator fenn+sinifi avtomatik doldursun, muellim yalniz
+        --  "Testi yig" bassin.
         select jsonb_build_object(
                  'id',      t.id,
                  'name',    t.name,
                  'subject', sub.name,
+                 'subject_slug', sub.slug,
+                 'level',   lv.code,
                  'total',   count(*),
                  'correct', count(*) filter (where aa.is_correct),
                  'ratio',   round(count(*) filter (where aa.is_correct) * 100.0 / count(*), 1)
@@ -101,8 +106,9 @@ begin
                                  and a.finished_at >= v_since
           join public.students s  on s.id = a.student_id and s.class_id = p_class_id
           join public.topics   t  on t.id = aa.topic_id
+          left join public.levels lv on lv.id = t.level_id
           join public.subjects sub on sub.id = t.subject_id
-         group by t.id, t.name, sub.name
+         group by t.id, t.name, sub.name, sub.slug, lv.code
         having count(*) >= app.min_topic_answers()
       ) z), '[]'::jsonb) end,
 
@@ -188,6 +194,8 @@ begin
                  'id',      t.id,
                  'name',    t.name,
                  'subject', sub.name,
+                 'subject_slug', sub.slug,
+                 'level',   lv.code,
                  'total',   count(*),
                  'correct', count(*) filter (where aa.is_correct),
                  'ratio',   round(count(*) filter (where aa.is_correct) * 100.0 / count(*), 1)) as y
@@ -197,8 +205,9 @@ begin
                                 and a.status = 'submitted'
                                 and a.finished_at >= v_since
           join public.topics t   on t.id = aa.topic_id
+          left join public.levels lv on lv.id = t.level_id
           join public.subjects sub on sub.id = t.subject_id
-         group by t.id, t.name, sub.name
+         group by t.id, t.name, sub.name, sub.slug, lv.code
         having count(*) >= app.min_topic_answers()
       ) z), '[]'::jsonb) end,
 

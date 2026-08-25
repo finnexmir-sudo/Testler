@@ -51,7 +51,8 @@ delete from public.user_roles;      delete from auth.users;
 
 with sync_playwright() as pw:
     br  = pw.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
-    ctx = br.new_context(viewport={"width": 430, "height": 900})
+    ctx = br.new_context(viewport={"width": 430, "height": 900},
+                         permissions=["clipboard-read", "clipboard-write"])
 
     def new_page():
         pg = ctx.new_page()
@@ -296,6 +297,14 @@ with sync_playwright() as pw:
     ok("zəif mövzular seçilib" in pg.inner_text("#main"),
        "generator zeif movzularla acilir")
     ok("Vurma və bölmə" in pg.inner_text("#main"), "movzunun adi gorunur")
+    # Fenn ve sinif AVTOMATIK secilir - muellim yalniz "Testi yig" basir
+    ok(pg.input_value("#gsub") == "riyaziyyat", "fenn avtomatik secilir",
+       pg.input_value("#gsub"))
+    ok(pg.input_value("#glev") == "4", "sinif avtomatik secilir",
+       pg.input_value("#glev"))
+    pg.wait_for_selector("#gTop", timeout=8000)
+    ok(pg.locator("#gTop .chip.on").count() >= 1,
+       "zeif movzunun nisani secili gorunur")
     pg.wait_for_function(
         "document.querySelector('#gPrev') && "
         "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
@@ -314,6 +323,25 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/r/" + GID); pg.reload()
     pg.wait_for_selector("#btnRem", timeout=8000)
     ok(True, "qrup hesabatinda da duzelis duymesi var")
+
+    print("L · Valideyn xülasəsi")
+    pg.goto(PANEL + "#/s/" + SID + "/" + GID); pg.reload()
+    pg.wait_for_selector("#vTxt", timeout=8000)
+    t = pg.input_value("#vTxt")
+    ok("Kənan" in t, "sagirdin adi metndedir", t.split("\n")[0][:40])
+    ok("📊" in t and "▰" in t, "semimi uslubda emoji ve zolaqlar var")
+    ok("%" in t, "faizler metndedir")
+    ok("↘" in t, "enme trendi gorunur (gerileyen sagird)")
+    ok("Vurma və bölmə" in t, "zeif movzu metnde adi ile var")
+    pg.locator("#vSty .seg", has_text="Rəsmi").click(); pg.wait_for_timeout(200)
+    t2 = pg.input_value("#vTxt")
+    ok("Hörmətli valideyn" in t2, "resmi uslub muracietle baslayir")
+    ok("📊" not in t2, "resmi uslubda emoji yoxdur")
+    pg.click("#vCopy"); pg.wait_for_timeout(400)
+    ok("Kopyalandı" in pg.inner_text("#vCopy"), "kopyalama tesdiqi gorunur",
+       pg.inner_text("#vCopy"))
+    cb = pg.evaluate("navigator.clipboard.readText()")
+    ok(cb == t2, "mubadile buferine TAM metn dusur")
 
     br.close()
 
