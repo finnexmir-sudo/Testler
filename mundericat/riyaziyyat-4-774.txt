@@ -1,0 +1,60 @@
+# riyaziyyat 4 I hisse
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=774
+# səhifə: 104 · bölmə: 6 · mövzu: 44
+
+== 1. Ədədlər (1 000 000-a qədər)
+     8  Yada salın
+    10  1. Çoxrəqəmli ədədlər
+    13  2. Müqayisə və sıralama
+    15  3. Yuvarlaqlaşdırma
+    17  Ümumiləşdirici tapşırıqlar
+
+== 2. Toplama və çıxma
+    20  Yada salın
+    22  4. Çoxrəqəmli ədədlərin toplanması
+    25  5. Çoxrəqəmli ədədlərin çıxılması
+    28  Məsələ və misallar
+    29  6. Toplama və çıxmanın digər üsulları
+    31  Ümumiləşdirici tapşırıqlar
+
+== 3. Vurma və bölmə
+    34  Yada salın
+    36  7. Dördrəqəmli ədədin birrəqəmli ədədə vurulması
+    38  8. Çoxrəqəmli ədədin birrəqəmli ədədə vurulması
+    40  Məsələ və misallar
+    41  9. Dördrəqəmli ədədin birrəqəmli ədədə bölünməsi
+    44  10. Çoxrəqəmli ədədin birrəqəmli ədədə bölünməsi
+    46  11. Ədədin bölənləri və bölünənləri
+    48  12. Vurma və bölmənin digər üsulları
+    50  Ümumiləşdirici tapşırıqlar
+
+== 4. Riyazi ifadələr. Tənlik
+    52  13. Ədədi ifadələr
+    54  14. Dəyişəni olan ifadələr
+    56  15. Tənlik
+    58  16. Tənlik qurmaqla məsələ həlli
+    60  17. Riyazi qanunauyğunluq
+    62  Ümumiləşdirici tapşırıqlar
+
+== 5. Vurma və bölmə
+    63  18. İkirəqəmli ədədə vurma
+    66  19. Üçrəqəmli ədədə vurma
+    68  Məsələ və misallar
+    69  20. İkirəqəmli ədədin ikirəqəmli ədədə bölünməsi.
+    71  21. Çoxrəqəmli ədədin ikirəqəmli ədədə bölünməsi
+    73  Ümumiləşdirici tapşırıqlar
+
+== 6. Həndəsi fiqurlar
+    76  Yada salın
+    78  22. Sadə həndəsi fiqurlar.Çevrə
+    81  23. Bucaq.Bucağın ölçüsü
+    83  24. Bucağın ölçülməsi.Transportir
+    86  25. Koordinat şəbəkəsi
+    89  26. Həndəsi ornamentlər
+    91  Məsələlər
+    92  27. Fəza fiqurlarının açılışı
+    94  28. Fiqurların müxtəlif tərəflərdən görünüşü
+    96  Ümumiləşdirici tapşırıqlar
+    98  1-ci yarımil üzrə ümumiləşdirici tapşırıqlar
+   102  Sözlük
+

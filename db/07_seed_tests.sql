@@ -77,28 +77,28 @@ delete from public.question_options o
 --  id-lere variantlari baglayir.
 with d(test, ord, topic, body, why, opts, correct) as (values
 -- Vurma cedveli
-('riy-3-vurma-1',1,'riy-3-vurma-cedveli','6 × 7 neçə edər?',
+('riy-3-vurma-1',1,'riy-3-vurma-bolme','6 × 7 neçə edər?',
  'Altı dəfə yeddi qırx iki edər.', array['42','36','48','54'],1),
-('riy-3-vurma-1',2,'riy-3-vurma-cedveli','9 × 8 neçə edər?',
+('riy-3-vurma-1',2,'riy-3-vurma-bolme','9 × 8 neçə edər?',
  'Doqquz dəfə səkkiz yetmiş iki edər.', array['64','72','81','78'],2),
-('riy-3-vurma-1',3,'riy-3-vurma-cedveli','4 × 9 neçə edər?',
+('riy-3-vurma-1',3,'riy-3-vurma-bolme','4 × 9 neçə edər?',
  'Dörd dəfə doqquz otuz altı edər.', array['32','35','36','40'],3),
-('riy-3-vurma-1',4,'riy-3-vurma-cedveli','5 × 6 neçə edər?',
+('riy-3-vurma-1',4,'riy-3-vurma-bolme','5 × 6 neçə edər?',
  'Beşə vuranda cavab həmişə 0 və ya 5 ilə bitir.', array['25','30','35','36'],2),
-('riy-3-vurma-1',5,'riy-3-vurma-cedveli','3 × 8 neçə edər?',
+('riy-3-vurma-1',5,'riy-3-vurma-bolme','3 × 8 neçə edər?',
  'Üç dəfə səkkiz iyirmi dörd edər.', array['21','24','27','28'],2),
-('riy-3-vurma-1',6,'riy-3-vurma-cedveli','7 × 7 neçə edər?',
+('riy-3-vurma-1',6,'riy-3-vurma-bolme','7 × 7 neçə edər?',
  'Yeddi dəfə yeddi qırx doqquz edər.', array['42','49','56','63'],2),
 
 -- Qarisiq
-('riy-3-qarisiq-1',1,'riy-3-toplama-cixma','245 + 138 neçə edər?',
+('riy-3-qarisiq-1',1,'riy-3-toplama','245 + 138 neçə edər?',
  'Vahidlər: 5+8=13, biri onluğa keçir.', array['373','383','393','483'],2),
-('riy-3-qarisiq-1',2,'riy-3-toplama-cixma','500 − 264 neçə edər?',
+('riy-3-qarisiq-1',2,'riy-3-toplama','500 − 264 neçə edər?',
  'Beş yüzdən iki yüz altmış dörd çıxsaq iki yüz otuz altı qalır.',
  array['236','246','336','244'],1),
-('riy-3-qarisiq-1',3,'riy-3-vurma-cedveli','8 × 6 neçə edər?',
+('riy-3-qarisiq-1',3,'riy-3-vurma-bolme','8 × 6 neçə edər?',
  'Səkkiz dəfə altı qırx səkkiz edər.', array['42','46','48','54'],3),
-('riy-3-qarisiq-1',4,'riy-3-bolme','56 : 8 neçə edər?',
+('riy-3-qarisiq-1',4,'riy-3-vurma-bolme-2','56 : 8 neçə edər?',
  'Səkkizə vurulanda 56 verən ədəd 7-dir.', array['6','7','8','9'],2),
 ('riy-3-qarisiq-1',5,'riy-3-mesele',
  'Aysunun 24 konfeti var. O, konfetləri 4 dostuna bərabər payladı. Hər dosta neçə konfet düşdü?',
@@ -107,10 +107,10 @@ with d(test, ord, topic, body, why, opts, correct) as (values
  'Bir qutuda 9 qələm var. 5 belə qutuda neçə qələm var?',
  'Hər qutuda eyni sayda olduğu üçün vururuq: 9 × 5 = 45.',
  array['40','45','49','54'],2),
-('riy-3-qarisiq-1',7,'riy-3-toplama-cixma',
+('riy-3-qarisiq-1',7,'riy-3-toplama',
  'Kənanın 150 manatı var idi. 65 manat xərclədi. Neçə manatı qaldı?',
  'Xərclənən pul çıxılır: 150 − 65 = 85.', array['75','85','95','115'],2),
-('riy-3-qarisiq-1',8,'riy-3-bolme','63 : 9 neçə edər?',
+('riy-3-qarisiq-1',8,'riy-3-vurma-bolme-2','63 : 9 neçə edər?',
  'Doqquza vurulanda 63 verən ədəd 7-dir.', array['6','7','8','9'],2),
 
 -- Azerbaycan dili
@@ -132,9 +132,9 @@ with d(test, ord, topic, body, why, opts, correct) as (values
  array['vergül','nöqtə','tire','iki nöqtə'],2),
 
 -- Odenisli analiz testi
-('riy-3-analiz',1,'riy-3-vurma-cedveli','12 × 4 neçə edər?',
+('riy-3-analiz',1,'riy-3-vurma-bolme','12 × 4 neçə edər?',
  'On iki dörd dəfə qırx səkkiz edər.', array['42','44','46','48'],4),
-('riy-3-analiz',2,'riy-3-bolme','81 : 9 neçə edər?',
+('riy-3-analiz',2,'riy-3-vurma-bolme-2','81 : 9 neçə edər?',
  'Doqquza vurulanda 81 verən ədəd 9-dur.', array['7','8','9','11'],3),
 ('riy-3-analiz',3,'riy-3-mesele',
  'Sinifdə 28 şagird var. Onların yarısı qızdır. Neçə qız var?',

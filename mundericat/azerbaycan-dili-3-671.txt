@@ -1,0 +1,36 @@
+# azerbaycan-dili 3 II hisse
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=671
+# səhifə: 104 · bölmə: 4 · mövzu: 24
+
+== 5 İXTİRALAR
+     8  1 • ZƏKAVƏ İXTİRA
+    14  2 • ƏN MÜHÜM İXTİRA
+    18  3 • İXTİRAÇI UŞAQLAR
+    22  4 • ÖZÜN DÜZƏLT
+    26  5 • RƏQƏMLƏRİN TARİXİ
+    31  Ümumiləşdirici təkrar
+
+== 6 UNUDULMAZ QƏHRƏMANLAR
+    34  1 • HÜNƏR GÖSTƏR, AD QAZAN
+    38  2 • EL İGİDLƏRİ İLƏ TANINAR
+    42  3 • İGİD DÖYÜŞDƏ BƏLLİ OLAR
+    46  4 • QƏHRƏMANLAR UNUDULMUR
+    50  5 • MÖHTƏŞƏM DÖNÜŞ
+    55  Ümumiləşdirici təkrar
+
+== 7 ODLAR YURDU
+    58  1 • ODLAR OĞLU
+    62  2 • GÖYÇƏ GÖLÜ
+    66  3 • AZƏRBAYCAN MUSİQİSİ
+    70  4 • QIZ QALASI
+    74  5 • AZƏRBAYCAN QALALARI
+    79  Ümumiləşdirici təkrar
+
+== 8 HİKMƏT XƏZİNƏSİ
+    82  1 • ƏMƏKSEVƏRLİK
+    86  2 • NƏSİHƏT
+    90  3 • BİRLİK
+    94  4 • YUMOR VƏ HİKMƏT
+    98  5 • MƏHARƏT
+   102  Ümumiləşdirici təkrar
+

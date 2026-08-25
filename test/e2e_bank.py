@@ -122,8 +122,12 @@ with sync_playwright() as pw:
     ok(pg.locator(".opt-row").count() == 3, "silmek de bir-bir isleyir")
     pg.locator(".obody").nth(2).fill("48")
     pg.select_option("#qlev", "3")
-    tp = db("select id::text i from public.topics where slug='riy-3-vurma-cedveli'", one=True)
-    if tp: pg.select_option("#qtop", tp["i"])
+    tp = db("select id::text i from public.topics where slug='riy-3-vurma-bolme'", one=True)
+    # Movzu tapilmasa SUSMAQ olmaz - evvel "if tp:" yazilmisdi ve slug
+    # deyisende test sadece movzusuz davam edirdi, "movzu saxlanildi"
+    # yoxlamasi ise sonra sinirdi.  Sebeb burdadir, orda yox.
+    assert tp, "riy-3-vurma-bolme movzusu bazada yoxdur"
+    pg.select_option("#qtop", tp["i"])
     # Sehife QACMAMALIDIR: cetinlik/tip secmek butun formani yeniden
     # cizirdi ve surusme yuxari atilirdi - muellim yerini itirirdi.
     pg.locator("#qdiff").scroll_into_view_if_needed(); pg.wait_for_timeout(200)
@@ -201,7 +205,12 @@ with sync_playwright() as pw:
     if pg.locator("details.filt:not([open])").count():
         pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
     nt = pg.locator("#bTop .chip").count()
-    ok(0 < nt <= 40, "fenn secilende yalniz onun movzulari cixir", nt)
+    # Sert say yazmaq olmaz - movzu agaci e-dersliye gore deyise biler.
+    # Bazadaki heqiqi sayla tutusduruq.
+    nriy = db("select count(*) n from public.topics t join public.subjects s "
+              "on s.id = t.subject_id where s.slug = 'riyaziyyat'", one=True)["n"]
+    ok(nt == nriy, "fenn secilende yalniz onun movzulari cixir",
+       "ekran %d, baza %d" % (nt, nriy))
     pg.select_option("#bsub", ""); pg.wait_for_timeout(900)
     if pg.locator("details.filt:not([open])").count():
         pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)

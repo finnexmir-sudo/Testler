@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+e-derslik.edu.az mundericatini (TOC) yigir.
+
+Nə üçün: mövzu ağacımız (db/14_movzular.sql) real dərslik
+mündəricatına uyğun olmalıdır. Dərsliyin mətni deyil, yalnız
+bölmə/fəsil adları götürülür - bu, faktdır, kopyalanan məzmun deyil.
+
+İşlətmək:
+    python3 tools/mundericat.py            # hamısı
+    python3 tools/mundericat.py 774 775    # yalnız verilən kitablar
+
+Nəticə: mundericat/<id>-<ad>.txt
+"""
+import html
+import os
+import re
+import sys
+import time
+import urllib.request
+
+BASE = "https://www.e-derslik.edu.az"
+OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "mundericat")
+
+# 1-4 sinif, dord fennimiz. e-derslik portal id-leri.
+KITABLAR = [
+    # (id, fenn, sinif, qeyd)
+    (419, "riyaziyyat", 1, "I hisse"),
+    (420, "riyaziyyat", 1, "II hisse"),
+    (664, "riyaziyyat", 2, "I hisse"),
+    (665, "riyaziyyat", 2, "II hisse"),
+    (680, "riyaziyyat", 3, "I hisse"),
+    (681, "riyaziyyat", 3, "II hisse"),
+    (774, "riyaziyyat", 4, "I hisse"),
+    (775, "riyaziyyat", 4, "II hisse"),
+    (413, "azerbaycan-dili", 1, "I hisse"),
+    (414, "azerbaycan-dili", 1, "II hisse"),
+    (662, "azerbaycan-dili", 2, "I hisse"),
+    (663, "azerbaycan-dili", 2, "II hisse"),
+    (670, "azerbaycan-dili", 3, "I hisse"),
+    (671, "azerbaycan-dili", 3, "II hisse"),
+    (764, "azerbaycan-dili", 4, "I hisse"),
+    (765, "azerbaycan-dili", 4, "II hisse"),
+    (762, "heyat-bilgisi", 1, ""),
+    (829, "heyat-bilgisi", 2, ""),
+    (900, "heyat-bilgisi", 3, ""),
+    (769, "heyat-bilgisi", 4, ""),
+    (417, "informatika", 1, ""),
+    (520, "informatika", 2, ""),
+    (676, "informatika", 3, ""),
+    (360, "informatika", 4, ""),
+]
+
+TEG = re.compile(r"<[^>]*>")
+BOSLUQ = re.compile(r"\s+")
+
+
+def yukle(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=40) as r:
+        return r.read().decode("utf-8", "replace")
+
+
+def temizle(s):
+    return BOSLUQ.sub(" ", html.unescape(TEG.sub(" ", s))).strip()
+
+
+BOX = re.compile(
+    r'<div class="box">\s*<h6>(.*?)</h6>(.*?)</div>', re.S)
+LINK = re.compile(
+    r'<li><a href="#[^"]*?page(\d+)\.xhtml">(.*?)</a></li>', re.S)
+
+
+def mundericat(pleyer):
+    """Pleyerin «Mövzular» panelini oxuyur.
+
+    Qaytarir: [(bolme_adi, [(seh_no, movzu_adi), ...]), ...]
+    Yalniz basliqlar goturulur - dersliyin metni yox.
+    """
+    i = pleyer.find('topics-box')
+    if i < 0:
+        return []
+    j = pleyer.find('<!-- /topics box', i)
+    blok = pleyer[i:j if j > 0 else len(pleyer)]
+    netice = []
+    for m in BOX.finditer(blok):
+        bolme = temizle(m.group(1))
+        movzular = [(int(a), temizle(b)) for a, b in LINK.findall(m.group(2))]
+        if bolme or movzular:
+            netice.append((bolme, movzular))
+    return netice
+
+
+def sehife_sayi(pleyer):
+    m = re.search(r"Cəmi səhifə\s*(\d+)", pleyer)
+    return int(m.group(1)) if m else 0
+
+
+def main():
+    istenen = set(int(a) for a in sys.argv[1:]) if len(sys.argv) > 1 else None
+    os.makedirs(OUT, exist_ok=True)
+    umumi = 0
+    for kid, fenn, sinif, qeyd in KITABLAR:
+        if istenen is not None and kid not in istenen:
+            continue
+        try:
+            pleyer = yukle(BASE + "/player/index3.php?book_id=%d" % kid)
+        except Exception as e:
+            print("  X %d - %s" % (kid, e))
+            continue
+        ad = "%s %d %s" % (fenn, sinif, qeyd)
+        toc = mundericat(pleyer)
+        n = sehife_sayi(pleyer)
+        nm = sum(len(v) for _, v in toc)
+        yol = os.path.join(OUT, "%s-%d-%d.txt" % (fenn, sinif, kid))
+        with open(yol, "w", encoding="utf-8") as f:
+            f.write("# %s\n" % ad.strip())
+            f.write("# mənbə: %s/player/index3.php?book_id=%d\n" % (BASE, kid))
+            f.write("# səhifə: %d · bölmə: %d · mövzu: %d\n\n" % (n, len(toc), nm))
+            for bolme, movzular in toc:
+                f.write("== %s\n" % bolme)
+                for seh, mv in movzular:
+                    f.write("   %3d  %s\n" % (seh, mv))
+                f.write("\n")
+        print("  %-26s %2d bölmə %3d mövzu %3d səh  -> %s"
+              % (ad.strip()[:26], len(toc), nm, n, os.path.basename(yol)))
+        umumi += nm
+        time.sleep(0.4)
+    print("\ncəmi %d mövzu" % umumi)
+
+
+if __name__ == "__main__":
+    main()

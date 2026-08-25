@@ -1,0 +1,36 @@
+# azerbaycan-dili 3 I hisse
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=670
+# səhifə: 104 · bölmə: 4 · mövzu: 24
+
+== 1 FƏRD VƏ TOPLUM
+     8  1 • DÜRÜSTLÜK
+    12  2 • DOSTLUQ
+    18  3 • MƏRHƏMƏT
+    22  4 • MƏSULİYYƏT
+    26  5 • NİKBİNLİK
+    31  Ümumiləşdirici təkrar
+
+== 2 DÜNYAMIZI TANIYAQ
+    34  1 • BİZ AZƏRBAYCANLIYIQ
+    38  2 • DÜNYA XALQLARI
+    42  3 • TARİXİ ABİDƏLƏR
+    46  4 • MİLLİ BAYRAMLAR
+    50  5 • SƏYAHƏT
+    55  Ümumiləşdirici təkrar
+
+== 3 QƏRİBƏ HEYVANLAR
+    58  1 • MAMONT VƏ FİL
+    62  2 • NADİR MEŞƏ HEYVANLARI
+    66  3 • MANQUST
+    72  4 • ANTARKTİDA SAKİNLƏRİ
+    76  5 • DELFİN
+    79  Ümumiləşdirici təkrar
+
+== 4 TƏBİİ FƏLAKƏTLƏR
+    82  1 • SEL
+    86  2 • MEŞƏ YANĞINLARI
+    92  3 • DƏNİZDƏ FIRTINA
+    98  4 • SUNAMİ
+   100  5 • DAŞQIN
+   103  Ümumiləşdirici təkrar
+

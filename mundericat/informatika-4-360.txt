@@ -1,0 +1,43 @@
+# informatika 4
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=360
+# səhifə: 88 · bölmə: 3 · mövzu: 33
+
+== 1. İNFORMASİYA
+     6  1. TEXNİKADA İNFORMASİYA
+     9  2. İNFORMASİYA TEXNOLOGİYALARI
+    12  3. KOMPÜTER VƏ İNFORMASİYA
+    15  4. İNFORMASİYANI ÖTÜRMƏ VASİTƏLƏRİ
+    17  5. ELEKTRON POÇT VƏ İNTERNET
+    20  Yoxlama sualları
+
+== 2. ALQORİTM
+    22  MƏNTİQ
+    22  6. ƏLAMƏTLƏRİN CƏDVƏL ŞƏKLİNDƏ TƏSVİRİ
+    25  7. QRUP VƏ ALTQRUP
+    28  8. “VƏ”, “VƏ YA" SÖZLƏRİ OLAN MÜRƏKKƏB MÜLAHİZƏLƏR
+    31  9. MÜLAHİZƏLƏRİN SXEMLƏRLƏ GÖSTƏRİLMƏSİ
+    34  10. “ƏGƏR - ONDA" QAYDASI
+    37  11. MƏNTİQİ MÜHAKİMƏLƏR
+    40  ALQORİTM VƏ İCRAÇILAR
+    40  12. ALQORİTMİN İCRAÇISI
+    43  13. MƏŞHUR İCRAÇILAR
+    46  14. ALQORİTMLƏRDƏ BUDAQLANMA
+    49  15. DÖVRİ ALQORİTMLƏR
+    52  Yoxlama suallar
+
+== 3. KOMPÜTERDƏ İŞ
+    54  QRAFİK REDAKTOR
+    54  16. QRAFİK REDAKTORUN ALƏTLƏRİ
+    57  17. ŞƏKLİN FORMASININ DƏYİŞDİRİLMƏSİ
+    60  18. SİMMETRİK FİQURLARIN ÇƏKİLMƏSİ
+    63  19. MOZAİKA VƏ NAXIŞLARIN QURULMASI
+    66  20. RƏSMİN ÇAP EDİLMƏSİ
+    69  21. MƏTNLİ ŞƏKİLLƏR
+    72  MƏTN REDAKTORU
+    72  22. MƏTNLƏRİN YIĞILMASI
+    75  23. MƏTNLƏRLƏ İŞ
+    78  24. MƏTNİN NİZAMLANMASI
+    81  25. SƏNƏDİN ÇAPA HAZIRLANMASI
+    84  BU KİTAB NECƏ HAZIRLANIB
+    86  Yoxlama suallar
+

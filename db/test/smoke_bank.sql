@@ -66,7 +66,7 @@ begin
     from public.subjects s
     join public.levels l on l.code = '3'
     join public.programs p on p.id = l.program_id and p.slug = 'ibtidai'
-    left join public.topics tp on tp.subject_id = s.id and tp.slug = 'riy-3-vurma-cedveli'
+    left join public.topics tp on tp.subject_id = s.id and tp.slug = 'riy-3-vurma-bolme'
    where s.slug = 'riyaziyyat'
   returning id into v_q;
   assert v_q is not null, 'test olmadan sual yazila bilmedi';

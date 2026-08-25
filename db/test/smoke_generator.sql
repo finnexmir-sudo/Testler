@@ -27,27 +27,36 @@ insert into public.account_members values
 
 --  Muellimin oz bankı: 3 movzu x 8 sual, cavablari ferqli
 do $$
-declare v_s uuid; v_l uuid; v_t uuid; i int; k int := 0; tp text;
+declare
+  v_s uuid; v_l uuid; v_t uuid; i int; j int; k int := 0; v_body text;
+  --  DIQQET: sual metnleri BIR-BIRINE OXSAMAMALIDIR.  Generator >= 0.95
+  --  oxsarligi tekrar sayir; movzu slug-ini metne yazsaq
+  --  "riy-3-vurma-bolme" ve "riy-3-vurma-bolme-2" bir-birinin
+  --  tekrari kimi gorunur ve hovuz 24 yerine 22 olur.
+  tp   text[] := array['riy-3-vurma-bolme','riy-3-toplama','riy-3-vurma-bolme-2'];
+  etiket text[] := array['vurma cedveli','toplama ve cixma','bolme emeli'];
 begin
   select id into v_s from public.subjects where slug='riyaziyyat';
   select l.id into v_l from public.levels l join public.programs p on p.id=l.program_id
    where p.slug='ibtidai' and l.code='3';
-  foreach tp in array array['riy-3-vurma-cedveli','riy-3-toplama-cixma','riy-3-bolme'] loop
-    select id into v_t from public.topics where slug = tp and subject_id = v_s;
+  for j in 1..array_length(tp, 1) loop
+    select id into v_t from public.topics where slug = tp[j] and subject_id = v_s;
+    assert v_t is not null, format('movzu tapilmadi: %s', tp[j]);
     for i in 1..8 loop
       k := k + 1;
+      v_body := etiket[j] || ' sualı nomre ' || i;
       insert into public.questions
         (owner_type, owner_id, account_id, subject_id, level_id, topic_id,
          kind, body, difficulty, quarter, status)
       values ('educator','11110000-0000-0000-0000-00000000009a',
               'aaaa0000-0000-0000-0000-00000000009a', v_s, v_l, v_t,
-              'single', tp || ' sualı nomre ' || i, (i % 3) + 1, 1, 'published');
+              'single', v_body, (i % 3) + 1, 1, 'published');
       insert into public.question_options (question_id, ord, body, is_correct)
       select q.id, 1, 'cavab ' || k, true from public.questions q
-       where q.body = tp || ' sualı nomre ' || i;
+       where q.body = v_body;
       insert into public.question_options (question_id, ord, body, is_correct)
       select q.id, 2, 'yanlis ' || k, false from public.questions q
-       where q.body = tp || ' sualı nomre ' || i;
+       where q.body = v_body;
     end loop;
   end loop;
 end $$;
@@ -99,7 +108,7 @@ end $$;
 do $$
 declare v jsonb; tp uuid; n int;
 begin
-  select id into tp from public.topics where slug='riy-3-bolme';
+  select id into tp from public.topics where slug='riy-3-vurma-bolme-2';
   v := public.rpc_generate_test(
         format('{"pool":"mine","topics":["%s"],"count":5}', tp)::jsonb, 'Tek movzu');
   select count(*) into n from public.test_questions tq

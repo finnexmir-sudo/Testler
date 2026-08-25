@@ -5,7 +5,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export PGHOST=${PGHOST:-/tmp} PGPORT=${PGPORT:-55432} PGUSER=${PGUSER:-postgres}
-OLD=${1:-HEAD~12}
+#  Sual bankindan ONCEKI commit - SABIT olmalidir.  Evvel HEAD~12 yazilmisdi,
+#  amma her yeni commit onu suruyurdu ve gunun birinde "kohne baza" artiq
+#  banki olan bazaya cevrildi - migrasiya oz uzerinden isleyib sindi.
+OLD=${1:-554e09a}
 WT=$(mktemp -d)
 trap 'git worktree remove --force "$WT" >/dev/null 2>&1 || true' EXIT
 
@@ -17,6 +20,7 @@ dropdb --if-exists miq_test 2>/dev/null || true; createdb miq_test
 echo "kohne baza quruldu ($OLD)"
 
 for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
+         15_movzular_ederslik.sql \
          07_seed_tests.sql 05_grants.sql; do
   printf "  %-22s" "$f"
   if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then

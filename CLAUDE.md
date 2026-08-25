@@ -60,16 +60,9 @@ Sonra `db/test/verify.sql` işlət — 7 sətir, hamısı `OK` olmalıdır.
 ## Yerli yoxlama
 
 ```bash
-# SQL testləri
-createdb tehsil && cd db && ./run.sh tehsil --local
-psql -d tehsil -f test/smoke.sql
-psql -d tehsil -f test/smoke_educator.sql
-psql -d tehsil -f test/smoke_reports.sql
-psql -d tehsil -f test/smoke_assign.sql
-psql -d tehsil -f test/smoke_bank.sql
-psql -d tehsil -f test/smoke_bank_rpc.sql
-psql -d tehsil -f test/smoke_generator.sql
-./db/test/miqrasiya.sh          # teze vs miqrasiya olunmus sxem
+# SQL testləri — hər suite öz təmiz bazasında
+./db/test/yoxla.sh
+./db/test/miqrasiya.sh          # təzə vs miqrasiya olunmuş sxem
 
 # panel uçdan-uca (mock Supabase + Chromium)
 ./test/run_e2e.sh
@@ -79,8 +72,10 @@ Sxem və ya RLS dəyişəndə **mütləq** hamısını işlət. Bu testlər
 təhlükəsizlik iddialarıdır, yalnız «işləyir/işləmir» yoxlaması deyil.
 
 Hər test faylı **öz təmiz bazasında** işlədilməlidir — bir-birinin
-arxasınca eyni bazada işlətsən sonrakılar uğursuz olur (`run_e2e.sh`
-elə edir). 
+arxasınca eyni bazada işlətsən sonrakılar uğursuz olur: `smoke_educator.sql`
+müəllim panelini yoxlayarkən testləri silir, ondan sonrakı suite platforma
+testini tapmır və «Test tapılmadı» verir, kod düzgün olsa belə.
+`yoxla.sh` və `run_e2e.sh` bazanı hər dəfə yenidən qurur.
 
 `anon` rolu altında işləyən yoxlamalarda `public.tests`, `questions` və
 `question_options` **oxunmur** — `05_grants.sql` bunu qadağan edir. Test
@@ -183,11 +178,26 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   şagirdin gördüyü sualı göstərir. Yeni cavab yolu yazırsansa
   `question_body` və `question_explanation` sütunlarını doldur.
 - Hesabatlarda səhv sualları **surətdən** oxu, `questions`-dan yox.
-- Mövzular **mərkəzdən** gəlir (`db/14_movzular.sql`), müəllim özü
+- Mövzular **mərkəzdən** gəlir (`db/14_movzular.sql` →
+  `db/15_movzular_ederslik.sql`), müəllim özü
   yaza bilmir — hər müəllim «Vurma» / «Vurma cədvəli» / «vurma» yazsaydı
   zəif nöqtə hesabatı üç yerə bölünərdi. Çatışmayan yer üçün `tags`.
   Slug qaydası: `<fənn>-<sinif>-<mövzu>` — `topics`-də
   `unique(subject_id, slug)` var, sinif slug-in içində olmalıdır.
+- Ağacın **mənbəyi e-derslik.edu.az-dır** — Təhsil Nazirliyinin rəsmi
+  portalı. `tools/mundericat.py` kitabların **mündəricatını** yığır
+  (`mundericat/*.txt`), `15_...sql` isə ondan mövzu ağacını qurur.
+  Dərsliyin mətni, çalışmaları, şəkilləri **götürülmür** — onlar müəllif
+  hüququ ilə qorunur; mündəricat isə faktdır.
+  Azərbaycan dili istisnadır: dərslik mövzuya yox, **mövzuya (temaya)**
+  görə bölünüb («Fərd və toplum»), qrammatika dərsin içindədir — test
+  bankı üçün qrammatika oxu (isim, sifət, durğu işarələri) saxlanılır.
+  Riyaziyyat 2 də istisnadır: portaldakı nəşr köhnədir (yalnız 20-yə
+  qədər gedir).
+- Mövzu slug-u dəyişəndə **testlər də dəyişməlidir** —
+  `07_seed_tests.sql`, `test/smoke_generator.sql`, `test/e2e_bank.py`
+  slug-a görə axtarır. Tapılmayanda **susmasın, sınsın**: `if tp:` yox,
+  `assert tp`.
 - Platforma seed sualları `ext_key` (`test-slug#sıra`) ilə tanınır —
   `07_seed_tests.sql` təkrar işlədiləndə sual çoxalmır, üzərinə yazılır.
 

@@ -1,0 +1,22 @@
+# riyaziyyat 2 II hisse
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=665
+# səhifə: 104 · bölmə: 1 · mövzu: 16
+
+== II BÖLMƏ İKİNCİ ONLUQ. ÖLÇMƏ (DAVAMI)
+     5  1. 13 ədədi
+    15  2. Birrəqəmli və ikirəqəmli ədədlər
+    16  3. 14 ədədi
+    26  4. Toplama əməlinin komponentləri
+    28  5. Toplamanın yerdəyişmə xassəsi
+    30  6. 15 ədədi
+    39  7. Tutum vahidi - litr
+    42  8. 16 ədədi
+    51  9. Uzunluq vahidi - santimetr (sm)
+    53  10. 17 ədədi
+    62  11. Zaman vahidi - saat
+    66  12. 18 ədədi
+    75  13. Çıxma əməlinin komponentləri
+    79  14. 19 ədədi
+    88  15. 20 ədədi
+    97  16. Təkrar
+

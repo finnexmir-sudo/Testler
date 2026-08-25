@@ -1,0 +1,51 @@
+# informatika 3
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=676
+# səhifə: 80 · bölmə: 4 · mövzu: 39
+
+== 1 İNFORMASİYA
+     6  ƏTRAFIMIZDA İNFORMASİYA
+     6  1. İNSAN VƏ İNFORMASİYA
+     8  2. TƏBİƏTDƏ İNFORMASİYA
+    10  İNFORMASİYA İLƏ İŞ
+    10  3. İNFORMASİYA PROSESLƏRİ
+    12  4. İNFORMASİYANIN ÖTÜRÜLMƏSİ
+    14  5. İNFORMASİYANIN KODLAŞDIRILMASI
+    16  6. REBUS
+    18  7. İNFORMASİYANIN EMALI
+    20  Sual və tapşırıqlar
+
+== 2 ALQORİTM
+    22  QRUPLAŞDIRMA
+    22  8 OBYEKTLƏR QRUPU
+    24  9 OBYEKTİN FƏRQLƏNDİRİCİ ƏLAMƏTLƏRİ
+    26  10 “HAMISI”, “HEÇ BİRİ”, “BƏZİSİ”
+    28  11 QANUNAUYĞUNLUQ
+    30  HƏRƏKƏTLƏR ARDICILLIĞI
+    30  12. ALQORİTM
+    32  13. XƏTTİ ALQORİTM
+    34  14. BUDAQLANMA
+    37  15. MƏQSƏDƏUYĞUN YOLUN SEÇİLMƏSİ
+    39  16. TƏKRARLANAN HƏRƏKƏTLƏR
+    41  Sual və tapşırıqlar
+
+== 3 KOMPÜTER
+    44  KOMPÜTERDƏ ƏMƏLİYYATLAR
+    44  17. KOMPÜTER VƏ İNFORMASİYA
+    46  18. İŞ MASASI
+    49  19. QOVLUQ
+    52  QRAFİK REDAKTOR
+    52  20. PAINT PROQRAMI
+    54  21. PALİTRA
+    57  22. ŞƏKLİN FRAQMENTİ İLƏ İŞ
+    60  23. ŞƏKİLLƏRİN KOMPÜTERDƏ SAXLANMASI
+    63  Sual və tapşırıqlar
+
+== MƏTN REDAKTORU
+    64  24. WORDPAD PROQRAMI
+    67  25. MƏTNLƏRLƏ İŞ
+    70  26. MƏTNƏ ŞƏKLİN ƏLAVƏ EDİLMƏSİ
+    73  27. MƏTNDƏ SÖZLƏRİN ƏVƏZ OLUNMASI
+    76  28. KOMPÜTERDƏ HESABLAMALARIN APARILMASI
+    78  Sual və tapşırıqlar
+    79  Terminlər
+
