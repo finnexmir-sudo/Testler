@@ -1,0 +1,925 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+6-ci sinfin tebiet fennleri -> db/32_bank_fenn6.sql
+
+    Fizika 6       4 movzu x 10 =  40
+    Biologiya 6    8 movzu x 10 =  80
+    Cografiya 6    7 movzu x 10 =  70
+                            cemi  190
+
+Bu fennler 6-ci sinifde baslayir - platforma banklarinin ilk fizika,
+biologiya ve cografiya suallari.  Movzular 29_movzular_orta6.sql
+agacina uygundur (e-derslik: fizika 546, biologiya 538, cografiya
+859/860).  Suallar yalniz derslik seviyyeli, subhesiz faktlardir;
+sixliq kimi hesablanan cavablar Python-da yoxlanilir.
+
+Isletmek:
+    python3 tools/fenn6.py
+"""
+import io
+import os
+
+KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CIXIS = os.path.join(KOK, "db", "32_bank_fenn6.sql")
+
+#  (fenn, movzu-slug, rub)
+MOVZULAR = [
+    ("fizika", "fiz-6-giris",    1),
+    ("fizika", "fiz-6-materiya", 2),
+    ("fizika", "fiz-6-madde",    3),
+    ("fizika", "fiz-6-hereket",  4),
+    ("biologiya", "bio-6-tedqiqat",        1),
+    ("biologiya", "bio-6-huceyre",         1),
+    ("biologiya", "bio-6-vegetativ",       2),
+    ("biologiya", "bio-6-generativ",       2),
+    ("biologiya", "bio-6-hereket-qida",    3),
+    ("biologiya", "bio-6-dasinma-coxalma", 3),
+    ("biologiya", "bio-6-muhit",           4),
+    ("biologiya", "bio-6-rol",             4),
+    ("cografiya", "cog-6-mekan",    1),
+    ("cografiya", "cog-6-beledci",  1),
+    ("cografiya", "cog-6-col",      2),
+    ("cografiya", "cog-6-kainat",   2),
+    ("cografiya", "cog-6-tebiet",   3),
+    ("cografiya", "cog-6-yurdumuz", 3),
+    ("cografiya", "cog-6-dunya",    4),
+]
+
+SUALLAR = {
+# ========================= FIZIKA 6 ===================================
+"fiz-6-giris": [
+ ("Fizika elmi nəyi öyrənir?",
+  "Fizika təbiət hadisələrini və onların qanunlarını öyrənir.",
+  ["Təbiət hadisələrini", "Yalnız bitkiləri", "Yalnız tarixi",
+   "Yalnız dilləri"], 1, None, 1),
+ ("Hansı hadisə fiziki hadisədir?",
+  "Buzun əriməsi — maddənin halı dəyişir, özü dəyişmir.",
+  ["Buzun əriməsi", "Ağacın böyüməsi", "Dəmirin paslanması",
+   "Südün turşuması"], 1, None, 2),
+ ("Hansı fiziki kəmiyyətdir?",
+  "Kütlə ölçülə bilən fiziki kəmiyyətdir.",
+  ["Kütlə", "Sevinc", "Dad", "Yuxu"], 1, None, 2),
+ ("Uzunluğun beynəlxalq sistemdə (BS) vahidi hansıdır?",
+  "Uzunluğun BS vahidi metrdir.",
+  ["Metr", "Kiloqram", "Saniyə", "Litr"], 1, None, 2),
+ ("Zamanın BS vahidi hansıdır?",
+  "Zamanın BS vahidi saniyədir.",
+  ["Saniyə", "Metr", "Dərəcə", "Qram"], 1, None, 2),
+ ("Mayelərin həcmini ölçmək üçün hansı cihazdan istifadə olunur?",
+  "Həcm menzurka (ölçü silindri) ilə ölçülür.",
+  ["Menzurka", "Tərəzi", "Xətkeş", "Kompas"], 1, None, 2),
+ ("Fizikada əsas öyrənmə metodları hansılardır?",
+  "Müşahidə və təcrübə əsas metodlardır.",
+  ["Müşahidə və təcrübə", "Yalnız əzbərləmə",
+   "Yalnız şəkil çəkmə", "Təxmin etmə"], 1, None, 2),
+ ("Ölçmə nədir?",
+  "Kəmiyyətin qəbul olunmuş vahidlə müqayisəsidir.",
+  ["Kəmiyyətin vahidlə müqayisəsi", "Cihazın təmiri",
+   "Rəqəmlərin yazılması", "Cədvəlin çəkilməsi"], 1, None, 3),
+ ("Klassik mexanikanın banilərindən sayılan alim kimdir?",
+  "İsaak Nyuton mexanikanın əsasını qoymuşdur.",
+  ["İsaak Nyuton", "Şekspir", "Motsart", "Kolumb"], 1, None, 2),
+ ("Ölçmənin dəqiqliyi nədən asılıdır?",
+  "Cihazın bölgü qiymətindən asılıdır.",
+  ["Cihazın bölgü qiymətindən", "Otağın rəngindən",
+   "Günün vaxtından", "Ölçənin boyundan"], 1, None, 3),
+],
+"fiz-6-materiya": [
+ ("Materiya nədir?",
+  "Kainatda mövcud olan hər şey — maddə və fiziki sahə.",
+  ["Kainatda mövcud olan hər şey", "Yalnız su",
+   "Yalnız hava", "Yalnız işıq"], 1, None, 2),
+ ("Hansı maddəyə misaldır?",
+  "Su maddədir; sahələr maddə deyil, materiyanın başqa növüdür.",
+  ["Su", "Maqnit sahəsi", "Elektrik sahəsi",
+   "Qravitasiya sahəsi"], 1, None, 2),
+ ("Fiziki cisim nədir?",
+  "Maddədən təşkil olunmuş əşyadır: stol, daş, qələm.",
+  ["Maddədən təşkil olunmuş əşya", "İşıq şüası",
+   "Səs dalğası", "Kölgə"], 1, None, 2),
+ ("Atomun mərkəzində nə yerləşir?",
+  "Atomun mərkəzində nüvə yerləşir.",
+  ["Nüvə", "Molekul", "Hüceyrə", "Toz"], 1, None, 2),
+ ("Molekul nədir?",
+  "Atomlardan təşkil olunmuş hissəcikdir.",
+  ["Atomlardan təşkil olunmuş hissəcik", "Ən böyük cisim",
+   "Planet", "Mineral"], 1, None, 2),
+ ("Maddənin neçə əsas aqreqat halı var?",
+  "Üç əsas hal: bərk, maye, qaz.",
+  ["3", "2", "5", "10"], 1, None, 2),
+ ("Su buxarı maddənin hansı halıdır?",
+  "Buxar qaz halıdır.",
+  ["Qaz", "Bərk", "Maye", "Heç biri"], 1, None, 2),
+ ("Bərk cisimlərin xarakterik xüsusiyyəti nədir?",
+  "Bərk cisimlər öz formasını saxlayır.",
+  ["Öz formasını saxlayır", "Qabın formasını alır",
+   "Bütün fəzanı doldurur", "Görünmür"], 1, None, 2),
+ ("Mayelərin xarakterik xüsusiyyəti hansıdır?",
+  "Maye tökuldüyü qabın formasını alır.",
+  ["Qabın formasını alır", "Formasını saxlayır",
+   "Sıxıla bilir", "Yalnız isti olur"], 1, None, 2),
+ ("Şüşə stəkan maddədir, yoxsa cisim?",
+  "Stəkan cisimdir, şüşə isə maddədir.",
+  ["Cisimdir", "Maddədir", "Sahədir", "Hadisədir"],
+  1, None, 3),
+],
+"fiz-6-madde": [
+ ("Diffuziya nədir?",
+  "Bir maddə hissəciklərinin digərinin arasına yayılmasıdır.",
+  ["Maddələrin qarışması (yayılması)", "Suyun donması",
+   "Cismin düşməsi", "İşığın sınması"], 1, None, 2),
+ ("Ətrin otağa yayılması hansı hadisəyə misaldır?",
+  "Qoxu hissəcikləri havada yayılır — diffuziyadır.",
+  ["Diffuziyaya", "Zəlzələyə", "Cazibəyə", "Elektrikləşməyə"],
+  1, None, 2),
+ ("Qızdırılan cisimlər adətən nə edir?",
+  "İstidən cisimlər genişlənir.",
+  ["Genişlənir", "Sıxılır", "Yox olur", "Dəyişmir"],
+  1, None, 2),
+ ("Sıxlıq hansı düsturla hesablanır?",
+  "Sıxlıq = kütlə : həcm.",
+  ["Kütlə : həcm", "Kütlə × həcm", "Həcm : kütlə",
+   "Kütlə + həcm"], 1, None, 3),
+ ("Kütləsi 200 q, həcmi 100 sm³ olan cismin sıxlığı neçədir?",
+  "200 : 100 = 2 q/sm³.",
+  ["2 q/sm³", "20 q/sm³", "0,5 q/sm³", "300 q/sm³"], 1,
+  "%d q/sm³" % (200 // 100), 3),
+ ("Kütlənin BS vahidi hansıdır?",
+  "Kütlənin BS vahidi kiloqramdır.",
+  ["Kiloqram", "Metr", "Litr", "Dərəcə"], 1, None, 2),
+ ("Suyun sıxlığı təxminən neçə q/sm³-dür?",
+  "Suyun sıxlığı 1 q/sm³-dür.",
+  ["1", "10", "100", "0,1"], 1, str(1), 3),
+ ("Normal şəraitdə su neçə dərəcədə qaynayır?",
+  "Su 100°C-də qaynayır.",
+  ["100°C-də", "50°C-də", "0°C-də", "1 000°C-də"], 1, None, 2),
+ ("Su neçə dərəcədə donur?",
+  "Su 0°C-də donub buza çevrilir.",
+  ["0°C-də", "100°C-də", "−100°C-də", "10°C-də"], 1, None, 2),
+ ("Menzurkaya salınmış cismin həcmi necə təyin olunur?",
+  "Mayenin səviyyəsinin nə qədər qalxdığına görə.",
+  ["Mayenin səviyyəsinin dəyişməsinə görə", "Cismin rənginə görə",
+   "Cismin səsinə görə", "Təyin etmək olmur"], 1, None, 3),
+],
+"fiz-6-hereket": [
+ ("Mexaniki hərəkət nədir?",
+  "Cismin başqa cisimlərə nəzərən vəziyyətinin dəyişməsidir.",
+  ["Cismin yerdəyişməsi", "Cismin rənginin dəyişməsi",
+   "Cismin əriməsi", "Cismin yanması"], 1, None, 2),
+ ("Cisimləri Yerə tərəf çəkən qüvvə necə adlanır?",
+  "Bu, cazibə (qravitasiya) qüvvəsidir.",
+  ["Cazibə qüvvəsi", "Külək qüvvəsi", "Maqnit qüvvəsi",
+   "Səs qüvvəsi"], 1, None, 2),
+ ("Günəş sisteminin mərkəzində hansı göy cismi durur?",
+  "Mərkəzdə Günəş yerləşir, planetlər onun ətrafında dövr edir.",
+  ["Günəş", "Yer", "Ay", "Mars"], 1, None, 1),
+ ("Sürtünmə ilə elektriklənmiş daraq kağız qırıntılarına necə "
+  "təsir edir?",
+  "Elektriklənmiş cisim yüngül cisimləri cəzb edir.",
+  ["Cəzb edir", "İtələyir", "Yandırır", "Heç cür"], 1, None, 2),
+ ("Maqnitin ən güclü cəzb edən hissələri necə adlanır?",
+  "Maqnitin qütbləri ən güclü hissələridir.",
+  ["Qütblər", "Ortası", "Alt hissəsi", "Səthi"],
+  1, None, 3),
+ ("Elektrik cərəyanı nədir?",
+  "Yüklü hissəciklərin istiqamətlənmiş hərəkətidir.",
+  ["Yüklü hissəciklərin istiqamətlənmiş hərəkəti",
+   "Suyun axını", "Küləyin əsməsi", "İşığın yayılması"],
+  1, None, 3),
+ ("Enerji nədir?",
+  "Cismin iş görmə qabiliyyətidir.",
+  ["İş görmə qabiliyyəti", "Cismin rəngi", "Cismin adı",
+   "Cismin forması"], 1, None, 2),
+ ("Hərəkət edən cismin malik olduğu enerji necə adlanır?",
+  "Hərəkət enerjisi kinetik enerjidir.",
+  ["Kinetik enerji", "Potensial enerji", "Maqnit enerjisi",
+   "Enerjisi olmur"], 1, None, 3),
+ ("Elektrik cərəyanını keçirən materiallar necə adlanır?",
+  "Cərəyanı keçirənlər naqillər (keçiricilər) adlanır.",
+  ["Keçiricilər", "İzolyatorlar", "Maqnitlər", "Güzgülər"],
+  1, None, 3),
+ ("Toxunma ilə baş verən qarşılıqlı təsirə misal hansıdır?",
+  "Topa ayaqla vurulan zərbə toxunma təsiridir.",
+  ["Topa vurulan zərbə", "Ayın Yeri cəzb etməsi",
+   "Maqnitin uzaqdan təsiri", "Günəşin istiliyi"], 1, None, 2),
+],
+# ======================== BIOLOGIYA 6 =================================
+"bio-6-tedqiqat": [
+ ("Biologiya elmi nəyi öyrənir?",
+  "Biologiya canlı orqanizmləri öyrənir.",
+  ["Canlı orqanizmləri", "Daşları", "Ulduzları", "Rəqəmləri"],
+  1, None, 1),
+ ("Canlıların əsas xüsusiyyətləri hansılardır?",
+  "Qidalanma, tənəffüs, çoxalma, böyümə canlılara xasdır.",
+  ["Qidalanma, tənəffüs, çoxalma", "Yalnız hərəkət",
+   "Yalnız səs çıxarma", "Parlaqlıq"], 1, None, 2),
+ ("Canlıların təsnifatında ən böyük vahidlərdən biri hansıdır?",
+  "Canlılar aləmlərə bölünür.",
+  ["Aləm", "Küçə", "Otaq", "Səhifə"], 1, None, 3),
+ ("İnsan təsnifat sistemində hansı aləmə aid edilir?",
+  "İnsan heyvanlar aləminə aiddir.",
+  ["Heyvanlar aləminə", "Bitkilər aləminə", "Göbələklərə",
+   "Bakteriyalara"], 1, None, 3),
+ ("Bitkiləri öyrənən elm sahəsi necə adlanır?",
+  "Bitkiləri botanika öyrənir.",
+  ["Botanika", "Zoologiya", "Coğrafiya", "Tarix"], 1, None, 2),
+ ("Heyvanları öyrənən elm necə adlanır?",
+  "Heyvanları zoologiya öyrənir.",
+  ["Zoologiya", "Botanika", "Fizika", "Astronomiya"],
+  1, None, 2),
+ ("Canlını cansızdan fərqləndirən əsas əlamət hansıdır?",
+  "Canlılar qidalanır, böyüyür və çoxalır.",
+  ["Qidalanıb çoxalması", "Ağır olması", "Rəngli olması",
+   "Böyük olması"], 1, None, 2),
+ ("Göbələklər təsnifatda hansı yeri tutur?",
+  "Göbələklər ayrıca aləm təşkil edir.",
+  ["Ayrıca aləmdir", "Bitkidir", "Heyvandır", "Mineraldır"],
+  1, None, 3),
+ ("Təbiəti öyrənərkən hansı üsullardan istifadə olunur?",
+  "Müşahidə və təcrübə əsas üsullardır.",
+  ["Müşahidə və təcrübədən", "Yalnız yuxudan",
+   "Yalnız təxmindən", "Fal açmaqdan"], 1, None, 2),
+ ("Bakteriyaları görmək üçün hansı cihaz lazımdır?",
+  "Bakteriyalar yalnız mikroskopla görünür.",
+  ["Mikroskop", "Teleskop", "Kompas", "Termometr"], 1, None, 2),
+],
+"bio-6-huceyre": [
+ ("Bütün canlıların quruluş vahidi nədir?",
+  "Canlılar hüceyrələrdən təşkil olunub.",
+  ["Hüceyrə", "Daş", "Qum dənəsi", "Damcı"], 1, None, 1),
+ ("Hüceyrənin idarəedici hissəsi hansıdır?",
+  "Hüceyrəni nüvə idarə edir.",
+  ["Nüvə", "Qılaf", "Kölgə", "Su"], 1, None, 2),
+ ("Nüvəsi olmayan orqanizmlər necə adlanır?",
+  "Nüvəsizlər prokariotlardır (məs. bakteriyalar).",
+  ["Prokariotlar", "Eukariotlar", "Nəhənglər", "Parazitlər"],
+  1, None, 3),
+ ("Bakteriyalar hansı orqanizmlərdəndir?",
+  "Bakteriyalar birhüceyrəli orqanizmlərdir.",
+  ["Birhüceyrəli", "Çoxhüceyrəli", "Cansız", "Bitki"],
+  1, None, 2),
+ ("Virusların əsas xüsusiyyəti nədir?",
+  "Viruslar yalnız canlı hüceyrədə çoxala bilir.",
+  ["Yalnız canlı hüceyrədə çoxalır", "Torpaqda böyüyür",
+   "Fotosintez edir", "Sərbəst qidalanır"], 1, None, 3),
+ ("Hüceyrələr necə çoxalır?",
+  "Hüceyrələr bölünmə yolu ilə çoxalır.",
+  ["Bölünmə yolu ilə", "Yanma ilə", "Donma ilə",
+   "Çoxalmır"], 1, None, 2),
+ ("Çoxhüceyrəli orqanizmə misal hansıdır?",
+  "İnsan milyardlarla hüceyrədən ibarətdir.",
+  ["İnsan", "Bakteriya", "Amöb", "İnfuzor"], 1, None, 2),
+ ("Quruluşca oxşar hüceyrələrin birliyi necə adlanır?",
+  "Oxşar hüceyrələr toxuma əmələ gətirir.",
+  ["Toxuma", "Qrup", "Dəstə", "Sinif"], 1, None, 2),
+ ("Bitkidə su və qida maddələrini daşıyan toxuma hansıdır?",
+  "Daşımanı ötürücü toxuma yerinə yetirir.",
+  ["Ötürücü toxuma", "Örtük toxuması", "Mexaniki toxuma",
+   "Törədici toxuma"], 1, None, 3),
+ ("Birgə iş görən orqanlar nəyi əmələ gətirir?",
+  "Orqanlar orqanlar sistemində birləşir.",
+  ["Orqanlar sistemini", "Toxumanı", "Hüceyrəni", "Aləmi"],
+  1, None, 2),
+],
+"bio-6-vegetativ": [
+ ("Bitkinin vegetativ orqanları hansılardır?",
+  "Kök, gövdə və yarpaq vegetativ orqanlardır.",
+  ["Kök, gövdə, yarpaq", "Çiçək və meyvə",
+   "Yalnız toxum", "Ləçəklər"], 1, None, 2),
+ ("Kökün əsas funksiyaları hansılardır?",
+  "Bitkini torpağa bərkidir, su və mineralları çəkir.",
+  ["Bərkitmək və su çəkmək", "Fotosintez etmək",
+   "Çiçək açmaq", "Meyvə vermək"], 1, None, 2),
+ ("Yarpağın əsas funksiyası nədir?",
+  "Yarpaqda fotosintez gedir — qida hazırlanır.",
+  ["Fotosintez", "Torpağı bərkitmək", "Toxum yaymaq",
+   "Su saxlamaq"], 1, None, 2),
+ ("Fotosintez üçün nə lazımdır?",
+  "İşıq, su və karbon qazı lazımdır.",
+  ["İşıq, su və karbon qazı", "Qaranlıq və soyuq",
+   "Yalnız torpaq", "Yalnız külək"], 1, None, 2),
+ ("Yarpağa yaşıl rəng verən maddə hansıdır?",
+  "Yaşıllığı xlorofil verir.",
+  ["Xlorofil", "Nişasta", "Duz", "Şəkər"], 1, None, 2),
+ ("Gövdənin funksiyası nədir?",
+  "Maddələri daşıyır, yarpaq və çiçəkləri saxlayır.",
+  ["Maddələri daşımaq və saxlamaq", "Toxum əmələ gətirmək",
+   "Torpağı yumşaltmaq", "Heç bir funksiyası yoxdur"],
+  1, None, 2),
+ ("Kartof yumrusu hansı orqanın şəkildəyişməsidir?",
+  "Yumru yeraltı zoğun (gövdənin) şəkildəyişməsidir.",
+  ["Gövdənin (zoğun)", "Kökün", "Yarpağın", "Çiçəyin"],
+  1, None, 3),
+ ("Yerkökü hansı orqanın şəkildəyişməsidir?",
+  "Yerkökü kökümeyvədir — kökün şəkildəyişməsidir.",
+  ["Kökün", "Gövdənin", "Yarpağın", "Meyvənin"], 1, None, 3),
+ ("Tumurcuq nədir?",
+  "Tumurcuq rüşeym halında olan zoğdur.",
+  ["Rüşeym halında zoğ", "Yetişmiş meyvə", "Quru yarpaq",
+   "Kök ucu"], 1, None, 3),
+ ("Kök sistemləri hansı növlərə ayrılır?",
+  "Mil kök və saçaqlı kök sistemləri var.",
+  ["Mil və saçaqlı", "Uzun və qısa", "İsti və soyuq",
+   "Yaş və quru"], 1, None, 3),
+],
+"bio-6-generativ": [
+ ("Bitkinin generativ (çoxalma) orqanları hansılardır?",
+  "Çiçək, meyvə və toxum çoxalma orqanlarıdır.",
+  ["Çiçək, meyvə, toxum", "Kök və gövdə",
+   "Yalnız yarpaq", "Tumurcuqlar"], 1, None, 2),
+ ("Çiçəyin parlaq rəngli hissəsi necə adlanır?",
+  "Parlaq hissə ləçəklərdir (tac).",
+  ["Ləçəklər", "Kök", "Gövdə", "Qabıq"], 1, None, 2),
+ ("Tozlanma nədir?",
+  "Tozcuğun dişiciyin ağzına düşməsidir.",
+  ["Tozcuğun dişiciyə düşməsi", "Yarpağın tökülməsi",
+   "Kökün böyüməsi", "Meyvənin yetişməsi"], 1, None, 3),
+ ("Tozlanmada hansı həşərat mühüm rol oynayır?",
+  "Arılar çiçəkdən-çiçəyə tozcuq daşıyır.",
+  ["Arı", "Qarışqa yuvası", "Hörümçək", "Milçək sürfəsi"],
+  1, None, 2),
+ ("Toxumun içərisində nə yerləşir?",
+  "Toxumda gələcək bitkinin rüşeymi var.",
+  ["Rüşeym", "Daş", "Su damcısı", "Torpaq"], 1, None, 2),
+ ("Meyvə çiçəyin hansı hissəsindən əmələ gəlir?",
+  "Meyvə dişiciyin yumurtalığından əmələ gəlir.",
+  ["Dişiciyin yumurtalığından", "Ləçəkdən", "Kasacıqdan",
+   "Saplaqdan"], 1, None, 3),
+ ("Hansı meyvə şirəli meyvədir?",
+  "Albalı şirəli meyvədir; fındıq, qoz, paxla qurudur.",
+  ["Albalı", "Fındıq", "Qoz", "Paxla"], 1, None, 2),
+ ("Çiçək qrupu nədir?",
+  "Xırda çiçəklərin bir yerdə toplanmasıdır.",
+  ["Çiçəklərin birgə yerləşməsi", "Yarpaq dəstəsi",
+   "Kök topası", "Meyvə qutusu"], 1, None, 3),
+ ("Toxumlar təbiətdə necə yayılır?",
+  "Külək, su və heyvanlar toxumları yayır.",
+  ["Külək, su və heyvanlarla", "Yalnız insan əli ilə",
+   "Yayılmır", "Telefon ilə"], 1, None, 2),
+ ("Quru meyvəyə misal hansıdır?",
+  "Fındıq quru meyvədir.",
+  ["Fındıq", "Albalı", "Qarpız", "Pomidor"], 1, None, 2),
+],
+"bio-6-hereket-qida": [
+ ("Heyvanlarda dayaq funksiyasını nə yerinə yetirir?",
+  "Bədənə dayağı skelet verir.",
+  ["Skelet", "Dəri", "Tük", "Quyruq"], 1, None, 2),
+ ("Balıqlar nə ilə hərəkət edir?",
+  "Balıqlar üzgəclərlə üzür.",
+  ["Üzgəclərlə", "Qanadlarla", "Ayaqlarla", "Əllərlə"],
+  1, None, 1),
+ ("Bitkilər qidasını necə əldə edir?",
+  "Fotosintez yolu ilə özləri hazırlayır.",
+  ["Özləri hazırlayır (fotosintez)", "Ov edir",
+   "Mağazadan alır", "Başqa bitkiləri yeyir"], 1, None, 2),
+ ("Heyvanlar tənəffüs zamanı hansı qazı qəbul edir?",
+  "Tənəffüsdə oksigen qəbul olunur.",
+  ["Oksigeni", "Karbon qazını", "Heliumu", "Buxarı"], 1, None, 2),
+ ("Balıqlar suda nə ilə tənəffüs edir?",
+  "Balıqlar qəlsəmələrlə tənəffüs edir.",
+  ["Qəlsəmələrlə", "Ağciyərlərlə", "Burunla", "Üzgəclərlə"], 1, None, 2),
+ ("Otyeyən heyvana misal hansıdır?",
+  "İnək otla qidalanır.",
+  ["İnək", "Canavar", "Qartal", "Tülkü"], 1, None, 1),
+ ("Ətlə qidalanan heyvan hansıdır?",
+  "Şir yırtıcıdır — ətlə qidalanır.",
+  ["Şir", "İnək", "Dovşan", "Keçi"], 1, None, 1),
+ ("İnsanın tənəffüs orqanı hansıdır?",
+  "İnsan ağciyərlərlə tənəffüs edir.",
+  ["Ağciyərlər", "Mədə", "Ürək", "Böyrəklər"], 1, None, 2),
+ ("Bitkilər tənəffüs edirmi?",
+  "Bəli, bitkilər sutka boyu tənəffüs edir.",
+  ["Bəli, daim tənəffüs edir", "Xeyr, heç vaxt",
+   "Yalnız qışda", "Yalnız gündüz"],
+  1, None, 3),
+ ("Qidalanma orqanizmə nə verir?",
+  "Enerji və inkişaf üçün maddələr verir.",
+  ["Enerji və qida maddələri", "Yalnız rəng",
+   "Yalnız yuxu", "Heç nə"], 1, None, 2),
+],
+"bio-6-dasinma-coxalma": [
+ ("İnsanda qanı hərəkət etdirən orqan hansıdır?",
+  "Qanı ürək hərəkət etdirir.",
+  ["Ürək", "Mədə", "Ağciyər", "Dalaq"], 1, None, 1),
+ ("Bitkidə su hansı istiqamətdə hərəkət edir?",
+  "Su kökdən yarpaqlara doğru qalxır.",
+  ["Kökdən yarpaqlara", "Yarpaqdan kökə",
+   "Yalnız gövdə boyu aşağı", "Hərəkət etmir"], 1, None, 3),
+ ("İfrazat nədir?",
+  "Lazımsız maddələrin orqanizmdən xaric edilməsidir.",
+  ["Lazımsız maddələrin xaric edilməsi", "Qida qəbulu",
+   "Tənəffüs", "Hərəkət"], 1, None, 3),
+ ("Toxumun cücərməsi üçün hansı şərtlər vacibdir?",
+  "Su, hava və istilik lazımdır.",
+  ["Su, hava və istilik", "Yalnız qaranlıq",
+   "Yalnız duz", "Səs-küy"], 1, None, 2),
+ ("Vegetativ çoxalma nədir?",
+  "Bitkinin vegetativ orqanları ilə çoxalmasıdır.",
+  ["Vegetativ orqanlarla çoxalma", "Toxumla çoxalma",
+   "Yumurta ilə çoxalma", "Bölünmə ilə çoxalma"], 1, None, 3),
+ ("Çiyələk hansı orqanla vegetativ çoxalır?",
+  "Çiyələk bığcıqlarla çoxalır.",
+  ["Bığcıqlarla", "Toxumla yalnız", "Yarpaqla", "Çiçəklə"],
+  1, None, 3),
+ ("Kəpənəyin inkişaf mərhələləri hansı ardıcıllıqladır?",
+  "Yumurta → tırtıl → pup → kəpənək.",
+  ["Yumurta, tırtıl, pup, kəpənək", "Kəpənək, pup, tırtıl",
+   "Tırtıl, yumurta, kəpənək", "Pup, yumurta, tırtıl"],
+  1, None, 3),
+ ("Qanın funksiyalarından biri hansıdır?",
+  "Qan qida və oksigen daşıyır.",
+  ["Qida və oksigen daşımaq", "Sümük əmələ gətirmək",
+   "Görməni təmin etmək", "Səs çıxarmaq"], 1, None, 2),
+ ("İnsanda tər hansı orqan vasitəsilə xaric olur?",
+  "Tər dəri vasitəsilə ifraz olunur.",
+  ["Dəri ilə", "Saçla", "Dırnaqla", "Dişlə"], 1, None, 2),
+ ("Heyvanlarda inkişaf necə gedir?",
+  "Balalar böyüyərək yetkin fərdə çevrilir.",
+  ["Bala böyüyüb yetkinləşir", "Heyvanlar dəyişmir",
+   "Yalnız kiçilirlər", "İnkişaf olmur"], 1, None, 2),
+],
+"bio-6-muhit": [
+ ("Orqanizmin yaşadığı şərait necə adlanır?",
+  "Orqanizmi əhatə edən şərait yaşayış mühitidir.",
+  ["Yaşayış mühiti", "Mənzil", "Sinif", "Qab"], 1, None, 2),
+ ("Hansılar cansız təbiət amilləridir?",
+  "İşıq, temperatur, rütubət cansız amillərdir.",
+  ["İşıq, temperatur, rütubət", "Bitkilər və heyvanlar",
+   "İnsanlar", "Bakteriyalar"], 1, None, 3),
+ ("Dəvənin səhra həyatına uyğunlaşması nədir?",
+  "Dəvə uzun müddət susuz qala bilir.",
+  ["Susuzluğa davamlılıq", "Suda üzmək",
+   "Ağacda yaşamaq", "Uçmaq"], 1, None, 2),
+ ("Qışda xəzi ağaran heyvan hansıdır?",
+  "Ağ dovşan qışda ağarır — qarda gizlənir.",
+  ["Ağ dovşan", "İnək", "At", "Qoyun"], 1, None, 2),
+ ("Təbii birlik nədir?",
+  "Bir ərazidə birgə yaşayan orqanizmlər qrupudur (meşə, göl).",
+  ["Birgə yaşayan orqanizmlər qrupu", "Bir heyvan",
+   "Bir daş", "Bir bulud"], 1, None, 3),
+ ("Meşələrin qırılması nəyə səbəb olur?",
+  "Canlıların yaşayış yeri məhv olur.",
+  ["Canlıların yaşayış yerinin itməsinə", "Havanın təmizlənməsinə",
+   "Heyvanların artmasına", "Heç nəyə"], 1, None, 2),
+ ("Qida zənciri nədir?",
+  "Canlıların qidalanma ardıcıllığıdır.",
+  ["Canlıların qidalanma ardıcıllığı", "Mağaza növbəsi",
+   "Bitki kolleksiyası", "Heyvan oyunu"], 1, None, 3),
+ ("«Ot → dovşan → canavar» sırası nəyə misaldır?",
+  "Bu, qida zənciridir.",
+  ["Qida zəncirinə", "Əlifba sırasına", "Say ardıcıllığına",
+   "Təsnifata"], 1, None, 2),
+ ("Su hövzələrinin çirklənməsi kimlərə zərər verir?",
+  "Su canlılarına və insanlara zərər verir.",
+  ["Su canlılarına və insana", "Heç kimə",
+   "Yalnız daşlara", "Yalnız qayıqlara"], 1, None, 2),
+ ("«Qırmızı kitab»a hansı canlılar daxil edilir?",
+  "Nəsli kəsilmək təhlükəsində olan növlər.",
+  ["Nəsli kəsilməkdə olanlar", "Ən çoxsaylılar",
+   "Ən böyüklər", "Ev heyvanları"], 1, None, 3),
+],
+"bio-6-rol": [
+ ("Bitkilər fotosintez zamanı atmosferə hansı qazı verir?",
+  "Bitkilər oksigen ifraz edir.",
+  ["Oksigen", "Karbon qazı", "Tüstü", "Metan"], 1, None, 2),
+ ("Dərman bitkisinə misal hansıdır?",
+  "Çobanyastığı dərman bitkisidir.",
+  ["Çobanyastığı", "Kaktus", "Qamış", "Mamır"], 1, None, 2),
+ ("Bal arısı insana nə verir?",
+  "Arıdan bal və mum alınır.",
+  ["Bal və mum", "Süd", "Yumurta", "Yun"], 1, None, 1),
+ ("Hansı bitki mədəni bitkidir?",
+  "Buğdanı insan əkib-becərir.",
+  ["Buğda", "Yovşan", "Qanqal", "Gicitkən"], 1, None, 2),
+ ("Ev heyvanları insana nə verir?",
+  "Süd, ət, yumurta, yun kimi məhsullar verir.",
+  ["Qida və digər məhsullar", "Heç nə",
+   "Yalnız səs-küy", "Yalnız xəstəlik"], 1, None, 1),
+ ("Yun hansı heyvandan alınır?",
+  "Yun qoyundan qırxılır.",
+  ["Qoyundan", "Toyuqdan", "Balıqdan", "Arıdan"], 1, None, 1),
+ ("İpəkqurdu insana nə verir?",
+  "İpəkqurdunun baramasından ipək sapı alınır.",
+  ["İpək sapı", "Bal", "Süd", "Dəri"], 1, None, 3),
+ ("Bağlarda zərərverici həşəratları məhv edən canlılar "
+  "hansılardır?",
+  "Quşlar zərərvericiləri yeyərək bağları qoruyur.",
+  ["Quşlar", "Zərərvericilərin özləri", "Daşlar", "Küləklər"],
+  1, None, 2),
+ ("Bitkilərin insan üçün əhəmiyyətlərindən biri nədir?",
+  "Bitkilər əsas qida mənbəyidir.",
+  ["Qida mənbəyidir", "Yalnız kölgədir",
+   "Yalnız bəzəkdir", "Əhəmiyyəti yoxdur"], 1, None, 2),
+ ("Pambıqdan nə istehsal olunur?",
+  "Pambıqdan parça toxunur.",
+  ["Parça", "Şüşə", "Dəmir", "Plastik"], 1, None, 2),
+],
+# ======================== COGRAFIYA 6 =================================
+"cog-6-mekan": [
+ ("Coğrafiya elmi nəyi öyrənir?",
+  "Yer səthini, təbiəti və əhalini öyrənir.",
+  ["Yer səthini və təbiəti", "Yalnız keçmişi",
+   "Yalnız rəqəmləri", "Yalnız dilləri"], 1, None, 1),
+ ("Məkan dedikdə nə nəzərdə tutulur?",
+  "Bizi əhatə edən və yaşadığımız ərazi.",
+  ["Yaşadığımız ərazi", "Yalnız otaq", "Yalnız kosmos",
+   "Yalnız dəniz"], 1, None, 2),
+ ("Lokal (yerli) məkana misal hansıdır?",
+  "Yaşadığımız məhəllə lokal məkandır.",
+  ["Yaşadığımız məhəllə", "Bütün Yer kürəsi",
+   "Günəş sistemi", "Okean"], 1, None, 2),
+ ("Qlobal məkan nədir?",
+  "Bütöv Yer kürəsi qlobal məkandır.",
+  ["Bütün Yer kürəsi", "Bir küçə", "Bir ev", "Bir sinif"],
+  1, None, 2),
+ ("Azərbaycan hansı materikdə yerləşir?",
+  "Azərbaycan Avrasiya materikindədir.",
+  ["Avrasiyada", "Afrikada", "Amerikada", "Avstraliyada"],
+  1, None, 2),
+ ("Yaşadığımız məkanı hansı əlamətlər fərqləndirir?",
+  "Relyefi, təbiəti və əhalisi ilə fərqlənir.",
+  ["Relyefi, təbiəti, əhalisi", "Yalnız adı",
+   "Yalnız rəngi", "Heç nə ilə"], 1, None, 3),
+ ("Məkanın miqyası nəyi bildirir?",
+  "Ərazinin böyüklük dərəcəsini bildirir.",
+  ["Ərazinin böyüklüyünü", "Havanın istiliyini",
+   "Əhalinin adlarını", "Suyun dadını"], 1, None, 3),
+ ("«Ölkə» anlayışı hansı məkana aiddir?",
+  "Ölkə bir dövlətin ərazisidir.",
+  ["Dövlətin ərazisinə", "Bir otağa", "Bir planetə",
+   "Bir ulduza"], 1, None, 2),
+ ("Regional məkana misal hansıdır?",
+  "Qafqaz bir regiondur.",
+  ["Qafqaz", "Bir məktəb", "Bir həyət", "Bir mənzil"],
+  1, None, 3),
+ ("Məkanları öyrənmək nə üçün lazımdır?",
+  "Ətraf aləmi tanımaq və düzgün istifadə etmək üçün.",
+  ["Ətraf aləmi tanımaq üçün", "Yalnız qiymət almaq üçün",
+   "Heç nə üçün", "Yalnız şəkil üçün"], 1, None, 2),
+],
+"cog-6-beledci": [
+ ("Ərazinin şərti işarələrlə kiçildilmiş təsviri necə adlanır?",
+  "Bu, plan və ya xəritədir.",
+  ["Plan (xəritə)", "Şəkil", "Fotoalbom", "Kitab"], 1, None, 2),
+ ("Miqyas nəyi göstərir?",
+  "Məsafənin xəritədə neçə dəfə kiçildildiyini göstərir.",
+  ["Məsafənin kiçilmə dərəcəsini", "Havanın istiliyini",
+   "Əhalinin sayını", "Dağın hündürlüyünü"], 1, None, 2),
+ ("Üfüqün əsas cəhətləri hansılardır?",
+  "Şimal, cənub, şərq və qərb.",
+  ["Şimal, cənub, şərq, qərb", "Yuxarı və aşağı",
+   "Sağ və sol", "İrəli və geri"], 1, None, 2),
+ ("Kompasın əqrəbi həmişə hansı cəhəti göstərir?",
+  "Kompas əqrəbi şimalı göstərir.",
+  ["Şimalı", "Cənubu", "Şərqi", "Qərbi"], 1, None, 2),
+ ("Günəş hansı tərəfdən doğur?",
+  "Günəş şərqdən doğur.",
+  ["Şərqdən", "Qərbdən", "Şimaldan", "Cənubdan"], 1, None, 1),
+ ("Xəritədə şimal adətən hansı tərəfdə göstərilir?",
+  "Xəritənin yuxarısı şimaldır.",
+  ["Yuxarıda", "Aşağıda", "Solda", "Sağda"], 1, None, 2),
+ ("Xəritədəki şərti işarələr nə üçündür?",
+  "Obyektləri (yol, çay, meşə) göstərmək üçün.",
+  ["Obyektləri göstərmək üçün", "Bəzək üçün",
+   "Rəngləmək üçün", "Heç nə üçün"], 1, None, 2),
+ ("Qlobus xəritədən nə ilə üstündür?",
+  "Yerin formasını təhrifsiz göstərir.",
+  ["Yerin formasını düzgün göstərir", "Daha ucuzdur",
+   "Cibə yerləşir", "Daha rənglidir"], 1, None, 3),
+ ("Dağlar fiziki xəritədə hansı rənglə göstərilir?",
+  "Dağlıq ərazilər qəhvəyi rənglə verilir.",
+  ["Qəhvəyi", "Mavi", "Yaşıl", "Ağ"], 1, None, 2),
+ ("Şimal yarımkürəsində günorta Günəş hansı tərəfdə olur?",
+  "Günorta Günəş cənub tərəfdə olur.",
+  ["Cənubda", "Şimalda", "Qərbdə", "Şərqdə"], 1, None, 3),
+],
+"cog-6-col": [
+ ("Çöl tədqiqatı nədir?",
+  "Təbiəti bilavasitə yerində öyrənməkdir.",
+  ["Təbiəti yerində öyrənmək", "Evdə kitab oxumaq",
+   "Televizora baxmaq", "Yuxu görmək"], 1, None, 2),
+ ("Tədqiqata çıxarkən özünlə nə götürmək lazımdır?",
+  "Bloknot, kompas və xəritə lazımdır.",
+  ["Bloknot, kompas, xəritə", "Yalnız oyuncaq",
+   "Televizor", "Çarpayı"], 1, None, 1),
+ ("Hava müşahidəsində nələr qeyd olunur?",
+  "Temperatur, külək və yağıntı qeyd olunur.",
+  ["Temperatur, külək, yağıntı", "Yalnız quşların sayı",
+   "Yalnız maşınlar", "Heç nə"], 1, None, 2),
+ ("Küləyin istiqamətini hansı cihaz göstərir?",
+  "Küləyin istiqamətini flüger göstərir.",
+  ["Flüger", "Tərəzi", "Mikroskop", "Saat"], 1, None, 3),
+ ("Yağıntının miqdarı hansı vahidlə ölçülür?",
+  "Yağıntı millimetrlə ölçülür.",
+  ["Millimetrlə", "Kiloqramla", "Metrlə", "Dərəcə ilə"], 1, None, 3),
+ ("Müşahidə nəticələri harada qeyd olunur?",
+  "Müşahidə gündəliyində (cədvəldə) qeyd olunur.",
+  ["Müşahidə gündəliyində", "Yaddaşda qalır",
+   "Qumun üstündə", "Heç yerdə"], 1, None, 2),
+ ("Gün ərzində havanın temperaturu nə vaxt ən yüksək olur?",
+  "Günortadan sonra temperatur maksimuma çatır.",
+  ["Günortadan sonra", "Gecə yarısı", "Səhər tezdən",
+   "Gün batan kimi"], 1, None, 3),
+ ("Relyef müşahidəsində nəyə diqqət edilir?",
+  "Ərazinin hündür-alçaqlığına baxılır.",
+  ["Ərazinin hündür-alçaqlığına", "Mağaza qiymətlərinə",
+   "Maşın markalarına", "Paltarlara"], 1, None, 2),
+ ("Çayın axın sürətini sadə üsulla necə təyin etmək olar?",
+  "Üzən əşyanın müəyyən məsafəni qət etmə vaxtı ilə.",
+  ["Üzən əşyanın hərəkətini izləməklə", "Suyu dadmaqla",
+   "Sahildə oturmaqla", "Təyin etmək olmaz"], 1, None, 3),
+ ("Tədqiqat zamanı təbiətə münasibət necə olmalıdır?",
+  "Təbiətə zərər vermədən öyrənmək lazımdır.",
+  ["Zərər vermədən", "Budaqları qıraraq", "Zibil ataraq",
+   "Yuvaları dağıdaraq"], 1, None, 1),
+],
+"cog-6-kainat": [
+ ("Günəş sistemində neçə planet var?",
+  "Günəş sistemində 8 planet var.",
+  ["8", "9", "7", "12"], 1, None, 2),
+ ("Yer Günəşdən neçənci planetdir?",
+  "Yer Günəşdən üçüncü planetdir.",
+  ["3-cü", "1-ci", "5-ci", "8-ci"], 1, None, 2),
+ ("Yerə ən yaxın göy cismi hansıdır?",
+  "Ay Yerə ən yaxın göy cismidir.",
+  ["Ay", "Günəş", "Mars", "Venera"], 1, None, 2),
+ ("Günəş hansı göy cismidir?",
+  "Günəş ulduzdur.",
+  ["Ulduz", "Planet", "Peyk", "Komet"], 1, None, 2),
+ ("Günəş sisteminin ən böyük planeti hansıdır?",
+  "Yupiter ən böyük planetdir.",
+  ["Yupiter", "Yer", "Mars", "Merkuri"], 1, None, 3),
+ ("«Qırmızı planet» adlandırılan planet hansıdır?",
+  "Mars səthinin rənginə görə qırmızı planet adlanır.",
+  ["Mars", "Venera", "Saturn", "Neptun"], 1, None, 2),
+ ("Yer öz oxu ətrafında tam dövrü nə qədərə başa vurur?",
+  "Bir dövr bir sutkaya (24 saata) başa gəlir.",
+  ["24 saata", "1 ilə", "1 aya", "1 saata"], 1, None, 2),
+ ("Ulduzlardan təşkil olunmuş nəhəng sistemlər necə adlanır?",
+  "Ulduz sistemləri qalaktikalar adlanır.",
+  ["Qalaktikalar", "Kometlər", "Peyklər", "Buludlar"],
+  1, None, 3),
+ ("Bizim qalaktikamız necə adlanır?",
+  "Qalaktikamız Süd Yolu adlanır.",
+  ["Süd Yolu", "Andromeda", "Qara dəlik", "Böyük Ayı"],
+  1, None, 3),
+ ("Günəşə ən yaxın planet hansıdır?",
+  "Merkuri Günəşə ən yaxındır.",
+  ["Merkuri", "Yer", "Yupiter", "Neptun"], 1, None, 3),
+],
+"cog-6-tebiet": [
+ ("Yerin bərk qabığı necə adlanır?",
+  "Bərk qabıq litosferdir.",
+  ["Litosfer", "Hidrosfer", "Atmosfer", "Biosfer"],
+  1, None, 3),
+ ("Yerin su təbəqəsi necə adlanır?",
+  "Su təbəqəsi hidrosferdir.",
+  ["Hidrosfer", "Litosfer", "Atmosfer", "Stratosfer"],
+  1, None, 3),
+ ("Atmosfer nədir?",
+  "Yeri əhatə edən hava təbəqəsidir.",
+  ["Yerin hava təbəqəsi", "Yerin su təbəqəsi",
+   "Dağ süxurları", "Meşə zolağı"], 1, None, 2),
+ ("Canlıların yayıldığı təbəqə necə adlanır?",
+  "Canlılar aləmi biosferi təşkil edir.",
+  ["Biosfer", "Litosfer", "Kosmos", "Nüvə"], 1, None, 3),
+ ("Vulkan püskürəndə yer səthinə nə axır?",
+  "Yer səthinə lava axır.",
+  ["Lava", "Süd", "Neft", "Buz"], 1, None, 2),
+ ("Zəlzələ nədir?",
+  "Yer qabığının titrəyişləridir.",
+  ["Yer qabığının titrəməsi", "Küləyin əsməsi",
+   "Yağışın yağması", "Suyun donması"], 1, None, 2),
+ ("Dünyanın ən hündür dağ zirvəsi hansıdır?",
+  "Everest (Comolunqma) — 8848 m.",
+  ["Everest", "Bazardüzü", "Elbrus", "Alp"], 1, None, 2),
+ ("Dünyanın ən böyük okeanı hansıdır?",
+  "Sakit okean ən böyükdür.",
+  ["Sakit okean", "Atlantik okean", "Hind okeanı",
+   "Şimal Buzlu okean"], 1, None, 2),
+ ("Çayın başlandığı yer necə adlanır?",
+  "Çayın başlanğıcı mənbə adlanır.",
+  ["Mənbə", "Mənsəb", "Sahil", "Körpü"], 1, None, 3),
+ ("Küləyi yaradan əsas səbəb nədir?",
+  "Havanın yerdəyişməsi (təzyiq fərqi) küləyi yaradır.",
+  ["Havanın yerdəyişməsi", "Quşların uçuşu",
+   "Maşınların hərəkəti", "Dənizin dadı"], 1, None, 3),
+],
+"cog-6-yurdumuz": [
+ ("Azərbaycan hansı dənizin sahilində yerləşir?",
+  "Ölkəmiz Xəzər dənizinin sahilindədir.",
+  ["Xəzər", "Qara dəniz", "Aralıq dənizi", "Baltik"],
+  1, None, 1),
+ ("Azərbaycanın ən uzun çayı hansıdır?",
+  "Kür ən uzun çayımızdır.",
+  ["Kür", "Araz", "Samur", "Tərtər"], 1, None, 2),
+ ("Azərbaycanın ən hündür zirvəsi hansıdır?",
+  "Bazardüzü zirvəsi — 4466 m.",
+  ["Bazardüzü", "Everest", "Elbrus", "Savalan"], 1, None, 2),
+ ("Böyük Qafqaz dağları ölkəmizin hansı hissəsindədir?",
+  "Böyük Qafqaz şimaldadır.",
+  ["Şimalında", "Cənubunda", "Mərkəzində", "Şərq dənizində"],
+  1, None, 2),
+ ("Azərbaycan ərazisində dünyanın 11 iqlim tipindən neçəsi var?",
+  "Ölkəmizdə 9 iqlim tipi müşahidə olunur.",
+  ["9", "2", "11", "5"], 1, None, 3),
+ ("Kür çayı hansı dənizə tökülür?",
+  "Kür Xəzər dənizinə tökülür.",
+  ["Xəzərə", "Qara dənizə", "Aralıq dənizinə", "Okeana"],
+  1, None, 2),
+ ("Naxçıvan Muxtar Respublikasının xüsusiyyəti nədir?",
+  "Əsas ərazidən aralı yerləşən muxtar respublikadır.",
+  ["Əsas ərazidən aralı yerləşir", "Dənizin ortasındadır",
+   "Başqa materikdədir", "Şəhər deyil, kənddir"], 1, None, 3),
+ ("Azərbaycan hansı vulkanların sayına görə dünyada öndədir?",
+  "Palçıq vulkanlarının sayına görə birincidir.",
+  ["Palçıq vulkanlarının", "Buz vulkanlarının",
+   "Lava göllərinin", "Qeyzerlərin"], 1, None, 3),
+ ("Araz çayı hansı çayın qoludur?",
+  "Araz Kürün ən böyük qoludur.",
+  ["Kürün", "Volqanın", "Nilin", "Dunayın"], 1, None, 2),
+ ("Hirkan meşələrində qorunan nadir ağac hansıdır?",
+  "Dəmirağac Hirkan meşələrinin nadir ağacıdır.",
+  ["Dəmirağac", "Kaktus", "Palma", "Sekvoyya"], 1, None, 3),
+],
+"cog-6-dunya": [
+ ("Dünyada neçə materik var?",
+  "Altı materik var.",
+  ["6", "5", "7", "4"], 1, None, 2),
+ ("Ən böyük materik hansıdır?",
+  "Avrasiya ən böyük materikdir.",
+  ["Avrasiya", "Afrika", "Avstraliya", "Antarktida"],
+  1, None, 2),
+ ("Ən isti materik hansıdır?",
+  "Afrika ən isti materikdir.",
+  ["Afrika", "Antarktida", "Avrasiya", "Şimali Amerika"], 1, None, 2),
+ ("Ən soyuq materik hansıdır?",
+  "Antarktida buzla örtülü ən soyuq materikdir.",
+  ["Antarktida", "Afrika", "Avstraliya", "Cənubi Amerika"],
+  1, None, 2),
+ ("Dünyanın ən uzun çayı hansıdır?",
+  "Nil dünyanın ən uzun çayı sayılır.",
+  ["Nil", "Volqa", "Kür", "Dunay"], 1, None, 3),
+ ("Böyük Səhra hansı materikdədir?",
+  "Böyük Səhra Afrikadadır.",
+  ["Afrikada", "Avropada", "Antarktidada", "Avstraliyada"],
+  1, None, 2),
+ ("Dünya okeanı Yer səthinin təxminən nə qədərini tutur?",
+  "Səthin təxminən 71%-ni (dörddə üçünü) su tutur.",
+  ["Təxminən 71%-ni", "10%-ni", "Yarıdan azını", "99%-ni"],
+  1, None, 3),
+ ("Kenquru hansı materikdə yaşayır?",
+  "Kenquru Avstraliyada yaşayır.",
+  ["Avstraliyada", "Afrikada", "Avropada", "Antarktidada"],
+  1, None, 2),
+ ("Əhalisi ən çox olan qitə hansıdır?",
+  "Asiya əhalisinə görə birincidir.",
+  ["Asiya", "Avstraliya", "Antarktida", "Cənubi Amerika"],
+  1, None, 3),
+ ("Yer kürəsini qorumaq üçün insanlar nə etməlidir?",
+  "Təbiətə qayğı ilə yanaşmalı, çirkləndirməməlidir.",
+  ["Təbiətə qayğı ilə yanaşmalı", "Daha çox meşə qırmalı",
+   "Suları çirkləndirməli", "Heç nə etməməli"], 1, None, 1),
+],
+}
+
+
+def yoxla():
+    n = xeta = 0
+    butun = set()
+    movzu_fenn = {m: f for f, m, _r in MOVZULAR}
+    for movzu, siyahi in SUALLAR.items():
+        assert movzu in movzu_fenn, movzu
+        if len(siyahi) != 10:
+            print("XETA  %s: %d sual (10 olmalidir)" % (movzu, len(siyahi)))
+            xeta += 1
+        for body, why, opts, correct, expect, diff in siyahi:
+            n += 1
+            p = []
+            if len(opts) != 4: p.append("variant sayi %d" % len(opts))
+            if len(set(opts)) != len(opts): p.append("tekrar variant")
+            if not (1 <= correct <= 4): p.append("correct")
+            if not why: p.append("izah bos")
+            if diff not in (1, 2, 3): p.append("cetinlik")
+            if body in butun: p.append("eyni sual iki defe")
+            butun.add(body)
+            if expect is not None and opts[correct - 1] != expect:
+                p.append("hesablanan «%s» != variant «%s»" % (expect, opts[correct - 1]))
+            for t in [body, why] + opts:
+                if "'" in t: p.append("apostrof var")
+            if p:
+                xeta += 1
+                print("XETA  %s: %s\n      %s" % (movzu, body[:60], "; ".join(p)))
+    hes = sum(1 for s in SUALLAR.values() for q in s if q[4] is not None)
+    print("%d sual yoxlandı (%d-i hesabla təsdiqləndi), %d xəta" % (n, hes, xeta))
+    return xeta == 0, n
+
+
+def sql_yaz(n):
+    q = lambda t: t.replace("'", "''")
+    on = {"fizika": "fiz6", "biologiya": "bio6", "cografiya": "cog6"}
+    setirler = []
+    for fenn, movzu, rub in MOVZULAR:
+        qisa = movzu.split("-", 2)[2]
+        for i, (body, why, opts, correct, _e, diff) in enumerate(SUALLAR[movzu], 1):
+            setirler.append(
+                "('%s-%s#%d','%s','%s',%d,%d,'%s','%s',array['%s','%s','%s','%s'],%d)"
+                % (on[fenn], qisa, i, fenn, movzu, diff, rub, q(body), q(why),
+                   q(opts[0]), q(opts[1]), q(opts[2]), q(opts[3]), correct))
+    with io.open(CIXIS, "w", encoding="utf-8") as f:
+        f.write("""-- =====================================================================
+--  32_bank_fenn6.sql : 6-CI SINIF - FIZIKA, BIOLOGIYA, COGRAFIYA
+--
+--  BU FAYL ELLE YAZILMIR - tools/fenn6.py yaradir:
+--      python3 tools/fenn6.py
+--
+--  Fizika 4 + Biologiya 8 + Cografiya 7 = 19 movzu x 10 = %d.
+--  ext_key: fiz6-/bio6-/cog6-...
+--  ON SERT: 29_movzular_orta6.sql islenmis olmalidir.
+--  SONRA:   05_grants.sql yeniden islet.
+-- =====================================================================
+
+do $$
+begin
+  if not exists (select 1 from public.topics t join public.subjects s
+      on s.id = t.subject_id
+     where (s.slug, t.slug) in (('fizika','fiz-6-giris'),
+                                ('biologiya','bio-6-huceyre'),
+                                ('cografiya','cog-6-kainat'))
+     having count(*) = 3) then
+    raise exception 'ONCE 29_movzular_orta6.sql isledilmelidir.';
+  end if;
+end $$;
+
+delete from public.question_options o
+ using public.questions q
+ where o.question_id = q.id
+   and q.owner_type = 'platform'
+   and (q.ext_key like 'fiz6-%%' or q.ext_key like 'bio6-%%'
+        or q.ext_key like 'cog6-%%');
+
+with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
+%s
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, d.diff, d.rub, 'published'
+    from d
+    join public.subjects s on s.slug = d.fenn
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '6'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(d.opts) with ordinality as o(txt, ord);
+
+do $$
+declare n int; k int;
+begin
+  select count(*) into n from public.questions
+   where owner_type = 'platform'
+     and (ext_key like 'fiz6-%%' or ext_key like 'bio6-%%'
+          or ext_key like 'cog6-%%');
+  if n <> %d then
+    raise exception 'fenn6 suallari: %d gozlenilirdi, %% tapildi', n;
+  end if;
+  select count(*) into k from public.questions q
+   where (q.ext_key like 'fiz6-%%' or q.ext_key like 'bio6-%%'
+          or q.ext_key like 'cog6-%%')
+     and ((select count(*) from public.question_options o
+            where o.question_id = q.id) <> 4
+       or (select count(*) from public.question_options o
+            where o.question_id = q.id and o.is_correct) <> 1);
+  if k > 0 then
+    raise exception '%% sualda variant qurulusu sehvdir', k;
+  end if;
+  select count(distinct topic_id) into k from public.questions
+   where ext_key like 'fiz6-%%' or ext_key like 'bio6-%%'
+      or ext_key like 'cog6-%%';
+  if k <> 19 then
+    raise exception 'movzu sayi 19 deyil: %%', k;
+  end if;
+  raise notice '6-ci sinif tebiet fennleri banki: %% sual, 19 movzu (fiz, bio, cog).', n;
+end $$;
+""" % (n, ",\n".join(setirler), n, n))
+    print("yazildi: %s" % CIXIS)
+
+
+if __name__ == "__main__":
+    ok, n = yoxla()
+    if not ok:
+        raise SystemExit(1)
+    sql_yaz(n)

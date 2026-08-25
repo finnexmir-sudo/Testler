@@ -122,7 +122,8 @@ with sync_playwright() as pw:
     if pg.locator("details.filt:not([open])").count():
         pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
     subs = pg.locator("#bsub option").all_inner_texts()
-    ok("Fizika" not in " ".join(subs), "bank suzgecinde sualsiz fenn yoxdur", subs)
+    # DIQQET: fizika 32_bank_fenn6 ile sual qazandi - sualsiz fenn indi kimyadir
+    ok("Kimya" not in " ".join(subs), "bank suzgecinde sualsiz fenn yoxdur", subs)
     ok(any("Riyaziyyat" in x for x in subs), "sualli fenn var")
     pg.goto(PANEL + "#/q/new"); pg.wait_for_selector("#qsub", timeout=8000)
     pg.wait_for_function("document.querySelectorAll('#qsub option').length > 3", timeout=8000)
@@ -135,7 +136,7 @@ with sync_playwright() as pw:
     ok(pg.locator("#gPool .seg.on").inner_text() == "Öz suallarım",
        "abunesiz hesabda hovuz «öz suallarım»dır")
     subs = pg.locator("#gsub option").all_inner_texts()
-    ok("Fizika" not in " ".join(subs), "generatorda da sualsiz fenn yoxdur")
+    ok("Kimya" not in " ".join(subs), "generatorda da sualsiz fenn yoxdur")
     # "Hovuz yoxlanılır..." da metndir - cavabin GELMESINI gozle
     pg.wait_for_function(
         "document.querySelector('#gPrev') && "
