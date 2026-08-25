@@ -67,8 +67,10 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    `insert into user_roles (user_id, role) select id,'admin' from
    auth.users where email='...'`. Mərhələ 2 (kart ödənişi,
    Payriff/Epoint) müştəri sayı artanda.
-2. **Sual bankının davamı** — 3-4-cü siniflər hazır; qalır 1-2-ci
-   siniflər və ingilis dili.
+2. ~~Sual bankının davamı~~ — hazırdır: 1-4-cü siniflər (ingilis dili
+   daxil) + 5-8-ci siniflər (orta proqram, 9 fənn). Mövzu ağacları
+   `db/25/29/33/37_movzular_orta*.sql`, banklar `db/23–40`. Davamı:
+   9-11-ci siniflər (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
    «köməkçi işçisi» olsun.
@@ -236,12 +238,23 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
 - Platforma sual bankı: `db/16_bank_riy4.sql` (Riyaziyyat 4),
   `db/17_bank_sinif4.sql` (Az dili + Həyat bilgisi + İnformatika 4),
   `db/19_bank_riy3.sql` (Riyaziyyat 3), `db/20_bank_sinif3.sql`
-  (Az dili + Həyat bilgisi + İnformatika 3). **Əllə yazılmır** —
-  `tools/riy4.py`, `tools/sinif4.py`, `tools/riy3.py`, `tools/sinif3.py`
+  (Az dili + Həyat bilgisi + İnformatika 3), `db/23/24_bank_sinif1/2.sql`
+  (1-2-ci siniflər, 4 fənn bir yerdə), `db/28_bank_ing.sql` (İngilis
+  dili 1-4). Orta məktəb: hər sinif üçün əvvəl mövzu ağacı
+  (`25/29/33/37_movzular_orta5/6/7/8.sql`), sonra banklar —
+  `26/30/34/38_bank_riy5/6/7/8.sql` (riyaziyyat),
+  `27/31/35/39_bank_sinif5/6/7/8.sql` (az dili, ingilis, informatika,
+  tarix), `32/36/40_bank_fenn6/7/8.sql` (fizika/kimya/biologiya/
+  coğrafiya — hansı fənn o sinifdə varsa). **Əllə yazılmır** —
+  `tools/riyN.py`, `tools/sinifN.py`, `tools/fennN.py`, `tools/ing.py`
   yaradır. Skript hər riyazi cavabı yenidən hesablayıb düzgün variantla
   tutuşdurur; düzəliş skriptdə edilir, sonra SQL yenidən çıxarılır.
   Yeni fənn/sinif bankı üçün eyni qəlibi izlə: `tools/<fənn><sinif>.py`
-  → `db/1X_bank_<fənn><sinif>.sql`, ext_key `<qısaad>-<mövzu>#<sıra>`.
+  → `db/NN_bank_<fənn><sinif>.sql`, ext_key `<qısaad>-<mövzu>#<sıra>`.
+  Yeni bank hazır olanda: movzu daxilində və qonşu siniflərlə pg_trgm
+  ≥0.95 təkrar yoxla, fənn üzrə eyni düzgün cavab ≤2 olsun,
+  `rpc_generate_test` balans yoxlaması işlət (nümunə:
+  `test/smoke_generator.sql`).
 
 ---
 
