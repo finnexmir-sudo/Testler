@@ -50,12 +50,13 @@ a{color:var(--brand);text-decoration:none}
   height:56px;padding:0 20px;background:var(--surface);
   border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;
 }
+/*  Nisan Bil10 qabarcigidir - qradiyent SVG-nin icindedir,
+    fon-kvadrat yoxdur.  Olcu 26px qalir (testler bunu olcur). */
 .top .mark{
-  width:26px;height:26px;border-radius:7px;flex:0 0 26px;
-  background:linear-gradient(140deg,var(--brand) 0%,var(--teal) 100%);
-  display:flex;align-items:center;justify-content:center;color:#fff;
-  font-size:12px;font-weight:700;letter-spacing:-.02em;
+  width:26px;height:26px;flex:0 0 26px;
+  display:flex;align-items:center;justify-content:center;
 }
+.top .mark svg{width:26px;height:26px}
 .top b{flex:1;font-size:14.5px;font-weight:600;letter-spacing:-.011em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .top .who{font-size:13px;color:var(--fg-2);white-space:nowrap}
