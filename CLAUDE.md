@@ -57,6 +57,25 @@ Sonra `db/test/verify.sql` işlət — 7 sətir, hamısı `OK` olmalıdır.
 
 ---
 
+## Yol xəritəsi
+
+Sıra ilə (istifadəçi ilə razılaşdırılıb):
+
+1. **Ödəniş axını** — «Paket al» səhifəsi + ödəniş qəbulu. Satışın açarı.
+2. **Sual bankının davamı** — 3-cü sinif (riyaziyyat hazır), sonra dil/
+   həyat bilgisi/informatika 3, sonra 1–2-ci siniflər, ingilis dili.
+3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
+   hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
+   «köməkçi işçisi» olsun.
+4. **Vərəqin çap/PDF görünüşü** — cavabsız şagird + cavablı müəllim nüsxəsi.
+5. **Dinamika qrafiki** — şagirdin nəticəsi həftə-həftə.
+6. **«Səhvlər üzərində iş»** — səhv edilən sualların özündən bir kliklə test.
+7. PWA quraşdırma (manifest + ikon), Riyaziyyat 2 mövzularının yenilənməsi
+   (portala yeni nəşr gələndə).
+
+Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
+mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
+
 ## Yerli yoxlama
 
 ```bash
@@ -209,11 +228,10 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   `assert tp`.
 - Platforma seed sualları `ext_key` (`test-slug#sıra`) ilə tanınır —
   `07_seed_tests.sql` təkrar işlədiləndə sual çoxalmır, üzərinə yazılır.
-- Platforma sual bankı: `db/16_bank_riy4.sql` (Riyaziyyat 4,
-  12 mövzu × 10) və `db/17_bank_sinif4.sql` (Az dili 8 + Həyat bilgisi 5 +
-  İnformatika 3 mövzu × 10). **Əllə yazılmır** — `python3 tools/riy4.py` və
-  `python3 tools/sinif4.py`
-  yaradır. Skript hər riyazi cavabı yenidən hesablayıb düzgün variantla
+- Platforma sual bankı: `db/16_bank_riy4.sql` (Riyaziyyat 4),
+  `db/17_bank_sinif4.sql` (Az dili + Həyat bilgisi + İnformatika 4),
+  `db/19_bank_riy3.sql` (Riyaziyyat 3). **Əllə yazılmır** —
+  `tools/riy4.py`, `tools/sinif4.py`, `tools/riy3.py` yaradır. Skript hər riyazi cavabı yenidən hesablayıb düzgün variantla
   tutuşdurur; düzəliş skriptdə edilir, sonra SQL yenidən çıxarılır.
   Yeni fənn/sinif bankı üçün eyni qəlibi izlə: `tools/<fənn><sinif>.py`
   → `db/1X_bank_<fənn><sinif>.sql`, ext_key `<qısaad>-<mövzu>#<sıra>`.

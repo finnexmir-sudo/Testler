@@ -21,6 +21,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 18_siqnal.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 19_bank_riy3.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
