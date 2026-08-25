@@ -87,7 +87,7 @@ with sync_playwright() as pw:
 
     ok(pg.locator('a[href="muellim/"]').count() >= 1, "muellim kecidi var")
     ok(pg.locator('a[href="sagird/"]').count() == 1, "sagird kecidi var")
-    ok("Anlaq" in pg.inner_text(".logo"), "ad gorunur", pg.inner_text(".logo").replace("\n"," "))
+    ok("Bil10" in pg.inner_text(".logo"), "ad gorunur", pg.inner_text(".logo").replace("\n"," "))
     pg.set_viewport_size({"width": 430, "height": 900})
 
     print("A · Qeydiyyat və hesab quraşdırması")

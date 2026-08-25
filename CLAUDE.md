@@ -1,4 +1,4 @@
-# Layihə: Anlaq
+# Layihə: Bil10
 
 İbtidai siniflər (1–4) üçün onlayn test platforması. Gələcəkdə yuxarı
 siniflər, MİQ və sertifikasiya da əlavə olunacaq.
