@@ -192,14 +192,29 @@
       '<div class="g"><b>' + esc(t.title) + "</b><i>" +
         "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
         "<span>" + (t.questions || 0) + " sual</span>" +
-        (isAsg && t.closes_at
-          ? "<span>·</span><span>son tarix " + esc(dateAz(t.closes_at)) + "</span>" : "") +
+        (isAsg && t.closes_at ? dueSpan(t.closes_at) : "") +
         (left > 0 ? "<span>·</span><span>" + left + " cəhd qalıb</span>" : "") +
         (lock ? "<span>·</span><span>abunə lazımdır</span>" : "") +
         (over ? "<span>·</span><span>işlənib — toxun, nəticəni gör</span>" : "") +
       "</i></div>" +
-      (done ? '<span class="best">' + Math.round(t.best) + "%</span>" : "") +
+      (done ? '<span class="best ' + pctCls(t.best) + '">' +
+        Math.round(t.best) + "%</span>" : "") +
       (lock ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
+  }
+
+  /* Faiz uzre reng sinfi: >=80 yasil, >=60 narinci, alti qirmizi */
+  function pctCls(p) {
+    var n = Number(p) || 0;
+    return n >= 80 ? "bh" : (n >= 60 ? "bm" : "bl");
+  }
+
+  /* Son tarix + qalan gun: yaxinlasanda qirmizi xeberdarliq */
+  function dueSpan(iso) {
+    var gun = Math.ceil((new Date(iso).getTime() - Date.now()) / 864e5);
+    var t = "son tarix " + esc(dateAz(iso));
+    if (gun > 0 && gun <= 7) t += " · " + gun + " gün qaldı";
+    return "<span>·</span><span" + (gun <= 2 ? ' class="due"' : "") + ">" +
+      t + "</span>";
   }
 
   /* Son tarix: "4 okt" */
@@ -220,9 +235,26 @@
       d = d || {};
       var asg  = d.assigned || [];
       var prac = d.practice || [];
-      var h = "";
-      if (CLS) {
-        h += '<p class="note" style="margin-bottom:14px">Qrup: <b>' + esc(CLS.name) + "</b></p>";
+
+      /* Salamlama + kicik gostericiler - "ireliledigimi gorurem" hissi */
+      var worked = asg.concat(prac).filter(function (t) {
+        return Number(t.done) > 0;
+      });
+      var avg = 0;
+      worked.forEach(function (t) { avg += Number(t.best) || 0; });
+      avg = worked.length ? Math.round(avg / worked.length) : 0;
+
+      var h = '<div class="shero">' + av(ME ? ME.display_name : "?") +
+        "<div><b>Salam, " + esc(ME ? ME.display_name : "") + "! 👋</b>" +
+        (CLS ? "<i>" + esc(CLS.name) + "</i>" : "") + "</div></div>";
+      if (worked.length) {
+        h += '<div class="stiles">' +
+          '<div class="st a"><b>' + worked.length +
+            "</b><span>işlənmiş test</span></div>" +
+          '<div class="st b"><b>' + avg + "%</b><span>ortalama</span></div>" +
+          '<button class="st c" id="btnMyRes"><b>' + ic("cup") + "</b>" +
+            "<span>nəticələrim</span></button>" +
+        "</div>";
       }
 
       /* 1. Muellimin verdiyi tapsiriqlar - hemise yuxarida */
@@ -247,6 +279,7 @@
       }
 
       show(h);
+      on("btnMyRes", "click", screenMyResults);
       Array.prototype.forEach.call(main.querySelectorAll("[data-t]"), function (b) {
         b.addEventListener("click", function () {
           var id = b.getAttribute("data-t");
@@ -431,7 +464,8 @@
     topTitle.textContent = "Nəticə";
     show(
       '<div class="card"><div class="score">' +
-        '<div class="ring' + (passed ? " pass" : "") + '">' +
+        '<div class="ring' +
+          (passed ? " pass" : (pct >= 60 ? " mid" : " lo")) + '">' +
           '<svg viewBox="0 0 132 132"><circle class="track" cx="66" cy="66" r="58" ' +
             'fill="none" stroke-width="9"/>' +
             '<circle class="fill" cx="66" cy="66" r="58" fill="none" stroke-width="9" ' +
@@ -515,10 +549,57 @@
     });
   }
 
+  /* Herf-avatar: muellim panelindeki ile eyni reng qaydasi */
+  function av(name) {
+    var n = String(name || "?").trim();
+    var ch = n.charAt(0).toUpperCase() || "?";
+    var k = 7;
+    for (var i = 0; i < n.length; i++) k = (k * 31 + n.charCodeAt(i)) % 100003;
+    return '<span class="av c' + (k % 6) + '">' + esc(ch) + "</span>";
+  }
+
   function fmtTime(sec) {
     sec = Math.max(0, parseInt(sec, 10) || 0);
     var m = Math.floor(sec / 60), s = sec % 60;
     return m ? (m + " dəq " + s + " san") : (s + " san");
+  }
+
+  /* ---------------------------------------------------- neticelerim */
+  /* Sagird oz gedisatini gorur: mini qrafik + son testler.  Yalniz OZ
+     neticeleri - duzgun cavab ve basqa sagird melumati yoxdur. */
+  function screenMyResults() {
+    topTitle.textContent = "Nəticələrim";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_student_my_results", { p_token: TOKEN }).then(function (rows) {
+      rows = rows || [];
+      var h = '<button class="btn sm ghost" id="btnB2">' + ic("back") +
+        "Testlər</button>" + '<div class="spacer"></div>';
+      if (!rows.length) {
+        h += '<div class="card pad0"><div class="empty"><div class="ic">' +
+          ic("doc") + "</div><b>Hələ nəticə yoxdur</b>" +
+          "İlk testini işlə — burada görünəcək.</div></div>";
+      } else {
+        if (rows.length >= 2) {
+          var bars = rows.slice(0, 12).slice().reverse();
+          h += '<div class="card"><div class="dyn">' + bars.map(function (a) {
+            var p = Math.max(6, Math.round(Number(a.percent) || 0));
+            return '<i class="d' + pctCls(p).charAt(1) + '" style="height:' +
+              p + '%"></i>';
+          }).join("") + "</div>" +
+          '<p class="note" style="margin:10px 0 0">Soldan sağa: köhnədən ' +
+            "yeniyə. Yaşıl — əla, narıncı — orta, qırmızı — təkrar lazımdır.</p>" +
+          "</div>" + '<div class="spacer"></div>';
+        }
+        h += '<div class="card pad0">' + rows.map(function (a) {
+          var p = Math.round(Number(a.percent) || 0);
+          return '<div class="myr"><div class="g"><b>' + esc(a.test) + "</b>" +
+            "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max + "</i></div>" +
+            '<span class="best ' + pctCls(p) + '">' + p + "%</span></div>";
+        }).join("") + "</div>";
+      }
+      show(h);
+      on("btnB2", "click", screenTests);
+    }).catch(function (e) { errScreen(e, screenMyResults); });
   }
 
   /* ---------------------------------------------------------- lovhe */

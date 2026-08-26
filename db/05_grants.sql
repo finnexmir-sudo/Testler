@@ -83,7 +83,8 @@ begin
        and p.proname not in ('rpc_student_login','rpc_student_tests',
                              'rpc_start_attempt','rpc_submit_attempt',
                              'rpc_leaderboard','rpc_test_result',
-                             'rpc_report_question_student')
+                             'rpc_report_question_student',
+                             'rpc_student_my_results')
   loop
     execute format('revoke all on function %s from anon', fn);
   end loop;
@@ -108,10 +109,11 @@ begin
      and p.proname not in ('rpc_student_login','rpc_student_tests',
                            'rpc_start_attempt','rpc_submit_attempt',
                            'rpc_leaderboard','rpc_test_result',
-                             'rpc_report_question_student');
+                             'rpc_report_question_student',
+                             'rpc_student_my_results');
   if leak is not null then
     raise exception 'anon bu funksiyalari cagira bilir: %', leak;
   end if;
 
-  raise notice 'Huquqlar quruldu: anon yalniz kataloqu ve 7 sagird RPC-sini gorur.';
+  raise notice 'Huquqlar quruldu: anon yalniz kataloqu ve 8 sagird RPC-sini gorur.';
 end $$;

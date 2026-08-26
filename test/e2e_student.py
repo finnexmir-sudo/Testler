@@ -107,6 +107,8 @@ with sync_playwright() as pw:
     ok(True, "kodla giris isleyir")
     ok("Aysu M." in pg.inner_text("#topTitle"), "ustlukde leqeb gorunur")
     ok("3-B qrupu" in pg.inner_text("#main"), "qrup adi gorunur")
+    ok(pg.locator(".shero .av").count() == 1, "salamlama basligi avatarlidir")
+    ok(pg.locator(".stiles").count() == 0, "islenmis test yoxdur - statlar gizlidir")
 
     print("B · Test siyahısı")
     n = pg.locator(".test").count()
@@ -269,8 +271,20 @@ with sync_playwright() as pw:
             one=True)["n"]
     ok(nr == 1, "bildiris bazaya dusdu", nr)
 
-    print("I · Yarımçıq testdə çıxış xəbərdarlığı")
+    print("H2 · Nəticələrim: statlar, qrafik, siyahı")
     pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
+    ok(pg.locator(".stiles").count() == 1, "islenmis testden sonra statlar cixir")
+    pg.click("#btnMyRes")
+    pg.wait_for_selector(".myr", timeout=8000)
+    ok(pg.locator(".myr").count() >= 2, "neticeler siyahisi dolur",
+       pg.locator(".myr").count())
+    ok(pg.locator(".dyn i").count() >= 2, "mini qrafik cizilir",
+       pg.locator(".dyn i").count())
+    ok(pg.locator(".myr .best").count() >= 2, "faiz cipleri rənglidir")
+    pg.click("#btnB2"); pg.wait_for_selector(".test", timeout=8000)
+
+    print("I · Yarımçıq testdə çıxış xəbərdarlığı")
+    pg.wait_for_selector(".test", timeout=8000)
     pg.locator(".test:not(.lock)", has_text="Qarışıq").first.click()
     pg.wait_for_selector(".opt", timeout=8000)
     asked = {"v": False}

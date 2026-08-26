@@ -15,7 +15,11 @@
 --  Sagird terefine hec ne acilmir: her uc funksiya yalniz muellim
 --  (authenticated + uzvluk) ucundur; is_correct yalniz bu kanalla gedir.
 --
+--  4) rpc_student_my_results: sagird OZ neticelerini gorur (motivasiya).
+--     Token ile; duzgun cavab dasimir.  05_grants-da anon siyahisina daxildir.
+--
 --  ON SERT: 01, 08 (can_read_student), 09 (rpc_assign_test), 21 (abune).
+--  SONRA:   05_grants.sql yeniden islet (anon siyahisi genislenib).
 --  Tekrar isledile biler.
 -- =====================================================================
 
@@ -263,13 +267,44 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------- huquq
+-- ------------------------------------------------- sagird: oz neticelerim
+--  Sagird yalniz OZ islediyi testlerin siyahisini gorur - gedisat
+--  ve motivasiya ucun.  Duzgun cavab bu kanalda YOXDUR.
+create or replace function public.rpc_student_my_results(p_token text)
+returns jsonb
+language plpgsql stable security definer
+set search_path = public, extensions, pg_temp as $$
+declare v_student uuid := app.session_student(p_token);
+begin
+  if v_student is null then
+    raise exception 'Sessiya bitib. Yeniden daxil ol.' using errcode = '28000';
+  end if;
+  return coalesce((
+    select jsonb_agg(x order by x->>'at' desc)
+    from (
+      select jsonb_build_object(
+               'at',      a.finished_at,
+               'test',    t.title,
+               'score',   a.score,
+               'max',     a.max_score,
+               'percent', round(a.percent, 0)) as x
+        from public.attempts a
+        join public.tests t on t.id = a.test_id
+       where a.student_id = v_student and a.status = 'submitted'
+       order by a.finished_at desc
+       limit 20
+    ) z), '[]'::jsonb);
+end $$;
+
 revoke all on function public.rpc_student_report(uuid)     from public, anon;
 revoke all on function public.rpc_attempt_sheet(uuid)      from public, anon;
 revoke all on function public.rpc_remedial_test(uuid, int) from public, anon;
+revoke all on function public.rpc_student_my_results(text) from public;
 
 grant execute on function public.rpc_student_report(uuid)     to authenticated;
 grant execute on function public.rpc_attempt_sheet(uuid)      to authenticated;
 grant execute on function public.rpc_remedial_test(uuid, int) to authenticated;
+grant execute on function public.rpc_student_my_results(text) to anon, authenticated;
 
 do $$
 begin

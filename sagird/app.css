@@ -231,3 +231,42 @@ body{background:
 .wrong .rfrm{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .wrong .rfrm select{flex:1;min-width:150px}
 .wrong .rok{margin-top:6px;font-size:12.5px;font-weight:560;color:var(--ok,#0e9384)}
+
+/* salamlama basligi + kicik gostericiler */
+.shero{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
+.shero .av{width:44px;height:44px;flex:0 0 44px;border-radius:14px;font-size:17px}
+.shero b{display:block;font-size:18px;letter-spacing:-.01em}
+.shero i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-3);margin-top:2px}
+.stiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:0 0 16px}
+.st{border-radius:14px;padding:12px 10px;text-align:center;color:#fff;border:0}
+.st b{display:block;font-size:20px;font-weight:680;line-height:1.2}
+.st b svg{width:20px;height:20px}
+.st span{display:block;font-size:11px;opacity:.85;margin-top:2px}
+.st.a{background:linear-gradient(135deg,#2b4acb,#4a63e0)}
+.st.b{background:linear-gradient(135deg,#0e9384,#18b8a6)}
+.st.c{background:linear-gradient(135deg,#232a38,#3a4358);cursor:pointer;font:inherit}
+.st.c:active{transform:scale(.97)}
+
+/* son tarix yaxinlasanda qirmizi */
+.test .due{color:var(--err);font-weight:600}
+
+/* netice cipleri - faize gore reng */
+.best.bh{color:var(--ok)}
+.best.bm{color:var(--warn)}
+.best.bl{color:var(--err)}
+.ring.mid .fill{stroke:var(--warn)}
+.ring.lo .fill{stroke:var(--err)}
+
+/* neticelerim: mini qrafik + setirler */
+.dyn{display:flex;align-items:flex-end;gap:6px;height:90px}
+.dyn i{flex:1;max-width:34px;border-radius:6px 6px 2px 2px;min-height:5px}
+.dyn .dh{background:var(--ok)}
+.dyn .dm{background:var(--warn)}
+.dyn .dl{background:var(--err)}
+.myr{display:flex;align-items:center;gap:12px;padding:13px 16px;
+  border-bottom:1px solid var(--n-100)}
+.myr:last-child{border-bottom:0}
+.myr .g{flex:1;min-width:0}
+.myr b{display:block;font-size:14px;font-weight:560}
+.myr i{display:block;font-style:normal;font-size:12px;color:var(--fg-3);margin-top:2px}
+.myr .best{font-size:15px;font-weight:640}

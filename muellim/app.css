@@ -188,6 +188,11 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
   box-shadow:0 1px 2px rgba(16,24,40,.07)}
 
 /* Cox secimli nisanlar: cetinlik, movzular */
+/* veraqde "verilib" siyahisi */
+.pgiven{margin:0 0 14px;display:flex;flex-direction:column;gap:7px}
+.pgrow{display:flex;align-items:center;gap:8px;font-size:13px}
+.pgrow svg{width:16px;height:16px;color:var(--ok);flex:0 0 auto}
+
 /* zeng duymesi - ustlukde, noktesi yeni siqnal demekdir */
 .bellbtn{position:relative;border:0;background:none;cursor:pointer;
   padding:6px;color:var(--fg-2);display:inline-flex;border-radius:8px}

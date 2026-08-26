@@ -2956,14 +2956,22 @@
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     Promise.all([
       sb.rpc("rpc_test_preview", { p_test_id: id }),
-      sb.select("classes", { select: "id,name", eq: { account_id: ACC.id }, order: "name" })
+      sb.select("classes", { select: "id,name", eq: { account_id: ACC.id }, order: "name" }),
+      //  bu testin movcud teyinatlari - "verilib" siyahisi ucun
+      sb.select("assignments", { select: "class_id,closes_at", eq: { test_id: id } })
+        .catch(function () { return []; })
     ]).then(function (res) {
       if (!live()) return;
-      drawPaper(res[0] || {}, res[1] || []);
+      drawPaper(res[0] || {}, res[1] || [], res[2] || []);
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
-  function drawPaper(t, classes) {
+  function drawPaper(t, classes, asgs) {
+    //  verilmis qruplar ayrilir - secimde tekrar teklif olunmur
+    var asgMap = {};
+    (asgs || []).forEach(function (a) { asgMap[a.class_id] = a; });
+    var given = classes.filter(function (c) { return asgMap[c.id]; });
+    var freeCls = classes.filter(function (c) { return !asgMap[c.id]; });
     var qs = t.questions || [];
     var done = Number(t.done) || 0;
     topTitle.textContent = t.title || "Test vərəqi";
@@ -2990,10 +2998,22 @@
       '<div class="spacer"></div>' +
       "<h2>Qrupa təyin et</h2>" +
       '<div class="card">' +
-        (classes.length
+        (given.length
+          ? '<div class="pgiven">' + given.map(function (c) {
+              var a = asgMap[c.id];
+              return '<div class="pgrow">' + ic("check") +
+                "<span><b>" + esc(c.name) + "</b> — verilib" +
+                (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : " · açıq") +
+                "</span></div>";
+            }).join("") + "</div>"
+          : "") +
+        (classes.length && !freeCls.length
+          ? '<p class="muted" style="margin:0">Bu test bütün qruplarınıza verilib.</p>'
+          : "") +
+        (freeCls.length
           ? '<div class="fieldrow">' +
               '<div><label for="pCls">Qrup</label><select id="pCls">' +
-                classes.map(function (c) {
+                freeCls.map(function (c) {
                   return '<option value="' + esc(c.id) + '">' + esc(c.name) + "</option>";
                 }).join("") + "</select></div>" +
               '<div><label for="pDate">Son tarix</label>' +
@@ -3009,8 +3029,10 @@
               "ən yaxşı nəticə görünür.</p>" +
             '<div id="pAsgMsg"></div>' +
             '<button class="btn go" id="btnPAsg">' + ic("plus") + "Tapşırıq ver</button>"
-          : '<p class="muted">Əvvəlcə əsas səhifədə qrup yaradın — sonra bu ' +
-            "testi ona təyin edə biləcəksiniz.</p>") +
+          : (classes.length
+              ? ""
+              : '<p class="muted">Əvvəlcə əsas səhifədə qrup yaradın — sonra bu ' +
+                "testi ona təyin edə biləcəksiniz.</p>")) +
       "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Suallar</h2>" +
@@ -3074,9 +3096,9 @@
         p_class_id: cls, p_test_id: t.id,
         p_closes_at: closes, p_max_attempts: Number(($("pTry") || {}).value || 1)
       }).then(function () {
-        setBusy("btnPAsg", false, "Tapşırıq ver");
-        $("pAsgMsg").innerHTML = msg("ok",
-          "Tapşırıq verildi — şagirdlər testi artıq görür.");
+        //  sehife yenilenir - teze teyinat "verilib" siyahisinda gorunur
+        busy = false;
+        screenPaper(t.id);
       }).catch(function (e) {
         setBusy("btnPAsg", false, "Tapşırıq ver");
         $("pAsgMsg").innerHTML = msg("err", fail(e));

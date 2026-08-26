@@ -203,11 +203,10 @@ with sync_playwright() as pw:
     pg.fill("#pDate", day)
     pg.select_option("#pTry", "2")
     pg.click("#btnPAsg")
-    pg.wait_for_function(
-        "document.querySelector('#pAsgMsg') && document.querySelector('#pAsgMsg').innerText.length > 3",
-        timeout=8000)
-    ok("verildi" in pg.inner_text("#pAsgMsg"), "teyinat tesdiqi gorunur",
-       pg.inner_text("#pAsgMsg")[:50])
+    #  teyinatdan sonra sehife yenilenir - "verilib" siyahisi tesdiqdir
+    pg.wait_for_selector(".pgiven", timeout=8000)
+    ok("verilib" in pg.inner_text(".pgiven"), "teyinat veraqde gorunur",
+       pg.inner_text(".pgiven")[:50].replace("\n", " "))
     a = db("select class_id::text c, max_attempts m from public.assignments", one=True)
     ok(a is not None and a["c"] == GID and a["m"] == 2, "bazada teyinat duzgundur")
 
