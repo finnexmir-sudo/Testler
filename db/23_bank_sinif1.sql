@@ -5,7 +5,7 @@
 --      python3 tools/sinif1.py
 --
 --  Riyaziyyat 12 movzu x 40 + az/hey/inf 16 movzu x 20
---  = 780 sual.  ext_key: riy1-/az1-/hey1-/inf1-...
+--  = 800 sual.  ext_key: riy1-/az1-/hey1-/inf1-...
 --  ON SERT: 14_movzular.sql ve 15_movzular_ederslik.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
@@ -291,6 +291,26 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('riy1-fiqurlar#18','riyaziyyat','riy-1-fiqurlar',2,2,'Alma tən ortadan bölündü. Neçə yarı alındı?','Tam iki yarıya bölünür.',array['İki yarı','Üç yarı','Bir yarı','Dörd yarı'],1),
 ('riy1-fiqurlar#19','riyaziyyat','riy-1-fiqurlar',1,2,'Hansı fiqurun küncləri yoxdur?','Dairənin küncü yoxdur.',array['Dairənin','Kvadratın','Üçbucağın','Düzbucaqlının'],1),
 ('riy1-fiqurlar#20','riyaziyyat','riy-1-fiqurlar',3,2,'Piramida şəkilli oyuncaq hansı fiqurlar qrupundandır?','Piramida fəza fiqurudur.',array['Fəza fiqurlarından','Müstəvi fiqurlardan','Rəqəmlərdən','Hərflərdən'],1),
+('riy1-fiqurlar#21','riyaziyyat','riy-1-fiqurlar',1,2,'Üçbucaqda neçə tərəf olur?','Üçbucağın üç tərəfi var.',array['3 tərəf','4 tərəf','2 tərəf','5 tərəf'],1),
+('riy1-fiqurlar#22','riyaziyyat','riy-1-fiqurlar',1,2,'Kvadratın künclərini sayaq: neçə künc alınır?','Kvadratın dörd küncü var.',array['4 künc','3 künc','5 künc','6 künc'],1),
+('riy1-fiqurlar#23','riyaziyyat','riy-1-fiqurlar',2,2,'«Yol ver» nişanı hansı fiqura bənzəyir?','Bu nişan üçbucaq formasındadır.',array['Üçbucağa','Kvadrata','Dairəyə','Ulduza'],1),
+('riy1-fiqurlar#24','riyaziyyat','riy-1-fiqurlar',1,2,'Pizza bütöv halda hansı fiqura bənzəyir?','Bütöv pizza dairə formasındadır.',array['Dairəyə','Kvadrata','Üçbucağa','Düzbucaqlıya'],1),
+('riy1-fiqurlar#25','riyaziyyat','riy-1-fiqurlar',2,2,'Kvadratın tərəfləri bir-birinə görə necədir?','Kvadratın bütün tərəfləri bərabərdir.',array['Hamısı bərabərdir','Hamısı fərqlidir','İkisi uzundur','Biri əyridir'],1),
+('riy1-fiqurlar#26','riyaziyyat','riy-1-fiqurlar',3,2,'Dördbucaqlının tərəflərinin sayı ilə künclərinin sayı necədir?','Dörd tərəf, dörd künc — bərabərdir.',array['Hər ikisi dörddür','Tərəflər çoxdur','Künclər çoxdur','Heç biri yoxdur'],1),
+('riy1-fiqurlar#27','riyaziyyat','riy-1-fiqurlar',3,2,'Silindrin üst və alt üzləri hansı fiqurdur?','Silindrin oturacaqları dairədir.',array['Dairədir','Kvadratdır','Üçbucaqdır','Ulduzdur'],1),
+('riy1-fiqurlar#28','riyaziyyat','riy-1-fiqurlar',2,2,'Rafinad qənd parçası hansı fəza fiquruna bənzəyir?','Qənd parçası kub formasındadır.',array['Kuba','Kürəyə yox, dairəyə','Konusa','Silindrə'],1),
+('riy1-fiqurlar#29','riyaziyyat','riy-1-fiqurlar',2,2,'Müstəvi fiqurları seçin.','Dairə və kvadrat kağızda çəkilən müstəvi fiqurlardır.',array['Dairə və kvadrat','Kub və kürə','Silindr və konus','Kub və konus'],1),
+('riy1-fiqurlar#30','riyaziyyat','riy-1-fiqurlar',2,2,'Üçbucaq, kvadrat və dairə birlikdə necə adlanır?','Bunlar müstəvi fiqurlardır.',array['Müstəvi fiqurlar','Fəza fiqurları','Ədədlər','Cisimlər'],1),
+('riy1-fiqurlar#31','riyaziyyat','riy-1-fiqurlar',1,2,'Şahmat taxtasının hər xanası hansı fiqurdur?','Xanalar kvadrat formasındadır.',array['Kvadrat','Dairə','Üçbucaq','Oval'],1),
+('riy1-fiqurlar#32','riyaziyyat','riy-1-fiqurlar',1,2,'Divar saatlarının çoxu hansı fiqur formasındadır?','Divar saatları adətən dairə formasında olur.',array['Dairə','Konus','Piramida','Küp'],1),
+('riy1-fiqurlar#33','riyaziyyat','riy-1-fiqurlar',2,2,'Üçbucağın künc nöqtələrinin sayı neçədir?','Üçbucağın üç künc nöqtəsi var.',array['3 künc nöqtəsi','4 künc nöqtəsi','2 künc nöqtəsi','6 künc nöqtəsi'],1),
+('riy1-fiqurlar#34','riyaziyyat','riy-1-fiqurlar',2,2,'Kürənin üzərində künc varmı?','Kürə tamamilə yumrudur, küncü yoxdur.',array['Xeyr, yoxdur','Bəli, dörd küncü var','Bəli, bir küncü var','Bəli, səkkiz küncü var'],1),
+('riy1-fiqurlar#35','riyaziyyat','riy-1-fiqurlar',3,2,'Düzbucaqlının qarşı-qarşıya duran tərəfləri necədir?','Qarşı tərəflər bərabərdir.',array['Bərabərdir','Fərqlidir','Əyridir','Yoxdur'],1),
+('riy1-fiqurlar#36','riyaziyyat','riy-1-fiqurlar',2,2,'Yer kürəsinin kiçik modeli olan qlobus formaca nəyə bənzəyir?','Qlobus kürə formasındadır.',array['Kürəyə','Kuba','Konusa','Piramidaya'],1),
+('riy1-fiqurlar#37','riyaziyyat','riy-1-fiqurlar',3,2,'Misir ehramlarına bənzəyən fəza fiquru necə adlanır?','Ehramlar piramida formasındadır.',array['Piramida','Silindr','Kürə','Dairə'],1),
+('riy1-fiqurlar#38','riyaziyyat','riy-1-fiqurlar',1,2,'Yelkənli qayığın yelkəni çox vaxt hansı fiqur şəklində çəkilir?','Yelkən üçbucaq şəklində çəkilir.',array['Üçbucaq şəklində','Dairə şəklində','Kub şəklində','Oval şəklində'],1),
+('riy1-fiqurlar#39','riyaziyyat','riy-1-fiqurlar',3,2,'Hansı fiquru kağız üzərində çəkmək olmaz, çünki o, fəza fiqurudur?','Kürə fəza fiqurudur, kağızda yalnız dairə çəkilir.',array['Kürəni','Dairəni','Kvadratı','Üçbucağı'],1),
+('riy1-fiqurlar#40','riyaziyyat','riy-1-fiqurlar',2,2,'Romb, kvadrat və düzbucaqlı fiqurlarının hər birinin neçə tərəfi var?','Üçü də dördbucaqlıdır — dörd tərəf.',array['4 tərəfi','3 tərəfi','5 tərəfi','6 tərəfi'],1),
 ('riy1-toplama-20#1','riyaziyyat','riy-1-toplama-20',1,3,'12 + 5 neçə edər?','12 + 5 = 17.',array['17','16','18','7'],1),
 ('riy1-toplama-20#2','riyaziyyat','riy-1-toplama-20',2,3,'9 + 6 cəmini tapın.','9-u 10-a tamamlayaq: 9 + 1 = 10; 10 + 5 = 15.',array['15','14','16','13'],1),
 ('riy1-toplama-20#3','riyaziyyat','riy-1-toplama-20',2,3,'8 + 8 neçə edər?','8 + 8 = 16.',array['16','15','17','14'],1),
@@ -843,8 +863,8 @@ begin
    where owner_type = 'platform'
      and (ext_key like 'riy1-%' or ext_key like 'az1-%'
           or ext_key like 'hey1-%' or ext_key like 'inf1-%');
-  if n <> 780 then
-    raise exception 'sinif1 suallari: 780 gozlenilirdi, % tapildi', n;
+  if n <> 800 then
+    raise exception 'sinif1 suallari: 800 gozlenilirdi, % tapildi', n;
   end if;
   select count(*) into k from public.questions q
    where (q.ext_key like 'riy1-%' or q.ext_key like 'az1-%'
