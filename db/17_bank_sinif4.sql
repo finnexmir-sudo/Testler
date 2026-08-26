@@ -4,8 +4,8 @@
 --  BU FAYL ELLE YAZILMIR - tools/sinif4.py yaradir:
 --      python3 tools/sinif4.py
 --
---  Az dili 8 movzu + Heyat bilgisi 5 + Informatika 3 = 16 movzu x 20
---  sual = 320.  Suallar orijinaldir.  ext_key: az4-/hey4-/inf4-...
+--  Az dili 8 movzu + Heyat bilgisi 5 + Informatika 3 = 18 movzu x 20
+--  sual = 360.  Suallar orijinaldir.  ext_key: az4-/hey4-/inf4-...
 --
 --  ON SERT: 14_movzular.sql ve 15_movzular_ederslik.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
@@ -350,7 +350,47 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('inf4-kompyuter#17','informatika','inf-4-kompyuter',1,3,'Kompüter otağında hansı qaydaya əməl etməli?','Səliqəli və ehtiyatlı olmaq.',array['Səliqəli və ehtiyatlı olmaq','Qaçıb oynamaq','Yemək yemək','Su tökmək'],1),
 ('inf4-kompyuter#18','informatika','inf-4-kompyuter',2,3,'Klaviaturada boşluq (probel) düyməsi nə üçündür?','Sözlər arasında boşluq qoymaq üçün.',array['Sözlər arasında boşluq qoymaq üçün','Səs açmaq üçün','Ekranı söndürmək üçün','Şəkil çəkmək üçün'],1),
 ('inf4-kompyuter#19','informatika','inf-4-kompyuter',1,3,'Kompüterə qulaqlıq nə üçün qoşulur?','Səsi başqalarına mane olmadan dinləmək üçün.',array['Səsi tək dinləmək üçün','Şəkil görmək üçün','Mətn yazmaq üçün','Çap üçün'],1),
-('inf4-kompyuter#20','informatika','inf-4-kompyuter',2,3,'Veb-kamera nə üçündür?','Görüntünü çəkib ötürmək üçün.',array['Görüntü ötürmək üçün','Qoxu ötürmək üçün','Sənəd çap etmək üçün','Heç nə üçün'],1)
+('inf4-kompyuter#20','informatika','inf-4-kompyuter',2,3,'Veb-kamera nə üçündür?','Görüntünü çəkib ötürmək üçün.',array['Görüntü ötürmək üçün','Qoxu ötürmək üçün','Sənəd çap etmək üçün','Heç nə üçün'],1),
+('inf4-mentiq#1','informatika','inf-4-mentiq',2,2,'Əşyaların əlamətlərini müqayisə etmək üçün onları harada təsvir etmək əlverişlidir?','Əlamətlər cədvəldə aydın müqayisə olunur.',array['Cədvəldə','Yuxuda','Mahnıda','Kölgədə'],1),
+('inf4-mentiq#2','informatika','inf-4-mentiq',3,2,'«Bütün quşlar uçur» mülahizəsi doğrudurmu?','Dəvəquşu uçmur - mülahizə yalandır.',array['Xeyr (dəvəquşu uçmur)','Bəli, tam doğrudur','Sual deyil','Bilinmir'],1),
+('inf4-mentiq#3','informatika','inf-4-mentiq',2,2,'Qrup və altqrup münasibətinə misal hansıdır?','Quşlar heyvanlar qrupunun altqrupudur.',array['Heyvanlar və quşlar','Stol və külək','Su və rəqəm','Hərf və planet'],1),
+('inf4-mentiq#4','informatika','inf-4-mentiq',3,2,'«Və» bağlayıcısı ilə qurulmuş mürəkkəb mülahizə nə vaxt doğru olur?','Hər iki hissə doğru olduqda mülahizə doğrudur.',array['Hər iki hissə doğru olanda','Bir hissə yalan olanda','Heç vaxt','Həmişə'],1),
+('inf4-mentiq#5','informatika','inf-4-mentiq',3,2,'«Və ya» bağlayıcılı mülahizə nə vaxt doğrudur?','Ən azı bir hissə doğrudursa, mülahizə doğrudur.',array['Ən azı bir hissə doğru olanda','Yalnız hər ikisi yalan olanda','Heç vaxt','Yalnız qışda'],1),
+('inf4-mentiq#6','informatika','inf-4-mentiq',2,2,'«Əgər yağış yağarsa, onda çətir götür» qaydası hansı formadadır?','Bu, əgər-onda qaydasıdır.',array['Əgər-onda qaydası','Təkrarlama','Sadalama','Tapmaca'],1),
+('inf4-mentiq#7','informatika','inf-4-mentiq',2,2,'Mülahizələri əyani göstərmək üçün nədən istifadə olunur?','Sxemlər mülahizələri əyani təsvir edir.',array['Sxemlərdən','Mahnılardan','Rəqslərdən','Yeməklərdən'],1),
+('inf4-mentiq#8','informatika','inf-4-mentiq',3,2,'«5 > 3 və 2 > 4» mülahizəsi necə mülahizədir?','2 > 4 yalandır, ona görə bütöv mülahizə yalandır.',array['Yalandır','Doğrudur','Qeyri-müəyyəndir','Sualdır'],1),
+('inf4-mentiq#9','informatika','inf-4-mentiq',3,2,'Məntiqi mühakimə nəyə əsaslanır?','Mühakimə faktlara və qaydalara söykənir.',array['Faktlara və qaydalara','Təsadüfə','Yuxulara','Səs-küyə'],1),
+('inf4-mentiq#10','informatika','inf-4-mentiq',3,2,'«Bəzi» sözü işlənən mülahizəyə misal hansıdır?','«Bəzi quşlar üzə bilir» - bəzi sözlü mülahizədir.',array['Bəzi quşlar üzə bilir','Bütün itlər hürür','Heç bir daş uçmur','5 böyükdür 3-dən'],1),
+('inf4-mentiq#11','informatika','inf-4-mentiq',3,2,'Altqrupun bütün üzvləri qrupun da üzvüdürmü?','Altqrup qrupun içindədir - bəli.',array['Bəli','Xeyr','Yalnız bəzən','Qrupdan asılı deyil'],1),
+('inf4-mentiq#12','informatika','inf-4-mentiq',3,2,'«Əgər hava soyuqdursa, onda isti geyin» qaydasında şərt hansıdır?','Şərt - havanın soyuq olmasıdır.',array['Havanın soyuq olması','İsti geyinmək','Qaydanın özü','Şərt yoxdur'],1),
+('inf4-mentiq#13','informatika','inf-4-mentiq',2,2,'Cədvəlin sətir və sütunları nəyi göstərir?','Cədvəldə əşyalar və onların əlamətləri yerləşdirilir.',array['Əşyaları və əlamətləri','Yalnız rəngləri','Yalnız səsləri','Heç nəyi'],1),
+('inf4-mentiq#14','informatika','inf-4-mentiq',3,2,'İki mülahizədən nəticə çıxarmaq necə adlanır?','Bu, mühakimə yürütməkdir.',array['Mühakimə yürütmək','Yuxu görmək','Şəkil çəkmək','Mahnı oxumaq'],1),
+('inf4-mentiq#15','informatika','inf-4-mentiq',2,2,'«Heç bir balıq uçmur» mülahizəsində hansı ifadə işlənib?','Mülahizədə «heç bir» ifadəsi işlənib.',array['«Heç bir»','«Bəzi»','«Bütün»','«Və ya»'],1),
+('inf4-mentiq#16','informatika','inf-4-mentiq',2,2,'Doğru mülahizəyə misal hansıdır?','«Bir ildə 12 ay var» - doğru mülahizədir.',array['Bir ildə 12 ay var','Daşlar üzə bilir','Günəş gecə çıxır','Balıqlar quruda yaşayır'],1),
+('inf4-mentiq#17','informatika','inf-4-mentiq',2,2,'Yalan mülahizəyə misal hansıdır?','«Günəş qərbdən doğur» yalandır - Günəş şərqdən doğur.',array['Günəş qərbdən doğur','Qış soyuq fəsildir','Həftədə 7 gün var','Su mayedir'],1),
+('inf4-mentiq#18','informatika','inf-4-mentiq',3,2,'«Əgər-onda» qaydasında «onda» hissəsi nəyi bildirir?','«Onda» hissəsi icra olunacaq hərəkəti - nəticəni bildirir.',array['Nəticəni (hərəkəti)','Şərti','Sualı','Rəngi'],1),
+('inf4-mentiq#19','informatika','inf-4-mentiq',2,2,'Məntiqi düşünmə hansı fəaliyyətdə xüsusilə kömək edir?','Məsələ həllində məntiq əsas köməkçidir.',array['Məsələ həllində','Yuxuda','Yeməkdə','Yerişdə'],1),
+('inf4-mentiq#20','informatika','inf-4-mentiq',2,2,'Sxemdə oxlar nəyi göstərir?','Oxlar ardıcıllığı və əlaqəni göstərir.',array['Ardıcıllığı və əlaqəni','Havanın istiliyini','Rənglərin sayını','Heç nəyi'],1),
+('inf4-qrafik#1','informatika','inf-4-qrafik',1,4,'Qrafik redaktorun alətlər qutusunda nə yerləşir?','Alətlər qutusunda çəkmə alətləri olur.',array['Çəkmə alətləri','Yemək qabları','Kabellər','Oyunlar'],1),
+('inf4-qrafik#2','informatika','inf-4-qrafik',2,4,'Şəklin formasını dəyişmək üçün hansı əməliyyat aparılır?','Şəkli dartıb ölçüsünü və formasını dəyişmək olar.',array['Dartıb ölçüsünü dəyişmə','Səs yazma','Çap etmə','Fayl silmə'],1),
+('inf4-qrafik#3','informatika','inf-4-qrafik',3,4,'Simmetrik fiqur çəkmək üçün fiqurun yarısı ilə nə edilir?','Yarı əks olunur (çevrilir) və birləşdirilir.',array['Əks olunur (çevrilir)','Silinir','Rənglənir yalnız','Çap edilir'],1),
+('inf4-qrafik#4','informatika','inf-4-qrafik',2,4,'Mozaika nədir?','Kiçik hissələrdən yığılan təsvir mozaika adlanır.',array['Kiçik hissələrdən yığılmış təsvir','Səs yazısı','Mətn sənədi','Kompüter oyunu'],1),
+('inf4-qrafik#5','informatika','inf-4-qrafik',3,4,'Naxış qurarkən hansı əməliyyat dəfələrlə təkrarlanır?','Naxış elementinin köçürülməsi təkrarlanır.',array['Fraqmentin köçürülməsi','Faylın silinməsi','Kompüterin söndürülməsi','Rəngin silinməsi'],1),
+('inf4-qrafik#6','informatika','inf-4-qrafik',2,4,'Rəsmi çap etməzdən əvvəl nəyə baxmaq lazımdır?','Çapdan əvvəl görünüşə baxıb yoxlamaq lazımdır.',array['Çapdan əvvəl görünüşə','Televizora','Pəncərəyə','Təqvimə'],1),
+('inf4-qrafik#7','informatika','inf-4-qrafik',1,4,'Rəsm hansı qurğu ilə kağıza çıxarılır?','Rəsmlər printerlə çap olunur.',array['Printerlə','Skanerlə','Mikrofonla','Dinamiklə'],1),
+('inf4-qrafik#8','informatika','inf-4-qrafik',2,4,'Mətnli şəkil yaratmaq üçün şəklə nə əlavə olunur?','Şəklə yazı əlavə edilir.',array['Yazı','Səs','Qoxu','Heç nə'],1),
+('inf4-qrafik#9','informatika','inf-4-qrafik',2,4,'Şəkildə rənglərin bir-birinə uyğunluğu nəyə təsir edir?','Uyğun rənglər şəklin gözəlliyini artırır.',array['Gözəlliyinə','Faylın adına','Printerin sürətinə','Kompüterin yaddaşına'],1),
+('inf4-qrafik#10','informatika','inf-4-qrafik',3,4,'Fiquru 90 dərəcə döndərmək hansı əməliyyatdır?','Döndərmə fırlatma əməliyyatıdır.',array['Fırlatma','Silmə','Doldurma','Yazma'],1),
+('inf4-qrafik#11','informatika','inf-4-qrafik',3,4,'Böyük rəsmi çap etmək üçün kağız necə seçilir?','Kağız rəsmin ölçüsünə uyğun seçilir.',array['Rəsmin ölçüsünə uyğun','Həmişə ən kiçik','Rəngli kağız yalnız','Fərqi yoxdur'],1),
+('inf4-qrafik#12','informatika','inf-4-qrafik',2,4,'Qrafik redaktorda işin nəticəsi nə olur?','Nəticə rəsm - qrafik fayl olur.',array['Rəsm (qrafik fayl)','Mahnı','Cədvəl','Oyun'],1),
+('inf4-qrafik#13','informatika','inf-4-qrafik',3,4,'Naxışlarda hansı qanunauyğunluq olur?','Naxışda elementlər müəyyən qayda ilə təkrarlanır.',array['Elementlərin təkrarlanması','Tam qarışıqlıq','Yalnız bir rəng','Qanunauyğunluq olmur'],1),
+('inf4-qrafik#14','informatika','inf-4-qrafik',2,4,'Şəklin ölçüsünü kiçildəndə nə baş verir?','Təsvir kiçilir, yer az tutur.',array['Təsvir balacalaşır','Təsvir silinir','Rənglər itir','Fayl açılmır'],1),
+('inf4-qrafik#15','informatika','inf-4-qrafik',3,4,'Rəsmdə uzaqdakı əşyalar necə təsvir olunur?','Uzaqdakı əşyalar daha kiçik çəkilir.',array['Daha kiçik','Daha böyük','Daha parlaq','Çəkilmir'],1),
+('inf4-qrafik#16','informatika','inf-4-qrafik',3,4,'Rəngli rəsmi çap etmək üçün printerdə nə olmalıdır?','Printerdə rəngli boya (katric) olmalıdır.',array['Rəngli boya (katric)','Əlavə klaviatura','İkinci ekran','Səs kartı'],1),
+('inf4-qrafik#17','informatika','inf-4-qrafik',2,4,'Hazır fiqurların köməyi ilə hansı təsvirləri qurmaq olar?','Fiqurlardan ev, maşın, robot təsvirləri yığmaq olar.',array['Ev, maşın, robot təsvirlərini','Yalnız xətləri','Yalnız nöqtələri','Heç nəyi'],1),
+('inf4-qrafik#18','informatika','inf-4-qrafik',2,4,'Şəkli kompüter yaddaşına yazmaq üçün ona nə verilir?','Fayla ad verilir.',array['Ad','Rəng','Səs','Qiymət'],1),
+('inf4-qrafik#19','informatika','inf-4-qrafik',2,4,'Simmetriyaya malik təsvirə misal hansıdır?','Kəpənək təsviri simmetrikdir.',array['Kəpənək təsviri','Ləkə','Qarışıq cızma-qara','Təsadüfi xətlər'],1),
+('inf4-qrafik#20','informatika','inf-4-qrafik',2,4,'Qrafik redaktorda səliqəli nəticə üçün nə vacibdir?','Alətlərdən düzgün istifadə səliqəli nəticə verir.',array['Alətlərdən düzgün istifadə','Sürətli klik','Bahalı kompüter yalnız','Təsadüf'],1)
 ),
 ins as (
   insert into public.questions
@@ -383,8 +423,8 @@ begin
    where owner_type = 'platform'
      and (ext_key like 'az4-%' or ext_key like 'hey4-%'
           or ext_key like 'inf4-%');
-  if n <> 320 then
-    raise exception 'sinif4 suallari: 320 gozlenilirdi, % tapildi', n;
+  if n <> 360 then
+    raise exception 'sinif4 suallari: 360 gozlenilirdi, % tapildi', n;
   end if;
 
   select count(*) into k from public.questions q
@@ -401,9 +441,9 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'az4-%' or ext_key like 'hey4-%'
       or ext_key like 'inf4-%';
-  if k <> 16 then
-    raise exception 'movzu sayi 16 deyil: %', k;
+  if k <> 18 then
+    raise exception 'movzu sayi 18 deyil: %', k;
   end if;
 
-  raise notice '4-cu sinif banki: % sual, 16 movzu (az dili, heyat bilgisi, informatika).', n;
+  raise notice '4-cu sinif banki: % sual, 18 movzu (az dili, heyat bilgisi, informatika).', n;
 end $$;

@@ -82,7 +82,11 @@ select s.id, l.id, v.slug, v.name, v.sort
 
     -- ================== UMUMI TARIX 7 (723) ===========================
     ('tarix','7','tarix-7-erken-orta-esrler', 'Dünya ölkələri III–XI yüzilliklərdə', 10),
+    ('tarix','7','tarix-7-turk-dovletleri',   'Türk dövlətləri: Hun, Göytürk, Xəzər', 12),
+    ('tarix','7','tarix-7-ereb-xilafeti',     'Ərəb xilafəti',                       14),
     ('tarix','7','tarix-7-orta-esrler',       'Dünya ölkələri XI–XVI yüzilliklərdə', 20),
+    ('tarix','7','tarix-7-selcuq-osmanli',    'Səlcuq, Monqol və Osmanlı dövlətləri', 22),
+    ('tarix','7','tarix-7-avropa',            'Orta əsrlər Avropası',                24),
 
     -- ==================== FIZIKA 7 (867 + 868) ========================
     ('fizika','7','fiz-7-olcme',      'Fiziki kəmiyyətlər və ölçmə',         10),
@@ -135,8 +139,8 @@ begin
     join public.levels l on l.id = t.level_id
     join public.programs p on p.id = l.program_id
    where p.slug = 'orta' and l.code = '7';
-  if n < 59 then
-    raise exception '7-ci sinif movzulari: 59 gozlenilirdi, % tapildi', n;
+  if n < 63 then
+    raise exception '7-ci sinif movzulari: 63 gozlenilirdi, % tapildi', n;
   end if;
 
   select string_agg(x.slug || '=' || x.say, ', ') into bad from (
@@ -151,7 +155,7 @@ begin
       or (x.slug = 'az-dili'      and x.say <> 8)
       or (x.slug = 'ingilis-dili' and x.say <> 6)
       or (x.slug = 'informatika'  and x.say <> 5)
-      or (x.slug = 'tarix'        and x.say <> 2)
+      or (x.slug = 'tarix'        and x.say <> 6)
       or (x.slug = 'fizika'       and x.say <> 7)
       or (x.slug = 'kimya'        and x.say <> 7)
       or (x.slug = 'biologiya'    and x.say <> 7)
@@ -168,5 +172,5 @@ begin
     raise exception 'Kimya orta proqrama elave olunmayib.';
   end if;
 
-  raise notice '7-ci sinif agaci: % movzu (riy 10, az 8, ing 6, inf 5, tarix 2, fiz 7, kim 7, bio 7, cog 7).', n;
+  raise notice '7-ci sinif agaci: % movzu (riy 10, az 8, ing 6, inf 5, tarix 6, fiz 7, kim 7, bio 7, cog 7).', n;
 end $$;

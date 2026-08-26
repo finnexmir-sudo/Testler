@@ -71,13 +71,18 @@ select s.id, l.id, v.slug, v.name, v.sort
     -- ============== AZERBAYCAN TARIXI 6 (910) =========================
     ('tarix','6','tarix-6-ibtidai',          'Azərbaycanda ibtidai cəmiyyət', 10),
     ('tarix','6','tarix-6-qedim-dovletler',  'Azərbaycanda qədim dövlətlər',  20),
+    ('tarix','6','tarix-6-manna',            'Manna dövləti',                 22),
+    ('tarix','6','tarix-6-atropatena',       'Atropatena dövləti',            24),
+    ('tarix','6','tarix-6-albaniya',         'Albaniya dövləti',              26),
     ('tarix','6','tarix-6-erken-orta',       'Azərbaycan III–VI yüzilliklərdə', 30),
 
     -- ==================== FIZIKA 6 (546) ==============================
     ('fizika','6','fiz-6-giris',    'Fizika nəyi öyrənir',                   10),
+    ('fizika','6','fiz-6-olcmeler', 'Fiziki kəmiyyətlər və ölçmələr',        15),
     ('fizika','6','fiz-6-materiya', 'Materiya',                              20),
     ('fizika','6','fiz-6-madde',    'Maddə və onun xassələri',               30),
     ('fizika','6','fiz-6-hereket',  'Qarşılıqlı təsirlər və hərəkət',        40),
+    ('fizika','6','fiz-6-enerji',   'Mexaniki hərəkət, cərəyan və enerji',   50),
 
     -- =================== BIOLOGIYA 6 (538) ============================
     ('biologiya','6','bio-6-tedqiqat',        'Biologiyanın tədqiqat obyektləri', 10),
@@ -113,8 +118,8 @@ begin
     join public.levels l on l.id = t.level_id
     join public.programs p on p.id = l.program_id
    where p.slug = 'orta' and l.code = '6';
-  if n < 52 then
-    raise exception '6-ci sinif movzulari: 52 gozlenilirdi, % tapildi', n;
+  if n < 57 then
+    raise exception '6-ci sinif movzulari: 57 gozlenilirdi, % tapildi', n;
   end if;
 
   select string_agg(x.slug || '=' || x.say, ', ') into bad from (
@@ -129,13 +134,13 @@ begin
       or (x.slug = 'az-dili'      and x.say <> 8)
       or (x.slug = 'ingilis-dili' and x.say <> 8)
       or (x.slug = 'informatika'  and x.say <> 5)
-      or (x.slug = 'tarix'        and x.say <> 3)
-      or (x.slug = 'fizika'       and x.say <> 4)
+      or (x.slug = 'tarix'        and x.say <> 6)
+      or (x.slug = 'fizika'       and x.say <> 6)
       or (x.slug = 'biologiya'    and x.say <> 8)
       or (x.slug = 'cografiya'    and x.say <> 7);
   if bad is not null then
     raise exception 'Fenn uzre movzu sayi gozlenilenden ferqlidir: %', bad;
   end if;
 
-  raise notice '6-ci sinif agaci: % movzu (riy 9, az 8, ing 8, inf 5, tarix 3, fiz 4, bio 8, cog 7).', n;
+  raise notice '6-ci sinif agaci: % movzu (riy 9, az 8, ing 8, inf 5, tarix 6, fiz 6, bio 8, cog 7).', n;
 end $$;

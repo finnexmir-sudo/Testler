@@ -69,7 +69,7 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    Payriff/Epoint) müştəri sayı artanda.
 2. ~~Sual bankının davamı~~ — hazırdır: 1-4-cü siniflər (ingilis dili
    daxil) + 5-8-ci siniflər (orta proqram, 9 fənn), hər mövzuda
-   **20 sual** (dərinləşdirilmiş bank, cəmi ~6900 platforma sualı).
+   **20 sual** (dərinləşdirilmiş bank, cəmi ~7200 platforma sualı).
    Mövzu ağacları `db/25/29/33/37_movzular_orta*.sql`, banklar
    `db/23–40`. Davamı: 9-11-ci siniflər (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,

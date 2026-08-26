@@ -6,7 +6,7 @@
 --      python3 tools/sinif7.py
 --
 --  Az dili 8 + Ingilis dili 6 + Informatika 5 + Tarix 2
---  = 21 movzu x 20 = 420.  ext_key: az7-/ing7-/inf7-/tarix7-...
+--  = 25 movzu x 20 = 500.  ext_key: az7-/ing7-/inf7-/tarix7-...
 --  ON SERT: 33_movzular_orta7.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
@@ -451,7 +451,87 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('tarix7-orta-esrler#17','tarix','tarix-7-orta-esrler',3,2,'Reformasiya hərəkatının banisi kimdir?','Martin Lüter.',array['Martin Lüter','Böyük Karl','Kolumb','Qutenberq'],1),
 ('tarix7-orta-esrler#18','tarix','tarix-7-orta-esrler',3,2,'Əmir Teymurun paytaxtı hansı şəhər idi?','Səmərqənd şəhəri.',array['Səmərqənd','Buxara','İstanbul','Qahirə'],1),
 ('tarix7-orta-esrler#19','tarix','tarix-7-orta-esrler',3,2,'Qızıl Orda dövləti kimlər tərəfindən yaradılmışdı?','Batı xanın başçılığı ilə monqollar.',array['Monqollar (Batı xan)','Franklar','Ərəblər','Vikinqlər'],1),
-('tarix7-orta-esrler#20','tarix','tarix-7-orta-esrler',2,2,'1453-cü ildə hansı imperiya süqut etdi?','Konstantinopolun fəthi ilə Bizans süqut etdi.',array['Bizans imperiyası','Roma respublikası','Osmanlı dövləti','Səfəvi dövləti'],1)
+('tarix7-orta-esrler#20','tarix','tarix-7-orta-esrler',2,2,'1453-cü ildə hansı imperiya süqut etdi?','Konstantinopolun fəthi ilə Bizans süqut etdi.',array['Bizans imperiyası','Roma respublikası','Osmanlı dövləti','Səfəvi dövləti'],1),
+('tarix7-turk-dovletleri#1','tarix','tarix-7-turk-dovletleri',2,1,'Avropa Hun dövlətinin ən qüdrətli hökmdarı kim olmuşdur?','Attilanın dövründə Hun dövləti ən güclü dövrünü yaşadı.',array['Attila','Bumın','Osman bəy','Böyük Karl'],1),
+('tarix7-turk-dovletleri#2','tarix','tarix-7-turk-dovletleri',2,1,'Xalqların böyük köçünə təkan verən əsas amil nə idi?','Hunların qərbə hərəkəti başqa xalqları da yerindən tərpətdi.',array['Hunların qərbə hərəkəti','Dəniz səviyyəsinin qalxması','Roma dəvəti','Kitab çapının yayılması'],1),
+('tarix7-turk-dovletleri#3','tarix','tarix-7-turk-dovletleri',2,1,'Göytürk xaqanlığı hansı əsrdə yaranmışdır?','Göytürk xaqanlığı VI əsrin ortalarında quruldu.',array['VI əsrdə','XV əsrdə','II əsrdə','XIX əsrdə'],1),
+('tarix7-turk-dovletleri#4','tarix','tarix-7-turk-dovletleri',2,1,'Göytürk dövlətinin banisi kim hesab olunur?','Dövləti Bumın xaqan qurmuşdur.',array['Bumın xaqan','Attila','Toğrul bəy','Çingiz xan'],1),
+('tarix7-turk-dovletleri#5','tarix','tarix-7-turk-dovletleri',2,1,'Orxon-Yenisey abidələri hansı xalqın yazılı abidələridir?','Bu daş kitabələr qədim türklərə məxsusdur.',array['Türklərin','Yunanların','Ərəblərin','Slavyanların'],1),
+('tarix7-turk-dovletleri#6','tarix','tarix-7-turk-dovletleri',3,1,'Ağ Hun (Eftalit) dövləti hansı əraziləri əhatə edirdi?','Ağ Hunlar Orta Asiyada güclü dövlət qurmuşdular.',array['Orta Asiyanı','Şimali Afrikanı','Skandinaviyanı','Amerikanı'],1),
+('tarix7-turk-dovletleri#7','tarix','tarix-7-turk-dovletleri',3,1,'Xəzər xaqanlığının paytaxtı hansı şəhər idi?','Xaqanlığın paytaxtı Volqa üzərindəki İtil şəhəri idi.',array['İtil','Bağdad','Konstantinopol','Qazaka'],1),
+('tarix7-turk-dovletleri#8','tarix','tarix-7-turk-dovletleri',3,1,'Xəzər xaqanlığında hansı dinlərə etiqad olunurdu?','Xəzərlərdə müxtəlif dinlər, o cümlədən iudaizm yayılmışdı.',array['Müxtəlif dinlər (o cümlədən iudaizm)','Yalnız xristianlıq','Yalnız buddizm','Heç bir din'],1),
+('tarix7-turk-dovletleri#9','tarix','tarix-7-turk-dovletleri',3,1,'Avar xaqanlığı hansı ərazidə yaranmışdı?','Avarlar Mərkəzi Avropada məskunlaşmışdılar.',array['Mərkəzi Avropada','Hindistanda','Misirdə','Yaponiyada'],1),
+('tarix7-turk-dovletleri#10','tarix','tarix-7-turk-dovletleri',3,1,'Bulqarların bir qolu Volqa boyunda hansı dövləti yaratdı?','Volqa Bulqarıstanı ticarət mərkəzi kimi tanınırdı.',array['Volqa Bulqarıstanını','Frank dövlətini','Xilafəti','Bizansı'],1),
+('tarix7-turk-dovletleri#11','tarix','tarix-7-turk-dovletleri',3,1,'Uyğur xaqanlığı hansı dövlətin varisi kimi yarandı?','Göytürk xaqanlığının süqutundan sonra uyğurlar hakimiyyətə gəldi.',array['Göytürk xaqanlığının','Roma imperiyasının','Misir fironluğunun','Xilafətin'],1),
+('tarix7-turk-dovletleri#12','tarix','tarix-7-turk-dovletleri',1,1,'Türk dövlətlərində hökmdar hansı titul daşıyırdı?','Türk hökmdarları xaqan titulu daşıyırdı.',array['Xaqan','Firon','Konsul','Papa'],1),
+('tarix7-turk-dovletleri#13','tarix','tarix-7-turk-dovletleri',3,1,'Oğuz dövləti hansı çayın hövzəsində yerləşirdi?','Oğuzlar Sırdərya boyunda məskunlaşmışdılar.',array['Sırdərya boyunda','Nil boyunda','Reyn boyunda','Amazon boyunda'],1),
+('tarix7-turk-dovletleri#14','tarix','tarix-7-turk-dovletleri',2,1,'Qaraxanlı dövlətində hansı din qəbul edildi?','Qaraxanlılar islamı qəbul edən ilk türk dövlətlərindəndir.',array['İslam','Buddizm yalnız','Şamanizm yalnız','Katoliklik'],1),
+('tarix7-turk-dovletleri#15','tarix','tarix-7-turk-dovletleri',3,1,'Qəznəvi dövlətinin ən məşhur hökmdarı kim idi?','Sultan Mahmud Qəznəvi dövləti qüdrətli imperiyaya çevirdi.',array['Sultan Mahmud Qəznəli','Attila','Osman bəy','Böyük Karl'],1),
+('tarix7-turk-dovletleri#16','tarix','tarix-7-turk-dovletleri',3,1,'Samani dövləti hansı ərazidə mövcud olmuşdur?','Samanilər Orta Asiya və Xorasanda hökmranlıq edirdilər.',array['Orta Asiyada və Xorasanda','İspaniyada','Britaniyada','Şimali Afrikada'],1),
+('tarix7-turk-dovletleri#17','tarix','tarix-7-turk-dovletleri',3,1,'Türk xalqlarının qədim yazısı necə adlanır?','Qədim türklər runik (Orxon) yazısından istifadə edirdilər.',array['Runik (Orxon) yazısı','Heroqlif','Latın yazısı','Mixi yazı'],1),
+('tarix7-turk-dovletleri#18','tarix','tarix-7-turk-dovletleri',3,1,'Xəzər xaqanlığı hansı dövlətlə uzun müharibələr aparırdı?','Xəzər-ərəb müharibələri yüz ilə yaxın davam etmişdir.',array['Ərəb xilafəti ilə','Yaponiya ilə','İngiltərə ilə','Hindistanla'],1),
+('tarix7-turk-dovletleri#19','tarix','tarix-7-turk-dovletleri',3,1,'«Türk» sözü ilk dəfə hansı dövlətin adında rəsmi işlənmişdir?','Göytürk xaqanlığı adında türk sözü rəsmi işlənib.',array['Göytürk xaqanlığında','Roma imperiyasında','Frank dövlətində','Bizansda'],1),
+('tarix7-turk-dovletleri#20','tarix','tarix-7-turk-dovletleri',3,1,'Xalqların böyük köçü nəticəsində Avropada hansı proses sürətləndi?','Köç Qərbi Roma imperiyasının süqutunu sürətləndirdi.',array['Roma imperiyasının süqutu','Kitab çapının kəşfi','Amerikanın kəşfi','Xaç yürüşləri'],1),
+('tarix7-ereb-xilafeti#1','tarix','tarix-7-ereb-xilafeti',2,2,'Ərəb xilafətinin ilk paytaxtı hansı şəhər idi?','İlk dövrdə xilafətin mərkəzi Mədinə idi.',array['Mədinə','Bağdad','Dəməşq','Qahirə'],1),
+('tarix7-ereb-xilafeti#2','tarix','tarix-7-ereb-xilafeti',3,2,'Əməvilər sülaləsi dövründə xilafətin paytaxtı hansı şəhər idi?','Əməvilər paytaxtı Dəməşqə köçürdülər.',array['Dəməşq','Məkkə','İstanbul','Kordova'],1),
+('tarix7-ereb-xilafeti#3','tarix','tarix-7-ereb-xilafeti',2,2,'Məhəmməd peyğəmbərdən sonra müsəlmanlara rəhbərlik edənlər necə adlanırdı?','Dövlətə xəlifələr başçılıq edirdi.',array['Xəlifələr','Fironlar','Xaqanlar','İmperatorlar'],1),
+('tarix7-ereb-xilafeti#4','tarix','tarix-7-ereb-xilafeti',2,2,'İslamın əsas şərtlərindən biri hansıdır?','Namaz qılmaq islamın beş şərtindən biridir.',array['Namaz qılmaq','Şəkil çəkmək','Dəniz səyahəti','İdman etmək'],1),
+('tarix7-ereb-xilafeti#5','tarix','tarix-7-ereb-xilafeti',2,2,'Ərəb xilafəti hansı üç qitədə torpaqlara sahib idi?','Xilafət Asiya, Afrika və Avropada torpaqlar tuturdu.',array['Asiya, Afrika, Avropa','Yalnız Asiyada','Amerika və Avstraliyada','Yalnız Afrikada'],1),
+('tarix7-ereb-xilafeti#6','tarix','tarix-7-ereb-xilafeti',3,2,'Ərəblərin İspaniyada yaratdığı dövlət necə adlanırdı?','Pireney yarımadasında Kordova əmirliyi yarandı.',array['Kordova əmirliyi','Frank krallığı','Papalıq','Qızıl Orda'],1),
+('tarix7-ereb-xilafeti#7','tarix','tarix-7-ereb-xilafeti',3,2,'Abbasilər dövründə Bağdadda fəaliyyət göstərən elm mərkəzi necə adlanırdı?','«Hikmət evi» tərcümə və elm mərkəzi idi.',array['«Hikmət evi»','«Akademiya»','«Lisey»','«Universitet»'],1),
+('tarix7-ereb-xilafeti#8','tarix','tarix-7-ereb-xilafeti',2,2,'Ərəb alimləri hansı elm sahələrində xüsusilə irəli getmişdilər?','Riyaziyyat, tibb və astronomiya yüksək inkişaf etdi.',array['Riyaziyyat, tibb, astronomiya','Yalnız musiqidə','Yalnız rəssamlıqda','Heç bir sahədə'],1),
+('tarix7-ereb-xilafeti#9','tarix','tarix-7-ereb-xilafeti',2,2,'Müsəlmanların Məkkəyə ziyarəti necə adlanır?','Məkkə ziyarəti həcc adlanır.',array['Həcc','Hicrət','Cizyə','Xərac'],1),
+('tarix7-ereb-xilafeti#10','tarix','tarix-7-ereb-xilafeti',3,2,'«Ərəb rəqəmləri» adlanan rəqəmlər əslində haradan götürülmüşdür?','Bu rəqəmləri ərəblər Hindistandan mənimsəyib yaymışlar.',array['Hindistandan','Romadan','Misirdən','Çindən'],1),
+('tarix7-ereb-xilafeti#11','tarix','tarix-7-ereb-xilafeti',3,2,'İslam təqvimi hansı hadisədən başlanır?','Təqvim hicrətdən - 622-ci ildən hesablanır.',array['Hicrətdən','Roma süqutundan','Hz. İsanın doğumundan','Xilafətin süqutundan'],1),
+('tarix7-ereb-xilafeti#12','tarix','tarix-7-ereb-xilafeti',3,2,'Xilafət ordusunun əsas zərbə qüvvəsi nə idi?','Yüngül silahlı süvari dəstələri əsas qüvvə idi.',array['Süvari dəstələri','Fil qoşunları','Donanma yalnız','Toplar'],1),
+('tarix7-ereb-xilafeti#13','tarix','tarix-7-ereb-xilafeti',3,2,'Ərəbdilli elmi əsərlər Avropaya hansı yolla çatırdı?','Əsərlər latın dilinə tərcümələr vasitəsilə yayılırdı.',array['Tərcümələr vasitəsilə','Televiziya ilə','Qəzetlərlə','Çatmırdı'],1),
+('tarix7-ereb-xilafeti#14','tarix','tarix-7-ereb-xilafeti',3,2,'732-ci ildə ərəblərin Qərbi Avropada irəliləyişini hansı döyüş dayandırdı?','Puatye döyüşündə franklar ərəbləri məğlub etdi.',array['Puatye döyüşü','Malazgird döyüşü','Ankara döyüşü','Kulikovo döyüşü'],1),
+('tarix7-ereb-xilafeti#15','tarix','tarix-7-ereb-xilafeti',3,2,'Əməvilərdən sonra xilafətdə hakimiyyətə hansı sülalə gəldi?','750-ci ildə hakimiyyət Abbasilərə keçdi.',array['Abbasilər','Səfəvilər','Osmanlılar','Səlcuqlar'],1),
+('tarix7-ereb-xilafeti#16','tarix','tarix-7-ereb-xilafeti',3,2,'Xilafətdə torpaq vergisi necə adlanırdı?','Torpaqdan xərac vergisi alınırdı.',array['Xərac','Gömrük','Aksiz','Töycü'],1),
+('tarix7-ereb-xilafeti#17','tarix','tarix-7-ereb-xilafeti',2,2,'Məscidlərin yanında fəaliyyət göstərən təhsil ocaqları necə adlanırdı?','Mədrəsələrdə dini və dünyəvi elmlər öyrədilirdi.',array['Mədrəsələr','Universitetlər','Liseylər','Gimnaziyalar'],1),
+('tarix7-ereb-xilafeti#18','tarix','tarix-7-ereb-xilafeti',3,2,'Xilafətin zəifləməsinin səbəblərindən biri nə idi?','Yerli sülalələr mərkəzdən ayrılıb müstəqilləşirdi.',array['Yerli sülalələrin müstəqilləşməsi','Əhalinin artması','Elmin inkişafı','Ticarətin genişlənməsi'],1),
+('tarix7-ereb-xilafeti#19','tarix','tarix-7-ereb-xilafeti',3,2,'Ərəb səyyahları və tacirləri hansı elmin inkişafına böyük töhfə verdilər?','Səyahətlər coğrafiya elmini zənginləşdirdi.',array['Coğrafiya elminə','Genetikaya','Kimyaya yalnız','İnformatikaya'],1),
+('tarix7-ereb-xilafeti#20','tarix','tarix-7-ereb-xilafeti',2,2,'Qurani-Kərim hansı dildə nazil olmuşdur?','Müqəddəs kitab ərəb dilindədir.',array['Ərəb dilində','Latın dilində','Fars dilində','Yunan dilində'],1),
+('tarix7-selcuq-osmanli#1','tarix','tarix-7-selcuq-osmanli',2,3,'Səlcuqlar hansı türk tayfa birliyindən çıxmışlar?','Səlcuqlar oğuzların qınıq boyundan idilər.',array['Oğuzlardan','Uyğurlardan','Bulqarlardan','Avarlardan'],1),
+('tarix7-selcuq-osmanli#2','tarix','tarix-7-selcuq-osmanli',2,3,'Malazgird döyüşündə Səlcuq ordusuna kim başçılıq edirdi?','1071-ci ildə Alp Arslan Bizansı məğlub etdi.',array['Alp Arslan','Osman bəy','Attila','Çingiz xan'],1),
+('tarix7-selcuq-osmanli#3','tarix','tarix-7-selcuq-osmanli',3,3,'Böyük Səlcuq dövlətinin məşhur vəziri kim idi?','Nizamülmülk dövlət quruculuğunda böyük rol oynadı.',array['Nizamülmülk','Sokrat','Aristotel','Marko Polo'],1),
+('tarix7-selcuq-osmanli#4','tarix','tarix-7-selcuq-osmanli',3,3,'Nizamiyyə mədrəsələri hansı dövlətdə yaradılmışdı?','Bu mədrəsələr Səlcuq dövlətində açılmışdı.',array['Səlcuq dövlətində','Frank dövlətində','Bizansda','İngiltərədə'],1),
+('tarix7-selcuq-osmanli#5','tarix','tarix-7-selcuq-osmanli',3,3,'Çingiz xanın əsl adı nə idi?','Onun əsl adı Temuçin idi.',array['Temuçin','Batı','Toxtamış','Bumın'],1),
+('tarix7-selcuq-osmanli#6','tarix','tarix-7-selcuq-osmanli',3,3,'Monqol dövlətinin qanunlar toplusu necə adlanırdı?','Çingiz xanın qanunları «Yasa» adlanırdı.',array['«Yasa»','«Konstitusiya»','«Xartiya»','«Avesta»'],1),
+('tarix7-selcuq-osmanli#7','tarix','tarix-7-selcuq-osmanli',3,3,'Qızıl Ordanın paytaxtı hansı şəhər idi?','Dövlətin mərkəzi Volqa üzərindəki Saray şəhəri idi.',array['Saray','Səmərqənd','Moskva','Dehli'],1),
+('tarix7-selcuq-osmanli#8','tarix','tarix-7-selcuq-osmanli',3,3,'1380-ci ildə Kulikovo döyüşündə monqollara qarşı kim qalib gəldi?','Moskva knyazı Dmitri Donskoy qələbə qazandı.',array['Moskva knyazı Dmitri','Böyük Karl','Vilhelm Fateh','Yustinian'],1),
+('tarix7-selcuq-osmanli#9','tarix','tarix-7-selcuq-osmanli',2,3,'Osmanlı ordusunun seçmə piyada hissələri necə adlanırdı?','Yeniçərilər sultanın daimi qoşunu idi.',array['Yeniçərilər','Cəngavərlər','Leqionerlər','Qladiatorlar'],1),
+('tarix7-selcuq-osmanli#10','tarix','tarix-7-selcuq-osmanli',3,3,'1402-ci il Ankara döyüşündə hansı hökmdarlar qarşılaşdı?','Teymur İldırım Bəyazidi məğlub etdi.',array['Teymur və İldırım Bəyazid','Attila və Karl','Çingiz xan və Osman','Alp Arslan və Roman Diogen'],1),
+('tarix7-selcuq-osmanli#11','tarix','tarix-7-selcuq-osmanli',3,3,'Dehli sultanlığı hansı ölkənin ərazisində yaranmışdı?','Sultanlıq Şimali Hindistanda qurulmuşdu.',array['Hindistanda','Misirdə','İspaniyada','İranda'],1),
+('tarix7-selcuq-osmanli#12','tarix','tarix-7-selcuq-osmanli',3,3,'Böyük Moğol dövlətinin banisi kimdir?','Dövləti Teymurun nəslindən olan Babur qurdu.',array['Babur','Əkbər şah','Mahmud Qəznəli','Nadir şah'],1),
+('tarix7-selcuq-osmanli#13','tarix','tarix-7-selcuq-osmanli',3,3,'Osmanlı dövlətində sultandan sonra ən yüksək vəzifə hansı idi?','Dövlət işlərinə sədrəzəm (baş vəzir) baxırdı.',array['Sədrəzəm (baş vəzir)','Konsul','Senator','Xaqan'],1),
+('tarix7-selcuq-osmanli#14','tarix','tarix-7-selcuq-osmanli',3,3,'Teymuri hökmdarı Uluqbəy hansı elm sahəsi ilə məşğul olurdu?','Uluqbəy Səmərqənddə rəsədxana qurmuş astronom idi.',array['Astronomiya ilə','Dənizçiliklə','Kitab çapı ilə','Kimyagərliklə'],1),
+('tarix7-selcuq-osmanli#15','tarix','tarix-7-selcuq-osmanli',3,3,'Monqol imperiyası Çingiz xanın ölümündən sonra necə idarə olundu?','İmperiya oğulları arasında uluslara bölündü.',array['Uluslara bölündü','Respublika oldu','Satıldı','Dəyişməz qaldı'],1),
+('tarix7-selcuq-osmanli#16','tarix','tarix-7-selcuq-osmanli',3,3,'Osmanlıların Avropada ilk geniş fəthləri hansı ərazidə oldu?','Osmanlılar Balkanlarda möhkəmləndilər.',array['Balkanlarda','Skandinaviyada','İrlandiyada','Portuqaliyada'],1),
+('tarix7-selcuq-osmanli#17','tarix','tarix-7-selcuq-osmanli',3,3,'Böyük Səlcuq dövləti hansı əsrdə zəifləyib parçalandı?','XII əsrdə dövlət ayrı-ayrı sultanlıqlara parçalandı.',array['XII əsrdə','XX əsrdə','V əsrdə','XVIII əsrdə'],1),
+('tarix7-selcuq-osmanli#18','tarix','tarix-7-selcuq-osmanli',3,3,'Monqol yürüşləri hansı əraziləri xüsusilə viran qoydu?','Orta Asiya və Yaxın Şərq şəhərləri dağıdıldı.',array['Orta Asiya və Yaxın Şərqi','Avstraliyanı','Skandinaviyanı','Amerikanı'],1),
+('tarix7-selcuq-osmanli#19','tarix','tarix-7-selcuq-osmanli',3,3,'Osmanlı dövlətində torpaqlar hərbçilərə hansı şərtlə verilirdi?','Torpaq hərbi xidmət müqabilində (timar) verilirdi.',array['Hərbi xidmət müqabilində (timar)','Pulsuz hədiyyə kimi','Satış yolu ilə yalnız','Verilmirdi'],1),
+('tarix7-selcuq-osmanli#20','tarix','tarix-7-selcuq-osmanli',2,3,'Konstantinopolun fəthindən sonra şəhər hansı adla tanınmağa başladı?','Şəhər İstanbul adlandırıldı və paytaxt oldu.',array['İstanbul','Ankara','Roma','Afina'],1),
+('tarix7-avropa#1','tarix','tarix-7-avropa',2,4,'Feodal cəmiyyətinin əsas iki təbəqəsi kimlər idi?','Cəmiyyət feodallardan və asılı kəndlilərdən ibarət idi.',array['Feodallar və asılı kəndlilər','Fəhlələr və mühəndislər','Tacirlər və dənizçilər','Alimlər və tələbələr'],1),
+('tarix7-avropa#2','tarix','tarix-7-avropa',3,4,'Böyük feodala xidmət edən kiçik torpaq sahibi necə adlanırdı?','Xidmət müqabilində torpaq alan feodal vassal adlanırdı.',array['Vassal','Senator','Xəlifə','Konsul'],1),
+('tarix7-avropa#3','tarix','tarix-7-avropa',3,4,'1066-cı ildə İngiltərəni fəth edən sərkərdə kim idi?','Normandiya hersoqu Vilhelm Fateh İngiltərəni tutdu.',array['Vilhelm Fateh','Böyük Karl','Attila','Sezar'],1),
+('tarix7-avropa#4','tarix','tarix-7-avropa',3,4,'1215-ci ildə İngiltərədə imzalanan məşhur sənəd hansıdır?','Kral Böyük azadlıqlar xartiyasını imzalamağa məcbur oldu.',array['Böyük azadlıqlar xartiyası','Türkmənçay müqaviləsi','Roma hüququ','Yasa'],1),
+('tarix7-avropa#5','tarix','tarix-7-avropa',2,4,'İngiltərədə yaranan silki nümayəndəlik orqanı necə adlanırdı?','XIII əsrdə İngiltərədə parlament yarandı.',array['Parlament','Senat','Məclis-i şura','Veçe'],1),
+('tarix7-avropa#6','tarix','tarix-7-avropa',3,4,'Fransada silki nümayəndəlik orqanı necə adlanırdı?','Fransada Baş ştatlar çağırılırdı.',array['Baş ştatlar','Duma','Konqres','Xalq məclisi'],1),
+('tarix7-avropa#7','tarix','tarix-7-avropa',3,4,'Yüzillik müharibədə fransızlara qələbələr qazandıran «Orlean qızı» kim idi?','Janna Dark Orleanı mühasirədən azad etdi.',array['Janna Dark','Kleopatra','Yelizaveta','Mariya Tereza'],1),
+('tarix7-avropa#8','tarix','tarix-7-avropa',2,4,'Xaçlı yürüşlərinin əsas təşkilatçısı kim idi?','Yürüşlərə Roma papası çağırış edirdi.',array['Roma papası','Çin imperatoru','Monqol xanı','Rus knyazı'],1),
+('tarix7-avropa#9','tarix','tarix-7-avropa',3,4,'Xaçlıların Şərqdə yaratdığı dövlətlərdən biri hansıdır?','Birinci yürüşdən sonra Yerusəlim krallığı quruldu.',array['Yerusəlim krallığı','Qızıl Orda','Xilafət','Atropatena'],1),
+('tarix7-avropa#10','tarix','tarix-7-avropa',3,4,'Reformasiya nəticəsində yaranan yeni xristian cərəyanı necə adlanır?','Katolik kilsəsindən ayrılanlar protestantlar adlandı.',array['Protestantlıq','Pravoslavlıq','Buddizm','Zərdüştilik'],1),
+('tarix7-avropa#11','tarix','tarix-7-avropa',3,4,'Hindistana dəniz yolunu açan səyyah kimdir?','Vasko da Qama Afrikanı dolanaraq Hindistana çatdı.',array['Vasko da Qama','Kolumb','Magellan','Marko Polo'],1),
+('tarix7-avropa#12','tarix','tarix-7-avropa',3,4,'Dünya səyahətini ilk dəfə başa çatdıran ekspedisiyaya kim başçılıq etmişdi?','Magellanın ekspedisiyası Yerin kürə şəklində olduğunu sübut etdi.',array['Fernan Magellan','Vasko da Qama','Kolumb','Ceyms Kuk'],1),
+('tarix7-avropa#13','tarix','tarix-7-avropa',3,4,'İntibah dövrünün dahi rəssamı, «Mona Liza»nın müəllifi kimdir?','Leonardo da Vinçi İntibahın ən böyük nümayəndələrindəndir.',array['Leonardo da Vinçi','Rafael yalnız','Höte','Bethoven'],1),
+('tarix7-avropa#14','tarix','tarix-7-avropa',2,4,'Orta əsr Avropasında ali təhsil mərkəzləri hansılar idi?','İlk universitetlər Bolonya, Paris və Oksfordda yarandı.',array['Universitetlər','Rəsədxanalar','Kitab mağazaları','Teatrlar'],1),
+('tarix7-avropa#15','tarix','tarix-7-avropa',3,4,'Barıt, kağız və kompas Avropaya haradan gəlmişdi?','Bu ixtiralar Şərqdən (Çindən) gətirilmişdi.',array['Şərqdən (Çindən)','Amerikadan','Avstraliyadan','Afrikadan'],1),
+('tarix7-avropa#16','tarix','tarix-7-avropa',2,4,'Feodal qəsrləri hansı məqsədlə tikilirdi?','Qalın divarlı qəsrlər müdafiə üçün idi.',array['Müdafiə məqsədilə','Ticarət üçün','Teatr üçün','Anbar üçün yalnız'],1),
+('tarix7-avropa#17','tarix','tarix-7-avropa',3,4,'Orta əsr şəhərləri kimlərdən asılılıqdan azad olmağa çalışırdı?','Şəhərlər senyorların hakimiyyətindən qurtulmaq istəyirdi.',array['Senyorlardan','Tələbələrdən','Sənətkarlardan','Tacirlərdən'],1),
+('tarix7-avropa#18','tarix','tarix-7-avropa',3,4,'Bizansın ən məşhur məbədi hansı idi?','Konstantinopoldakı Müqəddəs Sofiya məbədi idi.',array['Müqəddəs Sofiya məbədi','Kəbə','Panteon','Notr-Dam'],1),
+('tarix7-avropa#19','tarix','tarix-7-avropa',3,4,'Şərqi slavyanların yaratdığı dövlət hansı idi?','Şərqi slavyanlar Kiyev Rus dövlətini yaratdılar.',array['Kiyev Rus dövləti','Frank dövləti','Xəzər xaqanlığı','Din ölkəsi'],1),
+('tarix7-avropa#20','tarix','tarix-7-avropa',3,4,'Böyük coğrafi kəşflərin əsas səbəbi nə idi?','Avropalılar Şərqə yeni ticarət yolları axtarırdılar.',array['Şərqə yeni ticarət yolları axtarışı','İdman marağı','Təsadüf','Kilsənin qadağası'],1)
 ),
 ins as (
   insert into public.questions
@@ -484,8 +564,8 @@ begin
    where owner_type = 'platform'
      and (ext_key like 'az7-%' or ext_key like 'ing7-%'
           or ext_key like 'inf7-%' or ext_key like 'tarix7-%');
-  if n <> 420 then
-    raise exception 'sinif7 suallari: 420 gozlenilirdi, % tapildi', n;
+  if n <> 500 then
+    raise exception 'sinif7 suallari: 500 gozlenilirdi, % tapildi', n;
   end if;
   select count(*) into k from public.questions q
    where (q.ext_key like 'az7-%' or q.ext_key like 'ing7-%'
@@ -500,8 +580,8 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'az7-%' or ext_key like 'ing7-%'
       or ext_key like 'inf7-%' or ext_key like 'tarix7-%';
-  if k <> 21 then
-    raise exception 'movzu sayi 21 deyil: %', k;
+  if k <> 25 then
+    raise exception 'movzu sayi 25 deyil: %', k;
   end if;
-  raise notice '7-ci sinif banki: % sual, 21 movzu (az, ing, inf, tarix).', n;
+  raise notice '7-ci sinif banki: % sual, 25 movzu (az, ing, inf, tarix).', n;
 end $$;

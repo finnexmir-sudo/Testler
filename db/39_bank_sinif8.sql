@@ -6,7 +6,7 @@
 --      python3 tools/sinif8.py
 --
 --  Az dili 8 + Ingilis dili 6 + Informatika 6 + Tarix 4
---  = 24 movzu x 20 = 480.  ext_key: az8-/ing8-/inf8-/tarix8-...
+--  = 26 movzu x 20 = 520.  ext_key: az8-/ing8-/inf8-/tarix8-...
 --  ON SERT: 37_movzular_orta8.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
@@ -511,7 +511,47 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('tarix8-xix#17','tarix','tarix-8-xix',3,4,'1826–1828-ci illər müharibəsi hansı müqavilə ilə yekunlaşdı?','Türkmənçay müqaviləsi ilə.',array['Türkmənçay','Gülüstan','Amasiya','İstanbul'],1),
 ('tarix8-xix#18','tarix','tarix-8-xix',3,4,'İşğaldan sonra xanlıqların yerində hansı inzibati vahidlər yaradıldı?','Əyalət və dairələr yaradıldı.',array['Əyalət və dairələr','Yeni xanlıqlar','Respublikalar','Krallıqlar'],1),
 ('tarix8-xix#19','tarix','tarix-8-xix',3,4,'Türkmənçay müqaviləsindən sonra hansı proses sürətləndi?','Ermənilərin bölgəyə köçürülməsi.',array['Ermənilərin köçürülməsi','Xanlıqların bərpası','Sərhədlərin açılması','Vergilərin ləğvi'],1),
-('tarix8-xix#20','tarix','tarix-8-xix',3,4,'Car-Balakən camaatlığı Azərbaycanın hansı bölgəsində yerləşirdi?','Şimal-qərbində.',array['Şimal-qərbdə','Cənubda','Abşeronda','Muğanda'],1)
+('tarix8-xix#20','tarix','tarix-8-xix',3,4,'Car-Balakən camaatlığı Azərbaycanın hansı bölgəsində yerləşirdi?','Şimal-qərbində.',array['Şimal-qərbdə','Cənubda','Abşeronda','Muğanda'],1),
+('tarix8-muqavileler#1','tarix','tarix-8-muqavileler',2,4,'Gülüstan müqaviləsini imzalayan dövlətlər hansılardır?','Müqavilə Rusiya ilə Qacarlar İranı arasında bağlandı.',array['Rusiya və Qacarlar İranı','Osmanlı və Səfəvilər','İngiltərə və Fransa','Rusiya və Osmanlı'],1),
+('tarix8-muqavileler#2','tarix','tarix-8-muqavileler',3,4,'Gülüstan müqaviləsinə görə hansı xanlıqlar hələlik İranın əlində qaldı?','İrəvan və Naxçıvan xanlıqları İranın tərkibində qaldı.',array['İrəvan və Naxçıvan xanlıqları','Bakı və Quba xanlıqları','Şəki və Şirvan xanlıqları','Heç biri'],1),
+('tarix8-muqavileler#3','tarix','tarix-8-muqavileler',3,4,'Türkmənçay müqaviləsi hansı yaşayış məntəqəsində imzalanmışdır?','Müqavilə Təbriz yaxınlığındakı Türkmənçay kəndində bağlandı.',array['Türkmənçay kəndində','Gülüstan kəndində','Tiflisdə','Tehranda'],1),
+('tarix8-muqavileler#4','tarix','tarix-8-muqavileler',3,4,'Türkmənçay müqaviləsinə görə İran Rusiyaya nə qədər təzminat ödəməli idi?','İran 20 milyon manat gümüş təzminat ödəməli oldu.',array['20 milyon manat gümüş','1 min qızıl','Heç nə','100 milyon kağız pul'],1),
+('tarix8-muqavileler#5','tarix','tarix-8-muqavileler',3,4,'Müqavilələrə görə Xəzər dənizində hərbi donanma saxlamaq hüququ kimə verildi?','Bu hüquq yalnız Rusiyaya məxsus oldu.',array['Yalnız Rusiyaya','Yalnız İrana','Hər iki dövlətə','Osmanlıya'],1),
+('tarix8-muqavileler#6','tarix','tarix-8-muqavileler',3,4,'Türkmənçay müqaviləsinin hazırlanmasında iştirak edən rus yazıçısı-diplomat kim idi?','«Ağıldan bəla» əsərinin müəllifi Aleksandr Qriboyedov idi.',array['Aleksandr Qriboyedov','Lev Tolstoy','Aleksandr Puşkin','Anton Çexov'],1),
+('tarix8-muqavileler#7','tarix','tarix-8-muqavileler',2,4,'İkinci Rusiya-İran müharibəsi hansı illərdə baş verdi?','Müharibə 1826-1828-ci illəri əhatə etdi.',array['1826–1828','1804–1813','1914–1918','1700–1721'],1),
+('tarix8-muqavileler#8','tarix','tarix-8-muqavileler',3,4,'İkinci müharibədə İran qoşunlarına kim başçılıq edirdi?','Qoşunlara vəliəhd Abbas Mirzə komandanlıq edirdi.',array['Abbas Mirzə','Nadir şah','Şah İsmayıl','Ağa Məhəmməd xan'],1),
+('tarix8-muqavileler#9','tarix','tarix-8-muqavileler',3,4,'1827-ci ildə rus qoşunları hansı qalanı ələ keçirdi?','Uzun mühasirədən sonra İrəvan qalası süqut etdi.',array['İrəvan qalasını','Bakı qalasını','Gəncə qalasını','Dərbənd qalasını'],1),
+('tarix8-muqavileler#10','tarix','tarix-8-muqavileler',3,4,'İkinci Rusiya-İran müharibəsində rus ordusuna hansı general komandanlıq edirdi?','Orduya general İvan Paskeviç başçılıq edirdi.',array['İvan Paskeviç','Mixail Kutuzov','Aleksandr Suvorov','Georgi Jukov'],1),
+('tarix8-muqavileler#11','tarix','tarix-8-muqavileler',2,4,'Türkmənçay müqaviləsindən sonra İrəvan və Naxçıvan xanlıqları hansı dövlətə keçdi?','Bu xanlıqlar Rusiyaya birləşdirildi.',array['Rusiyaya','Osmanlıya','İranda qaldı','İngiltərəyə'],1),
+('tarix8-muqavileler#12','tarix','tarix-8-muqavileler',2,4,'Bu iki müqavilə Azərbaycan xalqı üçün hansı nəticəyə gətirdi?','Xalq və onun torpaqları iki dövlət arasında bölündü.',array['Xalq və torpaqlar iki yerə bölündü','Tam müstəqillik verdi','Vahid dövlət yaratdı','Heç nə dəyişmədi'],1),
+('tarix8-muqavileler#13','tarix','tarix-8-muqavileler',3,4,'Şəmkir və Gəncə yaxınlığındakı döyüşlər hansı müharibənin gedişində olub?','Bu döyüşlər 1826-cı ildə - ikinci müharibədə baş verdi.',array['İkinci Rusiya-İran müharibəsinin','Çaldıran savaşının','Birinci dünya müharibəsinin','Krım müharibəsinin'],1),
+('tarix8-muqavileler#14','tarix','tarix-8-muqavileler',3,4,'Türkmənçay müqaviləsinin 15-ci maddəsi nəyə şərait yaradırdı?','Maddə ermənilərin İrandan köçürülməsinə imkan verirdi.',array['Ermənilərin köçürülməsinə','Sərhədlərin açılmasına','Vergilərin silinməsinə','Ordunun buraxılmasına'],1),
+('tarix8-muqavileler#15','tarix','tarix-8-muqavileler',3,4,'Köçürülən ermənilər əsasən hansı ərazilərdə yerləşdirildi?','Onlar İrəvan, Qarabağ və Naxçıvan torpaqlarında yerləşdirildi.',array['İrəvan, Qarabağ və Naxçıvanda','Sibirdə','Volqaboyunda','Krımda'],1),
+('tarix8-muqavileler#16','tarix','tarix-8-muqavileler',3,4,'Gülüstan müqaviləsi ilə Rusiyaya keçən xanlıqlardan biri hansıdır?','Bakı xanlığı da Rusiyaya keçən xanlıqlardan idi.',array['Bakı xanlığı','İrəvan xanlığı','Naxçıvan xanlığı','Təbriz xanlığı'],1),
+('tarix8-muqavileler#17','tarix','tarix-8-muqavileler',3,4,'Müqavilələrə görə Xəzərdə ticarət gəmiçiliyi hüququ necə müəyyənləşdi?','Ticarət gəmiçiliyi hər iki tərəfə icazəli idi.',array['Hər iki tərəfə verildi','Yalnız İrana verildi','Tam qadağan edildi','Osmanlıya verildi'],1),
+('tarix8-muqavileler#18','tarix','tarix-8-muqavileler',2,4,'Gülüstan və Türkmənçay müqavilələri tarixdə necə qiymətləndirilir?','Onlar xalqın iradəsi nəzərə alınmadan bağlanmış ədalətsiz bölgü müqavilələridir.',array['Ədalətsiz bölgü müqavilələri kimi','Bərabərhüquqlu saziş kimi','Ticarət sazişi kimi','Sülh bayramı kimi'],1),
+('tarix8-muqavileler#19','tarix','tarix-8-muqavileler',3,4,'Türkmənçay müqaviləsi neçə maddədən ibarət idi?','Müqavilə 16 maddədən ibarət idi.',array['16 maddədən','2 maddədən','100 maddədən','55 maddədən'],1),
+('tarix8-muqavileler#20','tarix','tarix-8-muqavileler',2,4,'Araz çayı sərhəd olduqdan sonra Azərbaycanın şimal hissəsi necə adlanmağa başladı?','Rusiyaya qatılan hissə Şimali Azərbaycan adlanır.',array['Şimali Azərbaycan','Cənubi Azərbaycan','Qərbi İran','Kiçik Asiya'],1),
+('tarix8-medeniyyet#1','tarix','tarix-8-medeniyyet',2,4,'XVII əsrdə Azərbaycan xalq ədəbiyyatında hansı sənət xüsusilə çiçəkləndi?','Aşıq poeziyası xalq arasında geniş yayıldı.',array['Aşıq poeziyası','Roman janrı','Dram teatrı','Opera'],1),
+('tarix8-medeniyyet#2','tarix','tarix-8-medeniyyet',3,4,'«Koroğlu» dastanı hansı hadisələrlə səsləşir?','Dastan Cəlalilər hərəkatı dövrünün hadisələri ilə bağlıdır.',array['Cəlalilər hərəkatı ilə','Kosmik uçuşlarla','Neft sənayesi ilə','Dəmir yolu tikintisi ilə'],1),
+('tarix8-medeniyyet#3','tarix','tarix-8-medeniyyet',3,4,'XVII əsrdə Təbriz hansı incəsənət sahəsi ilə məşhur idi?','Təbriz miniatür sənətinin mərkəzlərindən idi.',array['Miniatür sənəti ilə','Kino ilə','Fotoqrafiya ilə','Balet ilə'],1),
+('tarix8-medeniyyet#4','tarix','tarix-8-medeniyyet',2,4,'Səfəvilər dövrünün memarlıq abidələrinə misal hansıdır?','Bu dövrdə məscidlər və karvansaralar tikilirdi.',array['Məscid və karvansaralar','Dəmir yolu vağzalları','Göydələnlər','Metro stansiyaları'],1),
+('tarix8-medeniyyet#5','tarix','tarix-8-medeniyyet',2,4,'Şair Molla Pənah Vaqif hansı xanlıqda vəzir olmuşdur?','Vaqif Qarabağ xanı İbrahimxəlil xanın vəziri idi.',array['Qarabağ xanlığında','Quba xanlığında','Şəki xanlığında','Bakı xanlığında'],1),
+('tarix8-medeniyyet#6','tarix','tarix-8-medeniyyet',2,4,'Molla Vəli Vidadi kim idi?','Vidadi XVIII əsrin görkəmli şairi idi.',array['Şair','Sərkərdə','Memar','Həkim'],1),
+('tarix8-medeniyyet#7','tarix','tarix-8-medeniyyet',2,4,'XVIII əsrdə xanlıq mərkəzlərində hansı tikililər ucaldılırdı?','Xanlıq paytaxtlarında xan sarayları tikilirdi.',array['Xan sarayları','Fabriklər','Universitetlər','Stadionlar'],1),
+('tarix8-medeniyyet#8','tarix','tarix-8-medeniyyet',2,4,'Şəki xan sarayı hansı əsrdə tikilmişdir?','Saray XVIII əsrdə inşa olunmuşdur.',array['XVIII əsrdə','V əsrdə','XX əsrdə','X əsrdə'],1),
+('tarix8-medeniyyet#9','tarix','tarix-8-medeniyyet',2,4,'Pənahəli xanın tikdirdiyi qala-şəhər hansıdır?','Qarabağda Şuşa qalası salındı.',array['Şuşa','Bakı','Dərbənd','Təbriz'],1),
+('tarix8-medeniyyet#10','tarix','tarix-8-medeniyyet',3,4,'XVIII əsrdə Azərbaycanda elmin hansı sahələri üstün idi?','Tibb və astronomiya sahəsində alimlər fəaliyyət göstərirdi.',array['Tibb və astronomiya','Genetika','İnformatika','Aviasiya'],1),
+('tarix8-medeniyyet#11','tarix','tarix-8-medeniyyet',1,4,'Aşıq sənətində istifadə olunan əsas musiqi aləti hansıdır?','Aşıqlar sazla ifa edirlər.',array['Saz','Piano','Skripka','Qarmon yalnız'],1),
+('tarix8-medeniyyet#12','tarix','tarix-8-medeniyyet',2,4,'Azərbaycan xalçaçılığının məşhur məktəblərindən biri hansıdır?','Təbriz xalça məktəbi dünyada tanınır.',array['Təbriz xalça məktəbi','Paris məktəbi','London məktəbi','Şanxay məktəbi'],1),
+('tarix8-medeniyyet#13','tarix','tarix-8-medeniyyet',3,4,'XVII əsrdə Azərbaycana səyahət edib qeydlər yazmış səyyah kimdir?','Osmanlı səyyahı Övliya Çələbi Azərbaycanı təsvir etmişdir.',array['Övliya Çələbi','Marko Polo','Kolumb','Vasko da Qama'],1),
+('tarix8-medeniyyet#14','tarix','tarix-8-medeniyyet',3,4,'Mədrəsələrdə təhsil əsasən hansı dillərdə aparılırdı?','Tədris ərəb və fars dillərində gedirdi.',array['Ərəb və fars dillərində','İngilis dilində','Latın dilində','Rus dilində yalnız'],1),
+('tarix8-medeniyyet#15','tarix','tarix-8-medeniyyet',3,4,'XVIII əsr poeziyasında Vaqifin yaradıcılığı ilə hansı ənənə gücləndi?','Şeirdə həyatilik - realist təsvir gücləndi.',array['Realist şeir ənənəsi','Yalnız dini şeir','Epik roman','Sərbəst şeir'],1),
+('tarix8-medeniyyet#16','tarix','tarix-8-medeniyyet',3,4,'Qarabağ tarixinə həsr olunmuş salnamə əsərləri necə adlanır?','Bu əsərlər «Qarabağnamələr» adı ilə tanınır.',array['«Qarabağnamələr»','«Dədə Qorqud»','«Şahnamə»','«İliada»'],1),
+('tarix8-medeniyyet#17','tarix','tarix-8-medeniyyet',3,4,'Gəncədəki Cümə məscidi (Şah Abbas məscidi) hansı dövrün abidəsidir?','Məscid Səfəvilər dövründə tikilmişdir.',array['Səfəvilər dövrünün','Sovet dövrünün','Antik dövrün','Xilafət dövrünün'],1),
+('tarix8-medeniyyet#18','tarix','tarix-8-medeniyyet',2,4,'XVII-XVIII əsrlərdə şifahi xalq yaradıcılığının əsas nümunələri hansılardır?','Dastanlar və bayatılar xalq yaradıcılığının əsasını təşkil edirdi.',array['Dastanlar və bayatılar','Qəzetlər','Radio verilişləri','Elmi məqalələr'],1),
+('tarix8-medeniyyet#19','tarix','tarix-8-medeniyyet',2,4,'Xəttatlıq sənəti nə ilə məşğul olurdu?','Xəttatlar gözəl yazı nümunələri yaradırdılar.',array['Gözəl yazı ilə','Daş yonma ilə','Gəmiqayırma ilə','Dulusçuluqla'],1),
+('tarix8-medeniyyet#20','tarix','tarix-8-medeniyyet',3,4,'XIX əsrin əvvəllərindən Azərbaycan mədəniyyətinə hansı yeni təsir güclənməyə başladı?','İşğaldan sonra rus və Avropa mədəniyyətinin təsiri artdı.',array['Rus və Avropa mədəniyyətinin təsiri','Yapon təsiri','Amerika təsiri','Heç bir təsir'],1)
 ),
 ins as (
   insert into public.questions
@@ -544,8 +584,8 @@ begin
    where owner_type = 'platform'
      and (ext_key like 'az8-%' or ext_key like 'ing8-%'
           or ext_key like 'inf8-%' or ext_key like 'tarix8-%');
-  if n <> 480 then
-    raise exception 'sinif8 suallari: 480 gozlenilirdi, % tapildi', n;
+  if n <> 520 then
+    raise exception 'sinif8 suallari: 520 gozlenilirdi, % tapildi', n;
   end if;
   select count(*) into k from public.questions q
    where (q.ext_key like 'az8-%' or q.ext_key like 'ing8-%'
@@ -560,8 +600,8 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'az8-%' or ext_key like 'ing8-%'
       or ext_key like 'inf8-%' or ext_key like 'tarix8-%';
-  if k <> 24 then
-    raise exception 'movzu sayi 24 deyil: %', k;
+  if k <> 26 then
+    raise exception 'movzu sayi 26 deyil: %', k;
   end if;
-  raise notice '8-ci sinif banki: % sual, 24 movzu (az, ing, inf, tarix).', n;
+  raise notice '8-ci sinif banki: % sual, 26 movzu (az, ing, inf, tarix).', n;
 end $$;

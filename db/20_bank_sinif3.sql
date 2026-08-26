@@ -4,7 +4,7 @@
 --  BU FAYL ELLE YAZILMIR - tools/sinif3.py yaradir:
 --      python3 tools/sinif3.py
 --
---  Az dili 8 + Heyat bilgisi 6 + Informatika 4 = 18 movzu x 10 = 360.
+--  Az dili 8 + Heyat bilgisi 6 + Informatika 4 = 18 movzu x 10 = 380.
 --  ext_key: az3-/hey3-/inf3-...
 --  ON SERT: 14_movzular.sql ve 15_movzular_ederslik.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
@@ -389,7 +389,27 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('inf3-metn#17','informatika','inf-3-metn',2,4,'«Ə», «ğ», «ş» hərflərini hansı klaviatura düzülüşündə yazmaq olar?','Bu hərflər Azərbaycan klaviaturasındadır.',array['Azərbaycan klaviaturasında','Yalnız ingilis','Heç birində','Yalnız rəqəm hissəsində'],1),
 ('inf3-metn#18','informatika','inf-3-metn',2,4,'Yazılmış mətni daha maraqlı etmək üçün nə əlavə etmək olar?','Mətnə şəkil əlavə etmək olar.',array['Şəkil','Daş','Yapışqan','Kağız'],1),
 ('inf3-metn#19','informatika','inf-3-metn',2,4,'Mətn redaktorunda yeni sənəd necə yaradılır?','«Yeni» (New) əmri yeni sənəd açır.',array['«Yeni» (New) əmri ilə','Kompüteri silkələməklə','Ekranı silməklə','Mausu dəyişməklə'],1),
-('inf3-metn#20','informatika','inf-3-metn',3,4,'Kompüterdə yazılmış mətnin kağızdakı forması necə adlanır?','Kağıza çıxarılmış nüsxə çap nüsxəsidir.',array['Çap nüsxəsi','Yaddaş','Kursor','Fayl'],1)
+('inf3-metn#20','informatika','inf-3-metn',3,4,'Kompüterdə yazılmış mətnin kağızdakı forması necə adlanır?','Kağıza çıxarılmış nüsxə çap nüsxəsidir.',array['Çap nüsxəsi','Yaddaş','Kursor','Fayl'],1),
+('inf3-qrafik#1','informatika','inf-3-qrafik',1,3,'Paint proqramında karandaş aləti nə edir?','Karandaş aləti nazik xətt çəkir.',array['Nazik xətt çəkir','Şəkli silir','Səs çıxarır','Faylı bağlayır'],1),
+('inf3-qrafik#2','informatika','inf-3-qrafik',2,3,'Palitra nədir?','Palitra rənglər toplusudur.',array['Rənglər toplusu','Alətlər qutusu','Fayl adı','Kompüter hissəsi'],1),
+('inf3-qrafik#3','informatika','inf-3-qrafik',2,3,'Şəklin bir hissəsini seçmək üçün hansı alətdən istifadə olunur?','Seçmə aləti fraqmenti ayırır.',array['Seçmə aləti','Fırça','Silgi','Sprey'],1),
+('inf3-qrafik#4','informatika','inf-3-qrafik',2,3,'Seçilmiş fraqmenti başqa yerə necə aparmaq olar?','Fraqmenti sürükləyib köçürmək olar.',array['Köçürməklə (sürükləməklə)','Kabellə','Printerlə','Aparmaq olmaz'],1),
+('inf3-qrafik#5','informatika','inf-3-qrafik',2,3,'Paint-də fiqurun içini rəngləmək üçün hansı alət işlədilir?','Doldurma aləti qapalı sahəni rənglə doldurur.',array['Doldurma aləti','Mətn aləti','Lupa','Karandaş'],1),
+('inf3-qrafik#6','informatika','inf-3-qrafik',2,3,'Çəkilmiş şəkli kompüterdə saxlamaq üçün hansı əmr verilir?','Saxla (Save) əmri şəkli fayl kimi yazır.',array['Saxla (Save) əmri','Sil əmri','Çap əmri yalnız','Bağla əmri'],1),
+('inf3-qrafik#7','informatika','inf-3-qrafik',1,3,'Paint-də düz xətt çəkmək üçün hansı alət seçilir?','Xətt aləti düz xətt çəkməyə imkan verir.',array['Xətt aləti','Sprey','Silgi','Seçmə aləti'],1),
+('inf3-qrafik#8','informatika','inf-3-qrafik',2,3,'Paint-də səhv əməliyyatı necə geri qaytarmaq olar?','Geri (Undo) əmri son əməliyyatı ləğv edir.',array['Geri (Undo) əmri ilə','Kompüteri söndürməklə','Ekranı silməklə','Mümkün deyil'],1),
+('inf3-qrafik#9','informatika','inf-3-qrafik',2,3,'Şəklin fraqmentini silsək nə baş verər?','Silinmiş yer ağ (fon rəngində) qalar.',array['Həmin hissə ağ qalar','Bütün şəkil silinər','Şəkil böyüyər','Heç nə olmaz'],1),
+('inf3-qrafik#10','informatika','inf-3-qrafik',2,3,'Rəng püskürdən (sprey) alət nə üçün istifadə olunur?','Sprey səpələnmiş rəng effekti verir.',array['Səpələnmiş rəng vurmaq üçün','Yazı yazmaq üçün','Faylı silmək üçün','Şəkli kiçiltmək üçün'],1),
+('inf3-qrafik#11','informatika','inf-3-qrafik',2,3,'Paint-də hazır fiqurlara misal hansılardır?','Alətlər arasında düzbucaqlı, oval, çoxbucaqlı var.',array['Düzbucaqlı, oval, çoxbucaqlı','Yalnız ulduz','Yalnız ürək','Fiqur yoxdur'],1),
+('inf3-qrafik#12','informatika','inf-3-qrafik',1,3,'Şəkli çəkməzdən əvvəl nəyi düşünmək faydalıdır?','Əvvəlcə nə çəkəcəyini fikirləşmək lazımdır.',array['Nə çəkəcəyini','Printerin rəngini','Kabelin uzunluğunu','Heç nəyi'],1),
+('inf3-qrafik#13','informatika','inf-3-qrafik',2,3,'Böyüdücü (lupa) aləti nə üçündür?','Lupa şəklin hissəsini böyüdüb dəqiq işləməyə imkan verir.',array['Şəklin hissəsini böyütmək üçün','Şəkli silmək üçün','Rəng seçmək üçün','Fayl açmaq üçün'],1),
+('inf3-qrafik#14','informatika','inf-3-qrafik',1,3,'Paint-də silgi aləti nəyi silir?','Silgi şəklin çəkilmiş hissəsini təmizləyir.',array['Şəklin çəkilmiş hissəsini','Faylın adını','Kompüterin yaddaşını','Proqramı'],1),
+('inf3-qrafik#15','informatika','inf-3-qrafik',3,3,'Kompüterdə saxlanan şəkillər necə adlanır?','Şəkillər qrafik fayllar adlanır.',array['Qrafik fayllar','Mətn faylları','Səs faylları','Oyunlar'],1),
+('inf3-qrafik#16','informatika','inf-3-qrafik',2,3,'Saxlanmış şəkil faylını yenidən açmaq üçün nə etməli?','Faylı tapıb açmaq lazımdır.',array['Faylı tapıb açmaq','Yeni şəkil çəkmək','Printeri qoşmaq','Mümkün deyil'],1),
+('inf3-qrafik#17','informatika','inf-3-qrafik',1,3,'Paint-də işləyərkən rəng seçimi haradan edilir?','Rəng palitradan seçilir.',array['Palitradan','Klaviaturadan','Sistem blokundan','Dinamikdən'],1),
+('inf3-qrafik#18','informatika','inf-3-qrafik',3,3,'Simmetrik naxış çəkmək üçün fraqmentlə hansı əməliyyat aparılır?','Fraqment çevrilir (əks etdirilir).',array['Çevirmə (əks etdirmə)','Silmə','Çap etmə','Səsləndirmə'],1),
+('inf3-qrafik#19','informatika','inf-3-qrafik',2,3,'Şəklin arxa hissəsi necə adlanır?','Şəklin arxa hissəsi fon (arxa plan) adlanır.',array['Arxa plan (fon)','Palitra','Fraqment','Kursor'],1),
+('inf3-qrafik#20','informatika','inf-3-qrafik',2,3,'Qrafik redaktorda çəkilmiş şəkli çap etmək olarmı?','Şəkli printerlə kağıza çap etmək mümkündür.',array['Bəli, printerlə','Xeyr, heç vaxt','Yalnız yayda','Yalnız ağ-qara'],1)
 ),
 ins as (
   insert into public.questions
@@ -422,8 +442,8 @@ begin
    where owner_type = 'platform'
      and (ext_key like 'az3-%' or ext_key like 'hey3-%'
           or ext_key like 'inf3-%');
-  if n <> 360 then
-    raise exception 'sinif3 suallari: 360 gozlenilirdi, % tapildi', n;
+  if n <> 380 then
+    raise exception 'sinif3 suallari: 380 gozlenilirdi, % tapildi', n;
   end if;
   select count(*) into k from public.questions q
    where (q.ext_key like 'az3-%' or q.ext_key like 'hey3-%'
@@ -438,8 +458,8 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'az3-%' or ext_key like 'hey3-%'
       or ext_key like 'inf3-%';
-  if k <> 18 then
-    raise exception 'movzu sayi 18 deyil: %', k;
+  if k <> 19 then
+    raise exception 'movzu sayi 19 deyil: %', k;
   end if;
-  raise notice '3-cu sinif banki: % sual, 18 movzu (az dili, heyat bilgisi, informatika).', n;
+  raise notice '3-cu sinif banki: % sual, 19 movzu (az dili, heyat bilgisi, informatika).', n;
 end $$;

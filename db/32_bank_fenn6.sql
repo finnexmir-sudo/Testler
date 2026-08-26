@@ -4,7 +4,7 @@
 --  BU FAYL ELLE YAZILMIR - tools/fenn6.py yaradir:
 --      python3 tools/fenn6.py
 --
---  Fizika 4 + Biologiya 8 + Cografiya 7 = 19 movzu x 20 = 380.
+--  Fizika 6 + Biologiya 8 + Cografiya 7 = 21 movzu x 20 = 420.
 --  ext_key: fiz6-/bio6-/cog6-...
 --  ON SERT: 29_movzular_orta6.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
@@ -409,7 +409,47 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('cog6-dunya#17','cografiya','cog-6-dunya',2,4,'Materikləri bir-birindən nə ayırır?','Okean və dənizlər ayırır.',array['Okean və dənizlər','Hasarlar','Dağlar yalnız','Yollar'],1),
 ('cog6-dunya#18','cografiya','cog-6-dunya',2,4,'Asiyanın ən uca dağ sistemi hansıdır?','Himalay dağlarıdır.',array['Himalay','Qafqaz','Alp','And'],1),
 ('cog6-dunya#19','cografiya','cog-6-dunya',3,4,'Şimal Buzlu okeanının xüsusiyyəti nədir?','Ən soyuq və ən kiçik okeandır.',array['Ən soyuq və kiçik okeandır','Ən isti okeandır','Ən dərin okeandır','Şirin suludur'],1),
-('cog6-dunya#20','cografiya','cog-6-dunya',3,4,'Müxtəlif materiklərdə təbiətin fərqli olması nədən asılıdır?','İqlim şəraitindən asılıdır.',array['İqlimdən','Bayraqlardan','Dillərdən','Adlardan'],1)
+('cog6-dunya#20','cografiya','cog-6-dunya',3,4,'Müxtəlif materiklərdə təbiətin fərqli olması nədən asılıdır?','İqlim şəraitindən asılıdır.',array['İqlimdən','Bayraqlardan','Dillərdən','Adlardan'],1),
+('fiz6-olcmeler#1','fizika','fiz-6-olcmeler',2,1,'Menzurkanın bölgü qiyməti 2 ml-dirsə, bu nə deməkdir?','Qonşu bölgülər arasındakı fərq 2 ml-dir.',array['Qonşu bölgülər arası 2 ml-dir','Menzurka 2 ml tutur','Ən böyük qiymət 2 ml-dir','Menzurka sınıqdır'],1),
+('fiz6-olcmeler#2','fizika','fiz-6-olcmeler',2,1,'BS (Beynəlxalq Sistem) hansı əsas vahidləri götürür?','Uzunluq - metr, kütlə - kiloqram, zaman - saniyə.',array['Metr, kiloqram, saniyə','Verst, pud, saat','Mil, funt, gün','Düym, unsiya, həftə'],1),
+('fiz6-olcmeler#3','fizika','fiz-6-olcmeler',2,1,'2,5 m neçə santimetrdir?','1 m = 100 sm, 2,5 m = 250 sm.',array['250 sm','25 sm','2 500 sm','205 sm'],1),
+('fiz6-olcmeler#4','fizika','fiz-6-olcmeler',2,1,'0,5 km neçə metrdir?','1 km = 1 000 m, yarısı 500 m.',array['500 m','50 m','5 000 m','550 m'],1),
+('fiz6-olcmeler#5','fizika','fiz-6-olcmeler',1,1,'1 t neçə kiloqramdır?','1 ton = 1 000 kq.',array['1 000 kq','100 kq','10 kq','10 000 kq'],1),
+('fiz6-olcmeler#6','fizika','fiz-6-olcmeler',2,1,'5 dəqiqə neçə saniyədir?','5 × 60 = 300 saniyə.',array['300 saniyə','500 saniyə','50 saniyə','3 000 saniyə'],1),
+('fiz6-olcmeler#7','fizika','fiz-6-olcmeler',2,1,'Sahə hansı vahidlə ölçülür?','Sahənin BS vahidi kvadrat metrdir.',array['m²','m³','kq','san'],1),
+('fiz6-olcmeler#8','fizika','fiz-6-olcmeler',2,1,'Həcmin BS vahidi hansıdır?','Həcm kub metrlə ölçülür.',array['m³','m²','litr yalnız','metr'],1),
+('fiz6-olcmeler#9','fizika','fiz-6-olcmeler',2,1,'Qısa zaman fasilələrini dəqiq ölçmək üçün hansı cihazdan istifadə olunur?','İdman yarışlarında saniyəölçən işlədilir.',array['Saniyəölçən','Tərəzi','Menzurka','Barometr'],1),
+('fiz6-olcmeler#10','fizika','fiz-6-olcmeler',3,1,'Termometrin bölgü qiyməti 1°C-dirsə, o nəyi dəqiq göstərə bilər?','Belə termometr tam dərəcələri dəqiq göstərir.',array['Tam dərəcələri','Dərəcənin mindəbirini','Yalnız mənfi qiymətləri','Heç nəyi'],1),
+('fiz6-olcmeler#11','fizika','fiz-6-olcmeler',2,1,'Ölçmə zamanı gözün düzgün vəziyyəti necə olmalıdır?','Göz şkala ilə eyni səviyyədə olmalıdır.',array['Şkala ilə eyni səviyyədə','Şkaladan yuxarıda','Şkaladan aşağıda','Fərqi yoxdur'],1),
+('fiz6-olcmeler#12','fizika','fiz-6-olcmeler',2,1,'125 sm neçə metrdir?','125 sm = 1,25 m.',array['1,25 m','12,5 m','0,125 m','125 m'],1),
+('fiz6-olcmeler#13','fizika','fiz-6-olcmeler',2,1,'Kütləni tərəzidə dəqiq ölçmək üçün nədən istifadə olunur?','Müxtəlif ölçülü çəki daşlarından istifadə edilir.',array['Çəki daşlarından','Xətkeşdən','Menzurkadan','Termometrdən'],1),
+('fiz6-olcmeler#14','fizika','fiz-6-olcmeler',2,1,'Ölçmə xətası nə vaxt azalır?','Bölgü qiyməti kiçik olan dəqiq cihaz seçiləndə xəta azalır.',array['Dəqiq cihaz seçiləndə','Tələsik ölçəndə','Cihazsız təxmin edəndə','Qaranlıqda ölçəndə'],1),
+('fiz6-olcmeler#15','fizika','fiz-6-olcmeler',3,1,'Mayenin həcmini menzurka ilə ölçərkən hansı səviyyə oxunur?','Maye səthinin alt (çökük) xətti üzrə oxunur.',array['Maye səthinin alt xətti','Qabın kənarı','Ən yuxarı damcı','Qabın dibi'],1),
+('fiz6-olcmeler#16','fizika','fiz-6-olcmeler',3,1,'Bir neçə dəfə ölçüb orta qiymət götürmək nə üçün lazımdır?','Təkrar ölçmələr xətanı azaldır.',array['Xətanı azaltmaq üçün','Vaxt keçirmək üçün','Cihazı yoxlamaq üçün yalnız','Lazım deyil'],1),
+('fiz6-olcmeler#17','fizika','fiz-6-olcmeler',2,1,'Uzunluğun köməkçi vahidlərinə misal hansıdır?','Millimetr və kilometr metrin köməkçi vahidləridir.',array['Millimetr və kilometr','Kiloqram və qram','Saat və saniyə','Litr və millilitr'],1),
+('fiz6-olcmeler#18','fizika','fiz-6-olcmeler',1,1,'2 dəqiqə neçə saniyədir?','2 × 60 = 120 saniyə.',array['120 saniyə','20 saniyə','200 saniyə','60 saniyə'],1),
+('fiz6-olcmeler#19','fizika','fiz-6-olcmeler',3,1,'Cihazın ölçmə həddi nədir?','Cihazın ölçə biləcəyi ən böyük qiymətdir.',array['Ölçə biləcəyi ən böyük qiymət','Cihazın çəkisi','Cihazın qiyməti','Bölgülərin sayı'],1),
+('fiz6-olcmeler#20','fizika','fiz-6-olcmeler',1,1,'10 mm neçə santimetrdir?','10 mm = 1 sm.',array['1 sm','10 sm','100 sm','0,1 sm'],1),
+('fiz6-enerji#1','fizika','fiz-6-enerji',2,4,'Cismin sürətini tapmaq üçün gedilən yolu nəyə bölmək lazımdır?','Sürət yolun zamana nisbətidir.',array['Zamana','Kütləyə','Həcmə','Temperatura'],1),
+('fiz6-enerji#2','fizika','fiz-6-enerji',2,4,'Avtomobil 100 km yolu 2 saata qət etdi. Sürəti neçədir?','100 : 2 = 50 km/saat.',array['50 km/saat','200 km/saat','102 km/saat','98 km/saat'],1),
+('fiz6-enerji#3','fizika','fiz-6-enerji',1,4,'Piyada ilə avtomobildən hansının sürəti böyükdür?','Avtomobil vahid zamanda daha çox yol gedir.',array['Avtomobilin','Piyadanın','Bərabərdir','Bilinmir'],1),
+('fiz6-enerji#4','fizika','fiz-6-enerji',2,4,'Mexaniki enerjinin hansı növləri var?','Kinetik və potensial enerji mexaniki enerjinin növləridir.',array['Kinetik və potensial','İsti və soyuq','Bərk və maye','Müsbət və mənfi yalnız'],1),
+('fiz6-enerji#5','fizika','fiz-6-enerji',3,4,'Sıxılmış yayın enerjisi hansı enerji növünə aiddir?','Sıxılmış yay potensial enerjiyə malikdir.',array['Potensial enerjidir','Kinetik enerjidir','İstilik enerjisidir','Enerjisi yoxdur'],1),
+('fiz6-enerji#6','fizika','fiz-6-enerji',2,4,'Enerji bir növdən başqa növə keçə bilərmi?','Enerji itmir, bir növdən digərinə çevrilir.',array['Bəli, çevrilir','Xeyr, heç vaxt','Yalnız qışda','Yalnız suda'],1),
+('fiz6-enerji#7','fizika','fiz-6-enerji',3,4,'Elektrik dövrəsinin əsas hissələri hansılardır?','Dövrə mənbə, keçirici və istehlakçıdan ibarətdir.',array['Mənbə, keçirici, istehlakçı','Yalnız lampalar','Yalnız kabellər','Yalnız açar'],1),
+('fiz6-enerji#8','fizika','fiz-6-enerji',2,4,'Elektrik cərəyanının istilik təsirinə misal hansıdır?','Elektrik sobasının qızması istilik təsiridir.',array['Elektrik sobasının qızması','Kölgənin düşməsi','Yağışın yağması','Küləyin əsməsi'],1),
+('fiz6-enerji#9','fizika','fiz-6-enerji',2,4,'Cərəyanın işıq təsirindən harada istifadə olunur?','Lampalar cərəyanın işıq təsirinə əsaslanır.',array['Lampalarda','Tərəzilərdə','Xətkeşlərdə','Menzurkalarda'],1),
+('fiz6-enerji#10','fizika','fiz-6-enerji',2,4,'Açar elektrik dövrəsində nə üçündür?','Açar dövrəni qapayıb-açmaq üçündür.',array['Cərəyanı qoşub-ayırmaq üçün','İşığı boyamaq üçün','Səs vermək üçün','Bəzək üçün'],1),
+('fiz6-enerji#11','fizika','fiz-6-enerji',2,4,'Külək enerjisindən müasir dövrdə nə üçün istifadə olunur?','Külək turbinləri elektrik enerjisi istehsal edir.',array['Elektrik almaq üçün','Yağış yağdırmaq üçün','Torpağı qızdırmaq üçün','İstifadə olunmur'],1),
+('fiz6-enerji#12','fizika','fiz-6-enerji',2,4,'Günəş panelləri hansı enerjini elektrik enerjisinə çevirir?','Panellər işıq enerjisini elektrikə çevirir.',array['İşıq (Günəş) enerjisini','Səs enerjisini','Külək enerjisini','Nüvə enerjisini'],1),
+('fiz6-enerji#13','fizika','fiz-6-enerji',3,4,'Suyun axını hansı qurğularda elektrik enerjisi verir?','Su elektrik stansiyalarında axının enerjisindən istifadə olunur.',array['Su elektrik stansiyalarında','Dəyirmanlarda yalnız','Hovuzlarda','Fəvvarələrdə'],1),
+('fiz6-enerji#14','fizika','fiz-6-enerji',3,4,'Yanacaqlar (odun, qaz) yanarkən enerji hansı formada ayrılır?','Yanma zamanı istilik enerjisi ayrılır.',array['İstilik şəklində','Yalnız səs şəklində','Maqnit sahəsi şəklində','Ayrılmır'],1),
+('fiz6-enerji#15','fizika','fiz-6-enerji',2,4,'Hərəkət edən avtomobilin enerjisi hansı enerji növüdür?','Hərəkətdəki cismin enerjisi kinetik enerjidir.',array['Kinetik enerjidir','Potensial enerjidir','Kimyəvi enerjidir','Enerjisi yoxdur'],1),
+('fiz6-enerji#16','fizika','fiz-6-enerji',3,4,'Sürəti dəyişməyən hərəkət necə adlanır?','Sürət sabit qalırsa, hərəkət bərabərsürətlidir.',array['Bərabərsürətli hərəkət','Dəyişənsürətli hərəkət','Fırlanma hərəkəti','Rəqsi hərəkət'],1),
+('fiz6-enerji#17','fizika','fiz-6-enerji',3,4,'Velosipedçi 30 km/saat sürətlə 2 saat getdi. Nə qədər yol qət etdi?','30 × 2 = 60 km.',array['60 km','15 km','32 km','28 km'],1),
+('fiz6-enerji#18','fizika','fiz-6-enerji',2,4,'Enerjiyə qənaətin sadə yollarından biri hansıdır?','İşlətmədikdə cihazları söndürmək enerjiyə qənaətdir.',array['İşlətmədikdə cihazları söndürmək','İşığı gecə-gündüz yandırmaq','Pəncərəni qışda açıq qoymaq','Cihazları daim işlətmək'],1),
+('fiz6-enerji#19','fizika','fiz-6-enerji',3,4,'Cərəyanın maqnit təsirindən istifadə edən qurğu hansıdır?','Elektromaqnit cərəyanın maqnit təsirinə əsaslanır.',array['Elektromaqnit','Termometr','Menzurka','Xətkeş'],1),
+('fiz6-enerji#20','fizika','fiz-6-enerji',3,4,'Batareyada hansı enerji elektrik enerjisinə çevrilir?','Batareyada kimyəvi enerji elektrikə çevrilir.',array['Kimyəvi enerji','Səs enerjisi','İşıq enerjisi','Külək enerjisi'],1)
 ),
 ins as (
   insert into public.questions
@@ -442,8 +482,8 @@ begin
    where owner_type = 'platform'
      and (ext_key like 'fiz6-%' or ext_key like 'bio6-%'
           or ext_key like 'cog6-%');
-  if n <> 380 then
-    raise exception 'fenn6 suallari: 380 gozlenilirdi, % tapildi', n;
+  if n <> 420 then
+    raise exception 'fenn6 suallari: 420 gozlenilirdi, % tapildi', n;
   end if;
   select count(*) into k from public.questions q
    where (q.ext_key like 'fiz6-%' or q.ext_key like 'bio6-%'
@@ -458,8 +498,8 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'fiz6-%' or ext_key like 'bio6-%'
       or ext_key like 'cog6-%';
-  if k <> 19 then
-    raise exception 'movzu sayi 19 deyil: %', k;
+  if k <> 21 then
+    raise exception 'movzu sayi 21 deyil: %', k;
   end if;
-  raise notice '6-ci sinif tebiet fennleri banki: % sual, 19 movzu (fiz, bio, cog).', n;
+  raise notice '6-ci sinif tebiet fennleri banki: % sual, 21 movzu (fiz, bio, cog).', n;
 end $$;

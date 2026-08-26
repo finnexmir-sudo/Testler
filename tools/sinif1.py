@@ -2045,6 +2045,97 @@ for _k, _v in ELAVE_RIY.items():
 
 
 
+MOVZULAR += [("informatika", "inf-1-komp-imkanlar", 4)]
+YENI_INF = {
+"inf-1-komp-imkanlar": [
+ ("Şəkil çəkən proqramda fırça aləti nə üçündür?",
+  "Fırça ilə şəkil rənglənir.",
+  ["Rəngləmək üçün", "Yazı silmək üçün", "Səs yazmaq üçün",
+   "Kompüteri söndürmək üçün"], 1, None, 1),
+ ("Kompüterdə düz xətt çəkmək üçün hansı alət seçilir?",
+  "Xətt aləti düz xətt çəkir.",
+  ["Xətt aləti", "Silgi", "Boşluq düyməsi", "Dinamik"],
+  1, None, 2),
+ ("Çəkilmiş fiqurun içini rəngləmək üçün hansı alət işlədilir?",
+  "Doldurma aləti fiqurun içini boyayır.",
+  ["Doldurma (boyama) aləti", "Xətkeş", "Qayçı",
+   "Klaviatura"], 1, None, 2),
+ ("Kompüterdə dairə çəkmək üçün hansı fiqur aləti işlədilir?",
+  "Oval (dairə) aləti ilə dairə çəkilir.",
+  ["Oval (dairə) aləti", "Kvadrat aləti", "Ulduz aləti",
+   "Yazı aləti"], 1, None, 2),
+ ("Səhv çəkilmiş xətti hansı alətlə silmək olar?",
+  "Pozan (silgi) aləti çəkilmişi silir.",
+  ["Pozan (silgi) alətlə", "Fırça ilə", "Mausun sağ düyməsi ilə",
+   "Silmək olmaz"], 1, None, 1),
+ ("Kompüterdə yazdığımız hərflər harada görünür?",
+  "Yazdıqlarımız ekranda görünür.",
+  ["Ekranda", "Printerin içində", "Mausda", "Kabeldə"],
+  1, None, 1),
+ ("Kalkulyator proqramı ilə nə etmək olar?",
+  "Kalkulyatorla hesablamaq olar.",
+  ["Hesablamaq", "Mahnı oxumaq", "Şəkil çəkmək",
+   "Yatmaq"], 1, None, 1),
+ ("Şəkil proqramında rənglər haradan seçilir?",
+  "Rənglər rəng qutusundan (palitradan) seçilir.",
+  ["Rəng qutusundan (palitradan)", "Klaviaturadan",
+   "Printerdən", "Kabeldən"], 1, None, 2),
+ ("Çəkilmiş şəkil kompüterdə harada qalır?",
+  "Saxlanılan şəkil yaddaşda qalır.",
+  ["Yaddaşda saxlanılır", "Ekranın arxasında",
+   "Mausun içində", "Heç yerdə"], 1, None, 2),
+ ("Kompüterdə fiqurlardan (dairə, kvadrat) nə qurmaq olar?",
+  "Fiqurları birləşdirib şəkil və naxış qurmaq olar.",
+  ["Şəkil və naxış", "Yemək", "Oyuncaq", "Geyim"],
+  1, None, 2),
+ ("Yazı yazanda sözlər arasında nə buraxılır?",
+  "Sözlər arasında boşluq olur.",
+  ["Boşluq", "Rəqəm", "Şəkil", "Heç nə"], 1, None, 1),
+ ("Kompüterdə şəkil çəkməkdən başqa daha nə etmək mümkündür?",
+  "Kompüterdə yazı yazmaq və hesablamaq da olar.",
+  ["Yazı yazmaq və hesablamaq", "Yalnız oynamaq",
+   "Yemək bişirmək", "Paltar tikmək"], 1, None, 1),
+ ("Şəkil çəkərkən rəngi dəyişmək istəsən nə etməlisən?",
+  "Palitradan başqa rəng seçmək lazımdır.",
+  ["Başqa rəng seçməlisən", "Kompüteri söndürməlisən",
+   "Şəkli silməlisən", "Gözləməlisən"], 1, None, 1),
+ ("Kompüterdə çəkilən şəkil kağızdakı şəkildən nə ilə fərqlənir?",
+  "Kompüter şəklini asanlıqla düzəltmək olur.",
+  ["Asan düzəldilə bilər", "Heç vaxt silinmir",
+   "Həmişə qara olur", "Fərqlənmir"], 1, None, 2),
+ ("Klaviaturada rəqəm düymələri nə üçün lazımdır?",
+  "Rəqəm düymələri ilə ədədlər yazılır.",
+  ["Ədədləri yazmaq üçün", "Şəkil çəkmək üçün",
+   "Səsi artırmaq üçün", "İşıq yandırmaq üçün"],
+  1, None, 1),
+ ("Kompüter yazıda buraxılan səhvi necə düzəltməyə imkan verir?",
+  "Səhvi silib yenidən yazmaq mümkündür.",
+  ["Silib yenidən yazmaqla", "Kağızı cırmaqla",
+   "Pozanla kağızda silməklə", "İmkan vermir"],
+  1, None, 2),
+ ("Sadə misalı (2 + 3) kompüterdə hansı proqramla hesablamaq olar?",
+  "Kalkulyator proqramı misalları hesablayır.",
+  ["Kalkulyatorla", "Şəkil proqramı ilə", "Saatla",
+   "Təqvimlə"], 1, None, 2),
+ ("Naxış çəkmək üçün hansı fiqurları təkrarlamaq olar?",
+  "Dairə və kvadratları təkrarlayıb naxış qurmaq olar.",
+  ["Dairə və kvadratları", "Yalnız hərfləri",
+   "Yalnız rəqəmləri", "Heç nəyi"], 1, None, 2),
+ ("Kompüterdə iş bitəndə çəkdiyin şəkli saxlamasan nə olar?",
+  "Saxlanmayan şəkil itər.",
+  ["Şəkil itər", "Şəkil böyüyər", "Şəkil çap olunar",
+   "Heç nə olmaz"], 1, None, 2),
+ ("Hansı işi kompüter görə bilməz?",
+  "Kompüter yemək bişirə bilməz.",
+  ["Yemək bişirmək", "Hesablamaq", "Şəkil göstərmək",
+   "Yazı yazmaq"], 1, None, 1),
+],
+}
+for _k, _v in YENI_INF.items():
+    SUALLAR[_k] = _v
+
+
+
 def yoxla():
     n = xeta = 0
     butun = set()
@@ -2096,7 +2187,7 @@ def sql_yaz(n):
 --      python3 tools/sinif1.py
 --
 --  Riyaziyyat 12 + Az dili 6 + Heyat bilgisi 5 + Informatika 4
---  = 27 movzu x 20 = %d.  ext_key: riy1-/az1-/hey1-/inf1-...
+--  = 28 movzu x 20 = %d.  ext_key: riy1-/az1-/hey1-/inf1-...
 --  ON SERT: 14_movzular.sql ve 15_movzular_ederslik.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
@@ -2171,10 +2262,10 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'riy1-%%' or ext_key like 'az1-%%'
       or ext_key like 'hey1-%%' or ext_key like 'inf1-%%';
-  if k <> 27 then
-    raise exception 'movzu sayi 27 deyil: %%', k;
+  if k <> 28 then
+    raise exception 'movzu sayi 28 deyil: %%', k;
   end if;
-  raise notice '1-ci sinif banki: %% sual, 27 movzu (riy, az, hey, inf).', n;
+  raise notice '1-ci sinif banki: %% sual, 28 movzu (riy, az, hey, inf).', n;
 end $$;
 """ % (n, ",\n".join(setirler), n, n))
     print("yazildi: %s" % CIXIS)

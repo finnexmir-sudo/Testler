@@ -2049,6 +2049,98 @@ for _k, _v in ELAVE_INF_RIY.items():
 
 
 
+MOVZULAR += [("informatika", "inf-2-proqramlar", 4)]
+YENI_INF = {
+"inf-2-proqramlar": [
+ ("Mətnin rəngini və ölçüsünü dəyişmək necə adlanır?",
+  "Mətnin görünüşünün dəyişdirilməsi formatlama adlanır.",
+  ["Formatlama", "Silmə", "Çap etmə", "Kopyalama"],
+  1, None, 2),
+ ("Şrift nədir?",
+  "Şrift hərflərin yazılış formasıdır.",
+  ["Hərflərin yazılış forması", "Kompüterin hissəsi",
+   "Oyun proqramı", "Kabel növü"], 1, None, 2),
+ ("Qrafik redaktorda nə yaradılır?",
+  "Qrafik redaktorda şəkillər çəkilir.",
+  ["Şəkillər", "Musiqi", "Cədvəllər yalnız", "Oyunlar"],
+  1, None, 1),
+ ("Mətnli şəkil nədir?",
+  "İçində yazı olan şəkil mətnli şəkil adlanır.",
+  ["İçində yazı olan şəkil", "Səsli şəkil",
+   "Hərəkətli oyun", "Boş vərəq"], 1, None, 2),
+ ("Kalkulyator proqramında hansı əməllər yerinə yetirilir?",
+  "Toplama, çıxma, vurma və bölmə əməlləri aparılır.",
+  ["Toplama, çıxma, vurma, bölmə", "Yalnız yazı",
+   "Yalnız şəkil", "Heç bir əməl"], 1, None, 1),
+ ("Proqram pəncərəsi ekranda nəyə bənzəyir?",
+  "Pəncərə düzbucaqlı sahə şəklində açılır.",
+  ["Düzbucaqlı sahəyə", "Dairəyə", "Ulduza",
+   "Üçbucağa"], 1, None, 2),
+ ("İş masasında proqramlar nə ilə göstərilir?",
+  "Hər proqramın öz nişanı (ikonu) var.",
+  ["Nişanlarla (ikonlarla)", "Rəqəmlərlə", "Səslə",
+   "Kölgə ilə"], 1, None, 2),
+ ("Proqramı açmaq üçün nişanın üzərində nə edilir?",
+  "Nişan üzərində ikiqat klik edilir.",
+  ["İkiqat klik", "Uzun fit", "Ekranı silmək",
+   "Düyməni saxlamaq"], 1, None, 2),
+ ("Mətndə başlığı fərqləndirmək üçün nə etmək olar?",
+  "Başlığı qalın şriftlə yazmaq olar.",
+  ["Qalın şriftlə yazmaq", "Kiçiltmək", "Silmək",
+   "Gizlətmək"], 1, None, 2),
+ ("Yazının rəngini dəyişəndə mətnin mənası dəyişirmi?",
+  "Rəng yalnız görünüşü dəyişir.",
+  ["Xeyr, yalnız görünüşü dəyişir", "Bəli, tam dəyişir",
+   "Mətn silinir", "Mətn böyüyür"], 1, None, 2),
+ ("Şəkilə yazı əlavə etmək üçün hansı alətdən istifadə olunur?",
+  "Mətn (A) aləti şəklə yazı əlavə edir.",
+  ["Mətn (A) aləti", "Silgi", "Doldurma", "Lupa"],
+  1, None, 2),
+ ("Kompüterdə misalların cavabını yoxlamaq üçün hansı proqram köməkçidir?",
+  "Kalkulyator proqramı hesablamada kömək edir.",
+  ["Kalkulyator", "Qrafik redaktor", "Saat", "Oyun"],
+  1, None, 1),
+ ("Mətn redaktorunda yeni sətir necə yaranır?",
+  "Enter düyməsi yeni sətrə keçirir.",
+  ["Enter düyməsi ilə", "Boşluqla", "Silgi ilə",
+   "Mausu tərpətməklə"], 1, None, 2),
+ ("Proqramda görülən işi geri qaytarmaq mümkündürmü?",
+  "Geri qaytarma əmri son əməliyyatı ləğv edir.",
+  ["Bəli, geri qaytarma əmri var", "Xeyr, heç vaxt",
+   "Yalnız şənbə günü", "Yalnız oyunlarda"], 1, None, 3),
+ ("Şəkli böyütmək üçün qrafik redaktorda nə edilir?",
+  "Şəklin ölçüsü dəyişdirilir.",
+  ["Ölçüsü dəyişdirilir", "Şəkil silinir",
+   "Kompüter yenidən qoşulur", "Rəng dəyişdirilir"],
+  1, None, 3),
+ ("Mətn və şəkli birləşdirmək nə üçün lazımdır?",
+  "Şəkil yazını daha əyani və aydın edir.",
+  ["Yazını əyani etmək üçün", "Yaddaşı doldurmaq üçün",
+   "Printeri yormaq üçün", "Lazım deyil"], 1, None, 3),
+ ("Proqram pəncərəsinin yuxarısında nə yazılır?",
+  "Pəncərənin başlığında proqramın adı olur.",
+  ["Proqramın adı", "İstifadəçinin yaşı", "Havanın istiliyi",
+   "Mahnının sözləri"], 1, None, 2),
+ ("Yazılmış mətn kompüterdə hansı formada saxlanılır?",
+  "Mətn fayl şəklində yaddaşda saxlanılır.",
+  ["Fayl şəklində", "Kağız şəklində", "Səs şəklində",
+   "Saxlanılmır"], 1, None, 3),
+ ("Bir proqramdan başqasına keçmək mümkündürmü?",
+  "Pəncərələri dəyişməklə proqramlar arasında keçmək olar.",
+  ["Bəli, pəncərələri dəyişməklə", "Xeyr, mümkün deyil",
+   "Yalnız kompüteri söndürməklə", "Yalnız ustanın köməyi ilə"],
+  1, None, 3),
+ ("Proqramla işi bitirəndə nə etmək lazımdır?",
+  "İşi yadda saxlayıb proqramı bağlamaq lazımdır.",
+  ["İşi saxlayıb proqramı bağlamaq", "Ekranı örtmək",
+   "Mausu çıxarmaq", "Heç nə"], 1, None, 2),
+],
+}
+for _k, _v in YENI_INF.items():
+    SUALLAR[_k] = _v
+
+
+
 def yoxla():
     n = xeta = 0
     butun = set()
@@ -2100,7 +2192,7 @@ def sql_yaz(n):
 --      python3 tools/sinif2.py
 --
 --  Riyaziyyat 9 + Az dili 7 + Heyat bilgisi 6 + Informatika 4
---  = 26 movzu x 20 = %d.  ext_key: riy2-/az2-/hey2-/inf2-...
+--  = 27 movzu x 20 = %d.  ext_key: riy2-/az2-/hey2-/inf2-...
 --  ON SERT: 14_movzular.sql ve 15_movzular_ederslik.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
@@ -2175,10 +2267,10 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'riy2-%%' or ext_key like 'az2-%%'
       or ext_key like 'hey2-%%' or ext_key like 'inf2-%%';
-  if k <> 26 then
-    raise exception 'movzu sayi 26 deyil: %%', k;
+  if k <> 27 then
+    raise exception 'movzu sayi 27 deyil: %%', k;
   end if;
-  raise notice '2-ci sinif banki: %% sual, 26 movzu (riy, az, hey, inf).', n;
+  raise notice '2-ci sinif banki: %% sual, 27 movzu (riy, az, hey, inf).', n;
 end $$;
 """ % (n, ",\n".join(setirler), n, n))
     print("yazildi: %s" % CIXIS)

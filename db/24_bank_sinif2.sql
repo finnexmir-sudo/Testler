@@ -5,7 +5,7 @@
 --      python3 tools/sinif2.py
 --
 --  Riyaziyyat 9 + Az dili 7 + Heyat bilgisi 6 + Informatika 4
---  = 26 movzu x 20 = 520.  ext_key: riy2-/az2-/hey2-/inf2-...
+--  = 27 movzu x 20 = 540.  ext_key: riy2-/az2-/hey2-/inf2-...
 --  ON SERT: 14_movzular.sql ve 15_movzular_ederslik.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
@@ -550,7 +550,27 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('inf2-kompyuter#17','informatika','inf-2-kompyuter',1,4,'Kompüterdə mətn yazarkən hansı qurğudan istifadə edirik?','Mətn klaviatura ilə yığılır.',array['Klaviaturadan','Dinamikdən','Kameradan','Printerdən'],1),
 ('inf2-kompyuter#18','informatika','inf-2-kompyuter',2,4,'Ekranda əmrləri göstərən kiçik ox necə adlanır?','Ekrandakı ox kursordur.',array['Kursor','Klaviş','Fayl','Virus'],1),
 ('inf2-kompyuter#19','informatika','inf-2-kompyuter',2,4,'Kompüterlə iş zamanı hər 30 dəqiqədən bir nə edilməlidir?','Gözlərin dincəlməsi üçün fasilə verilməlidir.',array['Fasilə','Səsi artırmaq','Oyunu dəyişmək','İşığı söndürmək'],1),
-('inf2-kompyuter#20','informatika','inf-2-kompyuter',2,4,'Kompüteri tozdan qorumaq üçün nə etmək olar?','Cihazı təmiz saxlamaq lazımdır.',array['Təmiz saxlamaq','Su ilə yumaq','Örtüb heç işlətməmək','Günəşə qoymaq'],1)
+('inf2-kompyuter#20','informatika','inf-2-kompyuter',2,4,'Kompüteri tozdan qorumaq üçün nə etmək olar?','Cihazı təmiz saxlamaq lazımdır.',array['Təmiz saxlamaq','Su ilə yumaq','Örtüb heç işlətməmək','Günəşə qoymaq'],1),
+('inf2-proqramlar#1','informatika','inf-2-proqramlar',2,4,'Mətnin rəngini və ölçüsünü dəyişmək necə adlanır?','Mətnin görünüşünün dəyişdirilməsi formatlama adlanır.',array['Formatlama','Silmə','Çap etmə','Kopyalama'],1),
+('inf2-proqramlar#2','informatika','inf-2-proqramlar',2,4,'Şrift nədir?','Şrift hərflərin yazılış formasıdır.',array['Hərflərin yazılış forması','Kompüterin hissəsi','Oyun proqramı','Kabel növü'],1),
+('inf2-proqramlar#3','informatika','inf-2-proqramlar',1,4,'Qrafik redaktorda nə yaradılır?','Qrafik redaktorda şəkillər çəkilir.',array['Şəkillər','Musiqi','Cədvəllər yalnız','Oyunlar'],1),
+('inf2-proqramlar#4','informatika','inf-2-proqramlar',2,4,'Mətnli şəkil nədir?','İçində yazı olan şəkil mətnli şəkil adlanır.',array['İçində yazı olan şəkil','Səsli şəkil','Hərəkətli oyun','Boş vərəq'],1),
+('inf2-proqramlar#5','informatika','inf-2-proqramlar',1,4,'Kalkulyator proqramında hansı əməllər yerinə yetirilir?','Toplama, çıxma, vurma və bölmə əməlləri aparılır.',array['Toplama, çıxma, vurma, bölmə','Yalnız yazı','Yalnız şəkil','Heç bir əməl'],1),
+('inf2-proqramlar#6','informatika','inf-2-proqramlar',2,4,'Proqram pəncərəsi ekranda nəyə bənzəyir?','Pəncərə düzbucaqlı sahə şəklində açılır.',array['Düzbucaqlı sahəyə','Dairəyə','Ulduza','Üçbucağa'],1),
+('inf2-proqramlar#7','informatika','inf-2-proqramlar',2,4,'İş masasında proqramlar nə ilə göstərilir?','Hər proqramın öz nişanı (ikonu) var.',array['Nişanlarla (ikonlarla)','Rəqəmlərlə','Səslə','Kölgə ilə'],1),
+('inf2-proqramlar#8','informatika','inf-2-proqramlar',2,4,'Proqramı açmaq üçün nişanın üzərində nə edilir?','Nişan üzərində ikiqat klik edilir.',array['İkiqat klik','Uzun fit','Ekranı silmək','Düyməni saxlamaq'],1),
+('inf2-proqramlar#9','informatika','inf-2-proqramlar',2,4,'Mətndə başlığı fərqləndirmək üçün nə etmək olar?','Başlığı qalın şriftlə yazmaq olar.',array['Qalın şriftlə yazmaq','Kiçiltmək','Silmək','Gizlətmək'],1),
+('inf2-proqramlar#10','informatika','inf-2-proqramlar',2,4,'Yazının rəngini dəyişəndə mətnin mənası dəyişirmi?','Rəng yalnız görünüşü dəyişir.',array['Xeyr, yalnız görünüşü dəyişir','Bəli, tam dəyişir','Mətn silinir','Mətn böyüyür'],1),
+('inf2-proqramlar#11','informatika','inf-2-proqramlar',2,4,'Şəkilə yazı əlavə etmək üçün hansı alətdən istifadə olunur?','Mətn (A) aləti şəklə yazı əlavə edir.',array['Mətn (A) aləti','Silgi','Doldurma','Lupa'],1),
+('inf2-proqramlar#12','informatika','inf-2-proqramlar',1,4,'Kompüterdə misalların cavabını yoxlamaq üçün hansı proqram köməkçidir?','Kalkulyator proqramı hesablamada kömək edir.',array['Kalkulyator','Qrafik redaktor','Saat','Oyun'],1),
+('inf2-proqramlar#13','informatika','inf-2-proqramlar',2,4,'Mətn redaktorunda yeni sətir necə yaranır?','Enter düyməsi yeni sətrə keçirir.',array['Enter düyməsi ilə','Boşluqla','Silgi ilə','Mausu tərpətməklə'],1),
+('inf2-proqramlar#14','informatika','inf-2-proqramlar',3,4,'Proqramda görülən işi geri qaytarmaq mümkündürmü?','Geri qaytarma əmri son əməliyyatı ləğv edir.',array['Bəli, geri qaytarma əmri var','Xeyr, heç vaxt','Yalnız şənbə günü','Yalnız oyunlarda'],1),
+('inf2-proqramlar#15','informatika','inf-2-proqramlar',3,4,'Şəkli böyütmək üçün qrafik redaktorda nə edilir?','Şəklin ölçüsü dəyişdirilir.',array['Ölçüsü dəyişdirilir','Şəkil silinir','Kompüter yenidən qoşulur','Rəng dəyişdirilir'],1),
+('inf2-proqramlar#16','informatika','inf-2-proqramlar',3,4,'Mətn və şəkli birləşdirmək nə üçün lazımdır?','Şəkil yazını daha əyani və aydın edir.',array['Yazını əyani etmək üçün','Yaddaşı doldurmaq üçün','Printeri yormaq üçün','Lazım deyil'],1),
+('inf2-proqramlar#17','informatika','inf-2-proqramlar',2,4,'Proqram pəncərəsinin yuxarısında nə yazılır?','Pəncərənin başlığında proqramın adı olur.',array['Proqramın adı','İstifadəçinin yaşı','Havanın istiliyi','Mahnının sözləri'],1),
+('inf2-proqramlar#18','informatika','inf-2-proqramlar',3,4,'Yazılmış mətn kompüterdə hansı formada saxlanılır?','Mətn fayl şəklində yaddaşda saxlanılır.',array['Fayl şəklində','Kağız şəklində','Səs şəklində','Saxlanılmır'],1),
+('inf2-proqramlar#19','informatika','inf-2-proqramlar',3,4,'Bir proqramdan başqasına keçmək mümkündürmü?','Pəncərələri dəyişməklə proqramlar arasında keçmək olar.',array['Bəli, pəncərələri dəyişməklə','Xeyr, mümkün deyil','Yalnız kompüteri söndürməklə','Yalnız ustanın köməyi ilə'],1),
+('inf2-proqramlar#20','informatika','inf-2-proqramlar',2,4,'Proqramla işi bitirəndə nə etmək lazımdır?','İşi yadda saxlayıb proqramı bağlamaq lazımdır.',array['İşi saxlayıb proqramı bağlamaq','Ekranı örtmək','Mausu çıxarmaq','Heç nə'],1)
 ),
 ins as (
   insert into public.questions
@@ -583,8 +603,8 @@ begin
    where owner_type = 'platform'
      and (ext_key like 'riy2-%' or ext_key like 'az2-%'
           or ext_key like 'hey2-%' or ext_key like 'inf2-%');
-  if n <> 520 then
-    raise exception 'sinif2 suallari: 520 gozlenilirdi, % tapildi', n;
+  if n <> 540 then
+    raise exception 'sinif2 suallari: 540 gozlenilirdi, % tapildi', n;
   end if;
   select count(*) into k from public.questions q
    where (q.ext_key like 'riy2-%' or q.ext_key like 'az2-%'
@@ -599,8 +619,8 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'riy2-%' or ext_key like 'az2-%'
       or ext_key like 'hey2-%' or ext_key like 'inf2-%';
-  if k <> 26 then
-    raise exception 'movzu sayi 26 deyil: %', k;
+  if k <> 27 then
+    raise exception 'movzu sayi 27 deyil: %', k;
   end if;
-  raise notice '2-ci sinif banki: % sual, 26 movzu (riy, az, hey, inf).', n;
+  raise notice '2-ci sinif banki: % sual, 27 movzu (riy, az, hey, inf).', n;
 end $$;

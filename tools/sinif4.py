@@ -1304,6 +1304,179 @@ for _k, _v in ELAVE.items():
     SUALLAR[_k] = SUALLAR[_k] + _v
 
 
+MOVZULAR += [
+    ("informatika", "inf-4-mentiq", 2),
+    ("informatika", "inf-4-qrafik", 4),
+]
+YENI_INF = {
+"inf-4-mentiq": [
+ ("Əşyaların əlamətlərini müqayisə etmək üçün onları harada təsvir etmək əlverişlidir?",
+  "Əlamətlər cədvəldə aydın müqayisə olunur.",
+  ["Cədvəldə", "Yuxuda", "Mahnıda", "Kölgədə"], 1, None, 2),
+ ("«Bütün quşlar uçur» mülahizəsi doğrudurmu?",
+  "Dəvəquşu uçmur - mülahizə yalandır.",
+  ["Xeyr (dəvəquşu uçmur)", "Bəli, tam doğrudur",
+   "Sual deyil", "Bilinmir"], 1, None, 3),
+ ("Qrup və altqrup münasibətinə misal hansıdır?",
+  "Quşlar heyvanlar qrupunun altqrupudur.",
+  ["Heyvanlar və quşlar", "Stol və külək", "Su və rəqəm",
+   "Hərf və planet"], 1, None, 2),
+ ("«Və» bağlayıcısı ilə qurulmuş mürəkkəb mülahizə nə vaxt doğru olur?",
+  "Hər iki hissə doğru olduqda mülahizə doğrudur.",
+  ["Hər iki hissə doğru olanda", "Bir hissə yalan olanda",
+   "Heç vaxt", "Həmişə"], 1, None, 3),
+ ("«Və ya» bağlayıcılı mülahizə nə vaxt doğrudur?",
+  "Ən azı bir hissə doğrudursa, mülahizə doğrudur.",
+  ["Ən azı bir hissə doğru olanda", "Yalnız hər ikisi yalan olanda",
+   "Heç vaxt", "Yalnız qışda"], 1, None, 3),
+ ("«Əgər yağış yağarsa, onda çətir götür» qaydası hansı formadadır?",
+  "Bu, əgər-onda qaydasıdır.",
+  ["Əgər-onda qaydası", "Təkrarlama", "Sadalama",
+   "Tapmaca"], 1, None, 2),
+ ("Mülahizələri əyani göstərmək üçün nədən istifadə olunur?",
+  "Sxemlər mülahizələri əyani təsvir edir.",
+  ["Sxemlərdən", "Mahnılardan", "Rəqslərdən",
+   "Yeməklərdən"], 1, None, 2),
+ ("«5 > 3 və 2 > 4» mülahizəsi necə mülahizədir?",
+  "2 > 4 yalandır, ona görə bütöv mülahizə yalandır.",
+  ["Yalandır", "Doğrudur", "Qeyri-müəyyəndir",
+   "Sualdır"], 1, None, 3),
+ ("Məntiqi mühakimə nəyə əsaslanır?",
+  "Mühakimə faktlara və qaydalara söykənir.",
+  ["Faktlara və qaydalara", "Təsadüfə", "Yuxulara",
+   "Səs-küyə"], 1, None, 3),
+ ("«Bəzi» sözü işlənən mülahizəyə misal hansıdır?",
+  "«Bəzi quşlar üzə bilir» - bəzi sözlü mülahizədir.",
+  ["Bəzi quşlar üzə bilir", "Bütün itlər hürür",
+   "Heç bir daş uçmur", "5 böyükdür 3-dən"], 1, None, 3),
+ ("Altqrupun bütün üzvləri qrupun da üzvüdürmü?",
+  "Altqrup qrupun içindədir - bəli.",
+  ["Bəli", "Xeyr", "Yalnız bəzən", "Qrupdan asılı deyil"],
+  1, None, 3),
+ ("«Əgər hava soyuqdursa, onda isti geyin» qaydasında şərt hansıdır?",
+  "Şərt - havanın soyuq olmasıdır.",
+  ["Havanın soyuq olması", "İsti geyinmək",
+   "Qaydanın özü", "Şərt yoxdur"], 1, None, 3),
+ ("Cədvəlin sətir və sütunları nəyi göstərir?",
+  "Cədvəldə əşyalar və onların əlamətləri yerləşdirilir.",
+  ["Əşyaları və əlamətləri", "Yalnız rəngləri",
+   "Yalnız səsləri", "Heç nəyi"], 1, None, 2),
+ ("İki mülahizədən nəticə çıxarmaq necə adlanır?",
+  "Bu, mühakimə yürütməkdir.",
+  ["Mühakimə yürütmək", "Yuxu görmək", "Şəkil çəkmək",
+   "Mahnı oxumaq"], 1, None, 3),
+ ("«Heç bir balıq uçmur» mülahizəsində hansı ifadə işlənib?",
+  "Mülahizədə «heç bir» ifadəsi işlənib.",
+  ["«Heç bir»", "«Bəzi»", "«Bütün»", "«Və ya»"],
+  1, None, 2),
+ ("Doğru mülahizəyə misal hansıdır?",
+  "«Bir ildə 12 ay var» - doğru mülahizədir.",
+  ["Bir ildə 12 ay var", "Daşlar üzə bilir",
+   "Günəş gecə çıxır", "Balıqlar quruda yaşayır"],
+  1, None, 2),
+ ("Yalan mülahizəyə misal hansıdır?",
+  "«Günəş qərbdən doğur» yalandır - Günəş şərqdən doğur.",
+  ["Günəş qərbdən doğur", "Qış soyuq fəsildir",
+   "Həftədə 7 gün var", "Su mayedir"], 1, None, 2),
+ ("«Əgər-onda» qaydasında «onda» hissəsi nəyi bildirir?",
+  "«Onda» hissəsi icra olunacaq hərəkəti - nəticəni bildirir.",
+  ["Nəticəni (hərəkəti)", "Şərti", "Sualı", "Rəngi"],
+  1, None, 3),
+ ("Məntiqi düşünmə hansı fəaliyyətdə xüsusilə kömək edir?",
+  "Məsələ həllində məntiq əsas köməkçidir.",
+  ["Məsələ həllində", "Yuxuda", "Yeməkdə",
+   "Yerişdə"], 1, None, 2),
+ ("Sxemdə oxlar nəyi göstərir?",
+  "Oxlar ardıcıllığı və əlaqəni göstərir.",
+  ["Ardıcıllığı və əlaqəni", "Havanın istiliyini",
+   "Rənglərin sayını", "Heç nəyi"], 1, None, 2),
+],
+"inf-4-qrafik": [
+ ("Qrafik redaktorun alətlər qutusunda nə yerləşir?",
+  "Alətlər qutusunda çəkmə alətləri olur.",
+  ["Çəkmə alətləri", "Yemək qabları", "Kabellər",
+   "Oyunlar"], 1, None, 1),
+ ("Şəklin formasını dəyişmək üçün hansı əməliyyat aparılır?",
+  "Şəkli dartıb ölçüsünü və formasını dəyişmək olar.",
+  ["Dartıb ölçüsünü dəyişmə", "Səs yazma", "Çap etmə",
+   "Fayl silmə"], 1, None, 2),
+ ("Simmetrik fiqur çəkmək üçün fiqurun yarısı ilə nə edilir?",
+  "Yarı əks olunur (çevrilir) və birləşdirilir.",
+  ["Əks olunur (çevrilir)", "Silinir", "Rənglənir yalnız",
+   "Çap edilir"], 1, None, 3),
+ ("Mozaika nədir?",
+  "Kiçik hissələrdən yığılan təsvir mozaika adlanır.",
+  ["Kiçik hissələrdən yığılmış təsvir", "Səs yazısı",
+   "Mətn sənədi", "Kompüter oyunu"], 1, None, 2),
+ ("Naxış qurarkən hansı əməliyyat dəfələrlə təkrarlanır?",
+  "Naxış elementinin köçürülməsi təkrarlanır.",
+  ["Fraqmentin köçürülməsi", "Faylın silinməsi",
+   "Kompüterin söndürülməsi", "Rəngin silinməsi"],
+  1, None, 3),
+ ("Rəsmi çap etməzdən əvvəl nəyə baxmaq lazımdır?",
+  "Çapdan əvvəl görünüşə baxıb yoxlamaq lazımdır.",
+  ["Çapdan əvvəl görünüşə", "Televizora", "Pəncərəyə",
+   "Təqvimə"], 1, None, 2),
+ ("Rəsm hansı qurğu ilə kağıza çıxarılır?",
+  "Rəsmlər printerlə çap olunur.",
+  ["Printerlə", "Skanerlə", "Mikrofonla", "Dinamiklə"],
+  1, None, 1),
+ ("Mətnli şəkil yaratmaq üçün şəklə nə əlavə olunur?",
+  "Şəklə yazı əlavə edilir.",
+  ["Yazı", "Səs", "Qoxu", "Heç nə"], 1, None, 2),
+ ("Şəkildə rənglərin bir-birinə uyğunluğu nəyə təsir edir?",
+  "Uyğun rənglər şəklin gözəlliyini artırır.",
+  ["Gözəlliyinə", "Faylın adına", "Printerin sürətinə",
+   "Kompüterin yaddaşına"], 1, None, 2),
+ ("Fiquru 90 dərəcə döndərmək hansı əməliyyatdır?",
+  "Döndərmə fırlatma əməliyyatıdır.",
+  ["Fırlatma", "Silmə", "Doldurma", "Yazma"], 1, None, 3),
+ ("Böyük rəsmi çap etmək üçün kağız necə seçilir?",
+  "Kağız rəsmin ölçüsünə uyğun seçilir.",
+  ["Rəsmin ölçüsünə uyğun", "Həmişə ən kiçik",
+   "Rəngli kağız yalnız", "Fərqi yoxdur"], 1, None, 3),
+ ("Qrafik redaktorda işin nəticəsi nə olur?",
+  "Nəticə rəsm - qrafik fayl olur.",
+  ["Rəsm (qrafik fayl)", "Mahnı", "Cədvəl", "Oyun"],
+  1, None, 2),
+ ("Naxışlarda hansı qanunauyğunluq olur?",
+  "Naxışda elementlər müəyyən qayda ilə təkrarlanır.",
+  ["Elementlərin təkrarlanması", "Tam qarışıqlıq",
+   "Yalnız bir rəng", "Qanunauyğunluq olmur"], 1, None, 3),
+ ("Şəklin ölçüsünü kiçildəndə nə baş verir?",
+  "Təsvir kiçilir, yer az tutur.",
+  ["Təsvir balacalaşır", "Təsvir silinir",
+   "Rənglər itir", "Fayl açılmır"], 1, None, 2),
+ ("Rəsmdə uzaqdakı əşyalar necə təsvir olunur?",
+  "Uzaqdakı əşyalar daha kiçik çəkilir.",
+  ["Daha kiçik", "Daha böyük", "Daha parlaq",
+   "Çəkilmir"], 1, None, 3),
+ ("Rəngli rəsmi çap etmək üçün printerdə nə olmalıdır?",
+  "Printerdə rəngli boya (katric) olmalıdır.",
+  ["Rəngli boya (katric)", "Əlavə klaviatura",
+   "İkinci ekran", "Səs kartı"], 1, None, 3),
+ ("Hazır fiqurların köməyi ilə hansı təsvirləri qurmaq olar?",
+  "Fiqurlardan ev, maşın, robot təsvirləri yığmaq olar.",
+  ["Ev, maşın, robot təsvirlərini", "Yalnız xətləri",
+   "Yalnız nöqtələri", "Heç nəyi"], 1, None, 2),
+ ("Şəkli kompüter yaddaşına yazmaq üçün ona nə verilir?",
+  "Fayla ad verilir.",
+  ["Ad", "Rəng", "Səs", "Qiymət"], 1, None, 2),
+ ("Simmetriyaya malik təsvirə misal hansıdır?",
+  "Kəpənək təsviri simmetrikdir.",
+  ["Kəpənək təsviri", "Ləkə", "Qarışıq cızma-qara",
+   "Təsadüfi xətlər"], 1, None, 2),
+ ("Qrafik redaktorda səliqəli nəticə üçün nə vacibdir?",
+  "Alətlərdən düzgün istifadə səliqəli nəticə verir.",
+  ["Alətlərdən düzgün istifadə", "Sürətli klik",
+   "Bahalı kompüter yalnız", "Təsadüf"], 1, None, 2),
+],
+}
+for _k, _v in YENI_INF.items():
+    SUALLAR[_k] = _v
+
+
+
 def yoxla():
     n = xeta = 0
     butun = set()
@@ -1351,7 +1524,7 @@ def sql_yaz(n):
 --  BU FAYL ELLE YAZILMIR - tools/sinif4.py yaradir:
 --      python3 tools/sinif4.py
 --
---  Az dili 8 movzu + Heyat bilgisi 5 + Informatika 3 = 16 movzu x 20
+--  Az dili 8 movzu + Heyat bilgisi 5 + Informatika 3 = 18 movzu x 20
 --  sual = %d.  Suallar orijinaldir.  ext_key: az4-/hey4-/inf4-...
 --
 --  ON SERT: 14_movzular.sql ve 15_movzular_ederslik.sql islenmis olmalidir.
@@ -1429,11 +1602,11 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'az4-%%' or ext_key like 'hey4-%%'
       or ext_key like 'inf4-%%';
-  if k <> 16 then
-    raise exception 'movzu sayi 16 deyil: %%', k;
+  if k <> 18 then
+    raise exception 'movzu sayi 18 deyil: %%', k;
   end if;
 
-  raise notice '4-cu sinif banki: %% sual, 16 movzu (az dili, heyat bilgisi, informatika).', n;
+  raise notice '4-cu sinif banki: %% sual, 18 movzu (az dili, heyat bilgisi, informatika).', n;
 end $$;
 """ % (n, ",\n".join(setirler), n, n))
     print("yazildi: %s" % CIXIS)

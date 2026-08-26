@@ -6,7 +6,7 @@
 --      python3 tools/sinif6.py
 --
 --  Az dili 8 + Ingilis dili 8 + Informatika 5 + Tarix 3
---  = 24 movzu x 20 = 480.  ext_key: az6-/ing6-/inf6-/tarix6-...
+--  = 27 movzu x 20 = 540.  ext_key: az6-/ing6-/inf6-/tarix6-...
 --  ON SERT: 29_movzular_orta6.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
@@ -511,7 +511,67 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('tarix6-erken-orta#17','tarix','tarix-6-erken-orta',3,3,'Girdiman dövləti hansı sülalə ilə bağlıdır?','Mehranilər sülaləsi ilə.',array['Mehranilərlə','Səfəvilərlə','Əhəmənilərlə','Atabəylərlə'],1),
 ('tarix6-erken-orta#18','tarix','tarix-6-erken-orta',2,3,'Feodal cəmiyyətində əsas sərvət nə idi?','Torpaq əsas sərvət idi.',array['Torpaq','Neft','Kağız pul','Qızıl yalnız'],1),
 ('tarix6-erken-orta#19','tarix','tarix-6-erken-orta',3,3,'Natural təsərrüfat nə deməkdir?','Hər şeyin öz təsərrüfatında istehsal olunması.',array['Hər şeyin öz təsərrüfatında istehsalı','Hər şeyin bazardan alınması','Fabrik istehsalı','Xarici ticarət'],1),
-('tarix6-erken-orta#20','tarix','tarix-6-erken-orta',2,3,'Bəzz qalası ilə bağlı hərəkat necə adlanırdı?','Xürrəmilər hərəkatı.',array['Xürrəmilər hərəkatı','Dekabristlər','Səlib yürüşü','Qızılbaşlar'],1)
+('tarix6-erken-orta#20','tarix','tarix-6-erken-orta',2,3,'Bəzz qalası ilə bağlı hərəkat necə adlanırdı?','Xürrəmilər hərəkatı.',array['Xürrəmilər hərəkatı','Dekabristlər','Səlib yürüşü','Qızılbaşlar'],1),
+('tarix6-manna#1','tarix','tarix-6-manna',2,2,'Manna haqqında məlumatlar hansı yazı növü ilə yazılmış mənbələrdədir?','Assur və Urartu mixi yazıları Manna haqqında əsas mənbədir.',array['Mixi yazılarla','Heroqliflərlə','Latın əlifbası ilə','Runik yazı ilə'],1),
+('tarix6-manna#2','tarix','tarix-6-manna',3,2,'Manna hökmdarı İranzunun oğulları kimlər idi?','İranzudan sonra oğulları Aza və Ullusunu hakimiyyətdə oldular.',array['Aza və Ullusunu','Atropat və Oris','Toğrul və Çağrı','Kir və Dara'],1),
+('tarix6-manna#3','tarix','tarix-6-manna',3,2,'Manna hökmdarı Ullusunu hansı dövlətlə müttəfiqlik edirdi?','Ullusunu Assuriya ilə yaxınlaşaraq ölkəni qorumağa çalışırdı.',array['Assuriya ilə','Roma ilə','Misirlə','Bizansla'],1),
+('tarix6-manna#4','tarix','tarix-6-manna',2,2,'Həsənli təpəsindən tapılmış məşhur Manna abidəsi hansıdır?','Həsənlidən tapılan qızıl cam Manna incəsənətinin şah əsəridir.',array['Qızıl cam','Daş heykəl','Gümüş qılınc','Saxsı küpə'],1),
+('tarix6-manna#5','tarix','tarix-6-manna',2,2,'Manna sənətkarlığında hansı sahə xüsusilə inkişaf etmişdi?','Metalişləmə - qızıl, gümüş və tunc emalı yüksək səviyyədə idi.',array['Metalişləmə','Şüşəüfürmə','Kağız istehsalı','Zərgərlik yalnız'],1),
+('tarix6-manna#6','tarix','tarix-6-manna',2,2,'Manna dövləti hansı dövlətin tərkibinə qatılmaqla süqut etdi?','E.ə. VII əsrin sonunda Manna Midiyaya birləşdirildi.',array['Midiyanın','Romanın','Osmanlının','Sasanilərin'],1),
+('tarix6-manna#7','tarix','tarix-6-manna',2,2,'Manna ordusunun əsas silahları nə idi?','Döyüşçülər ox, nizə və qalxanla silahlanırdı.',array['Ox, nizə və qalxan','Top və tüfəng','Yalnız daşlar','Qılınc yalnız'],1),
+('tarix6-manna#8','tarix','tarix-6-manna',3,2,'Manna hökmdarı ölkəni necə idarə edirdi?','Vilayətlərə hökmdarın təyin etdiyi canişinlər başçılıq edirdi.',array['Canişinlər vasitəsilə','Seçkili şuralarla','Kahinlər vasitəsilə yalnız','İdarə olunmurdu'],1),
+('tarix6-manna#9','tarix','tarix-6-manna',2,2,'Manna əhalisinin dini inancları nə ilə bağlı idi?','Əhali təbiət qüvvələrinə sitayiş edirdi.',array['Təbiət qüvvələrinə sitayişlə','Xristianlıqla','İslamla','Buddizmlə'],1),
+('tarix6-manna#10','tarix','tarix-6-manna',2,2,'Manna incəsənətinə aid qiymətli tapıntılar haradan aşkar olunub?','Həsənli və Ziviyə abidələrindən zəngin tapıntılar əldə edilib.',array['Həsənli və Ziviyədən','Qobustandan','Bakıdan','İçərişəhərdən'],1),
+('tarix6-manna#11','tarix','tarix-6-manna',3,2,'Ziviyə dəfinəsi nə ilə məşhurdur?','Ziviyədən qızıl və gümüş əşyalar tapılmışdır.',array['Qızıl və gümüş əşyalarla','Daş kitabələrlə','Gil qablarla yalnız','Dəmir alətlərlə'],1),
+('tarix6-manna#12','tarix','tarix-6-manna',3,2,'Manna e.ə. VII əsrdə hansı köçəri tayfaların hücumlarına məruz qalırdı?','Şimaldan gələn skif və kimmer tayfaları Mannaya hücumlar edirdi.',array['Skiflərin və kimmerlərin','Ərəblərin','Monqolların','Slavyanların'],1),
+('tarix6-manna#13','tarix','tarix-6-manna',3,2,'Manna hökmdarı Ahşeri dövründə dövlətdə nə baş verdi?','Ahşerinin dövründə üsyanlar güclənmiş, dövlət zəifləmişdi.',array['Üsyanlar gücləndi','Dövlət ən qüdrətli oldu','Paytaxt dəyişdirildi','Yeni əlifba yaradıldı'],1),
+('tarix6-manna#14','tarix','tarix-6-manna',2,2,'Manna şəhərlərinin ətrafına nə çəkilirdi?','Şəhərlər müdafiə divarları ilə əhatə olunurdu.',array['Müdafiə divarları','Su kanalları yalnız','Üzüm bağları','Daş yollar'],1),
+('tarix6-manna#15','tarix','tarix-6-manna',3,2,'Manna dövləti təxminən neçə əsr mövcud olmuşdur?','E.ə. IX əsrdən VII əsrin sonunadək - təqribən üç əsr.',array['Təxminən üç əsr','Yarım əsr','On əsr','Bir əsr'],1),
+('tarix6-manna#16','tarix','tarix-6-manna',2,2,'Manna əkinçiliyində hansı bitkilər becərilirdi?','Taxıl və üzüm becərilməsi geniş yayılmışdı.',array['Taxıl və üzüm','Kartof və pomidor','Çay və sitrus','Pambıq yalnız'],1),
+('tarix6-manna#17','tarix','tarix-6-manna',2,2,'Manna maldarlığında hansı sahə xüsusilə məşhur idi?','Manna atları qonşu ölkələrdə də yüksək qiymətləndirilirdi.',array['Atçılıq','Dəvəçilik','Quşçuluq','Arıçılıq'],1),
+('tarix6-manna#18','tarix','tarix-6-manna',2,2,'Mannada suvarma sistemləri nə üçün qurulurdu?','Kanallar əkin sahələrini su ilə təmin edirdi.',array['Əkin sahələrini su ilə təmin etmək üçün','Gəmiçilik üçün','Balıqçılıq üçün','Şəhərləri bəzəmək üçün'],1),
+('tarix6-manna#19','tarix','tarix-6-manna',2,2,'Manna dövləti Azərbaycan tarixində hansı əhəmiyyəti daşıyır?','Manna Azərbaycan ərazisində ilk güclü dövlət qurumudur.',array['İlk güclü dövlət qurumu kimi','Son orta əsr dövləti kimi','Yalnız şəhər dövləti kimi','Əhəmiyyəti yoxdur'],1),
+('tarix6-manna#20','tarix','tarix-6-manna',3,2,'Assuriya hökmdarları Mannaya yürüşləri zamanı nəyi ələ keçirirdilər?','Yürüşlərdə qənimət və mal-qara aparılırdı.',array['Qənimət və mal-qara','Kitabxanaları','Gəmiləri','Neft quyularını'],1),
+('tarix6-atropatena#1','tarix','tarix-6-atropatena',2,2,'Atropat əvvəllər hansı imperiyanın canişini idi?','Atropat Əhəmənilər imperiyasının Midiya canişini olmuşdu.',array['Əhəmənilərin','Romanın','Assuriyanın','Osmanlının'],1),
+('tarix6-atropatena#2','tarix','tarix-6-atropatena',2,2,'Atropatena dövləti təxminən hansı dövrdə yaranmışdır?','Dövlət e.ə. IV əsrin sonunda müstəqilləşdi.',array['E.ə. IV əsrin sonunda','E.ə. XV əsrdə','Eramızın V əsrində','XVIII əsrdə'],1),
+('tarix6-atropatena#3','tarix','tarix-6-atropatena',3,2,'Atropatenanın Fraaspa qalası hansı dövlətin hücumuna qarşı müdafiə olundu?','Roma qoşunları Fraaspanı ala bilmədilər.',array['Romanın','Misirin','Hindistanın','Çinin'],1),
+('tarix6-atropatena#4','tarix','tarix-6-atropatena',3,2,'E.ə. 36-cı ildə Atropatenaya yürüş edən Roma sərkərdəsi kim idi?','Mark Antoninin yürüşü uğursuzluqla nəticələndi.',array['Mark Antoni','Yuli Sezar','Pompey','Neron'],1),
+('tarix6-atropatena#5','tarix','tarix-6-atropatena',2,2,'Atropatena ordusunun əsas zərbə qüvvəsini nə təşkil edirdi?','Atropatena öz süvariləri ilə məşhur idi.',array['Süvarilər','Fil qoşunu','Donanma','Muzdlular yalnız'],1),
+('tarix6-atropatena#6','tarix','tarix-6-atropatena',2,2,'Atropatena adı zaman keçdikcə hansı ada çevrilmişdir?','Atropatena adı tədricən Azərbaycan adına çevrilmişdir.',array['Azərbaycan adına','Albaniya adına','Midiya adına','Xəzər adına'],1),
+('tarix6-atropatena#7','tarix','tarix-6-atropatena',3,2,'Atropatenada zərb olunan pullar nəyi göstərir?','Pul zərbi ticarətin inkişafından xəbər verir.',array['Ticarətin inkişafını','Yazının olmamasını','Ordunun zəifliyini','Əkinçiliyin tənəzzülünü'],1),
+('tarix6-atropatena#8','tarix','tarix-6-atropatena',3,2,'Atropatena hansı beynəlxalq yolların üzərində yerləşirdi?','Ölkədən Şərqlə Qərbi birləşdirən ticarət yolları keçirdi.',array['Şərqlə Qərbi birləşdirən yolların','Dəniz yollarının yalnız','Şimal buz yollarının','Heç bir yolun'],1),
+('tarix6-atropatena#9','tarix','tarix-6-atropatena',3,2,'Atropatenada atəşpərəstlərin baş məbədi harada yerləşirdi?','Zərdüştiliyin əsas məbədi paytaxt Qazakada idi.',array['Qazakada','Bakıda','Təbrizdə','Dərbənddə'],1),
+('tarix6-atropatena#10','tarix','tarix-6-atropatena',2,2,'Zərdüştiliyin müqəddəs kitabı necə adlanır?','Zərdüştilərin müqəddəs kitabı «Avesta»dır.',array['«Avesta»','«Quran»','«İncil»','«Tövrat»'],1),
+('tarix6-atropatena#11','tarix','tarix-6-atropatena',3,2,'Atropatena e.ə. I əsrdə hansı dövlətlə müttəfiq kimi Romaya qarşı vuruşurdu?','Atropatena Parfiya ilə birlikdə Roma yürüşlərini dəf edirdi.',array['Parfiya ilə','Misirlə','Assuriya ilə','Çinlə'],1),
+('tarix6-atropatena#12','tarix','tarix-6-atropatena',2,2,'Atropatenanın hərbi qüdrətini göstərən əsas fakt hansıdır?','Güclü Roma ordusunun yürüşü dəf edilmişdi.',array['Roma yürüşünün dəf edilməsi','Çinin fəthi','Misirin tutulması','Donanmanın yaradılması'],1),
+('tarix6-atropatena#13','tarix','tarix-6-atropatena',2,2,'Atropatenanın oturaq əhalisi əsasən nə ilə məşğul olurdu?','Münbit torpaqlarda əkinçilik və bağçılıq inkişaf etmişdi.',array['Əkinçilik və bağçılıqla','Dənizçiliklə','Ovçuluqla yalnız','Mədənçiliklə yalnız'],1),
+('tarix6-atropatena#14','tarix','tarix-6-atropatena',2,2,'Atropatenada sənətkarlığın hansı sahələri inkişaf etmişdi?','Dulusçuluq və toxuculuq geniş yayılmışdı.',array['Dulusçuluq və toxuculuq','Saatsazlıq','Kitab çapı','Şüşə istehsalı yalnız'],1),
+('tarix6-atropatena#15','tarix','tarix-6-atropatena',2,2,'Atropatena III əsrdə hansı dövlətin tərkibinə qatıldı?','Ölkə Sasani imperiyasının tərkibinə daxil edildi.',array['Sasanilərin','Romanın','Misirin','Xəzərlərin'],1),
+('tarix6-atropatena#16','tarix','tarix-6-atropatena',3,2,'Atropatenanın təbii sərvətlərindən biri nə idi?','Mənbələr ərazidə çıxan yanar mayedən - neftdən bəhs edir.',array['Neft (yanar maye)','Almaz','Uran','Kömür yalnız'],1),
+('tarix6-atropatena#17','tarix','tarix-6-atropatena',3,2,'Atropatena cəmiyyətində yüksək təbəqəni kimlər təşkil edirdi?','Əyanlar və kahinlər cəmiyyətin yuxarı təbəqəsi idi.',array['Əyanlar və kahinlər','Qullar','Sənətkarlar','Çobanlar'],1),
+('tarix6-atropatena#18','tarix','tarix-6-atropatena',3,2,'Atropatena haqqında məlumat verən antik müəllif kimdir?','Yunan coğrafiyaşünası Strabon Atropatenanı təsvir etmişdir.',array['Strabon','Nizami','Firdovsi','Homer yalnız'],1),
+('tarix6-atropatena#19','tarix','tarix-6-atropatena',3,2,'«Kiçik Midiya» adlanan ərazi hansı dövlətə uyğun gəlir?','Antik müəlliflər Atropatenanı Kiçik Midiya da adlandırırdılar.',array['Atropatenaya','Albaniyaya','Mannaya','Assuriyaya'],1),
+('tarix6-atropatena#20','tarix','tarix-6-atropatena',2,2,'Atropatena süvarilərinin əsas silahı nə idi?','Süvarilər nizə və kamanla silahlanırdı.',array['Nizə və kaman','Top','Tüfəng','Balta yalnız'],1),
+('tarix6-albaniya#1','tarix','tarix-6-albaniya',2,3,'Albaniya dövləti təxminən hansı dövrdə yaranmışdır?','Albaniya e.ə. IV-III əsrlərdə formalaşmışdır.',array['E.ə. IV-III əsrlərdə','XII əsrdə','E.ə. XX əsrdə','Eramızın X əsrində'],1),
+('tarix6-albaniya#2','tarix','tarix-6-albaniya',2,3,'Albaniyanın paytaxtı V əsrdə hansı şəhərə köçürüldü?','Paytaxt Qəbələdən Bərdəyə köçürüldü.',array['Bərdəyə','Gəncəyə','Şamaxıya','Naxçıvana'],1),
+('tarix6-albaniya#3','tarix','tarix-6-albaniya',3,3,'E.ə. 66-65-ci illərdə Albaniyaya yürüş edən Roma sərkərdəsi kim idi?','Pompeyin qoşunları Albaniyaya daxil olmuşdu.',array['Pompey','Mark Antoni','Sezar','Oktavian'],1),
+('tarix6-albaniya#4','tarix','tarix-6-albaniya',3,3,'Roma yürüşləri zamanı alban qoşununa kim başçılıq edirdi?','Alban hökmdarı Oris Pompeyə qarşı vuruşmuşdur.',array['Oris','Atropat','İranzu','Cavanşir'],1),
+('tarix6-albaniya#5','tarix','tarix-6-albaniya',2,3,'Albaniyada xristianlığı dövlət dini elan edən hökmdar kimdir?','IV əsrdə hökmdar Urnayr xristianlığı qəbul etdi.',array['Urnayr','Oris','Babək','Şah İsmayıl'],1),
+('tarix6-albaniya#6','tarix','tarix-6-albaniya',3,3,'«Alban tarixi» əsərinin müəllifi kimdir?','Musa Kalankatlı Albaniyanın tarixini qələmə almışdır.',array['Musa Kalankatlı','Strabon','Herodot','Nizami'],1),
+('tarix6-albaniya#7','tarix','tarix-6-albaniya',3,3,'Albaniyanın ilk xristian məbədlərindən biri hansıdır?','Amaras məbədi ilk kilsələrdən sayılır.',array['Amaras məbədi','Atəşgah','Möminə xatın','Şirvanşahlar sarayı'],1),
+('tarix6-albaniya#8','tarix','tarix-6-albaniya',2,3,'Alban tayfa birliyinə daxil olan tayfalardan biri hansı idi?','Utilər alban tayfa birliyinə daxil idi.',array['Utilər','Franklar','Slavyanlar','Ərəblər'],1),
+('tarix6-albaniya#9','tarix','tarix-6-albaniya',2,3,'Albaniyada balıqçılığın inkişafı hansı təbii şəraitlə bağlı idi?','Kür çayı və Xəzər dənizi balıqla zəngin idi.',array['Kür və Xəzərlə','Səhraların çoxluğu ilə','Dağların hündürlüyü ilə','Meşələrlə'],1),
+('tarix6-albaniya#10','tarix','tarix-6-albaniya',2,3,'Albaniyada IV əsrədək əhali nəyə sitayiş edirdi?','Əhali Aya və Günəşə sitayiş edirdi.',array['Aya və Günəşə','Yalnız oda','Heykəllərə yalnız','Heç nəyə'],1),
+('tarix6-albaniya#11','tarix','tarix-6-albaniya',2,3,'Albaniya hansı iki böyük çayın hövzəsində yerləşirdi?','Ölkənin əsas torpaqları Kür və Araz hövzəsində idi.',array['Kür və Araz','Nil və Konqo','Volqa və Don','Dəclə və Fərat'],1),
+('tarix6-albaniya#12','tarix','tarix-6-albaniya',3,3,'Sasanilər Albaniyanı idarə etmək üçün kimləri təyin edirdilər?','Ölkəyə Sasani mərzbanları göndərilirdi.',array['Mərzbanları','Konsulları','Sultanları','Xanları'],1),
+('tarix6-albaniya#13','tarix','tarix-6-albaniya',3,3,'Alban kilsəsi hansı statusa malik idi?','Alban kilsəsi müstəqil (avtokefal) kilsə idi.',array['Müstəqil (avtokefal) kilsə idi','Roma kilsəsinə tabe idi','Fəaliyyət göstərmirdi','Yalnız monastır idi'],1),
+('tarix6-albaniya#14','tarix','tarix-6-albaniya',3,3,'Albaniyada ipəkçilik hansı bölgədə xüsusilə inkişaf etmişdi?','Şəki-Qəbələ bölgəsi ipəkçiliyi ilə tanınırdı.',array['Şəki-Qəbələ bölgəsində','Muğanda yalnız','Abşeronda','Naxçıvanda'],1),
+('tarix6-albaniya#15','tarix','tarix-6-albaniya',3,3,'Qəbələ təxminən nə qədər müddət Albaniyanın paytaxtı olmuşdur?','Qəbələ təqribən 600 il paytaxt olaraq qalmışdır.',array['Təxminən 600 il','50 il','10 il','2000 il'],1),
+('tarix6-albaniya#16','tarix','tarix-6-albaniya',3,3,'Albaniya ərazisində geniş yayılmış qədim dəfn abidələri hansılardır?','Arxeoloqlar çoxlu küp qəbirləri aşkar etmişlər.',array['Küp qəbirləri','Ehramlar','Mavzoleylər','Kurqansız düzlər'],1),
+('tarix6-albaniya#17','tarix','tarix-6-albaniya',2,3,'Albaniyanın şimal sərhədlərini qorumaq üçün hansı istehkam sistemi vardı?','Dərbənd səddi şimal hücumlarının qarşısını alırdı.',array['Dərbənd səddi','Çin səddi','Roma valı','Bakı qalası'],1),
+('tarix6-albaniya#18','tarix','tarix-6-albaniya',3,3,'Albaniyada zərgərlik və şüşə məmulatları istehsalı nəyi göstərir?','Bu tapıntılar sənətkarlığın yüksək inkişafını sübut edir.',array['Sənətkarlığın inkişafını','Yazının olmamasını','Ticarətin dayanmasını','Əhalinin azlığını'],1),
+('tarix6-albaniya#19','tarix','tarix-6-albaniya',2,3,'Alban yazısı hansı əsrdə yaradılmışdır?','Alban əlifbası V əsrdə tərtib olunmuşdur.',array['V əsrdə','XX əsrdə','E.ə. X əsrdə','XV əsrdə'],1),
+('tarix6-albaniya#20','tarix','tarix-6-albaniya',3,3,'Antik müəlliflər Albaniyanın təbiətini necə təsvir edirdilər?','Mənbələr Albaniyanı münbit və məhsuldar ölkə kimi təsvir edir.',array['Münbit və məhsuldar ölkə kimi','Səhra kimi','Buzlaq kimi','Yaşayışsız ada kimi'],1)
 ),
 ins as (
   insert into public.questions
@@ -544,8 +604,8 @@ begin
    where owner_type = 'platform'
      and (ext_key like 'az6-%' or ext_key like 'ing6-%'
           or ext_key like 'inf6-%' or ext_key like 'tarix6-%');
-  if n <> 480 then
-    raise exception 'sinif6 suallari: 480 gozlenilirdi, % tapildi', n;
+  if n <> 540 then
+    raise exception 'sinif6 suallari: 540 gozlenilirdi, % tapildi', n;
   end if;
   select count(*) into k from public.questions q
    where (q.ext_key like 'az6-%' or q.ext_key like 'ing6-%'
@@ -560,8 +620,8 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'az6-%' or ext_key like 'ing6-%'
       or ext_key like 'inf6-%' or ext_key like 'tarix6-%';
-  if k <> 24 then
-    raise exception 'movzu sayi 24 deyil: %', k;
+  if k <> 27 then
+    raise exception 'movzu sayi 27 deyil: %', k;
   end if;
-  raise notice '6-ci sinif banki: % sual, 24 movzu (az, ing, inf, tarix).', n;
+  raise notice '6-ci sinif banki: % sual, 27 movzu (az, ing, inf, tarix).', n;
 end $$;

@@ -78,6 +78,8 @@ select s.id, l.id, v.slug, v.name, v.sort
     ('tarix','8','tarix-8-xviii-1',   'Azərbaycan XVIII əsrin I yarısında',  20),
     ('tarix','8','tarix-8-xanliqlar', 'Xanlıqlar dövrü',                     30),
     ('tarix','8','tarix-8-xix',       'Azərbaycan XIX əsrin əvvəllərində',   40),
+    ('tarix','8','tarix-8-muqavileler','Gülüstan və Türkmənçay müqavilələri', 50),
+    ('tarix','8','tarix-8-medeniyyet','XVII–XIX əsrin əvvəli: mədəniyyət',   60),
 
     -- ==================== FIZIKA 8 (931 + 932) ========================
     ('fizika','8','fiz-8-quvve',        'Qüvvə',                             10),
@@ -130,8 +132,8 @@ begin
     join public.levels l on l.id = t.level_id
     join public.programs p on p.id = l.program_id
    where p.slug = 'orta' and l.code = '8';
-  if n < 63 then
-    raise exception '8-ci sinif movzulari: 63 gozlenilirdi, % tapildi', n;
+  if n < 65 then
+    raise exception '8-ci sinif movzulari: 65 gozlenilirdi, % tapildi', n;
   end if;
 
   select string_agg(x.slug || '=' || x.say, ', ') into bad from (
@@ -146,7 +148,7 @@ begin
       or (x.slug = 'az-dili'      and x.say <> 8)
       or (x.slug = 'ingilis-dili' and x.say <> 6)
       or (x.slug = 'informatika'  and x.say <> 6)
-      or (x.slug = 'tarix'        and x.say <> 4)
+      or (x.slug = 'tarix'        and x.say <> 6)
       or (x.slug = 'fizika'       and x.say <> 6)
       or (x.slug = 'kimya'        and x.say <> 6)
       or (x.slug = 'biologiya'    and x.say <> 8)
@@ -155,5 +157,5 @@ begin
     raise exception 'Fenn uzre movzu sayi gozlenilenden ferqlidir: %', bad;
   end if;
 
-  raise notice '8-ci sinif agaci: % movzu (riy 11, az 8, ing 6, inf 6, tarix 4, fiz 6, kim 6, bio 8, cog 8).', n;
+  raise notice '8-ci sinif agaci: % movzu (riy 11, az 8, ing 6, inf 6, tarix 6, fiz 6, kim 6, bio 8, cog 8).', n;
 end $$;

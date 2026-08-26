@@ -1581,6 +1581,184 @@ for _k, _v in ELAVE.items():
     SUALLAR[_k] = SUALLAR[_k] + _v
 
 
+MOVZULAR += [
+    ("fizika", "fiz-6-olcmeler", 1),
+    ("fizika", "fiz-6-enerji",   4),
+]
+
+YENI_FIZ = {
+"fiz-6-olcmeler": [
+ ("Menzurkanın bölgü qiyməti 2 ml-dirsə, bu nə deməkdir?",
+  "Qonşu bölgülər arasındakı fərq 2 ml-dir.",
+  ["Qonşu bölgülər arası 2 ml-dir", "Menzurka 2 ml tutur",
+   "Ən böyük qiymət 2 ml-dir", "Menzurka sınıqdır"],
+  1, None, 2),
+ ("BS (Beynəlxalq Sistem) hansı əsas vahidləri götürür?",
+  "Uzunluq - metr, kütlə - kiloqram, zaman - saniyə.",
+  ["Metr, kiloqram, saniyə", "Verst, pud, saat",
+   "Mil, funt, gün", "Düym, unsiya, həftə"], 1, None, 2),
+ ("2,5 m neçə santimetrdir?",
+  "1 m = 100 sm, 2,5 m = 250 sm.",
+  ["250 sm", "25 sm", "2 500 sm", "205 sm"], 1,
+  "%d sm" % 250, 2),
+ ("0,5 km neçə metrdir?",
+  "1 km = 1 000 m, yarısı 500 m.",
+  ["500 m", "50 m", "5 000 m", "550 m"], 1,
+  "%d m" % 500, 2),
+ ("1 t neçə kiloqramdır?",
+  "1 ton = 1 000 kq.",
+  ["1 000 kq", "100 kq", "10 kq", "10 000 kq"],
+  1, None, 1),
+ ("5 dəqiqə neçə saniyədir?",
+  "5 × 60 = 300 saniyə.",
+  ["300 saniyə", "500 saniyə", "50 saniyə", "3 000 saniyə"],
+  1, "%d saniyə" % (5 * 60), 2),
+ ("Sahə hansı vahidlə ölçülür?",
+  "Sahənin BS vahidi kvadrat metrdir.",
+  ["m²", "m³", "kq", "san"], 1, None, 2),
+ ("Həcmin BS vahidi hansıdır?",
+  "Həcm kub metrlə ölçülür.",
+  ["m³", "m²", "litr yalnız", "metr"], 1, None, 2),
+ ("Qısa zaman fasilələrini dəqiq ölçmək üçün hansı cihazdan istifadə olunur?",
+  "İdman yarışlarında saniyəölçən işlədilir.",
+  ["Saniyəölçən", "Tərəzi", "Menzurka", "Barometr"],
+  1, None, 2),
+ ("Termometrin bölgü qiyməti 1°C-dirsə, o nəyi dəqiq göstərə bilər?",
+  "Belə termometr tam dərəcələri dəqiq göstərir.",
+  ["Tam dərəcələri", "Dərəcənin mindəbirini",
+   "Yalnız mənfi qiymətləri", "Heç nəyi"], 1, None, 3),
+ ("Ölçmə zamanı gözün düzgün vəziyyəti necə olmalıdır?",
+  "Göz şkala ilə eyni səviyyədə olmalıdır.",
+  ["Şkala ilə eyni səviyyədə", "Şkaladan yuxarıda",
+   "Şkaladan aşağıda", "Fərqi yoxdur"], 1, None, 2),
+ ("125 sm neçə metrdir?",
+  "125 sm = 1,25 m.",
+  ["1,25 m", "12,5 m", "0,125 m", "125 m"], 1, None, 2),
+ ("Kütləni tərəzidə dəqiq ölçmək üçün nədən istifadə olunur?",
+  "Müxtəlif ölçülü çəki daşlarından istifadə edilir.",
+  ["Çəki daşlarından", "Xətkeşdən", "Menzurkadan",
+   "Termometrdən"], 1, None, 2),
+ ("Ölçmə xətası nə vaxt azalır?",
+  "Bölgü qiyməti kiçik olan dəqiq cihaz seçiləndə xəta azalır.",
+  ["Dəqiq cihaz seçiləndə", "Tələsik ölçəndə",
+   "Cihazsız təxmin edəndə", "Qaranlıqda ölçəndə"],
+  1, None, 2),
+ ("Mayenin həcmini menzurka ilə ölçərkən hansı səviyyə oxunur?",
+  "Maye səthinin alt (çökük) xətti üzrə oxunur.",
+  ["Maye səthinin alt xətti", "Qabın kənarı",
+   "Ən yuxarı damcı", "Qabın dibi"], 1, None, 3),
+ ("Bir neçə dəfə ölçüb orta qiymət götürmək nə üçün lazımdır?",
+  "Təkrar ölçmələr xətanı azaldır.",
+  ["Xətanı azaltmaq üçün", "Vaxt keçirmək üçün",
+   "Cihazı yoxlamaq üçün yalnız", "Lazım deyil"],
+  1, None, 3),
+ ("Uzunluğun köməkçi vahidlərinə misal hansıdır?",
+  "Millimetr və kilometr metrin köməkçi vahidləridir.",
+  ["Millimetr və kilometr", "Kiloqram və qram",
+   "Saat və saniyə", "Litr və millilitr"], 1, None, 2),
+ ("2 dəqiqə neçə saniyədir?",
+  "2 × 60 = 120 saniyə.",
+  ["120 saniyə", "20 saniyə", "200 saniyə", "60 saniyə"],
+  1, "%d saniyə" % (2 * 60), 1),
+ ("Cihazın ölçmə həddi nədir?",
+  "Cihazın ölçə biləcəyi ən böyük qiymətdir.",
+  ["Ölçə biləcəyi ən böyük qiymət", "Cihazın çəkisi",
+   "Cihazın qiyməti", "Bölgülərin sayı"], 1, None, 3),
+ ("10 mm neçə santimetrdir?",
+  "10 mm = 1 sm.",
+  ["1 sm", "10 sm", "100 sm", "0,1 sm"], 1,
+  "%d sm" % 1, 1),
+],
+"fiz-6-enerji": [
+ ("Cismin sürətini tapmaq üçün gedilən yolu nəyə bölmək lazımdır?",
+  "Sürət yolun zamana nisbətidir.",
+  ["Zamana", "Kütləyə", "Həcmə", "Temperatura"],
+  1, None, 2),
+ ("Avtomobil 100 km yolu 2 saata qət etdi. Sürəti neçədir?",
+  "100 : 2 = 50 km/saat.",
+  ["50 km/saat", "200 km/saat", "102 km/saat", "98 km/saat"],
+  1, "%d km/saat" % (100 // 2), 2),
+ ("Piyada ilə avtomobildən hansının sürəti böyükdür?",
+  "Avtomobil vahid zamanda daha çox yol gedir.",
+  ["Avtomobilin", "Piyadanın", "Bərabərdir", "Bilinmir"],
+  1, None, 1),
+ ("Mexaniki enerjinin hansı növləri var?",
+  "Kinetik və potensial enerji mexaniki enerjinin növləridir.",
+  ["Kinetik və potensial", "İsti və soyuq",
+   "Bərk və maye", "Müsbət və mənfi yalnız"], 1, None, 2),
+ ("Sıxılmış yayın enerjisi hansı enerji növünə aiddir?",
+  "Sıxılmış yay potensial enerjiyə malikdir.",
+  ["Potensial enerjidir", "Kinetik enerjidir",
+   "İstilik enerjisidir", "Enerjisi yoxdur"], 1, None, 3),
+ ("Enerji bir növdən başqa növə keçə bilərmi?",
+  "Enerji itmir, bir növdən digərinə çevrilir.",
+  ["Bəli, çevrilir", "Xeyr, heç vaxt", "Yalnız qışda",
+   "Yalnız suda"], 1, None, 2),
+ ("Elektrik dövrəsinin əsas hissələri hansılardır?",
+  "Dövrə mənbə, keçirici və istehlakçıdan ibarətdir.",
+  ["Mənbə, keçirici, istehlakçı", "Yalnız lampalar",
+   "Yalnız kabellər", "Yalnız açar"], 1, None, 3),
+ ("Elektrik cərəyanının istilik təsirinə misal hansıdır?",
+  "Elektrik sobasının qızması istilik təsiridir.",
+  ["Elektrik sobasının qızması", "Kölgənin düşməsi",
+   "Yağışın yağması", "Küləyin əsməsi"], 1, None, 2),
+ ("Cərəyanın işıq təsirindən harada istifadə olunur?",
+  "Lampalar cərəyanın işıq təsirinə əsaslanır.",
+  ["Lampalarda", "Tərəzilərdə", "Xətkeşlərdə",
+   "Menzurkalarda"], 1, None, 2),
+ ("Açar elektrik dövrəsində nə üçündür?",
+  "Açar dövrəni qapayıb-açmaq üçündür.",
+  ["Cərəyanı qoşub-ayırmaq üçün", "İşığı boyamaq üçün",
+   "Səs vermək üçün", "Bəzək üçün"], 1, None, 2),
+ ("Külək enerjisindən müasir dövrdə nə üçün istifadə olunur?",
+  "Külək turbinləri elektrik enerjisi istehsal edir.",
+  ["Elektrik almaq üçün", "Yağış yağdırmaq üçün",
+   "Torpağı qızdırmaq üçün", "İstifadə olunmur"],
+  1, None, 2),
+ ("Günəş panelləri hansı enerjini elektrik enerjisinə çevirir?",
+  "Panellər işıq enerjisini elektrikə çevirir.",
+  ["İşıq (Günəş) enerjisini", "Səs enerjisini",
+   "Külək enerjisini", "Nüvə enerjisini"], 1, None, 2),
+ ("Suyun axını hansı qurğularda elektrik enerjisi verir?",
+  "Su elektrik stansiyalarında axının enerjisindən istifadə olunur.",
+  ["Su elektrik stansiyalarında", "Dəyirmanlarda yalnız",
+   "Hovuzlarda", "Fəvvarələrdə"], 1, None, 3),
+ ("Yanacaqlar (odun, qaz) yanarkən enerji hansı formada ayrılır?",
+  "Yanma zamanı istilik enerjisi ayrılır.",
+  ["İstilik şəklində", "Yalnız səs şəklində",
+   "Maqnit sahəsi şəklində", "Ayrılmır"], 1, None, 3),
+ ("Hərəkət edən avtomobilin enerjisi hansı enerji növüdür?",
+  "Hərəkətdəki cismin enerjisi kinetik enerjidir.",
+  ["Kinetik enerjidir", "Potensial enerjidir",
+   "Kimyəvi enerjidir", "Enerjisi yoxdur"], 1, None, 2),
+ ("Sürəti dəyişməyən hərəkət necə adlanır?",
+  "Sürət sabit qalırsa, hərəkət bərabərsürətlidir.",
+  ["Bərabərsürətli hərəkət", "Dəyişənsürətli hərəkət",
+   "Fırlanma hərəkəti", "Rəqsi hərəkət"], 1, None, 3),
+ ("Velosipedçi 30 km/saat sürətlə 2 saat getdi. Nə qədər yol qət etdi?",
+  "30 × 2 = 60 km.",
+  ["60 km", "15 km", "32 km", "28 km"], 1,
+  "%d km" % (30 * 2), 3),
+ ("Enerjiyə qənaətin sadə yollarından biri hansıdır?",
+  "İşlətmədikdə cihazları söndürmək enerjiyə qənaətdir.",
+  ["İşlətmədikdə cihazları söndürmək", "İşığı gecə-gündüz yandırmaq",
+   "Pəncərəni qışda açıq qoymaq", "Cihazları daim işlətmək"],
+  1, None, 2),
+ ("Cərəyanın maqnit təsirindən istifadə edən qurğu hansıdır?",
+  "Elektromaqnit cərəyanın maqnit təsirinə əsaslanır.",
+  ["Elektromaqnit", "Termometr", "Menzurka", "Xətkeş"],
+  1, None, 3),
+ ("Batareyada hansı enerji elektrik enerjisinə çevrilir?",
+  "Batareyada kimyəvi enerji elektrikə çevrilir.",
+  ["Kimyəvi enerji", "Səs enerjisi", "İşıq enerjisi",
+   "Külək enerjisi"], 1, None, 3),
+],
+}
+for _k, _v in YENI_FIZ.items():
+    SUALLAR[_k] = _v
+
+
+
 def yoxla():
     n = xeta = 0
     butun = set()
@@ -1630,7 +1808,7 @@ def sql_yaz(n):
 --  BU FAYL ELLE YAZILMIR - tools/fenn6.py yaradir:
 --      python3 tools/fenn6.py
 --
---  Fizika 4 + Biologiya 8 + Cografiya 7 = 19 movzu x 20 = %d.
+--  Fizika 6 + Biologiya 8 + Cografiya 7 = 21 movzu x 20 = %d.
 --  ext_key: fiz6-/bio6-/cog6-...
 --  ON SERT: 29_movzular_orta6.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
@@ -1705,10 +1883,10 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'fiz6-%%' or ext_key like 'bio6-%%'
       or ext_key like 'cog6-%%';
-  if k <> 19 then
-    raise exception 'movzu sayi 19 deyil: %%', k;
+  if k <> 21 then
+    raise exception 'movzu sayi 21 deyil: %%', k;
   end if;
-  raise notice '6-ci sinif tebiet fennleri banki: %% sual, 19 movzu (fiz, bio, cog).', n;
+  raise notice '6-ci sinif tebiet fennleri banki: %% sual, 21 movzu (fiz, bio, cog).', n;
 end $$;
 """ % (n, ",\n".join(setirler), n, n))
     print("yazildi: %s" % CIXIS)

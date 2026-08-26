@@ -5,7 +5,7 @@
 --      python3 tools/sinif1.py
 --
 --  Riyaziyyat 12 + Az dili 6 + Heyat bilgisi 5 + Informatika 4
---  = 27 movzu x 20 = 540.  ext_key: riy1-/az1-/hey1-/inf1-...
+--  = 28 movzu x 20 = 560.  ext_key: riy1-/az1-/hey1-/inf1-...
 --  ON SERT: 14_movzular.sql ve 15_movzular_ederslik.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
@@ -570,7 +570,27 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('inf1-kompyuter#17','informatika','inf-1-kompyuter',1,4,'Ekrana çox yaxından baxmaq nəyə zərərdir?','Yaxın məsafə gözləri yorur.',array['Gözlərə','Ayaqlara','Saçlara','Heç nəyə'],1),
 ('inf1-kompyuter#18','informatika','inf-1-kompyuter',1,4,'Kompüter oyunundan əvvəl kimdən icazə almaq lazımdır?','Valideynlərdən icazə alınmalıdır.',array['Valideynlərdən','Qonşudan','Dostdan','Heç kimdən'],1),
 ('inf1-kompyuter#19','informatika','inf-1-kompyuter',2,4,'Kompüter masasının arxasında qamətimiz necə olmalıdır?','Kürək düz saxlanmalıdır.',array['Düz','Əyri','Yatmış','Fərqi yoxdur'],1),
-('inf1-kompyuter#20','informatika','inf-1-kompyuter',2,4,'Kompüter insan üçün nədir?','Kompüter işdə və təhsildə köməkçi vasitədir.',array['Köməkçi vasitə','Oyuncaq yalnız','Yemək qabı','Geyim'],1)
+('inf1-kompyuter#20','informatika','inf-1-kompyuter',2,4,'Kompüter insan üçün nədir?','Kompüter işdə və təhsildə köməkçi vasitədir.',array['Köməkçi vasitə','Oyuncaq yalnız','Yemək qabı','Geyim'],1),
+('inf1-komp-imkanlar#1','informatika','inf-1-komp-imkanlar',1,4,'Şəkil çəkən proqramda fırça aləti nə üçündür?','Fırça ilə şəkil rənglənir.',array['Rəngləmək üçün','Yazı silmək üçün','Səs yazmaq üçün','Kompüteri söndürmək üçün'],1),
+('inf1-komp-imkanlar#2','informatika','inf-1-komp-imkanlar',2,4,'Kompüterdə düz xətt çəkmək üçün hansı alət seçilir?','Xətt aləti düz xətt çəkir.',array['Xətt aləti','Silgi','Boşluq düyməsi','Dinamik'],1),
+('inf1-komp-imkanlar#3','informatika','inf-1-komp-imkanlar',2,4,'Çəkilmiş fiqurun içini rəngləmək üçün hansı alət işlədilir?','Doldurma aləti fiqurun içini boyayır.',array['Doldurma (boyama) aləti','Xətkeş','Qayçı','Klaviatura'],1),
+('inf1-komp-imkanlar#4','informatika','inf-1-komp-imkanlar',2,4,'Kompüterdə dairə çəkmək üçün hansı fiqur aləti işlədilir?','Oval (dairə) aləti ilə dairə çəkilir.',array['Oval (dairə) aləti','Kvadrat aləti','Ulduz aləti','Yazı aləti'],1),
+('inf1-komp-imkanlar#5','informatika','inf-1-komp-imkanlar',1,4,'Səhv çəkilmiş xətti hansı alətlə silmək olar?','Pozan (silgi) aləti çəkilmişi silir.',array['Pozan (silgi) alətlə','Fırça ilə','Mausun sağ düyməsi ilə','Silmək olmaz'],1),
+('inf1-komp-imkanlar#6','informatika','inf-1-komp-imkanlar',1,4,'Kompüterdə yazdığımız hərflər harada görünür?','Yazdıqlarımız ekranda görünür.',array['Ekranda','Printerin içində','Mausda','Kabeldə'],1),
+('inf1-komp-imkanlar#7','informatika','inf-1-komp-imkanlar',1,4,'Kalkulyator proqramı ilə nə etmək olar?','Kalkulyatorla hesablamaq olar.',array['Hesablamaq','Mahnı oxumaq','Şəkil çəkmək','Yatmaq'],1),
+('inf1-komp-imkanlar#8','informatika','inf-1-komp-imkanlar',2,4,'Şəkil proqramında rənglər haradan seçilir?','Rənglər rəng qutusundan (palitradan) seçilir.',array['Rəng qutusundan (palitradan)','Klaviaturadan','Printerdən','Kabeldən'],1),
+('inf1-komp-imkanlar#9','informatika','inf-1-komp-imkanlar',2,4,'Çəkilmiş şəkil kompüterdə harada qalır?','Saxlanılan şəkil yaddaşda qalır.',array['Yaddaşda saxlanılır','Ekranın arxasında','Mausun içində','Heç yerdə'],1),
+('inf1-komp-imkanlar#10','informatika','inf-1-komp-imkanlar',2,4,'Kompüterdə fiqurlardan (dairə, kvadrat) nə qurmaq olar?','Fiqurları birləşdirib şəkil və naxış qurmaq olar.',array['Şəkil və naxış','Yemək','Oyuncaq','Geyim'],1),
+('inf1-komp-imkanlar#11','informatika','inf-1-komp-imkanlar',1,4,'Yazı yazanda sözlər arasında nə buraxılır?','Sözlər arasında boşluq olur.',array['Boşluq','Rəqəm','Şəkil','Heç nə'],1),
+('inf1-komp-imkanlar#12','informatika','inf-1-komp-imkanlar',1,4,'Kompüterdə şəkil çəkməkdən başqa daha nə etmək mümkündür?','Kompüterdə yazı yazmaq və hesablamaq da olar.',array['Yazı yazmaq və hesablamaq','Yalnız oynamaq','Yemək bişirmək','Paltar tikmək'],1),
+('inf1-komp-imkanlar#13','informatika','inf-1-komp-imkanlar',1,4,'Şəkil çəkərkən rəngi dəyişmək istəsən nə etməlisən?','Palitradan başqa rəng seçmək lazımdır.',array['Başqa rəng seçməlisən','Kompüteri söndürməlisən','Şəkli silməlisən','Gözləməlisən'],1),
+('inf1-komp-imkanlar#14','informatika','inf-1-komp-imkanlar',2,4,'Kompüterdə çəkilən şəkil kağızdakı şəkildən nə ilə fərqlənir?','Kompüter şəklini asanlıqla düzəltmək olur.',array['Asan düzəldilə bilər','Heç vaxt silinmir','Həmişə qara olur','Fərqlənmir'],1),
+('inf1-komp-imkanlar#15','informatika','inf-1-komp-imkanlar',1,4,'Klaviaturada rəqəm düymələri nə üçün lazımdır?','Rəqəm düymələri ilə ədədlər yazılır.',array['Ədədləri yazmaq üçün','Şəkil çəkmək üçün','Səsi artırmaq üçün','İşıq yandırmaq üçün'],1),
+('inf1-komp-imkanlar#16','informatika','inf-1-komp-imkanlar',2,4,'Kompüter yazıda buraxılan səhvi necə düzəltməyə imkan verir?','Səhvi silib yenidən yazmaq mümkündür.',array['Silib yenidən yazmaqla','Kağızı cırmaqla','Pozanla kağızda silməklə','İmkan vermir'],1),
+('inf1-komp-imkanlar#17','informatika','inf-1-komp-imkanlar',2,4,'Sadə misalı (2 + 3) kompüterdə hansı proqramla hesablamaq olar?','Kalkulyator proqramı misalları hesablayır.',array['Kalkulyatorla','Şəkil proqramı ilə','Saatla','Təqvimlə'],1),
+('inf1-komp-imkanlar#18','informatika','inf-1-komp-imkanlar',2,4,'Naxış çəkmək üçün hansı fiqurları təkrarlamaq olar?','Dairə və kvadratları təkrarlayıb naxış qurmaq olar.',array['Dairə və kvadratları','Yalnız hərfləri','Yalnız rəqəmləri','Heç nəyi'],1),
+('inf1-komp-imkanlar#19','informatika','inf-1-komp-imkanlar',2,4,'Kompüterdə iş bitəndə çəkdiyin şəkli saxlamasan nə olar?','Saxlanmayan şəkil itər.',array['Şəkil itər','Şəkil böyüyər','Şəkil çap olunar','Heç nə olmaz'],1),
+('inf1-komp-imkanlar#20','informatika','inf-1-komp-imkanlar',1,4,'Hansı işi kompüter görə bilməz?','Kompüter yemək bişirə bilməz.',array['Yemək bişirmək','Hesablamaq','Şəkil göstərmək','Yazı yazmaq'],1)
 ),
 ins as (
   insert into public.questions
@@ -603,8 +623,8 @@ begin
    where owner_type = 'platform'
      and (ext_key like 'riy1-%' or ext_key like 'az1-%'
           or ext_key like 'hey1-%' or ext_key like 'inf1-%');
-  if n <> 540 then
-    raise exception 'sinif1 suallari: 540 gozlenilirdi, % tapildi', n;
+  if n <> 560 then
+    raise exception 'sinif1 suallari: 560 gozlenilirdi, % tapildi', n;
   end if;
   select count(*) into k from public.questions q
    where (q.ext_key like 'riy1-%' or q.ext_key like 'az1-%'
@@ -619,8 +639,8 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'riy1-%' or ext_key like 'az1-%'
       or ext_key like 'hey1-%' or ext_key like 'inf1-%';
-  if k <> 27 then
-    raise exception 'movzu sayi 27 deyil: %', k;
+  if k <> 28 then
+    raise exception 'movzu sayi 28 deyil: %', k;
   end if;
-  raise notice '1-ci sinif banki: % sual, 27 movzu (riy, az, hey, inf).', n;
+  raise notice '1-ci sinif banki: % sual, 28 movzu (riy, az, hey, inf).', n;
 end $$;

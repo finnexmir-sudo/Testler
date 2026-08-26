@@ -1426,6 +1426,95 @@ for _k, _v in ELAVE.items():
 
 
 
+MOVZULAR += [("informatika", "inf-3-qrafik", 3)]
+YENI_INF = {
+"inf-3-qrafik": [
+ ("Paint proqramında karandaş aləti nə edir?",
+  "Karandaş aləti nazik xətt çəkir.",
+  ["Nazik xətt çəkir", "Şəkli silir", "Səs çıxarır",
+   "Faylı bağlayır"], 1, None, 1),
+ ("Palitra nədir?",
+  "Palitra rənglər toplusudur.",
+  ["Rənglər toplusu", "Alətlər qutusu", "Fayl adı",
+   "Kompüter hissəsi"], 1, None, 2),
+ ("Şəklin bir hissəsini seçmək üçün hansı alətdən istifadə olunur?",
+  "Seçmə aləti fraqmenti ayırır.",
+  ["Seçmə aləti", "Fırça", "Silgi", "Sprey"], 1, None, 2),
+ ("Seçilmiş fraqmenti başqa yerə necə aparmaq olar?",
+  "Fraqmenti sürükləyib köçürmək olar.",
+  ["Köçürməklə (sürükləməklə)", "Kabellə", "Printerlə",
+   "Aparmaq olmaz"], 1, None, 2),
+ ("Paint-də fiqurun içini rəngləmək üçün hansı alət işlədilir?",
+  "Doldurma aləti qapalı sahəni rənglə doldurur.",
+  ["Doldurma aləti", "Mətn aləti", "Lupa", "Karandaş"],
+  1, None, 2),
+ ("Çəkilmiş şəkli kompüterdə saxlamaq üçün hansı əmr verilir?",
+  "Saxla (Save) əmri şəkli fayl kimi yazır.",
+  ["Saxla (Save) əmri", "Sil əmri", "Çap əmri yalnız",
+   "Bağla əmri"], 1, None, 2),
+ ("Paint-də düz xətt çəkmək üçün hansı alət seçilir?",
+  "Xətt aləti düz xətt çəkməyə imkan verir.",
+  ["Xətt aləti", "Sprey", "Silgi", "Seçmə aləti"],
+  1, None, 1),
+ ("Paint-də səhv əməliyyatı necə geri qaytarmaq olar?",
+  "Geri (Undo) əmri son əməliyyatı ləğv edir.",
+  ["Geri (Undo) əmri ilə", "Kompüteri söndürməklə",
+   "Ekranı silməklə", "Mümkün deyil"], 1, None, 2),
+ ("Şəklin fraqmentini silsək nə baş verər?",
+  "Silinmiş yer ağ (fon rəngində) qalar.",
+  ["Həmin hissə ağ qalar", "Bütün şəkil silinər",
+   "Şəkil böyüyər", "Heç nə olmaz"], 1, None, 2),
+ ("Rəng püskürdən (sprey) alət nə üçün istifadə olunur?",
+  "Sprey səpələnmiş rəng effekti verir.",
+  ["Səpələnmiş rəng vurmaq üçün", "Yazı yazmaq üçün",
+   "Faylı silmək üçün", "Şəkli kiçiltmək üçün"], 1, None, 2),
+ ("Paint-də hazır fiqurlara misal hansılardır?",
+  "Alətlər arasında düzbucaqlı, oval, çoxbucaqlı var.",
+  ["Düzbucaqlı, oval, çoxbucaqlı", "Yalnız ulduz",
+   "Yalnız ürək", "Fiqur yoxdur"], 1, None, 2),
+ ("Şəkli çəkməzdən əvvəl nəyi düşünmək faydalıdır?",
+  "Əvvəlcə nə çəkəcəyini fikirləşmək lazımdır.",
+  ["Nə çəkəcəyini", "Printerin rəngini", "Kabelin uzunluğunu",
+   "Heç nəyi"], 1, None, 1),
+ ("Böyüdücü (lupa) aləti nə üçündür?",
+  "Lupa şəklin hissəsini böyüdüb dəqiq işləməyə imkan verir.",
+  ["Şəklin hissəsini böyütmək üçün", "Şəkli silmək üçün",
+   "Rəng seçmək üçün", "Fayl açmaq üçün"], 1, None, 2),
+ ("Paint-də silgi aləti nəyi silir?",
+  "Silgi şəklin çəkilmiş hissəsini təmizləyir.",
+  ["Şəklin çəkilmiş hissəsini", "Faylın adını",
+   "Kompüterin yaddaşını", "Proqramı"], 1, None, 1),
+ ("Kompüterdə saxlanan şəkillər necə adlanır?",
+  "Şəkillər qrafik fayllar adlanır.",
+  ["Qrafik fayllar", "Mətn faylları", "Səs faylları",
+   "Oyunlar"], 1, None, 3),
+ ("Saxlanmış şəkil faylını yenidən açmaq üçün nə etməli?",
+  "Faylı tapıb açmaq lazımdır.",
+  ["Faylı tapıb açmaq", "Yeni şəkil çəkmək",
+   "Printeri qoşmaq", "Mümkün deyil"], 1, None, 2),
+ ("Paint-də işləyərkən rəng seçimi haradan edilir?",
+  "Rəng palitradan seçilir.",
+  ["Palitradan", "Klaviaturadan", "Sistem blokundan",
+   "Dinamikdən"], 1, None, 1),
+ ("Simmetrik naxış çəkmək üçün fraqmentlə hansı əməliyyat aparılır?",
+  "Fraqment çevrilir (əks etdirilir).",
+  ["Çevirmə (əks etdirmə)", "Silmə", "Çap etmə",
+   "Səsləndirmə"], 1, None, 3),
+ ("Şəklin arxa hissəsi necə adlanır?",
+  "Şəklin arxa hissəsi fon (arxa plan) adlanır.",
+  ["Arxa plan (fon)", "Palitra", "Fraqment", "Kursor"],
+  1, None, 2),
+ ("Qrafik redaktorda çəkilmiş şəkli çap etmək olarmı?",
+  "Şəkli printerlə kağıza çap etmək mümkündür.",
+  ["Bəli, printerlə", "Xeyr, heç vaxt", "Yalnız yayda",
+   "Yalnız ağ-qara"], 1, None, 2),
+],
+}
+for _k, _v in YENI_INF.items():
+    SUALLAR[_k] = _v
+
+
+
 def yoxla():
     n = xeta = 0
     butun = set()
@@ -1547,10 +1636,10 @@ begin
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'az3-%%' or ext_key like 'hey3-%%'
       or ext_key like 'inf3-%%';
-  if k <> 18 then
-    raise exception 'movzu sayi 18 deyil: %%', k;
+  if k <> 19 then
+    raise exception 'movzu sayi 19 deyil: %%', k;
   end if;
-  raise notice '3-cu sinif banki: %% sual, 18 movzu (az dili, heyat bilgisi, informatika).', n;
+  raise notice '3-cu sinif banki: %% sual, 19 movzu (az dili, heyat bilgisi, informatika).', n;
 end $$;
 """ % (n, ",\n".join(setirler), n, n))
     print("yazildi: %s" % CIXIS)

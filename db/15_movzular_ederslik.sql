@@ -180,21 +180,26 @@ select s.id, l.id, v.slug, v.name, v.sort
     ('informatika','1','inf-1-esyalar',      'Əşyaların təsviri və müqayisəsi', 10),
     ('informatika','1','inf-1-ardicilliq',   'Hadisələr və hərəkətlər ardıcıllığı',20),
     ('informatika','1','inf-1-informasiya',  'İnformasiya',                     30),
+    ('informatika','1','inf-1-komp-imkanlar','Kompüterin imkanları',            45),
     ('informatika','1','inf-1-kompyuter',    'Kompüter',                        40),
 
     ('informatika','2','inf-2-obyekt',       'Obyekt',                          10),
     ('informatika','2','inf-2-informasiya',  'İnformasiya',                     20),
     ('informatika','2','inf-2-alqoritm',     'Alqoritm',                        30),
+    ('informatika','2','inf-2-proqramlar',   'Proqramlarla iş',                 45),
     ('informatika','2','inf-2-kompyuter',    'Kompüter',                        40),
 
     ('informatika','3','inf-3-informasiya',  'İnformasiya',                     10),
     ('informatika','3','inf-3-alqoritm',     'Alqoritm',                        20),
     ('informatika','3','inf-3-kompyuter',    'Kompüter',                        30),
+    ('informatika','3','inf-3-qrafik',       'Qrafik redaktor (Paint)',         35),
     ('informatika','3','inf-3-metn',         'Mətn redaktoru',                  40),
 
     ('informatika','4','inf-4-informasiya',  'İnformasiya',                     10),
     ('informatika','4','inf-4-alqoritm',     'Alqoritm',                        20),
-    ('informatika','4','inf-4-kompyuter',    'Kompüterdə iş',                   30)
+    ('informatika','4','inf-4-mentiq',       'Məntiq: mülahizələr',             25),
+    ('informatika','4','inf-4-kompyuter',    'Kompüterdə iş',                   30),
+    ('informatika','4','inf-4-qrafik',       'Qrafik redaktor',                 40)
   ) as v(fenn, sinif, slug, name, sort)
   join public.subjects s on s.slug = v.fenn
   join public.programs p on p.slug = 'ibtidai'
@@ -241,9 +246,13 @@ begin
          'hey-4-canli-heyat','hey-4-ferd-aile','hey-4-dovlet-huquq',
          'hey-4-saglamliq-teh','hey-4-hereket-enerji',
          'inf-1-esyalar','inf-1-ardicilliq','inf-1-informasiya','inf-1-kompyuter',
+         'inf-1-komp-imkanlar',
          'inf-2-obyekt','inf-2-informasiya','inf-2-alqoritm','inf-2-kompyuter',
+         'inf-2-proqramlar',
          'inf-3-informasiya','inf-3-alqoritm','inf-3-kompyuter','inf-3-metn',
-         'inf-4-informasiya','inf-4-alqoritm','inf-4-kompyuter')
+         'inf-3-qrafik',
+         'inf-4-informasiya','inf-4-alqoritm','inf-4-kompyuter',
+         'inf-4-mentiq','inf-4-qrafik')
   ),
   islek as (
     select h.id from hedef h
