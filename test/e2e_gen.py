@@ -136,6 +136,11 @@ with sync_playwright() as pw:
        "abunesiz hesabda hovuz «öz suallarım»dır")
     subs = pg.locator("#gsub option").all_inner_texts()
     ok("Fizika" not in " ".join(subs), "generatorda da sualsiz fenn yoxdur")
+    # "Oz suallarim" hovuzunda siyahi yalniz OZ fennlerinden ibaretdir
+    nmine = db("select count(distinct subject_id) n from public.questions "
+               "where owner_type = 'educator'", one=True)["n"]
+    ok(len(subs) - 1 == nmine,
+       "oz hovuzunda yalniz oz fennleri gorunur", (len(subs) - 1, nmine))
     # "Hovuz yoxlanılır..." da metndir - cavabin GELMESINI gozle
     pg.wait_for_function(
         "document.querySelector('#gPrev') && "

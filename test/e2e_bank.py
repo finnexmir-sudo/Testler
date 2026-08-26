@@ -205,11 +205,13 @@ with sync_playwright() as pw:
     if pg.locator("details.filt:not([open])").count():
         pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
     nt = pg.locator("#bTop .chip").count()
-    # Sert say yazmaq olmaz - movzu agaci e-dersliye gore deyise biler.
-    # Bazadaki heqiqi sayla tutusduruq.
-    nriy = db("select count(*) n from public.topics t join public.subjects s "
-              "on s.id = t.subject_id where s.slug = 'riyaziyyat'", one=True)["n"]
-    ok(nt == nriy, "fenn secilende yalniz onun movzulari cixir",
+    # Bank ekrani OZ hovuzuna gore suzur: yalniz muellimin sual yazdigi
+    # movzular gorunur (bos movzu nisani aldadici olardi).
+    nriy = db("select count(distinct q.topic_id) n from public.questions q "
+              "join public.subjects s on s.id = q.subject_id "
+              "where s.slug = 'riyaziyyat' and q.owner_type = 'educator' "
+              "and q.topic_id is not null", one=True)["n"]
+    ok(nt == nriy, "fenn secilende yalniz oz suallarinin movzulari cixir",
        "ekran %d, baza %d" % (nt, nriy))
     pg.select_option("#bsub", ""); pg.wait_for_timeout(900)
     if pg.locator("details.filt:not([open])").count():

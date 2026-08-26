@@ -1628,7 +1628,8 @@
     var f = genFilter();
     topTitle.textContent = "Test yığ";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
-    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null, p_level: f.level || null })
+    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
+                                p_level: f.level || null, p_pool: f.pool })
       .then(function (fac) { if (!live()) return; FAC = fac || {}; drawGen(); })
       .catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -1727,7 +1728,11 @@
     on("gPool", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
-      f.pool = b.getAttribute("data-v"); drawGen();
+      //  hovuz deyisende siyahilar da deyisir - fenn/sinif/movzu
+      //  secimleri sifirdan, serverden teze suzulur
+      f.pool = b.getAttribute("data-v");
+      f.subject = ""; f.level = ""; f.topics = [];
+      screenGen();
     });
     on("gDiff", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-d]") : null;
@@ -1974,7 +1979,8 @@
     topTitle.textContent = "Sual bankı";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
 
-    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null, p_level: f.level || null })
+    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
+                                p_level: f.level || null, p_pool: "mine" })
       .then(function (fac) {
         if (!live()) return;
         FAC = fac || {};

@@ -31,7 +31,7 @@ expected(fn, who) as (values
   ('public.rpc_bank_list(jsonb, int, int, uuid)',        'authenticated'),
   ('public.rpc_bank_question(uuid)',                     'authenticated'),
   ('public.rpc_bank_delete_question(uuid)',              'authenticated'),
-  ('public.rpc_bank_facets(text, text, uuid)',           'authenticated'),
+  ('public.rpc_bank_facets(text, text, uuid, text)',           'authenticated'),
   ('public.rpc_assign_test(uuid, uuid, timestamptz, int)','authenticated'),
   ('public.rpc_available_tests(uuid)',                   'authenticated'),
   ('public.rpc_class_assignments(uuid)',                 'authenticated')),

@@ -380,10 +380,19 @@ end $$;
 -- =====================================================================
 --  SUZGEC SIYAHILARI  -  fenn, sinif, movzu, etiket
 -- =====================================================================
+--  Signatura genislenib (p_pool) - kohne versiya silinir ki PostgREST
+--  iki eyniadli funksiya gormesin.
+drop function if exists public.rpc_bank_facets(text, text, uuid);
+
+--  p_pool: null = tam siyahi (sual FORMASI ucun - ilk suali yazmaq
+--  olsun deye her sey gorunur). 'mine' / 'platform' / 'all' = yalniz
+--  hemin hovuzda SUALI OLAN fenn/sinif/movzular - suzgec ekranlari
+--  aldatmasin deye.
 create or replace function public.rpc_bank_facets(
   p_subject text default null,
   p_level   text default null,
-  p_account uuid default null)
+  p_account uuid default null,
+  p_pool    text default null)
 returns jsonb
 language plpgsql stable security definer set search_path = public, extensions, pg_temp as $$
 declare v_acc uuid := app.pick_account(p_account);
@@ -399,8 +408,14 @@ begin
           select s.slug, s.name, s.sort,
                  (select count(*) from public.questions q
                    where q.subject_id = s.id
-                     and (q.account_id = v_acc
-                          or (q.owner_type = 'platform' and q.status = 'published'))) as n
+                     and case coalesce(p_pool, 'all')
+                         when 'mine'     then q.account_id = v_acc
+                         when 'platform' then q.owner_type = 'platform'
+                                              and q.status = 'published'
+                         else q.account_id = v_acc
+                              or (q.owner_type = 'platform'
+                                  and q.status = 'published')
+                         end) as n
             from public.subjects s) z), '[]'::jsonb),
     --  Yalniz gorunen suali OLAN sinifler qaytarilir - fennler kimi.
     --  Yeni sinfin banki yuklenen kimi siyahida ozu peyda olur;
@@ -412,8 +427,14 @@ begin
           select l.code, min(l.name) as name, min(l.sort) as sort
             from public.levels l
             join public.questions q on q.level_id = l.id
-           where (q.account_id = v_acc
-                  or (q.owner_type = 'platform' and q.status = 'published'))
+           where case coalesce(p_pool, 'all')
+                 when 'mine'     then q.account_id = v_acc
+                 when 'platform' then q.owner_type = 'platform'
+                                      and q.status = 'published'
+                 else q.account_id = v_acc
+                      or (q.owner_type = 'platform'
+                          and q.status = 'published')
+                 end
              and (p_subject is null or q.subject_id in
                   (select id from public.subjects where slug = p_subject))
            group by l.code) z), '[]'::jsonb),
@@ -431,6 +452,17 @@ begin
        where (p_subject is null or s.slug = p_subject)
          and (p_level is null or t.level_id is null
               or t.level_id in (select id from public.levels where code = p_level))
+         and (p_pool is null or exists (
+                select 1 from public.questions q
+                 where q.topic_id = t.id
+                   and case p_pool
+                       when 'mine'     then q.account_id = v_acc
+                       when 'platform' then q.owner_type = 'platform'
+                                            and q.status = 'published'
+                       else q.account_id = v_acc
+                            or (q.owner_type = 'platform'
+                                and q.status = 'published')
+                       end))
       ), '[]'::jsonb),
     'tags', coalesce((
       select jsonb_agg(distinct tg)
@@ -451,14 +483,14 @@ revoke all on function public.rpc_bank_delete_question(uuid)        from public,
 revoke all on function public.rpc_bank_question(uuid)               from public, anon;
 revoke all on function public.rpc_bank_list(jsonb, int, int, uuid)  from public, anon;
 revoke all on function public.rpc_bank_count(jsonb, uuid)           from public, anon;
-revoke all on function public.rpc_bank_facets(text, text, uuid)     from public, anon;
+revoke all on function public.rpc_bank_facets(text, text, uuid, text) from public, anon;
 
 grant execute on function public.rpc_bank_save_question(uuid, text, text, jsonb, text, text, uuid, text, int, int, int, text[], uuid) to authenticated;
 grant execute on function public.rpc_bank_delete_question(uuid)       to authenticated;
 grant execute on function public.rpc_bank_question(uuid)              to authenticated;
 grant execute on function public.rpc_bank_list(jsonb, int, int, uuid) to authenticated;
 grant execute on function public.rpc_bank_count(jsonb, uuid)          to authenticated;
-grant execute on function public.rpc_bank_facets(text, text, uuid)    to authenticated;
+grant execute on function public.rpc_bank_facets(text, text, uuid, text) to authenticated;
 
 do $$
 declare bad text;
@@ -469,7 +501,7 @@ begin
     'public.rpc_bank_question(uuid)',
     'public.rpc_bank_list(jsonb, int, int, uuid)',
     'public.rpc_bank_count(jsonb, uuid)',
-    'public.rpc_bank_facets(text, text, uuid)']) f
+    'public.rpc_bank_facets(text, text, uuid, text)']) f
    where not has_function_privilege('authenticated', f, 'EXECUTE');
   if bad is not null then
     raise exception 'muellim bu funksiyalari cagira bilmir: %', bad;

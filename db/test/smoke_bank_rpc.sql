@@ -330,8 +330,30 @@ begin
   assert jsonb_array_length(v->'topics') >= 1, 'movzu siyahisi bos';
   assert (v->'usage'->>'limit')::int = 3, 'hedd gorunmur';
   assert (v->'usage'->>'used')::int = 3, 'istifade gorunmur';
+
+  --  hovuz suzgeci: 'mine' yalniz OZ suallarinin fennini sayir -
+  --  muellimin butun suallari riyaziyyatdadir
+  v := public.rpc_bank_facets(null, null, null, 'mine');
+  assert (select count(*) from jsonb_array_elements(v->'subjects') e
+           where (e->>'n')::int > 0) = 1,
+         'mine hovuzunda yalniz oz fenni sayilmalidir';
+  --  'platform' hovuzunda oz suallari sayilmir, banklar sayilir
+  v := public.rpc_bank_facets(null, null, null, 'platform');
+  assert exists (select 1 from jsonb_array_elements(v->'subjects') e
+                  where e->>'slug' = 'riyaziyyat'
+                    and (e->>'n')::int >= 100),
+         'platform hovuzunda bank sayilmir';
+  --  p_pool verilende movzu siyahisina yalniz suali olanlar dusur
+  v := public.rpc_bank_facets('riyaziyyat', '3', null, 'platform');
+  assert jsonb_array_length(v->'topics') >= 1, 'platform movzulari bos';
+  assert (select bool_and(exists (
+            select 1 from public.questions q
+             where q.topic_id = (e->>'id')::uuid
+               and q.owner_type = 'platform' and q.status = 'published'))
+            from jsonb_array_elements(v->'topics') e),
+         'sualsiz movzu siyahiya dusdu';
 end $$;
-\echo 'OK 12 · suzgec siyahilari ve istifade gostericisi'
+\echo 'OK 12 · suzgec siyahilari, hovuz suzgeci, istifade gostericisi'
 
 reset role; reset request.jwt.claim.sub;
 create or replace function app.free_question_limit() returns int
