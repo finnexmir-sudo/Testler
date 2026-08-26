@@ -700,7 +700,12 @@
               "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
               "<span>" + esc(it.topic) + "</span>" +
               (it.test_id
-                ? '<a href="#/t/' + esc(it.test_id) + '" class="pltest">vərəq</a>' : "") +
+                ? '<a href="#/t/' + esc(it.test_id) + '" class="pltest">vərəq</a>'
+                : (it.done
+                    ? '<button class="plmk" data-plmk="' + esc(it.id) + '"' +
+                      (d.paid ? "" : ' disabled title="Abunə paketi ilə"') +
+                      ">test yığ</button>"
+                    : "")) +
               (lastDone && it.id === lastDone.id
                 ? '<button class="plundo" data-plundo="' + esc(it.id) +
                   '" title="Geri qaytar">geri</button>' : "") +
@@ -738,8 +743,14 @@
       }
       id = b.getAttribute("data-pltest");
       if (id) return planTest(g, b, id);
+      id = b.getAttribute("data-plmk");
+      if (id) return planOfferLate(id);
       id = b.getAttribute("data-plskip");
-      if (id) { var s2 = $("pls-" + id); if (s2) s2.innerHTML = ""; return; }
+      if (id) {
+        var s2 = $("pls-" + id); if (s2) s2.innerHTML = "";
+        var m2 = $("plm-" + id); if (m2) m2.innerHTML = "";
+        return;
+      }
     });
     function rebindOnly() {}
   }
@@ -758,25 +769,51 @@
       drawPlan(g);
       var slot = plan && $("pls-" + plan.id);
       if (slot) {
-        slot.innerHTML =
-          '<div class="ploffer">' +
-            "<b>«" + esc(topic) + "» keçildi. Yoxlama testi yığılsınmı?</b>" +
-            '<p class="muted" style="margin:4px 0 10px">Test bu mövzunun ' +
-              "suallarından yığılır və qrupa dərhal tapşırıq verilir " +
-              "(son tarix: 7 gün, 1 cəhd).</p>" +
-            '<div class="plbtns">' +
-              '<input id="plCnt" type="number" min="3" max="50" value="15">' +
-              '<button class="btn go sm" data-pltest="' + esc(itemId) + '">' +
-                "Yığ və tapşırıq ver</button>" +
-              '<button class="btn sm ghost" data-plskip="' +
-                esc(plan.id) + '">Sonra</button>' +
-            "</div>" +
-          "</div>";
+        slot.innerHTML = offerHtml(
+          "«" + esc(topic) + "» keçildi. Yoxlama testi yığılsınmı?",
+          itemId, plan.id);
       }
     }).catch(function (e) {
       busy = false; b.disabled = false;
       alert(fail(e));
     });
+  }
+
+  /* Test teklifi qutusu - hem "Kecildi" aninda, hem sonradan siyahidan */
+  function offerHtml(head, itemId, planId) {
+    return '<div class="ploffer">' +
+      "<b>" + head + "</b>" +
+      '<p class="muted" style="margin:4px 0 10px">Test bu mövzunun ' +
+        "suallarından yığılır və qrupa dərhal tapşırıq verilir " +
+        "(son tarix: 7 gün, 1 cəhd).</p>" +
+      '<div class="plbtns">' +
+        '<input id="plCnt" type="number" min="3" max="50" value="15">' +
+        '<button class="btn go sm" data-pltest="' + esc(itemId) + '">' +
+          "Yığ və tapşırıq ver</button>" +
+        '<button class="btn sm ghost" data-plskip="' + esc(planId) +
+          '">Sonra</button>' +
+      "</div>" +
+    "</div>";
+  }
+
+  /* "Sonra" deyilmis (ve ya bir nece movzu kecilmis) halda siyahidan
+     istenilen KECILMIS movzu ucun teklifi yeniden acmaq */
+  function planOfferLate(itemId) {
+    var plan = null, topic = "";
+    (PLD && PLD.plans || []).forEach(function (p) {
+      (p.items || []).forEach(function (it) {
+        if (it.id === itemId) { plan = p; topic = it.topic; }
+      });
+    });
+    if (!plan) return;
+    var s = $("pls-" + plan.id);
+    if (s) s.innerHTML = "";
+    var m = $("plm-" + plan.id);
+    if (m) {
+      m.innerHTML = offerHtml(
+        "«" + esc(topic) + "» — yoxlama testi yığılsınmı?", itemId, plan.id);
+      m.scrollIntoView({ block: "nearest" });
+    }
   }
 
   function planUndo(g, itemId) {

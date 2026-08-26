@@ -135,6 +135,29 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(300)
     ok(pg.locator(".ploffer").count() == 0, "teklif baglanir")
 
+    print("F · Sonradan test: siyahıdan «test yığ»")
+    pg.locator("[data-pldone]").click()          # movzu 2 kecildi
+    pg.wait_for_selector(".ploffer", timeout=8000)
+    pg.locator("[data-plskip]").click()          # helelik test yigilmir
+    pg.wait_for_timeout(300)
+    pg.locator(".plan summary").click(); pg.wait_for_timeout(300)
+    ok(pg.locator("[data-plmk]").count() == 1, "kecilmis movzuda «test yığ» var",
+       pg.locator("[data-plmk]").count())
+    pg.locator("[data-plmk]").click()
+    pg.wait_for_selector(".ploffer", timeout=4000)
+    pg.fill("#plCnt", "4")
+    pg.locator("[data-pltest]").click()
+    pg.wait_for_selector(".plan [id^='plm-'] a", timeout=10000)
+    ok("tapşırıq verildi" in pg.inner_text(".plan [id^='plm-']"),
+       "sonradan test yigildi")
+    n2 = db("select count(*) n from public.tests where owner_type='educator'",
+            one=True)["n"]
+    ok(n2 == 2, "ikinci test bazada var", n2)
+    pg.locator(".plan summary").click(); pg.wait_for_timeout(300)
+    ok(pg.locator("[data-plmk]").count() == 0, "test yigilandan sonra duyme itir")
+    ok(pg.locator(".plrow .pltest").count() == 2, "iki movzuda veraq linki var",
+       pg.locator(".plrow .pltest").count())
+
     br.close()
 
 print()

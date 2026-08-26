@@ -379,10 +379,14 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .plrow.cur i{background:var(--brand-tint);color:var(--brand);
   border-color:var(--brand-line)}
 .plrow .pltest{margin-left:auto;font-size:11.5px}
+.plrow .plmk{margin-left:auto;border:0;background:none;cursor:pointer;
+  font:inherit;font-size:11.5px;color:var(--brand);text-decoration:underline;
+  text-underline-offset:2px}
+.plrow .plmk:disabled{color:var(--fg-3);cursor:default;text-decoration:none}
 .plrow .plundo{margin-left:auto;border:0;background:none;cursor:pointer;
   font:inherit;font-size:11px;color:var(--fg-3);text-decoration:underline;
   text-underline-offset:2px}
-.plrow .pltest + .plundo{margin-left:8px}
+.plrow .pltest + .plundo,.plrow .plmk + .plundo{margin-left:8px}
 
 /* sual sehvi bildirisi + admin bildiris kartlari + 2FA */
 .rlink{border:0;background:none;cursor:pointer;font:inherit;
