@@ -1654,20 +1654,39 @@
              "</div><b>Hələ cavab yoxdur</b>Şagird test işlədikcə " +
              "mövzular burada yığılacaq.</div></div>";
       } else {
-        //  Server zeifden gucluye siralayir - agriyan movzular ustdedir
-        h += '<div class="card pad0">' + r.topics.map(function (t) {
-          var low = Number(t.total) < minA;
-          var bad = Number(t.ratio) < 60 && !low;
-          return '<div class="trow"><div class="g"><b>' +
-            (bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
-            esc(t.name) + "</b>" +
-            "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total +
-            (low ? ' · <span class="lowtag">az məlumat</span>' : "") + "</i>" +
-            meter(t.ratio) + "</div>" +
-            pctChip(t.ratio) + "</div>";
-        }).join("") + "</div>";
-        var sweak = r.topics.filter(function (t) {
-          return Number(t.ratio) < 60 && Number(t.total) >= minA && t.id;
+        //  Etibarli movzular (>= minA cavab) esas siyahida - zeifden
+        //  gucluye; 1-2 cavabliq movzular sehifeni yemesin deye ayrica
+        //  YIGILMIS bolmede, neytral (rengsiz) faizle gedir.
+        var tsure = r.topics.filter(function (t) { return Number(t.total) >= minA; });
+        var tlow  = r.topics.filter(function (t) { return Number(t.total) < minA; });
+        if (tsure.length) {
+          h += '<div class="card pad0">' + tsure.map(function (t) {
+            var bad = Number(t.ratio) < 60;
+            return '<div class="trow"><div class="g"><b>' +
+              (bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
+              esc(t.name) + "</b>" +
+              "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
+              meter(t.ratio) + "</div>" +
+              pctChip(t.ratio) + "</div>";
+          }).join("") + "</div>";
+        } else {
+          h += '<div class="card"><p class="muted" style="margin:0">Hər mövzu üzrə ' +
+            "ən azı " + minA + " cavab yığılanda etibarlı mənzərə burada görünəcək. " +
+            "İlkin cavablar aşağıdakı bölmədədir.</p></div>";
+        }
+        if (tlow.length) {
+          h += '<details class="more filt" style="margin-top:10px">' +
+            "<summary>Az məlumatlı mövzular " +
+              '<span class="fn">' + tlow.length + "</span></summary>" +
+            '<div class="card pad0" style="margin-top:10px">' + tlow.map(function (t) {
+              return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
+                "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total +
+                ' · <span class="lowtag">az məlumat</span></i></div>' +
+                '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
+            }).join("") + "</div></details>";
+        }
+        var sweak = tsure.filter(function (t) {
+          return Number(t.ratio) < 60 && t.id;
         });
         if (sweak.length) {
           h += '<div class="spacer"></div>' +

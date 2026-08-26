@@ -220,7 +220,8 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 .dyn .dl{background:var(--err)}
 
 /* cavab vereqi - tarixce setrine klikle acilir */
-.atr{border:0;background:none;width:100%;font:inherit;cursor:pointer}
+.atr{border:0;background:none;width:100%;font:inherit;cursor:pointer;
+  text-align:left}
 .atr .lnk2{color:var(--brand);text-decoration:underline;
   text-underline-offset:2px}
 .sheet{border-bottom:1px solid var(--n-100);background:var(--n-25)}
