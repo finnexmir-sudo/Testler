@@ -325,7 +325,7 @@ SUALLAR = {
   ["1,05 = 1,050", "1,5 = 1,05", "0,3 > 0,30", "2,4 < 2,04"], 1, None, 3),
 ],
 "riy-4-pullar": [
- ("1 manat neçə qəpikdir?",
+ ("Bir manatda neçə qəpik var?",
   "1 manat = 100 qəpik.",
   ["100 qəpik", "10 qəpik", "50 qəpik", "1 000 qəpik"], 1, None, 1),
  ("3 man 45 qəp + 2 man 80 qəp neçə edər?",

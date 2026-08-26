@@ -116,7 +116,7 @@ with d(ext, topic, diff, rub, body, why, opts, correct) as (values
 ('riy4-onluq-kesr#8','riy-4-onluq-kesr',3,3,'12,5 − 4,7 fərqini tapın.','12,5 − 4,7 = 7,8.',array['7,8','8,8','7,2','8,2'],1),
 ('riy4-onluq-kesr#9','riy-4-onluq-kesr',3,3,'0,25 hansı adi kəsrə bərabərdir?','0,25 = 25/100 = 1/4.',array['1/4','1/2','2/5','1/25'],1),
 ('riy4-onluq-kesr#10','riy-4-onluq-kesr',3,3,'Hansı bərabərlik doğrudur?','Onluq kəsrin sonuna sıfır artırmaq qiymətini dəyişmir.',array['1,05 = 1,050','1,5 = 1,05','0,3 > 0,30','2,4 < 2,04'],1),
-('riy4-pullar#1','riy-4-pullar',1,3,'1 manat neçə qəpikdir?','1 manat = 100 qəpik.',array['100 qəpik','10 qəpik','50 qəpik','1 000 qəpik'],1),
+('riy4-pullar#1','riy-4-pullar',1,3,'Bir manatda neçə qəpik var?','1 manat = 100 qəpik.',array['100 qəpik','10 qəpik','50 qəpik','1 000 qəpik'],1),
 ('riy4-pullar#2','riy-4-pullar',2,3,'3 man 45 qəp + 2 man 80 qəp neçə edər?','45 + 80 = 125 qəpik = 1 man 25 qəp; cəmi 6 man 25 qəp.',array['6 man 25 qəp','5 man 25 qəp','6 man 15 qəp','5 man 65 qəp'],1),
 ('riy4-pullar#3','riy-4-pullar',2,3,'Aysu 10 manatla 2 man 75 qəp ödədi. Qalığı neçədir?','10 man − 2 man 75 qəp = 7 man 25 qəp.',array['7 man 25 qəp','8 man 25 qəp','7 man 75 qəp','6 man 25 qəp'],1),
 ('riy4-pullar#4','riy-4-pullar',2,3,'Hər biri 60 qəpik olan 5 dəftərin qiyməti neçədir?','60 · 5 = 300 qəpik = 3 manat.',array['3 manat','2 man 40 qəp','3 man 60 qəp','65 qəpik'],1),
