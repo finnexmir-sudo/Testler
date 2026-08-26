@@ -130,12 +130,12 @@
         (isUp ? '<label for="fname">Ad, soyad</label><input id="fname" autocomplete="name">' : "") +
         '<label for="email">E-poçt</label>' +
         '<input id="email" type="email" autocomplete="email" inputmode="email">' +
-        (isUp
-          ? '<label for="pass">Parol</label>'
-          : '<div class="lblrow"><label for="pass">Parol</label>' +
-            '<button class="lnk" id="btnForgot" type="button">Parolu unutmusunuz?</button></div>') +
+        '<label for="pass">Parol</label>' +
         '<input id="pass" type="password" autocomplete="' +
           (isUp ? "new-password" : "current-password") + '">' +
+        (isUp ? "" :
+          '<div class="fglink"><button class="lnk" id="btnForgot" ' +
+            'type="button">Parolu unutmusunuz?</button></div>') +
         '<button class="btn go wide" id="btnAuth">' +
           (isUp ? "Hesab yarat" : "Daxil ol") + "</button>" +
         '<div class="spacer"></div>' +
