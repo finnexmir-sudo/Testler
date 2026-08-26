@@ -81,6 +81,26 @@
     if (/limit/i.test(t) || /check_violation/i.test(t)) {
       t = t.replace(/^.*?:\s*/, "");
     }
+    //  Supabase Auth-un ingilisce mesajlari - istifadeciye oz dilinde
+    if (/invalid login credentials/i.test(t)) {
+      return "E-poçt və ya parol yanlışdır.";
+    }
+    if (/email not confirmed/i.test(t)) {
+      return "E-poçt hələ təsdiqlənməyib — poçtunuzdakı linkə keçin " +
+             "(spam qovluğunu da yoxlayın).";
+    }
+    if (/already registered|already been registered/i.test(t)) {
+      return "Bu e-poçtla hesab artıq var — daxil olun.";
+    }
+    if (/rate limit|too many requests/i.test(t)) {
+      return "Çox cəhd edildi — bir neçə dəqiqə sonra yenidən yoxlayın.";
+    }
+    if (/password should be at least/i.test(t)) {
+      return "Parol çox qısadır.";
+    }
+    if (/unable to validate email|invalid format/i.test(t)) {
+      return "E-poçt düzgün formatda deyil.";
+    }
     return t;
   }
   function setBusy(id, state, label) {
