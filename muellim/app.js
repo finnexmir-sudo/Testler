@@ -371,7 +371,7 @@
       '<div id="hRecent"></div>' +
       '<div class="spacer"></div>' +
       '<div class="card">' +
-        '<label for="gname">Yeni qrup</label>' +
+        '<label for="gname">Qrup adı</label>' +
         '<div class="fieldrow">' +
           '<div><input id="gname" placeholder="məsələn: Cümə qrupu"></div>' +
           '<div style="flex:0 0 148px"><select id="glevel">' +
@@ -485,7 +485,7 @@
     if (!ACC) return;
     var groups = null;
     sb.select("classes", {
-      select: "id,name,join_code,kind,level_id",
+      select: "id,name,kind,level_id",
       eq: { account_id: ACC.id },
       order: "name"
     }).then(function (rows) {
@@ -514,8 +514,7 @@
           '<div class="ic">' + ic("group") + "</div>" +
           '<div class="g"><b>' + esc(g.name) + "</b>" +
           "<i>" + (lv ? "<span>" + esc(lv) + "</span><span>·</span>" : "") +
-          "<span>" + n + " şagird</span><span>·</span>" +
-          '<span class="code">' + esc(g.join_code) + "</span></i></div>" +
+          "<span>" + n + " şagird</span></i></div>" +
           '<span class="arrow">' + ic("right") + "</span></button>";
       }).join("");
       Array.prototype.forEach.call(box.querySelectorAll("[data-g]"), function (b) {
@@ -823,7 +822,7 @@
     var live = guard();
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     Promise.all([
-      sb.select("classes", { select: "id,name,join_code,account_id,level_id", eq: { id: id } }),
+      sb.select("classes", { select: "id,name,account_id,level_id", eq: { id: id } }),
       loadLevels()
     ])
       .then(function (res) {
@@ -847,11 +846,8 @@
         '<div class="muted" style="display:flex;align-items:center;gap:7px;' +
           'margin-top:8px;flex-wrap:wrap" id="gMeta">' +
           (levelName(g.level_id)
-            ? "<span>" + esc(levelName(g.level_id)) + "</span><span>·</span>" : "") +
-          "<span>Qoşulma kodu</span>" +
-          '<span class="code key">' + esc(g.join_code) + "</span>" +
-          '<button class="btn sm ghost icon" id="gCopy" title="Kodu kopyala" ' +
-            'aria-label="Kodu kopyala">' + ic("copy") + "</button></div>" +
+            ? "<span>" + esc(levelName(g.level_id)) + "</span>" : "") +
+          "</div>" +
         '<div class="spacer"></div>' +
         '<div class="row two">' +
           '<button class="btn wide" id="btnAsgs">' + ic("clip") + "Tapşırıqlar</button>" +
@@ -877,7 +873,6 @@
     on("btnBack", "click", function () { nav("#/"); });
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
-    on("gCopy", "click", function () { copyText(g.join_code, $("gCopy")); });
     loadAlerts(g.id);
     loadPlan(g);
     on("btnRen", "click", function () { renameGroup(g); });
@@ -949,9 +944,7 @@
           if (meta) {
             meta.innerHTML =
               (levelName(newLevel)
-                ? "<span>" + esc(levelName(newLevel)) + "</span><span>·</span>" : "") +
-              "<span>Qoşulma kodu</span>" +
-              '<span class="code key">' + esc(g.join_code) + "</span>";
+                ? "<span>" + esc(levelName(newLevel)) + "</span>" : "");
           }
           close();
         })

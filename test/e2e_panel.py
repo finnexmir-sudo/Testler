@@ -123,9 +123,10 @@ with sync_playwright() as pw:
     ok("Cume qrupu" in txt, "qrup siyahida gorunur")
     ok("3-cü sinif" in txt, "SINIF siyahida gorunur", txt.replace("\n", " ")[:70])
     ok("0 şagird" in txt, "sagird sayi 0")
+    # qosulma kodu sagird axininda istifade olunmur - UI-da gosterilmir
     code = re.search(r"\b([A-Z2-9]{8})\b", txt.replace("\n", " "))
-    ok(code is not None, "qosulma kodu 8 simvol, qarisiq simvolsuz",
-       code.group(1) if code else txt[:80])
+    ok(code is None, "qosulma kodu siyahida GORUNMUR",
+       code.group(1) if code else "")
 
     print("C · Şagird əlavə etmək")
     pg.click("#groups .item")
