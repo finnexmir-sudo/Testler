@@ -402,10 +402,21 @@ begin
                      and (q.account_id = v_acc
                           or (q.owner_type = 'platform' and q.status = 'published'))) as n
             from public.subjects s) z), '[]'::jsonb),
+    --  Yalniz gorunen suali OLAN sinifler qaytarilir - fennler kimi.
+    --  Yeni sinfin banki yuklenen kimi siyahida ozu peyda olur;
+    --  bos sinfi secmek menasizdir.
     'levels', coalesce((
-      select jsonb_agg(distinct jsonb_build_object('code', l.code, 'name', l.name))
-        from public.levels l
-        join public.programs p on p.id = l.program_id and p.slug = 'ibtidai'), '[]'::jsonb),
+      select jsonb_agg(jsonb_build_object('code', z.code, 'name', z.name)
+                       order by z.sort)
+        from (
+          select l.code, min(l.name) as name, min(l.sort) as sort
+            from public.levels l
+            join public.questions q on q.level_id = l.id
+           where (q.account_id = v_acc
+                  or (q.owner_type = 'platform' and q.status = 'published'))
+             and (p_subject is null or q.subject_id in
+                  (select id from public.subjects where slug = p_subject))
+           group by l.code) z), '[]'::jsonb),
     --  Sinif de qaytarilir: eyni ad bir nece sinifde ola biler
     --  ("Bolme" 2-ci ve 3-cu sinifde).  Onsuz muellim hansini
     --  sectiyini bilmir.

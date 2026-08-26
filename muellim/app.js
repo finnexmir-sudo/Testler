@@ -898,14 +898,15 @@
      bir defe yuklenib yaddasda saxlanilir. */
   function loadLevels() {
     if (LEVELS) return Promise.resolve(LEVELS);
-    return sb.select("programs", { select: "id,slug", eq: { slug: "ibtidai" } })
-      .then(function (ps) {
-        if (!ps || !ps.length) return [];
-        return sb.select("levels", {
-          select: "id,code,name", eq: { program_id: ps[0].id }, order: "sort"
+    //  Sinif esasli seviyyeler (kod reqemdir: 1-11). MIQ/sertifikasiya
+    //  pilleleri sinif deyil - bura dusmur.
+    return sb.select("levels", { select: "id,code,name", order: "sort" })
+      .then(function (rows) {
+        LEVELS = (rows || []).filter(function (l) {
+          return /^[0-9]+$/.test(l.code);
         });
+        return LEVELS;
       })
-      .then(function (rows) { LEVELS = rows || []; return LEVELS; })
       .catch(function () { LEVELS = []; return LEVELS; });
   }
 

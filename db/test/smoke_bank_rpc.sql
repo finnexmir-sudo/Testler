@@ -322,7 +322,11 @@ declare v jsonb;
 begin
   v := public.rpc_bank_facets('riyaziyyat', '3');
   assert jsonb_array_length(v->'subjects') >= 10, 'fenn siyahisi bos';
-  assert jsonb_array_length(v->'levels') >= 4, 'sinif siyahisi bos';
+  --  test bazasinda yalniz 3-4-cu sinif banklari var - siyahida da
+  --  yalniz onlar olmalidir (suali olmayan sinif gorunmur)
+  assert jsonb_array_length(v->'levels') >= 2, 'sinif siyahisi bos';
+  assert not exists (select 1 from jsonb_array_elements(v->'levels') e
+                      where e->>'code' = '11'), 'sualsiz sinif siyahidadir';
   assert jsonb_array_length(v->'topics') >= 1, 'movzu siyahisi bos';
   assert (v->'usage'->>'limit')::int = 3, 'hedd gorunmur';
   assert (v->'usage'->>'used')::int = 3, 'istifade gorunmur';
