@@ -97,8 +97,16 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    siyahı və ya uyğunsuzluq = tam siyahı. `rpc_my_context` 26-da
    genişləndirilib (06-nı dəyişəndə 26-dakı kopyanı da yenilə).
 4. **Vərəqin çap/PDF görünüşü** — cavabsız şagird + cavablı müəllim nüsxəsi.
-5. **Dinamika qrafiki** — şagirdin nəticəsi həftə-həftə.
-6. **«Səhvlər üzərində iş»** — səhv edilən sualların özündən bir kliklə test.
+5. ~~Dinamika qrafiki~~ — şagird hesabatında mini sütun qrafiki var
+   (son 12 test, rəng dərəcəli); həftəlik aqreqasiya gələcəyə qalır.
+6. ~~«Səhvlər üzərində iş»~~ — hazırdır (`db/27_hesabat.sql`):
+   `rpc_remedial_test` şagirdin səhv etdiyi sualların özündən test yığıb
+   qrupa tapşırıq verir (hesabatda «Bu səhvlərdən təkrar testi yığ»).
+   Əlavə: `rpc_attempt_sheet` — cəhdin cavab vərəqi (seçilən/düz cavab);
+   `rpc_student_report` genişlənib (27-də override): mövzular eşiksiz +
+   `min_answers` («az məlumat» nişanı), weak-də mövzu teqi + `qid`.
+   Hamısı ödənişli qapının arxasındadır; 08-i dəyişəndə 27-dəki
+   kopyanı da yenilə.
 7. PWA quraşdırma (manifest + ikon), Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
 

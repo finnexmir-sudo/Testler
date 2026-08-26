@@ -203,6 +203,36 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 .pctv.pvm{color:var(--warn)}
 .pctv.pvl{color:var(--err)}
 
+/* derin hesabat: zeif movzu noktesi, az-melumat nisani, movzu teqi */
+.wdot{display:inline-block;width:8px;height:8px;border-radius:99px;
+  background:var(--err);margin-right:7px;vertical-align:1px}
+.lowtag{color:var(--fg-3);background:var(--n-100);border-radius:6px;
+  padding:1px 6px;font-size:10.5px}
+.wq .wtag{display:inline-block;margin:4px 0 2px;padding:1px 8px;
+  border-radius:99px;background:var(--brand-tint);color:var(--brand);
+  border:1px solid var(--brand-line);font-size:10.5px;font-weight:600}
+
+/* dinamika - mini sutun qrafiki */
+.dyn{display:flex;align-items:flex-end;gap:6px;height:92px}
+.dyn i{flex:1;max-width:36px;border-radius:6px 6px 2px 2px;min-height:5px}
+.dyn .dh{background:var(--ok)}
+.dyn .dm{background:var(--warn)}
+.dyn .dl{background:var(--err)}
+
+/* cavab vereqi - tarixce setrine klikle acilir */
+.atr{border:0;background:none;width:100%;font:inherit;cursor:pointer}
+.atr .lnk2{color:var(--brand);text-decoration:underline;
+  text-underline-offset:2px}
+.sheet{border-bottom:1px solid var(--n-100);background:var(--n-25)}
+.sheet.hide{display:none}
+.shq{padding:11px 16px;border-top:1px dashed var(--n-150)}
+.shq b{display:block;font-size:13px;font-weight:600}
+.shq .sa{display:flex;gap:14px;flex-wrap:wrap;margin-top:5px;font-size:12.5px}
+.shq .sc{color:var(--ok)}
+.shq .sw{color:var(--err)}
+.shq .sex{display:block;margin-top:4px;font-size:12px;color:var(--fg-3);
+  font-style:normal}
+
 /* sagird hesabati basligi - avatarli */
 .shead{display:flex;align-items:center;gap:13px}
 .shead .av{width:44px;height:44px;flex:0 0 44px;border-radius:14px;

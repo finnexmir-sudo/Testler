@@ -347,14 +347,16 @@ with sync_playwright() as pw:
     print("L · Valideyn xülasəsi")
     pg.goto(PANEL + "#/s/" + SID + "/" + GID); pg.reload()
     pg.wait_for_selector("#vTxt", timeout=8000)
-    # Tekrar sehv siyahisi QATLIDIR - sehifeni yemesin
-    ok(pg.locator("details.wrongbox").count() == 1, "sehv siyahisi qatlanandir")
-    ok(pg.locator("details.wrongbox[open]").count() == 0, "ilkin halda baglidir")
+    # Sehv siyahisi indi ACIQ gelir - hereket merkezidir
+    ok(pg.locator("details.wrongbox").count() == 1, "sehv siyahisi var")
+    ok(pg.locator("details.wrongbox[open]").count() == 1, "ilkin halda aciqdir")
     ok(pg.locator("details.wrongbox .fn").inner_text().strip().isdigit(),
        "basliqda say gorunur", pg.locator("details.wrongbox .fn").inner_text())
-    pg.locator("details.wrongbox summary").click(); pg.wait_for_timeout(200)
-    ok(pg.locator(".wq").count() >= 1, "acilanda setirler gorunur",
+    ok(pg.locator(".wq").count() >= 1, "setirler gorunur",
        pg.locator(".wq").count())
+    ok(pg.locator(".wq .wtag").count() >= 1, "sehvlerde movzu teqi var",
+       pg.locator(".wq .wtag").count())
+    ok(pg.locator("#btnFix").count() == 1, "sehvlerden test duymesi var")
     t = pg.input_value("#vTxt")
     ok("Kənan" in t, "sagirdin adi metndedir", t.split("\n")[0][:40])
     ok("📊" in t and "▰" in t, "semimi uslubda emoji ve zolaqlar var")
@@ -370,6 +372,38 @@ with sync_playwright() as pw:
        pg.inner_text("#vCopy"))
     cb = pg.evaluate("navigator.clipboard.readText()")
     ok(cb == t2, "mubadile buferine TAM metn dusur")
+
+    print("M · Dinamika, cavab vərəqi, səhvlərdən test")
+    ok(pg.locator(".dyn i").count() >= 2, "dinamika sutunlari var",
+       pg.locator(".dyn i").count())
+    pg.locator(".atr").first.click()
+    pg.wait_for_selector(".shq", timeout=8000)
+    ok(pg.locator(".shq").count() >= 1, "cavab vereqi acilir",
+       pg.locator(".shq").count())
+    ok(pg.locator(".shq .sw").count() >= 1, "sehv cavab qirmizi gorunur")
+    ok("Düzü:" in pg.inner_text(".sheet"), "duz cavab gosterilir")
+    pg.locator(".atr").first.click(); pg.wait_for_timeout(200)
+    ok(not pg.locator(".sheet .shq").first.is_visible(), "tekrar klik baglayir")
+
+    pg.click("#btnFix")
+    pg.wait_for_selector("#fixMsg .ok a", timeout=10000)
+    ok("tapşırıq verildi" in pg.inner_text("#fixMsg"), "sehv testi yigilir")
+    rem = db("""select t.id::text i,
+                       (select count(*) from public.test_questions tq
+                         where tq.test_id = t.id) nq
+                  from public.tests t
+                 where t.title like %s
+                 order by t.created_at desc limit 1""",
+             ("%səhvlər üzərində iş%",), one=True)
+    ok(bool(rem) and rem["nq"] >= 1, "sehv testi bazadadir", rem and rem["nq"])
+    ok(bool(db("select 1 ok from public.assignments where test_id = %s",
+               (rem["i"],), one=True)), "tapsiriq bazada var")
+    wq = db("""select count(*) n from public.test_questions tq
+                where tq.test_id = %s
+                  and tq.question_id not in (
+                    select aa.question_id from public.attempt_answers aa
+                     where aa.is_correct is not true)""", (rem["i"],), one=True)["n"]
+    ok(wq == 0, "testde yalniz sehv edilen suallar var", wq)
 
     br.close()
 
