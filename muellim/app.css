@@ -188,6 +188,39 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
   box-shadow:0 1px 2px rgba(16,24,40,.07)}
 
 /* Cox secimli nisanlar: cetinlik, movzular */
+/* ana sehife: suretli emeliyyatlar */
+.qhead{font-size:11.5px;font-weight:640;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--fg-3);margin:0 0 12px}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qact{display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  padding:13px 14px;border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--n-25);cursor:pointer;font:inherit;text-align:left;
+  transition:background .12s,border-color .12s,transform .06s}
+.qact:hover{background:var(--brand-tint);border-color:var(--brand-line)}
+.qact:active{transform:scale(.98)}
+.qact svg{width:21px;height:21px;margin-bottom:7px}
+.qact b{font-size:13.5px}
+.qact span{font-size:11px;color:var(--fg-3)}
+.qact.qa svg{color:var(--brand)}
+.qact.qb svg{color:var(--teal)}
+.qact.qc svg{color:var(--warn)}
+.qact.qd svg{color:var(--n-600)}
+
+/* alt naviqasiya - yalniz telefonda gorunur */
+.bnav{display:none}
+@media (max-width:720px){
+  body.bnav-on{padding-bottom:76px}
+  body.bnav-on .bnav{position:fixed;left:0;right:0;bottom:0;z-index:40;
+    display:flex;justify-content:space-around;
+    background:var(--surface);border-top:1px solid var(--line);
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+  .bnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:5px 0 3px;font-size:10px;font-weight:560;color:var(--fg-3);
+    text-decoration:none;border-radius:10px}
+  .bnav a svg{width:20px;height:20px}
+  .bnav a.on{color:var(--brand)}
+}
+
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 /* fenn secimi (qurulus + profil); ustlukdeki ad profili acir */
 .chips.subpick{margin:0 0 14px}

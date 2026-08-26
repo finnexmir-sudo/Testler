@@ -45,6 +45,7 @@
             '4.3-.6L9.5 3z"/>',
     clock:  '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/>',
     lock:   '<rect x="4.2" y="8.4" width="10.6" height="7.4" rx="1.6"/><path d="M6.6 8.4V6.2a2.9 2.9 0 0 1 5.8 0v2.2"/>',
+    home:   '<path d="M3.4 9.4 9.5 3.9l6.1 5.5"/><path d="M5.3 8.7v6.8h8.4V8.7"/>',
     pen:    '<path d="M12.4 3.6a1.7 1.7 0 0 1 2.4 2.4L6.6 14.2l-3.1.7.7-3.1 8.2-8.2z"/>',
     doc:    '<path d="M11 2.5H6a1.8 1.8 0 0 0-1.8 1.8v10.4A1.8 1.8 0 0 0 6 16.5h7a1.8 1.8 0 0 0 1.8-1.8V6.3L11 2.5z"/>' +
             '<path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/>'
@@ -117,6 +118,7 @@
     topTitle.textContent = "Müəllim paneli";
     topWho.textContent = "";
     btnOut.classList.add("hide");
+    if (typeof bnavHide === "function") bnavHide();
 
     var isUp = mode === "up";
     show(
@@ -388,30 +390,30 @@
           : "") +
       "</div>" +
       '<div class="spacer"></div>' +
-      '<div class="card pad0"><button class="item" id="btnBank">' +
-        '<div class="ic">' + ic("doc") + "</div>" +
-        '<div class="g"><b>Sual bankı</b><i><span>Öz suallarınızı yazın, ' +
-          "testlərə yığın</span></i></div>" +
-        '<span class="arrow">' + ic("right") + "</span></button>" +
-      '<button class="item" id="btnGen">' +
-        '<div class="ic">' + ic("gen") + "</div>" +
-        '<div class="g"><b>Test yığ</b><i><span>Mövzu və çətinliyə görə ' +
-          "avtomatik test</span></i></div>" +
-        '<span class="arrow">' + ic("right") + "</span></button>" +
-      '<button class="item" id="btnPkt">' +
-        '<div class="ic">' + ic("star") + "</div>" +
-        '<div class="g"><b>Paket</b><i><span>' +
-          (ACC.plan ? "Abunə paketiniz və müddəti" :
-                      "Qiymətlər və abunə") + "</span></i></div>" +
-        '<span class="arrow">' + ic("right") + "</span></button>" +
+      /* Suretli emeliyyatlar - boyuk barmaq-dostu kartlar (mobil ustunlyu) */
+      '<div class="card">' +
+        '<div class="qhead">Sürətli əməliyyatlar</div>' +
+        '<div class="qgrid">' +
+          '<button class="qact qa" id="btnGen">' + ic("gen") +
+            "<b>Test yığ</b><span>mövzu və çətinliyə görə</span></button>" +
+          '<button class="qact qb" id="btnBank">' + ic("doc") +
+            "<b>Sual bankı</b><span>öz suallarınız</span></button>" +
+          '<button class="qact qc" id="btnPkt">' + ic("star") +
+            "<b>Paket</b><span>" +
+            (ACC.plan ? "abunə və müddət" : "qiymətlər və abunə") +
+            "</span></button>" +
+          '<button class="qact qd" id="btnMe">' + ic("person") +
+            "<b>Profil</b><span>fənlər və hesab</span></button>" +
+        "</div>" +
+      "</div>" +
       (isAdmin()
-        ? '<button class="item" id="btnAdm">' +
+        ? '<div class="spacer"></div>' +
+          '<div class="card pad0"><button class="item" id="btnAdm">' +
           '<div class="ic">' + ic("group") + "</div>" +
           '<div class="g"><b>İdarəetmə</b><i><span>Hesablar və ' +
             "abunələr (admin)</span></i></div>" +
-          '<span class="arrow">' + ic("right") + "</span></button>"
+          '<span class="arrow">' + ic("right") + "</span></button></div>"
         : "") +
-      "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Qruplar</h2>" +
       '<div id="groups" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
@@ -440,6 +442,7 @@
     on("btnBank", "click", function () { nav("#/b"); });
     on("btnGen", "click", function () { nav("#/gen"); });
     on("btnPkt", "click", function () { nav("#/p"); });
+    on("btnMe", "click", function () { nav("#/me"); });
     on("btnAdm", "click", function () { nav("#/adm"); });
 
     on("btnGroup", "click", function () {
@@ -3548,9 +3551,37 @@
     else location.hash = h;
   }
 
+  /* ------------------------------------------ alt naviqasiya (mobil)
+     Telefonda bes esas bolme bir toxunusdadir; masaustunde gorunmur.
+     Panel yalniz daxil olmus ve hesabi qurulmus istifadecide cixir. */
+  var bnav = document.createElement("nav");
+  bnav.id = "bnav";
+  bnav.className = "bnav";
+  document.body.appendChild(bnav);
+  var BNAV = [
+    ["",    "home",   "İcmal"],
+    ["b",   "doc",    "Bank"],
+    ["gen", "gen",    "Test yığ"],
+    ["p",   "star",   "Paket"],
+    ["me",  "person", "Profil"]
+  ];
+  function bnavShow(cur) {
+    bnav.innerHTML = BNAV.map(function (it) {
+      return '<a href="#/' + it[0] + '"' +
+        (cur === it[0] ? ' class="on"' : "") + ">" +
+        ic(it[1]) + "<span>" + it[2] + "</span></a>";
+    }).join("");
+    document.body.classList.add("bnav-on");
+  }
+  function bnavHide() {
+    bnav.innerHTML = "";
+    document.body.classList.remove("bnav-on");
+  }
+
   function route() {
-    if (!ACC) { screenSetup(); return; }
+    if (!ACC) { bnavHide(); screenSetup(); return; }
     var m = (location.hash || "#/").replace(/^#/, "").split("/").filter(Boolean);
+    bnavShow({ b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "g" && m[1]) return screenGroup(m[1]);
     if (m[0] === "r" && m[1]) return screenReport(m[1]);
     if (m[0] === "a" && m[1]) return screenAssign(m[1]);

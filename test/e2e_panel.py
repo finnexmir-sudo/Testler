@@ -109,6 +109,24 @@ with sync_playwright() as pw:
 
     ok(empty_icons(pg) == 0, "esas ekranda bos ikon yoxdur", empty_icons(pg))
 
+    ok(pg.locator(".qact").count() == 4, "suretli emeliyyatlar 4 kartdir",
+       pg.locator(".qact").count())
+    ok(pg.locator("#btnMe").count() == 1, "profil qisayolu var")
+    ok(pg.locator("#bnav a").count() == 5, "alt naviqasiya 5 bendlidir",
+       pg.locator("#bnav a").count())
+    # kontekst 430px-dedir - dar ekranda panel gorunur, masaustunde yox
+    ok(pg.locator("#bnav").is_visible(), "dar ekranda alt panel gorunur")
+    pg.set_viewport_size({"width": 1280, "height": 900})
+    pg.wait_for_timeout(200)
+    ok(not pg.locator("#bnav").is_visible(), "masaustunde alt panel gizlidir")
+    pg.set_viewport_size({"width": 430, "height": 900})
+    pg.wait_for_timeout(200)
+    pg.locator("#bnav a", has_text="Profil").click()
+    pg.wait_for_selector("#meSubs", timeout=8000)
+    ok(True, "alt paneldan profil acilir")
+    pg.locator("#btnBack").click()
+    pg.wait_for_selector("#btnGroup", timeout=8000)
+
     print("B · Qrup yaratmaq")
     # siniflər ayrıca sorğu ilə gəlir - dolmasını gözləyirik
     pg.wait_for_function("document.querySelectorAll('#glevel option').length > 1",
