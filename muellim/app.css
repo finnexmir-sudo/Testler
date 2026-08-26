@@ -387,6 +387,11 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   font:inherit;font-size:11px;color:var(--fg-3);text-decoration:underline;
   text-underline-offset:2px}
 .plrow .pltest + .plundo,.plrow .plmk + .plundo{margin-left:8px}
+.plrow .plck{margin-left:auto;flex:0 0 auto;width:15px;height:15px;
+  accent-color:var(--brand);cursor:pointer}
+.plrow .plck + .pltest,.plrow .plck + .plmk{margin-left:10px}
+.plmbar{margin-top:10px}
+.plmbar:empty{display:none}
 
 /* sual sehvi bildirisi + admin bildiris kartlari + 2FA */
 .rlink{border:0;background:none;cursor:pointer;font:inherit;

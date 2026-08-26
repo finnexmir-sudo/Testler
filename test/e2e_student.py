@@ -32,9 +32,17 @@ db("""
 delete from public.question_reports;
 delete from public.attempt_answers;
 delete from public.attempts;
+delete from public.assignments;
 delete from public.student_sessions;
 delete from public.students;
 delete from public.classes;
+-- muellim testleri/suallari da silinir - suite sirasindan asililiq olmasin
+delete from public.test_questions tq using public.tests t
+ where t.id = tq.test_id and t.owner_type = 'educator';
+delete from public.tests where owner_type = 'educator';
+delete from public.question_options o using public.questions q
+ where q.id = o.question_id and q.owner_type = 'educator';
+delete from public.questions where owner_type = 'educator';
 delete from public.account_members;
 delete from public.accounts;
 delete from public.user_roles;

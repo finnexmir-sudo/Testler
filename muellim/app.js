@@ -699,6 +699,10 @@
               (cur && it.id === cur.id ? " cur" : "") + '">' +
               "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
               "<span>" + esc(it.topic) + "</span>" +
+              (it.done && d.paid
+                ? '<input type="checkbox" class="plck" data-plck="' + esc(p.id) +
+                  '" value="' + esc(it.id) + '" title="Birgə test üçün seç">'
+                : "") +
               (it.test_id
                 ? '<a href="#/t/' + esc(it.test_id) + '" class="pltest">vərəq</a>'
                 : (it.done
@@ -711,6 +715,7 @@
                   '" title="Geri qaytar">geri</button>' : "") +
             "</div>";
           }).join("") + "</div>" +
+          '<div class="plmbar" id="plmb-' + esc(p.id) + '"></div>' +
           '<button class="btn sm ghost" data-pldel="' + esc(p.id) +
             '" style="margin-top:10px">Planı sil</button>' +
         "</details>" +
@@ -745,12 +750,41 @@
       if (id) return planTest(g, b, id);
       id = b.getAttribute("data-plmk");
       if (id) return planOfferLate(id);
+      id = b.getAttribute("data-plmulti");
+      if (id) {
+        var ids = [];
+        Array.prototype.forEach.call(
+          box.querySelectorAll('[data-plck="' + id + '"]:checked'),
+          function (c) { ids.push(c.value); });
+        if (ids.length < 2) return;
+        var s3 = $("pls-" + id); if (s3) s3.innerHTML = "";
+        var m3 = $("plm-" + id);
+        if (m3) {
+          m3.innerHTML = offerHtml(
+            "Seçilən " + ids.length + " mövzudan qarışıq test yığılsınmı?",
+            ids.join(","), id);
+          m3.scrollIntoView({ block: "nearest" });
+        }
+        return;
+      }
       id = b.getAttribute("data-plskip");
       if (id) {
         var s2 = $("pls-" + id); if (s2) s2.innerHTML = "";
         var m2 = $("plm-" + id); if (m2) m2.innerHTML = "";
         return;
       }
+    });
+    //  birge test: 2+ movzu secilende duyme cixir
+    box.addEventListener("change", function (ev) {
+      var c = ev.target;
+      var pid = c && c.getAttribute ? c.getAttribute("data-plck") : null;
+      if (!pid) return;
+      var n = box.querySelectorAll('[data-plck="' + pid + '"]:checked').length;
+      var bar = $("plmb-" + pid);
+      if (bar) bar.innerHTML = n >= 2
+        ? '<button class="btn sm" data-plmulti="' + esc(pid) + '">' +
+          "Seçilən " + n + " mövzudan birgə test yığ</button>"
+        : "";
     });
     function rebindOnly() {}
   }
@@ -825,18 +859,27 @@
 
   function planTest(g, b, itemId) {
     var n = Number(($("plCnt") || {}).value) || 15;
+    //  vergullu id = bir nece movzudan QARISIQ test
+    var multi = itemId.indexOf(",") >= 0;
+    var card = b.closest ? b.closest(".plan") : null;
     busy = true; b.disabled = true;
     b.textContent = "Yığılır…";
-    sb.rpc("rpc_plan_test", { p_item_id: itemId, p_count: n })
+    (multi
+      ? sb.rpc("rpc_plan_test_multi",
+               { p_item_ids: itemId.split(","), p_count: n })
+      : sb.rpc("rpc_plan_test", { p_item_id: itemId, p_count: n }))
       .then(function (r) {
         busy = false;
-        //  itemin testini yerli olaraq bagla, netice mesaji goster
-        var pid = null;
-        (PLD.plans || []).forEach(function (p) {
-          (p.items || []).forEach(function (it) {
-            if (it.id === itemId) { it.test_id = r.test_id; pid = p.id; }
+        //  tek movzuda itemin testini yerli olaraq bagla; qarisiq test
+        //  item-e baglanmir - netice mesaji linki verir
+        var pid = card ? card.getAttribute("data-p") : null;
+        if (!multi) {
+          (PLD.plans || []).forEach(function (p) {
+            (p.items || []).forEach(function (it) {
+              if (it.id === itemId) { it.test_id = r.test_id; pid = p.id; }
+            });
           });
-        });
+        }
         drawPlan(g);
         var m = $("plm-" + pid);
         //  msg() metni esc edir - link ucun qutunu ozumuz yigiriq

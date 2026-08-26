@@ -298,6 +298,77 @@ begin
                             'count', v_res->>'count');
 end $$;
 
+-- ------------------------------------------------- birge yoxlama testi
+--  Bir nece KECILMIS movzudan QARISIQ test: "Sonra" deyilib sonradan
+--  yigan, ve ya 2-3 movzunu birden yoxlamaq isteyen muellim ucun.
+--  Test item-lere baglanmir (movzu-test elaqesi tek movzuludur) -
+--  veraq ve neticeler Tapsiriqlar bolmesinde gorunur.
+create or replace function public.rpc_plan_test_multi(
+  p_item_ids uuid[], p_count int default 15)
+returns jsonb
+language plpgsql security definer
+set search_path = public, extensions, pg_temp as $$
+declare
+  v_ids    uuid[];
+  v_n      int;
+  v_plan   public.class_plans%rowtype;
+  v_topics jsonb;
+  v_rule   jsonb;
+  v_res    jsonb;
+  v_test   uuid;
+begin
+  if p_count is null or p_count < 3 or p_count > 50 then
+    raise exception 'Sual sayi 3-50 araliginda olmalidir.' using errcode = '22023';
+  end if;
+  select array_agg(distinct x) into v_ids from unnest(p_item_ids) x;
+  v_n := coalesce(array_length(v_ids, 1), 0);
+  if v_n < 2 then
+    raise exception 'En azi 2 movzu secin.' using errcode = '22023';
+  end if;
+  if (select count(*) from public.class_plan_items where id = any(v_ids)) <> v_n then
+    raise exception 'Movzu tapilmadi.' using errcode = '22023';
+  end if;
+  if (select count(distinct plan_id)
+        from public.class_plan_items where id = any(v_ids)) <> 1 then
+    raise exception 'Movzular eyni plandan olmalidir.' using errcode = '22023';
+  end if;
+
+  select p.* into v_plan
+    from public.class_plans p
+    join public.class_plan_items i on i.plan_id = p.id
+   where i.id = v_ids[1];
+  perform app.plan_class(v_plan.class_id);
+
+  if exists (select 1 from public.class_plan_items
+              where id = any(v_ids) and done_at is null) then
+    raise exception 'Yalniz kecilmis movzulardan test yigilir.'
+      using errcode = '22023';
+  end if;
+
+  select jsonb_agg(topic_id::text) into v_topics
+    from public.class_plan_items where id = any(v_ids);
+
+  v_rule := jsonb_build_object(
+    'pool', 'all',
+    'count', p_count,
+    'subject', (select slug from public.subjects where id = v_plan.subject_id),
+    'level',   (select code from public.levels   where id = v_plan.level_id),
+    'topics',  v_topics);
+
+  --  generator abuneni ozu yoxlayir ('all' hovuzu pullu qapidir)
+  v_res  := public.rpc_generate_test(
+    v_rule,
+    (select name from public.subjects where id = v_plan.subject_id) ||
+      ' — qarışıq yoxlama (' || v_n || ' mövzu)');
+  v_test := (v_res->>'test_id')::uuid;
+
+  perform public.rpc_assign_test(
+    v_plan.class_id, v_test, now() + interval '7 days', 1);
+
+  return jsonb_build_object('ok', true, 'test_id', v_test,
+                            'count', v_res->>'count');
+end $$;
+
 -- ------------------------------------------------- plan seçimləri
 --  Formada YALNIZ movzu agaci olan fenn+sinif kombinasiyalari
 --  gorunsun - "Kurikulum" kimi agacsiz fenni secib xeta almaq
@@ -334,6 +405,7 @@ revoke all on function public.rpc_plan_get(uuid)                from public, ano
 revoke all on function public.rpc_plan_done(uuid)               from public, anon;
 revoke all on function public.rpc_plan_undo(uuid)               from public, anon;
 revoke all on function public.rpc_plan_test(uuid, int)          from public, anon;
+revoke all on function public.rpc_plan_test_multi(uuid[], int)  from public, anon;
 
 grant execute on function public.rpc_plan_options()                to authenticated;
 grant execute on function public.rpc_plan_create(uuid, text, text) to authenticated;
@@ -342,6 +414,7 @@ grant execute on function public.rpc_plan_get(uuid)                to authentica
 grant execute on function public.rpc_plan_done(uuid)               to authenticated;
 grant execute on function public.rpc_plan_undo(uuid)               to authenticated;
 grant execute on function public.rpc_plan_test(uuid, int)          to authenticated;
+grant execute on function public.rpc_plan_test_multi(uuid[], int)  to authenticated;
 
 do $$
 begin

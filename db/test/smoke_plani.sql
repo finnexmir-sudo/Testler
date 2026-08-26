@@ -194,6 +194,53 @@ end $$;
 \echo 'OK  5 · yoxlama testi: movzudan yigilir, qrupa teyin olunur'
 
 -- =====================================================================
+--  5b. Qarisiq test: bir nece kecilmis movzudan birge
+-- =====================================================================
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000f1';
+do $$
+declare
+  v jsonb; it1 uuid; it2 uuid; it3 uuid; tid uuid;
+  ok1 boolean := false; ok2 boolean := false;
+begin
+  v := public.rpc_plan_get('cccc0000-0000-0000-0000-0000000000f1');
+  it1 := (v->'plans'->0->'items'->0->>'id')::uuid;
+  it2 := (v->'plans'->0->'items'->1->>'id')::uuid;
+  it3 := (v->'plans'->0->'items'->2->>'id')::uuid;
+
+  perform public.rpc_plan_done(it2);
+
+  --  kecilmemis movzu qarisiga dusmez; tek movzu da olmaz
+  begin
+    perform public.rpc_plan_test_multi(array[it1, it3], 5);
+  exception when others then ok1 := true; end;
+  begin
+    perform public.rpc_plan_test_multi(array[it1], 5);
+  exception when others then ok2 := true; end;
+  assert ok1 and ok2, 'yanlis qarisiq test kecdi';
+
+  v := public.rpc_plan_test_multi(array[it1, it2], 6);
+  tid := (v->>'test_id')::uuid;
+
+  --  cedvel oxunuslari ucun superuser kontekstine kecirik
+  reset role; reset request.jwt.claim.sub;
+  assert (select count(*) from public.test_questions where test_id = tid) = 6,
+         'qarisiq test 6 sualliq deyil';
+  assert not exists (
+    select 1 from public.test_questions tq
+      join public.questions q on q.id = tq.question_id
+     where tq.test_id = tid
+       and q.topic_id not in (select topic_id from public.class_plan_items
+                               where id in (it1, it2))),
+    'kenar movzunun suali dusdu';
+  assert exists (select 1 from public.assignments where test_id = tid),
+         'qarisiq teste tapsiriq verilmedi';
+  assert (select test_id from public.class_plan_items where id = it2) is null,
+         'qarisiq test item-e baglanmamalidir';
+end $$;
+\echo 'OK 5b · qarisiq test: 2 movzudan yigilir, item-e baglanmir'
+
+-- =====================================================================
 --  6. Ozge muellim plana toxuna bilmir
 -- =====================================================================
 set role authenticated;

@@ -184,17 +184,25 @@ class H(BaseHTTPRequestHandler):
         if not name.startswith("rpc_"):
             return self.send(404, {"message": "Bele funksiya yoxdur."})
         keys = list(args.keys())
-        stmt = sql.SQL("select {}({}) as r").format(
-            sql.Identifier("public", name),
-            sql.SQL(", ").join(
-                sql.SQL("{} => %s").format(sql.Identifier(k)) for k in keys))
 
         # PostgREST parametrin TIPINE baxir: jsonb-dirse JSON kimi,
         # text[]-dirse ARRAY kimi gonderir.  Hamisini Json()-a bukmek
         # text[] parametrde "malformed array literal" verir - ve bu sehv
         # yalniz burda gorunerdi, canli Supabase-de yox.  Ona gore biz de
         # tipe baxiriq: eks halda mock hequiqetden ferqli davranir.
+        # Massiv parametre acik cast da lazimdir: psycopg2 siyahini
+        # text[] kimi gonderir, uuid[] parametr onu qebul etmir -
+        # PostgREST ise imzaya gore ozu cevirir.
         types = self.arg_types(name)
+
+        def piece(k):
+            t = types.get(k, "")
+            cast = sql.SQL("::" + t) if t.endswith("[]") else sql.SQL("")
+            return sql.SQL("{} => %s{}").format(sql.Identifier(k), cast)
+
+        stmt = sql.SQL("select {}({}) as r").format(
+            sql.Identifier("public", name),
+            sql.SQL(", ").join(piece(k) for k in keys))
 
         def val(k, v):
             if not isinstance(v, (dict, list)):

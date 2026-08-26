@@ -158,6 +158,34 @@ with sync_playwright() as pw:
     ok(pg.locator(".plrow .pltest").count() == 2, "iki movzuda veraq linki var",
        pg.locator(".plrow .pltest").count())
 
+    print("G · Birgə test: 2 mövzu seçilir, qarışıq yığılır")
+    ok(pg.locator(".plck").count() == 2, "kecilmis movzularda secim qutusu var",
+       pg.locator(".plck").count())
+    pg.locator(".plck").nth(0).check()
+    pg.wait_for_timeout(200)
+    ok(pg.locator("[data-plmulti]").count() == 0, "tek secimde duyme cixmir")
+    pg.locator(".plck").nth(1).check()
+    pg.wait_for_selector("[data-plmulti]", timeout=4000)
+    ok("2 mövzudan" in pg.inner_text("[data-plmulti]"), "birge duyme cixir")
+    pg.locator("[data-plmulti]").click()
+    pg.wait_for_selector(".ploffer", timeout=4000)
+    ok("qarışıq" in pg.inner_text(".ploffer"), "qarisiq teklif qutusu")
+    pg.fill("#plCnt", "6")
+    pg.locator("[data-pltest]").click()
+    pg.wait_for_selector(".plan [id^='plm-'] a", timeout=10000)
+    t3 = db("""select t.id::text i, t.title,
+                      (select count(*) from public.test_questions tq
+                        where tq.test_id = t.id) nq
+                 from public.tests t
+                where t.owner_type='educator' and t.title like '%%qarışıq%%'""",
+            one=True)
+    ok(bool(t3), "qarisiq test bazada var")
+    ok(t3 and t3["nq"] == 6, "qarisiq test 6 sualliqdir", t3 and t3["nq"])
+    ok(bool(db("select 1 ok from public.assignments where test_id = %s",
+               (t3["i"],), one=True)), "qarisiq teste tapsiriq verildi")
+    ok(not db("select 1 ok from public.class_plan_items where test_id = %s",
+              (t3["i"],), one=True), "qarisiq test item-e baglanmir")
+
     br.close()
 
 print()
