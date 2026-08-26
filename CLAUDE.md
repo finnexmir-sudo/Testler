@@ -84,9 +84,18 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    Plan TARİXLƏ yox, ARDICILLIQLA yaşayır («keçildi» deyilməyincə cari
    mövzu dəyişmir). «Keçildi» → təklif: «N suallıq yoxlama testi
    yığılsınmı?» → `rpc_plan_test` generatoru işlədir və qrupa dərhal
-   tapşırıq verir (+7 gün, 1 cəhd). Pullu qapı: yaratma/keçildi/test
+   tapşırıq verir (+7 gün, 1 cəhd). Keçilmiş mövzudan sonradan da test
+   yığılır («test yığ»); bir neçə keçilmiş mövzu seçilib **birgə qarışıq
+   test** də mümkündür (`rpc_plan_test_multi` — item-ə bağlanmır).
+   Pullu qapı: yaratma/keçildi/test
    abunə istəyir, baxış sərbəstdir. Mərhələ 2 (sonra): mövzu testi
    zəif çıxanda növbəti dərsdən əvvəl xəbərdarlıq + düzəliş testi.
+   **Tədris fənləri** (`db/26_fenn.sql`): hesabda `subjects text[]`
+   (slug siyahısı) — quruluşda və `#/me` profilində (yuxarıdakı ada
+   klik) seçilir, `rpc_set_subjects` yazır. Bank/generator/plan fənn
+   siyahıları buna görə daralır — **filtrdir, məhdudiyyət deyil**: boş
+   siyahı və ya uyğunsuzluq = tam siyahı. `rpc_my_context` 26-da
+   genişləndirilib (06-nı dəyişəndə 26-dakı kopyanı da yenilə).
 4. **Vərəqin çap/PDF görünüşü** — cavabsız şagird + cavablı müəllim nüsxəsi.
 5. **Dinamika qrafiki** — şagirdin nəticəsi həftə-həftə.
 6. **«Səhvlər üzərində iş»** — səhv edilən sualların özündən bir kliklə test.

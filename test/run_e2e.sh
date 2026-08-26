@@ -52,5 +52,8 @@ echo
 echo "11/12 ders plani"
 python3 test/e2e_plan.py
 echo
-echo "12/12 parol berpasi"
+echo "12/13 parol berpasi"
 python3 test/e2e_parol.py
+echo
+echo "13/13 tedris fennleri"
+python3 test/e2e_fenn.py

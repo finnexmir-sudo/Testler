@@ -284,9 +284,14 @@
         "</select>" +
         '<label for="aname">Hesabın adı</label>' +
         '<input id="aname" placeholder="məsələn: Leyla müəllim — riyaziyyat">' +
+        "<label>Tədris etdiyiniz fənlər (istəyə görə)</label>" +
+        '<p class="note" style="margin-top:-4px">Seçsəniz, siyahılarda yalnız ' +
+          "öz fənləriniz görünəcək. Sonradan profildən dəyişmək olar.</p>" +
+        '<div class="chips subpick" id="setSubs"></div>' +
         '<button class="btn go wide" id="btnSetup">Davam et</button>' +
       "</div>"
     );
+    subChips("setSubs", []);
 
     on("btnSetup", "click", function () {
       if (busy) return;
@@ -297,10 +302,52 @@
       }
       setBusy("btnSetup", true, "Davam et");
       sb.rpc("rpc_create_account", { p_type: $("atype").value, p_name: name })
+        .then(function (r) {
+          //  fenn secimi konu deyil - alinmasa da hesab yaranib
+          var subs = chipVals("setSubs");
+          if (!subs.length || !r || !r.id) return null;
+          return sb.rpc("rpc_set_subjects",
+                        { p_account_id: r.id, p_subjects: subs })
+                   .catch(function () {});
+        })
         .then(boot)
         .catch(function (e) {
           setBusy("btnSetup", false, "Davam et");
           $("setupErr").innerHTML = msg("err", fail(e));
+        });
+    });
+  }
+
+  /* ----------------------------------------------------------- profil */
+  function screenMe() {
+    topTitle.textContent = "Profil";
+    show(
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") +
+        "Əsas səhifə</button>" +
+      '<div class="spacer"></div>' +
+      '<div class="card">' +
+        "<h1>Tədris etdiyiniz fənlər</h1>" +
+        '<p class="note">Seçilmiş fənlər sual bankı, test yığma və dərs planı ' +
+          "siyahılarını daraldır. Boş saxlasanız bütün fənlər görünür.</p>" +
+        '<div class="chips subpick" id="meSubs"><span class="skel">Yüklənir…</span></div>' +
+        '<div id="meErr"></div>' +
+        '<button class="btn go" id="btnMeSave">Yadda saxla</button>' +
+      "</div>");
+    on("btnBack", "click", function () { nav("#/"); });
+    subChips("meSubs", mySubs());
+    on("btnMeSave", "click", function () {
+      if (busy) return;
+      setBusy("btnMeSave", true, "Yadda saxla");
+      sb.rpc("rpc_set_subjects",
+             { p_account_id: ACC.id, p_subjects: chipVals("meSubs") })
+        .then(function () { return refreshContext(); })
+        .then(function () {
+          setBusy("btnMeSave", false, "Yadda saxla");
+          $("meErr").innerHTML = msg("ok", "Yadda saxlanıldı.");
+        })
+        .catch(function (e) {
+          setBusy("btnMeSave", false, "Yadda saxla");
+          $("meErr").innerHTML = msg("err", fail(e));
         });
     });
   }
@@ -623,7 +670,7 @@
       //  agacsiz fenni ("Kurikulum" ve s.) secib xeta almaq olmasin.
       //  Sinif siyahisi fenne gore daralir.
       sb.rpc("rpc_plan_options", {}).then(function (opts) {
-        opts = opts || [];
+        opts = subFilter(opts || []);
         var sel = $("plSub"), lev = $("plLev");
         if (!sel || !lev) return;
         sel.innerHTML = opts.map(function (x) {
@@ -1335,6 +1382,47 @@
 
   /* Sinif siyahisi hem qrup yaratmaqda, hem de gostermekde lazimdir -
      bir defe yuklenib yaddasda saxlanilir. */
+  /* ------------------------------------------- tedris fennleri (filtr)
+     Hesabda secilmis fennler fenn siyahilarini daraldir: sual banki,
+     generator, ders plani.  Bos siyahi ve ya "secilenlerde hec ne
+     yoxdur" hali = tam siyahi.  Bu filtrdir, mehdudiyyet deyil. */
+  function mySubs() { return (ACC && ACC.subjects) || []; }
+  function subFilter(list, keep) {
+    var s = mySubs();
+    if (!s.length) return list || [];
+    var out = (list || []).filter(function (x) {
+      return s.indexOf(x.slug) >= 0 || (keep && x.slug === keep);
+    });
+    return out.length ? out : (list || []);
+  }
+  /* Fenn nisanlari (toggle) - qurulus ve profil ekranlarinda */
+  function subChips(boxId, selected) {
+    sb.select("subjects", { select: "slug,name", order: "sort" })
+      .then(function (rows) {
+        var box = $(boxId);
+        if (!box) return;
+        box.innerHTML = (rows || []).map(function (s) {
+          return '<button type="button" class="chip' +
+            (selected.indexOf(s.slug) >= 0 ? " on" : "") +
+            '" data-sub="' + esc(s.slug) + '">' + esc(s.name) + "</button>";
+        }).join("");
+        box.addEventListener("click", function (ev) {
+          var b = ev.target.closest ? ev.target.closest("[data-sub]") : null;
+          if (b) b.classList.toggle("on");
+        });
+      }).catch(function () {
+        var box = $(boxId);
+        if (box) box.innerHTML = "";
+      });
+  }
+  function chipVals(boxId) {
+    var out = [];
+    Array.prototype.forEach.call(
+      document.querySelectorAll("#" + boxId + " .chip.on"),
+      function (b) { out.push(b.getAttribute("data-sub")); });
+    return out;
+  }
+
   function loadLevels() {
     if (LEVELS) return Promise.resolve(LEVELS);
     //  Sinif esasli seviyyeler (kod reqemdir: 1-11). MIQ/sertifikasiya
@@ -2410,9 +2498,9 @@
         '<div class="fieldrow" style="margin-top:12px">' +
           '<div><label for="gsub">Fənn</label>' +
             '<select id="gsub"><option value="">Bütün fənlər</option>' +
-            (FAC.subjects || []).filter(function (x) {
+            subFilter((FAC.subjects || []).filter(function (x) {
               return Number(x.n) > 0 || f.subject === x.slug;
-            }).map(function (x) {
+            }), f.subject).map(function (x) {
               return '<option value="' + esc(x.slug) + '"' +
                 (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
             }).join("") + "</select></div>" +
@@ -2831,9 +2919,9 @@
           '<div><select id="bsub"><option value="">Bütün fənlər</option>' +
             /* Suali olmayan fenn siyahida cixmir - onu secmek menasizdir.
                Sual FORMASINDA ise butun fennler qalir. */
-            (FAC.subjects || []).filter(function (s) {
+            subFilter((FAC.subjects || []).filter(function (s) {
               return Number(s.n) > 0 || f.subject === s.slug;
-            }).map(function (s) {
+            }), f.subject).map(function (s) {
               return '<option value="' + esc(s.slug) + '"' +
                 (f.subject === s.slug ? " selected" : "") + ">" + esc(s.name) + "</option>";
             }).join("") + "</select></div>" +
@@ -2931,9 +3019,9 @@
     if (f.pool !== "mine" && nFilt(f) === 0 && !(f.q || "").trim()) {
       var box0 = $("bList");
       if (box0) {
-        var subs = (FAC.subjects || []).filter(function (x) {
+        var subs = subFilter((FAC.subjects || []).filter(function (x) {
           return (Number(x.n) || 0) > 0;
-        });
+        }));
         var total = subs.reduce(function (a, x) {
           return a + (Number(x.n) || 0);
         }, 0);
@@ -3471,6 +3559,7 @@
     if (m[0] === "t" && m[1]) return screenPaper(m[1]);
     if (m[0] === "p") return screenPaket();
     if (m[0] === "adm") return screenAdmin();
+    if (m[0] === "me") return screenMe();
     if (m[0] === "q" && m[1]) return screenQuestion(m[1]);
     if (m[0] === "s" && m[1] && m[2]) return screenStudent(m[1], m[2]);
     screenHome();
@@ -3478,6 +3567,11 @@
 
   window.addEventListener("hashchange", function () {
     if (sb.session() && CTX) route();
+  });
+
+  /* Ustlukdeki ad profil sehifesini acir */
+  topWho.addEventListener("click", function () {
+    if (sb.session() && CTX && ACC) nav("#/me");
   });
 
   /* Muellim basqa tetbiqe kecib qayidanda hesabat ozu yenilenir -

@@ -189,6 +189,10 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 
 /* Cox secimli nisanlar: cetinlik, movzular */
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+/* fenn secimi (qurulus + profil); ustlukdeki ad profili acir */
+.chips.subpick{margin:0 0 14px}
+.top .who{cursor:pointer}
+.top .who:hover{color:var(--brand)}
 .chip{
   min-height:30px;padding:0 11px;border:1px solid var(--n-200);
   background:var(--surface);border-radius:999px;font:inherit;font-size:12.5px;

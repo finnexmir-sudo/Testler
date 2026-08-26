@@ -23,6 +23,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 22_esas.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 23_bildiris.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 24_admin_2fa.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 25_ders_plani.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 26_fenn.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql
