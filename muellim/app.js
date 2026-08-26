@@ -1578,9 +1578,13 @@
       var pl = a.plan, badge;
       if (pl) {
         //  bitmesine 7 gunden az qalibsa narinci - uzatmaq vaxtidir
-        var az7 = pl.ends && (new Date(pl.ends).getTime() - Date.now()) < 7 * 86400000;
-        badge = '<span class="pb ' + (az7 ? "z" : "y") + '">' + esc(pl.name) +
-          (pl.ends ? " → " + dateAz(pl.ends) : "") + "</span>";
+        var gq = pl.ends
+          ? Math.max(0, Math.ceil((new Date(pl.ends).getTime() - Date.now()) / 86400000))
+          : null;
+        badge = '<span class="pb ' + (gq !== null && gq < 7 ? "z" : "y") + '">' +
+          esc(pl.name) +
+          (pl.ends ? " → " + dateAz(pl.ends) + " · " + gq + " gün" : "") +
+          "</span>";
       } else {
         badge = '<span class="pb n">paketsiz</span>';
       }
