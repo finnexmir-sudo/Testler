@@ -67,6 +67,16 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    `insert into user_roles (user_id, role) select id,'admin' from
    auth.users where email='...'`. Mərhələ 2 (kart ödənişi,
    Payriff/Epoint) müştəri sayı artanda.
+   Admin **2FA ilə qorunur** (`db/24_admin_2fa.sql`): TOTP
+   (Authenticator tətbiqi) + 4 birdəfəlik ehtiyat kod; kilid 12 saat,
+   kod cəhdi 10 dəq/5. `app.admin_ok()` = rol + açılmış kilid — bütün
+   admin RPC-ləri bu qapıdan keçir. Telefon itsə: SQL Editor-də
+   `delete from admin_totp` kilidi sıfırlayır.
+   **Səhv bildirişləri** (`db/23_bildiris.sql`): müəllim vərəqdən,
+   şagird nəticə ekranından sualı bildirir (`question_reports`);
+   admin `#/adm`-də baxır, platforma sualını **yerində düzəldir**
+   (`rpc_admin_fix_question` — variant id-ləri qorunur) və ya rədd
+   edir. Bildiriş suala toxunmur — qərar həmişə admindədir.
 2. **Sual bankının davamı** — 3-4-cü siniflər hazır; qalır 1-2-ci
    siniflər və ingilis dili.
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,

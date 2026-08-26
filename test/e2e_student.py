@@ -29,6 +29,7 @@ def db(sql, args=None, one=False):
 db("""
 -- DIQQET: truncate ... cascade profiles-e istinad eden tests cedvelini de
 -- bosaldir - platforma testleri itir. Ona gore hedefli silme.
+delete from public.question_reports;
 delete from public.attempt_answers;
 delete from public.attempts;
 delete from public.student_sessions;
@@ -250,6 +251,15 @@ with sync_playwright() as pw:
        pg.locator(".wrong").count())
     ok(len(pg.locator(".wrong i").first.inner_text()) > 5,
        "sehv sualda izah gosterilir", pg.locator(".wrong i").first.inner_text()[:45])
+    # sualda sehv bildirisi: link -> sebeb -> gonder -> tesekkur
+    pg.locator(".wrong .rlink").first.click()
+    pg.wait_for_selector(".wrong [data-rsend]", timeout=4000)
+    pg.locator(".wrong [data-rsend]").first.click()
+    pg.wait_for_selector(".wrong .rok", timeout=6000)
+    ok("Bildirildi" in pg.inner_text(".wrong .rok"), "sagird bildirisi gonderilir")
+    nr = db("select count(*) n from public.question_reports where student_id is not null",
+            one=True)["n"]
+    ok(nr == 1, "bildiris bazaya dusdu", nr)
 
     print("I · Yarımçıq testdə çıxış xəbərdarlığı")
     pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)

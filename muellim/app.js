@@ -43,6 +43,7 @@
     star:   '<path d="M9.5 3l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 ' +
             '4.3-.6L9.5 3z"/>',
     clock:  '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/>',
+    lock:   '<rect x="4.2" y="8.4" width="10.6" height="7.4" rx="1.6"/><path d="M6.6 8.4V6.2a2.9 2.9 0 0 1 5.8 0v2.2"/>',
     pen:    '<path d="M12.4 3.6a1.7 1.7 0 0 1 2.4 2.4L6.6 14.2l-3.1.7.7-3.1 8.2-8.2z"/>',
     doc:    '<path d="M11 2.5H6a1.8 1.8 0 0 0-1.8 1.8v10.4A1.8 1.8 0 0 0 6 16.5h7a1.8 1.8 0 0 0 1.8-1.8V6.3L11 2.5z"/>' +
             '<path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/>'
@@ -1415,20 +1416,61 @@
   /* ---------------------------------------------------------- admin */
   var admFlash = "";   // redraw-dan sonra bir defe gosterilen netice mesaji
 
+  var F2 = null;   // 2FA veziyyeti (enabled/unlocked)
+
   function screenAdmin() {
     var live = guard();
     topTitle.textContent = "İdarəetmə";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
-    Promise.all([
-      sb.rpc("rpc_admin_stats", {}),
-      sb.rpc("rpc_admin_accounts", { p_q: null })
-    ]).then(function (r) {
+    sb.rpc("rpc_admin_2fa_status", {}).then(function (st2) {
       if (!live()) return;
-      drawAdmin(r[0] || {}, r[1] || []);
+      F2 = st2 || {};
+      if (F2.enabled && !F2.unlocked) return drawAdmLock();
+      Promise.all([
+        sb.rpc("rpc_admin_stats", {}),
+        sb.rpc("rpc_admin_accounts", { p_q: null }),
+        sb.rpc("rpc_admin_reports", { p_status: "new" })
+      ]).then(function (r) {
+        if (!live()) return;
+        drawAdmin(r[0] || {}, r[1] || [], r[2] || []);
+      }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
-  function drawAdmin(st, rows) {
+  /* Kilid ekrani: Authenticator kodu ve ya birtefelik ehtiyat kod */
+  function drawAdmLock() {
+    show(
+      '<div class="lock card">' +
+        '<div class="lic">' + ic("lock") + "</div>" +
+        "<h1>İdarəetmə kilidlidir</h1>" +
+        '<p class="muted">Authenticator tətbiqindəki 6 rəqəmli kodu və ya ' +
+          "birtəfəlik ehtiyat kodu daxil edin.</p>" +
+        '<div class="lrow"><input id="ulCode" maxlength="9" autocomplete="one-time-code" ' +
+          'placeholder="000000">' +
+        '<button class="btn go" id="btnUl">Aç</button></div>' +
+        '<div id="ulMsg"></div>' +
+      "</div>"
+    );
+    var inp = $("ulCode");
+    if (inp) inp.focus();
+    function go() {
+      if (busy) return;
+      busy = true;
+      sb.rpc("rpc_admin_unlock", { p_code: ($("ulCode") || {}).value || "" })
+        .then(function (r) {
+          busy = false;
+          if (r && r.ok) return screenAdmin();
+          $("ulMsg").innerHTML = msg("err", (r && r.err) || "Kod düzgün deyil.");
+        }).catch(function (e) {
+          busy = false;
+          $("ulMsg").innerHTML = msg("err", fail(e));
+        });
+    }
+    on("btnUl", "click", go);
+    on("ulCode", "keydown", function (e) { if (e.key === "Enter") go(); });
+  }
+
+  function drawAdmin(st, rows, reps) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "repetitor-25", name: "Repetitor — 25 şagird" }];
     show(
@@ -1466,7 +1508,19 @@
         '<div id="admMsg">' + admFlash + "</div>" +
       "</div>" +
       '<div class="spacer"></div>' +
-      '<div id="admList" class="card pad0">' + admRows(rows) + "</div>"
+      '<div id="admList" class="card pad0">' + admRows(rows) + "</div>" +
+      '<div class="spacer"></div>' +
+      "<h2>Bildirişlər" + (reps.length
+        ? ' <span class="rcnt">' + reps.length + "</span>" : "") + "</h2>" +
+      '<div class="chips" id="repF">' +
+        '<button class="chip on" data-rs="new">Yeni</button>' +
+        '<button class="chip" data-rs="fixed">Düzəldilib</button>' +
+        '<button class="chip" data-rs="rejected">Rədd edilib</button>' +
+      "</div>" +
+      '<div id="repList">' + (REPS_CACHE = reps, repCards(reps, "new")) + "</div>" +
+      '<div class="spacer"></div>' +
+      "<h2>Təhlükəsizlik</h2>" +
+      '<div class="card" id="secBox">' + secCard() + "</div>"
     );
     admFlash = "";
     //  standart secim - en cox satilan repetitor paketi
@@ -1498,6 +1552,21 @@
       admQuery();
     });
     bindAdm();
+    bindRep();
+    on("repF", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest(".chip") : null;
+      if (!b) return;
+      var cur = document.querySelector("#repF .chip.on");
+      if (cur) cur.classList.remove("on");
+      b.classList.add("on");
+      var st2 = b.getAttribute("data-rs");
+      sb.rpc("rpc_admin_reports", { p_status: st2 }).then(function (r) {
+        REPS_CACHE = r || [];
+        var box = $("repList");
+        if (box) box.innerHTML = repCards(REPS_CACHE, st2);
+      }).catch(function () {});
+    });
+    bindSec();
   }
 
   function admRows(rows) {
@@ -1567,6 +1636,228 @@
         busy = false; b.disabled = false;
         $("admMsg").innerHTML = msg("err", fail(e));
       });
+    });
+  }
+
+
+  /* --------------------------------------- admin: bildiris kartlari */
+  var R_LBL = { cavab: "Cavab səhvdir", sert: "Şərt qüsurludur",
+                yazi: "Yazı xətası", diger: "Digər" };
+
+  function repCards(reps, st) {
+    if (!reps.length) {
+      return '<div class="card"><p class="muted" style="margin:0">' +
+        (st === "new" ? "Yeni bildiriş yoxdur — bank təmizdir. 👌"
+                      : "Bu siyahı boşdur.") + "</p></div>";
+    }
+    return reps.map(function (r) {
+      var qid = r.question_id;
+      return '<div class="card repc" data-q="' + esc(qid) + '">' +
+        '<div class="rhead"><b>' + esc(r.body) + "</b>" +
+          '<span class="rcnt">' + r.n + "</span></div>" +
+        '<div class="qm">' +
+          (r.subject ? "<span>" + esc(r.subject) + "</span>" : "") +
+          (r.level ? "<span>·</span><span>" + esc(r.level) + "</span>" : "") +
+          (r.topic ? "<span>·</span><span>" + esc(r.topic) + "</span>" : "") +
+          "<span>·</span><span>" +
+            (r.owner === "platform" ? "platforma" : "müəllimin öz sualı") +
+          "</span></div>" +
+        (r.options || []).map(function (o) {
+          return '<div class="popt' + (o.is_correct ? " ok" : "") + '">' +
+            (o.is_correct ? ic("check") : "") + "<span>" + esc(o.body) +
+            "</span></div>";
+        }).join("") +
+        '<div class="rwho">' + (r.reports || []).map(function (x) {
+          return '<div class="rline"><b>' + esc(x.who || "") + "</b>" +
+            "<span>·</span><span>" + (x.kind === "sagird" ? "şagird" : "müəllim") +
+            "</span><span>·</span><span>" + (R_LBL[x.reason] || x.reason) +
+            "</span>" + (x.note ? '<i>«' + esc(x.note) + "»</i>" : "") + "</div>";
+        }).join("") + "</div>" +
+        (st === "new"
+          ? '<div class="rbtns">' +
+              (r.owner === "platform"
+                ? '<button class="btn sm" data-fix="' + esc(qid) + '">Düzəlt</button>'
+                : "") +
+              '<button class="btn sm ghost" data-rej="' + esc(qid) + '">Rədd et</button>' +
+              (r.owner === "platform"
+                ? "" : '<button class="btn sm ghost" data-cls="' + esc(qid) +
+                       '">Baxıldı</button>') +
+            "</div>" +
+            '<div class="fslot" id="fs-' + esc(qid) + '"></div>' +
+            '<div id="fm-' + esc(qid) + '"></div>'
+          : "") +
+      "</div>";
+    }).join("");
+  }
+
+  /* Yerinde duzelis redaktoru: metn + izah + variantlar, duz cavab radio */
+  function fixForm(r) {
+    return '<div class="ffrm">' +
+      "<label>Sual mətni</label>" +
+      '<textarea class="fbody" rows="2">' + esc(r.body) + "</textarea>" +
+      "<label>İzah</label>" +
+      '<textarea class="fexp" rows="2">' + esc(r.explanation || "") + "</textarea>" +
+      "<label>Variantlar — düzgün olanı seçin</label>" +
+      (r.options || []).map(function (o) {
+        return '<div class="fopt"><input type="radio" name="fc-' + esc(r.question_id) +
+          '"' + (o.is_correct ? " checked" : "") + ' data-oid="' + esc(o.id) + '">' +
+          '<input type="text" class="fob" data-oid="' + esc(o.id) + '" value="' +
+          esc(o.body).replace(/"/g, "&quot;") + '"></div>';
+      }).join("") +
+      '<div class="rbtns">' +
+        '<button class="btn go sm" data-save="' + esc(r.question_id) + '">Saxla</button>' +
+        '<button class="btn sm ghost" data-fcancel="' + esc(r.question_id) + '">İmtina</button>' +
+      "</div></div>";
+  }
+
+  var REPS_CACHE = [];
+
+  function bindRep() {
+    var box = $("repList");
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = "1";
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b || busy) return;
+      var qid = b.getAttribute("data-fix");
+      if (qid) {
+        var card = b.closest(".repc");
+        var slot = $("fs-" + qid);
+        if (!slot) return;
+        if (slot.innerHTML) { slot.innerHTML = ""; return; }
+        //  kartin oz melumatindan forma yigilir - serverden tezeden istemirik
+        var r = findRep(qid);
+        if (r) slot.innerHTML = fixForm(r);
+        return;
+      }
+      qid = b.getAttribute("data-fcancel");
+      if (qid) { var s2 = $("fs-" + qid); if (s2) s2.innerHTML = ""; return; }
+      qid = b.getAttribute("data-rej") || b.getAttribute("data-cls");
+      if (qid) {
+        if (!confirm(b.getAttribute("data-rej")
+              ? "Bildirişlər rədd edilsin? Sual olduğu kimi qalır."
+              : "Baxıldı kimi bağlansın?")) return;
+        busy = true; b.disabled = true;
+        sb.rpc("rpc_admin_report_set", { p_question: qid,
+            p_status: b.getAttribute("data-rej") ? "rejected" : "fixed" })
+          .then(function () { busy = false; screenAdmin(); })
+          .catch(function (e) {
+            busy = false; b.disabled = false;
+            var m = $("fm-" + qid);
+            if (m) m.innerHTML = msg("err", fail(e));
+          });
+        return;
+      }
+      qid = b.getAttribute("data-save");
+      if (qid) {
+        var slot3 = $("fs-" + qid);
+        if (!slot3) return;
+        var opts = [];
+        Array.prototype.forEach.call(slot3.querySelectorAll(".fob"), function (inp) {
+          var oid = inp.getAttribute("data-oid");
+          var rad = slot3.querySelector('input[type="radio"][data-oid="' + oid + '"]');
+          opts.push({ id: oid, body: inp.value,
+                      is_correct: !!(rad && rad.checked) });
+        });
+        busy = true; b.disabled = true;
+        sb.rpc("rpc_admin_fix_question", {
+          p_question: qid,
+          p_body: (slot3.querySelector(".fbody") || {}).value || "",
+          p_explanation: (slot3.querySelector(".fexp") || {}).value || "",
+          p_options: opts
+        }).then(function () {
+          busy = false;
+          admFlash = msg("ok", "Sual düzəldildi, bildirişlər bağlandı.");
+          screenAdmin();
+        }).catch(function (e) {
+          busy = false; b.disabled = false;
+          var m2 = $("fm-" + qid);
+          if (m2) m2.innerHTML = msg("err", fail(e));
+        });
+      }
+    });
+  }
+
+  function findRep(qid) {
+    for (var i = 0; i < REPS_CACHE.length; i++) {
+      if (REPS_CACHE[i].question_id === qid) return REPS_CACHE[i];
+    }
+    return null;
+  }
+
+  /* --------------------------------------- admin: 2FA karti */
+  function secCard() {
+    if (F2 && F2.enabled) {
+      return '<p style="margin:0 0 10px">' + ic("check", "okic") +
+        " İkinci amil (Authenticator) <b>aktivdir</b>. Panel hər 12 saatdan " +
+        "bir kod istəyəcək.</p>" +
+        '<div class="lrow"><input id="s2Code" maxlength="9" placeholder="Kod">' +
+        '<button class="btn sm ghost" id="btn2Off">Söndür</button></div>' +
+        '<div id="s2Msg"></div>';
+    }
+    return '<p style="margin:0 0 10px">İdarəetməni ikinci amillə qoruyun: ' +
+      "telefondakı <b>Google Authenticator</b> (və ya bənzər) tətbiqindən " +
+      "6 rəqəmli kod istənəcək. Parol oğurlansa belə panel açılmayacaq.</p>" +
+      '<button class="btn go sm" id="btn2On">' + ic("lock") + "2FA qur</button>" +
+      '<div id="s2Box"></div><div id="s2Msg"></div>';
+  }
+
+  function bindSec() {
+    on("btn2On", "click", function () {
+      if (busy) return;
+      busy = true;
+      sb.rpc("rpc_admin_2fa_setup", {}).then(function (r) {
+        busy = false;
+        var box = $("s2Box");
+        if (!box) return;
+        box.innerHTML =
+          '<div class="s2setup">' +
+            "<p><b>1.</b> Authenticator tətbiqində «hesab əlavə et» → " +
+              "«açarı əl ilə daxil et» seçin və bu açarı yazın:</p>" +
+            '<code class="s2key">' + esc(r.secret || "") + "</code>" +
+            "<p><b>2.</b> Bu birtəfəlik ehtiyat kodları təhlükəsiz yerdə " +
+              "saxlayın — telefon itəndə hər biri bir dəfə giriş verir:</p>" +
+            '<div class="s2bkp">' + (r.backup || []).map(function (c) {
+              return "<code>" + esc(c) + "</code>";
+            }).join("") + "</div>" +
+            "<p><b>3.</b> Tətbiqin göstərdiyi kodu daxil edib təsdiqləyin:</p>" +
+            '<div class="lrow"><input id="s2New" maxlength="6" placeholder="000000">' +
+            '<button class="btn go sm" id="btn2Ok">Təsdiqlə</button></div>' +
+          "</div>";
+        on("btn2Ok", "click", function () {
+          if (busy) return;
+          busy = true;
+          sb.rpc("rpc_admin_2fa_confirm", { p_code: ($("s2New") || {}).value || "" })
+            .then(function (r2) {
+              busy = false;
+              if (r2 && r2.ok) {
+                admFlash = msg("ok", "2FA aktivləşdi. Növbəti girişlər kodla olacaq.");
+                return screenAdmin();
+              }
+              $("s2Msg").innerHTML = msg("err", (r2 && r2.err) || "Kod düzgün deyil.");
+            }).catch(function (e) {
+              busy = false;
+              $("s2Msg").innerHTML = msg("err", fail(e));
+            });
+        });
+      }).catch(function (e) {
+        busy = false;
+        $("s2Msg").innerHTML = msg("err", fail(e));
+      });
+    });
+    on("btn2Off", "click", function () {
+      if (busy) return;
+      if (!confirm("2FA söndürülsün? Panel yalnız parolla qalacaq.")) return;
+      busy = true;
+      sb.rpc("rpc_admin_2fa_disable", { p_code: ($("s2Code") || {}).value || "" })
+        .then(function (r) {
+          busy = false;
+          if (r && r.ok) { admFlash = msg("ok", "2FA söndürüldü."); return screenAdmin(); }
+          $("s2Msg").innerHTML = msg("err", (r && r.err) || "Kod düzgün deyil.");
+        }).catch(function (e) {
+          busy = false;
+          $("s2Msg").innerHTML = msg("err", fail(e));
+        });
     });
   }
 
@@ -1815,6 +2106,63 @@
   }
 
   /* ---------------------------------------------------------- veraq */
+  /* ------------------------------------------- sual sehvi bildirisi
+     Veraqdaki "Sehv bildir" duymesi: sualin altinda kicik forma acilir,
+     rpc_report_question-a gedir.  Sual DEYISMIR - admin baxib qerar
+     verir.  Eyni suala tekrar bildiris serverde sakitce udulur. */
+  var R_REASONS = [
+    ["cavab", "Cavab səhvdir"], ["sert", "Şərt qüsurludur"],
+    ["yazi", "Yazı xətası"], ["diger", "Digər"]
+  ];
+
+  function reportForm(qid) {
+    return '<div class="rfrm">' +
+      '<select class="rsel">' + R_REASONS.map(function (r) {
+        return '<option value="' + r[0] + '">' + r[1] + "</option>";
+      }).join("") + "</select>" +
+      '<input class="rnote" maxlength="300" placeholder="Qeyd (istəyə görə)…">' +
+      '<button class="btn sm" data-rsend="' + esc(qid) + '">Göndər</button>' +
+      '<button class="btn sm ghost" data-rcancel="' + esc(qid) + '">İmtina</button>' +
+    "</div>";
+  }
+
+  function bindReportLinks() {
+    var root = $("main");
+    if (!root || root.dataset.rbound) return;
+    root.dataset.rbound = "1";
+    root.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b) return;
+      var qid = b.getAttribute("data-rq");
+      if (qid) {
+        var slot = $("rs-" + qid);
+        if (slot) slot.innerHTML = slot.innerHTML ? "" : reportForm(qid);
+        return;
+      }
+      qid = b.getAttribute("data-rcancel");
+      if (qid) { var s2 = $("rs-" + qid); if (s2) s2.innerHTML = ""; return; }
+      qid = b.getAttribute("data-rsend");
+      if (qid && !busy) {
+        var slot3 = $("rs-" + qid);
+        if (!slot3) return;
+        busy = true; b.disabled = true;
+        sb.rpc("rpc_report_question", {
+          p_question: qid,
+          p_reason: (slot3.querySelector(".rsel") || {}).value || "diger",
+          p_note: (slot3.querySelector(".rnote") || {}).value || ""
+        }).then(function () {
+          busy = false;
+          slot3.innerHTML = '<div class="rok">Bildirildi — təşəkkürlər. ' +
+            "Baxılandan sonra düzəldiləcək.</div>";
+        }).catch(function (e) {
+          busy = false; b.disabled = false;
+          slot3.innerHTML = reportForm(qid) +
+            '<div class="rerr">' + esc(fail(e)) + "</div>";
+        });
+      }
+    });
+  }
+
   function screenPaper(id) {
     var live = guard();
     topTitle.textContent = "Test vərəqi";
@@ -1890,7 +2238,9 @@
               "<span>·</span><span>" + (q.mine ? "öz sualınız" : "platforma") + "</span>" +
               (q.remedial
                 ? '<span class="rem">səhvə bənzər</span>' : "") +
+              '<button class="rlink" data-rq="' + esc(q.id) + '">Səhv bildir</button>' +
             "</div>" +
+            '<div class="rslot" id="rs-' + esc(q.id) + '"></div>' +
             (q.options || []).map(function (o) {
               return '<div class="popt' + (o.correct ? " ok" : "") + '">' +
                 (o.correct ? ic("check") : "") + "<span>" + esc(o.body) + "</span></div>";
@@ -1903,6 +2253,7 @@
     );
 
     on("btnBack", "click", function () { nav("#/gen"); });
+    bindReportLinks();
 
     on("btnRegen", "click", function () {
       if (busy) return;

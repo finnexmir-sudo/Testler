@@ -457,9 +457,14 @@
         '<button class="btn" id="btnLb" style="flex:1">' + ic("cup") + "Lövhə</button></div>" +
 
       ((r.wrong && r.wrong.length)
-        ? "<h2>Səhv cavablar</h2><div class=\"card pad0\">" + r.wrong.map(function (w) {
+        ? "<h2>Səhv cavablar</h2><div class=\"card pad0\" id=\"wrongBox\">" +
+          r.wrong.map(function (w) {
             return '<div class="wrong"><b>' + esc(w.body) + "</b>" +
-              (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") + "</div>";
+              (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
+              '<button class="rlink" data-rq="' + esc(w.question_id || "") +
+                '">Sualda səhv var?</button>' +
+              '<div class="rslot" id="rs-' + esc(w.question_id || "") + '"></div>' +
+            "</div>";
           }).join("") + "</div>"
         : '<div class="ok" style="margin-top:16px">' + ic("check") +
           "<span>Bütün suallara düzgün cavab verdin.</span></div>")
@@ -467,6 +472,47 @@
 
     on("btnHome", "click", screenTests);
     on("btnLb", "click", function () { screenBoard(review); });
+    bindWrongReports();
+  }
+
+  /* Sualda sehv gorende sagird bir klikle bildirir.  Sual DEYISMIR -
+     muellim/admin baxandan sonra duzeldilir.  Server yalniz sagirdin
+     OZ gorduyu suali qebul edir. */
+  function bindWrongReports() {
+    var box = document.getElementById("wrongBox");
+    if (!box) return;
+    var RS = [["cavab", "Cavab səhvdir"], ["sert", "Sual qüsurludur"],
+              ["yazi", "Yazı xətası"], ["diger", "Digər"]];
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b) return;
+      var qid = b.getAttribute("data-rq");
+      if (qid) {
+        var slot = document.getElementById("rs-" + qid);
+        if (!slot) return;
+        slot.innerHTML = slot.innerHTML ? "" :
+          '<div class="rfrm"><select class="rsel">' + RS.map(function (x) {
+            return '<option value="' + x[0] + '">' + x[1] + "</option>";
+          }).join("") + "</select>" +
+          '<button class="btn sm" data-rsend="' + qid + '">Göndər</button></div>';
+        return;
+      }
+      qid = b.getAttribute("data-rsend");
+      if (qid) {
+        var slot2 = document.getElementById("rs-" + qid);
+        if (!slot2) return;
+        b.disabled = true;
+        sb.rpc("rpc_report_question_student", {
+          p_token: TOKEN, p_question: qid,
+          p_reason: (slot2.querySelector(".rsel") || {}).value || "diger",
+          p_note: ""
+        }).then(function () {
+          slot2.innerHTML = '<div class="rok">Bildirildi — təşəkkürlər! 🙌</div>';
+        }).catch(function () {
+          slot2.innerHTML = '<div class="rok">Bildirilə bilmədi. Bir az sonra yenidən yoxla.</div>';
+        });
+      }
+    });
   }
 
   function fmtTime(sec) {

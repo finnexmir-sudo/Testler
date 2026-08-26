@@ -12,7 +12,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 DB="${1:-tehsil_t}"
-SUITES=(smoke.sql smoke_educator.sql smoke_reports.sql smoke_assign.sql smoke_siqnal.sql smoke_paket.sql
+SUITES=(smoke.sql smoke_educator.sql smoke_reports.sql smoke_assign.sql smoke_siqnal.sql smoke_paket.sql smoke_bildiris.sql
         smoke_bank.sql smoke_bank_rpc.sql smoke_generator.sql)
 umumi=0; xeta=0
 for s in "${SUITES[@]}"; do

@@ -67,7 +67,7 @@ grant update          on public.accounts to authenticated;
 --  anon ucun HEC BIR cedvel - sagird terefi tamamile RPC ile isleyir
 
 -- ============================================================ funksiyalar
---  Sagird tetbiqi ALTI funksiya cagirir - basqa hec ne.  Supabase yeni
+--  Sagird tetbiqi YEDDI funksiya cagirir - basqa hec ne.  Supabase yeni
 --  funksiyalara anon ucun EXECUTE-u avtomatik verdiyi ucun burda hamisi
 --  geri alinir, sonra 03_rpc.sql-in verdiyi alti dene yerinde qalir.
 --  Beleliklə sonradan yazilan her yeni muellim funksiyasi OZ-OZUNE
@@ -82,7 +82,8 @@ begin
        and has_function_privilege('anon', p.oid, 'EXECUTE')
        and p.proname not in ('rpc_student_login','rpc_student_tests',
                              'rpc_start_attempt','rpc_submit_attempt',
-                             'rpc_leaderboard','rpc_test_result')
+                             'rpc_leaderboard','rpc_test_result',
+                             'rpc_report_question_student')
   loop
     execute format('revoke all on function %s from anon', fn);
   end loop;
@@ -106,10 +107,11 @@ begin
      and has_function_privilege('anon', p.oid, 'EXECUTE')
      and p.proname not in ('rpc_student_login','rpc_student_tests',
                            'rpc_start_attempt','rpc_submit_attempt',
-                           'rpc_leaderboard','rpc_test_result');
+                           'rpc_leaderboard','rpc_test_result',
+                             'rpc_report_question_student');
   if leak is not null then
     raise exception 'anon bu funksiyalari cagira bilir: %', leak;
   end if;
 
-  raise notice 'Huquqlar quruldu: anon yalniz kataloqu ve 6 sagird RPC-sini gorur.';
+  raise notice 'Huquqlar quruldu: anon yalniz kataloqu ve 7 sagird RPC-sini gorur.';
 end $$;

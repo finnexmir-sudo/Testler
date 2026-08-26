@@ -12,8 +12,11 @@
 --      select id, 'admin' from auth.users where email = 'SENIN@EPOCTUN'
 --      on conflict do nothing;
 --
---  Butun admin funksiyalari iceride app.is_admin() yoxlayir - rol
---  olmayan istifadeciye acıq imtina qaytarilir.
+--  Butun admin funksiyalari iceride app.admin_ok() yoxlayir - rol
+--  olmayan istifadeciye acıq imtina qaytarilir.  app.admin_ok() burda
+--  rola beraberdir; 24_admin_2fa.sql onu genislendirir (rol + acilmis
+--  2FA kilidi) - ona gore admin funksiyalarini yeniden yazmadan butun
+--  panel ikinci amille qorunur.
 --
 --  ON SERT: 01_schema.sql, 04_seed.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
@@ -29,6 +32,13 @@ end $$;
 
 -- ------------------------------------------------- paket sehifesi
 --  Muellim oz hesabinin veziyyetini ve ona uygun planlari gorur.
+--  Admin qapisi.  24_admin_2fa.sql bu funksiyani ust-uste yazir:
+--  rol + acilmis TOTP kilidi.  Bu fayl tek islense de panel isleyir.
+create or replace function app.admin_ok() returns boolean
+language sql stable security definer set search_path = public, extensions, pg_temp as $$
+  select app.is_admin()
+$$;
+
 create or replace function public.rpc_paket(p_account uuid default null)
 returns jsonb
 language plpgsql stable security definer
@@ -81,7 +91,7 @@ returns jsonb
 language plpgsql stable security definer
 set search_path = public, extensions, pg_temp as $$
 begin
-  if not app.is_admin() then
+  if not app.admin_ok() then
     raise exception 'Bu emeliyyat yalniz admin ucundur.' using errcode = '42501';
   end if;
 
@@ -148,7 +158,7 @@ returns jsonb
 language plpgsql stable security definer
 set search_path = public, extensions, pg_temp as $$
 begin
-  if not app.is_admin() then
+  if not app.admin_ok() then
     raise exception 'Bu emeliyyat yalniz admin ucundur.' using errcode = '42501';
   end if;
 
@@ -198,7 +208,7 @@ declare
   v_sub  public.subscriptions%rowtype;
   v_end  timestamptz;
 begin
-  if not app.is_admin() then
+  if not app.admin_ok() then
     raise exception 'Bu emeliyyat yalniz admin ucundur.' using errcode = '42501';
   end if;
   if p_months is null or p_months < 1 or p_months > 24 then
@@ -247,7 +257,7 @@ language plpgsql security definer
 set search_path = public, extensions, pg_temp as $$
 declare v_n int;
 begin
-  if not app.is_admin() then
+  if not app.admin_ok() then
     raise exception 'Bu emeliyyat yalniz admin ucundur.' using errcode = '42501';
   end if;
 

@@ -45,3 +45,6 @@ python3 test/e2e_gen.py
 echo
 echo "9/9  paket ve admin"
 python3 test/e2e_paket.py
+echo
+echo "10/10 bildirisler ve 2FA"
+python3 test/e2e_bildiris.py

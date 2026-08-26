@@ -223,3 +223,11 @@ body{background:
 .lb:nth-child(3) .rk{background:linear-gradient(135deg,#e2a06b,#c77b3f);color:#5a3010}
 .lb.me:nth-child(n+4) .rk{background:var(--brand);color:#fff}
 .tans:focus{border-color:var(--brand)}
+
+/* sual sehvi bildirisi */
+.wrong .rlink{border:0;background:none;cursor:pointer;font:inherit;
+  font-size:11.5px;color:var(--fg-3,#8a90a4);text-decoration:underline;
+  text-underline-offset:2px;padding:0;display:block;margin-top:6px}
+.wrong .rfrm{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.wrong .rfrm select{flex:1;min-width:150px}
+.wrong .rok{margin-top:6px;font-size:12.5px;font-weight:560;color:var(--ok,#0e9384)}
