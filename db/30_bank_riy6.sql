@@ -82,7 +82,7 @@ with d(ext, topic, diff, rub, body, why, opts, correct) as (values
 ('riy6-tam-ededler#14','riy-6-tam-ededler',2,2,'−1 ilə 2 arasında hansı tam ədədlər var?','Aralıqda 0 və 1 var.',array['0 və 1','Yalnız 1','−1 və 2','Heç biri'],1),
 ('riy6-tam-ededler#15','riy-6-tam-ededler',2,2,'Modulu 11 olan mənfi ədəd hansıdır?','|−11| = 11.',array['−11','11','−1','0'],1),
 ('riy6-tam-ededler#16','riy-6-tam-ededler',2,2,'Ən böyük mənfi tam ədəd hansıdır?','Sıfıra ən yaxın mənfi tam ədəd −1-dir.',array['−1','−10','0','1'],1),
-('riy6-tam-ededler#17','riy-6-tam-ededler',2,2,'56 : (−8) neçə edər?','İşarələr fərqlidir: −7.',array['−7','7','−48','−64'],1),
+('riy6-tam-ededler#17','riy-6-tam-ededler',2,2,'(−54) : 6 neçə edər?','İşarələr fərqlidir, nəticə mənfidir: −9.',array['−9','9','−48','−60'],1),
 ('riy6-tam-ededler#18','riy-6-tam-ededler',3,2,'Temperatur −2°-dən −9°-yə düşdü. Neçə dərəcə soyudu?','|−9 − (−2)| = 7°.',array['7°','11°','2°','9°'],1),
 ('riy6-tam-ededler#19','riy-6-tam-ededler',2,2,'Sıfırın modulu haqqında nə demək olar?','|0| = 0.',array['Sıfıra bərabərdir','Müsbətdir','Mənfidir','Təyin olunmur'],1),
 ('riy6-tam-ededler#20','riy-6-tam-ededler',3,2,'Kubu hesablayın: (−3)³.','(−3)·(−3)·(−3) = −27.',array['−27','27','−9','−6'],1),
