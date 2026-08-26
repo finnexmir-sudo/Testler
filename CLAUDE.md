@@ -68,9 +68,9 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    auth.users where email='...'`. Mərhələ 2 (kart ödənişi,
    Payriff/Epoint) müştəri sayı artanda.
 2. ~~Sual bankının davamı~~ — hazırdır: 1-4-cü siniflər (ingilis dili
-   daxil) + 5-8-ci siniflər (orta proqram, 9 fənn). Riyaziyyat 1-4-də
+   daxil) + 5-8-ci siniflər (orta proqram, 9 fənn). Riyaziyyat 1-8-də
    hər mövzuda **40 sual**, Az dili 3-4-də **30 sual**, qalanlarda
-   **20 sual** (cəmi ~8250 platforma sualı).
+   **20 sual** (cəmi ~9000 platforma sualı).
    Mövzu ağacları `db/25/29/33/37_movzular_orta*.sql`, banklar
    `db/23–40`. Davamı: 9-11-ci siniflər (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
