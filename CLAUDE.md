@@ -79,9 +79,14 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    edir. Bildiriş suala toxunmur — qərar həmişə admindədir.
 2. **Sual bankının davamı** — 3-4-cü siniflər hazır; qalır 1-2-ci
    siniflər və ingilis dili.
-3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
-   hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
-   «köməkçi işçisi» olsun.
+3. ~~Dərs planı bölgüsü~~ — hazırdır (`db/25_ders_plani.sql`): qrupda
+   fənn+sinif seçilir, mövzular dərslik ardıcıllığı ilə plana düzülür.
+   Plan TARİXLƏ yox, ARDICILLIQLA yaşayır («keçildi» deyilməyincə cari
+   mövzu dəyişmir). «Keçildi» → təklif: «N suallıq yoxlama testi
+   yığılsınmı?» → `rpc_plan_test` generatoru işlədir və qrupa dərhal
+   tapşırıq verir (+7 gün, 1 cəhd). Pullu qapı: yaratma/keçildi/test
+   abunə istəyir, baxış sərbəstdir. Mərhələ 2 (sonra): mövzu testi
+   zəif çıxanda növbəti dərsdən əvvəl xəbərdarlıq + düzəliş testi.
 4. **Vərəqin çap/PDF görünüşü** — cavabsız şagird + cavablı müəllim nüsxəsi.
 5. **Dinamika qrafiki** — şagirdin nəticəsi həftə-həftə.
 6. **«Səhvlər üzərində iş»** — səhv edilən sualların özündən bir kliklə test.

@@ -457,6 +457,238 @@
   }
 
   /* ------------------------------------------------------- qrup detali */
+  /* ================================================================
+     DERS PLANI - "komekci isci"
+     Movzu agaci real derslik ardicilligindadir; plan TARIXLE yox,
+     ARDICILLIQLA yasayir: "Kecildi" deyilmeyince cari movzu deyismir.
+     "Kecildi"den sonra sistem ozu teklif edir: yoxlama testi yigilsin?
+     Test yaranan kimi qrupa tapsiriq da verilir - sagird derhal gorur.
+     ================================================================ */
+  var PLD = null;   // son plan_get cavabi (redraw ucun)
+
+  function loadPlan(g) {
+    var live = guard();
+    sb.rpc("rpc_plan_get", { p_class_id: g.id }).then(function (d) {
+      if (!live()) return;
+      PLD = d || {};
+      drawPlan(g);
+    }).catch(function () {
+      var box = $("planBox");
+      if (box) box.innerHTML = "";
+    });
+  }
+
+  function drawPlan(g) {
+    var box = $("planBox");
+    if (!box) return;
+    var d = PLD || {};
+    var plans = d.plans || [];
+
+    if (!plans.length) {
+      if (!d.paid) {
+        box.innerHTML =
+          '<div class="card plock">' +
+            '<div class="lic">' + ic("lock") + "</div>" +
+            "<div><b>Dərs planı — abunə paketi ilə</b>" +
+            '<p class="muted" style="margin:4px 0 0">Mövzu təqvimi, «keçildi» ' +
+              "jurnalı və hər mövzudan sonra bir klikə yoxlama testi. " +
+              '<a href="#/p">Paketlərə bax</a></p></div>' +
+          "</div>";
+        return;
+      }
+      box.innerHTML =
+        '<div class="card">' +
+          '<p class="muted" style="margin:0 0 12px">Fənn və sinif seçin — ' +
+            "mövzular dərslik ardıcıllığı ilə plana düzüləcək. Hər mövzunu " +
+            "keçəndə bir kliklə yoxlama testi yığılıb qrupa veriləcək.</p>" +
+          '<div class="fieldrow">' +
+            '<div><label for="plSub">Fənn</label><select id="plSub"></select></div>' +
+            '<div style="flex:0 0 150px"><label for="plLev">Sinif</label>' +
+              '<select id="plLev"></select></div>' +
+          "</div>" +
+          '<div id="plMsg"></div>' +
+          '<button class="btn go" id="btnPlMk">' + ic("plus") + "Planı qur</button>" +
+        "</div>";
+      Promise.all([
+        sb.select("subjects", { select: "slug,name", order: "sort" }),
+        loadLevels()
+      ]).then(function (r) {
+        var sel = $("plSub"), lev = $("plLev");
+        if (!sel || !lev) return;
+        sel.innerHTML = (r[0] || []).map(function (x) {
+          return '<option value="' + esc(x.slug) + '">' + esc(x.name) + "</option>";
+        }).join("");
+        lev.innerHTML = (r[1] || []).map(function (x) {
+          return '<option value="' + esc(x.code) + '"' +
+            (g.level_id === x.id ? " selected" : "") + ">" + esc(x.name) + "</option>";
+        }).join("");
+      });
+      on("btnPlMk", "click", function () {
+        if (busy) return;
+        setBusy("btnPlMk", true, "Planı qur");
+        sb.rpc("rpc_plan_create", {
+          p_class_id: g.id,
+          p_subject: ($("plSub") || {}).value || "",
+          p_level: ($("plLev") || {}).value || ""
+        }).then(function () { busy = false; loadPlan(g); })
+          .catch(function (e) {
+            setBusy("btnPlMk", false, "Planı qur");
+            var m = $("plMsg");
+            if (m) m.innerHTML = msg("err", fail(e));
+          });
+      });
+      return;
+    }
+
+    box.innerHTML = plans.map(function (p) {
+      var items = p.items || [];
+      var cur = null, lastDone = null;
+      for (var i = 0; i < items.length; i++) {
+        if (!items[i].done && !cur) cur = items[i];
+        if (items[i].done) lastDone = items[i];
+      }
+      var pct = p.total ? Math.round(p.done * 100 / p.total) : 0;
+      return '<div class="card plan" data-p="' + esc(p.id) + '">' +
+        '<div class="plhead"><b>' + esc(p.subject) + " · " + esc(p.level) + "</b>" +
+          "<span>" + p.done + " / " + p.total + " mövzu</span></div>" +
+        '<div class="plbar"><i style="width:' + pct + '%"></i></div>' +
+        (cur
+          ? '<div class="plcur"><span class="pltag">Növbəti mövzu</span>' +
+            "<b>" + cur.ord + ". " + esc(cur.topic) + "</b>" +
+            '<div class="plbtns">' +
+              '<button class="btn go sm" data-pldone="' + esc(cur.id) + '"' +
+                (d.paid ? "" : " disabled title=\"Abunə paketi ilə\"") + ">" +
+                ic("check") + "Keçildi</button>" +
+            "</div>" +
+            '<div class="plslot" id="pls-' + esc(p.id) + '"></div></div>'
+          : '<div class="plcur done"><b>🎉 Bütün mövzular keçilib!</b>' +
+            '<p class="muted" style="margin:6px 0 0">Plan tamamlanıb — ' +
+            "hesabatda zəif mövzulara baxıb təkrar testlər verə bilərsiniz.</p></div>") +
+        "<details><summary>Bütün mövzular</summary>" +
+          '<div class="pllist">' + items.map(function (it) {
+            return '<div class="plrow' + (it.done ? " ok" : "") +
+              (cur && it.id === cur.id ? " cur" : "") + '">' +
+              "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
+              "<span>" + esc(it.topic) + "</span>" +
+              (it.test_id
+                ? '<a href="#/t/' + esc(it.test_id) + '" class="pltest">vərəq</a>' : "") +
+              (lastDone && it.id === lastDone.id
+                ? '<button class="plundo" data-plundo="' + esc(it.id) +
+                  '" title="Geri qaytar">geri</button>' : "") +
+            "</div>";
+          }).join("") + "</div>" +
+          '<button class="btn sm ghost" data-pldel="' + esc(p.id) +
+            '" style="margin-top:10px">Planı sil</button>' +
+        "</details>" +
+        '<div id="plm-' + esc(p.id) + '"></div>' +
+      "</div>";
+    }).join("");
+    bindPlan(g);
+  }
+
+  function bindPlan(g) {
+    var box = $("planBox");
+    if (!box || box.dataset.bound) { if (box) rebindOnly(); return; }
+    box.dataset.bound = "1";
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b || busy) return;
+      var id = b.getAttribute("data-pldone");
+      if (id) return planDone(g, b, id);
+      id = b.getAttribute("data-plundo");
+      if (id) return planUndo(g, id);
+      id = b.getAttribute("data-pldel");
+      if (id) {
+        if (!confirm("Plan silinsin? İrəliləyiş jurnalı itəcək " +
+                     "(yığılmış testlər qalır).")) return;
+        busy = true;
+        sb.rpc("rpc_plan_delete", { p_plan_id: id })
+          .then(function () { busy = false; loadPlan(g); })
+          .catch(function () { busy = false; });
+        return;
+      }
+      id = b.getAttribute("data-pltest");
+      if (id) return planTest(g, b, id);
+      id = b.getAttribute("data-plskip");
+      if (id) { var s2 = $("pls-" + id); if (s2) s2.innerHTML = ""; return; }
+    });
+    function rebindOnly() {}
+  }
+
+  function planDone(g, b, itemId) {
+    busy = true; b.disabled = true;
+    sb.rpc("rpc_plan_done", { p_item_id: itemId }).then(function () {
+      busy = false;
+      //  yerli veziyyeti yenile ve TEKLIF goster - "komekci isci" ani
+      var plan = null, topic = "";
+      (PLD.plans || []).forEach(function (p) {
+        (p.items || []).forEach(function (it) {
+          if (it.id === itemId) { it.done = true; p.done++; plan = p; topic = it.topic; }
+        });
+      });
+      drawPlan(g);
+      var slot = plan && $("pls-" + plan.id);
+      if (slot) {
+        slot.innerHTML =
+          '<div class="ploffer">' +
+            "<b>«" + esc(topic) + "» keçildi. Yoxlama testi yığılsınmı?</b>" +
+            '<p class="muted" style="margin:4px 0 10px">Test bu mövzunun ' +
+              "suallarından yığılır və qrupa dərhal tapşırıq verilir " +
+              "(son tarix: 7 gün, 1 cəhd).</p>" +
+            '<div class="plbtns">' +
+              '<input id="plCnt" type="number" min="3" max="50" value="15">' +
+              '<button class="btn go sm" data-pltest="' + esc(itemId) + '">' +
+                "Yığ və tapşırıq ver</button>" +
+              '<button class="btn sm ghost" data-plskip="' +
+                esc(plan.id) + '">Sonra</button>' +
+            "</div>" +
+          "</div>";
+      }
+    }).catch(function (e) {
+      busy = false; b.disabled = false;
+      alert(fail(e));
+    });
+  }
+
+  function planUndo(g, itemId) {
+    busy = true;
+    sb.rpc("rpc_plan_undo", { p_item_id: itemId })
+      .then(function () { busy = false; loadPlan(g); })
+      .catch(function (e) { busy = false; alert(fail(e)); });
+  }
+
+  function planTest(g, b, itemId) {
+    var n = Number(($("plCnt") || {}).value) || 15;
+    busy = true; b.disabled = true;
+    b.textContent = "Yığılır…";
+    sb.rpc("rpc_plan_test", { p_item_id: itemId, p_count: n })
+      .then(function (r) {
+        busy = false;
+        //  itemin testini yerli olaraq bagla, netice mesaji goster
+        var pid = null;
+        (PLD.plans || []).forEach(function (p) {
+          (p.items || []).forEach(function (it) {
+            if (it.id === itemId) { it.test_id = r.test_id; pid = p.id; }
+          });
+        });
+        drawPlan(g);
+        var m = $("plm-" + pid);
+        //  msg() metni esc edir - link ucun qutunu ozumuz yigiriq
+        if (m) m.innerHTML = '<div class="ok">' + ic("check") +
+          "<span>Test yığıldı və qrupa tapşırıq verildi. " +
+          '<a href="#/t/' + esc(r.test_id) + '">Vərəqə bax</a></span></div>';
+      })
+      .catch(function (e) {
+        busy = false; b.disabled = false;
+        b.textContent = "Yığ və tapşırıq ver";
+        var slot = b.closest(".plslot") || b.parentElement;
+        var err = document.createElement("div");
+        err.className = "rerr";
+        err.textContent = fail(e);
+        slot.appendChild(err);
+      });
+  }
+
   function screenGroup(id) {
     var live = guard();
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
@@ -497,6 +729,8 @@
         "</div>" +
       "</div>" +
       '<div id="alerts"></div>' +
+      "<h2>Dərs planı</h2>" +
+      '<div id="planBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>' +
       "<h2>Şagirdlər</h2>" +
       '<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
@@ -515,6 +749,7 @@
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
     on("gCopy", "click", function () { copyText(g.join_code, $("gCopy")); });
     loadAlerts(g.id);
+    loadPlan(g);
     on("btnRen", "click", function () { renameGroup(g); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("btnStu", "click", addStudent);
