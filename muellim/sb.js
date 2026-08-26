@@ -80,7 +80,14 @@
         // Token kohnelibse bir defe yenileyib tekrar cehd edirik
         if (r.status === 401 && !retry && S && S.refresh_token) {
           return refresh().then(function (ok) {
-            if (!ok) { saveSession(null); throw new Error("Sessiya bitib. Yeniden daxil olun."); }
+            if (!ok) {
+              saveSession(null);
+              //  butun ekranlar ucun merkezi siqnal - app giris ekranina qaytarir
+              try { window.dispatchEvent(new Event("sb:sessionend")); } catch (e2) {}
+              var e = new Error("Sessiya bitib. Yeniden daxil olun.");
+              e.session = true;
+              throw e;
+            }
             return request(path, opt, true);
           });
         }

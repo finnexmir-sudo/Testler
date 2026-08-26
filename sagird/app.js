@@ -593,5 +593,19 @@
     }
   }
 
+  /* Loqo klik = testler siyahisi (girissizse giris ekrani) */
+  (function () {
+    var mk = document.querySelector(".mark");
+    function goHome() {
+      if (S && S.attempt) return;   // imtahan zamani tesadufi cixis olmasin
+      if (TOKEN) screenTests(); else screenLogin();
+    }
+    if (mk) { mk.style.cursor = "pointer"; mk.addEventListener("click", goHome); }
+    if (topTitle) {
+      topTitle.style.cursor = "pointer";
+      topTitle.addEventListener("click", goHome);
+    }
+  })();
+
   boot();
 })();

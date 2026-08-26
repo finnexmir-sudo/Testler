@@ -3333,6 +3333,33 @@
     });
   }
 
+  /* Sessiya bitende hec bir ekranda dalana diranmirik - giris ekrani
+     xos xeberdarliqla acilir */
+  window.addEventListener("sb:sessionend", function () {
+    CTX = null; ACC = null;
+    try { history.replaceState(null, "", location.pathname); } catch (e) {}
+    screenAuth("in", msg("warn",
+      "Sessiyanız bitdi — təhlükəsizlik üçün yenidən daxil olun."));
+  });
+
+  /* Loqo ve basliq klik = esas sehife */
+  (function () {
+    var head = document.querySelector(".mark");
+    function goHome() {
+      if (!sb.session()) { screenAuth("in"); return; }
+      if (location.hash === "#/" || location.hash === "") { boot(); }
+      else nav("#/");
+    }
+    if (head) {
+      head.style.cursor = "pointer";
+      head.addEventListener("click", goHome);
+    }
+    if (topTitle) {
+      topTitle.style.cursor = "pointer";
+      topTitle.addEventListener("click", goHome);
+    }
+  })();
+
   btnOut.addEventListener("click", function () {
     sb.signOut().then(function () {
       CTX = null; ACC = null;
