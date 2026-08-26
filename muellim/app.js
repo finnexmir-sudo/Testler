@@ -1499,7 +1499,8 @@
           "</select></div>" +
         "</div>" +
         '<div class="chips" id="admF">' +
-          [["", "Hamısı"], ["pullu", "Pullu"], ["pulsuz", "Pulsuz"]]
+          [["", "Hamısı"], ["pullu", "Pullu"], ["pulsuz", "Pulsuz"],
+           ["bitir", "Bitmək üzrə"]]
             .map(function (f) {
               return '<button class="chip' + (f[0] === "" ? " on" : "") +
                 '" data-f="' + f[0] + '">' + f[1] + "</button>";

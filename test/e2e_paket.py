@@ -97,7 +97,8 @@ with sync_playwright() as pw:
     tl = pg.inner_text(".tiles").replace("\n", " ")
     ok("hesab" in tl and "pullu" in tl and "pulsuz" in tl and "gəlir" in tl,
        "lovhelerde hesab/pullu/pulsuz/gelir var", tl[:70])
-    ok(pg.locator("#admF .chip").count() == 3, "pullu/pulsuz suzgec cipleri var")
+    ok(pg.locator("#admF .chip").count() == 4,
+       "pullu/pulsuz/bitir suzgec cipleri var")
     npo = pg.locator("#admPlan option").count()
     ok(npo >= 2, "plan secimi bazadan dolur", npo)
     row = pg.inner_text(".admr").replace("\n", " ")

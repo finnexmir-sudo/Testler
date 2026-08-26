@@ -84,7 +84,10 @@ end $$;
 --  yoxsa PostgREST iki eyniadli funksiya gorub sasirir.
 drop function if exists public.rpc_admin_accounts(text);
 
---  p_f: null = hamisi, 'pullu' = aktiv abunesi olanlar, 'pulsuz' = qalanlar
+--  p_f: null = hamisi, 'pullu' = aktiv abunesi olanlar, 'pulsuz' = qalanlar,
+--  'bitir' = 14 gun icinde bitecekler.  'pullu' ve 'bitir' siyahisi
+--  bitme tarixine gore siralanir - en tez biten yuxarida, admin kime
+--  xatirlatma gonderecayini bir baxisda gorsun.
 create or replace function public.rpc_admin_accounts(
   p_q text default null, p_f text default null)
 returns jsonb
@@ -96,7 +99,10 @@ begin
   end if;
 
   return coalesce((
-    select jsonb_agg(x order by x->>'created' desc)
+    select jsonb_agg(x order by
+             case when p_f in ('pullu','bitir')
+                  then x->'plan'->>'ends' end asc nulls last,
+             x->>'created' desc)
     from (
       select jsonb_build_object(
                'id',    a.id,
@@ -139,12 +145,19 @@ begin
            or a.name ilike '%' || btrim(p_q) || '%'
            or u.email ilike '%' || btrim(p_q) || '%')
          and (p_f is null
-           or (p_f = 'pullu')  = exists (
+           or (p_f = 'bitir' and exists (
+                select 1 from public.subscriptions s2
+                 where s2.account_id = a.id
+                   and s2.status in ('trialing','active')
+                   and s2.current_period_end > now()
+                   and s2.current_period_end <= now() + interval '14 days'))
+           or (p_f in ('pullu','pulsuz')
+               and (p_f = 'pullu') = exists (
                 select 1 from public.subscriptions s2
                  where s2.account_id = a.id
                    and s2.status in ('trialing','active')
                    and (s2.current_period_end is null
-                        or s2.current_period_end > now())))
+                        or s2.current_period_end > now()))))
        order by a.created_at desc
        limit 50
     ) z), '[]'::jsonb);

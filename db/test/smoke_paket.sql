@@ -114,7 +114,25 @@ begin
   assert jsonb_array_length(v) = 1, 'pullu suzgeci aktiv abuneni tapmir';
   v := public.rpc_admin_accounts(null, 'pulsuz');
   assert jsonb_array_length(v) = 0, 'pulsuz suzgecine abuneli hesab dusdu';
+  --  'bitir': abune ~90 gun sonra bitir - 14 gunluk pencereye dusmur
+  v := public.rpc_admin_accounts(null, 'bitir');
+  assert jsonb_array_length(v) = 0, 'uzaq bitme tarixi bitir siyahisina dusdu';
 end $$;
+--  bitmeye az qalan abune siyahiya duser (superuser tarixi qisaldir)
+reset role; reset request.jwt.claim.sub;
+update public.subscriptions set current_period_end = now() + interval '3 days';
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
+do $$
+declare v jsonb;
+begin
+  v := public.rpc_admin_accounts(null, 'bitir');
+  assert jsonb_array_length(v) = 1, 'bitmek uzre olan hesab gorunmur';
+end $$;
+reset role; reset request.jwt.claim.sub;
+update public.subscriptions set current_period_end = now() + interval '80 days';
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
 \echo 'OK  5 · admin siyahisi: axtaris, plan statusu, pullu/pulsuz suzgeci'
 
 -- =====================================================================
