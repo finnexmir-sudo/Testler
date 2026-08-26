@@ -1980,7 +1980,7 @@
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
 
     sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
-                                p_level: f.level || null, p_pool: "mine" })
+                                p_level: f.level || null, p_pool: f.pool || "mine" })
       .then(function (fac) {
         if (!live()) return;
         FAC = fac || {};
@@ -2071,7 +2071,9 @@
     on("bPool", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
-      f.pool = b.getAttribute("data-v"); drawBank();
+      f.pool = b.getAttribute("data-v");
+      f.subject = ""; f.level = ""; f.topics = [];
+      screenBank();
     });
     on("bDiff", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-d]") : null;
@@ -2120,6 +2122,38 @@
   function loadBank() {
     var live = guard();
     var f = bankFilter();
+    /*  Suzgecsiz platforma/hamisi: minlerle suali tokmek evezine fenn
+        secimi teklif olunur.  Oz banki ise derhal acilir - muellim oz
+        suallarini gormek ucun gelir.  */
+    if (f.pool !== "mine" && nFilt(f) === 0 && !(f.q || "").trim()) {
+      var box0 = $("bList");
+      if (box0) {
+        var subs = (FAC.subjects || []).filter(function (x) {
+          return (Number(x.n) || 0) > 0;
+        });
+        var total = subs.reduce(function (a, x) {
+          return a + (Number(x.n) || 0);
+        }, 0);
+        box0.innerHTML = subs.length
+          ? '<div class="bpick"><p>Bankda <b>' + total + "</b> sual var. " +
+              "Siyahı üçün fənn seçin və ya yuxarıdan axtarın:</p>" +
+              '<div class="g">' + subs.map(function (x) {
+                return '<button class="pkb" data-s="' + esc(x.slug) + '">' +
+                  esc(x.name) + "<i>" + x.n + " sual</i></button>";
+              }).join("") + "</div></div>"
+          : '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
+            "<b>Bu hovuzda hələ sual yoxdur</b></div>";
+        Array.prototype.forEach.call(
+          box0.querySelectorAll("[data-s]"), function (b) {
+            b.addEventListener("click", function () {
+              f.subject = b.getAttribute("data-s");
+              f.topics = [];
+              screenBank();
+            });
+          });
+      }
+      return;
+    }
     sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: 50, p_offset: 0 })
       .then(function (d) {
         if (!live()) return;

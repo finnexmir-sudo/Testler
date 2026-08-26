@@ -225,12 +225,24 @@ with sync_playwright() as pw:
     pg.locator("#bDiff .chip", has_text="Asan").click(); pg.wait_for_timeout(500)
     ok(pg.locator(".qrow").count() == 1, "suzgec geri qaytarilir")
 
-    pg.locator("#bPool .seg", has_text="Platforma").click(); pg.wait_for_timeout(600)
+    pg.locator("#bPool .seg", has_text="Platforma").click()
+    # suzgecsiz platforma hovuzu siyahi tokmur - fenn secimi teklif edir
+    pg.wait_for_selector(".bpick .pkb", timeout=8000)
+    ok(pg.locator(".qrow").count() == 0,
+       "suzgecsiz platforma hovuzunda siyahi tokulmur")
+    npk = pg.locator(".bpick .pkb").count()
+    ndb = db("select count(distinct subject_id) n from public.questions "
+             "where owner_type = 'platform' and status = 'published'",
+             one=True)["n"]
+    ok(npk == ndb, "fenn secimi bazadaki fennlerle ust-uste dusur", (npk, ndb))
+    pg.locator(".bpick .pkb").first.click()
+    pg.wait_for_selector(".qrow", timeout=8000)
     np = pg.locator(".qrow").count()
-    ok(np >= 20, "platforma hovuzu gorunur", np)
+    ok(np >= 20, "fenn secilende platforma siyahisi acilir", np)
     ok(pg.locator(".qrow[disabled]").count() == np,
        "platforma suallari redakte olunmur")
-    pg.locator("#bPool .seg", has_text="Öz suallarım").click(); pg.wait_for_timeout(600)
+    pg.locator("#bPool .seg", has_text="Öz suallarım").click()
+    pg.wait_for_selector(".qrow:not([disabled])", timeout=8000)
 
     pg.fill("#bq", "tapilmaz"); pg.wait_for_timeout(800)
     ok(pg.locator(".qrow").count() == 0, "metn axtarisi isleyir")
