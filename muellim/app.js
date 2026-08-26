@@ -130,7 +130,10 @@
         (isUp ? '<label for="fname">Ad, soyad</label><input id="fname" autocomplete="name">' : "") +
         '<label for="email">E-poçt</label>' +
         '<input id="email" type="email" autocomplete="email" inputmode="email">' +
-        '<label for="pass">Parol</label>' +
+        (isUp
+          ? '<label for="pass">Parol</label>'
+          : '<div class="lblrow"><label for="pass">Parol</label>' +
+            '<button class="lnk" id="btnForgot" type="button">Parolu unutmusunuz?</button></div>') +
         '<input id="pass" type="password" autocomplete="' +
           (isUp ? "new-password" : "current-password") + '">' +
         '<button class="btn go wide" id="btnAuth">' +
@@ -138,8 +141,6 @@
         '<div class="spacer"></div>' +
         '<button class="btn ghost wide" id="btnSwap">' +
           (isUp ? "Hesabım var — daxil ol" : "Hesabınız yoxdur? Yaradın") + "</button>" +
-        (isUp ? "" :
-          '<button class="linkbtn" id="btnForgot">Parolu unutmusunuz?</button>') +
       "</div>"
     );
 
