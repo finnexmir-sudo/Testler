@@ -169,11 +169,21 @@ begin
                           where i.plan_id = p.id),
                'done', (select count(*) from public.class_plan_items i
                          where i.plan_id = p.id and i.done_at is not null),
+               --  'avg'/'takers': movzu testinin qrup neticesi - plan
+               --  adaptiv olsun: zeif cixan movzu setirde qirmizi gorunur
                'items', (select jsonb_agg(jsonb_build_object(
                           'id', i.id, 'ord', i.ord, 'topic', t.name,
                           'done', i.done_at is not null,
                           'done_at', i.done_at,
-                          'test_id', i.test_id) order by i.ord)
+                          'test_id', i.test_id,
+                          'avg', (select round(avg(a.percent))
+                                    from public.attempts a
+                                   where a.test_id = i.test_id
+                                     and a.status = 'submitted'),
+                          'takers', (select count(distinct a.student_id)
+                                       from public.attempts a
+                                      where a.test_id = i.test_id
+                                        and a.status = 'submitted')) order by i.ord)
                           from public.class_plan_items i
                           join public.topics t on t.id = i.topic_id
                          where i.plan_id = p.id)

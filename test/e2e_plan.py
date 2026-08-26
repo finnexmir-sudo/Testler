@@ -158,6 +158,7 @@ with sync_playwright() as pw:
     ok(pg.locator(".plrow .pltest").count() == 2, "iki movzuda veraq linki var",
        pg.locator(".plrow .pltest").count())
 
+
     print("G · Birgə test: 2 mövzu seçilir, qarışıq yığılır")
     ok(pg.locator(".plck").count() == 2, "kecilmis movzularda secim qutusu var",
        pg.locator(".plck").count())
@@ -185,6 +186,40 @@ with sync_playwright() as pw:
                (t3["i"],), one=True)), "qarisiq teste tapsiriq verildi")
     ok(not db("select 1 ok from public.class_plan_items where test_id = %s",
               (t3["i"],), one=True), "qarisiq test item-e baglanmir")
+
+    print("H · Adaptiv plan: ortalama, tarix, zəif mövzuda «təkrar yığ»")
+    db("""insert into public.students (account_id, class_id, created_by,
+                                       full_name, display_name, login_code)
+          select c.account_id, c.id, c.teacher_id, 'Plan Sagird', 'Plan S.', 'PLANSGE1'
+            from public.classes c where c.id = 'cccc1111-0000-0000-0000-0000000000e9'""")
+    t1 = db("""select test_id::text t from public.class_plan_items
+                where test_id is not null order by ord limit 1""", one=True)["t"]
+    db("""insert into public.attempts (student_id, test_id, class_id, status,
+                                       finished_at, score, max_score, percent)
+          select s.id, %s, s.class_id, 'submitted', now(), 2, 5, 40
+            from public.students s where s.login_code = 'PLANSGE1'""", (t1,))
+    pg.reload()
+    pg.wait_for_selector(".plan summary", timeout=8000)
+    head = pg.inner_text(".plan .plhead").replace("\n", " ")
+    ok("%" in head, "basliqda faiz gorunur", head)
+    pg.locator(".plan summary").click(); pg.wait_for_timeout(300)
+    ok(pg.locator(".plavg").count() == 1, "movzu ortalamasi cipi var",
+       pg.locator(".plavg").count())
+    ok("40%" in pg.inner_text(".plavg"), "ortalama 40%-dir")
+    ok(pg.locator(".pldate").count() >= 2, "kecilme tarixleri gorunur",
+       pg.locator(".pldate").count())
+    ok(pg.locator(".plmk.plre").count() == 1, "zeif movzuda «təkrar yığ» var")
+    pg.locator(".plmk.plre").click()
+    pg.wait_for_selector(".ploffer", timeout=4000)
+    pg.fill("#plCnt", "4")
+    pg.locator("[data-pltest]").click()
+    pg.wait_for_selector(".plan [id^='plm-'] a", timeout=10000)
+    t1b = db("""select test_id::text t from public.class_plan_items
+                 where test_id is not null order by ord limit 1""", one=True)["t"]
+    ok(t1b != t1, "tekrar test item-e baglandi (yeni test)")
+    ok(bool(db("select 1 ok from public.assignments where test_id = %s",
+               (t1b,), one=True)), "tekrar teste tapsiriq verildi")
+
 
     br.close()
 

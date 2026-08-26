@@ -31,6 +31,11 @@ insert into public.account_members values
 insert into public.classes (id, account_id, teacher_id, kind, name, join_code) values
   ('cccc0000-0000-0000-0000-0000000000f1','aaaa0000-0000-0000-0000-0000000000f1',
    '11110000-0000-0000-0000-0000000000f1','tutor_group','Plan qrupu','KODPLN01');
+insert into public.students (id, account_id, class_id, created_by,
+                             full_name, display_name, login_code) values
+  ('5555000a-0000-0000-0000-0000000000f1','aaaa0000-0000-0000-0000-0000000000f1',
+   'cccc0000-0000-0000-0000-0000000000f1','11110000-0000-0000-0000-0000000000f1',
+   'Plan Sagird','Plan S.','PLANSGF1');
 
 \echo '--- hazirliq tamam'
 
@@ -239,6 +244,36 @@ begin
          'qarisiq test item-e baglanmamalidir';
 end $$;
 \echo 'OK 5b · qarisiq test: 2 movzudan yigilir, item-e baglanmir'
+
+-- =====================================================================
+--  5c. Adaptiv plan: movzu testinin qrup ortalamasi plana qayidir
+-- =====================================================================
+do $$
+declare tid uuid;
+begin
+  select test_id into tid from public.class_plan_items
+   where test_id is not null order by ord limit 1;
+  insert into public.attempts (student_id, test_id, class_id, status,
+                               finished_at, score, max_score, percent)
+  values ('5555000a-0000-0000-0000-0000000000f1', tid,
+          'cccc0000-0000-0000-0000-0000000000f1', 'submitted',
+          now(), 2, 5, 40);
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000f1';
+do $$
+declare v jsonb; it jsonb;
+begin
+  v := public.rpc_plan_get('cccc0000-0000-0000-0000-0000000000f1');
+  it := v->'plans'->0->'items'->0;
+  assert (it->>'avg')::numeric = 40, format('ortalama 40 deyil: %s', it->>'avg');
+  assert (it->>'takers')::int = 1, 'istirakci sayi 1 deyil';
+  --  testi olmayan movzuda avg bosdur
+  assert v->'plans'->0->'items'->2->'avg' = 'null'::jsonb,
+         'testsiz movzuda avg dolu geldi';
+end $$;
+reset role; reset request.jwt.claim.sub;
+\echo 'OK 5c · movzu testinin ortalamasi plan setirine qayidir'
 
 -- =====================================================================
 --  6. Ozge muellim plana toxuna bilmir

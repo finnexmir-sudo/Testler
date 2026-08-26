@@ -749,7 +749,7 @@
       var pct = p.total ? Math.round(p.done * 100 / p.total) : 0;
       return '<div class="card plan" data-p="' + esc(p.id) + '">' +
         '<div class="plhead"><b>' + esc(p.subject) + " · " + esc(p.level) + "</b>" +
-          "<span>" + p.done + " / " + p.total + " mövzu</span></div>" +
+          "<span>" + p.done + " / " + p.total + " mövzu · " + pct + "%</span></div>" +
         '<div class="plbar"><i style="width:' + pct + '%"></i></div>' +
         (cur
           ? '<div class="plcur"><span class="pltag">Növbəti mövzu</span>' +
@@ -765,10 +765,25 @@
             "hesabatda zəif mövzulara baxıb təkrar testlər verə bilərsiniz.</p></div>") +
         "<details><summary>Bütün mövzular</summary>" +
           '<div class="pllist">' + items.map(function (it) {
+            /* Movzu testinin qrup ortalamasi - plan adaptiv olsun:
+               zeif cixan movzu qirmizi gorunur, "tekrar yig" teklif olunur */
+            var avgN = it.avg == null ? null : Number(it.avg);
+            var avgChip = "";
+            if (it.done && avgN != null) {
+              avgChip = '<b class="plavg ' +
+                (avgN >= 80 ? "pvh" : (avgN >= 60 ? "pvm" : "pvl")) +
+                '" title="Qrup ortalaması · ' + (Number(it.takers) || 0) +
+                ' şagird">' + Math.round(avgN) + "%</b>";
+            }
+            var weak = it.done && it.test_id && avgN != null && avgN < 60;
             return '<div class="plrow' + (it.done ? " ok" : "") +
               (cur && it.id === cur.id ? " cur" : "") + '">' +
               "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
-              "<span>" + esc(it.topic) + "</span>" +
+              "<span>" + esc(it.topic) +
+                (it.done && it.done_at
+                  ? ' <s class="pldate">· ' + dateAz(it.done_at) + "</s>" : "") +
+              "</span>" +
+              avgChip +
               (it.done && d.paid
                 ? '<input type="checkbox" class="plck" data-plck="' + esc(p.id) +
                   '" value="' + esc(it.id) + '" title="Birgə test üçün seç">'
@@ -780,6 +795,11 @@
                       (d.paid ? "" : ' disabled title="Abunə paketi ilə"') +
                       ">test yığ</button>"
                     : "")) +
+              (weak && d.paid
+                ? '<button class="plmk plre" data-plmk="' + esc(it.id) +
+                  '" title="Qrup zəif nəticə göstərib — yeni yoxlama yığ">' +
+                  "təkrar yığ</button>"
+                : "") +
               (lastDone && it.id === lastDone.id
                 ? '<button class="plundo" data-plundo="' + esc(it.id) +
                   '" title="Geri qaytar">geri</button>' : "") +

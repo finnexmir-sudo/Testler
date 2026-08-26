@@ -490,6 +490,17 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .plrow .plck{margin-left:auto;flex:0 0 auto;width:15px;height:15px;
   accent-color:var(--brand);cursor:pointer}
 .plrow .plck + .pltest,.plrow .plck + .plmk{margin-left:10px}
+/* adaptiv plan: kecilme tarixi, qrup ortalamasi, tekrar duymesi */
+.plrow .pldate{text-decoration:none;color:var(--fg-3);font-size:11px;
+  font-weight:400}
+.plrow .plavg{margin-left:auto;flex:0 0 auto;font-size:11.5px;font-weight:650}
+.plrow .plavg.pvh{color:var(--ok)}
+.plrow .plavg.pvm{color:var(--warn)}
+.plrow .plavg.pvl{color:var(--err)}
+.plrow .plavg ~ .plck{margin-left:10px}
+.plrow .plavg ~ .pltest,.plrow .plavg ~ .plmk{margin-left:10px}
+.plrow .plck ~ .pltest,.plrow .plck ~ .plmk{margin-left:10px}
+.plrow .plmk.plre{color:var(--err)}
 .plmbar{margin-top:10px}
 .plmbar:empty{display:none}
 
