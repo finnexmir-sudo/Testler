@@ -561,7 +561,7 @@
         var n = cnt[g.id] || 0;
         var lv = levelName(g.level_id);
         return '<button class="item" data-g="' + esc(g.id) + '">' +
-          '<div class="ic">' + ic("group") + "</div>" +
+          av(g.name) +
           '<div class="g"><b>' + esc(g.name) + "</b>" +
           "<i>" + (lv ? "<span>" + esc(lv) + "</span><span>·</span>" : "") +
           "<span>" + n + " şagird</span></i></div>" +
@@ -1711,7 +1711,8 @@
       "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Verilmiş tapşırıqlar</h2>" +
-      '<div id="asgList" class="card pad0">' + asgRows(items, d.students || 0) + "</div>" +
+      '<div class="segs asgf" id="asgTabs"></div>' +
+      '<div id="asgList" class="card pad0"></div>' +
       '<div class="spacer"></div>' +
       "<h2>Yeni tapşırıq</h2>" +
       '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>'
@@ -1731,17 +1732,46 @@
         });
     });
 
+    /* Aktiv/Bagli tablari - kohne tapsiriqlar aktivlere qarismasin */
+    var AF = "on";
+    function drawAsgList() {
+      var tabs = $("asgTabs"), box = $("asgList");
+      var nOn = items.filter(function (a) { return a.open !== false; }).length;
+      if (tabs) tabs.innerHTML =
+        seg("on", "Aktiv (" + nOn + ")", AF) +
+        seg("off", "Bağlı (" + (items.length - nOn) + ")", AF);
+      if (box) box.innerHTML = asgRows(items, d.students || 0, AF);
+    }
+    drawAsgList();
+    on("asgTabs", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest(".seg") : null;
+      if (!b) return;
+      AF = b.getAttribute("data-v");
+      drawAsgList();
+    });
+
     bindAsgRows(g);
     loadPick(g);
   }
 
-  function asgRows(items, students) {
+  function asgRows(items, students, f) {
     if (!items.length) {
       return '<div class="empty"><div class="ic">' + ic("clip") + "</div>" +
         "<b>Hələ tapşırıq verilməyib</b>" +
         "Aşağıdan test seçin — şagirdlər dərhal görəcək.</div>";
     }
-    return items.map(function (a) {
+    var list = !f ? items : items.filter(function (a) {
+      return f === "off" ? a.open === false : a.open !== false;
+    });
+    if (!list.length) {
+      return '<div class="empty"><div class="ic">' + ic("clip") + "</div>" +
+        "<b>" + (f === "off" ? "Bağlı tapşırıq yoxdur" : "Aktiv tapşırıq yoxdur") +
+        "</b>" +
+        (f === "off"
+          ? "Son tarixi keçən və götürülən tapşırıqlar bura düşür."
+          : "Aşağıdan test seçib tapşırıq verin.") + "</div>";
+    }
+    return list.map(function (a) {
       var open = a.open !== false;
       var done = Number(a.done) || 0;
       var tries = Number(a.max_attempts) === 0 ? "limitsiz cəhd"

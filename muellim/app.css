@@ -188,6 +188,12 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
   box-shadow:0 1px 2px rgba(16,24,40,.07)}
 
 /* Cox secimli nisanlar: cetinlik, movzular */
+/* qrup siyahisinda herf-avatar (GPT eskizindeki fenn ikonu evezine) */
+.item .av{width:38px;height:38px;flex:0 0 38px;border-radius:12px;
+  font-size:15px;margin-right:2px}
+/* tapsiriq tablari */
+.segs.asgf{margin:0 0 10px}
+
 /* ana sehife: suretli emeliyyatlar */
 .qhead{font-size:11.5px;font-weight:640;letter-spacing:.5px;
   text-transform:uppercase;color:var(--fg-3);margin:0 0 12px}
