@@ -648,7 +648,11 @@
         }
         fillLev();
         sel.addEventListener("change", fillLev);
-      }).catch(function () {});
+      }).catch(function (e) {
+        //  siyahi gelmese sebebi gizletme - bos select cashdirir
+        var m = $("plMsg");
+        if (m) m.innerHTML = msg("err", "Fənn siyahısı yüklənmədi: " + fail(e));
+      });
       on("btnPlMk", "click", function () {
         if (busy) return;
         setBusy("btnPlMk", true, "Planı qur");
