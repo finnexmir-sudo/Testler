@@ -1582,9 +1582,18 @@
         var gq = pl.ends
           ? Math.max(0, Math.ceil((new Date(pl.ends).getTime() - Date.now()) / 86400000))
           : null;
+        //  basqa ilin tarixine il de yazilir - "25 avq · 365 gun"
+        //  cashdirmasin (novbeti ilin 25 avqustudur)
+        var yr = "";
+        if (pl.ends) {
+          var ed = new Date(pl.ends);
+          if (!isNaN(ed) && ed.getFullYear() !== new Date().getFullYear()) {
+            yr = " " + ed.getFullYear();
+          }
+        }
         badge = '<span class="pb ' + (gq !== null && gq < 7 ? "z" : "y") + '">' +
           esc(pl.name) +
-          (pl.ends ? " → " + dateAz(pl.ends) + " · " + gq + " gün" : "") +
+          (pl.ends ? " → " + dateAz(pl.ends) + yr + " · " + gq + " gün" : "") +
           "</span>";
       } else {
         badge = '<span class="pb n">paketsiz</span>';
