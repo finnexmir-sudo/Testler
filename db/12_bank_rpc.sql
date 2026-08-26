@@ -401,6 +401,8 @@ begin
     --  Her fennin gorunen sual sayi da qaytarilir ('n').  Suzgec
     --  ekranlari n=0 fenni GIZLEDIR - bos fenni secmek menasizdir.
     --  Sual FORMASI ise hamisini gosterir (ilk suali yazmaq ucun).
+    --  Sinif secilibse, say O SINIF uzre hesablanir - 4-cu sinifde
+    --  suali olmayan fenn siyahiya dusmesin.
     'subjects', coalesce((
       select jsonb_agg(jsonb_build_object('slug', z.slug, 'name', z.name, 'n', z.n)
                        order by z.sort)
@@ -408,6 +410,8 @@ begin
           select s.slug, s.name, s.sort,
                  (select count(*) from public.questions q
                    where q.subject_id = s.id
+                     and (p_level is null or q.level_id in
+                          (select id from public.levels where code = p_level))
                      and case coalesce(p_pool, 'all')
                          when 'mine'     then q.account_id = v_acc
                          when 'platform' then q.owner_type = 'platform'

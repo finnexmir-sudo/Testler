@@ -355,6 +355,31 @@ begin
 end $$;
 \echo 'OK 12 · suzgec siyahilari, hovuz suzgeci, istifade gostericisi'
 
+-- =====================================================================
+--  13. Fenn sayi secilen sinfe gore hesablanir
+-- =====================================================================
+do $$
+declare v jsonb; n3 int; nall int; e3 int; eall int;
+begin
+  v := public.rpc_bank_facets(null, '3', null, 'platform');
+  select (e->>'n')::int into n3 from jsonb_array_elements(v->'subjects') e
+   where e->>'slug' = 'informatika';
+  v := public.rpc_bank_facets(null, null, null, 'platform');
+  select (e->>'n')::int into nall from jsonb_array_elements(v->'subjects') e
+   where e->>'slug' = 'informatika';
+  select count(*) into e3 from public.questions q
+    join public.subjects s on s.id = q.subject_id and s.slug = 'informatika'
+   where q.owner_type = 'platform' and q.status = 'published'
+     and q.level_id in (select id from public.levels where code = '3');
+  select count(*) into eall from public.questions q
+    join public.subjects s on s.id = q.subject_id and s.slug = 'informatika'
+   where q.owner_type = 'platform' and q.status = 'published';
+  assert n3 = e3 and nall = eall and e3 < eall,
+         format('sinif suzgeci fenn sayina tesir etmir: %s/%s vs %s/%s',
+                n3, nall, e3, eall);
+end $$;
+\echo 'OK 13 · fenn sayi secilen sinfe gore hesablanir'
+
 reset role; reset request.jwt.claim.sub;
 create or replace function app.free_question_limit() returns int
 language sql immutable as $$ select 150 $$;

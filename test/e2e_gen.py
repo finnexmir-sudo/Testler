@@ -405,6 +405,35 @@ with sync_playwright() as pw:
                      where aa.is_correct is not true)""", (rem["i"],), one=True)["n"]
     ok(wq == 0, "testde yalniz sehv edilen suallar var", wq)
 
+    print("N · Qrup seçimi ilə yığ; «başqa qrupda verilib» nişanı")
+    pg.goto(PANEL + "#/gen"); pg.reload()
+    pg.wait_for_selector("#gAsg", timeout=8000)
+    pg.wait_for_function(
+        "document.querySelectorAll('#gAsg option').length > 1", timeout=8000)
+    pg.select_option("#gAsg", GID)
+    pg.wait_for_function(
+        "document.querySelector('#gPrev') && "
+        "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
+        "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
+    pg.fill("#gTitle", "Qrupla birge test")
+    pg.click("#btnMake")
+    pg.wait_for_selector(".paper", timeout=8000)
+    NID = pg.url.split("/t/")[1]
+    ok(bool(db("select 1 ok from public.assignments "
+               "where test_id = %s and class_id = %s", (NID, GID), one=True)),
+       "yigan kimi tapsiriq da verildi")
+
+    #  ikinci qrup: nisan + sexsi testin gizlenmesi
+    db("""insert into public.classes (id, account_id, teacher_id, kind, name, join_code)
+          values ('cccc2222-0000-0000-0000-0000000000e2', %s, %s,
+                  'tutor_group', 'Iki qrup', 'KODIKI01')""", (AID, UID))
+    pg.goto(PANEL + "#/a/cccc2222-0000-0000-0000-0000000000e2"); pg.reload()
+    pg.wait_for_selector("#aTest", timeout=8000)
+    opts = " | ".join(pg.locator("#aTest option").all_inner_texts())
+    ok("başqa qrupda verilib" in opts, "verilib nisani gorunur", opts[:80])
+    ok("səhvlər üzərində iş" not in opts,
+       "sexsi sehv-testi basqa qrupa teklif olunmur")
+
     br.close()
 
 print()

@@ -1978,12 +1978,27 @@
   /* Teyin edile bilen testler: sinife uygun olanlar */
   function loadPick(g) {
     var live = guard();
-    sb.rpc("rpc_available_tests", { p_class_id: g.id }).then(function (list) {
+    Promise.all([
+      sb.rpc("rpc_available_tests", { p_class_id: g.id }),
+      //  basqa qrupdaki teyinatlar - "verilib" nisani ucun
+      sb.select("assignments", { select: "test_id,class_id" })
+        .catch(function () { return []; })
+    ]).then(function (res) {
       if (!live()) return;
       var box = $("pick");
       if (!box) return;
-      list = list || [];
+      var list = res[0] || [];
+      var elsew = {};
+      (res[1] || []).forEach(function (a) {
+        if (a.class_id !== g.id) elsew[a.test_id] = true;
+      });
       var free = list.filter(function (t) { return !t.assigned; });
+      //  "sehvler uzerinde is" sexsi testdir - oz qrupundan basqa yerde
+      //  teklif olunmur (yanlis istifadenin qarsisi)
+      free = free.filter(function (t) {
+        return !(elsew[t.id] &&
+                 String(t.title || "").indexOf("səhvlər üzərində iş") >= 0);
+      });
       /* Iki ayri hal - eyni mesaji vermek olmaz:
          siyahi tamam bosdursa bu sinif ucun hele test YAZILMAYIB. */
       if (!list.length) {
@@ -2009,8 +2024,14 @@
           var lbl = (sub && ttl.indexOf(sub) !== 0) ? sub + " — " + ttl : ttl;
           return '<option value="' + esc(t.id) + '">' + esc(lbl) +
             " (" + (Number(t.questions) || 0) + " sual)" +
-            (t.is_free ? "" : " · abunə") + "</option>";
+            (t.is_free ? "" : " · abunə") +
+            (elsew[t.id] ? " · başqa qrupda verilib" : "") + "</option>";
         }).join("") + "</select>" +
+        (g.level_id
+          ? '<p class="muted" style="margin:-8px 0 14px">Yalnız ' +
+            esc(levelName(g.level_id) || "") + " və sinifsiz testlər " +
+            "göstərilir — qrupun sinfini dəyişsəniz siyahı da dəyişər.</p>"
+          : "") +
         '<div class="fieldrow">' +
           '<div><label for="aDate">Son tarix</label>' +
             '<input type="date" id="aDate"></div>' +
@@ -2743,6 +2764,10 @@
             '<input id="gCnt" type="number" min="1" max="100" inputmode="numeric" value="' +
             f.count + '"></div>' +
         "</div>" +
+        '<label for="gAsg">Qrupa tapşırıq ver (istəyə görə)</label>' +
+        '<select id="gAsg"><option value="">Yalnız test yığılsın</option></select>' +
+        '<p class="muted" style="margin:-8px 0 14px">Qrup seçsəniz, test yaranan ' +
+          "kimi ona tapşırıq gedəcək (son tarix 7 gün, 1 cəhd).</p>" +
         '<div id="gPrev"><div class="skel">Hovuz yoxlanılır…</div></div>' +
         '<div id="gErr"></div>' +
         '<button class="btn go" id="btnMake">' + ic("gen") + "Testi yığ</button>" +
@@ -2787,6 +2812,19 @@
       f.level = $("glev").value; f.topics = []; screenGen();
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
+    //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin
+    sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
+                           order: "name" })
+      .then(function (rows) {
+        var sel = $("gAsg");
+        if (!sel) return;
+        sel.innerHTML = '<option value="">Yalnız test yığılsın</option>' +
+          (rows || []).map(function (c) {
+            return '<option value="' + esc(c.id) + '"' +
+              (f.asg === c.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
+          }).join("");
+      }).catch(function () {});
+    on("gAsg", "change", function () { f.asg = $("gAsg").value; });
 
     var t = null;
     on("gCnt", "input", function () {
@@ -2833,6 +2871,16 @@
     $("gErr").innerHTML = "";
     setBusy("btnMake", true, "Testi yığ");
     sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: f.title || "" })
+      .then(function (v) {
+        //  qrup secilibse test derhal tapsiriq kimi gedir; tapsiriq
+        //  alinmasa da test hazirdir - veraqde elle vermek olar
+        if (!f.asg) return v;
+        return sb.rpc("rpc_assign_test", {
+          p_class_id: f.asg, p_test_id: v.test_id,
+          p_closes_at: new Date(Date.now() + 7 * 864e5).toISOString(),
+          p_max_attempts: 1
+        }).catch(function () {}).then(function () { return v; });
+      })
       .then(function (v) {
         busy = false;
         nav("#/t/" + v.test_id);
