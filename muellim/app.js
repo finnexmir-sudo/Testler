@@ -46,6 +46,7 @@
     clock:  '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/>',
     lock:   '<rect x="4.2" y="8.4" width="10.6" height="7.4" rx="1.6"/><path d="M6.6 8.4V6.2a2.9 2.9 0 0 1 5.8 0v2.2"/>',
     home:   '<path d="M3.4 9.4 9.5 3.9l6.1 5.5"/><path d="M5.3 8.7v6.8h8.4V8.7"/>',
+    bell:   '<path d="M9.5 3.1a4.3 4.3 0 0 0-4.3 4.3c0 3.2-1.1 4.4-1.6 4.9h11.8c-.5-.5-1.6-1.7-1.6-4.9A4.3 4.3 0 0 0 9.5 3.1z"/><path d="M8 14.8a1.6 1.6 0 0 0 3 0"/>',
     pen:    '<path d="M12.4 3.6a1.7 1.7 0 0 1 2.4 2.4L6.6 14.2l-3.1.7.7-3.1 8.2-8.2z"/>',
     doc:    '<path d="M11 2.5H6a1.8 1.8 0 0 0-1.8 1.8v10.4A1.8 1.8 0 0 0 6 16.5h7a1.8 1.8 0 0 0 1.8-1.8V6.3L11 2.5z"/>' +
             '<path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/>'
@@ -320,6 +321,46 @@
     });
   }
 
+  /* ------------------------------------------------- bildirisler ekrani */
+  function screenNotif() {
+    var live = guard();
+    topTitle.textContent = "Bildirişlər";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_home", {}).then(function (v) {
+      if (!live()) return;
+      v = v || {};
+      var al = v.alerts || [];
+      bellDot(al.length);
+      var h = '<button class="btn sm ghost" id="btnBack">' + ic("back") +
+        "Əsas səhifə</button>" + '<div class="spacer"></div>' +
+        "<h2>Siqnallar</h2>";
+      if (v.alerts === null) {
+        h += '<div class="card"><p class="muted" style="margin:0">Geriləyən və ' +
+          "zəif mövzuda ilişən şagird siqnalları abunə paketi ilə açılır. " +
+          '<a href="#/p">Paketlərə bax</a></p></div>';
+      } else if (!al.length) {
+        h += '<div class="card pad0"><div class="empty"><div class="ic">' +
+          ic("bell") + "</div><b>Yeni siqnal yoxdur</b>" +
+          "Geriləyən və ya zəif mövzuda ilişən şagird olanda burada görünəcək.</div></div>";
+      } else {
+        h += '<div class="card pad0" id="nAl">' + al.map(alertRow).join("") + "</div>";
+      }
+      var rc = v.recent || [];
+      if (rc.length) {
+        h += '<div class="spacer"></div>' + "<h2>Son nəticələr</h2>" +
+          '<div class="card pad0">' + rc.map(function (x) {
+            return '<div class="trow"><div class="g"><b>' + esc(x.student || "") +
+              "</b><i>" + esc(x.test || "") +
+              (x["class"] ? " · " + esc(x["class"]) : "") +
+              " · " + dateAz(x.at) + "</i></div>" + pctChip(x.percent) + "</div>";
+          }).join("") + "</div>";
+      }
+      show(h);
+      bindAlerts($("nAl"));
+      on("btnBack", "click", function () { nav("#/"); });
+    }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+
   /* ----------------------------------------------------------- profil */
   function screenMe() {
     topTitle.textContent = "Profil";
@@ -485,34 +526,13 @@
             (st.attempts ? pct(st.avg) + "%" : "—") + "</b><span>orta bal</span></div>";
       }
 
+      bellDot(v.alerts ? v.alerts.length : 0);
       var ab = $("hAlerts");
       if (ab && v.alerts && v.alerts.length) {
         ab.innerHTML = '<div class="spacer"></div>' +
           "<h2>Təhlükə zonası</h2>" +
-          '<div class="card pad0">' + v.alerts.map(function (a) {
-            var tx;
-            if (a.kind === "risk") {
-              tx = "son testlərdə geriləyir (" + pct(a.prev3) + "% → " +
-                   pct(a.last3) + "%)" +
-                   (a.topic ? " · zəif: " + esc(a.topic) : "");
-            } else if (a.kind === "weak") {
-              tx = "zəif mövzu: " + esc(a.topic || "") +
-                   " (" + pct(a.topic_ratio) + "%)";
-            } else {
-              tx = "son 3 testdə sabit " + pct(a.last3) + "% — əla gedir";
-            }
-            return '<button class="al ' + a.kind + '" data-al="' +
-              esc(a.student_id) + '" data-g="' + esc(a.class_id) + '">' +
-              ic(a.kind === "star" ? "check" : "warn") +
-              "<span><b>" + esc(a.name) + "</b> <span class=\"muted\">(" +
-                esc(a.class || "") + ")</span> " + tx + "</span>" +
-              '<span class="arrow">' + ic("right") + "</span></button>";
-          }).join("") + "</div>";
-        Array.prototype.forEach.call(ab.querySelectorAll("[data-al]"), function (b) {
-          b.addEventListener("click", function () {
-            nav("#/s/" + b.getAttribute("data-al") + "/" + b.getAttribute("data-g"));
-          });
-        });
+          '<div class="card pad0">' + v.alerts.map(alertRow).join("") + "</div>";
+        bindAlerts(ab);
       }
 
       var rc = $("hRecent");
@@ -524,7 +544,7 @@
               "</b><i>" + esc(x.test || "") +
               (x["class"] ? " · " + esc(x["class"]) : "") +
               " · " + dateAz(x.at) + "</i></div>" +
-              '<span class="pctv">' + pct(x.percent) + "%</span></div>";
+              pctChip(x.percent) + "</div>";
           }).join("") + "</div>";
       }
     }).catch(function () {});
@@ -1313,7 +1333,7 @@
             "<i><span>" + (s.attempts || 0) + " test</span><span>·</span>" +
             "<span>son: " + dateAz(s.last_at) + "</span></i>" +
             meter(s.avg) + "</div>" +
-            '<span class="pctv">' + (s.attempts ? pct(s.avg) + "%" : "—") + "</span>" +
+            (s.attempts ? pctChip(s.avg) : '<span class="pctv">—</span>') +
             '<span class="arrow">' + ic("right") + "</span></button>";
         }).join("") + "</div>";
       }
@@ -1330,7 +1350,7 @@
           return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
             "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
             meter(t.ratio) + "</div>" +
-            '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
+            pctChip(t.ratio) + "</div>";
         }).join("") + "</div>";
         /* Dovreni baglayan duyme: zeif movzular -> hazir test.
            Generator qrupun SEHV ETDIYI suallara benzeyenleri de
@@ -1348,7 +1368,7 @@
           r.recent.map(function (x) {
             return '<div class="trow"><div class="g"><b>' + esc(x.student) + "</b>" +
               "<i>" + esc(x.test) + " · " + dateAz(x.at) + "</i></div>" +
-              '<span class="pctv">' + pct(x.percent) + "%</span></div>";
+              pctChip(x.percent) + "</div>";
           }).join("") + "</div>";
       }
 
@@ -1545,6 +1565,41 @@
     return '<span class="av c' + k + '">' + esc(ch) + "</span>";
   }
 
+  /* Faiz cipi - deyere gore reng: >=80 yasil, >=60 narinci, alti qirmizi */
+  function pctChip(p) {
+    var n = Number(p) || 0;
+    var c = n >= 80 ? " pvh" : (n >= 60 ? " pvm" : " pvl");
+    return '<span class="pctv' + c + '">' + pct(p) + "%</span>";
+  }
+
+  /* Siqnal setri - hem ana sehifede, hem bildirisler ekraninda */
+  function alertRow(a) {
+    var tx;
+    if (a.kind === "risk") {
+      tx = "son testlərdə geriləyir (" + pct(a.prev3) + "% → " +
+           pct(a.last3) + "%)" + (a.topic ? " · zəif: " + esc(a.topic) : "");
+    } else if (a.kind === "weak") {
+      tx = "zəif mövzu: " + esc(a.topic || "") +
+           " (" + pct(a.topic_ratio) + "%)";
+    } else {
+      tx = "son 3 testdə sabit " + pct(a.last3) + "% — əla gedir";
+    }
+    return '<button class="al ' + a.kind + '" data-al="' +
+      esc(a.student_id) + '" data-g="' + esc(a.class_id) + '">' +
+      ic(a.kind === "star" ? "check" : "warn") +
+      "<span><b>" + esc(a.name) + "</b> <span class=\"muted\">(" +
+        esc(a["class"] || "") + ")</span> " + tx + "</span>" +
+      '<span class="arrow">' + ic("right") + "</span></button>";
+  }
+  function bindAlerts(box) {
+    if (!box) return;
+    Array.prototype.forEach.call(box.querySelectorAll("[data-al]"), function (b) {
+      b.addEventListener("click", function () {
+        nav("#/s/" + b.getAttribute("data-al") + "/" + b.getAttribute("data-g"));
+      });
+    });
+  }
+
   function statTile(val, lbl, cls) {
     return '<div class="stat ' + (cls || "") + '"><b>' + esc(String(val)) +
       "</b><span>" + esc(lbl) + "</span></div>";
@@ -1561,10 +1616,12 @@
       var h =
         '<button class="btn sm ghost" id="btnB">' + ic("back") + "Geri</button>" +
         '<div class="spacer"></div>' +
-        '<div class="card tight"><h1>' + esc(s.full_name) + "</h1>" +
-          '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:8px">' +
+        '<div class="card tight"><div class="shead">' + av(s.full_name) +
+          "<div><h1>" + esc(s.full_name) + "</h1>" +
+          '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:6px">' +
             "<span>" + esc(s.display_name) + "</span>" +
-            '<span class="code key">' + esc(s.login_code) + "</span></div></div>" +
+            '<span class="code key">' + esc(s.login_code) + "</span></div>" +
+          "</div></div></div>" +
         '<div class="stats">' +
           statTile(sm.attempts || 0, "test", "g1") +
           statTile(pct(sm.avg) + "%", "orta", "g2") +
@@ -1596,7 +1653,7 @@
           return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
             "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
             meter(t.ratio) + "</div>" +
-            '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
+            pctChip(t.ratio) + "</div>";
         }).join("") + "</div>";
         var sweak = r.topics.filter(function (t) { return Number(t.ratio) < 60 && t.id; });
         if (sweak.length) {
@@ -1630,7 +1687,7 @@
         h += '<div class="card pad0">' + at.map(function (a) {
           return '<div class="trow"><div class="g"><b>' + esc(a.test) + "</b>" +
             "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max + "</i></div>" +
-            '<span class="pctv">' + pct(a.percent) + "%</span></div>";
+            pctChip(a.percent) + "</div>";
         }).join("") + "</div>";
       }
 
@@ -3584,6 +3641,20 @@
   /* ------------------------------------------ alt naviqasiya (mobil)
      Telefonda bes esas bolme bir toxunusdadir; masaustunde gorunmur.
      Panel yalniz daxil olmus ve hesabi qurulmus istifadecide cixir. */
+  /* Zeng - siqnallar ustluk duymesi (nokteli isare = yeni siqnal var) */
+  var btnBell = document.createElement("button");
+  btnBell.id = "btnBell";
+  btnBell.className = "bellbtn hide";
+  btnBell.title = "Bildirişlər";
+  btnBell.setAttribute("aria-label", "Bildirişlər");
+  btnBell.innerHTML = ic("bell") + '<i id="bellDot" class="hide"></i>';
+  topWho.parentNode.insertBefore(btnBell, topWho);
+  btnBell.addEventListener("click", function () { nav("#/n"); });
+  function bellDot(n) {
+    var d = $("bellDot");
+    if (d) d.classList.toggle("hide", !(Number(n) > 0));
+  }
+
   var bnav = document.createElement("nav");
   bnav.id = "bnav";
   bnav.className = "bnav";
@@ -3602,10 +3673,12 @@
         ic(it[1]) + "<span>" + it[2] + "</span></a>";
     }).join("");
     document.body.classList.add("bnav-on");
+    btnBell.classList.remove("hide");
   }
   function bnavHide() {
     bnav.innerHTML = "";
     document.body.classList.remove("bnav-on");
+    btnBell.classList.add("hide");
   }
 
   function route() {
@@ -3621,6 +3694,7 @@
     if (m[0] === "p") return screenPaket();
     if (m[0] === "adm") return screenAdmin();
     if (m[0] === "me") return screenMe();
+    if (m[0] === "n") return screenNotif();
     if (m[0] === "q" && m[1]) return screenQuestion(m[1]);
     if (m[0] === "s" && m[1] && m[2]) return screenStudent(m[1], m[2]);
     screenHome();
@@ -3670,6 +3744,10 @@
       btnOut.classList.remove("hide");
       topWho.textContent = (CTX.profile && CTX.profile.full_name) || "";
       route();
+      //  zeng noktesi - hansi sehifeden acilmasindan asili olmadan
+      if (ACC) sb.rpc("rpc_home", {}).then(function (v) {
+        bellDot(v && v.alerts ? v.alerts.length : 0);
+      }).catch(function () {});
     }).catch(function (e) {
       if (e && e.status === 401) { sb.signOut().then(function () { screenAuth("in"); }); return; }
       show(msg("err", fail(e)));

@@ -127,6 +127,17 @@ with sync_playwright() as pw:
     pg.locator("#btnBack").click()
     pg.wait_for_selector("#btnGroup", timeout=8000)
 
+    ok(pg.locator("#btnBell").count() == 1, "ustlukde zeng duymesi var")
+    pg.click("#btnBell")
+    pg.wait_for_selector("#btnBack", timeout=8000)
+    # h2 CSS ile boyudulur - metn yox, unvan yoxlanilir
+    ok(pg.evaluate("location.hash") == "#/n", "bildirisler ekrani acilir",
+       pg.evaluate("location.hash"))
+    ok("abunə paketi ilə" in pg.inner_text("#main"),
+       "paketsiz hesabda siqnal upsell gorunur")
+    pg.locator("#btnBack").click()
+    pg.wait_for_selector("#btnGroup", timeout=8000)
+
     print("B · Qrup yaratmaq")
     # siniflər ayrıca sorğu ilə gəlir - dolmasını gözləyirik
     pg.wait_for_function("document.querySelectorAll('#glevel option').length > 1",

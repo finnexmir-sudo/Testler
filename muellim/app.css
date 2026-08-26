@@ -188,6 +188,27 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
   box-shadow:0 1px 2px rgba(16,24,40,.07)}
 
 /* Cox secimli nisanlar: cetinlik, movzular */
+/* zeng duymesi - ustlukde, noktesi yeni siqnal demekdir */
+.bellbtn{position:relative;border:0;background:none;cursor:pointer;
+  padding:6px;color:var(--fg-2);display:inline-flex;border-radius:8px}
+.bellbtn:hover{color:var(--brand);background:var(--n-100)}
+.bellbtn svg{width:19px;height:19px}
+.bellbtn i{position:absolute;top:5px;right:5px;width:8px;height:8px;
+  border-radius:99px;background:var(--err);border:1.5px solid var(--surface)}
+.bellbtn i.hide{display:none}
+.bellbtn.hide{display:none}
+
+/* faiz cipleri - deyere gore reng */
+.pctv.pvh{color:var(--ok)}
+.pctv.pvm{color:var(--warn)}
+.pctv.pvl{color:var(--err)}
+
+/* sagird hesabati basligi - avatarli */
+.shead{display:flex;align-items:center;gap:13px}
+.shead .av{width:44px;height:44px;flex:0 0 44px;border-radius:14px;
+  font-size:17px}
+.shead h1{margin:0}
+
 /* qrup siyahisinda herf-avatar (GPT eskizindeki fenn ikonu evezine) */
 .item .av{width:38px;height:38px;flex:0 0 38px;border-radius:12px;
   font-size:15px;margin-right:2px}
