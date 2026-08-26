@@ -7,6 +7,7 @@
   "use strict";
 
   var main = document.getElementById("main");
+  var RECOVERY = false;   // parol berpasi axini gedir
   var topWho = document.getElementById("topWho");
   var topTitle = document.getElementById("topTitle");
   var btnOut = document.getElementById("btnOut");
@@ -117,10 +118,13 @@
         '<div class="spacer"></div>' +
         '<button class="btn ghost wide" id="btnSwap">' +
           (isUp ? "Hesabım var — daxil ol" : "Hesabınız yoxdur? Yaradın") + "</button>" +
+        (isUp ? "" :
+          '<button class="linkbtn" id="btnForgot">Parolu unutmusunuz?</button>') +
       "</div>"
     );
 
     on("btnSwap", "click", function () { screenAuth(isUp ? "in" : "up"); });
+    on("btnForgot", "click", screenForgot);
     on("btnAuth", "click", doAuth);
     ["email", "pass", "fname"].forEach(function (id) {
       on(id, "keydown", function (e) { if (e.key === "Enter") doAuth(); });
@@ -158,6 +162,90 @@
         $("authErr").innerHTML = msg("err", fail(e));
       });
     }
+  }
+
+  /* --------------------------------------------- parol berpasi */
+  function screenForgot() {
+    topTitle.textContent = "Parol bərpası";
+    show(
+      '<div class="card" style="margin-top:22px">' +
+        "<h1>Parolu bərpa edin</h1>" +
+        '<p class="note">Qeydiyyatdakı e-poçtunuzu yazın — bərpa linki ' +
+          "göndərəcəyik. Linkə keçəndə yeni parol təyin edəcəksiniz.</p>" +
+        '<div id="fgErr"></div>' +
+        '<label for="fgMail">E-poçt</label>' +
+        '<input id="fgMail" type="email" autocomplete="email" inputmode="email">' +
+        '<button class="btn go wide" id="btnFg">Bərpa linki göndər</button>' +
+        '<div class="spacer"></div>' +
+        '<button class="btn ghost wide" id="btnFgBack">Girişə qayıt</button>' +
+      "</div>"
+    );
+    var inp = $("fgMail");
+    if (inp) inp.focus();
+    function go() {
+      if (busy) return;
+      var email = (($("fgMail") || {}).value || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        $("fgErr").innerHTML = msg("err", "Düzgün e-poçt yazın.");
+        return;
+      }
+      setBusy("btnFg", true, "Bərpa linki göndər");
+      //  redirect: berpa linki mehz bu panele qaytarsin
+      var back = location.origin + location.pathname;
+      sb.recover(email, back).then(function () {
+        busy = false;
+        screenAuth("in", msg("ok",
+          "Bu e-poçtla hesab varsa, bərpa linki göndərildi. Poçtunuzu " +
+          "(spam qovluğu daxil) yoxlayın — link bir dəfəlikdir."));
+      }).catch(function (e) {
+        setBusy("btnFg", false, "Bərpa linki göndər");
+        $("fgErr").innerHTML = msg("err", fail(e));
+      });
+    }
+    on("btnFg", "click", go);
+    on("fgMail", "keydown", function (e) { if (e.key === "Enter") go(); });
+  }
+
+  /* Berpa linkinden qayidis: yeni parol ekrani */
+  function screenNewPass() {
+    topTitle.textContent = "Yeni parol";
+    btnOut.classList.add("hide");
+    show(
+      '<div class="card" style="margin-top:22px">' +
+        "<h1>Yeni parol təyin edin</h1>" +
+        '<div id="npErr"></div>' +
+        '<label for="np1">Yeni parol</label>' +
+        '<input id="np1" type="password" autocomplete="new-password">' +
+        '<label for="np2">Təkrar yazın</label>' +
+        '<input id="np2" type="password" autocomplete="new-password">' +
+        '<button class="btn go wide" id="btnNp">Parolu dəyiş</button>' +
+      "</div>"
+    );
+    function go() {
+      if (busy) return;
+      var p1 = ($("np1") || {}).value || "";
+      var p2 = ($("np2") || {}).value || "";
+      if (p1.length < 8) {
+        $("npErr").innerHTML = msg("err", "Parol ən azı 8 simvol olmalıdır.");
+        return;
+      }
+      if (p1 !== p2) {
+        $("npErr").innerHTML = msg("err", "Parollar üst-üstə düşmür.");
+        return;
+      }
+      setBusy("btnNp", true, "Parolu dəyiş");
+      sb.updatePassword(p1).then(function () {
+        busy = false;
+        boot();
+      }).catch(function (e) {
+        setBusy("btnNp", false, "Parolu dəyiş");
+        $("npErr").innerHTML = msg("err", fail(e));
+      });
+    }
+    on("btnNp", "click", go);
+    ["np1", "np2"].forEach(function (id) {
+      on(id, "keydown", function (e) { if (e.key === "Enter") go(); });
+    });
   }
 
   /* --------------------------------------------------- ilk quraşdirma */
@@ -372,6 +460,8 @@
   }
 
   function loadGroups() {
+    //  loadLevels() gozleyerken cixis edilibse ACC bosdur - sakit dayan
+    if (!ACC) return;
     var groups = null;
     sb.select("classes", {
       select: "id,name,join_code,kind,level_id",
@@ -3368,5 +3458,23 @@
     });
   });
 
-  boot();
+  /* Berpa linkinden qayidanda Supabase tokenleri hash-de gonderir:
+     #access_token=...&refresh_token=...&type=recovery
+     Bu, bizim #/ marsrutlarimiz deyil - evvel tutub sessiya qururuq. */
+  (function () {
+    var h = location.hash || "";
+    if (h.indexOf("type=recovery") < 0 || h.indexOf("access_token=") < 0) return;
+    var q = {};
+    h.replace(/^#/, "").split("&").forEach(function (kv) {
+      var i = kv.indexOf("=");
+      if (i > 0) q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1));
+    });
+    if (!q.access_token) return;
+    sb.setSession(q.access_token, q.refresh_token || "");
+    try { history.replaceState(null, "", location.pathname); } catch (e) {}
+    screenNewPass();
+    RECOVERY = true;
+  })();
+
+  if (!RECOVERY) boot();
 })();

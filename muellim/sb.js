@@ -141,6 +141,29 @@
       });
     },
 
+    /* Parol berpasi: e-pocta link gonderilir; linke kecende Supabase
+       istifadecini redirect_to unvanina token ile qaytarir. */
+    recover: function (email, redirectTo) {
+      return request("/auth/v1/recover?redirect_to=" +
+                     encodeURIComponent(redirectTo || ""), {
+        method: "POST", auth: false,
+        body: { email: email }
+      });
+    },
+
+    /* Berpa linkinden gelen tokenlerle sessiya qurulur */
+    setSession: function (accessToken, refreshToken) {
+      saveSession({ access_token: accessToken, refresh_token: refreshToken });
+    },
+
+    /* Yeni parol - aktiv sessiya ile */
+    updatePassword: function (newPass) {
+      return request("/auth/v1/user", {
+        method: "PUT",
+        body: { password: newPass }
+      });
+    },
+
     signOut: function () {
       var had = !!(S && S.access_token);
       var p = had ? request("/auth/v1/logout", { method: "POST" }).catch(function () {}) 

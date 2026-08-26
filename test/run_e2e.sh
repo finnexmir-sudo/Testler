@@ -49,5 +49,8 @@ echo
 echo "10/11 bildirisler ve 2FA"
 python3 test/e2e_bildiris.py
 echo
-echo "11/11 ders plani"
+echo "11/12 ders plani"
 python3 test/e2e_plan.py
+echo
+echo "12/12 parol berpasi"
+python3 test/e2e_parol.py
