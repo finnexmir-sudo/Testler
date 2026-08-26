@@ -95,8 +95,9 @@ with sync_playwright() as pw:
     ok(pg.locator(".tile").count() == 4, "gosterici lovheleri gorunur",
        pg.locator(".tile").count())
     tl = pg.inner_text(".tiles").replace("\n", " ")
-    ok("hesab" in tl and "abun" in tl and "gəlir" in tl,
-       "lovhelerde hesab/abune/gelir var", tl[:70])
+    ok("hesab" in tl and "pullu" in tl and "pulsuz" in tl and "gəlir" in tl,
+       "lovhelerde hesab/pullu/pulsuz/gelir var", tl[:70])
+    ok(pg.locator("#admF .chip").count() == 3, "pullu/pulsuz suzgec cipleri var")
     npo = pg.locator("#admPlan option").count()
     ok(npo >= 2, "plan secimi bazadan dolur", npo)
     row = pg.inner_text(".admr").replace("\n", " ")
@@ -116,6 +117,15 @@ with sync_playwright() as pw:
     a = db("""select s.status, s.provider from public.subscriptions s""", one=True)
     ok(a and a["status"] == "active" and a["provider"] == "manual",
        "bazada active/manual abune var")
+    pg.locator("#admF .chip[data-f='pulsuz']").click()
+    pg.wait_for_timeout(700)
+    ok("Hesab tapılmadı" in pg.inner_text("#admList"),
+       "pulsuz suzgecinde abuneli hesab cixmir")
+    pg.locator("#admF .chip[data-f='pullu']").click()
+    pg.wait_for_selector(".admr .pb.y", timeout=8000)
+    ok("pkt@t.az" in pg.inner_text(".admr"), "pullu suzgecinde hesab gorunur")
+    pg.locator("#admF .chip[data-f='']").click()
+    pg.wait_for_timeout(500)
 
     print("E · Paket səhifəsi abunəni göstərir")
     pg.goto(PANEL + "#/p"); pg.reload()

@@ -109,8 +109,13 @@ begin
   assert v->0->'plan'->>'status' = 'active', 'plan statusu gorunmur';
   assert v->0 ? 'groups' and v->0 ? 'attempts' and v->0 ? 'last_active',
          'aktivlik sutunlari yoxdur';
+  --  pullu/pulsuz suzgeci: hesabin bu anda aktiv abunesi var
+  v := public.rpc_admin_accounts(null, 'pullu');
+  assert jsonb_array_length(v) = 1, 'pullu suzgeci aktiv abuneni tapmir';
+  v := public.rpc_admin_accounts(null, 'pulsuz');
+  assert jsonb_array_length(v) = 0, 'pulsuz suzgecine abuneli hesab dusdu';
 end $$;
-\echo 'OK  5 · admin siyahisi: axtaris, e-poct, plan statusu, aktivlik'
+\echo 'OK  5 · admin siyahisi: axtaris, plan statusu, pullu/pulsuz suzgeci'
 
 -- =====================================================================
 --  6. Dayandirmaq - abune derhal kecersizdir
@@ -176,6 +181,7 @@ begin
   assert (v->>'accounts')::int = 1, 'hesab sayi sehvdir';
   --  6-ci addimda abune dayandirilib - aktiv abune qalmamalidir
   assert (v->>'active_subs')::int = 0, 'dayandirilmis abune sayilir';
+  assert (v->>'paid_accounts')::int = 0, 'pullu hesab sayi sehvdir';
   assert (v->>'mrr_minor')::int = 0, 'gelir sifir olmalidir';
   assert jsonb_array_length(v->'plans') >= 2, 'plan siyahisi bosdur';
   assert not exists (select 1 from jsonb_array_elements(v->'plans') p

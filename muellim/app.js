@@ -1437,7 +1437,8 @@
         '<div class="tile a"><b>' + (st.accounts || 0) + "</b><span>hesab" +
           ((st.accounts_week || 0) > 0 ? " · +" + st.accounts_week + " bu həftə" : "") +
           "</span></div>" +
-        '<div class="tile b"><b>' + (st.active_subs || 0) + "</b><span>aktiv abunə</span></div>" +
+        '<div class="tile b"><b>' + (st.paid_accounts || 0) + "</b><span>pullu · " +
+          Math.max(0, (st.accounts || 0) - (st.paid_accounts || 0)) + " pulsuz</span></div>" +
         '<div class="tile c"><b>' + azn(st.mrr_minor || 0) + "</b><span>aylıq gəlir</span></div>" +
         '<div class="tile d"><b>' + (st.attempts_week || 0) + "</b><span>cəhd · son 7 gün</span></div>" +
       "</div>" +
@@ -1454,6 +1455,13 @@
             }).join("") +
           "</select></div>" +
         "</div>" +
+        '<div class="chips" id="admF">' +
+          [["", "Hamısı"], ["pullu", "Pullu"], ["pulsuz", "Pulsuz"]]
+            .map(function (f) {
+              return '<button class="chip' + (f[0] === "" ? " on" : "") +
+                '" data-f="' + f[0] + '">' + f[1] + "</button>";
+            }).join("") +
+        "</div>" +
         '<div id="admMsg">' + admFlash + "</div>" +
       "</div>" +
       '<div class="spacer"></div>' +
@@ -1466,16 +1474,27 @@
       sel0.value = "repetitor-25";
     }
     on("btnBack", "click", function () { nav("#/"); });
+    function admQuery() {
+      var fb = document.querySelector("#admF .chip.on");
+      sb.rpc("rpc_admin_accounts", {
+        p_q: (($("admQ") || {}).value || "").trim() || null,
+        p_f: (fb && fb.getAttribute("data-f")) || null
+      }).then(function (rows2) {
+        var box = $("admList");
+        if (box) box.innerHTML = admRows(rows2 || []);
+      }).catch(function () {});
+    }
     var t = null;
     on("admQ", "input", function () {
-      clearTimeout(t);
-      t = setTimeout(function () {
-        sb.rpc("rpc_admin_accounts", { p_q: ($("admQ").value || "").trim() || null })
-          .then(function (rows2) {
-            var box = $("admList");
-            if (box) box.innerHTML = admRows(rows2 || []);
-          }).catch(function () {});
-      }, 350);
+      clearTimeout(t); t = setTimeout(admQuery, 350);
+    });
+    on("admF", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest(".chip") : null;
+      if (!b) return;
+      var cur = document.querySelector("#admF .chip.on");
+      if (cur) cur.classList.remove("on");
+      b.classList.add("on");
+      admQuery();
     });
     bindAdm();
   }

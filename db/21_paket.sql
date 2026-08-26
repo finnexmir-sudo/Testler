@@ -70,7 +70,13 @@ begin
 end $$;
 
 -- ------------------------------------------------- admin: hesablar
-create or replace function public.rpc_admin_accounts(p_q text default null)
+--  Signatura deyisdiyi ucun kohne bir-parametrli versiya silinir -
+--  yoxsa PostgREST iki eyniadli funksiya gorub sasirir.
+drop function if exists public.rpc_admin_accounts(text);
+
+--  p_f: null = hamisi, 'pullu' = aktiv abunesi olanlar, 'pulsuz' = qalanlar
+create or replace function public.rpc_admin_accounts(
+  p_q text default null, p_f text default null)
 returns jsonb
 language plpgsql stable security definer
 set search_path = public, extensions, pg_temp as $$
@@ -119,9 +125,16 @@ begin
              ) as x
         from public.accounts a
         join auth.users u on u.id = a.owner_id
-       where p_q is null or btrim(p_q) = ''
-          or a.name ilike '%' || btrim(p_q) || '%'
-          or u.email ilike '%' || btrim(p_q) || '%'
+       where (p_q is null or btrim(p_q) = ''
+           or a.name ilike '%' || btrim(p_q) || '%'
+           or u.email ilike '%' || btrim(p_q) || '%')
+         and (p_f is null
+           or (p_f = 'pullu')  = exists (
+                select 1 from public.subscriptions s2
+                 where s2.account_id = a.id
+                   and s2.status in ('trialing','active')
+                   and (s2.current_period_end is null
+                        or s2.current_period_end > now())))
        order by a.created_at desc
        limit 50
     ) z), '[]'::jsonb);
@@ -143,6 +156,11 @@ begin
     'accounts', (select count(*) from public.accounts),
     'accounts_week', (select count(*) from public.accounts
                        where created_at > now() - interval '7 days'),
+    'paid_accounts', (select count(distinct s.account_id)
+                       from public.subscriptions s
+                      where s.status in ('trialing','active')
+                        and (s.current_period_end is null
+                             or s.current_period_end > now())),
     'active_subs', (select count(*) from public.subscriptions s
                      where s.status in ('trialing','active')
                        and (s.current_period_end is null
@@ -246,13 +264,13 @@ end $$;
 
 -- ---------------------------------------------------------------- huquq
 revoke all on function public.rpc_paket(uuid)                    from public, anon;
-revoke all on function public.rpc_admin_accounts(text)           from public, anon;
+revoke all on function public.rpc_admin_accounts(text, text)     from public, anon;
 revoke all on function public.rpc_admin_stats()                  from public, anon;
 revoke all on function public.rpc_admin_grant(text, text, int)   from public, anon;
 revoke all on function public.rpc_admin_stop(text)               from public, anon;
 
 grant execute on function public.rpc_paket(uuid)                  to authenticated;
-grant execute on function public.rpc_admin_accounts(text)         to authenticated;
+grant execute on function public.rpc_admin_accounts(text, text)   to authenticated;
 grant execute on function public.rpc_admin_stats()                to authenticated;
 grant execute on function public.rpc_admin_grant(text, text, int) to authenticated;
 grant execute on function public.rpc_admin_stop(text)             to authenticated;
