@@ -509,20 +509,35 @@
           '<div id="plMsg"></div>' +
           '<button class="btn go" id="btnPlMk">' + ic("plus") + "Planı qur</button>" +
         "</div>";
-      Promise.all([
-        sb.select("subjects", { select: "slug,name", order: "sort" }),
-        loadLevels()
-      ]).then(function (r) {
+      //  Siyahida YALNIZ movzu agaci olan fenn+sinif kombinasiyalari -
+      //  agacsiz fenni ("Kurikulum" ve s.) secib xeta almaq olmasin.
+      //  Sinif siyahisi fenne gore daralir.
+      sb.rpc("rpc_plan_options", {}).then(function (opts) {
+        opts = opts || [];
         var sel = $("plSub"), lev = $("plLev");
         if (!sel || !lev) return;
-        sel.innerHTML = (r[0] || []).map(function (x) {
+        sel.innerHTML = opts.map(function (x) {
           return '<option value="' + esc(x.slug) + '">' + esc(x.name) + "</option>";
         }).join("");
-        lev.innerHTML = (r[1] || []).map(function (x) {
-          return '<option value="' + esc(x.code) + '"' +
-            (g.level_id === x.id ? " selected" : "") + ">" + esc(x.name) + "</option>";
-        }).join("");
-      });
+        function fillLev() {
+          var cur = null;
+          for (var i = 0; i < opts.length; i++) {
+            if (opts[i].slug === sel.value) cur = opts[i];
+          }
+          lev.innerHTML = ((cur && cur.levels) || []).map(function (x) {
+            return '<option value="' + esc(x.code) + '">' + esc(x.name) + "</option>";
+          }).join("");
+          //  qrupun oz sinfi siyahidadirsa, onu sec
+          var gl = levelName(g.level_id);
+          if (gl) {
+            for (var j = 0; j < lev.options.length; j++) {
+              if (lev.options[j].text === gl) lev.selectedIndex = j;
+            }
+          }
+        }
+        fillLev();
+        sel.addEventListener("change", fillLev);
+      }).catch(function () {});
       on("btnPlMk", "click", function () {
         if (busy) return;
         setBusy("btnPlMk", true, "Planı qur");

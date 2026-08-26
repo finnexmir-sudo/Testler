@@ -79,7 +79,11 @@ with sync_playwright() as pw:
             from public.plans p where p.slug = 'repetitor-25'""", (AID,))
     pg.reload()
     pg.wait_for_selector("#btnPlMk", timeout=8000)
-    pg.wait_for_function("document.querySelectorAll('#plSub option').length > 3", timeout=8000)
+    pg.wait_for_function("document.querySelectorAll('#plSub option').length > 1", timeout=8000)
+    subs = pg.locator("#plSub option").all_inner_texts()
+    ndb = db("select count(distinct subject_id) n from public.topics "
+             "where level_id is not null", one=True)["n"]
+    ok(len(subs) == ndb, "yalniz movzu agaci olan fennler", (len(subs), ndb))
     pg.select_option("#plSub", "riyaziyyat")
     pg.select_option("#plLev", "3")
     pg.click("#btnPlMk")

@@ -298,7 +298,36 @@ begin
                             'count', v_res->>'count');
 end $$;
 
+-- ------------------------------------------------- plan seçimləri
+--  Formada YALNIZ movzu agaci olan fenn+sinif kombinasiyalari
+--  gorunsun - "Kurikulum" kimi agacsiz fenni secib xeta almaq
+--  olmasin.  Agac genislendikce siyahi ozu boyuyur.
+create or replace function public.rpc_plan_options()
+returns jsonb
+language plpgsql stable security definer
+set search_path = public, extensions, pg_temp as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Daxil olmamisiniz.' using errcode = '28000';
+  end if;
+  return coalesce((
+    select jsonb_agg(jsonb_build_object(
+             'slug', z.slug, 'name', z.name, 'levels', z.levels)
+           order by z.sort)
+    from (
+      select s.slug, s.name, s.sort,
+             jsonb_agg(jsonb_build_object('code', l.code, 'name', l.name)
+                       order by l.sort) as levels
+        from (select distinct t.subject_id, t.level_id
+                from public.topics t
+               where t.level_id is not null) x
+        join public.subjects s on s.id = x.subject_id
+        join public.levels   l on l.id = x.level_id
+       group by s.slug, s.name, s.sort) z), '[]'::jsonb);
+end $$;
+
 -- ---------------------------------------------------------------- huquq
+revoke all on function public.rpc_plan_options()                from public, anon;
 revoke all on function public.rpc_plan_create(uuid, text, text) from public, anon;
 revoke all on function public.rpc_plan_delete(uuid)             from public, anon;
 revoke all on function public.rpc_plan_get(uuid)                from public, anon;
@@ -306,6 +335,7 @@ revoke all on function public.rpc_plan_done(uuid)               from public, ano
 revoke all on function public.rpc_plan_undo(uuid)               from public, anon;
 revoke all on function public.rpc_plan_test(uuid, int)          from public, anon;
 
+grant execute on function public.rpc_plan_options()                to authenticated;
 grant execute on function public.rpc_plan_create(uuid, text, text) to authenticated;
 grant execute on function public.rpc_plan_delete(uuid)             to authenticated;
 grant execute on function public.rpc_plan_get(uuid)                to authenticated;

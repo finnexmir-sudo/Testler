@@ -84,6 +84,28 @@ end $$;
 \echo 'OK  2 · plan movzu agacindan dolur, tekrar/bos imtina'
 
 -- =====================================================================
+--  2b. Secimler: yalniz movzu agaci olan fenn+sinif kombinasiyalari
+-- =====================================================================
+do $$
+declare v jsonb;
+begin
+  v := public.rpc_plan_options();
+  assert exists (select 1 from jsonb_array_elements(v) e
+                  where e->>'slug' = 'riyaziyyat'
+                    and exists (select 1 from jsonb_array_elements(e->'levels') l
+                                 where l->>'code' = '3')),
+         'riyaziyyat/3 secimlerde yoxdur';
+  --  agaci olmayan fenn siyahiya dusmur
+  assert not exists (select 1 from jsonb_array_elements(v) e
+                      where not exists (
+                        select 1 from public.topics t
+                          join public.subjects s on s.id = t.subject_id
+                         where s.slug = e->>'slug')),
+         'agacsiz fenn siyahiya dusdu';
+end $$;
+\echo 'OK 2b · secimlerde yalniz agaci olan kombinasiyalar'
+
+-- =====================================================================
 --  3. plan_get: irelileyis, cari movzu
 -- =====================================================================
 do $$
