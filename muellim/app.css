@@ -647,3 +647,30 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .lnk{border:0;background:none;cursor:pointer;font:inherit;
   font-size:12px;font-weight:560;color:var(--brand);padding:0}
 .lnk:hover{text-decoration:underline;text-underline-offset:3px}
+
+/* ---------------- cap / PDF veraqi ----------------
+   #printBox ekranda hec vaxt gorunmur - yalniz cap zamani.
+   body.printing sinfi paperPrint() icinde qoyulub goturulur. */
+#printBox{display:none}
+.prnrow{display:flex;gap:8px;flex-wrap:wrap}
+@media print{
+  @page{margin:12mm}
+  body.printing>:not(#printBox){display:none!important}
+  body.printing{background:#fff}
+  body.printing #printBox{display:block;color:#000;background:#fff;
+    font:12.5px/1.5 Georgia,"Times New Roman",serif}
+  #printBox h1{font-size:18px;margin:0 0 4px;color:#000}
+  #printBox .pph{border-bottom:2px solid #000;padding:0 0 8px;margin:0 0 14px}
+  #printBox .ppm{font-size:11px;color:#333;margin:0 0 10px}
+  #printBox .ppf{display:flex;gap:20px;flex-wrap:wrap;font-size:12px}
+  #printBox .ppq{break-inside:avoid;page-break-inside:avoid;margin:0 0 12px}
+  #printBox .ppb{font-weight:700;margin:0 0 4px}
+  #printBox .ppmu{font-weight:400;font-style:italic;font-size:11px}
+  #printBox .ppo{margin:2px 0 2px 16px}
+  #printBox .ppl{margin:8px 0 2px 16px}
+  #printBox .ppk{break-before:page;page-break-before:always}
+  #printBox .ppk h2{font-size:15px;margin:0 0 10px;color:#000;
+    text-transform:none;letter-spacing:0}
+  #printBox .ppkg{display:grid;grid-template-columns:repeat(4,1fr);
+    gap:6px 14px;font-size:12.5px}
+}

@@ -49,7 +49,10 @@
     bell:   '<path d="M9.5 3.1a4.3 4.3 0 0 0-4.3 4.3c0 3.2-1.1 4.4-1.6 4.9h11.8c-.5-.5-1.6-1.7-1.6-4.9A4.3 4.3 0 0 0 9.5 3.1z"/><path d="M8 14.8a1.6 1.6 0 0 0 3 0"/>',
     pen:    '<path d="M12.4 3.6a1.7 1.7 0 0 1 2.4 2.4L6.6 14.2l-3.1.7.7-3.1 8.2-8.2z"/>',
     doc:    '<path d="M11 2.5H6a1.8 1.8 0 0 0-1.8 1.8v10.4A1.8 1.8 0 0 0 6 16.5h7a1.8 1.8 0 0 0 1.8-1.8V6.3L11 2.5z"/>' +
-            '<path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/>'
+            '<path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/>',
+    print:  '<path d="M5.8 7.2V3.4h7.4v3.8"/>' +
+            '<path d="M5.8 13.2H3.4V8.4a1.2 1.2 0 0 1 1.2-1.2h9.8a1.2 1.2 0 0 1 1.2 1.2v4.8h-2.4"/>' +
+            '<rect x="5.8" y="11" width="7.4" height="5" rx=".8"/>'
   };
   function ic(name, cls) {
     return '<svg class="' + (cls || "") + '" viewBox="0 0 19 19" fill="none" ' +
@@ -3039,6 +3042,71 @@
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
+  /* Cap / PDF: veraq ucun temiz nusxe qurulur (ekran metalari -
+     movzu, cetinlik, "sehv bildir" - kagiza dusmur), brauzerin oz
+     cap pencersi acilir.  Orada "PDF olaraq saxla" da var - elave
+     kitabxana lazim deyil.  withKey=true olanda cavab acari AYRICA
+     sehifede cixir; sagird nusxesinde duzgun cavab izi yoxdur. */
+  function paperPrint(t, withKey) {
+    var qs = t.questions || [];
+    var L = "ABCDEFGH";
+    var box = $("printBox");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "printBox";
+      document.body.appendChild(box);
+    }
+    var h = '<div class="pph">' +
+      "<h1>" + esc(t.title || "") + "</h1>" +
+      '<div class="ppm">' + esc(t.subject || "") +
+        (t.level ? " · " + esc(t.level) : "") + " · " + qs.length +
+        " sual · Bil10</div>" +
+      '<div class="ppf"><span>Ad, soyad: ________________________</span>' +
+        "<span>Tarix: ____________</span><span>Bal: ______</span></div>" +
+      "</div>" +
+      qs.map(function (q) {
+        var b = '<div class="ppq"><div class="ppb">' + q.ord + ". " + esc(q.body) +
+          (q.kind === "multi"
+            ? ' <i class="ppmu">(bir neçə düzgün cavab)</i>' : "") + "</div>";
+        if (q.kind === "text") {
+          b += '<div class="ppl">Cavab: _______________________________</div>';
+        } else {
+          b += (q.options || []).map(function (o, i) {
+            return '<div class="ppo"><b>' + L.charAt(i) + ")</b> <span>" +
+              esc(o.body) + "</span></div>";
+          }).join("");
+        }
+        return b + "</div>";
+      }).join("");
+    if (withKey) {
+      h += '<div class="ppk"><h2>Cavab açarı — ' + esc(t.title || "") + "</h2>" +
+        '<div class="ppkg">' +
+        qs.map(function (q) {
+          var a;
+          if (q.kind === "text") {
+            a = (q.options || []).filter(function (o) { return o.correct; })
+              .map(function (o) { return esc(o.body); }).join(" / ");
+          } else {
+            a = (q.options || []).map(function (o, i) {
+              return o.correct ? L.charAt(i) : "";
+            }).filter(Boolean).join(", ");
+          }
+          return "<span><b>" + q.ord + ".</b> " + (a || "—") + "</span>";
+        }).join("") + "</div></div>";
+    }
+    box.innerHTML = h;
+    document.body.classList.add("printing");
+    function off() {
+      document.body.classList.remove("printing");
+      window.removeEventListener("afterprint", off);
+    }
+    window.addEventListener("afterprint", off);
+    window.print();
+    //  afterprint bezi brauzerlerde gelmir - ehtiyat temizlik
+    //  (sinif yalniz @media print-e tesir edir, ekranda gorunmur)
+    setTimeout(off, 2000);
+  }
+
   function drawPaper(t, classes, asgs) {
     //  verilmis qruplar ayrilir - secimde tekrar teklif olunmur
     var asgMap = {};
@@ -3059,12 +3127,22 @@
           " · " + qs.length + " sual" +
           (done ? " · " + done + " şagird işləyib" : "") + "</p>" +
         '<div class="spacer"></div>' +
-        (t.gen_rule
-          ? (done
-              ? '<p class="muted">Bu testi artıq şagird işlədiyi üçün ' +
-                "yeniləmək olmaz — yeni test yığın.</p>"
-              : '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
-                "Yenidən yığ</button>")
+        '<div class="prnrow">' +
+          '<button class="btn sm" id="btnPrn">' + ic("print") +
+            "Çap / PDF</button>" +
+          '<button class="btn sm ghost" id="btnPrnK">' + ic("key") +
+            "Cavab açarı ilə</button>" +
+          (t.gen_rule && !done
+            ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
+              "Yenidən yığ</button>"
+            : "") +
+        "</div>" +
+        '<p class="muted" style="margin:10px 0 0">Çap pəncərəsində printer ' +
+          "əvəzinə «PDF olaraq saxla» seçsəniz, vərəq fayl kimi yüklənəcək. " +
+          "«Cavab açarı ilə» variantında açar ayrıca səhifədə çıxır.</p>" +
+        (t.gen_rule && done
+          ? '<p class="muted" style="margin:8px 0 0">Bu testi artıq şagird ' +
+            "işlədiyi üçün yeniləmək olmaz — yeni test yığın.</p>"
           : "") +
         '<div id="pErr"></div>' +
       "</div>" +
@@ -3136,6 +3214,9 @@
 
     on("btnBack", "click", function () { nav("#/gen"); });
     bindReportLinks();
+
+    on("btnPrn",  "click", function () { paperPrint(t, false); });
+    on("btnPrnK", "click", function () { paperPrint(t, true); });
 
     on("btnRegen", "click", function () {
       if (busy) return;

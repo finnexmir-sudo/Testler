@@ -210,6 +210,28 @@ with sync_playwright() as pw:
     a = db("select class_id::text c, max_attempts m from public.assignments", one=True)
     ok(a is not None and a["c"] == GID and a["m"] == 2, "bazada teyinat duzgundur")
 
+    print("F2 · Çap / PDF vərəqi")
+    #  cap pencersi headless-de acilmir - print() saxta funksiya ile evezlenir
+    #  (setir () => {} ile sarilir - yoxsa playwright onu ozu bir defe cagirir)
+    pg.evaluate("() => { window.print = function(){ window.__prn = (window.__prn||0)+1 } }")
+    pg.click("#btnPrn")
+    ok(pg.evaluate("window.__prn") == 1, "cap pencersi cagirilir",
+       pg.evaluate("window.__prn"))
+    ok(pg.locator("#printBox .ppq").count() == 8, "cap nusxesinde 8 sual",
+       pg.locator("#printBox .ppq").count())
+    ptxt = pg.evaluate("document.getElementById('printBox').innerText")
+    ok("Ad, soyad" in ptxt, "veraq basligi (ad, tarix, bal) var")
+    ok("Cavab açarı" not in ptxt, "sagird nusxesinde acar YOXDUR")
+    ok(pg.locator("#printBox .ppk").count() == 0, "acar bolmesi de yoxdur")
+    ok("A)" in ptxt, "variantlar herflenib")
+    pg.click("#btnPrnK")
+    ok(pg.locator("#printBox .ppk").count() == 1, "acarli variantda acar sehifesi var")
+    ok(pg.locator("#printBox .ppkg span").count() == 8, "acarda 8 cavab",
+       pg.locator("#printBox .ppkg span").count())
+    #  ehtiyat temizlik isleyir - "printing" sinfi goturulur
+    pg.wait_for_function("!document.body.classList.contains('printing')",
+                         timeout=5000)
+
     print("G · Şagird tapşırığı görür")
     sp = new_page()
     sp.goto(STUDENT); sp.wait_for_selector("#btnIn", timeout=8000)
