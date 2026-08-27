@@ -546,18 +546,35 @@
             rgs.push({ id: x.class_id, name: x["class"] || "" });
           }
         });
-        var RF = "";
+        var RF = "", REXP = false, RCAP = 6;
         function recRows() {
           var list = RF ? recAll.filter(function (x) {
             return x.class_id === RF;
           }) : recAll;
-          return list.map(function (x) {
+          /* Sagird coxaldiqca sehife uzanmasin: ilk 6 setir gorunur,
+             qalani "Daha N netice" duymesi ile acilir. */
+          var vis = REXP ? list : list.slice(0, RCAP);
+          return vis.map(function (x) {
             return '<div class="trow"><div class="g"><b>' + esc(x.student || "") +
               "</b><i>" + esc(x.test || "") +
               (x["class"] ? " · " + esc(x["class"]) : "") +
               " · " + dateAz(x.at) + "</i></div>" +
               pctChip(x.percent) + "</div>";
-          }).join("");
+          }).join("") +
+          (list.length > RCAP && !REXP
+            ? '<button class="morebtn" id="recMore">Daha ' +
+              (list.length - RCAP) + " nəticə göstər</button>"
+            : "");
+        }
+        function recDraw() {
+          var rl = $("recList");
+          if (!rl) return;
+          rl.innerHTML = recRows();
+          var mb = $("recMore");
+          if (mb) mb.addEventListener("click", function () {
+            REXP = true;
+            recDraw();
+          });
         }
         rc.innerHTML = '<div class="spacer"></div>' +
           "<h2>Son nəticələr</h2>" +
@@ -569,17 +586,18 @@
                   esc(g.name) + "</button>";
               }).join("") + "</div>"
             : "") +
-          '<div class="card pad0" id="recList">' + recRows() + "</div>";
+          '<div class="card pad0" id="recList"></div>';
+        recDraw();
         var rf = $("recF");
         if (rf) rf.addEventListener("click", function (ev) {
           var b = ev.target.closest ? ev.target.closest("[data-rg]") : null;
           if (!b) return;
           RF = b.getAttribute("data-rg");
+          REXP = false;
           Array.prototype.forEach.call(rf.querySelectorAll(".chip"), function (c) {
             c.classList.toggle("on", c === b);
           });
-          var rl = $("recList");
-          if (rl) rl.innerHTML = recRows();
+          recDraw();
         });
       }
     }).catch(function () {});

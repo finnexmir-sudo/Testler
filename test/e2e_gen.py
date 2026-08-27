@@ -271,8 +271,10 @@ with sync_playwright() as pw:
                   where s.slug='riyaziyyat' and t.slug='riy-4-vurma-bolme'""",
                one=True)["i"]
     # temiz tarixce: gerileyen sagird (88,85,82 -> 60,55,50) + zeif movzu
+    # (evvele 2 kohne cehd elave olunub ki, lent 6-dan cox olsun ve
+    #  "Daha N netice" duymesi de yoxlansin; son 6 deyismir - siqnal qalir)
     db("delete from public.attempt_answers; delete from public.attempts;")
-    for i, p_ in enumerate([88, 85, 82, 60, 55, 50]):
+    for i, p_ in enumerate([70, 72, 88, 85, 82, 60, 55, 50]):
         db("""insert into public.attempts (test_id, student_id, status, percent, finished_at)
               values (%s, %s, 'submitted', %s, now() - interval '20 days' + (%s || ' days')::interval)""",
            (TID, SID, p_, i))
@@ -300,6 +302,15 @@ with sync_playwright() as pw:
     ok(pg.locator("#hRecent .trow").count() >= 1, "son neticeler lenti dolur",
        pg.locator("#hRecent .trow").count())
     ok(pg.locator("#recF").count() == 0, "tek qrupda lent cipleri gizlidir")
+    # Lent yigcamdir: 8 neticeden yalniz 6-si gorunur, qalani duyme ile
+    rn0 = pg.locator("#hRecent .trow").count()
+    ok(rn0 == 6, "lent en coxu 6 setirle acilir", rn0)
+    ok("Daha 2 nəticə" in pg.inner_text("#recMore"), "acici duyme sayi duz",
+       pg.inner_text("#recMore"))
+    pg.click("#recMore")
+    ok(pg.locator("#hRecent .trow").count() == 8, "daha N netice acilir",
+       pg.locator("#hRecent .trow").count())
+    ok(pg.locator("#recMore").count() == 0, "acilandan sonra duyme itir")
 
     pg.goto(PANEL + "#/g/" + GID); pg.reload()
     pg.wait_for_selector("#alerts .al", timeout=8000)
