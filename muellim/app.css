@@ -673,4 +673,13 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
     text-transform:none;letter-spacing:0}
   #printBox .ppkg{display:grid;grid-template-columns:repeat(4,1fr);
     gap:6px 14px;font-size:12.5px}
+  #printBox .ppkn{font-size:11px;color:#555;font-style:italic;margin:-6px 0 10px}
+  /*  Su nisani: <tfoot> her cap sehifesinde tekrarlanir ve ozune yer
+      ayirir - fixed altliq kimi metnin ustune dusmur. */
+  #printBox .ppw{width:100%;border-collapse:collapse}
+  #printBox .ppw>tbody>tr>td,#printBox .ppw>tfoot>tr>td{padding:0;border:0}
+  #printBox .ppw>tfoot{display:table-footer-group}
+  #printBox .ppfoot{font-size:9.5px;color:#8a8a8a;text-align:center;
+    letter-spacing:.02em;padding-top:4px;margin-top:10px;
+    border-top:.5px solid #d8d8d8}
 }

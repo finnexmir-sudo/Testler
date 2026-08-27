@@ -3050,6 +3050,14 @@
   function paperPrint(t, withKey) {
     var qs = t.questions || [];
     var L = "ABCDEFGH";
+    //  Su nisani: veraqi CAP EDEN muellimin adi + tam tarix.  Meqsed
+    //  maneе yaratmaq deyil - sual basqa yerde cixsa, kimin cixardigi
+    //  bilinsin.  Adi olmayan hesabda sadece "Bil10 · tarix" qalir.
+    var d = new Date();
+    var dm = function (n) { return (n < 10 ? "0" : "") + n; };
+    var stamp = dm(d.getDate()) + "." + dm(d.getMonth() + 1) + "." + d.getFullYear();
+    var who = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    var foot = "Bil10" + (who ? " · " + esc(who) : "") + " · " + stamp;
     var box = $("printBox");
     if (!box) {
       box = document.createElement("div");
@@ -3080,6 +3088,7 @@
       }).join("");
     if (withKey) {
       h += '<div class="ppk"><h2>Cavab açarı — ' + esc(t.title || "") + "</h2>" +
+        '<div class="ppkn">Bu səhifə şagirdlərə paylanmır.</div>' +
         '<div class="ppkg">' +
         qs.map(function (q) {
           var a;
@@ -3094,7 +3103,11 @@
           return "<span><b>" + q.ord + ".</b> " + (a || "—") + "</span>";
         }).join("") + "</div></div>";
     }
-    box.innerHTML = h;
+    //  Tekrarlanan altliq: <tfoot> her cap sehifesinde tekrarlanir VE
+    //  ozune yer ayirir - position:fixed kimi suallarin ustune dusmur.
+    box.innerHTML = '<table class="ppw"><tfoot><tr><td>' +
+      '<div class="ppfoot">' + foot + "</div></td></tr></tfoot>" +
+      "<tbody><tr><td>" + h + "</td></tr></tbody></table>";
     document.body.classList.add("printing");
     function off() {
       document.body.classList.remove("printing");

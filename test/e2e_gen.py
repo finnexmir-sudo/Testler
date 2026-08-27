@@ -224,8 +224,19 @@ with sync_playwright() as pw:
     ok("Cavab açarı" not in ptxt, "sagird nusxesinde acar YOXDUR")
     ok(pg.locator("#printBox .ppk").count() == 0, "acar bolmesi de yoxdur")
     ok("A)" in ptxt, "variantlar herflenib")
+    #  su nisani: cap eden muellimin adi + tam tarix, her sehifenin altinda
+    foot = pg.evaluate("document.querySelector('#printBox .ppfoot').textContent")
+    ok("Bil10" in foot, "su nisaninda brend var", foot)
+    ok("Gen Muellim" in foot, "su nisaninda muellimin adi var", foot)
+    import datetime as _dt
+    bugun = _dt.date.today().strftime("%d.%m.%Y")
+    ok(bugun in foot, "su nisaninda tam tarix var", foot)
     pg.click("#btnPrnK")
     ok(pg.locator("#printBox .ppk").count() == 1, "acarli variantda acar sehifesi var")
+    ok("şagirdlərə paylanmır" in pg.evaluate("document.querySelector('#printBox .ppkn').textContent"),
+       "acar sehifesinde paylanmama qeydi var")
+    ok(pg.locator("#printBox .ppfoot").count() == 1,
+       "acarli nusxede de su nisani tekdir")
     ok(pg.locator("#printBox .ppkg span").count() == 8, "acarda 8 cavab",
        pg.locator("#printBox .ppkg span").count())
     #  ehtiyat temizlik isleyir - "printing" sinfi goturulur
