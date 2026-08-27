@@ -537,15 +537,50 @@
 
       var rc = $("hRecent");
       if (rc && v.recent && v.recent.length) {
-        rc.innerHTML = '<div class="spacer"></div>' +
-          "<h2>Son nəticələr</h2>" +
-          '<div class="card pad0">' + v.recent.map(function (x) {
+        /* Qrup cipleri: sagird coxaldiqca lent qarismasin - bir
+           toxunusla qrupa suzulur.  Tek qrupda cipler gorunmur. */
+        var recAll = v.recent;
+        var rgs = [];
+        recAll.forEach(function (x) {
+          if (x.class_id && !rgs.some(function (g) { return g.id === x.class_id; })) {
+            rgs.push({ id: x.class_id, name: x["class"] || "" });
+          }
+        });
+        var RF = "";
+        function recRows() {
+          var list = RF ? recAll.filter(function (x) {
+            return x.class_id === RF;
+          }) : recAll;
+          return list.map(function (x) {
             return '<div class="trow"><div class="g"><b>' + esc(x.student || "") +
               "</b><i>" + esc(x.test || "") +
               (x["class"] ? " · " + esc(x["class"]) : "") +
               " · " + dateAz(x.at) + "</i></div>" +
               pctChip(x.percent) + "</div>";
-          }).join("") + "</div>";
+          }).join("");
+        }
+        rc.innerHTML = '<div class="spacer"></div>' +
+          "<h2>Son nəticələr</h2>" +
+          (rgs.length > 1
+            ? '<div class="chips recf" id="recF">' +
+              '<button class="chip on" data-rg="">Hamısı</button>' +
+              rgs.map(function (g) {
+                return '<button class="chip" data-rg="' + esc(g.id) + '">' +
+                  esc(g.name) + "</button>";
+              }).join("") + "</div>"
+            : "") +
+          '<div class="card pad0" id="recList">' + recRows() + "</div>";
+        var rf = $("recF");
+        if (rf) rf.addEventListener("click", function (ev) {
+          var b = ev.target.closest ? ev.target.closest("[data-rg]") : null;
+          if (!b) return;
+          RF = b.getAttribute("data-rg");
+          Array.prototype.forEach.call(rf.querySelectorAll(".chip"), function (c) {
+            c.classList.toggle("on", c === b);
+          });
+          var rl = $("recList");
+          if (rl) rl.innerHTML = recRows();
+        });
       }
     }).catch(function () {});
   }

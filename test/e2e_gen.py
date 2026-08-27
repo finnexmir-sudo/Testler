@@ -299,6 +299,7 @@ with sync_playwright() as pw:
     ok("geriləyir" in pg.inner_text("#hAlerts"), "ev sehifesinde de siqnal var")
     ok(pg.locator("#hRecent .trow").count() >= 1, "son neticeler lenti dolur",
        pg.locator("#hRecent .trow").count())
+    ok(pg.locator("#recF").count() == 0, "tek qrupda lent cipleri gizlidir")
 
     pg.goto(PANEL + "#/g/" + GID); pg.reload()
     pg.wait_for_selector("#alerts .al", timeout=8000)
