@@ -96,7 +96,16 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    siyahıları buna görə daralır — **filtrdir, məhdudiyyət deyil**: boş
    siyahı və ya uyğunsuzluq = tam siyahı. `rpc_my_context` 26-da
    genişləndirilib (06-nı dəyişəndə 26-dakı kopyanı da yenilə).
-4. **Vərəqin çap/PDF görünüşü** — cavabsız şagird + cavablı müəllim nüsxəsi.
+4. ~~Vərəqin çap/PDF görünüşü~~ — hazırdır (`paperPrint()` + `@media
+   print` `muellim/app.css`-də). «Çap / PDF» şagird nüsxəsini verir
+   (ad/tarix/bal xanaları, A) B) C) hərflənmiş variantlar, açıq suala
+   cavab xətti — cavab izi YOXDUR); «Cavab açarı ilə» sonuna ayrıca
+   açar səhifəsi əlavə edir. Kitabxana yoxdur — brauzerin öz çap
+   pəncərəsi, orada «PDF olaraq saxla». Hər səhifənin altında **su
+   nişanı**: `Bil10 · çap edən müəllimin adı · tam tarix` — maneə deyil,
+   izlənəbilirlik (və vərəq valideynə gedəndə pulsuz reklam). Altlıq
+   `<tfoot>` ilə qurulub: `position:fixed` çoxsəhifəli vərəqdə mətnin
+   üstünə düşürdü.
 5. ~~Dinamika qrafiki~~ — şagird hesabatında mini sütun qrafiki var
    (son 12 test, rəng dərəcəli); həftəlik aqreqasiya gələcəyə qalır.
 6. ~~«Səhvlər üzərində iş»~~ — hazırdır (`db/27_hesabat.sql`):
