@@ -67,13 +67,14 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    `insert into user_roles (user_id, role) select id,'admin' from
    auth.users where email='...'`. Mərhələ 2 (kart ödənişi,
    Payriff/Epoint) müştəri sayı artanda.
-2. ~~Sual bankının davamı~~ — hazırdır: 1-4-cü siniflər (ingilis dili
-   daxil) + 5-8-ci siniflər (orta proqram, 9 fənn). Riyaziyyat 1-8-də
-   hər mövzuda **40 sual**, Az dili 3-8, ingilis 5-8, tarix 5-8 və
-   təbiət fənləri (fizika/kimya/biologiya/coğrafiya) **30 sual**,
-   qalanlarda **20 sual** (cəmi ~10 600 platforma sualı).
-   Mövzu ağacları `db/25/29/33/37_movzular_orta*.sql`, banklar
-   `db/23–40`. Davamı: 9-11-ci siniflər (eyni qəliblə).
+2. ~~Sual bankının davamı~~ — hazırdır: **1-11-ci siniflər**
+   (ibtidai + orta + yuxarı, ingilis dili daxil, 9 fənn).
+   Riyaziyyat 1-11-də hər mövzuda **40 sual**, Az dili 3-11,
+   ingilis 5-11, tarix 5-11 və təbiət fənləri
+   (fizika/kimya/biologiya/coğrafiya) **30 sual**, qalanlarda
+   **20 sual** (cəmi ~16 400 platforma sualı).
+   Mövzu ağacları `db/25/29/33/37/41/45/49_movzular_orta*.sql`,
+   banklar `db/23–52`. Davamı: MİQ və sertifikasiya (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
    «köməkçi işçisi» olsun.
@@ -243,12 +244,14 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   `db/19_bank_riy3.sql` (Riyaziyyat 3), `db/20_bank_sinif3.sql`
   (Az dili + Həyat bilgisi + İnformatika 3), `db/23/24_bank_sinif1/2.sql`
   (1-2-ci siniflər, 4 fənn bir yerdə), `db/28_bank_ing.sql` (İngilis
-  dili 1-4). Orta məktəb: hər sinif üçün əvvəl mövzu ağacı
-  (`25/29/33/37_movzular_orta5/6/7/8.sql`), sonra banklar —
-  `26/30/34/38_bank_riy5/6/7/8.sql` (riyaziyyat),
-  `27/31/35/39_bank_sinif5/6/7/8.sql` (az dili, ingilis, informatika,
-  tarix), `32/36/40_bank_fenn6/7/8.sql` (fizika/kimya/biologiya/
-  coğrafiya — hansı fənn o sinifdə varsa). **Əllə yazılmır** —
+  dili 1-4). Orta və yuxarı siniflər: hər sinif üçün əvvəl mövzu ağacı
+  (`25/29/33/37/41/45/49_movzular_orta5…11.sql`), sonra banklar —
+  `26/30/34/38/42/46/50_bank_riy5…11.sql` (riyaziyyat),
+  `27/31/35/39/43/47/51_bank_sinif5…11.sql` (az dili, ingilis,
+  informatika, tarix), `32/36/40/44/48/52_bank_fenn6…11.sql`
+  (fizika/kimya/biologiya/coğrafiya — hansı fənn o sinifdə varsa).
+  9-11-ci siniflərdə tarix Azərbaycan tarixidir, 10-cu sinifdə ümumi
+  tarix. **Əllə yazılmır** —
   `tools/riyN.py`, `tools/sinifN.py`, `tools/fennN.py`, `tools/ing.py`
   yaradır. Skript hər riyazi cavabı yenidən hesablayıb düzgün variantla
   tutuşdurur; düzəliş skriptdə edilir, sonra SQL yenidən çıxarılır.
@@ -258,6 +261,11 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   ≥0.95 təkrar yoxla, fənn üzrə eyni düzgün cavab ≤2 olsun,
   `rpc_generate_test` balans yoxlaması işlət (nümunə:
   `test/smoke_generator.sql`).
+- **Kiril oxşarı hərf tələsi.** `а е о р с х у М Т В` latın hərfləri
+  ilə eyni görünür, amma fərqli koddur — belə hərf düşən sual
+  axtarışda tapılmır və pg_trgm yoxlaması onu təkrar saymır.
+  `tools/fenn11.py`-dəki `yoxla()` bunu tutur (`Ѐ`–`ӿ` aralığı);
+  yeni skript yazanda həmin yoxlamanı da köçür.
 
 ---
 
