@@ -1,0 +1,59 @@
+# kimya 10
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=739
+# səhifə: 200 · bölmə: 8 · mövzu: 39
+
+== Kimya
+     7  Giriş
+
+== I BÖLMƏ. Alkanlar
+    12  Alkanların quruluşu və homoloji sırası
+    17  Alkanların molekullarının fəza quruluşu
+    22  Alkanların izomerliyi və alkil radikallar
+    30  Alkanların adlandırılması
+    36  Alkanların təbiətdə tapılması və alınması
+    42  Alkanların fiziki və kimyəvi xassələri
+    46  Alkanların kimyəvi xassələri
+    52  Praktik iş. Karbohidrogenlərin keyfiyyət tərkibinin təyini
+
+== II BÖLMƏ. Alkenlər
+    54  Alkenlərin homoloji sırası, molekullarının elektron və qrafik formulu
+    57  Alkenlərin molekullarının fəza quruluşu
+    62  Alkenlərin adlandırılması
+    68  Alkenlərin izomerliyi
+    74  Alkenlərin alınması və fiziki xassələri
+    79  Alkenlərin kimyəvi xassələri
+
+== III BÖLMƏ. Alkadienlər
+    88  Alkadienlərin homoloji sırası, qrafik formulları və molekullarının fəza quruluşu
+    92  Alkadienlərin adlandırılması və izomerliyi
+    97  Alkadienlərin alınması və fiziki xassələri
+   101  Alkadienlərin kimyəvi xassələri
+
+== IV BÖLMƏ. Alkinlər
+   110  Alkinlərin homoloji sırası, qrafik formulları və molekullarının fəza quruluşu
+   114  Alkinlərin adlandırılması və izomerliyi
+   119  Alkinlərin alınması, fiziki xassələri və yanma reaksiyaları
+   123  Alkinlərin kimyəvi xassələri
+
+== V BÖLMƏ. Tsikloalkanlar
+   130  Tsikloalkanların homoloji sırası, qrafik formulları və molekullarının fəza quruluşu
+   134  Tsikloalkanların adlandırılması və izomerliyi
+   139  Tsikloalkanların alınması və fiziki xassələri
+   143  Tsikloalkanların kimyəvi xassələri
+
+== VI BÖLMƏ. Aromatik karbohidrogenlər
+   149  Aromatik karbohidrogenlər. Benzol molekulunun fəza quruluşu
+   153  Benzolun homoloqlarının adlandırılması və İzomerliyi
+   158  Benzol sırası karbohidrogenlərin alınması və fiziki xassələri
+   163  Benzol sırası karbohidrogenlərin kimyəvi xassələri
+   169  Stirol
+
+== VII BÖLMƏ. Karbohidrogenlərin təbii mənbələri
+   173  Karbohidrogenlərin təbii mənbələri haqqında ümumi məlumat
+   176  Neft və onun ilkin emalı
+   181  Neft məhsullarının təkrar emalı
+   185  Benzinin keyfiyyəti və oktan ədədi
+   188  Daş kömürün emalı
+   190  Bəzi tapşırıqların cavabları
+   196  Terminlər və kimyəvi anlayışlar
+

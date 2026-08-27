@@ -1,0 +1,73 @@
+# fizika 10
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=734
+# səhifə: 208 · bölmə: 7 · mövzu: 55
+
+== I fəsil KİNEMATİKANIN ƏSASLARI
+    10  1.1. Mexaniki hərəkət və onun təsviri
+    14  1.2. Yol və yerdəyişmə
+    17  1.3. Düzxətli bərabərsürətli hərəkət. Sürət
+    21  1.4. Düzxətli dəyişənsürətli hərəkət. Təcil
+    24  1.5. Düzxətli bərabərtəcilli hərəkətdə sürət və yerdəyişmə
+    28  PRAKTİK İŞ. BƏRABƏRTƏCİLLİ HƏRƏKƏT ÜÇÜN "YOLLAR QANUNU"
+    28  1.6. Cismin sərbəstdüşməsi
+    31  1.7. Mexaniki hərəkətin nisbiliyi
+    34  1.8. Çevrə üzrə bərabərsürətli hərəkət
+    38  I fəslə aid məsələlər
+
+== II fəsil DİNAMİKANIN ƏSASLARI
+    43  2.1. Dinamikanın əsas məsələsi. Qüvvə. Əvəzləyici qüvvə. Kütlə
+    46  2.2. Ətalətlə hərəkət: Nyutonun I qanunu
+    49  2.3. Dinamikanın əsas qanunu: Nyutonun II qanunu
+    52  2.4. Təsir və əks təsir. Nyutonun III qanunu
+    54  2.5. Ümumdünya cazibə qanunu
+    57  2.6. Ağırlıq qüvvəsi. Qravitasiya sahəsinin intensivliyi
+    60  2.7. Çəki və çəkisizlik
+    65  2.8. Elastiklik qüvvəsi
+    69  2.9. Sürtünmə qüvvəsi. Sürtünmə qüvvəsinin təsiri altında hərəkət
+    73  2.10. Cismin tarazlıq şərtləri
+    75  II fəslə aid məsələlər
+
+== III fəsil SAXLANMA QANUNLARI
+    79  3.1. Qapalı sistem. İmpulsun saxlanması qanunu
+    84  3.2. Mexaniki iş və güc
+    87  3.3. Sistemin işgörmə qabiliyyəti - enerjidir. Kinetik enerji
+    89  3.4. Potensial enerji
+    92  3.5. Tam mexaniki enerji. Enerjinin saxlanması qanunu
+    95  3.6. Azərbaycanda alternativ enerji mənbələrindən istifadə (Təqdimat dərs)
+    97  III fəslə aid məsələlər
+
+== IV fəsil MEXANİKİ RƏQSLƏR VƏ DALĞALAR
+   101  4.1. Rəqsi hərəkət. Sərbəst rəqslər
+   105  4.2. Yaylı rəqqasda harmonik rəqslər
+   109  4.3. Riyazi rəqqasda harmonik rəqslər
+   112  PRAKTİK İŞ. Riyazi rəqqas vasitəsilə sərbəstdüşmə təcilinin təyini
+   113  4.4. Harmonik rəqslərdə enerji çevrilmələri (Təqdimat dərs)
+   116  4.5. Məcburi rəqslər. Rezonans
+   118  4.6. Rəqslərin elastik mühitdə yayılması: mexaniki dalğa
+   122  IV fəslə aid məsələlər
+
+== V fəsil RELYATİVİSTİK MEXANİKA
+   126  5.1. Nisbilik nəzəriyyəsinin əsasları
+   130  5.2. Enerji ilə kütlə arasında qarşılıqlı əlaqə qanunu
+   132  V fəslə aid məsələlər
+
+== VI fəsil MOLEKULYAR-KİNETİK NƏZƏRİYYƏ
+   135  6.1. Molekulyar-kinetik nəzəriyyə və onun əsas müddəaları
+   140  6.2. İdeal qaz. İdeal qazın molekulyar-kinetik nəzəriyyəsinin əsas tənliyi
+   143  6.3. İstilik tarazlığı - temperatur
+   147  6.4. İdeal qazın hal tənliyi
+   150  6.5. Qaz qanunları
+   154  6.6. Buxarların xassələri: doyan və doymayan buxar
+   158  6.7. Havanın rütubətliliyi. Şeh nöqtəsi
+   160  6.8. Mayelərin səthi gərilməsi. Kapilyar hadisələr
+   165  6.9. Bərk cisimlər və onların bəzi xassələri
+   169  VI fəslə aid məsələlər
+
+== VII fəsil TERMODİNAMİKANIN ƏSASLARI
+   173  7.1. Termodinamik sistem. Daxili enerji
+   178  7.2. Termodinamikanın birinci qanunu
+   181  7.3. Termodinamikanın ikinci qanunu. İstilik mühərriklərinin iş prinsipi
+   186  Layihə. İstilik mühərrikləri və ətraf mühit
+   187  VII fəslə aid məsələlər
+   189  Terminlər lüğəti
+

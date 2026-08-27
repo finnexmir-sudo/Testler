@@ -98,6 +98,37 @@ KITABLAR = [
     (927, "biologiya", 8, "I hisse"),
     (928, "biologiya", 8, "II hisse"),
     (799, "cografiya", 8, ""),
+    # ------- 9-cu sinif -------
+    (507, "riyaziyyat", 9, ""),
+    (875, "azerbaycan-dili", 9, "tedris dili"),
+    (886, "ingilis-dili", 9, "esas xarici dil"),
+    (884, "informatika", 9, ""),
+    (877, "tarix", 9, "Azerbaycan tarixi"),
+    (472, "fizika", 9, ""),
+    (505, "kimya", 9, ""),
+    (467, "biologiya", 9, ""),
+    (881, "cografiya", 9, ""),
+    # ------- 10-cu sinif -------
+    (741, "riyaziyyat", 10, ""),
+    (725, "azerbaycan-dili", 10, "I"),
+    (726, "azerbaycan-dili", 10, "II"),
+    (738, "ingilis-dili", 10, "esas xarici dil"),
+    (736, "informatika", 10, ""),
+    (745, "tarix", 10, "Umumi tarix"),
+    (734, "fizika", 10, ""),
+    (739, "kimya", 10, ""),
+    (727, "biologiya", 10, ""),
+    (729, "cografiya", 10, ""),
+    # ------- 11-ci sinif -------
+    (817, "riyaziyyat", 11, ""),
+    (812, "azerbaycan-dili", 11, ""),
+    (805, "ingilis-dili", 11, "esas xarici dil"),
+    (822, "informatika", 11, ""),
+    (807, "tarix", 11, "Azerbaycan tarixi"),
+    (282, "fizika", 11, ""),
+    (349, "kimya", 11, ""),
+    (276, "biologiya", 11, ""),
+    (814, "cografiya", 11, ""),
 ]
 
 TEG = re.compile(r"<[^>]*>")

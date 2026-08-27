@@ -1,0 +1,91 @@
+# kimya 11
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=349
+# səhifə: 208 · bölmə: 3 · mövzu: 81
+
+== I. Hissə. OKSİGENLİ ÜZVİ BİRLƏŞMƏLƏR
+    10  fəsil 1. SPİRTLƏR VƏ FENOLLAR
+    10  İlkin yoxlama
+    12  1.1. Doymuş biratomlu spirtlər
+    12  1.1.1. Adlandırılması və izomerliyi
+    17  1.1.2. Alınması
+    20  1.1.3. Quruluşu və fiziki xassələri
+    24  1.1.4. Kimyəvi xassələri və tətbiqi
+    30  1.1.5. Praktik dərs. Etanolun məhkəməsi
+    31  1.2. Doymuş çoxatomlu spirtlər
+    31  1.2.1. Etilenqlikol
+    35  1.2.2. Qliserin
+    38  1.3. Fenollar. Fenol
+    38  1.3.1. Alınması, quruluşu və fiziki xassələri
+    42  1.3.2. Kimyəvi xassələri və tətbiqi
+    46  I fəslə dair ümumi nəticələr
+    47  Ümumiləşdİrİcl sual və tapşırıqlar
+    50  fəsil 2. ALDEHİDLƏR
+    50  İlkin yoxlama
+    52  2.1. Aldehidlər
+    52  2.1.1. Adlandırılması və izomerliyi
+    56  2.1.2. Alınması, quruluşu və fiziki xassələri
+    61  2.1.3. Kimyəvi xassələri və tətbiqi
+    67  Praktik İş -1. Spirtlər, fenol və aldehidlərin kimyəvi xassələri
+    68  II fəslə dair ümumi nəticələr
+    69  Ümumiləşdirici sual və tapşırıqlar
+    72  fəsil 3. KARBON TURŞULARI VƏ ONLARIN TÖRƏMƏLƏRİ
+    72  İlkin yoxlama
+    74  3.1. Birəsaslı karbon turşuları
+    74  3.1.1. Adlandırılması və izomerliyi
+    77  3.1.2. Alınması
+    80  3.1.3. Quruluşu və fiziki xassələri
+    84  3.1.4. Kimyəvi xassələri və tətbiqi
+    89  3.1.5. Doymuş və doymamış ali karbon turşuları
+    94  3.2. İkiəsaslı karbon turşuları
+    97  3.3. Mürəkkəb efirlər
+    97  3.3.1. Adlandırılması və izomerliyi
+   101  3.3.2. Alınması və xassələri
+   104  3.4. Yağlar
+   109  3.5.Sabun və sintetik yuyucu maddələr
+   114  III fəslə dair ümumi nəticələr
+   115  Ümumiləşdirici sual və tapşırıqlar
+   118  fəsil 4. KARBOHİDRATLAR (SAXARİDLƏR)
+   118  İlkin yoxlama
+   120  4.1. Monosaxaridlər
+   120  4.1.1. Qlükoza: quruluşu və fiziki xassələri
+   123  4.1.2. Qlükoza: kimyəvi xassələri və tətbiqi
+   126  4.1.3. Fruktoza, riboza və dezoksiriboza
+   130  4.2. Disaxaridlər.Saxaroza
+   134  4.3. Polisaxaridlər
+   134  4.3.1. Nişasta
+   137  4.3.2. Sellüloza
+   143  4.1. Praktik iş - 2. Karbon turşuları, mürəkkəb efirlər, yuyucu maddələr və karbohidratların kimyəvi xassələri
+   144  IV fəslə dair ümumi nəticələr
+   145  Ümumiləşdirici sual və tapşırıqlar
+
+== II HİSSƏ. AZOTLU ÜZVİ BİRLƏŞMƏLƏR
+   148  fəsil 5. NİTROBİRLƏŞMƏLƏR, AMİNLƏR, AMİNTURŞULAR VƏ ZÜLALLAR
+   148  İlkin yoxlama
+   150  5.1. Nitrobirləşmələr
+   153  5.2. Aminlər
+   153  5.2.1. Adlandırılması və izomerliyi
+   156  5.2.2. Alınması, quruluşu və fiziki xassələri
+   159  5.2.3. Kimyəvi xassələri və tətbiqi
+   161  5.2.4. Anilin
+   165  5.3. Aminturşular
+   165  5.3.1. Adlandırılması, izomerliyi, alınması və quruluşu
+   168  5.3.2. Xassələri və tətbiqi
+   171  5.4. Zülallar
+   171  5.4.1. Quruluşu
+   176  5.4.2. Xassələri və tətbiqi
+   180  V fəslə dair ümumi nəticələr
+   181  Ümumiləşdirici sual və tapşırıqlar
+
+== III HİSSƏ. İRİMOLEKULLU BİRLƏŞMƏLƏR
+   184  fəsil 6. POLİMERLƏR
+   184  İlkin yoxlama
+   186  6.1. Polimerlərin quruluşu və fiziki xassələri. Plastik kütlələr
+   190  6.2. Təbii və sintetik kauçuklar
+   193  6.3. Liflər
+   196  6.4. Ətraf mühitin polimer maddələrlə çirklənmədən mühafizəsi
+   200  6.5. Debat dərs. Polimerlərin faydası və zərəri
+   201  Praktik iş - 3. Zülallar və polimerlərin fiziki və kimyəvi xassələri
+   202  VI fəslə dair ümumi nəticələr
+   203  Ümumiləşdirici sual və tapşırıqlar
+   204  Terminlər və kimyəvi anlayışlar
+

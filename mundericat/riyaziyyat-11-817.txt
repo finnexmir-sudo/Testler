@@ -1,0 +1,101 @@
+# riyaziyyat 11
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=817
+# səhifə: 320 · bölmə: 10 · mövzu: 77
+
+== 1. Çoxhədlilər
+     7  Çoxhədlinin çoxhədliyə bölünməsi
+    11  Qalıq haqqında teorem
+    13  Çoxhədlinin vuruqları haqqında teorem
+    15  Rasional köklərin tapılması
+    17  Kompleks ədədlər haqqında
+    21  Cəbrin əsas teoremi
+    25  Çoxhədli funksiya
+    29  Rasional funksiya
+    32  Ümumiləşdirici tapşırıqlar
+
+== 2. Fəzada vektorlar
+    34  Fəzada Dekart koordinat sistemi
+    42  Fəzada vektorlar
+    49  İki vektorun skalyar hasili
+    54  Düz xəttin ümumi tənliyi
+    56  Müstəvinin tənliyi
+    61  Müstəvilərin qarşılıqlı vəziyyəti
+    62  Sferanın tənliyi
+    64  Fəzada və müstəvidə çevrilmələr
+    67  Ümumiləşdirici tapşırıqlar
+
+== 3. Limit
+    70  Funksiyanın nöqtədə limiti
+    77  Limitin xassələri
+    83  Funksiyanın kəsilməzliyi
+    89  Triqonometrik funksiyalara aid xüsusi limitlər
+    91  Sonsuz limitlər və sonsuzluqda limit. Şaquli və üfüqi asimptotlar
+    96  Ədədi ardıcıllığın limiti
+   102  Ümumiləşdirici tapşırıqlar
+
+== 4. Fırlanma fiqurları. Silindr, konus, kürə
+   104  Fırlanma fiqurları
+   105  Silindr
+   107  Silindrin səthinin sahəsi
+   111  Konus
+   113  Konusun səthinin sahəsi
+   118  Silindrin və konusun müstəvi kəsikləri
+   120  Kəsik konus və səthinin sahəsi
+   123  Kürə və hissələrinin səthinin sahəsi
+   129  Mürəkkəb fiqurların səthinin sahəsi
+   131  Oxşar fiqurların səthinin sahəsi
+   132  Ümumiləşdirici tapşırıqlar
+
+== 5. Funksiyanın törəməsi
+   135  Dəyişmənin orta sürəti, dəyişmənin ani sürəti
+   140  Funksiyanın törəməsi
+   146  Diferensiallama qaydaları
+   151  Hasilin törəməsi
+   153  Nisbətin törəməsi
+   155  Mürəkkəb funksiyanın törəməsi
+   159  Törəmənin tətbiqi ilə məsələ həlli
+   161  İkinci tərtib törəmə
+   164  Üstlü funksiyanın törəməsi
+   167  Loqarifmik funksiyanın törəməsi
+   170  Triqonometrik funksiyaların törəməsi
+   174  Ümumiləşdirici tapşırıqlar
+
+== 6. Fırlanma fiqurlarının həcmi
+   176  Silindrin həcmi
+   180  Konusun həcmi
+   183  Kəsik konusun həcmi
+   184  Kürə və hissələrinin həcmi
+   189  Oxşar fiqurların həcmi
+   192  Ümumiləşdirici tapşırıqlar
+
+== 7. Törəmənin tətbiqi ilə funksiyanın araşdırılması
+   195  Funksiyanın artma və azalma aralıqlarının tapılması
+   200  Funksiyanın böhran nöqtələri və ekstremumları
+   208  Törəmənin tətbiqi ilə funksiyanın qrafikinin qurulması
+   212  Ekstremumun tapılmasına aid məsələ həlli. Optimallaşdırma
+   219  Ümumiləşdirici tapşırıqlar
+
+== 8. İnteqral
+   222  İbtidai funksiya.Qeyri-müəyyən inteqral
+   232  Müəyyən inteqral və sahə
+   234  Əyrinin əhatə etdiyi sahə
+   239  Müəyyən inteqral. Nyuton-Leybnis düsturu
+   245  Müəyyən inteqralın xassələri
+   250  Əyrilərlə hüdudlanmış fiqurun sahəsi
+   255  Müəyyən inteqral və fırlanmadan alınan fiqurların həcmi
+   261  Ümumiləşdirici tapşırıqlar
+
+== 9. Statistika və ehtimal
+   264  Statistik göstəricilər
+   269  Məlumatin paylanma formaları
+   270  Normal paylanma
+   274  Qutu-qulp diaqramı
+   278  Təsadüfi hadisələr və ehtimal
+   284  Ümumiləşdirici tapşırıqlar
+
+== 10. Tənliklər, bərabərsizliklər, tənliklər sistemi
+   287  İrrasional tənliklər və bərabərsizliklər
+   289  Üstlü tənliklər sistemi
+   290  Loqarifmik tənliklər sistemi
+   291  Ümumiləşdirici tapşırıqlar
+
