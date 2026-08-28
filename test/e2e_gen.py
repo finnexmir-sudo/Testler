@@ -431,7 +431,9 @@ with sync_playwright() as pw:
 
     pg.click("#btnFix")
     pg.wait_for_selector("#fixMsg .ok a", timeout=10000)
-    ok("tapşırıq verildi" in pg.inner_text("#fixMsg"), "sehv testi yigilir")
+    ok("YALNIZ bu şagirdə verildi" in pg.inner_text("#fixMsg"),
+       "sehv testi yigilir ve ferdi verildiyi yazilir",
+       pg.inner_text("#fixMsg")[:70].replace("\n", " "))
     rem = db("""select t.id::text i,
                        (select count(*) from public.test_questions tq
                          where tq.test_id = t.id) nq
@@ -440,8 +442,12 @@ with sync_playwright() as pw:
                  order by t.created_at desc limit 1""",
              ("%səhvlər üzərində iş%",), one=True)
     ok(bool(rem) and rem["nq"] >= 1, "sehv testi bazadadir", rem and rem["nq"])
-    ok(bool(db("select 1 ok from public.assignments where test_id = %s",
-               (rem["i"],), one=True)), "tapsiriq bazada var")
+    asg = db("""select student_id::text s from public.assignments
+                 where test_id = %s""", (rem["i"],), one=True)
+    ok(asg is not None, "tapsiriq bazada var")
+    #  duzelis testi FERDIDIR - qrupun qalani gormemelidir
+    ok(asg is not None and asg["s"] == SID,
+       "duzelis testi yalniz hemin sagirde verilib", asg and asg["s"])
     wq = db("""select count(*) n from public.test_questions tq
                 where tq.test_id = %s
                   and tq.question_id not in (

@@ -116,7 +116,21 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    `min_answers` («az məlumat» nişanı), weak-də mövzu teqi + `qid`.
    Hamısı ödənişli qapının arxasındadır; 08-i dəyişəndə 27-dəki
    kopyanı da yenilə.
-7. PWA quraşdırma (manifest + ikon), Riyaziyyat 2 mövzularının yenilənməsi
+7. ~~Fərdi tapşırıq~~ — hazırdır (`db/28_ferdi_tapsiriq.sql`):
+   `assignments.student_id` (**boş = bütün qrup**, köhnə sətirlərdə boş
+   qalır — davranış dəyişmir). Unikallıq `(class_id, test_id, student_id)`
+   `nulls not distinct` ilə. Müəllim tapşırıq ekranında və vərəqdə «Kimə»
+   seçir. **Səbəb:** «səhvlər üzərində iş» testi bir şagirdin səhvlərindən
+   yığılır, amma qrupdakı hamıya — adında həmin şagirdin adı ilə —
+   görünürdü; indi yalnız sahibinə gedir. `rpc_assign_test`-ə beşinci
+   parametr əlavə olundu, ona görə **köhnə 4 arqumentli funksiya silinir**
+   (yoxsa PostgREST iki namizəd arasında seçim edə bilmir).
+   `rpc_available_tests`-də `assigned` artıq yalnız QRUP təyinatını
+   bildirir (`assigned_n` = neçə şagirdə fərdi verilib).
+   **Tələ:** `rpc_assign_test`-in mənbəyi `09_assignments.sql`-dir —
+   `10_teyinat_migrasiya.sql` `run.sh`-də yoxdur və orada abunə qapısı
+   yoxdur; oradan kopyalama.
+8. PWA quraşdırma (manifest + ikon), Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının

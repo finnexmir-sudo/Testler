@@ -1855,7 +1855,8 @@
             //  msg() metni esc edir - linki ozumuz yigiriq
             $("fixMsg").innerHTML = '<div class="ok" style="margin-top:10px">' +
               ic("check") + "<span>" + (Number(res.count) || 0) +
-              " sualdan test yığıldı və qrupa tapşırıq verildi. " +
+              " sualdan test yığıldı və tapşırıq YALNIZ bu şagirdə verildi " +
+              "— qrupun qalanı onu görmür. " +
               '<a href="#/t/' + esc(res.test_id) + '">Vərəqə bax</a></span></div>';
           })
           .catch(function (e) {
@@ -1920,16 +1921,22 @@
     Promise.all([
       sb.select("classes", { select: "id,name,level_id", eq: { id: gid } }),
       sb.rpc("rpc_class_assignments", { p_class_id: gid }),
-      loadLevels()
+      loadLevels(),
+      //  "kime" secimi ucun qrupun aktiv sagirdleri
+      sb.select("students", {
+        select: "id,display_name",
+        eq: { class_id: gid, is_active: true },
+        order: "display_name"
+      }).catch(function () { return []; })
     ]).then(function (res) {
       if (!live()) return;
       var rows = res[0];
       if (!rows || !rows.length) throw new Error("Qrup tapılmadı.");
-      drawAssign(rows[0], res[1] || {});
+      drawAssign(rows[0], res[1] || {}, res[3] || []);
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
-  function drawAssign(g, d) {
+  function drawAssign(g, d, students) {
     topTitle.textContent = g.name;
     var items = d.items || [];
     var free  = d.free_practice !== false;
@@ -1993,7 +2000,7 @@
     });
 
     bindAsgRows(g);
-    loadPick(g);
+    loadPick(g, students || []);
   }
 
   function asgRows(items, students, f) {
@@ -2018,8 +2025,15 @@
       var done = Number(a.done) || 0;
       var tries = Number(a.max_attempts) === 0 ? "limitsiz cəhd"
                 : (Number(a.max_attempts) || 1) + " cəhd";
+      //  Ferdi teyinatda mexrec 1-dir - "0/5 sagird bitirib" yanlis olardi
+      var solo = !!a.student_id;
+      var tot  = Number(a.targets) || (solo ? 1 : students);
       return '<div class="asg">' +
         '<div class="l1"><b>' + esc(a.title) + "</b>" +
+          (solo
+            ? '<span class="pill solo">' + ic("person") +
+              "yalnız " + esc(a.student || "bir şagird") + "</span>"
+            : "") +
           '<span class="pill' + (open ? " on" : "") + '">' +
             (open ? "Aktiv" : "Bağlı") + "</span>" +
           '<button class="btn sm ghost icon" data-del="' + esc(a.id) + '" ' +
@@ -2028,7 +2042,7 @@
         '<div class="l2">' + esc(a.subject || "") + " · " +
           (Number(a.questions) || 0) + " sual · " + tries +
           (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : "") + "</div>" +
-        '<div class="l2">' + done + "/" + students + " şagird bitirib" +
+        '<div class="l2">' + done + "/" + tot + " şagird bitirib" +
           (a.avg != null ? " · orta " + pct(a.avg) + "%" : "") + "</div>" +
       "</div>";
     }).join("");
@@ -2052,7 +2066,7 @@
   }
 
   /* Teyin edile bilen testler: sinife uygun olanlar */
-  function loadPick(g) {
+  function loadPick(g, students) {
     var live = guard();
     Promise.all([
       sb.rpc("rpc_available_tests", { p_class_id: g.id }),
@@ -2068,6 +2082,8 @@
       (res[1] || []).forEach(function (a) {
         if (a.class_id !== g.id) elsew[a.test_id] = true;
       });
+      //  "assigned" indi yalniz QRUP teyinatini bildirir; yalniz
+      //  ferdi verilmis test siyahida qalir - basqa sagirde de olar
       var free = list.filter(function (t) { return !t.assigned; });
       //  "sehvler uzerinde is" sexsi testdir - oz qrupundan basqa yerde
       //  teklif olunmur (yanlis istifadenin qarsisi)
@@ -2108,6 +2124,18 @@
             esc(levelName(g.level_id) || "") + " və sinifsiz testlər " +
             "göstərilir — qrupun sinfini dəyişsəniz siyahı da dəyişər.</p>"
           : "") +
+        //  Kime: butun qrup (kohne davranis) ve ya tek sagird
+        (students.length
+          ? '<label for="aWho">Kimə</label>' +
+            '<select id="aWho"><option value="">Bütün qrup (' +
+              students.length + " şagird)</option>" +
+              students.map(function (st) {
+                return '<option value="' + esc(st.id) + '">yalnız ' +
+                  esc(st.display_name || "") + "</option>";
+              }).join("") + "</select>" +
+            '<p class="muted" style="margin:-8px 0 14px">Tək şagird ' +
+              "seçsəniz, tapşırığı yalnız o görəcək — qrupun qalanı yox.</p>"
+          : "") +
         '<div class="fieldrow">' +
           '<div><label for="aDate">Son tarix</label>' +
             '<input type="date" id="aDate"></div>' +
@@ -2147,7 +2175,9 @@
     setBusy("btnAsg", true, "Tapşırıq ver");
     sb.rpc("rpc_assign_test", {
       p_class_id: g.id, p_test_id: tid,
-      p_closes_at: closes, p_max_attempts: Number(($("aTry") || {}).value || 1)
+      p_closes_at: closes, p_max_attempts: Number(($("aTry") || {}).value || 1),
+      //  bos = butun qrup
+      p_student_id: (($("aWho") || {}).value || null)
     }).then(function () { screenAssign(g.id); })
       .catch(function (e) {
         setBusy("btnAsg", false, "Tapşırıq ver");
@@ -3034,11 +3064,17 @@
       sb.rpc("rpc_test_preview", { p_test_id: id }),
       sb.select("classes", { select: "id,name", eq: { account_id: ACC.id }, order: "name" }),
       //  bu testin movcud teyinatlari - "verilib" siyahisi ucun
-      sb.select("assignments", { select: "class_id,closes_at", eq: { test_id: id } })
-        .catch(function () { return []; })
+      sb.select("assignments", { select: "class_id,student_id,closes_at", eq: { test_id: id } })
+        .catch(function () { return []; }),
+      //  "kime" secimi: hesabin butun aktiv sagirdleri, qrupa gore suzulur
+      sb.select("students", {
+        select: "id,display_name,class_id",
+        eq: { account_id: ACC.id, is_active: true },
+        order: "display_name"
+      }).catch(function () { return []; })
     ]).then(function (res) {
       if (!live()) return;
-      drawPaper(res[0] || {}, res[1] || [], res[2] || []);
+      drawPaper(res[0] || {}, res[1] || [], res[2] || [], res[3] || []);
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
@@ -3120,10 +3156,15 @@
     setTimeout(off, 2000);
   }
 
-  function drawPaper(t, classes, asgs) {
-    //  verilmis qruplar ayrilir - secimde tekrar teklif olunmur
-    var asgMap = {};
-    (asgs || []).forEach(function (a) { asgMap[a.class_id] = a; });
+  function drawPaper(t, classes, asgs, students) {
+    students = students || [];
+    //  Yalniz QRUP teyinatlari qrupu secimden cixarir; ferdi teyinat
+    //  cixarmir - hemin qrupun basqa sagirdine de vermek olar.
+    var asgMap = {}, soloN = {};
+    (asgs || []).forEach(function (a) {
+      if (a.student_id) soloN[a.class_id] = (soloN[a.class_id] || 0) + 1;
+      else asgMap[a.class_id] = a;
+    });
     var given = classes.filter(function (c) { return asgMap[c.id]; });
     var freeCls = classes.filter(function (c) { return !asgMap[c.id]; });
     var qs = t.questions || [];
@@ -3162,23 +3203,37 @@
       '<div class="spacer"></div>' +
       "<h2>Qrupa təyin et</h2>" +
       '<div class="card">' +
-        (given.length
-          ? '<div class="pgiven">' + given.map(function (c) {
+        (given.length || Object.keys(soloN).length
+          ? '<div class="pgiven">' +
+            given.map(function (c) {
               var a = asgMap[c.id];
               return '<div class="pgrow">' + ic("check") +
                 "<span><b>" + esc(c.name) + "</b> — verilib" +
                 (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : " · açıq") +
                 "</span></div>";
-            }).join("") + "</div>"
+            }).join("") +
+            //  ferdi teyinatlar: qrupu bloklamir, amma gorunmelidir
+            classes.filter(function (c) { return soloN[c.id]; })
+              .map(function (c) {
+                return '<div class="pgrow">' + ic("person") +
+                  "<span><b>" + esc(c.name) + "</b> — " + soloN[c.id] +
+                  " şagirdə fərdi verilib</span></div>";
+              }).join("") + "</div>"
           : "") +
         (classes.length && !freeCls.length
           ? '<p class="muted" style="margin:0">Bu test bütün qruplarınıza verilib.</p>'
           : "") +
         (freeCls.length
-          ? '<div class="fieldrow">' +
+          ? '<div><label for="pWho">Kimə</label>' +
+              '<select id="pWho"></select></div>' +
+            '<p class="muted" style="margin:-8px 0 14px">Tək şagird ' +
+              "seçsəniz, tapşırığı yalnız o görəcək — qrupun qalanı yox.</p>" +
+            '<div class="fieldrow">' +
               '<div><label for="pCls">Qrup</label><select id="pCls">' +
                 freeCls.map(function (c) {
-                  return '<option value="' + esc(c.id) + '">' + esc(c.name) + "</option>";
+                  return '<option value="' + esc(c.id) + '">' + esc(c.name) +
+                    (soloN[c.id] ? " · " + soloN[c.id] + " şagirdə verilib" : "") +
+                    "</option>";
                 }).join("") + "</select></div>" +
               '<div><label for="pDate">Son tarix</label>' +
                 '<input type="date" id="pDate"></div>' +
@@ -3231,6 +3286,27 @@
     on("btnPrn",  "click", function () { paperPrint(t, false); });
     on("btnPrnK", "click", function () { paperPrint(t, true); });
 
+    /* "Kime" siyahisi secilen qrupa baglidir - qrup deyisende yenilenir.
+       Artiq ferdi teyinat almis sagird tekrar teklif olunmur. */
+    function fillWho() {
+      var sel = $("pWho"), cls = ($("pCls") || {}).value;
+      if (!sel) return;
+      var mine = students.filter(function (st) { return st.class_id === cls; });
+      var taken = {};
+      (asgs || []).forEach(function (a) {
+        if (a.student_id && a.class_id === cls) taken[a.student_id] = true;
+      });
+      mine = mine.filter(function (st) { return !taken[st.id]; });
+      sel.innerHTML = '<option value="">Bütün qrup' +
+        (mine.length ? " (" + mine.length + " şagird)" : "") + "</option>" +
+        mine.map(function (st) {
+          return '<option value="' + esc(st.id) + '">yalnız ' +
+            esc(st.display_name || "") + "</option>";
+        }).join("");
+    }
+    fillWho();
+    on("pCls", "change", fillWho);
+
     on("btnRegen", "click", function () {
       if (busy) return;
       setBusy("btnRegen", true, "Yenidən yığ");
@@ -3261,7 +3337,9 @@
       setBusy("btnPAsg", true, "Tapşırıq ver");
       sb.rpc("rpc_assign_test", {
         p_class_id: cls, p_test_id: t.id,
-        p_closes_at: closes, p_max_attempts: Number(($("pTry") || {}).value || 1)
+        p_closes_at: closes, p_max_attempts: Number(($("pTry") || {}).value || 1),
+        //  bos = butun qrup
+        p_student_id: (($("pWho") || {}).value || null)
       }).then(function () {
         //  sehife yenilenir - teze teyinat "verilib" siyahisinda gorunur
         busy = false;

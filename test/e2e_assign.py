@@ -60,6 +60,18 @@ with sync_playwright() as pw:
     br  = pw.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
     ctx = br.new_context(viewport={"width": 430, "height": 900})
 
+    def new_ctx_page():
+        '''Ayri kontekst: sagird sessiyasi localStorage-de saxlanir,
+           eyni kontekstde ikinci sagird avtomatik birincinin
+           sessiyasi ile acilirdi.'''
+        c = br.new_context(viewport={"width": 430, "height": 900})
+        pg = c.new_page()
+        pg.route("**/config.js*", lambda r: r.fulfill(
+            status=200, content_type="application/javascript", body=TEST_CFG))
+        pg.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)))
+        pg.route(BLOCK, lambda r: (fails.append("XARICI SORGU: " + r.request.url), r.abort()))
+        return c, pg
+
     def new_page():
         pg = ctx.new_page()
         pg.route("**/config.js*", lambda r: r.fulfill(
@@ -234,7 +246,62 @@ with sync_playwright() as pw:
        "serbest mesq bagli + tapsiriq yox -> sagirde test qalmir")
     ok("Tapşırıq yoxdur" in sp.inner_text("#main"), "sagirde sebeb izah olunur")
 
-    ctx.close(); br.close()
+    print("F · Fərdi tapşırıq — yalnız bir şagirdə")
+    #  ikinci sagird elave edilir ki, "yalniz o gorur" yoxlanila bilsin
+    pg.goto(PANEL + "#/g/" + GID); pg.reload()
+    pg.wait_for_selector("#btnStu", timeout=8000)
+    pg.fill("#sname", "Ikinci Sagird"); pg.click("#btnStu")
+    pg.wait_for_function("document.querySelectorAll('.stu').length >= 2", timeout=8000)
+    SID1 = db("select id::text i from public.students where login_code = %s",
+              (CODE,), one=True)["i"]
+    KOD2 = db("""select login_code c from public.students
+                  where full_name = 'Ikinci Sagird'""", one=True)["c"]
+
+    pg.goto(PANEL + "#/a/" + GID); pg.reload()
+    pg.wait_for_selector("#aWho", timeout=8000)
+    whos = pg.locator("#aWho option").all_inner_texts()
+    ok(len(whos) == 3, "kime siyahisi: butun qrup + 2 sagird", whos)
+    ok("Bütün qrup" in whos[0], "ilk secim butun qrupdur", whos[0])
+    ok(sum(1 for w in whos if "yalnız" in w) == 2, "her sagird 'yalniz' ile gelir")
+
+    #  novbeti testi YALNIZ birinci sagirde veririk
+    SOLO = pg.locator("#aTest option").first.get_attribute("value")
+    TTL  = pg.locator("#aTest option").first.inner_text()
+    pg.select_option("#aWho", SID1)
+    pg.click("#btnAsg")
+    pg.wait_for_selector(".asg .pill.solo", timeout=8000)
+    ok("yalnız" in pg.inner_text(".asg .pill.solo"), "siyahida ferdi nisani var",
+       pg.inner_text(".asg .pill.solo"))
+    a = db("""select student_id::text s, test_id::text t from public.assignments
+               where student_id is not null""", one=True)
+    ok(a is not None and a["s"] == SID1 and a["t"] == SOLO,
+       "bazada dogru sagirde / dogru testle yazilib")
+    #  ferdi teyinat mexreci 1-dir - "0/2" yazilmamalidir
+    ok("/1 şagird bitirib" in pg.inner_text("#asgList"),
+       "ferdi setirde mexrec 1-dir")
+
+    print("G · Şagird tərəfi: fərdi tapşırıq yalnız sahibinə")
+    #  testin adi qrup teyinatlarindan ferqlenir - ada gore axtaririq
+    ad = db("select title t from public.tests where id = %s", (SOLO,), one=True)["t"]
+    c1, s1 = new_ctx_page(); s1.goto(STUDENT)
+    s1.wait_for_selector("#code", timeout=8000)
+    s1.fill("#code", CODE); s1.click("#btnIn")
+    s1.wait_for_selector(".test", timeout=8000)
+    ok(ad in s1.inner_text("#main"), "sahibi ferdi tapsirigi gorur", ad[:40])
+    ok(s1.locator(".test .solo").count() == 1, "sahibinde 'sene' nisani var",
+       s1.locator(".test .solo").count())
+
+    c2, s2 = new_ctx_page(); s2.goto(STUDENT)
+    s2.wait_for_selector("#code", timeout=8000)
+    s2.fill("#code", KOD2); s2.click("#btnIn")
+    s2.wait_for_selector(".shero", timeout=8000)
+    ok(ad not in s2.inner_text("#main"),
+       "BASQA sagird ferdi tapsirigi GORMUR - sizinti yoxdur")
+    ok(s2.locator(".test .solo").count() == 0, "basqa sagirdde 'sene' nisani yoxdur")
+    c1.close(); c2.close()
+
+    ctx.close()
+    br.close()
 
 print()
 if fails:

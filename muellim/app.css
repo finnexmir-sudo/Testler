@@ -683,3 +683,9 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
     letter-spacing:.02em;padding-top:4px;margin-top:10px;
     border-top:.5px solid #d8d8d8}
 }
+
+/* ferdi tapsiriq nisani - "yalniz Lale" */
+.pill.solo{background:var(--brand-tint);color:var(--brand);
+  border-color:var(--brand-line);flex:0 0 auto}
+.pill.solo svg{width:12px;height:12px;stroke-width:1.9}
+.asg .l1{flex-wrap:wrap}

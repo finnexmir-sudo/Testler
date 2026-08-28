@@ -189,7 +189,9 @@
       '" data-t="' + esc(t.id) + '" data-mode="' + (over ? "view" : "start") + '"' +
       (lock ? " disabled" : "") + ">" +
       '<div class="ic">' + ic(lock ? "lock" : (over ? "check" : "doc")) + "</div>" +
-      '<div class="g"><b>' + esc(t.title) + "</b><i>" +
+      '<div class="g"><b>' + esc(t.title) +
+        //  Yalniz bu sagirde verilib - qrupun qalani gormur
+        (t.personal ? '<span class="solo">sənə</span>' : "") + "</b><i>" +
         "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
         "<span>" + (t.questions || 0) + " sual</span>" +
         (isAsg && t.closes_at ? dueSpan(t.closes_at) : "") +
