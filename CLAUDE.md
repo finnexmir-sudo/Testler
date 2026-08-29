@@ -329,3 +329,40 @@ sanacaqsan.
 - Panel açıq temadır, toxunma sahələri ən azı 44px
 - Xarici kitabxana yoxdur — CDN yüklənmir. `muellim/sb.js` Supabase üçün
   öz yüngül qatımızdır; onu böyütməkdənsə lazım olan hissəni əlavə et.
+
+---
+
+## Çətinlik səviyyəsi — ölçülür, təxmin edilmir
+
+Real sınaqda «çətin» suallar çətin çıxmadı. Səbəb faktın nadirliyi
+deyil, **variantların qurulusu** idi: bir düzgün cavab + üç «təhlükəsiz»
+yanlış → şagird faktı bilməsə də eliminasiya ilə tapır.
+
+**Çətin (3) sualın şərtləri:**
+
+- ən azı **iki faktın tutuşdurulması** tələb olunur;
+- dörd variantın hamısı **eyni dövrdən və eyni kateqoriyadan**;
+- düzgün variant qalanlardan **uzun olmamalı** (uzunluq özü nişandır);
+- yanlışlarda «yalnız / heç / tamamilə» kimi mütləq sözlər olmamalı;
+- düzgün cavab sualın açar sözünü təkrarlamamalı.
+
+**Beş çətinləşdirmə qəlibi:** xronoloji düzülüş (`2 - 4 - 1 - 3`),
+yaxın tarixlər (aralıq ≤ 12 il), səbəb-nəticə (dörd variant da real
+hadisə), «hansı SƏHVDİR» (üç doğru, bir yanlış), «şəxs - vəzifə» /
+«sənəd - il» cütlük uyğunluğu.
+
+`tools/cetinlik_analiz.py` bunu ölçür — banka toxunmur, yalnız
+variantların qurulusuna baxır:
+
+```bash
+python3 tools/cetinlik_analiz.py tarix11        # yalnız difficulty=3
+python3 tools/cetinlik_analiz.py tarix9 --hamisi
+```
+
+Nişanlar: `ILLER-ARALIQ` (çılpaq il variantları, aralıq > 12 il),
+`ERA-QARISIQ`, `UZUN-CAVAB` (düzgün ≥ 1.6 dəfə uzun), `MUTLEQ-SOZ`,
+`EKO-CAVAB`. **Yeni bank hazır olanda bu yoxlama 0 verməlidir** —
+pg_trgm və cavab balansı ilə bir sırada.
+
+Xronoloji sualda cavab sətri (`2 - 3 - 1`) da cavab sayılır — eyni
+sıralama bir bankda ikidən çox təkrarlanmamalıdır.
