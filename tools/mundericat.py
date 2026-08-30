@@ -26,6 +26,14 @@ OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
 # 1-4 sinif dord fennimiz + 5-ci sinif (orta). e-derslik portal id-leri.
 KITABLAR = [
     # (id, fenn, sinif, qeyd)
+    # ------- Edebiyyat 5-11 (ayrica fenn, ayri derslik) -------
+    (845, "edebiyyat", 5, ""),
+    (911, "edebiyyat", 6, ""),
+    (701, "edebiyyat", 7, ""),
+    (793, "edebiyyat", 8, ""),
+    (883, "edebiyyat", 9, ""),
+    (732, "edebiyyat", 10, ""),
+    (821, "edebiyyat", 11, ""),
     (419, "riyaziyyat", 1, "I hisse"),
     (420, "riyaziyyat", 1, "II hisse"),
     (664, "riyaziyyat", 2, "I hisse"),
