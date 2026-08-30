@@ -5,8 +5,8 @@
 
 insert into public.programs (slug, name, sort) values
   ('ibtidai',       'İbtidai siniflər (1-4)',        10),
-  ('orta',          'Orta məktəb (5-8)',             20),
-  ('buraxilis',     'Buraxılış imtahanı (9-11)',     30),
+  ('orta',          'Orta və yuxarı siniflər (5-11)', 20),
+  ('buraxilis',     'Buraxılış imtahanı',            30),
   ('miq',           'MİQ - müəllimlərin işə qəbulu', 40),
   ('sertifikasiya', 'Müəllim sertifikasiyası',       50)
 on conflict (slug) do update set name = excluded.name, sort = excluded.sort;
@@ -43,18 +43,16 @@ select p.id, g::text, app.ordinal_az(g) || ' sinif', g * 10
  where p.slug = 'ibtidai'
 on conflict (program_id, code) do nothing;
 
--- Orta: 5-8
+-- Orta ve yuxari siniflar: 5-11
+--  DIQQET: 9-11 EVVEL 'buraxilis' proqraminda yaradilirdi, movzu ve
+--  suallar ise 41/45/49_movzular_orta*.sql ile 'orta'ya yigilirdi -
+--  her sinif iki defe gorunurdu.  Mezmun mektebi proqramidir, imtahan
+--  hazirligi deyil; ona gore 5-11 burada, 'orta'dadir.  Kohne bazada
+--  qalan bos setirleri 57_sinif_dubli.sql silir.
 insert into public.levels (program_id, code, name, sort)
 select p.id, g::text, app.ordinal_az(g) || ' sinif', g * 10
-  from public.programs p, generate_series(5, 8) g
+  from public.programs p, generate_series(5, 11) g
  where p.slug = 'orta'
-on conflict (program_id, code) do nothing;
-
--- Buraxilis: 9-11
-insert into public.levels (program_id, code, name, sort)
-select p.id, g::text, app.ordinal_az(g) || ' sinif', g * 10
-  from public.programs p, generate_series(9, 11) g
- where p.slug = 'buraxilis'
 on conflict (program_id, code) do nothing;
 
 -- MIQ ve sertifikasiya: sinif yox, ixtisas pilleleri

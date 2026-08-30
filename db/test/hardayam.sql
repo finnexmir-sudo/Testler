@@ -50,3 +50,20 @@ begin
     raise notice 'NÖVBƏTİ İŞLƏDİLƏSİ FAYL:  %', v_next;
   end if;
 end $$;
+
+-- Sinif dublikatlari (04_seed 9-11-i 'buraxilis'de, 41/45/49 ise
+-- 'orta'da yaradirdi - her sinif iki defe gorunurdu)
+do $$
+declare k int;
+begin
+  select count(*) into k from (
+    select l.code from public.levels l
+     where l.code ~ '^[0-9]+$'
+     group by l.code having count(*) > 1) z;
+  if k > 0 then
+    raise notice 'DIQQET: % sinif kodu iki defe var - 57_sinif_dubli.sql '
+                 'isledilmelidir.', k;
+  else
+    raise notice 'Sinif kodlari tekdir - 57_sinif_dubli.sql lazim deyil.';
+  end if;
+end $$;

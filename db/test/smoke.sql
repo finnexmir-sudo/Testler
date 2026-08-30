@@ -440,6 +440,37 @@ end $$;
 reset role;
 drop table if exists public.test_fixtures;
 
+-- ---------------------------------------------------------------------
+--  12. KATALOQ:  her sinif kataloqda BIR defe olmalidir
+--      Bir defe pozuldu: 04_seed 9-11-i 'buraxilis' proqraminda,
+--      41/45/49_movzular_orta*.sql ise eyni siniflari 'orta'da
+--      yaradirdi.  Panelde siniflar ikileşirdi, ders plani ise
+--      "where code = ... limit 1" ile BOS setri sece bilirdi.
+--      Bu yoxlama kataloq faylina yeni sinif elave edilende sinacaq.
+-- ---------------------------------------------------------------------
+do $$
+declare v_dubl text; n int;
+begin
+  select string_agg(z.code, ', ' order by z.code) into v_dubl from (
+    select l.code from public.levels l
+     where l.code ~ '^[0-9]+$'
+     group by l.code having count(*) > 1) z;
+  assert v_dubl is null,
+    format('Bu sinif kodlari iki defe var: %s', v_dubl);
+
+  select count(*) into n from public.levels where code ~ '^[0-9]+$';
+  assert n = 11, format('Reqemli sinif sayi 11 deyil: %s', n);
+
+  --  Movzusu olan seviyye o proqramda olmalidir ki, qrup yaradanda
+  --  muellim onu tapsin
+  select count(*) into n from public.levels l
+    join public.programs p on p.id = l.program_id
+   where l.code in ('9', '10', '11') and p.slug <> 'orta';
+  assert n = 0,
+    format('9-11 sinifleri %s defe orta-dan kenar proqramdadir', n);
+end $$;
+\echo 'OK 12 · her sinif kataloqda bir defe var'
+
 
 \echo ''
 \echo '=============================='

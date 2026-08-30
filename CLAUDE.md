@@ -127,6 +127,37 @@ testini tapmır və «Test tapılmadı» verir, kod düzgün olsa belə.
 
 ---
 
+## Kataloq — hər sinif BİR dəfə
+
+`programs` təhsil kateqoriyasıdır, `levels` onun içindəki pillə.
+Sinif kodu (`1`…`11`) bütün kataloqda **bir dəfə** olmalıdır.
+
+Bir dəfə pozuldu: `04_seed.sql` 9-11-i `buraxilis` proqramında
+yaradırdı, `41/45/49_movzular_orta*.sql` isə eyni sinifləri `orta`da
+yaradıb bütün mövzu və sualları oraya yığdı. Nəticə: qrup yaratma
+formasında siniflər ikiləşdi, dərs planı isə sinfi
+`where code = ... limit 1` ilə tapdığı üçün **boş** sətri seçə bilirdi
+— plan yaranmırdı, kod düzgün olsa belə.
+
+Qərar: məzmun `orta`dadır (adı «Orta və yuxarı siniflər (5-11)»),
+`buraxilis` sinif saxlamır. Səbəb: bankın məzmunu e-dərslik
+dərsliyidir — adi məktəb proqramıdır, buraxılış imtahanı hazırlığı
+deyil. 9-cu sinif şagirdinin həftəlik testini «Buraxılış imtahanı»
+adı altında göstərmək yanlış olardı; `buraxilis` slug-ı sonra **əsl**
+imtahan hazırlığı üçün boş qalır (slug ilə mənanın ayrılması
+uzunmüddətli tələdir).
+
+Köhnə baza üçün: `db/57_sinif_dubli.sql` — boş sətirə bağlanmış
+qrup/test/sual **silinmir**, eyni kodlu `orta` səviyyəsinə köçürülür
+(`classes`/`tests` həm `program_id`, həm `level_id` saxlayır — ikisi
+də köçürülməlidir).
+
+`test/smoke.sql` bunu daimi iddia kimi yoxlayır (12-ci yoxlama);
+`db/test/hardayam.sql` isə bazaya baxıb «57 lazımdır/lazım deyil»
+deyir. Yeni sinif və ya proqram əlavə edəndə əvvəlcə kataloqa bax.
+
+---
+
 ## Mövcud bazanı yeniləmək
 
 Təzə baza: `db/run.sh` bütün faylları düzgün sıra ilə işlədir.
