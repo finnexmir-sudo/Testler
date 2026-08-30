@@ -130,7 +130,20 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    **Tələ:** `rpc_assign_test`-in mənbəyi `09_assignments.sql`-dir —
    `10_teyinat_migrasiya.sql` `run.sh`-də yoxdur və orada abunə qapısı
    yoxdur; oradan kopyalama.
-8. PWA quraşdırma (manifest + ikon), Riyaziyyat 2 mövzularının yenilənməsi
+8. ~~PWA quraşdırma~~ — hazırdır. Hər iki tətbiq ayrıca quraşdırılır:
+   `muellim/manifest.json` və `sagird/manifest.json` (fərqli ad, start_url,
+   tema rəngi), ikonlar `assets/icons/` (192/512 + maskable). Kökdə **bir**
+   `sw.js` — hər iki tətbiqi əhatə edir (`register("../sw.js", {scope:"../"})`;
+   ehatə skriptin yerinə görə müəyyən olunur, ona görə alt qovluqdan da
+   qeydiyyat keçir). `assets/pwa.js` həm qeydiyyatı, həm «Ana ekrana əlavə et»
+   zolağını idarə edir.
+   **Qaydalar — pozma:** (1) Supabase sorğuları HEÇ VAXT keşlənmir — sw.js
+   yalnız öz mənşəyini emal edir; (2) HTML network-first, yoxsa `./bump.sh`
+   ilə buraxılan yeni versiya istifadəçiyə çatmaz; (3) service worker yalnız
+   `https`-də qeydiyyatdan keçir — e2e 127.0.0.1-də işləyir, keş yoxlamaları
+   qeyri-müəyyən etməsin. Oflayn rejim **vəd edilmir**: yalnız karkas keşlənir.
+   iOS-da `beforeinstallprompt` yoxdur — Safari üçün ayrıca izah zolağı çıxır.
+9. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının

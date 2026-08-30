@@ -115,6 +115,35 @@ with sync_playwright() as pw:
     ok(pg.locator("#btnMe").count() == 1, "profil qisayolu var")
     ok(pg.locator("#bnav a").count() == 4, "alt naviqasiya 4 bendlidir",
        pg.locator("#bnav a").count())
+    #  PWA: manifest, tema rengi, ikonlar, qurasdirma skripti
+    ok(pg.locator('link[rel="manifest"]').count() == 1, "manifest baglanib")
+    mf = pg.evaluate("""async () => {
+        const r = await fetch('manifest.json');
+        if (!r.ok) return null;
+        return await r.json();
+    }""")
+    ok(mf is not None, "manifest.json yuklenir")
+    ok(mf and mf.get("display") == "standalone", "standalone rejimi",
+       mf and mf.get("display"))
+    ok(mf and mf.get("start_url") == "./", "start_url duzgun")
+    ok(mf and len(mf.get("icons") or []) == 4, "dord ikon var",
+       mf and len(mf.get("icons") or []))
+    ok(any(i.get("purpose") == "maskable" for i in (mf or {}).get("icons", [])),
+       "maskable ikon var")
+    ok(pg.locator('meta[name="theme-color"]').count() == 1, "tema rengi var")
+    ico = pg.evaluate("""async () => {
+        const r = await fetch('../assets/icons/icon-512.png');
+        return r.ok ? r.headers.get('content-type') : null;
+    }""")
+    ok(ico is not None and "image" in ico, "ikon fayli acilir", ico)
+    #  http-de service worker QURULMAMALIDIR - yoxlamalar deterministik qalsin
+    swn = pg.evaluate("""async () => {
+        if (!('serviceWorker' in navigator)) return 0;
+        const r = await navigator.serviceWorker.getRegistrations();
+        return r.length;
+    }""")
+    ok(swn == 0, "http-de service worker qurulmur", swn)
+
     nvt = " | ".join(pg.locator("#bnav a").all_inner_texts())
     ok("Paket" not in nvt, "alt menyuda Paket yoxdur", nvt)
     ok(pg.locator("#btnPkt").count() == 0, "suretli emeliyyatlarda Paket yoxdur")
