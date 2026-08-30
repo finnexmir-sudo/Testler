@@ -26,9 +26,16 @@ import sys
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-#  SQL setrindeki array['a','b','c','d'] hissesini cixaran qelib
+#  SQL setrindeki array['a','b','c','d'] hissesini cixaran qelib.
+#  IKI FORMA var:  humanitar/fenn banklarinda fenn sutunu VAR,
+#  riyaziyyat banklarinda YOXDUR (fenn onsuz da birdir).  Ikisini de
+#  tanimasaq riyaziyyat yoxlamadan sessizce kenarda qalir.
 SETIR = re.compile(
     r"\('(?P<ext>[^']+)','(?P<fenn>[^']*)','(?P<movzu>[^']*)',"
+    r"(?P<diff>\d+),(?P<rub>\d+),'(?P<body>(?:[^']|'')*)',"
+    r"'(?P<why>(?:[^']|'')*)',array\[(?P<opts>.*?)\],(?P<corr>\d+)\)")
+SETIR_RIY = re.compile(
+    r"\('(?P<ext>[^']+)','(?P<movzu>[^']*)',"
     r"(?P<diff>\d+),(?P<rub>\d+),'(?P<body>(?:[^']|'')*)',"
     r"'(?P<why>(?:[^']|'')*)',array\[(?P<opts>.*?)\],(?P<corr>\d+)\)")
 
@@ -130,7 +137,8 @@ def main():
     for fp in fayllar:
         with io.open(fp, encoding="utf-8") as f:
             metn = f.read()
-        for m in SETIR.finditer(metn):
+        qelib = SETIR if SETIR.search(metn) else SETIR_RIY
+        for m in qelib.finditer(metn):
             ext = m.group("ext")
             pre = ext.split("-")[0]
             if pre not in banklar:

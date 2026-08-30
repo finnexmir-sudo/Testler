@@ -68,7 +68,12 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    auth.users where email='...'`. Mərhələ 2 (kart ödənişi,
    Payriff/Epoint) müştəri sayı artanda.
 2. ~~Sual bankının davamı~~ — hazırdır: **1-11-ci siniflər**
-   (ibtidai + orta + yuxarı, ingilis dili daxil, 9 fənn).
+   (ibtidai + orta + yuxarı, ingilis dili daxil, 10 fənn).
+   Tarix **iki ayrı fənndir**: «Tarix» (Azərbaycan tarixi) və
+   «Ümumi tarix» — məktəbdə də ayrı dərslik, ayrı qiymətdir.
+   Ümumi tarix: 9-cu sinif XIX əsr, 11-ci sinif XX-XXI əsrlər
+   (`db/53_movzular_umumi_tarix.sql`, `db/54_bank_tarix_umumi.sql`);
+   10-cu sinifin dünya tarixi «Tarix» fənni altında qalır.
    Riyaziyyat 1-11-də hər mövzuda **40 sual**, Az dili 3-11,
    ingilis 5-11, tarix 5-11 və təbiət fənləri
    (fizika/kimya/biologiya/coğrafiya) **30 sual**, qalanlarda
@@ -351,8 +356,14 @@ yaxın tarixlər (aralıq ≤ 12 il), səbəb-nəticə (dörd variant da real
 hadisə), «hansı SƏHVDİR» (üç doğru, bir yanlış), «şəxs - vəzifə» /
 «sənəd - il» cütlük uyğunluğu.
 
+Yeni bank yazanda çətinlik bölgüsü **hər mövzuda 12 çətin sual**
+olmalıdır. Az olsa, müəllim bir mövzu + «Çətin» seçəndə generator
+«yalnız 8 fərqli sual tapıldı» deyir (`tools/tarix_umumi.py` bunu
+`BOLGU` ilə yoxlayır).
+
 `tools/cetinlik_analiz.py` bunu ölçür — banka toxunmur, yalnız
-variantların qurulusuna baxır:
+variantların qurulusuna baxır (həm humanitar, həm riyaziyyat sətir
+formasını tanıyır):
 
 ```bash
 python3 tools/cetinlik_analiz.py tarix11        # yalnız difficulty=3
