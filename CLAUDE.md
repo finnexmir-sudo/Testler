@@ -68,18 +68,26 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    auth.users where email='...'`. Mərhələ 2 (kart ödənişi,
    Payriff/Epoint) müştəri sayı artanda.
 2. ~~Sual bankının davamı~~ — hazırdır: **1-11-ci siniflər**
-   (ibtidai + orta + yuxarı, ingilis dili daxil, 10 fənn).
+   (ibtidai + orta + yuxarı, ingilis dili daxil, 11 fənn).
    Tarix **iki ayrı fənndir**: «Tarix» (Azərbaycan tarixi) və
    «Ümumi tarix» — məktəbdə də ayrı dərslik, ayrı qiymətdir.
    Ümumi tarix: 9-cu sinif XIX əsr, 11-ci sinif XX-XXI əsrlər
    (`db/53_movzular_umumi_tarix.sql`, `db/54_bank_tarix_umumi.sql`);
    10-cu sinifin dünya tarixi «Tarix» fənni altında qalır.
+   **Ədəbiyyat ayrıca fənndir** — «Az dili» mövzuları yalnız
+   qrammatikadır, ədəbiyyatın öz dərsliyi və qiyməti var.
+   Hazırdır: 11-ci sinif (`db/55_movzular_edebiyyat11.sql`,
+   `db/56_bank_edebiyyat11.sql`) — 8 mövzu × 31 sual. Mövzu bölgüsü
+   dərsliyin öz bölmələri (dövr / müəllif qrupu) üzrədir, tək-tək şair
+   üzrə yox: bir şair üzrə 31 keyfiyyətli sual çıxmır. Davamı: 10, 9,
+   sonra 5-8.
    Riyaziyyat 1-11-də hər mövzuda **40 sual**, Az dili 3-11,
    ingilis 5-11, tarix 5-11 və təbiət fənləri
    (fizika/kimya/biologiya/coğrafiya) **30 sual**, qalanlarda
-   **20 sual** (cəmi ~16 400 platforma sualı).
+   **20 sual**, ədəbiyyatda **31 sual** (cəmi ~17 060 platforma sualı).
    Mövzu ağacları `db/25/29/33/37/41/45/49_movzular_orta*.sql`,
-   banklar `db/23–52`. Davamı: MİQ və sertifikasiya (eyni qəliblə).
+   banklar `db/23–52`, `54`, `56`.
+   Davamı: MİQ və sertifikasiya (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
    «köməkçi işçisi» olsun.
