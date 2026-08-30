@@ -177,7 +177,10 @@ işlədilməyibsə, faylın başında aydın desin (`ÖNCƏ 11_... işlədilməl
 qaranlıq xəta çıxır və səbəb görünmür.
 
 Baza harada qaldığını bilmək üçün: `db/test/hardayam.sql` — heç nə
-dəyişmir, hansı faylın işlədildiyini və növbəti faylı deyir.
+dəyişmir. Hansı struktur faylının işlədildiyini və növbəti faylı deyir;
+sonra sinif dublikatını yoxlayır və bankın vəziyyətini fənn-fənn
+göstərir (mövzu/sual sayı, sualsız qalmış mövzu varsa xəbərdarlıq —
+o, işlədilməmiş bank faylı deməkdir).
 
 **`revoke ... from public` funksiya üçün kifayət deyil.** Supabase yeni
 funksiyalara `anon` üçün EXECUTE-u **birbaşa** verir — PUBLIC-dən geri
