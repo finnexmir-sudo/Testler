@@ -339,8 +339,8 @@
         "<h2>Siqnallar</h2>";
       if (v.alerts === null) {
         h += '<div class="card"><p class="muted" style="margin:0">Geriləyən və ' +
-          "zəif mövzuda ilişən şagird siqnalları abunə paketi ilə açılır. " +
-          '<a href="#/p">Paketlərə bax</a></p></div>';
+          "zəif mövzuda ilişən şagird siqnalları abunə paketi ilə açılır." +
+          (plansOn() ? ' <a href="#/p">Paketlərə bax</a>' : "") + "</p></div>";
       } else if (!al.length) {
         h += '<div class="card pad0"><div class="empty"><div class="ic">' +
           ic("bell") + "</div><b>Yeni siqnal yoxdur</b>" +
@@ -442,10 +442,12 @@
             "<b>Test yığ</b><span>mövzu və çətinliyə görə</span></button>" +
           '<button class="qact qb" id="btnBank">' + ic("doc") +
             "<b>Sual bankı</b><span>öz suallarınız</span></button>" +
-          '<button class="qact qc" id="btnPkt">' + ic("star") +
-            "<b>Paket</b><span>" +
-            (ACC.plan ? "abunə və müddət" : "qiymətlər və abunə") +
-            "</span></button>" +
+          (plansOn()
+            ? '<button class="qact qc" id="btnPkt">' + ic("star") +
+              "<b>Paket</b><span>" +
+              (ACC.plan ? "abunə və müddət" : "qiymətlər və abunə") +
+              "</span></button>"
+            : "") +
           '<button class="qact qd" id="btnMe">' + ic("person") +
             "<b>Profil</b><span>fənlər və hesab</span></button>" +
         "</div>" +
@@ -727,8 +729,8 @@
             '<div class="lic">' + ic("lock") + "</div>" +
             "<div><b>Dərs planı — abunə paketi ilə</b>" +
             '<p class="muted" style="margin:4px 0 0">Mövzu təqvimi, «keçildi» ' +
-              "jurnalı və hər mövzudan sonra bir klikə yoxlama testi. " +
-              '<a href="#/p">Paketlərə bax</a></p></div>' +
+              "jurnalı və hər mövzudan sonra bir klikə yoxlama testi." +
+              (plansOn() ? ' <a href="#/p">Paketlərə bax</a>' : "") + "</p></div>" +
           "</div>";
         return;
       }
@@ -2192,6 +2194,11 @@
      kocurur, admin abunesini acir.  Duyme CFG.CONTACT_WHATSAPP
      nomresine acilir - config.js-de teyin olunur.
      ================================================================ */
+  //  Paket bolmesi hazirda gizlidir - config.js-deki SHOW_PLANS acir.
+  function plansOn() {
+    return !!(window.CFG && window.CFG.SHOW_PLANS);
+  }
+
   function isAdmin() {
     return !!(CTX && CTX.roles && CTX.roles.indexOf("admin") >= 0);
   }
@@ -4089,7 +4096,9 @@
     ["gen", "gen",    "Test yığ"],
     ["p",   "star",   "Paket"],
     ["me",  "person", "Profil"]
-  ];
+  ].filter(function (it) {
+    return it[0] !== "p" || !!(window.CFG && window.CFG.SHOW_PLANS);
+  });
   function bnavShow(cur) {
     bnav.innerHTML = BNAV.map(function (it) {
       return '<a href="#/' + it[0] + '"' +
@@ -4115,7 +4124,8 @@
     if (m[0] === "b") return screenBank();
     if (m[0] === "gen") return screenGen();
     if (m[0] === "t" && m[1]) return screenPaper(m[1]);
-    if (m[0] === "p") return screenPaket();
+    //  gizli olanda unvanla da acilmir - ana sehifeye qaytarilir
+    if (m[0] === "p") return plansOn() ? screenPaket() : nav("#/");
     if (m[0] === "adm") return screenAdmin();
     if (m[0] === "me") return screenMe();
     if (m[0] === "n") return screenNotif();

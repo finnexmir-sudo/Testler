@@ -109,11 +109,19 @@ with sync_playwright() as pw:
 
     ok(empty_icons(pg) == 0, "esas ekranda bos ikon yoxdur", empty_icons(pg))
 
-    ok(pg.locator(".qact").count() == 4, "suretli emeliyyatlar 4 kartdir",
+    #  Paket gizlidir (SHOW_PLANS = false) - uc kart qalir
+    ok(pg.locator(".qact").count() == 3, "suretli emeliyyatlar 3 kartdir",
        pg.locator(".qact").count())
     ok(pg.locator("#btnMe").count() == 1, "profil qisayolu var")
-    ok(pg.locator("#bnav a").count() == 5, "alt naviqasiya 5 bendlidir",
+    ok(pg.locator("#bnav a").count() == 4, "alt naviqasiya 4 bendlidir",
        pg.locator("#bnav a").count())
+    nvt = " | ".join(pg.locator("#bnav a").all_inner_texts())
+    ok("Paket" not in nvt, "alt menyuda Paket yoxdur", nvt)
+    ok(pg.locator("#btnPkt").count() == 0, "suretli emeliyyatlarda Paket yoxdur")
+    #  unvanla da acilmir - ana sehifeye qaytarir
+    pg.goto(PANEL + "#/p"); pg.wait_for_timeout(700)
+    ok("Paketlər" not in pg.inner_text("#main"), "unvanla da Paket acilmir")
+    pg.goto(PANEL + "#/"); pg.wait_for_selector(".qgrid", timeout=8000)
     # kontekst 430px-dedir - dar ekranda panel gorunur, masaustunde yox
     ok(pg.locator("#bnav").is_visible(), "dar ekranda alt panel gorunur")
     pg.set_viewport_size({"width": 1280, "height": 900})
@@ -349,7 +357,8 @@ with sync_playwright() as pw:
        "yanlis parolda anlasilan xeta", pg3.inner_text("#authErr").strip()[:50])
     ok(pg3.is_visible("#btnAuth"), "xetadan sonra ekran qalir")
 
-    ctx.close(); br.close()
+    ctx.close()
+    br.close()
 
 print()
 if fails:

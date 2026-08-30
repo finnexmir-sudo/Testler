@@ -13,7 +13,8 @@ TEST_CFG = """window.CFG = {
   SUPABASE_URL: "http://127.0.0.1:54321",
   SUPABASE_ANON_KEY: "test-anon-key",
   STUDENT_URL: "https://example.test/Testler/",
-  CONTACT_WHATSAPP: "+994501234567"
+  CONTACT_WHATSAPP: "+994501234567",
+  SHOW_PLANS: true
 };"""
 
 fails = []
