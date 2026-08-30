@@ -34,7 +34,8 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          50_bank_riy11.sql 51_bank_sinif11.sql 52_bank_fenn11.sql \
          53_movzular_umumi_tarix.sql 54_bank_tarix_umumi.sql \
          55_movzular_edebiyyat11.sql 56_bank_edebiyyat11.sql \
-         57_sinif_dubli.sql \
+         57_sinif_dubli.sql 58_movzular_edebiyyat9_10.sql \
+         59_bank_edebiyyat10.sql 60_bank_edebiyyat9.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql 05_grants.sql; do
   printf "  %-22s" "$f"
   if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then

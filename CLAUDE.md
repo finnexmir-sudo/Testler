@@ -76,17 +76,21 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    10-cu sinifin dünya tarixi «Tarix» fənni altında qalır.
    **Ədəbiyyat ayrıca fənndir** — «Az dili» mövzuları yalnız
    qrammatikadır, ədəbiyyatın öz dərsliyi və qiyməti var.
-   Hazırdır: 11-ci sinif (`db/55_movzular_edebiyyat11.sql`,
-   `db/56_bank_edebiyyat11.sql`) — 8 mövzu × 31 sual. Mövzu bölgüsü
-   dərsliyin öz bölmələri (dövr / müəllif qrupu) üzrədir, tək-tək şair
-   üzrə yox: bir şair üzrə 31 keyfiyyətli sual çıxmır. Davamı: 10, 9,
-   sonra 5-8.
+   Hazırdır: **9, 10, 11-ci siniflər** — hər sinifdə 8 mövzu × 31 =
+   744 sual (`db/55`, `db/56`, `db/58`, `db/59`, `db/60`;
+   `tools/edebiyyat9/10/11.py`). Mövzu bölgüsü dərsliyin öz bölmələri
+   (dövr / müəllif qrupu) üzrədir, tək-tək şair üzrə yox: bir şair üzrə
+   31 keyfiyyətli sual çıxmır. Davamı: 5-8.
+   **Tələ:** eyni müəllif iki sinifdə olur (Vurğun, R.Rza, Şıxlı,
+   Vahabzadə…), amma dərslik hər sinifdə BAŞQA əsərini verir. Sual
+   həmin sinfin əsərinə görə yazılmalıdır — yoxsa siniflər arasında
+   pg_trgm təkrarı çıxır.
    Riyaziyyat 1-11-də hər mövzuda **40 sual**, Az dili 3-11,
    ingilis 5-11, tarix 5-11 və təbiət fənləri
    (fizika/kimya/biologiya/coğrafiya) **30 sual**, qalanlarda
-   **20 sual**, ədəbiyyatda **31 sual** (cəmi ~17 060 platforma sualı).
+   **20 sual**, ədəbiyyatda **31 sual** (cəmi ~17 560 platforma sualı).
    Mövzu ağacları `db/25/29/33/37/41/45/49_movzular_orta*.sql`,
-   banklar `db/23–52`, `54`, `56`.
+   banklar `db/23–52`, `54`, `56`, `59`, `60`.
    Davamı: MİQ və sertifikasiya (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
