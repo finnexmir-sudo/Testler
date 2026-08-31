@@ -16,11 +16,10 @@ input{min-height:52px;font-size:17px}
 /* ------------------------------------------------------------- giris */
 .hero{text-align:center;padding:26px 0 10px}
 .hero .mark{
-  width:52px;height:52px;border-radius:14px;margin:0 auto 16px;
-  background:linear-gradient(140deg,var(--brand) 0%,var(--teal) 100%);
-  display:flex;align-items:center;justify-content:center;color:#fff;
-  font-size:22px;font-weight:700;letter-spacing:-.02em;
+  width:56px;height:56px;margin:0 auto 14px;
+  display:flex;align-items:center;justify-content:center;
 }
+.hero .mark svg{width:56px;height:56px;filter:drop-shadow(0 4px 10px rgba(43,74,203,.25))}
 .hero h1{font-size:23px;letter-spacing:-.022em;margin-bottom:7px}
 .hero p{color:var(--fg-2);font-size:14.5px;margin:0}
 
@@ -208,8 +207,8 @@ input{min-height:52px;font-size:17px}
 
 /* xos detallar - sagird */
 body{background:
-  radial-gradient(52% 30% at 50% 0, rgba(43,74,203,.05), transparent 70%),
-  var(--surface-2, var(--n-25))}
+  radial-gradient(52% 30% at 50% 0, rgba(43,74,203,.05), transparent 70%)
+  no-repeat, var(--n-25)}
 .test{transition:background .12s}
 .test .arrow{transition:transform .15s,color .15s}
 .test:hover .arrow{transform:translateX(3px);color:var(--brand)}
@@ -224,3 +223,58 @@ body{background:
 .lb:nth-child(3) .rk{background:linear-gradient(135deg,#e2a06b,#c77b3f);color:#5a3010}
 .lb.me:nth-child(n+4) .rk{background:var(--brand);color:#fff}
 .tans:focus{border-color:var(--brand)}
+
+/* sual sehvi bildirisi */
+.wrong .rlink{border:0;background:none;cursor:pointer;font:inherit;
+  font-size:11.5px;color:var(--fg-3,#8a90a4);text-decoration:underline;
+  text-underline-offset:2px;padding:0;display:block;margin-top:6px}
+.wrong .rfrm{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.wrong .rfrm select{flex:1;min-width:150px}
+.wrong .rok{margin-top:6px;font-size:12.5px;font-weight:560;color:var(--ok,#0e9384)}
+
+/* salamlama basligi + kicik gostericiler */
+.shero{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
+.shero .av{width:44px;height:44px;flex:0 0 44px;border-radius:14px;font-size:17px}
+.shero b{display:block;font-size:18px;letter-spacing:-.01em}
+.shero i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-3);margin-top:2px}
+.stiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:0 0 16px}
+.st{border-radius:14px;padding:12px 10px;text-align:center;color:#fff;border:0}
+.st b{display:block;font-size:20px;font-weight:680;line-height:1.2}
+.st b svg{width:20px;height:20px}
+.st span{display:block;font-size:11px;opacity:.85;margin-top:2px}
+.st.a{background:linear-gradient(135deg,#2b4acb,#4a63e0)}
+.st.b{background:linear-gradient(135deg,#0e9384,#18b8a6)}
+.st.c{background:linear-gradient(135deg,#232a38,#3a4358);cursor:pointer;font:inherit}
+.st.c:active{transform:scale(.97)}
+
+/* son tarix yaxinlasanda qirmizi */
+.test .due{color:var(--err);font-weight:600}
+
+/* netice cipleri - faize gore reng */
+.best.bh{color:var(--ok)}
+.best.bm{color:var(--warn)}
+.best.bl{color:var(--err)}
+.ring.mid .fill{stroke:var(--warn)}
+.ring.lo .fill{stroke:var(--err)}
+
+/* neticelerim: mini qrafik + setirler */
+.dyn{display:flex;align-items:flex-end;gap:6px;height:90px}
+.dyn i{flex:1;max-width:34px;border-radius:6px 6px 2px 2px;min-height:5px}
+.dyn .dh{background:var(--ok)}
+.dyn .dm{background:var(--warn)}
+.dyn .dl{background:var(--err)}
+.myr{display:flex;align-items:center;gap:12px;padding:13px 16px;
+  border-bottom:1px solid var(--n-100)}
+.myr:last-child{border-bottom:0}
+.myr .g{flex:1;min-width:0}
+.myr b{display:block;font-size:14px;font-weight:560}
+.myr i{display:block;font-style:normal;font-size:12px;color:var(--fg-3);margin-top:2px}
+.myr .best{font-size:15px;font-weight:640}
+
+/* "sene" - yalniz bu sagirde verilmis tapsiriq */
+.test .g b .solo{display:inline-block;margin-left:7px;padding:1px 7px;
+  border-radius:999px;font-size:10.5px;font-weight:620;vertical-align:1px;
+  background:var(--brand-tint);color:var(--brand);border:1px solid var(--brand-line)}
+
+/* qaralamadan qaytarilan cavablar - bir defelik bildiris */
+.ok.restored{margin:0 0 14px}

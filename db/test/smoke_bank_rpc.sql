@@ -322,12 +322,73 @@ declare v jsonb;
 begin
   v := public.rpc_bank_facets('riyaziyyat', '3');
   assert jsonb_array_length(v->'subjects') >= 10, 'fenn siyahisi bos';
-  assert jsonb_array_length(v->'levels') >= 4, 'sinif siyahisi bos';
+  assert jsonb_array_length(v->'levels') >= 2, 'sinif siyahisi bos';
+  --  DIQQET: konkret sinif nomresine baglanmaq OLMAZ.  Evvel test
+  --  bazasinda yalniz 3-4-cu sinif banki vardi, ona gore 11-ci sinif
+  --  "sualsiz" idi ve siyahida gorunmemeliydi.  Indi bank 1-11-i tam
+  --  ortur - sualsiz sinif umumiyyetle qalmayib.  Ona gore MELUMATA
+  --  deyil, XASSEYE baxiriq: siyahiya dusen her sinifde hemin fenn
+  --  uzre en azi bir gorunen sual olmalidir.
+  assert (select bool_and(exists (
+            select 1 from public.questions q
+              join public.levels   l on l.id = q.level_id
+              join public.subjects s on s.id = q.subject_id
+             where s.slug = 'riyaziyyat' and l.code = e->>'code'
+               and q.owner_type = 'platform' and q.status = 'published'))
+            from jsonb_array_elements(v->'levels') e),
+         'sualsiz sinif siyahidadir';
   assert jsonb_array_length(v->'topics') >= 1, 'movzu siyahisi bos';
   assert (v->'usage'->>'limit')::int = 3, 'hedd gorunmur';
   assert (v->'usage'->>'used')::int = 3, 'istifade gorunmur';
+
+  --  hovuz suzgeci: 'mine' yalniz OZ suallarinin fennini sayir -
+  --  muellimin butun suallari riyaziyyatdadir
+  v := public.rpc_bank_facets(null, null, null, 'mine');
+  assert (select count(*) from jsonb_array_elements(v->'subjects') e
+           where (e->>'n')::int > 0) = 1,
+         'mine hovuzunda yalniz oz fenni sayilmalidir';
+  --  'platform' hovuzunda oz suallari sayilmir, banklar sayilir
+  v := public.rpc_bank_facets(null, null, null, 'platform');
+  assert exists (select 1 from jsonb_array_elements(v->'subjects') e
+                  where e->>'slug' = 'riyaziyyat'
+                    and (e->>'n')::int >= 100),
+         'platform hovuzunda bank sayilmir';
+  --  p_pool verilende movzu siyahisina yalniz suali olanlar dusur
+  v := public.rpc_bank_facets('riyaziyyat', '3', null, 'platform');
+  assert jsonb_array_length(v->'topics') >= 1, 'platform movzulari bos';
+  assert (select bool_and(exists (
+            select 1 from public.questions q
+             where q.topic_id = (e->>'id')::uuid
+               and q.owner_type = 'platform' and q.status = 'published'))
+            from jsonb_array_elements(v->'topics') e),
+         'sualsiz movzu siyahiya dusdu';
 end $$;
-\echo 'OK 12 · suzgec siyahilari ve istifade gostericisi'
+\echo 'OK 12 · suzgec siyahilari, hovuz suzgeci, istifade gostericisi'
+
+-- =====================================================================
+--  13. Fenn sayi secilen sinfe gore hesablanir
+-- =====================================================================
+do $$
+declare v jsonb; n3 int; nall int; e3 int; eall int;
+begin
+  v := public.rpc_bank_facets(null, '3', null, 'platform');
+  select (e->>'n')::int into n3 from jsonb_array_elements(v->'subjects') e
+   where e->>'slug' = 'informatika';
+  v := public.rpc_bank_facets(null, null, null, 'platform');
+  select (e->>'n')::int into nall from jsonb_array_elements(v->'subjects') e
+   where e->>'slug' = 'informatika';
+  select count(*) into e3 from public.questions q
+    join public.subjects s on s.id = q.subject_id and s.slug = 'informatika'
+   where q.owner_type = 'platform' and q.status = 'published'
+     and q.level_id in (select id from public.levels where code = '3');
+  select count(*) into eall from public.questions q
+    join public.subjects s on s.id = q.subject_id and s.slug = 'informatika'
+   where q.owner_type = 'platform' and q.status = 'published';
+  assert n3 = e3 and nall = eall and e3 < eall,
+         format('sinif suzgeci fenn sayina tesir etmir: %s/%s vs %s/%s',
+                n3, nall, e3, eall);
+end $$;
+\echo 'OK 13 · fenn sayi secilen sinfe gore hesablanir'
 
 reset role; reset request.jwt.claim.sub;
 create or replace function app.free_question_limit() returns int

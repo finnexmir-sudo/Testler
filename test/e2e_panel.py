@@ -2,7 +2,20 @@
 # -*- coding: utf-8 -*-
 """Muellim panelini real brauzerde, real sxem uzerinde surur."""
 import re, sys, time
+import psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright
+
+DSN = "host=/tmp port=55432 user=postgres dbname=panel_e2e"
+
+
+def db(sql, args=None, one=False):
+    """Bazani BIRBASA oxumaq - ekranin dedikleri ile uzlasirmi.
+       Ekran duz gostere biler, altda melumat yanlis yazilmis ola
+       biler (proqram/sinif uygunsuzlugu mehz bele gizlenirdi)."""
+    with psycopg2.connect(DSN, cursor_factory=psycopg2.extras.RealDictCursor) as c, c.cursor() as cur:
+        cur.execute(sql, args or ())
+        if cur.description:
+            return cur.fetchone() if one else cur.fetchall()
 
 PANEL = "http://127.0.0.1:8010/muellim/index.html"
 # Tehlukesizlik kilidi: yoxlama YALNIZ yerli mock-a getmelidir.
@@ -109,6 +122,72 @@ with sync_playwright() as pw:
 
     ok(empty_icons(pg) == 0, "esas ekranda bos ikon yoxdur", empty_icons(pg))
 
+    #  Paket gizlidir (SHOW_PLANS = false) - uc kart qalir
+    ok(pg.locator(".qact").count() == 3, "suretli emeliyyatlar 3 kartdir",
+       pg.locator(".qact").count())
+    ok(pg.locator("#btnMe").count() == 1, "profil qisayolu var")
+    ok(pg.locator("#bnav a").count() == 4, "alt naviqasiya 4 bendlidir",
+       pg.locator("#bnav a").count())
+    #  PWA: manifest, tema rengi, ikonlar, qurasdirma skripti
+    ok(pg.locator('link[rel="manifest"]').count() == 1, "manifest baglanib")
+    mf = pg.evaluate("""async () => {
+        const r = await fetch('manifest.json');
+        if (!r.ok) return null;
+        return await r.json();
+    }""")
+    ok(mf is not None, "manifest.json yuklenir")
+    ok(mf and mf.get("display") == "standalone", "standalone rejimi",
+       mf and mf.get("display"))
+    ok(mf and mf.get("start_url") == "./", "start_url duzgun")
+    ok(mf and len(mf.get("icons") or []) == 4, "dord ikon var",
+       mf and len(mf.get("icons") or []))
+    ok(any(i.get("purpose") == "maskable" for i in (mf or {}).get("icons", [])),
+       "maskable ikon var")
+    ok(pg.locator('meta[name="theme-color"]').count() == 1, "tema rengi var")
+    ico = pg.evaluate("""async () => {
+        const r = await fetch('../assets/icons/icon-512.png');
+        return r.ok ? r.headers.get('content-type') : null;
+    }""")
+    ok(ico is not None and "image" in ico, "ikon fayli acilir", ico)
+    #  http-de service worker QURULMAMALIDIR - yoxlamalar deterministik qalsin
+    swn = pg.evaluate("""async () => {
+        if (!('serviceWorker' in navigator)) return 0;
+        const r = await navigator.serviceWorker.getRegistrations();
+        return r.length;
+    }""")
+    ok(swn == 0, "http-de service worker qurulmur", swn)
+
+    nvt = " | ".join(pg.locator("#bnav a").all_inner_texts())
+    ok("Paket" not in nvt, "alt menyuda Paket yoxdur", nvt)
+    ok(pg.locator("#btnPkt").count() == 0, "suretli emeliyyatlarda Paket yoxdur")
+    #  unvanla da acilmir - ana sehifeye qaytarir
+    pg.goto(PANEL + "#/p"); pg.wait_for_timeout(700)
+    ok("Paketlər" not in pg.inner_text("#main"), "unvanla da Paket acilmir")
+    pg.goto(PANEL + "#/"); pg.wait_for_selector(".qgrid", timeout=8000)
+    # kontekst 430px-dedir - dar ekranda panel gorunur, masaustunde yox
+    ok(pg.locator("#bnav").is_visible(), "dar ekranda alt panel gorunur")
+    pg.set_viewport_size({"width": 1280, "height": 900})
+    pg.wait_for_timeout(200)
+    ok(not pg.locator("#bnav").is_visible(), "masaustunde alt panel gizlidir")
+    pg.set_viewport_size({"width": 430, "height": 900})
+    pg.wait_for_timeout(200)
+    pg.locator("#bnav a", has_text="Profil").click()
+    pg.wait_for_selector("#meSubs", timeout=8000)
+    ok(True, "alt paneldan profil acilir")
+    pg.locator("#btnBack").click()
+    pg.wait_for_selector("#btnGroup", timeout=8000)
+
+    ok(pg.locator("#btnBell").count() == 1, "ustlukde zeng duymesi var")
+    pg.click("#btnBell")
+    pg.wait_for_selector("#btnBack", timeout=8000)
+    # h2 CSS ile boyudulur - metn yox, unvan yoxlanilir
+    ok(pg.evaluate("location.hash") == "#/n", "bildirisler ekrani acilir",
+       pg.evaluate("location.hash"))
+    ok("abunə paketi ilə" in pg.inner_text("#main"),
+       "paketsiz hesabda siqnal upsell gorunur")
+    pg.locator("#btnBack").click()
+    pg.wait_for_selector("#btnGroup", timeout=8000)
+
     print("B · Qrup yaratmaq")
     # siniflər ayrıca sorğu ilə gəlir - dolmasını gözləyirik
     pg.wait_for_function("document.querySelectorAll('#glevel option').length > 1",
@@ -123,9 +202,35 @@ with sync_playwright() as pw:
     ok("Cume qrupu" in txt, "qrup siyahida gorunur")
     ok("3-cü sinif" in txt, "SINIF siyahida gorunur", txt.replace("\n", " ")[:70])
     ok("0 şagird" in txt, "sagird sayi 0")
+    # qosulma kodu sagird axininda istifade olunmur - UI-da gosterilmir
     code = re.search(r"\b([A-Z2-9]{8})\b", txt.replace("\n", " "))
-    ok(code is not None, "qosulma kodu 8 simvol, qarisiq simvolsuz",
-       code.group(1) if code else txt[:80])
+    ok(code is None, "qosulma kodu siyahida GORUNMUR",
+       code.group(1) if code else "")
+
+    #  YUXARI SINIF.  Panel evvel hemise p_program_slug="ibtidai"
+    #  gonderirdi, server ise sinfi HEMIN proqramin icinde axtarirdi -
+    #  8-ci sinif orada olmadigi ucun qrup SINIFSIZ yaranirdi.
+    #  Sessizce: xeta yox, sadece sinif itirdi.  1-4 islerdi, 5-11 yox.
+    pg.fill("#gname", "Sekkizinci qrup")
+    pg.select_option("#glevel", "8")
+    pg.click("#btnGroup")
+    pg.wait_for_function(
+        "document.querySelector('#groups') && "
+        "document.querySelector('#groups').innerText.indexOf('Sekkizinci qrup') >= 0",
+        timeout=8000)
+    t8 = pg.inner_text("#groups")
+    ok("8-ci sinif" in t8, "YUXARI sinif (8) itmir - qrup sinifli yaranir",
+       [x for x in t8.split("\n") if "Sekkizinci" in x or "sinif" in x][:3])
+    row = db("""select l.code as sinif, p.slug as program
+                  from public.classes c
+                  left join public.levels   l on l.id = c.level_id
+                  left join public.programs p on p.id = c.program_id
+                 where c.name = 'Sekkizinci qrup'""", one=True)
+    ok(row is not None and row["sinif"] == "8", "bazada sinif 8-dir",
+       row and row["sinif"])
+    #  Proqram GONDERILENDEN yox, SINIFDEN toremelidir
+    ok(row is not None and row["program"] not in (None, "ibtidai"),
+       "proqram sinifden toreyib (ibtidai qalmayib)", row and row["program"])
 
     print("C · Şagird əlavə etmək")
     pg.click("#groups .item")
@@ -266,6 +371,13 @@ with sync_playwright() as pw:
     ok("Son yenilənmə" in pg.inner_text("#main"), "son yenilenme vaxti yazilir")
     ok("5 / 5" in pg.inner_text(".stats") or "0 / 5" in pg.inner_text(".stats"),
        "xulase kartlari dolur", pg.inner_text(".stats").replace("\n", " ")[:40])
+    # Menimseme zolagi GORUNUR olmalidir: "ok" sinfi base.css-in mesaj
+    # qutusu ile toqqusub zolagi gizledirdi (ucuncu bele toqqusma) -
+    # meter artiq m-ok/m-mid/m-low isledir, kohne adlar qayitmasin
+    ok(pg.evaluate(
+        "!document.querySelector('.meter.ok') && !document.querySelector('.meter.mid')"
+        " && !document.querySelector('.meter.low')"),
+       "meter koehne toqqusan sinifleri islemir")
 
     # Sehife yenilenende muellim yerini itirmemelidir
     url = pg.url
@@ -312,7 +424,8 @@ with sync_playwright() as pw:
        "yanlis parolda anlasilan xeta", pg3.inner_text("#authErr").strip()[:50])
     ok(pg3.is_visible("#btnAuth"), "xetadan sonra ekran qalir")
 
-    ctx.close(); br.close()
+    ctx.close()
+    br.close()
 
 print()
 if fails:

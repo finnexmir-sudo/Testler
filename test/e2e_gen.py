@@ -122,8 +122,18 @@ with sync_playwright() as pw:
     if pg.locator("details.filt:not([open])").count():
         pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
     subs = pg.locator("#bsub option").all_inner_texts()
-    # DIQQET: kimya da 36_bank_fenn7 ile sual qazandi - sualsiz fenn indi kurikulumdur
-    ok("Kurikulum" not in " ".join(subs), "bank suzgecinde sualsiz fenn yoxdur", subs)
+    #  DIQQET: ne ADA, ne de SAYA baglanmaq olmaz.  Ada gore: bank
+    #  boyudukce "sualsiz fenn" deyisdi (Fizika -> Kimya -> Kurikulum),
+    #  indi ise sualsiz fenn umumiyyetle qalmayib.  Saya gore:
+    #  26_fenn.sql siyahini muellimin OZ fennleri ile daraldir, yeni
+    #  siyahi butun sualli fennler demek deyil.
+    #  Ona gore XASSEYE baxiriq: siyahiya dusen her fennin suali var.
+    sualli = {r["name"] for r in db(
+        "select distinct s.name from public.subjects s "
+        "join public.questions q on q.subject_id = s.id")}
+    adlar = [x.strip() for x in subs[1:] if x.strip()]   # [0] = «Butun fennler»
+    ok(adlar and all(a in sualli for a in adlar),
+       "bank suzgecinde yalniz suali olan fennler var", (adlar,))
     ok(any("Riyaziyyat" in x for x in subs), "sualli fenn var")
     pg.goto(PANEL + "#/q/new"); pg.wait_for_selector("#qsub", timeout=8000)
     pg.wait_for_function("document.querySelectorAll('#qsub option').length > 3", timeout=8000)
@@ -136,7 +146,12 @@ with sync_playwright() as pw:
     ok(pg.locator("#gPool .seg.on").inner_text() == "Öz suallarım",
        "abunesiz hesabda hovuz «öz suallarım»dır")
     subs = pg.locator("#gsub option").all_inner_texts()
-    ok("Kurikulum" not in " ".join(subs), "generatorda da sualsiz fenn yoxdur")
+    ok("Fizika" not in " ".join(subs), "generatorda da sualsiz fenn yoxdur")
+    # "Oz suallarim" hovuzunda siyahi yalniz OZ fennlerinden ibaretdir
+    nmine = db("select count(distinct subject_id) n from public.questions "
+               "where owner_type = 'educator'", one=True)["n"]
+    ok(len(subs) - 1 == nmine,
+       "oz hovuzunda yalniz oz fennleri gorunur", (len(subs) - 1, nmine))
     # "Hovuz yoxlanılır..." da metndir - cavabin GELMESINI gozle
     pg.wait_for_function(
         "document.querySelector('#gPrev') && "
@@ -199,13 +214,45 @@ with sync_playwright() as pw:
     pg.fill("#pDate", day)
     pg.select_option("#pTry", "2")
     pg.click("#btnPAsg")
-    pg.wait_for_function(
-        "document.querySelector('#pAsgMsg') && document.querySelector('#pAsgMsg').innerText.length > 3",
-        timeout=8000)
-    ok("verildi" in pg.inner_text("#pAsgMsg"), "teyinat tesdiqi gorunur",
-       pg.inner_text("#pAsgMsg")[:50])
+    #  teyinatdan sonra sehife yenilenir - "verilib" siyahisi tesdiqdir
+    pg.wait_for_selector(".pgiven", timeout=8000)
+    ok("verilib" in pg.inner_text(".pgiven"), "teyinat veraqde gorunur",
+       pg.inner_text(".pgiven")[:50].replace("\n", " "))
     a = db("select class_id::text c, max_attempts m from public.assignments", one=True)
     ok(a is not None and a["c"] == GID and a["m"] == 2, "bazada teyinat duzgundur")
+
+    print("F2 · Çap / PDF vərəqi")
+    #  cap pencersi headless-de acilmir - print() saxta funksiya ile evezlenir
+    #  (setir () => {} ile sarilir - yoxsa playwright onu ozu bir defe cagirir)
+    pg.evaluate("() => { window.print = function(){ window.__prn = (window.__prn||0)+1 } }")
+    pg.click("#btnPrn")
+    ok(pg.evaluate("window.__prn") == 1, "cap pencersi cagirilir",
+       pg.evaluate("window.__prn"))
+    ok(pg.locator("#printBox .ppq").count() == 8, "cap nusxesinde 8 sual",
+       pg.locator("#printBox .ppq").count())
+    ptxt = pg.evaluate("document.getElementById('printBox').innerText")
+    ok("Ad, soyad" in ptxt, "veraq basligi (ad, tarix, bal) var")
+    ok("Cavab açarı" not in ptxt, "sagird nusxesinde acar YOXDUR")
+    ok(pg.locator("#printBox .ppk").count() == 0, "acar bolmesi de yoxdur")
+    ok("A)" in ptxt, "variantlar herflenib")
+    #  su nisani: cap eden muellimin adi + tam tarix, her sehifenin altinda
+    foot = pg.evaluate("document.querySelector('#printBox .ppfoot').textContent")
+    ok("Bil10" in foot, "su nisaninda brend var", foot)
+    ok("Gen Muellim" in foot, "su nisaninda muellimin adi var", foot)
+    import datetime as _dt
+    bugun = _dt.date.today().strftime("%d.%m.%Y")
+    ok(bugun in foot, "su nisaninda tam tarix var", foot)
+    pg.click("#btnPrnK")
+    ok(pg.locator("#printBox .ppk").count() == 1, "acarli variantda acar sehifesi var")
+    ok("şagirdlərə paylanmır" in pg.evaluate("document.querySelector('#printBox .ppkn').textContent"),
+       "acar sehifesinde paylanmama qeydi var")
+    ok(pg.locator("#printBox .ppfoot").count() == 1,
+       "acarli nusxede de su nisani tekdir")
+    ok(pg.locator("#printBox .ppkg span").count() == 8, "acarda 8 cavab",
+       pg.locator("#printBox .ppkg span").count())
+    #  ehtiyat temizlik isleyir - "printing" sinfi goturulur
+    pg.wait_for_function("!document.body.classList.contains('printing')",
+                         timeout=5000)
 
     print("G · Şagird tapşırığı görür")
     sp = new_page()
@@ -268,8 +315,10 @@ with sync_playwright() as pw:
                   where s.slug='riyaziyyat' and t.slug='riy-4-vurma-bolme'""",
                one=True)["i"]
     # temiz tarixce: gerileyen sagird (88,85,82 -> 60,55,50) + zeif movzu
+    # (evvele 2 kohne cehd elave olunub ki, lent 6-dan cox olsun ve
+    #  "Daha N netice" duymesi de yoxlansin; son 6 deyismir - siqnal qalir)
     db("delete from public.attempt_answers; delete from public.attempts;")
-    for i, p_ in enumerate([88, 85, 82, 60, 55, 50]):
+    for i, p_ in enumerate([70, 72, 88, 85, 82, 60, 55, 50]):
         db("""insert into public.attempts (test_id, student_id, status, percent, finished_at)
               values (%s, %s, 'submitted', %s, now() - interval '20 days' + (%s || ' days')::interval)""",
            (TID, SID, p_, i))
@@ -296,6 +345,16 @@ with sync_playwright() as pw:
     ok("geriləyir" in pg.inner_text("#hAlerts"), "ev sehifesinde de siqnal var")
     ok(pg.locator("#hRecent .trow").count() >= 1, "son neticeler lenti dolur",
        pg.locator("#hRecent .trow").count())
+    ok(pg.locator("#recF").count() == 0, "tek qrupda lent cipleri gizlidir")
+    # Lent yigcamdir: 8 neticeden yalniz 6-si gorunur, qalani duyme ile
+    rn0 = pg.locator("#hRecent .trow").count()
+    ok(rn0 == 6, "lent en coxu 6 setirle acilir", rn0)
+    ok("Daha 2 nəticə" in pg.inner_text("#recMore"), "acici duyme sayi duz",
+       pg.inner_text("#recMore"))
+    pg.click("#recMore")
+    ok(pg.locator("#hRecent .trow").count() == 8, "daha N netice acilir",
+       pg.locator("#hRecent .trow").count())
+    ok(pg.locator("#recMore").count() == 0, "acilandan sonra duyme itir")
 
     pg.goto(PANEL + "#/g/" + GID); pg.reload()
     pg.wait_for_selector("#alerts .al", timeout=8000)
@@ -343,14 +402,16 @@ with sync_playwright() as pw:
     print("L · Valideyn xülasəsi")
     pg.goto(PANEL + "#/s/" + SID + "/" + GID); pg.reload()
     pg.wait_for_selector("#vTxt", timeout=8000)
-    # Tekrar sehv siyahisi QATLIDIR - sehifeni yemesin
-    ok(pg.locator("details.wrongbox").count() == 1, "sehv siyahisi qatlanandir")
-    ok(pg.locator("details.wrongbox[open]").count() == 0, "ilkin halda baglidir")
+    # Sehv siyahisi indi ACIQ gelir - hereket merkezidir
+    ok(pg.locator("details.wrongbox").count() == 1, "sehv siyahisi var")
+    ok(pg.locator("details.wrongbox[open]").count() == 1, "ilkin halda aciqdir")
     ok(pg.locator("details.wrongbox .fn").inner_text().strip().isdigit(),
        "basliqda say gorunur", pg.locator("details.wrongbox .fn").inner_text())
-    pg.locator("details.wrongbox summary").click(); pg.wait_for_timeout(200)
-    ok(pg.locator(".wq").count() >= 1, "acilanda setirler gorunur",
+    ok(pg.locator(".wq").count() >= 1, "setirler gorunur",
        pg.locator(".wq").count())
+    ok(pg.locator(".wq .wtag").count() >= 1, "sehvlerde movzu teqi var",
+       pg.locator(".wq .wtag").count())
+    ok(pg.locator("#btnFix").count() == 1, "sehvlerden test duymesi var")
     t = pg.input_value("#vTxt")
     ok("Kənan" in t, "sagirdin adi metndedir", t.split("\n")[0][:40])
     ok("📊" in t and "▰" in t, "semimi uslubda emoji ve zolaqlar var")
@@ -366,6 +427,165 @@ with sync_playwright() as pw:
        pg.inner_text("#vCopy"))
     cb = pg.evaluate("navigator.clipboard.readText()")
     ok(cb == t2, "mubadile buferine TAM metn dusur")
+
+    print("M · Dinamika, cavab vərəqi, səhvlərdən test")
+    ok(pg.locator(".dyn i").count() >= 2, "dinamika sutunlari var",
+       pg.locator(".dyn i").count())
+    pg.locator(".atr").first.click()
+    pg.wait_for_selector(".shq", timeout=8000)
+    ok(pg.locator(".shq").count() >= 1, "cavab vereqi acilir",
+       pg.locator(".shq").count())
+    ok(pg.locator(".shq .sw").count() >= 1, "sehv cavab qirmizi gorunur")
+    ok("Düzü:" in pg.inner_text(".sheet"), "duz cavab gosterilir")
+    pg.locator(".atr").first.click(); pg.wait_for_timeout(200)
+    ok(not pg.locator(".sheet .shq").first.is_visible(), "tekrar klik baglayir")
+
+    pg.click("#btnFix")
+    pg.wait_for_selector("#fixMsg .ok a", timeout=10000)
+    ok("YALNIZ bu şagirdə verildi" in pg.inner_text("#fixMsg"),
+       "sehv testi yigilir ve ferdi verildiyi yazilir",
+       pg.inner_text("#fixMsg")[:70].replace("\n", " "))
+    rem = db("""select t.id::text i,
+                       (select count(*) from public.test_questions tq
+                         where tq.test_id = t.id) nq
+                  from public.tests t
+                 where t.title like %s
+                 order by t.created_at desc limit 1""",
+             ("%səhvlər üzərində iş%",), one=True)
+    ok(bool(rem) and rem["nq"] >= 1, "sehv testi bazadadir", rem and rem["nq"])
+    asg = db("""select student_id::text s from public.assignments
+                 where test_id = %s""", (rem["i"],), one=True)
+    ok(asg is not None, "tapsiriq bazada var")
+    #  duzelis testi FERDIDIR - qrupun qalani gormemelidir
+    ok(asg is not None and asg["s"] == SID,
+       "duzelis testi yalniz hemin sagirde verilib", asg and asg["s"])
+    wq = db("""select count(*) n from public.test_questions tq
+                where tq.test_id = %s
+                  and tq.question_id not in (
+                    select aa.question_id from public.attempt_answers aa
+                     where aa.is_correct is not true)""", (rem["i"],), one=True)["n"]
+    ok(wq == 0, "testde yalniz sehv edilen suallar var", wq)
+
+    print("N · Qrup seçimi ilə yığ; «başqa qrupda verilib» nişanı")
+    pg.goto(PANEL + "#/gen"); pg.reload()
+    pg.wait_for_selector("#gAsg", timeout=8000)
+    pg.wait_for_function(
+        "document.querySelectorAll('#gAsg option').length > 1", timeout=8000)
+    pg.select_option("#gAsg", GID)
+    pg.wait_for_function(
+        "document.querySelector('#gPrev') && "
+        "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
+        "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
+    pg.fill("#gTitle", "Qrupla birge test")
+    pg.click("#btnMake")
+    pg.wait_for_selector(".paper", timeout=8000)
+    NID = pg.url.split("/t/")[1]
+    ok(bool(db("select 1 ok from public.assignments "
+               "where test_id = %s and class_id = %s", (NID, GID), one=True)),
+       "yigan kimi tapsiriq da verildi")
+
+    #  ikinci qrup: nisan + sexsi testin gizlenmesi
+    db("""insert into public.classes (id, account_id, teacher_id, kind, name, join_code)
+          values ('cccc2222-0000-0000-0000-0000000000e2', %s, %s,
+                  'tutor_group', 'Iki qrup', 'KODIKI01')""", (AID, UID))
+    pg.goto(PANEL + "#/a/cccc2222-0000-0000-0000-0000000000e2"); pg.reload()
+    pg.wait_for_selector("#aTest", timeout=8000)
+    opts = " | ".join(pg.locator("#aTest option").all_inner_texts())
+    ok("başqa qrupda verilib" in opts, "verilib nisani gorunur", opts[:80])
+    ok("səhvlər üzərində iş" not in opts,
+       "sexsi sehv-testi basqa qrupa teklif olunmur")
+
+    print("O · Tapşırıq ekranından yeni test yığmaq (gediş-qayıdış)")
+    pg.goto(PANEL + "#/a/" + GID); pg.reload()
+    pg.wait_for_selector("#btnGenHere", timeout=8000)
+    pg.click("#btnGenHere")
+    pg.wait_for_selector("#btnMake", timeout=8000)
+    ok(pg.url.endswith("#/gen"), "generator acilir", pg.url[-12:])
+    ok(pg.input_value("#glev") == "4", "qrupun sinfi avtomatik secilir",
+       pg.input_value("#glev"))
+    ok(pg.locator("#gAsg").count() == 0,
+       "qrup sahesi gizlidir - teyinati tapsiriq ekrani verecek")
+    ok("4-A qrupu" in pg.inner_text("#main"), "hara qayidacagi yazilir")
+    #  Sinif artiq secilidir - ipucu onu tekrar istememelidir
+    ok("fənn və sinif seçin" not in pg.inner_text("#main"),
+       "ipucu hazir sinfi tekrar istemir")
+    ok("Mövzu seçmək üçün fənn seçin" in pg.inner_text("#main"),
+       "ipucu yalniz fenni isteyir")
+    ok(pg.locator("#btnBack").inner_text().strip() == "4-A qrupu",
+       "geri duymesi qrupun adini gosterir", pg.locator("#btnBack").inner_text())
+
+    pg.select_option("#gsub", "riyaziyyat")
+    pg.wait_for_selector("#gsub", timeout=8000); pg.wait_for_timeout(400)
+    pg.fill("#gCnt", "6"); pg.fill("#gTitle", "Tapsiriqdan yigilan test")
+    pg.wait_for_function(
+        "document.querySelector('#gPrev') && "
+        "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
+        "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
+    pg.click("#btnMake")
+    pg.wait_for_selector("#aTest", timeout=10000)
+    ok(pg.url.endswith("#/a/" + GID), "tapsiriq ekranina QAYIDIR", pg.url[-20:])
+    ok("seçildi" in pg.inner_text("#pick .ok"), "bildiris cixir",
+       pg.inner_text("#pick .ok")[:60].replace("\n", " "))
+    NEWT = db("""select id::text i from public.tests
+                  where title = 'Tapsiriqdan yigilan test'""", one=True)
+    ok(bool(NEWT), "test bazada yarandi")
+    ok(pg.input_value("#aTest") == NEWT["i"], "teze test siyahida SECILI gelir")
+    #  teyinat hele VERILMEYIB - son tarixi muellim ozu qoyur
+    ok(not db("select 1 ok from public.assignments where test_id = %s",
+              (NEWT["i"],), one=True),
+       "yigmaq tek basina tapsiriq vermir")
+
+    pg.select_option("#aWho", "")
+    pg.click("#btnAsg")
+    #  DIQQET: ".asg" gozlemek AZDIR - bu qrupda onsuz da teyinat var,
+    #  selektor derhal qayidir ve baza yoxlamasi yazidan EVVEL isleyir.
+    #  Konkret teze setri gozleyirik.
+    pg.wait_for_function(
+        "document.querySelector('#asgList') && "
+        "document.querySelector('#asgList').innerText"
+        ".indexOf('Tapsiriqdan yigilan test') >= 0", timeout=8000)
+    ok(bool(db("select 1 ok from public.assignments where test_id = %s "
+               "and class_id = %s", (NEWT["i"], GID), one=True)),
+       "«Tapsiriq ver» basilanda teyinat yazilir")
+
+    #  bildiris bir defelikdir - ekran yenilenende qalmamalidir
+    pg.reload(); pg.wait_for_selector("#aTest", timeout=8000)
+    ok(pg.locator("#pick .ok").count() == 0, "bildiris bir defelikdir")
+
+    print("P · Sinif uyğun gəlməyəndə səbəb yazılır")
+    #  Muellim generatorda sinfi deyisirse, teze test qrupun suzgecine
+    #  DUSMUR (rpc_available_tests sinife gore suzur).  Test itmir -
+    #  ekran sebebi yazmalidir, yoxsa "yigdim, hara getdi?" olur.
+    pg.click("#btnGenHere"); pg.wait_for_selector("#btnMake", timeout=8000)
+    pg.select_option("#gsub", "riyaziyyat")
+    pg.wait_for_selector("#gsub", timeout=8000); pg.wait_for_timeout(400)
+    pg.select_option("#glev", "3")
+    pg.wait_for_selector("#glev", timeout=8000); pg.wait_for_timeout(400)
+    pg.fill("#gCnt", "5"); pg.fill("#gTitle", "Yanlis sinifle yigilan")
+    pg.wait_for_function(
+        "document.querySelector('#gPrev') && "
+        "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
+        "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
+    pg.click("#btnMake")
+    pg.wait_for_selector("#pick .warn", timeout=10000)
+    ok("sinfi" in pg.inner_text("#pick .warn"), "sebeb izah olunur",
+       pg.inner_text("#pick .warn")[:60].replace("\n", " "))
+    MIS = db("""select id::text i from public.tests
+                 where title = 'Yanlis sinifle yigilan'""", one=True)
+    ok(bool(MIS), "test ITMIR - bazada durur")
+    ok(pg.input_value("#aTest") != (MIS or {}).get("i"),
+       "uygun olmayan test secili gelmir")
+
+    print("R · İmtina və niyyətin təmizlənməsi")
+    pg.click("#btnGenHere"); pg.wait_for_selector("#btnMake", timeout=8000)
+    pg.click("#btnBack"); pg.wait_for_selector("#aTest", timeout=8000)
+    ok(pg.url.endswith("#/a/" + GID), "geri duymesi tapsiriq ekranina qaytarir",
+       pg.url[-20:])
+    #  niyyet silinir: adi "Test yig"dan girende qrup sahesi geri gelir
+    pg.goto(PANEL + "#/gen"); pg.reload()
+    pg.wait_for_selector("#gAsg", timeout=8000)
+    ok(pg.locator("#gAsg").count() == 1,
+       "adi girisde qrup sahesi geri gelir - niyyet yapismir")
 
     br.close()
 

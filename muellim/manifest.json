@@ -1,0 +1,19 @@
+{
+  "name": "Bil10 — Müəllim paneli",
+  "short_name": "Bil10 Müəllim",
+  "description": "Qrup yaradın, test yığın, tapşırıq verin, nəticələri izləyin.",
+  "lang": "az",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#2b4acb",
+  "icons": [
+    { "src": "../assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "../assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "../assets/icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "../assets/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -7,6 +7,7 @@
   "use strict";
 
   var main = document.getElementById("main");
+  var RECOVERY = false;   // parol berpasi axini gedir
   var topWho = document.getElementById("topWho");
   var topTitle = document.getElementById("topTitle");
   var btnOut = document.getElementById("btnOut");
@@ -43,9 +44,15 @@
     star:   '<path d="M9.5 3l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 ' +
             '4.3-.6L9.5 3z"/>',
     clock:  '<circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/>',
+    lock:   '<rect x="4.2" y="8.4" width="10.6" height="7.4" rx="1.6"/><path d="M6.6 8.4V6.2a2.9 2.9 0 0 1 5.8 0v2.2"/>',
+    home:   '<path d="M3.4 9.4 9.5 3.9l6.1 5.5"/><path d="M5.3 8.7v6.8h8.4V8.7"/>',
+    bell:   '<path d="M9.5 3.1a4.3 4.3 0 0 0-4.3 4.3c0 3.2-1.1 4.4-1.6 4.9h11.8c-.5-.5-1.6-1.7-1.6-4.9A4.3 4.3 0 0 0 9.5 3.1z"/><path d="M8 14.8a1.6 1.6 0 0 0 3 0"/>',
     pen:    '<path d="M12.4 3.6a1.7 1.7 0 0 1 2.4 2.4L6.6 14.2l-3.1.7.7-3.1 8.2-8.2z"/>',
     doc:    '<path d="M11 2.5H6a1.8 1.8 0 0 0-1.8 1.8v10.4A1.8 1.8 0 0 0 6 16.5h7a1.8 1.8 0 0 0 1.8-1.8V6.3L11 2.5z"/>' +
-            '<path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/>'
+            '<path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/>',
+    print:  '<path d="M5.8 7.2V3.4h7.4v3.8"/>' +
+            '<path d="M5.8 13.2H3.4V8.4a1.2 1.2 0 0 1 1.2-1.2h9.8a1.2 1.2 0 0 1 1.2 1.2v4.8h-2.4"/>' +
+            '<rect x="5.8" y="11" width="7.4" height="5" rx=".8"/>'
   };
   function ic(name, cls) {
     return '<svg class="' + (cls || "") + '" viewBox="0 0 19 19" fill="none" ' +
@@ -79,6 +86,26 @@
     if (/limit/i.test(t) || /check_violation/i.test(t)) {
       t = t.replace(/^.*?:\s*/, "");
     }
+    //  Supabase Auth-un ingilisce mesajlari - istifadeciye oz dilinde
+    if (/invalid login credentials/i.test(t)) {
+      return "E-poçt və ya parol yanlışdır.";
+    }
+    if (/email not confirmed/i.test(t)) {
+      return "E-poçt hələ təsdiqlənməyib — poçtunuzdakı linkə keçin " +
+             "(spam qovluğunu da yoxlayın).";
+    }
+    if (/already registered|already been registered/i.test(t)) {
+      return "Bu e-poçtla hesab artıq var — daxil olun.";
+    }
+    if (/rate limit|too many requests/i.test(t)) {
+      return "Çox cəhd edildi — bir neçə dəqiqə sonra yenidən yoxlayın.";
+    }
+    if (/password should be at least/i.test(t)) {
+      return "Parol çox qısadır.";
+    }
+    if (/unable to validate email|invalid format/i.test(t)) {
+      return "E-poçt düzgün formatda deyil.";
+    }
     return t;
   }
   function setBusy(id, state, label) {
@@ -95,6 +122,7 @@
     topTitle.textContent = "Müəllim paneli";
     topWho.textContent = "";
     btnOut.classList.add("hide");
+    if (typeof bnavHide === "function") bnavHide();
 
     var isUp = mode === "up";
     show(
@@ -111,6 +139,9 @@
         '<label for="pass">Parol</label>' +
         '<input id="pass" type="password" autocomplete="' +
           (isUp ? "new-password" : "current-password") + '">' +
+        (isUp ? "" :
+          '<div class="fglink"><button class="lnk" id="btnForgot" ' +
+            'type="button">Parolu unutmusunuz?</button></div>') +
         '<button class="btn go wide" id="btnAuth">' +
           (isUp ? "Hesab yarat" : "Daxil ol") + "</button>" +
         '<div class="spacer"></div>' +
@@ -120,6 +151,7 @@
     );
 
     on("btnSwap", "click", function () { screenAuth(isUp ? "in" : "up"); });
+    on("btnForgot", "click", screenForgot);
     on("btnAuth", "click", doAuth);
     ["email", "pass", "fname"].forEach(function (id) {
       on(id, "keydown", function (e) { if (e.key === "Enter") doAuth(); });
@@ -159,6 +191,90 @@
     }
   }
 
+  /* --------------------------------------------- parol berpasi */
+  function screenForgot() {
+    topTitle.textContent = "Parol bərpası";
+    show(
+      '<div class="card" style="margin-top:22px">' +
+        "<h1>Parolu bərpa edin</h1>" +
+        '<p class="note">Qeydiyyatdakı e-poçtunuzu yazın — bərpa linki ' +
+          "göndərəcəyik. Linkə keçəndə yeni parol təyin edəcəksiniz.</p>" +
+        '<div id="fgErr"></div>' +
+        '<label for="fgMail">E-poçt</label>' +
+        '<input id="fgMail" type="email" autocomplete="email" inputmode="email">' +
+        '<button class="btn go wide" id="btnFg">Bərpa linki göndər</button>' +
+        '<div class="spacer"></div>' +
+        '<button class="btn ghost wide" id="btnFgBack">Girişə qayıt</button>' +
+      "</div>"
+    );
+    var inp = $("fgMail");
+    if (inp) inp.focus();
+    function go() {
+      if (busy) return;
+      var email = (($("fgMail") || {}).value || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        $("fgErr").innerHTML = msg("err", "Düzgün e-poçt yazın.");
+        return;
+      }
+      setBusy("btnFg", true, "Bərpa linki göndər");
+      //  redirect: berpa linki mehz bu panele qaytarsin
+      var back = location.origin + location.pathname;
+      sb.recover(email, back).then(function () {
+        busy = false;
+        screenAuth("in", msg("ok",
+          "Bu e-poçtla hesab varsa, bərpa linki göndərildi. Poçtunuzu " +
+          "(spam qovluğu daxil) yoxlayın — link bir dəfəlikdir."));
+      }).catch(function (e) {
+        setBusy("btnFg", false, "Bərpa linki göndər");
+        $("fgErr").innerHTML = msg("err", fail(e));
+      });
+    }
+    on("btnFg", "click", go);
+    on("fgMail", "keydown", function (e) { if (e.key === "Enter") go(); });
+  }
+
+  /* Berpa linkinden qayidis: yeni parol ekrani */
+  function screenNewPass() {
+    topTitle.textContent = "Yeni parol";
+    btnOut.classList.add("hide");
+    show(
+      '<div class="card" style="margin-top:22px">' +
+        "<h1>Yeni parol təyin edin</h1>" +
+        '<div id="npErr"></div>' +
+        '<label for="np1">Yeni parol</label>' +
+        '<input id="np1" type="password" autocomplete="new-password">' +
+        '<label for="np2">Təkrar yazın</label>' +
+        '<input id="np2" type="password" autocomplete="new-password">' +
+        '<button class="btn go wide" id="btnNp">Parolu dəyiş</button>' +
+      "</div>"
+    );
+    function go() {
+      if (busy) return;
+      var p1 = ($("np1") || {}).value || "";
+      var p2 = ($("np2") || {}).value || "";
+      if (p1.length < 8) {
+        $("npErr").innerHTML = msg("err", "Parol ən azı 8 simvol olmalıdır.");
+        return;
+      }
+      if (p1 !== p2) {
+        $("npErr").innerHTML = msg("err", "Parollar üst-üstə düşmür.");
+        return;
+      }
+      setBusy("btnNp", true, "Parolu dəyiş");
+      sb.updatePassword(p1).then(function () {
+        busy = false;
+        boot();
+      }).catch(function (e) {
+        setBusy("btnNp", false, "Parolu dəyiş");
+        $("npErr").innerHTML = msg("err", fail(e));
+      });
+    }
+    on("btnNp", "click", go);
+    ["np1", "np2"].forEach(function (id) {
+      on(id, "keydown", function (e) { if (e.key === "Enter") go(); });
+    });
+  }
+
   /* --------------------------------------------------- ilk quraşdirma */
   function screenSetup() {
     topTitle.textContent = "Hesab quraşdırılması";
@@ -174,9 +290,14 @@
         "</select>" +
         '<label for="aname">Hesabın adı</label>' +
         '<input id="aname" placeholder="məsələn: Leyla müəllim — riyaziyyat">' +
+        "<label>Tədris etdiyiniz fənlər (istəyə görə)</label>" +
+        '<p class="note" style="margin-top:-4px">Seçsəniz, siyahılarda yalnız ' +
+          "öz fənləriniz görünəcək. Sonradan profildən dəyişmək olar.</p>" +
+        '<div class="chips subpick" id="setSubs"></div>' +
         '<button class="btn go wide" id="btnSetup">Davam et</button>' +
       "</div>"
     );
+    subChips("setSubs", []);
 
     on("btnSetup", "click", function () {
       if (busy) return;
@@ -187,10 +308,92 @@
       }
       setBusy("btnSetup", true, "Davam et");
       sb.rpc("rpc_create_account", { p_type: $("atype").value, p_name: name })
+        .then(function (r) {
+          //  fenn secimi konu deyil - alinmasa da hesab yaranib
+          var subs = chipVals("setSubs");
+          if (!subs.length || !r || !r.id) return null;
+          return sb.rpc("rpc_set_subjects",
+                        { p_account_id: r.id, p_subjects: subs })
+                   .catch(function () {});
+        })
         .then(boot)
         .catch(function (e) {
           setBusy("btnSetup", false, "Davam et");
           $("setupErr").innerHTML = msg("err", fail(e));
+        });
+    });
+  }
+
+  /* ------------------------------------------------- bildirisler ekrani */
+  function screenNotif() {
+    var live = guard();
+    topTitle.textContent = "Bildirişlər";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_home", {}).then(function (v) {
+      if (!live()) return;
+      v = v || {};
+      var al = v.alerts || [];
+      bellDot(al.length);
+      var h = '<button class="btn sm ghost" id="btnBack">' + ic("back") +
+        "Əsas səhifə</button>" + '<div class="spacer"></div>' +
+        "<h2>Siqnallar</h2>";
+      if (v.alerts === null) {
+        h += '<div class="card"><p class="muted" style="margin:0">Geriləyən və ' +
+          "zəif mövzuda ilişən şagird siqnalları abunə paketi ilə açılır." +
+          (plansOn() ? ' <a href="#/p">Paketlərə bax</a>' : "") + "</p></div>";
+      } else if (!al.length) {
+        h += '<div class="card pad0"><div class="empty"><div class="ic">' +
+          ic("bell") + "</div><b>Yeni siqnal yoxdur</b>" +
+          "Geriləyən və ya zəif mövzuda ilişən şagird olanda burada görünəcək.</div></div>";
+      } else {
+        h += '<div class="card pad0" id="nAl">' + al.map(alertRow).join("") + "</div>";
+      }
+      var rc = v.recent || [];
+      if (rc.length) {
+        h += '<div class="spacer"></div>' + "<h2>Son nəticələr</h2>" +
+          '<div class="card pad0">' + rc.map(function (x) {
+            return '<div class="trow"><div class="g"><b>' + esc(x.student || "") +
+              "</b><i>" + esc(x.test || "") +
+              (x["class"] ? " · " + esc(x["class"]) : "") +
+              " · " + dateAz(x.at) + "</i></div>" + pctChip(x.percent) + "</div>";
+          }).join("") + "</div>";
+      }
+      show(h);
+      bindAlerts($("nAl"));
+      on("btnBack", "click", function () { nav("#/"); });
+    }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+
+  /* ----------------------------------------------------------- profil */
+  function screenMe() {
+    topTitle.textContent = "Profil";
+    show(
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") +
+        "Əsas səhifə</button>" +
+      '<div class="spacer"></div>' +
+      '<div class="card">' +
+        "<h1>Tədris etdiyiniz fənlər</h1>" +
+        '<p class="note">Seçilmiş fənlər sual bankı, test yığma və dərs planı ' +
+          "siyahılarını daraldır. Boş saxlasanız bütün fənlər görünür.</p>" +
+        '<div class="chips subpick" id="meSubs"><span class="skel">Yüklənir…</span></div>' +
+        '<div id="meErr"></div>' +
+        '<button class="btn go" id="btnMeSave">Yadda saxla</button>' +
+      "</div>");
+    on("btnBack", "click", function () { nav("#/"); });
+    subChips("meSubs", mySubs());
+    on("btnMeSave", "click", function () {
+      if (busy) return;
+      setBusy("btnMeSave", true, "Yadda saxla");
+      sb.rpc("rpc_set_subjects",
+             { p_account_id: ACC.id, p_subjects: chipVals("meSubs") })
+        .then(function () { return refreshContext(); })
+        .then(function () {
+          setBusy("btnMeSave", false, "Yadda saxla");
+          $("meErr").innerHTML = msg("ok", "Yadda saxlanıldı.");
+        })
+        .catch(function (e) {
+          setBusy("btnMeSave", false, "Yadda saxla");
+          $("meErr").innerHTML = msg("err", fail(e));
         });
     });
   }
@@ -231,37 +434,39 @@
           : "") +
       "</div>" +
       '<div class="spacer"></div>' +
-      '<div class="card pad0"><button class="item" id="btnBank">' +
-        '<div class="ic">' + ic("doc") + "</div>" +
-        '<div class="g"><b>Sual bankı</b><i><span>Öz suallarınızı yazın, ' +
-          "testlərə yığın</span></i></div>" +
-        '<span class="arrow">' + ic("right") + "</span></button>" +
-      '<button class="item" id="btnGen">' +
-        '<div class="ic">' + ic("gen") + "</div>" +
-        '<div class="g"><b>Test yığ</b><i><span>Mövzu və çətinliyə görə ' +
-          "avtomatik test</span></i></div>" +
-        '<span class="arrow">' + ic("right") + "</span></button>" +
-      '<button class="item" id="btnPkt">' +
-        '<div class="ic">' + ic("star") + "</div>" +
-        '<div class="g"><b>Paket</b><i><span>' +
-          (ACC.plan ? "Abunə paketiniz və müddəti" :
-                      "Qiymətlər və abunə") + "</span></i></div>" +
-        '<span class="arrow">' + ic("right") + "</span></button>" +
+      /* Suretli emeliyyatlar - boyuk barmaq-dostu kartlar (mobil ustunlyu) */
+      '<div class="card">' +
+        '<div class="qhead">Sürətli əməliyyatlar</div>' +
+        '<div class="qgrid">' +
+          '<button class="qact qa" id="btnGen">' + ic("gen") +
+            "<b>Test yığ</b><span>mövzu və çətinliyə görə</span></button>" +
+          '<button class="qact qb" id="btnBank">' + ic("doc") +
+            "<b>Sual bankı</b><span>öz suallarınız</span></button>" +
+          (plansOn()
+            ? '<button class="qact qc" id="btnPkt">' + ic("star") +
+              "<b>Paket</b><span>" +
+              (ACC.plan ? "abunə və müddət" : "qiymətlər və abunə") +
+              "</span></button>"
+            : "") +
+          '<button class="qact qd" id="btnMe">' + ic("person") +
+            "<b>Profil</b><span>fənlər və hesab</span></button>" +
+        "</div>" +
+      "</div>" +
       (isAdmin()
-        ? '<button class="item" id="btnAdm">' +
+        ? '<div class="spacer"></div>' +
+          '<div class="card pad0"><button class="item" id="btnAdm">' +
           '<div class="ic">' + ic("group") + "</div>" +
           '<div class="g"><b>İdarəetmə</b><i><span>Hesablar və ' +
             "abunələr (admin)</span></i></div>" +
-          '<span class="arrow">' + ic("right") + "</span></button>"
+          '<span class="arrow">' + ic("right") + "</span></button></div>"
         : "") +
-      "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Qruplar</h2>" +
       '<div id="groups" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
       '<div id="hRecent"></div>' +
       '<div class="spacer"></div>' +
       '<div class="card">' +
-        '<label for="gname">Yeni qrup</label>' +
+        '<label for="gname">Qrup adı</label>' +
         '<div class="fieldrow">' +
           '<div><input id="gname" placeholder="məsələn: Cümə qrupu"></div>' +
           '<div style="flex:0 0 148px"><select id="glevel">' +
@@ -283,6 +488,7 @@
     on("btnBank", "click", function () { nav("#/b"); });
     on("btnGen", "click", function () { nav("#/gen"); });
     on("btnPkt", "click", function () { nav("#/p"); });
+    on("btnMe", "click", function () { nav("#/me"); });
     on("btnAdm", "click", function () { nav("#/adm"); });
 
     on("btnGroup", "click", function () {
@@ -295,7 +501,10 @@
         p_account_id: ACC.id,
         p_name: name,
         p_kind: ACC.type === "school" ? "school_class" : "tutor_group",
-        p_program_slug: "ibtidai",
+        //  Proqram GONDERILMIR: server onu sinifden ozu tapir.
+        //  Evvel burada sert "ibtidai" yazilirdi, server ise sinfi
+        //  HEMIN proqramin icinde axtarirdi - 8-ci sinif orada
+        //  olmadigi ucun qrup SINIFSIZ yaranirdi (db/31).
         p_level_code: $("glevel").value || null
       }).then(function () {
         $("gname").value = "";
@@ -325,55 +534,89 @@
             (st.attempts ? pct(st.avg) + "%" : "—") + "</b><span>orta bal</span></div>";
       }
 
+      bellDot(v.alerts ? v.alerts.length : 0);
       var ab = $("hAlerts");
       if (ab && v.alerts && v.alerts.length) {
         ab.innerHTML = '<div class="spacer"></div>' +
           "<h2>Təhlükə zonası</h2>" +
-          '<div class="card pad0">' + v.alerts.map(function (a) {
-            var tx;
-            if (a.kind === "risk") {
-              tx = "son testlərdə geriləyir (" + pct(a.prev3) + "% → " +
-                   pct(a.last3) + "%)" +
-                   (a.topic ? " · zəif: " + esc(a.topic) : "");
-            } else if (a.kind === "weak") {
-              tx = "zəif mövzu: " + esc(a.topic || "") +
-                   " (" + pct(a.topic_ratio) + "%)";
-            } else {
-              tx = "son 3 testdə sabit " + pct(a.last3) + "% — əla gedir";
-            }
-            return '<button class="al ' + a.kind + '" data-al="' +
-              esc(a.student_id) + '" data-g="' + esc(a.class_id) + '">' +
-              ic(a.kind === "star" ? "check" : "warn") +
-              "<span><b>" + esc(a.name) + "</b> <span class=\"muted\">(" +
-                esc(a.class || "") + ")</span> " + tx + "</span>" +
-              '<span class="arrow">' + ic("right") + "</span></button>";
-          }).join("") + "</div>";
-        Array.prototype.forEach.call(ab.querySelectorAll("[data-al]"), function (b) {
-          b.addEventListener("click", function () {
-            nav("#/s/" + b.getAttribute("data-al") + "/" + b.getAttribute("data-g"));
-          });
-        });
+          '<div class="card pad0">' + v.alerts.map(alertRow).join("") + "</div>";
+        bindAlerts(ab);
       }
 
       var rc = $("hRecent");
       if (rc && v.recent && v.recent.length) {
-        rc.innerHTML = '<div class="spacer"></div>' +
-          "<h2>Son nəticələr</h2>" +
-          '<div class="card pad0">' + v.recent.map(function (x) {
+        /* Qrup cipleri: sagird coxaldiqca lent qarismasin - bir
+           toxunusla qrupa suzulur.  Tek qrupda cipler gorunmur. */
+        var recAll = v.recent;
+        var rgs = [];
+        recAll.forEach(function (x) {
+          if (x.class_id && !rgs.some(function (g) { return g.id === x.class_id; })) {
+            rgs.push({ id: x.class_id, name: x["class"] || "" });
+          }
+        });
+        var RF = "", REXP = false, RCAP = 6;
+        function recRows() {
+          var list = RF ? recAll.filter(function (x) {
+            return x.class_id === RF;
+          }) : recAll;
+          /* Sagird coxaldiqca sehife uzanmasin: ilk 6 setir gorunur,
+             qalani "Daha N netice" duymesi ile acilir. */
+          var vis = REXP ? list : list.slice(0, RCAP);
+          return vis.map(function (x) {
             return '<div class="trow"><div class="g"><b>' + esc(x.student || "") +
               "</b><i>" + esc(x.test || "") +
               (x["class"] ? " · " + esc(x["class"]) : "") +
               " · " + dateAz(x.at) + "</i></div>" +
-              '<span class="pctv">' + pct(x.percent) + "%</span></div>";
-          }).join("") + "</div>";
+              pctChip(x.percent) + "</div>";
+          }).join("") +
+          (list.length > RCAP && !REXP
+            ? '<button class="morebtn" id="recMore">Daha ' +
+              (list.length - RCAP) + " nəticə göstər</button>"
+            : "");
+        }
+        function recDraw() {
+          var rl = $("recList");
+          if (!rl) return;
+          rl.innerHTML = recRows();
+          var mb = $("recMore");
+          if (mb) mb.addEventListener("click", function () {
+            REXP = true;
+            recDraw();
+          });
+        }
+        rc.innerHTML = '<div class="spacer"></div>' +
+          "<h2>Son nəticələr</h2>" +
+          (rgs.length > 1
+            ? '<div class="chips recf" id="recF">' +
+              '<button class="chip on" data-rg="">Hamısı</button>' +
+              rgs.map(function (g) {
+                return '<button class="chip" data-rg="' + esc(g.id) + '">' +
+                  esc(g.name) + "</button>";
+              }).join("") + "</div>"
+            : "") +
+          '<div class="card pad0" id="recList"></div>';
+        recDraw();
+        var rf = $("recF");
+        if (rf) rf.addEventListener("click", function (ev) {
+          var b = ev.target.closest ? ev.target.closest("[data-rg]") : null;
+          if (!b) return;
+          RF = b.getAttribute("data-rg");
+          REXP = false;
+          Array.prototype.forEach.call(rf.querySelectorAll(".chip"), function (c) {
+            c.classList.toggle("on", c === b);
+          });
+          recDraw();
+        });
       }
     }).catch(function () {});
   }
 
   function loadGroups() {
+    //  loadLevels() gozleyerken cixis edilibse ACC bosdur - sakit dayan
+    if (!ACC) return;
     var groups = null;
     sb.select("classes", {
-      select: "id,name,join_code,kind,level_id",
+      select: "id,name,kind,level_id",
       eq: { account_id: ACC.id },
       order: "name"
     }).then(function (rows) {
@@ -399,11 +642,10 @@
         var n = cnt[g.id] || 0;
         var lv = levelName(g.level_id);
         return '<button class="item" data-g="' + esc(g.id) + '">' +
-          '<div class="ic">' + ic("group") + "</div>" +
+          av(g.name) +
           '<div class="g"><b>' + esc(g.name) + "</b>" +
           "<i>" + (lv ? "<span>" + esc(lv) + "</span><span>·</span>" : "") +
-          "<span>" + n + " şagird</span><span>·</span>" +
-          '<span class="code">' + esc(g.join_code) + "</span></i></div>" +
+          "<span>" + n + " şagird</span></i></div>" +
           '<span class="arrow">' + ic("right") + "</span></button>";
       }).join("");
       Array.prototype.forEach.call(box.querySelectorAll("[data-g]"), function (b) {
@@ -456,11 +698,426 @@
   }
 
   /* ------------------------------------------------------- qrup detali */
+  /* ================================================================
+     DERS PLANI - "komekci isci"
+     Movzu agaci real derslik ardicilligindadir; plan TARIXLE yox,
+     ARDICILLIQLA yasayir: "Kecildi" deyilmeyince cari movzu deyismir.
+     "Kecildi"den sonra sistem ozu teklif edir: yoxlama testi yigilsin?
+     Test yaranan kimi qrupa tapsiriq da verilir - sagird derhal gorur.
+     ================================================================ */
+  var PLD = null;   // son plan_get cavabi (redraw ucun)
+
+  function loadPlan(g) {
+    var live = guard();
+    sb.rpc("rpc_plan_get", { p_class_id: g.id }).then(function (d) {
+      if (!live()) return;
+      PLD = d || {};
+      drawPlan(g);
+    }).catch(function () {
+      var box = $("planBox");
+      if (box) box.innerHTML = "";
+    });
+  }
+
+  function drawPlan(g) {
+    var box = $("planBox");
+    if (!box) return;
+    var d = PLD || {};
+    var plans = d.plans || [];
+
+    if (!plans.length) {
+      if (!d.paid) {
+        box.innerHTML =
+          '<div class="card plock">' +
+            '<div class="lic">' + ic("lock") + "</div>" +
+            "<div><b>Dərs planı — abunə paketi ilə</b>" +
+            '<p class="muted" style="margin:4px 0 0">Mövzu təqvimi, «keçildi» ' +
+              "jurnalı və hər mövzudan sonra bir klikə yoxlama testi." +
+              (plansOn() ? ' <a href="#/p">Paketlərə bax</a>' : "") + "</p></div>" +
+          "</div>";
+        return;
+      }
+      box.innerHTML =
+        '<div class="card">' +
+          '<p class="muted" style="margin:0 0 12px">Fənn və sinif seçin — ' +
+            "mövzular dərslik ardıcıllığı ilə plana düzüləcək. Hər mövzunu " +
+            "keçəndə bir kliklə yoxlama testi yığılıb qrupa veriləcək.</p>" +
+          '<div class="fieldrow">' +
+            '<div><label for="plSub">Fənn</label><select id="plSub"></select></div>' +
+            '<div style="flex:0 0 150px"><label for="plLev">Sinif</label>' +
+              '<select id="plLev"></select></div>' +
+          "</div>" +
+          '<div id="plMsg"></div>' +
+          '<button class="btn go" id="btnPlMk">' + ic("plus") + "Planı qur</button>" +
+        "</div>";
+      //  Siyahida YALNIZ movzu agaci olan fenn+sinif kombinasiyalari -
+      //  agacsiz fenni ("Kurikulum" ve s.) secib xeta almaq olmasin.
+      //  Sinif siyahisi fenne gore daralir.
+      sb.rpc("rpc_plan_options", {}).then(function (opts) {
+        opts = subFilter(opts || []);
+        var sel = $("plSub"), lev = $("plLev");
+        if (!sel || !lev) return;
+        sel.innerHTML = opts.map(function (x) {
+          return '<option value="' + esc(x.slug) + '">' + esc(x.name) + "</option>";
+        }).join("");
+        function fillLev() {
+          var cur = null;
+          for (var i = 0; i < opts.length; i++) {
+            if (opts[i].slug === sel.value) cur = opts[i];
+          }
+          lev.innerHTML = ((cur && cur.levels) || []).map(function (x) {
+            return '<option value="' + esc(x.code) + '">' + esc(x.name) + "</option>";
+          }).join("");
+          //  qrupun oz sinfi siyahidadirsa, onu sec
+          var gl = levelName(g.level_id);
+          if (gl) {
+            for (var j = 0; j < lev.options.length; j++) {
+              if (lev.options[j].text === gl) lev.selectedIndex = j;
+            }
+          }
+        }
+        fillLev();
+        sel.addEventListener("change", fillLev);
+      }).catch(function (e) {
+        //  siyahi gelmese sebebi gizletme - bos select cashdirir
+        var m = $("plMsg");
+        if (m) m.innerHTML = msg("err", "Fənn siyahısı yüklənmədi: " + fail(e));
+      });
+      on("btnPlMk", "click", function () {
+        if (busy) return;
+        setBusy("btnPlMk", true, "Planı qur");
+        sb.rpc("rpc_plan_create", {
+          p_class_id: g.id,
+          p_subject: ($("plSub") || {}).value || "",
+          p_level: ($("plLev") || {}).value || ""
+        }).then(function () { busy = false; loadPlan(g); })
+          .catch(function (e) {
+            setBusy("btnPlMk", false, "Planı qur");
+            var m = $("plMsg");
+            if (m) m.innerHTML = msg("err", fail(e));
+          });
+      });
+      return;
+    }
+
+    box.innerHTML = plans.map(function (p) {
+      var items = p.items || [];
+      var cur = null, lastDone = null;
+      for (var i = 0; i < items.length; i++) {
+        if (!items[i].done && !cur) cur = items[i];
+        if (items[i].done) lastDone = items[i];
+      }
+      var pct = p.total ? Math.round(p.done * 100 / p.total) : 0;
+      /*  Alt movzular varsa setirler artiq FESIL deyil, DERSDIR -
+          "2 / 47 ders" demek "2 / 11 movzu"dan durustdur.  */
+      var grouped = items.some(function (x) { return !!x.group_id; });
+      var unit = grouped ? " dərs · " : " mövzu · ";
+      /*  Ardicil setirleri feslere boluruk.  Fesil DB-de setir deyil -
+          server onu topics.parent_id-den toredir, biz burada yigiriq.  */
+      var blocks = [];
+      items.forEach(function (it) {
+        var last = blocks[blocks.length - 1];
+        if (it.group_id && last && last.gid === it.group_id) {
+          last.items.push(it); return;
+        }
+        blocks.push({ gid: it.group_id || null, name: it.group || "", items: [it] });
+      });
+      return '<div class="card plan" data-p="' + esc(p.id) + '">' +
+        '<div class="plhead"><b>' + esc(p.subject) + " · " + esc(p.level) + "</b>" +
+          "<span>" + p.done + " / " + p.total + unit + pct + "%</span></div>" +
+        '<div class="plbar"><i style="width:' + pct + '%"></i></div>' +
+        (cur
+          ? '<div class="plcur"><span class="pltag">Növbəti ' +
+              (cur.group ? "dərs" : "mövzu") + "</span>" +
+            (cur.group
+              ? '<span class="plgn">' + esc(cur.group) +
+                (cur.gtotal ? " · " + cur.gpos + "/" + cur.gtotal : "") + "</span>"
+              : "") +
+            "<b>" + cur.ord + ". " + esc(cur.topic) + "</b>" +
+            '<div class="plbtns">' +
+              '<button class="btn go sm" data-pldone="' + esc(cur.id) + '"' +
+                (d.paid ? "" : " disabled title=\"Abunə paketi ilə\"") + ">" +
+                ic("check") + "Keçildi</button>" +
+            "</div>" +
+            '<div class="plslot" id="pls-' + esc(p.id) + '"></div></div>'
+          : '<div class="plcur done"><b>🎉 Bütün mövzular keçilib!</b>' +
+            '<p class="muted" style="margin:6px 0 0">Plan tamamlanıb — ' +
+            "hesabatda zəif mövzulara baxıb təkrar testlər verə bilərsiniz.</p></div>") +
+        "<details><summary>Bütün mövzular</summary>" +
+          '<div class="pllist">' + blocks.map(function (bl) {
+            var rows = bl.items.map(plRow).join("");
+            if (!bl.gid) return rows;          //  fesilsiz - duz setir
+            /*  Fesil YIGILMIS gelir.  8-ci sinifde 11 fesil ~50 ders
+                demekdir - hamisi acıq olsa telefonda ekran udulur.
+                Yalniz cari dersin fesli acıq acilir.  */
+            var nd = bl.items.filter(function (x) { return x.done; }).length;
+            var acik = cur && bl.items.some(function (x) { return x.id === cur.id; });
+            return '<details class="plgrp"' + (acik ? " open" : "") + ">" +
+              "<summary><b>" + esc(bl.name) + "</b>" +
+              '<span class="plgc' + (nd === bl.items.length ? " ok" : "") + '">' +
+                nd + "/" + bl.items.length + "</span></summary>" +
+              rows + "</details>";
+          }).join("") + "</div>" +
+          '<div class="plmbar" id="plmb-' + esc(p.id) + '"></div>' +
+          '<button class="btn sm ghost" data-pldel="' + esc(p.id) +
+            '" style="margin-top:10px">Planı sil</button>' +
+        "</details>" +
+        '<div id="plm-' + esc(p.id) + '"></div>' +
+      "</div>";
+
+      function plRow(it) {
+            /* Movzu testinin qrup ortalamasi - plan adaptiv olsun:
+               zeif cixan movzu qirmizi gorunur, "tekrar yig" teklif olunur */
+            var avgN = it.avg == null ? null : Number(it.avg);
+            var avgChip = "";
+            if (it.done && avgN != null) {
+              avgChip = '<b class="plavg ' +
+                (avgN >= 80 ? "pvh" : (avgN >= 60 ? "pvm" : "pvl")) +
+                '" title="Qrup ortalaması · ' + (Number(it.takers) || 0) +
+                ' şagird">' + Math.round(avgN) + "%</b>";
+            }
+            var weak = it.done && it.test_id && avgN != null && avgN < 60;
+            return '<div class="plrow' + (it.done ? " ok" : "") +
+              (cur && it.id === cur.id ? " cur" : "") + '">' +
+              "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
+              "<span>" + esc(it.topic) +
+                (it.done && it.done_at
+                  ? ' <s class="pldate">· ' + dateAz(it.done_at) + "</s>" : "") +
+              "</span>" +
+              avgChip +
+              (it.done && d.paid
+                ? '<input type="checkbox" class="plck" data-plck="' + esc(p.id) +
+                  '" value="' + esc(it.id) + '" title="Birgə test üçün seç">'
+                : "") +
+              (it.test_id
+                ? '<a href="#/t/' + esc(it.test_id) + '" class="pltest">vərəq</a>'
+                /*  can_test serverden gelir: fesilsiz movzuda ozu,
+                    fesildə ise YALNIZ son dersde.  Suallar fesle
+                    baglidir - hər dersde teklif etsek bes ders eyni
+                    hovuzdan demek olar eyni testi yigardi.  */
+                : (it.can_test
+                    ? '<button class="plmk" data-plmk="' + esc(it.id) + '"' +
+                      (d.paid ? "" : ' disabled title="Abunə paketi ilə"') +
+                      ">test yığ</button>"
+                    : "")) +
+              (weak && d.paid
+                ? '<button class="plmk plre" data-plmk="' + esc(it.id) +
+                  '" title="Qrup zəif nəticə göstərib — yeni yoxlama yığ">' +
+                  "təkrar yığ</button>"
+                : "") +
+              (lastDone && it.id === lastDone.id
+                ? '<button class="plundo" data-plundo="' + esc(it.id) +
+                  '" title="Geri qaytar">geri</button>' : "") +
+            "</div>";
+      }
+    }).join("");
+    bindPlan(g);
+  }
+
+  function bindPlan(g) {
+    var box = $("planBox");
+    if (!box || box.dataset.bound) { if (box) rebindOnly(); return; }
+    box.dataset.bound = "1";
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b || busy) return;
+      var id = b.getAttribute("data-pldone");
+      if (id) return planDone(g, b, id);
+      id = b.getAttribute("data-plundo");
+      if (id) return planUndo(g, id);
+      id = b.getAttribute("data-pldel");
+      if (id) {
+        if (!confirm("Plan silinsin? İrəliləyiş jurnalı itəcək " +
+                     "(yığılmış testlər qalır).")) return;
+        busy = true;
+        sb.rpc("rpc_plan_delete", { p_plan_id: id })
+          .then(function () { busy = false; loadPlan(g); })
+          .catch(function () { busy = false; });
+        return;
+      }
+      id = b.getAttribute("data-pltest");
+      if (id) return planTest(g, b, id);
+      id = b.getAttribute("data-plmk");
+      if (id) return planOfferLate(id);
+      id = b.getAttribute("data-plmulti");
+      if (id) {
+        var ids = [];
+        Array.prototype.forEach.call(
+          box.querySelectorAll('[data-plck="' + id + '"]:checked'),
+          function (c) { ids.push(c.value); });
+        if (ids.length < 2) return;
+        var s3 = $("pls-" + id); if (s3) s3.innerHTML = "";
+        var m3 = $("plm-" + id);
+        if (m3) {
+          m3.innerHTML = offerHtml(
+            "Seçilən " + ids.length + " mövzudan qarışıq test yığılsınmı?",
+            ids.join(","), id);
+          m3.scrollIntoView({ block: "nearest" });
+        }
+        return;
+      }
+      id = b.getAttribute("data-plskip");
+      if (id) {
+        var s2 = $("pls-" + id); if (s2) s2.innerHTML = "";
+        var m2 = $("plm-" + id); if (m2) m2.innerHTML = "";
+        return;
+      }
+    });
+    //  birge test: 2+ movzu secilende duyme cixir
+    box.addEventListener("change", function (ev) {
+      var c = ev.target;
+      var pid = c && c.getAttribute ? c.getAttribute("data-plck") : null;
+      if (!pid) return;
+      var n = box.querySelectorAll('[data-plck="' + pid + '"]:checked').length;
+      var bar = $("plmb-" + pid);
+      if (bar) bar.innerHTML = n >= 2
+        ? '<button class="btn sm" data-plmulti="' + esc(pid) + '">' +
+          "Seçilən " + n + " mövzudan birgə test yığ</button>"
+        : "";
+    });
+    function rebindOnly() {}
+  }
+
+  /*  can_test-i YERLI olaraq yeniden hesablayir.
+      Serverin qaydasi ile eynidir (db/32): fesilsiz movzuda ozu,
+      fesildə ise YALNIZ son ders.  Niye tekrarlanir: "Kecildi"
+      basilanda ekran DERHAL yenilenir, serverden yeniden sorusmuruq -
+      yoxsa acilan "test yigilsinmi?" teklifi silinerdi.  Server yene
+      de esas menbedir: sehife yenilenende onun deyeri gelir.  */
+  function planCanTest(p) {
+    var items = p.items || [];
+    items.forEach(function (it, i) {
+      if (!it.done) { it.can_test = false; return; }
+      if (!it.group_id) { it.can_test = true; return; }
+      var son = true;
+      for (var j = i + 1; j < items.length; j++) {
+        if (items[j].group_id === it.group_id) { son = false; break; }
+      }
+      it.can_test = son;
+    });
+  }
+
+  function planDone(g, b, itemId) {
+    busy = true; b.disabled = true;
+    sb.rpc("rpc_plan_done", { p_item_id: itemId }).then(function () {
+      busy = false;
+      //  yerli veziyyeti yenile ve TEKLIF goster - "komekci isci" ani
+      var plan = null, topic = "";
+      (PLD.plans || []).forEach(function (p) {
+        (p.items || []).forEach(function (it) {
+          if (it.id === itemId) {
+            it.done = true;
+            //  done_at-i da qoyuruq: yoxsa setirde tarix yalniz
+            //  sehife yenilenenden sonra cixirdi
+            it.done_at = new Date().toISOString();
+            p.done++; plan = p; topic = it.topic;
+          }
+        });
+        planCanTest(p);
+      });
+      drawPlan(g);
+      var slot = plan && $("pls-" + plan.id);
+      if (slot) {
+        slot.innerHTML = offerHtml(
+          "«" + esc(topic) + "» keçildi. Yoxlama testi yığılsınmı?",
+          itemId, plan.id);
+      }
+    }).catch(function (e) {
+      busy = false; b.disabled = false;
+      alert(fail(e));
+    });
+  }
+
+  /* Test teklifi qutusu - hem "Kecildi" aninda, hem sonradan siyahidan */
+  function offerHtml(head, itemId, planId) {
+    return '<div class="ploffer">' +
+      "<b>" + head + "</b>" +
+      '<p class="muted" style="margin:4px 0 10px">Test bu mövzunun ' +
+        "suallarından yığılır və qrupa dərhal tapşırıq verilir " +
+        "(son tarix: 7 gün, 1 cəhd).</p>" +
+      '<div class="plbtns">' +
+        '<input id="plCnt" type="number" min="3" max="50" value="15">' +
+        '<button class="btn go sm" data-pltest="' + esc(itemId) + '">' +
+          "Yığ və tapşırıq ver</button>" +
+        '<button class="btn sm ghost" data-plskip="' + esc(planId) +
+          '">Sonra</button>' +
+      "</div>" +
+    "</div>";
+  }
+
+  /* "Sonra" deyilmis (ve ya bir nece movzu kecilmis) halda siyahidan
+     istenilen KECILMIS movzu ucun teklifi yeniden acmaq */
+  function planOfferLate(itemId) {
+    var plan = null, topic = "";
+    (PLD && PLD.plans || []).forEach(function (p) {
+      (p.items || []).forEach(function (it) {
+        if (it.id === itemId) { plan = p; topic = it.topic; }
+      });
+    });
+    if (!plan) return;
+    var s = $("pls-" + plan.id);
+    if (s) s.innerHTML = "";
+    var m = $("plm-" + plan.id);
+    if (m) {
+      m.innerHTML = offerHtml(
+        "«" + esc(topic) + "» — yoxlama testi yığılsınmı?", itemId, plan.id);
+      m.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  function planUndo(g, itemId) {
+    busy = true;
+    sb.rpc("rpc_plan_undo", { p_item_id: itemId })
+      .then(function () { busy = false; loadPlan(g); })
+      .catch(function (e) { busy = false; alert(fail(e)); });
+  }
+
+  function planTest(g, b, itemId) {
+    var n = Number(($("plCnt") || {}).value) || 15;
+    //  vergullu id = bir nece movzudan QARISIQ test
+    var multi = itemId.indexOf(",") >= 0;
+    var card = b.closest ? b.closest(".plan") : null;
+    busy = true; b.disabled = true;
+    b.textContent = "Yığılır…";
+    (multi
+      ? sb.rpc("rpc_plan_test_multi",
+               { p_item_ids: itemId.split(","), p_count: n })
+      : sb.rpc("rpc_plan_test", { p_item_id: itemId, p_count: n }))
+      .then(function (r) {
+        busy = false;
+        //  tek movzuda itemin testini yerli olaraq bagla; qarisiq test
+        //  item-e baglanmir - netice mesaji linki verir
+        var pid = card ? card.getAttribute("data-p") : null;
+        if (!multi) {
+          (PLD.plans || []).forEach(function (p) {
+            (p.items || []).forEach(function (it) {
+              if (it.id === itemId) { it.test_id = r.test_id; pid = p.id; }
+            });
+          });
+        }
+        drawPlan(g);
+        var m = $("plm-" + pid);
+        //  msg() metni esc edir - link ucun qutunu ozumuz yigiriq
+        if (m) m.innerHTML = '<div class="ok">' + ic("check") +
+          "<span>Test yığıldı və qrupa tapşırıq verildi. " +
+          '<a href="#/t/' + esc(r.test_id) + '">Vərəqə bax</a></span></div>';
+      })
+      .catch(function (e) {
+        busy = false; b.disabled = false;
+        b.textContent = "Yığ və tapşırıq ver";
+        var slot = b.closest(".plslot") || b.parentElement;
+        var err = document.createElement("div");
+        err.className = "rerr";
+        err.textContent = fail(e);
+        slot.appendChild(err);
+      });
+  }
+
   function screenGroup(id) {
     var live = guard();
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     Promise.all([
-      sb.select("classes", { select: "id,name,join_code,account_id,level_id", eq: { id: id } }),
+      sb.select("classes", { select: "id,name,account_id,level_id", eq: { id: id } }),
       loadLevels()
     ])
       .then(function (res) {
@@ -484,9 +1141,8 @@
         '<div class="muted" style="display:flex;align-items:center;gap:7px;' +
           'margin-top:8px;flex-wrap:wrap" id="gMeta">' +
           (levelName(g.level_id)
-            ? "<span>" + esc(levelName(g.level_id)) + "</span><span>·</span>" : "") +
-          "<span>Qoşulma kodu</span>" +
-          '<span class="code key">' + esc(g.join_code) + "</span></div>" +
+            ? "<span>" + esc(levelName(g.level_id)) + "</span>" : "") +
+          "</div>" +
         '<div class="spacer"></div>' +
         '<div class="row two">' +
           '<button class="btn wide" id="btnAsgs">' + ic("clip") + "Tapşırıqlar</button>" +
@@ -494,6 +1150,8 @@
         "</div>" +
       "</div>" +
       '<div id="alerts"></div>' +
+      "<h2>Dərs planı</h2>" +
+      '<div id="planBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>' +
       "<h2>Şagirdlər</h2>" +
       '<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
@@ -511,6 +1169,7 @@
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
     loadAlerts(g.id);
+    loadPlan(g);
     on("btnRen", "click", function () { renameGroup(g); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("btnStu", "click", addStudent);
@@ -571,7 +1230,11 @@
       if (nm === g.name && newLevel === g.level_id) { close(); return; }
       $("gRenErr").innerHTML = "";
       setBusy("gSave", true, "Yadda saxla");
-      sb.update("classes", { id: g.id }, { name: nm, level_id: newLevel })
+      //  Sinif deyisirse proqram da onunla getmelidir - yoxsa qrup
+      //  "orta" sinifde, "ibtidai" proqramda qalir (uygunsuz melumat).
+      var patch = { name: nm, level_id: newLevel };
+      if (lv) patch.program_id = lv.program_id || null;
+      sb.update("classes", { id: g.id }, patch)
         .then(function () {
           g.name = nm; g.level_id = newLevel;
           topTitle.textContent = nm;
@@ -580,9 +1243,7 @@
           if (meta) {
             meta.innerHTML =
               (levelName(newLevel)
-                ? "<span>" + esc(levelName(newLevel)) + "</span><span>·</span>" : "") +
-              "<span>Qoşulma kodu</span>" +
-              '<span class="code key">' + esc(g.join_code) + "</span>";
+                ? "<span>" + esc(levelName(newLevel)) + "</span>" : "");
           }
           close();
         })
@@ -755,10 +1416,24 @@
     return d.getDate() + " " + ay[d.getMonth()];
   }
 
+  /* Nisbi vaxt: siyahilarda "3 gun evvel" tarixden tez oxunur */
+  function agoAz(iso) {
+    if (!iso) return "heç vaxt";
+    var d = new Date(iso);
+    if (isNaN(d)) return "heç vaxt";
+    var g = Math.floor((Date.now() - d.getTime()) / 86400000);
+    if (g <= 0) return "bu gün";
+    if (g === 1) return "dünən";
+    if (g < 30) return g + " gün əvvəl";
+    return dateAz(iso);
+  }
+
   /* Menimseme zolagi: 0-49 zeif, 50-74 orta, 75+ yaxsi */
   function meter(ratio) {
     var r = pct(ratio);
-    var cls = r >= 75 ? "ok" : (r >= 50 ? "mid" : "low");
+    /*  DIQQET: "ok" YAZMA - base.css-de umumi mesaj qutusudur;
+        meter-i mint renge boyayib zolagi gizledirdi (3-cu toqqusma!) */
+    var cls = r >= 75 ? "m-ok" : (r >= 50 ? "m-mid" : "m-low");
     return '<div class="meter ' + cls + '"><i style="width:' + r + '%"></i></div>';
   }
 
@@ -784,9 +1459,9 @@
             ic("refresh") + "Yenilə</button></div>" +
         '<div class="spacer"></div>' +
         '<div class="stats">' +
-          statTile(sm.active + " / " + sm.students, "aktiv şagird") +
-          statTile(pct(sm.avg) + "%", "orta nəticə") +
-          statTile(sm.attempts || 0, "işlənmiş test") +
+          statTile(sm.active + " / " + sm.students, "aktiv şagird", "g1") +
+          statTile(pct(sm.avg) + "%", "orta nəticə", "g2") +
+          statTile(sm.attempts || 0, "işlənmiş test", "g3") +
         "</div>";
 
       if (!r.paid) {
@@ -807,7 +1482,7 @@
             "<i><span>" + (s.attempts || 0) + " test</span><span>·</span>" +
             "<span>son: " + dateAz(s.last_at) + "</span></i>" +
             meter(s.avg) + "</div>" +
-            '<span class="pctv">' + (s.attempts ? pct(s.avg) + "%" : "—") + "</span>" +
+            (s.attempts ? pctChip(s.avg) : '<span class="pctv">—</span>') +
             '<span class="arrow">' + ic("right") + "</span></button>";
         }).join("") + "</div>";
       }
@@ -824,7 +1499,7 @@
           return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
             "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
             meter(t.ratio) + "</div>" +
-            '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
+            pctChip(t.ratio) + "</div>";
         }).join("") + "</div>";
         /* Dovreni baglayan duyme: zeif movzular -> hazir test.
            Generator qrupun SEHV ETDIYI suallara benzeyenleri de
@@ -842,7 +1517,7 @@
           r.recent.map(function (x) {
             return '<div class="trow"><div class="g"><b>' + esc(x.student) + "</b>" +
               "<i>" + esc(x.test) + " · " + dateAz(x.at) + "</i></div>" +
-              '<span class="pctv">' + pct(x.percent) + "%</span></div>";
+              pctChip(x.percent) + "</div>";
           }).join("") + "</div>";
       }
 
@@ -879,16 +1554,58 @@
 
   /* Sinif siyahisi hem qrup yaratmaqda, hem de gostermekde lazimdir -
      bir defe yuklenib yaddasda saxlanilir. */
+  /* ------------------------------------------- tedris fennleri (filtr)
+     Hesabda secilmis fennler fenn siyahilarini daraldir: sual banki,
+     generator, ders plani.  Bos siyahi ve ya "secilenlerde hec ne
+     yoxdur" hali = tam siyahi.  Bu filtrdir, mehdudiyyet deyil. */
+  function mySubs() { return (ACC && ACC.subjects) || []; }
+  function subFilter(list, keep) {
+    var s = mySubs();
+    if (!s.length) return list || [];
+    var out = (list || []).filter(function (x) {
+      return s.indexOf(x.slug) >= 0 || (keep && x.slug === keep);
+    });
+    return out.length ? out : (list || []);
+  }
+  /* Fenn nisanlari (toggle) - qurulus ve profil ekranlarinda */
+  function subChips(boxId, selected) {
+    sb.select("subjects", { select: "slug,name", order: "sort" })
+      .then(function (rows) {
+        var box = $(boxId);
+        if (!box) return;
+        box.innerHTML = (rows || []).map(function (s) {
+          return '<button type="button" class="chip' +
+            (selected.indexOf(s.slug) >= 0 ? " on" : "") +
+            '" data-sub="' + esc(s.slug) + '">' + esc(s.name) + "</button>";
+        }).join("");
+        box.addEventListener("click", function (ev) {
+          var b = ev.target.closest ? ev.target.closest("[data-sub]") : null;
+          if (b) b.classList.toggle("on");
+        });
+      }).catch(function () {
+        var box = $(boxId);
+        if (box) box.innerHTML = "";
+      });
+  }
+  function chipVals(boxId) {
+    var out = [];
+    Array.prototype.forEach.call(
+      document.querySelectorAll("#" + boxId + " .chip.on"),
+      function (b) { out.push(b.getAttribute("data-sub")); });
+    return out;
+  }
+
   function loadLevels() {
     if (LEVELS) return Promise.resolve(LEVELS);
-    return sb.select("programs", { select: "id,slug", eq: { slug: "ibtidai" } })
-      .then(function (ps) {
-        if (!ps || !ps.length) return [];
-        return sb.select("levels", {
-          select: "id,code,name", eq: { program_id: ps[0].id }, order: "sort"
+    //  Sinif esasli seviyyeler (kod reqemdir: 1-11). MIQ/sertifikasiya
+    //  pilleleri sinif deyil - bura dusmur.
+    return sb.select("levels", { select: "id,code,name,program_id", order: "sort" })
+      .then(function (rows) {
+        LEVELS = (rows || []).filter(function (l) {
+          return /^[0-9]+$/.test(l.code);
         });
+        return LEVELS;
       })
-      .then(function (rows) { LEVELS = rows || []; return LEVELS; })
       .catch(function () { LEVELS = []; return LEVELS; });
   }
 
@@ -896,6 +1613,14 @@
     if (!id || !LEVELS) return "";
     var l = LEVELS.filter(function (x) { return x.id === id; })[0];
     return l ? l.name : "";
+  }
+
+  //  Qrupun sinif kodu (1-11) - generator suzgeci kodla isleyir,
+  //  qrupda ise level_id (uuid) durur.
+  function levelCode(id) {
+    if (!id || !LEVELS) return "";
+    var l = LEVELS.filter(function (x) { return x.id === id; })[0];
+    return l ? l.code : "";
   }
 
   function levelOptions(sel) {
@@ -945,7 +1670,10 @@
       tr = la - pa >= 5 ? "up" : (pa - la >= 5 ? "down" : "flat");
     }
 
-    var tops = (r.topics || []).slice().sort(function (a, b) {
+    var tops = (r.topics || []).filter(function (t) {
+      //  1 cavabliq movzu valideyn mektubuna dusmesin - yaniltici olur
+      return Number(t.total) >= 2;
+    }).sort(function (a, b) {
       return Number(b.ratio) - Number(a.ratio);
     });
     var strong = tops.filter(function (t) { return Number(t.ratio) >= 80; }).slice(0, 2);
@@ -991,13 +1719,50 @@
   function av(name) {
     var n = String(name || "?").trim();
     var ch = n.charAt(0).toUpperCase() || "?";
-    var k = 0;
-    for (var i = 0; i < n.length; i++) k = (k + n.charCodeAt(i)) % 6;
+    var k = 7;
+    for (var i = 0; i < n.length; i++) k = (k * 31 + n.charCodeAt(i)) % 100003;
+    k = k % 6;
     return '<span class="av c' + k + '">' + esc(ch) + "</span>";
   }
 
-  function statTile(val, lbl) {
-    return '<div class="stat"><b>' + esc(String(val)) + "</b><span>" + esc(lbl) + "</span></div>";
+  /* Faiz cipi - deyere gore reng: >=80 yasil, >=60 narinci, alti qirmizi */
+  function pctChip(p) {
+    var n = Number(p) || 0;
+    var c = n >= 80 ? " pvh" : (n >= 60 ? " pvm" : " pvl");
+    return '<span class="pctv' + c + '">' + pct(p) + "%</span>";
+  }
+
+  /* Siqnal setri - hem ana sehifede, hem bildirisler ekraninda */
+  function alertRow(a) {
+    var tx;
+    if (a.kind === "risk") {
+      tx = "son testlərdə geriləyir (" + pct(a.prev3) + "% → " +
+           pct(a.last3) + "%)" + (a.topic ? " · zəif: " + esc(a.topic) : "");
+    } else if (a.kind === "weak") {
+      tx = "zəif mövzu: " + esc(a.topic || "") +
+           " (" + pct(a.topic_ratio) + "%)";
+    } else {
+      tx = "son 3 testdə sabit " + pct(a.last3) + "% — əla gedir";
+    }
+    return '<button class="al ' + a.kind + '" data-al="' +
+      esc(a.student_id) + '" data-g="' + esc(a.class_id) + '">' +
+      ic(a.kind === "star" ? "check" : "warn") +
+      "<span><b>" + esc(a.name) + "</b> <span class=\"muted\">(" +
+        esc(a["class"] || "") + ")</span> " + tx + "</span>" +
+      '<span class="arrow">' + ic("right") + "</span></button>";
+  }
+  function bindAlerts(box) {
+    if (!box) return;
+    Array.prototype.forEach.call(box.querySelectorAll("[data-al]"), function (b) {
+      b.addEventListener("click", function () {
+        nav("#/s/" + b.getAttribute("data-al") + "/" + b.getAttribute("data-g"));
+      });
+    });
+  }
+
+  function statTile(val, lbl, cls) {
+    return '<div class="stat ' + (cls || "") + '"><b>' + esc(String(val)) +
+      "</b><span>" + esc(lbl) + "</span></div>";
   }
 
   function screenStudent(id, classId) {
@@ -1011,14 +1776,16 @@
       var h =
         '<button class="btn sm ghost" id="btnB">' + ic("back") + "Geri</button>" +
         '<div class="spacer"></div>' +
-        '<div class="card tight"><h1>' + esc(s.full_name) + "</h1>" +
-          '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:8px">' +
+        '<div class="card tight"><div class="shead">' + av(s.full_name) +
+          "<div><h1>" + esc(s.full_name) + "</h1>" +
+          '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:6px">' +
             "<span>" + esc(s.display_name) + "</span>" +
-            '<span class="code key">' + esc(s.login_code) + "</span></div></div>" +
+            '<span class="code key">' + esc(s.login_code) + "</span></div>" +
+          "</div></div></div>" +
         '<div class="stats">' +
-          statTile(sm.attempts || 0, "test") +
-          statTile(pct(sm.avg) + "%", "orta") +
-          statTile(pct(sm.best) + "%", "ən yaxşı") +
+          statTile(sm.attempts || 0, "test", "g1") +
+          statTile(pct(sm.avg) + "%", "orta", "g2") +
+          statTile(pct(sm.best) + "%", "ən yaxşı", "g3") +
         "</div>";
 
       if (r.topics !== null) {
@@ -1036,19 +1803,48 @@
       }
 
       h += "<h2>Mövzu üzrə mənimsəmə</h2>";
+      var minA = Number(r.min_answers) || 3;
       if (r.topics === null) {
         h += upsell("Mövzu üzrə mənimsəmə");
       } else if (!r.topics.length) {
         h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("chart") +
-             "</div><b>Hələ kifayət qədər cavab yoxdur</b></div></div>";
+             "</div><b>Hələ cavab yoxdur</b>Şagird test işlədikcə " +
+             "mövzular burada yığılacaq.</div></div>";
       } else {
-        h += '<div class="card pad0">' + r.topics.map(function (t) {
-          return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
-            "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
-            meter(t.ratio) + "</div>" +
-            '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
-        }).join("") + "</div>";
-        var sweak = r.topics.filter(function (t) { return Number(t.ratio) < 60 && t.id; });
+        //  Etibarli movzular (>= minA cavab) esas siyahida - zeifden
+        //  gucluye; 1-2 cavabliq movzular sehifeni yemesin deye ayrica
+        //  YIGILMIS bolmede, neytral (rengsiz) faizle gedir.
+        var tsure = r.topics.filter(function (t) { return Number(t.total) >= minA; });
+        var tlow  = r.topics.filter(function (t) { return Number(t.total) < minA; });
+        if (tsure.length) {
+          h += '<div class="card pad0">' + tsure.map(function (t) {
+            var bad = Number(t.ratio) < 60;
+            return '<div class="trow"><div class="g"><b>' +
+              (bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
+              esc(t.name) + "</b>" +
+              "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
+              meter(t.ratio) + "</div>" +
+              pctChip(t.ratio) + "</div>";
+          }).join("") + "</div>";
+        } else {
+          h += '<div class="card"><p class="muted" style="margin:0">Hər mövzu üzrə ' +
+            "ən azı " + minA + " cavab yığılanda etibarlı mənzərə burada görünəcək. " +
+            "İlkin cavablar aşağıdakı bölmədədir.</p></div>";
+        }
+        if (tlow.length) {
+          h += '<details class="more filt" style="margin-top:10px">' +
+            "<summary>Az məlumatlı mövzular " +
+              '<span class="fn">' + tlow.length + "</span></summary>" +
+            '<div class="card pad0" style="margin-top:10px">' + tlow.map(function (t) {
+              return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
+                "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total +
+                ' · <span class="lowtag">az məlumat</span></i></div>' +
+                '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
+            }).join("") + "</div></details>";
+        }
+        var sweak = tsure.filter(function (t) {
+          return Number(t.ratio) < 60 && t.id;
+        });
         if (sweak.length) {
           h += '<div class="spacer"></div>' +
             '<button class="btn go wide" id="btnRem">' + ic("gen") +
@@ -1057,30 +1853,52 @@
       }
 
       if (r.weak !== null && r.weak && r.weak.length) {
-        /* Uzun siyahi sehifeni yeyirdi - indi QATLANIR: bagli halda
-           yalniz basliq + say gorunur, klikle acilir.  Setirler de
-           yigcamdir: sual bir-iki setir, izah bir setir. */
-        h += '<details class="more filt wrongbox">' +
+        /* Sehv edilen suallar: movzu teqli, ALTINDA "sehvler uzerinde is"
+           duymesi - siyahi baxis yox, HEREKET nokresidir. */
+        h += '<details class="more filt wrongbox" open>' +
           "<summary>Təkrar səhv edilən suallar " +
             '<span class="fn">' + r.weak.length + "</span></summary>" +
           '<div class="card pad0" style="margin-top:10px">' +
           r.weak.map(function (w) {
             return '<div class="wq"><div class="g"><b>' + esc(w.body) + "</b>" +
+              (w.topic ? '<span class="wtag">' + esc(w.topic) + "</span>" : "") +
               (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
               '</div><span class="wn">' + w.wrong + "×</span></div>";
-          }).join("") + "</div></details>";
+          }).join("") + "</div>" +
+          '<button class="btn go wide" id="btnFix" style="margin-top:10px">' +
+            ic("gen") + "Bu səhvlərdən təkrar testi yığ (" +
+            r.weak.length + " sual)</button>" +
+          '<div id="fixMsg"></div>' +
+        "</details>";
+      }
+
+      var at = r.attempts || [];
+      /* Dinamika: kohneden yeniye, her sutun bir test */
+      if (at.length >= 2) {
+        var bars = at.slice(0, 12).slice().reverse();
+        h += "<h2>Dinamika</h2>" +
+          '<div class="card"><div class="dyn">' + bars.map(function (a) {
+            var p = Math.max(6, Math.round(Number(a.percent) || 0));
+            var c = p >= 80 ? "dh" : (p >= 60 ? "dm" : "dl");
+            return '<i class="' + c + '" style="height:' + p + '%" title="' +
+              esc(a.test) + " · " + pct(a.percent) + '%"></i>';
+          }).join("") + "</div>" +
+          '<p class="muted" style="margin:10px 0 0">Soldan sağa: köhnədən ' +
+            "yeniyə. Yaşıl ≥80%, narıncı 60-79%, qırmızı &lt;60%.</p></div>";
       }
 
       h += "<h2>Test tarixçəsi</h2>";
-      var at = r.attempts || [];
       if (!at.length) {
         h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("clock") +
              "</div><b>Hələ test işləməyib</b></div></div>";
       } else {
-        h += '<div class="card pad0">' + at.map(function (a) {
-          return '<div class="trow"><div class="g"><b>' + esc(a.test) + "</b>" +
-            "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max + "</i></div>" +
-            '<span class="pctv">' + pct(a.percent) + "%</span></div>";
+        h += '<div class="card pad0" id="atList">' + at.map(function (a) {
+          return '<button class="trow atr" data-att="' + esc(a.id) + '">' +
+            '<div class="g"><b>' + esc(a.test) + "</b>" +
+            "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max +
+            ' · <span class="lnk2">cavab vərəqi</span></i></div>' +
+            pctChip(a.percent) + "</button>" +
+            '<div class="sheet hide" id="sh-' + esc(a.id) + '"></div>';
         }).join("") + "</div>";
       }
 
@@ -1101,8 +1919,64 @@
       }
       on("btnB", "click", function () { nav("#/r/" + classId); });
       on("btnRem", "click", function () {
-        var sweak = (r.topics || []).filter(function (t) { return Number(t.ratio) < 60 && t.id; });
+        var minA2 = Number(r.min_answers) || 3;
+        var sweak = (r.topics || []).filter(function (t) {
+          return Number(t.ratio) < 60 && Number(t.total) >= minA2 && t.id;
+        });
         remedialGen(classId, sweak);
+      });
+
+      //  Sehvler uzerinde is: mehz sehv edilen suallardan ferdi test
+      on("btnFix", "click", function () {
+        if (busy) return;
+        setBusy("btnFix", true, "Bu səhvlərdən təkrar testi yığ");
+        sb.rpc("rpc_remedial_test", { p_student_id: id, p_count: 10 })
+          .then(function (res) {
+            setBusy("btnFix", false, "Bu səhvlərdən təkrar testi yığ");
+            //  msg() metni esc edir - linki ozumuz yigiriq
+            $("fixMsg").innerHTML = '<div class="ok" style="margin-top:10px">' +
+              ic("check") + "<span>" + (Number(res.count) || 0) +
+              " sualdan test yığıldı və tapşırıq YALNIZ bu şagirdə verildi " +
+              "— qrupun qalanı onu görmür. " +
+              '<a href="#/t/' + esc(res.test_id) + '">Vərəqə bax</a></span></div>';
+          })
+          .catch(function (e) {
+            setBusy("btnFix", false, "Bu səhvlərdən təkrar testi yığ");
+            $("fixMsg").innerHTML = msg("err", fail(e));
+          });
+      });
+
+      //  Cavab vereqi: setre klik - acilir/baglanir, ilk aciliska yuklenir
+      var atl = $("atList");
+      if (atl) atl.addEventListener("click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest("[data-att]") : null;
+        if (!b) return;
+        var box = $("sh-" + b.getAttribute("data-att"));
+        if (!box) return;
+        if (!box.classList.contains("hide")) { box.classList.add("hide"); return; }
+        box.classList.remove("hide");
+        if (box.dataset.done) return;
+        box.innerHTML = '<div class="skel" style="padding:12px 16px">Yüklənir…</div>';
+        sb.rpc("rpc_attempt_sheet", { p_attempt_id: b.getAttribute("data-att") })
+          .then(function (s) {
+            box.dataset.done = "1";
+            box.innerHTML = (s.items || []).map(function (q) {
+              return '<div class="shq">' +
+                "<b>" + q.ord + ". " + esc(q.body) + "</b>" +
+                '<div class="sa">' +
+                  '<span class="' + (q.ok ? "sc" : "sw") + '">Cavabı: ' +
+                    esc(q.chosen) + "</span>" +
+                  (q.ok ? "" : '<span class="sc">Düzü: ' + esc(q.correct) + "</span>") +
+                "</div>" +
+                (!q.ok && q.explanation
+                  ? '<i class="sex">' + esc(q.explanation) + "</i>" : "") +
+              "</div>";
+            }).join("");
+          })
+          .catch(function (e) {
+            box.innerHTML = '<div style="padding:10px 16px">' +
+              msg("err", fail(e)) + "</div>";
+          });
       });
     }).catch(function (e) {
       if (!live()) return;
@@ -1128,16 +2002,22 @@
     Promise.all([
       sb.select("classes", { select: "id,name,level_id", eq: { id: gid } }),
       sb.rpc("rpc_class_assignments", { p_class_id: gid }),
-      loadLevels()
+      loadLevels(),
+      //  "kime" secimi ucun qrupun aktiv sagirdleri
+      sb.select("students", {
+        select: "id,display_name",
+        eq: { class_id: gid, is_active: true },
+        order: "display_name"
+      }).catch(function () { return []; })
     ]).then(function (res) {
       if (!live()) return;
       var rows = res[0];
       if (!rows || !rows.length) throw new Error("Qrup tapılmadı.");
-      drawAssign(rows[0], res[1] || {});
+      drawAssign(rows[0], res[1] || {}, res[3] || []);
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
-  function drawAssign(g, d) {
+  function drawAssign(g, d, students) {
     topTitle.textContent = g.name;
     var items = d.items || [];
     var free  = d.free_practice !== false;
@@ -1161,13 +2041,26 @@
       "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Verilmiş tapşırıqlar</h2>" +
-      '<div id="asgList" class="card pad0">' + asgRows(items, d.students || 0) + "</div>" +
+      '<div class="segs asgf" id="asgTabs"></div>' +
+      '<div id="asgList" class="card pad0"></div>' +
       '<div class="spacer"></div>' +
       "<h2>Yeni tapşırıq</h2>" +
-      '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>'
+      '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>' +
+      '<div class="spacer"></div>' +
+      /* Bu ekran test YARATMIR - hazir testi qrupa yoneldir.
+         Muellimler bunu qarisdirirdi: siyahida yalniz kohneler
+         gorunurdu, yenisini haradan yigmagi ekran demirdi. */
+      '<div class="card tight">' +
+        '<p class="muted" style="margin:0 0 12px">Siyahıda uyğun test ' +
+          "yoxdursa, sual bankından yenisini yığın — hazır olan kimi " +
+          "bura qayıdacaq və seçilmiş gələcək.</p>" +
+        '<button class="btn wide" id="btnGenHere">' + ic("gen") +
+          "Yeni test yığ</button>" +
+      "</div>"
     );
 
     on("btnBack", "click", function () { nav("#/g/" + g.id); });
+    on("btnGenHere", "click", function () { genForClass(g); });
     on("fp", "change", function () {
       var el = $("fp");
       var val = el.checked;
@@ -1181,23 +2074,59 @@
         });
     });
 
+    /* Aktiv/Bagli tablari - kohne tapsiriqlar aktivlere qarismasin */
+    var AF = "on";
+    function drawAsgList() {
+      var tabs = $("asgTabs"), box = $("asgList");
+      var nOn = items.filter(function (a) { return a.open !== false; }).length;
+      if (tabs) tabs.innerHTML =
+        seg("on", "Aktiv (" + nOn + ")", AF) +
+        seg("off", "Bağlı (" + (items.length - nOn) + ")", AF);
+      if (box) box.innerHTML = asgRows(items, d.students || 0, AF);
+    }
+    drawAsgList();
+    on("asgTabs", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest(".seg") : null;
+      if (!b) return;
+      AF = b.getAttribute("data-v");
+      drawAsgList();
+    });
+
     bindAsgRows(g);
-    loadPick(g);
+    loadPick(g, students || []);
   }
 
-  function asgRows(items, students) {
+  function asgRows(items, students, f) {
     if (!items.length) {
       return '<div class="empty"><div class="ic">' + ic("clip") + "</div>" +
         "<b>Hələ tapşırıq verilməyib</b>" +
         "Aşağıdan test seçin — şagirdlər dərhal görəcək.</div>";
     }
-    return items.map(function (a) {
+    var list = !f ? items : items.filter(function (a) {
+      return f === "off" ? a.open === false : a.open !== false;
+    });
+    if (!list.length) {
+      return '<div class="empty"><div class="ic">' + ic("clip") + "</div>" +
+        "<b>" + (f === "off" ? "Bağlı tapşırıq yoxdur" : "Aktiv tapşırıq yoxdur") +
+        "</b>" +
+        (f === "off"
+          ? "Son tarixi keçən və götürülən tapşırıqlar bura düşür."
+          : "Aşağıdan test seçib tapşırıq verin.") + "</div>";
+    }
+    return list.map(function (a) {
       var open = a.open !== false;
       var done = Number(a.done) || 0;
       var tries = Number(a.max_attempts) === 0 ? "limitsiz cəhd"
                 : (Number(a.max_attempts) || 1) + " cəhd";
+      //  Ferdi teyinatda mexrec 1-dir - "0/5 sagird bitirib" yanlis olardi
+      var solo = !!a.student_id;
+      var tot  = Number(a.targets) || (solo ? 1 : students);
       return '<div class="asg">' +
         '<div class="l1"><b>' + esc(a.title) + "</b>" +
+          (solo
+            ? '<span class="pill solo">' + ic("person") +
+              "yalnız " + esc(a.student || "bir şagird") + "</span>"
+            : "") +
           '<span class="pill' + (open ? " on" : "") + '">' +
             (open ? "Aktiv" : "Bağlı") + "</span>" +
           '<button class="btn sm ghost icon" data-del="' + esc(a.id) + '" ' +
@@ -1206,7 +2135,7 @@
         '<div class="l2">' + esc(a.subject || "") + " · " +
           (Number(a.questions) || 0) + " sual · " + tries +
           (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : "") + "</div>" +
-        '<div class="l2">' + done + "/" + students + " şagird bitirib" +
+        '<div class="l2">' + done + "/" + tot + " şagird bitirib" +
           (a.avg != null ? " · orta " + pct(a.avg) + "%" : "") + "</div>" +
       "</div>";
     }).join("");
@@ -1229,19 +2158,74 @@
     });
   }
 
+  /* ---------------------------------------------- yeni test -> geri
+     Tapsiriq ekranindan "Yeni test yig" basilanda generatora kecirik,
+     amma hara qayidacagimizi yadda saxlayiriq (GF.back).  Test hazir
+     olanda hemin qrupun tapsiriq ekrani acilir ve teze test siyahida
+     SECILMIS gelir - muellim yalniz son tarixi qoyub gonderir.
+     PICKNEW bir defelikdir: ekran cizilen kimi silinir. */
+  var PICKNEW = "";
+
+  function genForClass(g) {
+    var f = genFilter();
+    //  Teze suzgec - kohne secimler yeni qrupa yapismasin
+    f.subject = ""; f.topics = []; f.difficulty = [];
+    f.title = ""; f.cls = ""; f.remNames = [];
+    //  Teyinati generator DEYIL, tapsiriq ekrani verecek: orada son
+    //  tarix, cehd sayi ve "tek sagird" secimi var.
+    f.asg = "";
+    f.level = levelCode(g.level_id);   // sinif teyin olunmayibsa bos qalir
+    f.back = g.id;
+    f.backName = g.name || "";
+    nav("#/gen");
+  }
+
   /* Teyin edile bilen testler: sinife uygun olanlar */
-  function loadPick(g) {
+  function loadPick(g, students) {
     var live = guard();
-    sb.rpc("rpc_available_tests", { p_class_id: g.id }).then(function (list) {
+    Promise.all([
+      sb.rpc("rpc_available_tests", { p_class_id: g.id }),
+      //  basqa qrupdaki teyinatlar - "verilib" nisani ucun
+      sb.select("assignments", { select: "test_id,class_id" })
+        .catch(function () { return []; })
+    ]).then(function (res) {
       if (!live()) return;
       var box = $("pick");
       if (!box) return;
-      list = list || [];
+      var list = res[0] || [];
+      var elsew = {};
+      (res[1] || []).forEach(function (a) {
+        if (a.class_id !== g.id) elsew[a.test_id] = true;
+      });
+      //  "assigned" indi yalniz QRUP teyinatini bildirir; yalniz
+      //  ferdi verilmis test siyahida qalir - basqa sagirde de olar
       var free = list.filter(function (t) { return !t.assigned; });
+      //  "sehvler uzerinde is" sexsi testdir - oz qrupundan basqa yerde
+      //  teklif olunmur (yanlis istifadenin qarsisi)
+      free = free.filter(function (t) {
+        return !(elsew[t.id] &&
+                 String(t.title || "").indexOf("səhvlər üzərində iş") >= 0);
+      });
+
+      /* Generatordan teze qayitmisiqsa - bildiris ve secim.
+         Bir defelikdir: burada oxuyub derhal silirik. */
+      var neu = PICKNEW; PICKNEW = "";
+      var isNew = neu && free.filter(function (t) { return t.id === neu; }).length > 0;
+      var note = "";
+      if (neu) {
+        note = isNew
+          ? msg("ok", "Test yığıldı və aşağıda seçildi — son tarixi " +
+                      "təyin edib «Tapşırıq ver» düyməsini basın.")
+          //  Testin sinfi qrupun sinfinden ferqlidirse suzgec onu kesir.
+          //  Test ITMIR - generatorda sinfi duzeldib yeniden vermek olar.
+          : msg("warn", "Test yığıldı, amma bu siyahıya düşmür — sinfi " +
+                        "qrupun sinfindən fərqlidir. Generatorda «Sinif» " +
+                        "seçimini qrupla eyni edin.");
+      }
       /* Iki ayri hal - eyni mesaji vermek olmaz:
          siyahi tamam bosdursa bu sinif ucun hele test YAZILMAYIB. */
       if (!list.length) {
-        box.innerHTML = '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
+        box.innerHTML = note + '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
           "<b>Bu sinif üçün hələ test yoxdur</b>" +
           "Test bazasına " + esc(levelName(g.level_id) || "bu sinif") +
           " materialları hələ əlavə olunmayıb. Qrupun sinfini dəyişsəniz " +
@@ -1249,11 +2233,11 @@
         return;
       }
       if (!free.length) {
-        box.innerHTML = '<div class="empty"><div class="ic">' + ic("check") + "</div>" +
+        box.innerHTML = note + '<div class="empty"><div class="ic">' + ic("check") + "</div>" +
           "<b>Bütün testlər verilib</b>Bu sinif üçün başqa test qalmayıb.</div>";
         return;
       }
-      box.innerHTML =
+      box.innerHTML = note +
         '<label for="aTest">Test</label>' +
         '<select id="aTest">' + free.map(function (t) {
           /* Testin adi onsuz da fennle baslayirsa fenni tekrar yazmiriq:
@@ -1263,8 +2247,26 @@
           var lbl = (sub && ttl.indexOf(sub) !== 0) ? sub + " — " + ttl : ttl;
           return '<option value="' + esc(t.id) + '">' + esc(lbl) +
             " (" + (Number(t.questions) || 0) + " sual)" +
-            (t.is_free ? "" : " · abunə") + "</option>";
+            (t.is_free ? "" : " · abunə") +
+            (elsew[t.id] ? " · başqa qrupda verilib" : "") + "</option>";
         }).join("") + "</select>" +
+        (g.level_id
+          ? '<p class="muted" style="margin:-8px 0 14px">Yalnız ' +
+            esc(levelName(g.level_id) || "") + " və sinifsiz testlər " +
+            "göstərilir — qrupun sinfini dəyişsəniz siyahı da dəyişər.</p>"
+          : "") +
+        //  Kime: butun qrup (kohne davranis) ve ya tek sagird
+        (students.length
+          ? '<label for="aWho">Kimə</label>' +
+            '<select id="aWho"><option value="">Bütün qrup (' +
+              students.length + " şagird)</option>" +
+              students.map(function (st) {
+                return '<option value="' + esc(st.id) + '">yalnız ' +
+                  esc(st.display_name || "") + "</option>";
+              }).join("") + "</select>" +
+            '<p class="muted" style="margin:-8px 0 14px">Tək şagird ' +
+              "seçsəniz, tapşırığı yalnız o görəcək — qrupun qalanı yox.</p>"
+          : "") +
         '<div class="fieldrow">' +
           '<div><label for="aDate">Son tarix</label>' +
             '<input type="date" id="aDate"></div>' +
@@ -1277,6 +2279,7 @@
           "tapşırıq siz götürənə qədər açıq qalır.</p>" +
         '<div id="aErr"></div>' +
         '<button class="btn go" id="btnAsg">' + ic("plus") + "Tapşırıq ver</button>";
+      if (isNew && $("aTest")) $("aTest").value = neu;
       on("btnAsg", "click", function () { doAssign(g); });
     }).catch(function (e) {
       if (!live()) return;
@@ -1304,7 +2307,9 @@
     setBusy("btnAsg", true, "Tapşırıq ver");
     sb.rpc("rpc_assign_test", {
       p_class_id: g.id, p_test_id: tid,
-      p_closes_at: closes, p_max_attempts: Number(($("aTry") || {}).value || 1)
+      p_closes_at: closes, p_max_attempts: Number(($("aTry") || {}).value || 1),
+      //  bos = butun qrup
+      p_student_id: (($("aWho") || {}).value || null)
     }).then(function () { screenAssign(g.id); })
       .catch(function (e) {
         setBusy("btnAsg", false, "Tapşırıq ver");
@@ -1319,6 +2324,11 @@
      kocurur, admin abunesini acir.  Duyme CFG.CONTACT_WHATSAPP
      nomresine acilir - config.js-de teyin olunur.
      ================================================================ */
+  //  Paket bolmesi hazirda gizlidir - config.js-deki SHOW_PLANS acir.
+  function plansOn() {
+    return !!(window.CFG && window.CFG.SHOW_PLANS);
+  }
+
   function isAdmin() {
     return !!(CTX && CTX.roles && CTX.roles.indexOf("admin") >= 0);
   }
@@ -1393,50 +2403,160 @@
   }
 
   /* ---------------------------------------------------------- admin */
+  var admFlash = "";   // redraw-dan sonra bir defe gosterilen netice mesaji
+
+  var F2 = null;   // 2FA veziyyeti (enabled/unlocked)
+
   function screenAdmin() {
     var live = guard();
     topTitle.textContent = "İdarəetmə";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
-    sb.rpc("rpc_admin_accounts", { p_q: null }).then(function (rows) {
+    sb.rpc("rpc_admin_2fa_status", {}).then(function (st2) {
       if (!live()) return;
-      drawAdmin(rows || []);
+      F2 = st2 || {};
+      if (F2.enabled && !F2.unlocked) return drawAdmLock();
+      Promise.all([
+        sb.rpc("rpc_admin_stats", {}),
+        sb.rpc("rpc_admin_accounts", { p_q: null }),
+        sb.rpc("rpc_admin_reports", { p_status: "new" })
+      ]).then(function (r) {
+        if (!live()) return;
+        drawAdmin(r[0] || {}, r[1] || [], r[2] || []);
+      }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
-  function drawAdmin(rows) {
+  /* Kilid ekrani: Authenticator kodu ve ya birtefelik ehtiyat kod */
+  function drawAdmLock() {
+    show(
+      '<div class="lock card">' +
+        '<div class="lic">' + ic("lock") + "</div>" +
+        "<h1>İdarəetmə kilidlidir</h1>" +
+        '<p class="muted">Authenticator tətbiqindəki 6 rəqəmli kodu və ya ' +
+          "birtəfəlik ehtiyat kodu daxil edin.</p>" +
+        '<div class="lrow"><input id="ulCode" maxlength="9" autocomplete="one-time-code" ' +
+          'placeholder="000000">' +
+        '<button class="btn go" id="btnUl">Aç</button></div>' +
+        '<div id="ulMsg"></div>' +
+      "</div>"
+    );
+    var inp = $("ulCode");
+    if (inp) inp.focus();
+    function go() {
+      if (busy) return;
+      busy = true;
+      sb.rpc("rpc_admin_unlock", { p_code: ($("ulCode") || {}).value || "" })
+        .then(function (r) {
+          busy = false;
+          if (r && r.ok) return screenAdmin();
+          $("ulMsg").innerHTML = msg("err", (r && r.err) || "Kod düzgün deyil.");
+        }).catch(function (e) {
+          busy = false;
+          $("ulMsg").innerHTML = msg("err", fail(e));
+        });
+    }
+    on("btnUl", "click", go);
+    on("ulCode", "keydown", function (e) { if (e.key === "Enter") go(); });
+  }
+
+  function drawAdmin(st, rows, reps) {
+    var plans = (st.plans && st.plans.length) ? st.plans
+      : [{ slug: "repetitor-25", name: "Repetitor — 25 şagird" }];
     show(
       '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
       '<div class="spacer"></div>' +
+      '<div class="tiles">' +
+        '<div class="tile a"><b>' + (st.accounts || 0) + "</b><span>hesab" +
+          ((st.accounts_week || 0) > 0 ? " · +" + st.accounts_week + " bu həftə" : "") +
+          "</span></div>" +
+        '<div class="tile b"><b>' + (st.paid_accounts || 0) + "</b><span>pullu · " +
+          Math.max(0, (st.accounts || 0) - (st.paid_accounts || 0)) + " pulsuz</span></div>" +
+        '<div class="tile c"><b>' + azn(st.mrr_minor || 0) + "</b><span>aylıq gəlir</span></div>" +
+        '<div class="tile d"><b>' + (st.attempts_week || 0) + "</b><span>cəhd · son 7 gün</span></div>" +
+      "</div>" +
       '<div class="card tight">' +
         "<h1>Hesablar</h1>" +
-        '<p class="muted" style="margin:8px 0 0">Abunə açmaq: sətirdəki ' +
-          "«+1 ay / +6 ay» düymələri seçilmiş planla işləyir. Eyni plan " +
-          "aktivdirsə, müddət üstünə əlavə olunur.</p>" +
+        '<p class="muted" style="margin:8px 0 0">«+1 ay / +6 ay» seçilmiş planı ' +
+          "həmin hesaba açır. Eyni plan aktivdirsə, müddət " +
+          "üstünə əlavə olunur.</p>" +
         '<div class="fieldrow" style="margin-top:12px">' +
           '<div><input id="admQ" placeholder="Ad və ya e-poçtla axtar…"></div>' +
-          '<div style="flex:0 0 210px"><select id="admPlan">' +
-            '<option value="repetitor-25">Repetitor — 25 şagird</option>' +
-            '<option value="repetitor-60">Repetitor — 60 şagird</option>' +
+          '<div style="flex:0 0 230px"><select id="admPlan">' +
+            plans.map(function (pl) {
+              return '<option value="' + esc(pl.slug) + '">' + esc(pl.name) + "</option>";
+            }).join("") +
           "</select></div>" +
         "</div>" +
-        '<div id="admMsg"></div>' +
+        '<div class="chips" id="admF">' +
+          [["", "Hamısı"], ["pullu", "Pullu"], ["pulsuz", "Pulsuz"],
+           ["bitir", "Bitmək üzrə"]]
+            .map(function (f) {
+              return '<button class="chip' + (f[0] === "" ? " on" : "") +
+                '" data-f="' + f[0] + '">' + f[1] + "</button>";
+            }).join("") +
+        "</div>" +
+        '<div id="admMsg">' + admFlash + "</div>" +
       "</div>" +
       '<div class="spacer"></div>' +
-      '<div id="admList" class="card pad0">' + admRows(rows) + "</div>"
+      '<div id="admList" class="card pad0">' + admRows(rows) + "</div>" +
+      '<div class="spacer"></div>' +
+      "<h2>Bildirişlər" + (reps.length
+        ? ' <span class="rcnt">' + reps.length + "</span>" : "") + "</h2>" +
+      '<div class="chips" id="repF">' +
+        '<button class="chip on" data-rs="new">Yeni</button>' +
+        '<button class="chip" data-rs="fixed">Düzəldilib</button>' +
+        '<button class="chip" data-rs="rejected">Rədd edilib</button>' +
+      "</div>" +
+      '<div id="repList">' + (REPS_CACHE = reps, repCards(reps, "new")) + "</div>" +
+      '<div class="spacer"></div>' +
+      "<h2>Təhlükəsizlik</h2>" +
+      '<div class="card" id="secBox">' + secCard() + "</div>"
     );
+    admFlash = "";
+    //  standart secim - en cox satilan repetitor paketi
+    var sel0 = $("admPlan");
+    if (sel0 && sel0.querySelector('option[value="repetitor-25"]')) {
+      sel0.value = "repetitor-25";
+    }
     on("btnBack", "click", function () { nav("#/"); });
+    function admQuery() {
+      var fb = document.querySelector("#admF .chip.on");
+      sb.rpc("rpc_admin_accounts", {
+        p_q: (($("admQ") || {}).value || "").trim() || null,
+        p_f: (fb && fb.getAttribute("data-f")) || null
+      }).then(function (rows2) {
+        var box = $("admList");
+        if (box) box.innerHTML = admRows(rows2 || []);
+      }).catch(function () {});
+    }
     var t = null;
     on("admQ", "input", function () {
-      clearTimeout(t);
-      t = setTimeout(function () {
-        sb.rpc("rpc_admin_accounts", { p_q: ($("admQ").value || "").trim() || null })
-          .then(function (rows2) {
-            var box = $("admList");
-            if (box) { box.innerHTML = admRows(rows2 || []); bindAdm(); }
-          }).catch(function () {});
-      }, 350);
+      clearTimeout(t); t = setTimeout(admQuery, 350);
+    });
+    on("admF", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest(".chip") : null;
+      if (!b) return;
+      var cur = document.querySelector("#admF .chip.on");
+      if (cur) cur.classList.remove("on");
+      b.classList.add("on");
+      admQuery();
     });
     bindAdm();
+    bindRep();
+    on("repF", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest(".chip") : null;
+      if (!b) return;
+      var cur = document.querySelector("#repF .chip.on");
+      if (cur) cur.classList.remove("on");
+      b.classList.add("on");
+      var st2 = b.getAttribute("data-rs");
+      sb.rpc("rpc_admin_reports", { p_status: st2 }).then(function (r) {
+        REPS_CACHE = r || [];
+        var box = $("repList");
+        if (box) box.innerHTML = repCards(REPS_CACHE, st2);
+      }).catch(function () {});
+    });
+    bindSec();
   }
 
   function admRows(rows) {
@@ -1445,15 +2565,37 @@
         "<b>Hesab tapılmadı</b></div>";
     }
     return rows.map(function (a) {
-      var pl = a.plan;
+      var pl = a.plan, badge;
+      if (pl) {
+        //  bitmesine 7 gunden az qalibsa narinci - uzatmaq vaxtidir
+        var gq = pl.ends
+          ? Math.max(0, Math.ceil((new Date(pl.ends).getTime() - Date.now()) / 86400000))
+          : null;
+        //  basqa ilin tarixine il de yazilir - "25 avq · 365 gun"
+        //  cashdirmasin (novbeti ilin 25 avqustudur)
+        var yr = "";
+        if (pl.ends) {
+          var ed = new Date(pl.ends);
+          if (!isNaN(ed) && ed.getFullYear() !== new Date().getFullYear()) {
+            yr = " " + ed.getFullYear();
+          }
+        }
+        badge = '<span class="pb ' + (gq !== null && gq < 7 ? "z" : "y") + '">' +
+          esc(pl.name) +
+          (pl.ends ? " → " + dateAz(pl.ends) + yr + " · " + gq + " gün" : "") +
+          "</span>";
+      } else {
+        badge = '<span class="pb n">paketsiz</span>';
+      }
       return '<div class="admr" data-em="' + esc(a.email || "") + '">' +
-        '<div class="g"><b>' + esc(a.name) + "</b>" +
-        "<i><span>" + esc(a.email || "") + "</span><span>·</span>" +
-        "<span>" + (a.students || 0) + " şagird</span>" +
-        (pl
-          ? '<span>·</span><span class="okt">' + esc(pl.name) +
-            (pl.ends ? " → " + dateAz(pl.ends) : "") + "</span>"
-          : '<span>·</span><span>paketsiz</span>') +
+        av(a.name) +
+        '<div class="g"><b>' + esc(a.name) + "</b>" + badge +
+        "<i>" +
+          "<span>" + esc(a.email || "") + "</span><span>·</span>" +
+          "<span>" + (a.students || 0) + " şagird</span><span>·</span>" +
+          "<span>" + (a.tests || 0) + " test</span><span>·</span>" +
+          "<span>" + (a.attempts || 0) + " cəhd</span><span>·</span>" +
+          "<span>aktivlik: " + agoAz(a.last_active) + "</span>" +
         "</i></div>" +
         '<div class="btns">' +
           '<button class="btn sm" data-m="1">+1 ay</button>' +
@@ -1478,19 +2620,247 @@
         if (!confirm(em + " — abunəni dayandırmaq?")) return;
         call = "rpc_admin_stop"; args = { p_email: em };
       } else {
+        var sel = $("admPlan");
+        var ay = Number(b.getAttribute("data-m")) || 1;
+        var ad = (sel && sel.selectedIndex >= 0)
+          ? sel.options[sel.selectedIndex].text : "";
+        if (!confirm(em + " → " + ad + " (+" + ay + " ay). Açılsın?")) return;
         call = "rpc_admin_grant";
-        args = { p_email: em, p_plan: ($("admPlan") || {}).value || "repetitor-25",
-                 p_months: Number(b.getAttribute("data-m")) || 1 };
+        args = { p_email: em, p_plan: (sel || {}).value || "repetitor-25",
+                 p_months: ay };
       }
       busy = true; b.disabled = true;
-      sb.rpc(call, args).then(function () {
+      sb.rpc(call, args).then(function (res) {
         busy = false;
-        $("admMsg").innerHTML = msg("ok", em + " — yerinə yetirildi.");
+        admFlash = msg("ok", em + " — yerinə yetirildi" +
+          (res && res.ends ? ". Qüvvədədir: " + dateAz(res.ends) : "") + ".");
         screenAdmin();
       }).catch(function (e) {
         busy = false; b.disabled = false;
         $("admMsg").innerHTML = msg("err", fail(e));
       });
+    });
+  }
+
+
+  /* --------------------------------------- admin: bildiris kartlari */
+  var R_LBL = { cavab: "Cavab səhvdir", sert: "Şərt qüsurludur",
+                yazi: "Yazı xətası", diger: "Digər" };
+
+  function repCards(reps, st) {
+    if (!reps.length) {
+      return '<div class="card"><p class="muted" style="margin:0">' +
+        (st === "new" ? "Yeni bildiriş yoxdur — bank təmizdir. 👌"
+                      : "Bu siyahı boşdur.") + "</p></div>";
+    }
+    return reps.map(function (r) {
+      var qid = r.question_id;
+      return '<div class="card repc" data-q="' + esc(qid) + '">' +
+        '<div class="rhead"><b>' + esc(r.body) + "</b>" +
+          '<span class="rcnt">' + r.n + "</span></div>" +
+        '<div class="qm">' +
+          (r.subject ? "<span>" + esc(r.subject) + "</span>" : "") +
+          (r.level ? "<span>·</span><span>" + esc(r.level) + "</span>" : "") +
+          (r.topic ? "<span>·</span><span>" + esc(r.topic) + "</span>" : "") +
+          "<span>·</span><span>" +
+            (r.owner === "platform" ? "platforma" : "müəllimin öz sualı") +
+          "</span></div>" +
+        (r.options || []).map(function (o) {
+          return '<div class="popt' + (o.is_correct ? " ok" : "") + '">' +
+            (o.is_correct ? ic("check") : "") + "<span>" + esc(o.body) +
+            "</span></div>";
+        }).join("") +
+        '<div class="rwho">' + (r.reports || []).map(function (x) {
+          return '<div class="rline"><b>' + esc(x.who || "") + "</b>" +
+            "<span>·</span><span>" + (x.kind === "sagird" ? "şagird" : "müəllim") +
+            "</span><span>·</span><span>" + (R_LBL[x.reason] || x.reason) +
+            "</span>" + (x.note ? '<i>«' + esc(x.note) + "»</i>" : "") + "</div>";
+        }).join("") + "</div>" +
+        (st === "new"
+          ? '<div class="rbtns">' +
+              (r.owner === "platform"
+                ? '<button class="btn sm" data-fix="' + esc(qid) + '">Düzəlt</button>'
+                : "") +
+              '<button class="btn sm ghost" data-rej="' + esc(qid) + '">Rədd et</button>' +
+              (r.owner === "platform"
+                ? "" : '<button class="btn sm ghost" data-cls="' + esc(qid) +
+                       '">Baxıldı</button>') +
+            "</div>" +
+            '<div class="fslot" id="fs-' + esc(qid) + '"></div>' +
+            '<div id="fm-' + esc(qid) + '"></div>'
+          : "") +
+      "</div>";
+    }).join("");
+  }
+
+  /* Yerinde duzelis redaktoru: metn + izah + variantlar, duz cavab radio */
+  function fixForm(r) {
+    return '<div class="ffrm">' +
+      "<label>Sual mətni</label>" +
+      '<textarea class="fbody" rows="2">' + esc(r.body) + "</textarea>" +
+      "<label>İzah</label>" +
+      '<textarea class="fexp" rows="2">' + esc(r.explanation || "") + "</textarea>" +
+      "<label>Variantlar — düzgün olanı seçin</label>" +
+      (r.options || []).map(function (o) {
+        return '<div class="fopt"><input type="radio" name="fc-' + esc(r.question_id) +
+          '"' + (o.is_correct ? " checked" : "") + ' data-oid="' + esc(o.id) + '">' +
+          '<input type="text" class="fob" data-oid="' + esc(o.id) + '" value="' +
+          esc(o.body).replace(/"/g, "&quot;") + '"></div>';
+      }).join("") +
+      '<div class="rbtns">' +
+        '<button class="btn go sm" data-save="' + esc(r.question_id) + '">Saxla</button>' +
+        '<button class="btn sm ghost" data-fcancel="' + esc(r.question_id) + '">İmtina</button>' +
+      "</div></div>";
+  }
+
+  var REPS_CACHE = [];
+
+  function bindRep() {
+    var box = $("repList");
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = "1";
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b || busy) return;
+      var qid = b.getAttribute("data-fix");
+      if (qid) {
+        var card = b.closest(".repc");
+        var slot = $("fs-" + qid);
+        if (!slot) return;
+        if (slot.innerHTML) { slot.innerHTML = ""; return; }
+        //  kartin oz melumatindan forma yigilir - serverden tezeden istemirik
+        var r = findRep(qid);
+        if (r) slot.innerHTML = fixForm(r);
+        return;
+      }
+      qid = b.getAttribute("data-fcancel");
+      if (qid) { var s2 = $("fs-" + qid); if (s2) s2.innerHTML = ""; return; }
+      qid = b.getAttribute("data-rej") || b.getAttribute("data-cls");
+      if (qid) {
+        if (!confirm(b.getAttribute("data-rej")
+              ? "Bildirişlər rədd edilsin? Sual olduğu kimi qalır."
+              : "Baxıldı kimi bağlansın?")) return;
+        busy = true; b.disabled = true;
+        sb.rpc("rpc_admin_report_set", { p_question: qid,
+            p_status: b.getAttribute("data-rej") ? "rejected" : "fixed" })
+          .then(function () { busy = false; screenAdmin(); })
+          .catch(function (e) {
+            busy = false; b.disabled = false;
+            var m = $("fm-" + qid);
+            if (m) m.innerHTML = msg("err", fail(e));
+          });
+        return;
+      }
+      qid = b.getAttribute("data-save");
+      if (qid) {
+        var slot3 = $("fs-" + qid);
+        if (!slot3) return;
+        var opts = [];
+        Array.prototype.forEach.call(slot3.querySelectorAll(".fob"), function (inp) {
+          var oid = inp.getAttribute("data-oid");
+          var rad = slot3.querySelector('input[type="radio"][data-oid="' + oid + '"]');
+          opts.push({ id: oid, body: inp.value,
+                      is_correct: !!(rad && rad.checked) });
+        });
+        busy = true; b.disabled = true;
+        sb.rpc("rpc_admin_fix_question", {
+          p_question: qid,
+          p_body: (slot3.querySelector(".fbody") || {}).value || "",
+          p_explanation: (slot3.querySelector(".fexp") || {}).value || "",
+          p_options: opts
+        }).then(function () {
+          busy = false;
+          admFlash = msg("ok", "Sual düzəldildi, bildirişlər bağlandı.");
+          screenAdmin();
+        }).catch(function (e) {
+          busy = false; b.disabled = false;
+          var m2 = $("fm-" + qid);
+          if (m2) m2.innerHTML = msg("err", fail(e));
+        });
+      }
+    });
+  }
+
+  function findRep(qid) {
+    for (var i = 0; i < REPS_CACHE.length; i++) {
+      if (REPS_CACHE[i].question_id === qid) return REPS_CACHE[i];
+    }
+    return null;
+  }
+
+  /* --------------------------------------- admin: 2FA karti */
+  function secCard() {
+    if (F2 && F2.enabled) {
+      return '<p style="margin:0 0 10px">' + ic("check", "okic") +
+        " İkinci amil (Authenticator) <b>aktivdir</b>. Panel hər 12 saatdan " +
+        "bir kod istəyəcək.</p>" +
+        '<div class="lrow"><input id="s2Code" maxlength="9" placeholder="Kod">' +
+        '<button class="btn sm ghost" id="btn2Off">Söndür</button></div>' +
+        '<div id="s2Msg"></div>';
+    }
+    return '<p style="margin:0 0 10px">İdarəetməni ikinci amillə qoruyun: ' +
+      "telefondakı <b>Google Authenticator</b> (və ya bənzər) tətbiqindən " +
+      "6 rəqəmli kod istənəcək. Parol oğurlansa belə panel açılmayacaq.</p>" +
+      '<button class="btn go sm" id="btn2On">' + ic("lock") + "2FA qur</button>" +
+      '<div id="s2Box"></div><div id="s2Msg"></div>';
+  }
+
+  function bindSec() {
+    on("btn2On", "click", function () {
+      if (busy) return;
+      busy = true;
+      sb.rpc("rpc_admin_2fa_setup", {}).then(function (r) {
+        busy = false;
+        var box = $("s2Box");
+        if (!box) return;
+        box.innerHTML =
+          '<div class="s2setup">' +
+            "<p><b>1.</b> Authenticator tətbiqində «hesab əlavə et» → " +
+              "«açarı əl ilə daxil et» seçin və bu açarı yazın:</p>" +
+            '<code class="s2key">' + esc(r.secret || "") + "</code>" +
+            "<p><b>2.</b> Bu birtəfəlik ehtiyat kodları təhlükəsiz yerdə " +
+              "saxlayın — telefon itəndə hər biri bir dəfə giriş verir:</p>" +
+            '<div class="s2bkp">' + (r.backup || []).map(function (c) {
+              return "<code>" + esc(c) + "</code>";
+            }).join("") + "</div>" +
+            "<p><b>3.</b> Tətbiqin göstərdiyi kodu daxil edib təsdiqləyin:</p>" +
+            '<div class="lrow"><input id="s2New" maxlength="6" placeholder="000000">' +
+            '<button class="btn go sm" id="btn2Ok">Təsdiqlə</button></div>' +
+          "</div>";
+        on("btn2Ok", "click", function () {
+          if (busy) return;
+          busy = true;
+          sb.rpc("rpc_admin_2fa_confirm", { p_code: ($("s2New") || {}).value || "" })
+            .then(function (r2) {
+              busy = false;
+              if (r2 && r2.ok) {
+                admFlash = msg("ok", "2FA aktivləşdi. Növbəti girişlər kodla olacaq.");
+                return screenAdmin();
+              }
+              $("s2Msg").innerHTML = msg("err", (r2 && r2.err) || "Kod düzgün deyil.");
+            }).catch(function (e) {
+              busy = false;
+              $("s2Msg").innerHTML = msg("err", fail(e));
+            });
+        });
+      }).catch(function (e) {
+        busy = false;
+        $("s2Msg").innerHTML = msg("err", fail(e));
+      });
+    });
+    on("btn2Off", "click", function () {
+      if (busy) return;
+      if (!confirm("2FA söndürülsün? Panel yalnız parolla qalacaq.")) return;
+      busy = true;
+      sb.rpc("rpc_admin_2fa_disable", { p_code: ($("s2Code") || {}).value || "" })
+        .then(function (r) {
+          busy = false;
+          if (r && r.ok) { admFlash = msg("ok", "2FA söndürüldü."); return screenAdmin(); }
+          $("s2Msg").innerHTML = msg("err", (r && r.err) || "Kod düzgün deyil.");
+        }).catch(function (e) {
+          busy = false;
+          $("s2Msg").innerHTML = msg("err", fail(e));
+        });
     });
   }
 
@@ -1506,8 +2876,10 @@
   function genFilter() {
     if (!GF) GF = { pool: (ACC && ACC.plan) ? "all" : "mine",
                     subject: "", level: "", topics: [], difficulty: [],
-                    count: 10, title: "",
-                    cls: "", remNames: [] };
+                    count: 10, title: "", asg: "",
+                    cls: "", remNames: [],
+                    //  tapsiriq ekranindan gelmisiksa hara qayidaq
+                    back: "", backName: "" };
     return GF;
   }
 
@@ -1552,7 +2924,8 @@
     var f = genFilter();
     topTitle.textContent = "Test yığ";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
-    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null, p_level: f.level || null })
+    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
+                                p_level: f.level || null, p_pool: f.pool })
       .then(function (fac) { if (!live()) return; FAC = fac || {}; drawGen(); })
       .catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -1560,7 +2933,8 @@
   function drawGen() {
     var f = genFilter();
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") +
+        (f.back ? esc(f.backName || "Tapşırıqlar") : "Əsas səhifə") + "</button>" +
       '<div class="spacer"></div>' +
       '<div class="card">' +
         "<h1>Avtomatik test</h1>" +
@@ -1590,9 +2964,9 @@
         '<div class="fieldrow" style="margin-top:12px">' +
           '<div><label for="gsub">Fənn</label>' +
             '<select id="gsub"><option value="">Bütün fənlər</option>' +
-            (FAC.subjects || []).filter(function (x) {
+            subFilter((FAC.subjects || []).filter(function (x) {
               return Number(x.n) > 0 || f.subject === x.slug;
-            }).map(function (x) {
+            }), f.subject).map(function (x) {
               return '<option value="' + esc(x.slug) + '"' +
                 (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
             }).join("") + "</select></div>" +
@@ -1615,7 +2989,8 @@
         (!f.subject || !f.level
           ? '<p class="muted" style="margin:12px 0 0">' +
             (!f.subject
-              ? "Mövzu seçmək üçün fənn və sinif seçin. "
+              ? (f.level ? "Mövzu seçmək üçün fənn seçin. "
+                         : "Mövzu seçmək üçün fənn və sinif seçin. ")
               : "Mövzu seçmək üçün sinif də seçin. ") +
             "Mövzu seçilməsə, hamısından götürüləcək.</p>"
           : ((FAC.topics || []).length
@@ -1636,13 +3011,28 @@
             '<input id="gCnt" type="number" min="1" max="100" inputmode="numeric" value="' +
             f.count + '"></div>' +
         "</div>" +
+        /* Tapsiriq ekranindan gelmisiksa bu saheye ehtiyac yoxdur:
+           teyinati ora qayidib veririk - orada son tarix, cehd sayi
+           ve "tek sagird" secimi de var. */
+        (f.back
+          ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi «' +
+            esc(f.backName || "qrup") + "» tapşırıq ekranına " +
+            "qayıdacaqsınız — test orada seçilmiş gələcək.</p>"
+          : '<label for="gAsg">Qrupa tapşırıq ver (istəyə görə)</label>' +
+            '<select id="gAsg"><option value="">Yalnız test yığılsın</option></select>' +
+            '<p class="muted" style="margin:-8px 0 14px">Qrup seçsəniz, test yaranan ' +
+              "kimi ona tapşırıq gedəcək (son tarix 7 gün, 1 cəhd).</p>") +
         '<div id="gPrev"><div class="skel">Hovuz yoxlanılır…</div></div>' +
         '<div id="gErr"></div>' +
         '<button class="btn go" id="btnMake">' + ic("gen") + "Testi yığ</button>" +
       "</div>"
     );
 
-    on("btnBack", "click", function () { nav("#/"); });
+    on("btnBack", "click", function () {
+      //  imtina: geri qayidis niyyetini de temizleyirik
+      if (f.back) { var gid = f.back; f.back = ""; f.backName = ""; nav("#/a/" + gid); return; }
+      nav("#/");
+    });
     on("gRemOff", "click", function (e) {
       e.preventDefault();
       f.cls = ""; f.remNames = []; f.topics = [];
@@ -1651,7 +3041,11 @@
     on("gPool", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
-      f.pool = b.getAttribute("data-v"); drawGen();
+      //  hovuz deyisende siyahilar da deyisir - fenn/sinif/movzu
+      //  secimleri sifirdan, serverden teze suzulur
+      f.pool = b.getAttribute("data-v");
+      f.subject = ""; f.level = ""; f.topics = [];
+      screenGen();
     });
     on("gDiff", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-d]") : null;
@@ -1676,6 +3070,19 @@
       f.level = $("glev").value; f.topics = []; screenGen();
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
+    //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin
+    if (!f.back) sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
+                           order: "name" })
+      .then(function (rows) {
+        var sel = $("gAsg");
+        if (!sel) return;
+        sel.innerHTML = '<option value="">Yalnız test yığılsın</option>' +
+          (rows || []).map(function (c) {
+            return '<option value="' + esc(c.id) + '"' +
+              (f.asg === c.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
+          }).join("");
+      }).catch(function () {});
+    on("gAsg", "change", function () { f.asg = $("gAsg").value; });
 
     var t = null;
     on("gCnt", "input", function () {
@@ -1723,7 +3130,26 @@
     setBusy("btnMake", true, "Testi yığ");
     sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: f.title || "" })
       .then(function (v) {
+        //  qrup secilibse test derhal tapsiriq kimi gedir; tapsiriq
+        //  alinmasa da test hazirdir - veraqde elle vermek olar
+        if (!f.asg) return v;
+        return sb.rpc("rpc_assign_test", {
+          p_class_id: f.asg, p_test_id: v.test_id,
+          p_closes_at: new Date(Date.now() + 7 * 864e5).toISOString(),
+          p_max_attempts: 1
+        }).catch(function () {}).then(function () { return v; });
+      })
+      .then(function (v) {
         busy = false;
+        //  Tapsiriq ekranindan gelmisiksa ora qayidiriq - teze test
+        //  siyahida secili gelsin deye id-ni otururuk.
+        if (f.back) {
+          var gid = f.back;
+          f.back = ""; f.backName = "";
+          PICKNEW = v.test_id;
+          nav("#/a/" + gid);
+          return;
+        }
         nav("#/t/" + v.test_id);
       })
       .catch(function (e) {
@@ -1734,20 +3160,174 @@
   }
 
   /* ---------------------------------------------------------- veraq */
+  /* ------------------------------------------- sual sehvi bildirisi
+     Veraqdaki "Sehv bildir" duymesi: sualin altinda kicik forma acilir,
+     rpc_report_question-a gedir.  Sual DEYISMIR - admin baxib qerar
+     verir.  Eyni suala tekrar bildiris serverde sakitce udulur. */
+  var R_REASONS = [
+    ["cavab", "Cavab səhvdir"], ["sert", "Şərt qüsurludur"],
+    ["yazi", "Yazı xətası"], ["diger", "Digər"]
+  ];
+
+  function reportForm(qid) {
+    return '<div class="rfrm">' +
+      '<select class="rsel">' + R_REASONS.map(function (r) {
+        return '<option value="' + r[0] + '">' + r[1] + "</option>";
+      }).join("") + "</select>" +
+      '<input class="rnote" maxlength="300" placeholder="Qeyd (istəyə görə)…">' +
+      '<button class="btn sm" data-rsend="' + esc(qid) + '">Göndər</button>' +
+      '<button class="btn sm ghost" data-rcancel="' + esc(qid) + '">İmtina</button>' +
+    "</div>";
+  }
+
+  function bindReportLinks() {
+    var root = $("main");
+    if (!root || root.dataset.rbound) return;
+    root.dataset.rbound = "1";
+    root.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b) return;
+      var qid = b.getAttribute("data-rq");
+      if (qid) {
+        var slot = $("rs-" + qid);
+        if (slot) slot.innerHTML = slot.innerHTML ? "" : reportForm(qid);
+        return;
+      }
+      qid = b.getAttribute("data-rcancel");
+      if (qid) { var s2 = $("rs-" + qid); if (s2) s2.innerHTML = ""; return; }
+      qid = b.getAttribute("data-rsend");
+      if (qid && !busy) {
+        var slot3 = $("rs-" + qid);
+        if (!slot3) return;
+        busy = true; b.disabled = true;
+        sb.rpc("rpc_report_question", {
+          p_question: qid,
+          p_reason: (slot3.querySelector(".rsel") || {}).value || "diger",
+          p_note: (slot3.querySelector(".rnote") || {}).value || ""
+        }).then(function () {
+          busy = false;
+          slot3.innerHTML = '<div class="rok">Bildirildi — təşəkkürlər. ' +
+            "Baxılandan sonra düzəldiləcək.</div>";
+        }).catch(function (e) {
+          busy = false; b.disabled = false;
+          slot3.innerHTML = reportForm(qid) +
+            '<div class="rerr">' + esc(fail(e)) + "</div>";
+        });
+      }
+    });
+  }
+
   function screenPaper(id) {
     var live = guard();
     topTitle.textContent = "Test vərəqi";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     Promise.all([
       sb.rpc("rpc_test_preview", { p_test_id: id }),
-      sb.select("classes", { select: "id,name", eq: { account_id: ACC.id }, order: "name" })
+      sb.select("classes", { select: "id,name", eq: { account_id: ACC.id }, order: "name" }),
+      //  bu testin movcud teyinatlari - "verilib" siyahisi ucun
+      sb.select("assignments", { select: "class_id,student_id,closes_at", eq: { test_id: id } })
+        .catch(function () { return []; }),
+      //  "kime" secimi: hesabin butun aktiv sagirdleri, qrupa gore suzulur
+      sb.select("students", {
+        select: "id,display_name,class_id",
+        eq: { account_id: ACC.id, is_active: true },
+        order: "display_name"
+      }).catch(function () { return []; })
     ]).then(function (res) {
       if (!live()) return;
-      drawPaper(res[0] || {}, res[1] || []);
+      drawPaper(res[0] || {}, res[1] || [], res[2] || [], res[3] || []);
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
-  function drawPaper(t, classes) {
+  /* Cap / PDF: veraq ucun temiz nusxe qurulur (ekran metalari -
+     movzu, cetinlik, "sehv bildir" - kagiza dusmur), brauzerin oz
+     cap pencersi acilir.  Orada "PDF olaraq saxla" da var - elave
+     kitabxana lazim deyil.  withKey=true olanda cavab acari AYRICA
+     sehifede cixir; sagird nusxesinde duzgun cavab izi yoxdur. */
+  function paperPrint(t, withKey) {
+    var qs = t.questions || [];
+    var L = "ABCDEFGH";
+    //  Su nisani: veraqi CAP EDEN muellimin adi + tam tarix.  Meqsed
+    //  maneе yaratmaq deyil - sual basqa yerde cixsa, kimin cixardigi
+    //  bilinsin.  Adi olmayan hesabda sadece "Bil10 · tarix" qalir.
+    var d = new Date();
+    var dm = function (n) { return (n < 10 ? "0" : "") + n; };
+    var stamp = dm(d.getDate()) + "." + dm(d.getMonth() + 1) + "." + d.getFullYear();
+    var who = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    var foot = "Bil10" + (who ? " · " + esc(who) : "") + " · " + stamp;
+    var box = $("printBox");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "printBox";
+      document.body.appendChild(box);
+    }
+    var h = '<div class="pph">' +
+      "<h1>" + esc(t.title || "") + "</h1>" +
+      '<div class="ppm">' + esc(t.subject || "") +
+        (t.level ? " · " + esc(t.level) : "") + " · " + qs.length +
+        " sual · Bil10</div>" +
+      '<div class="ppf"><span>Ad, soyad: ________________________</span>' +
+        "<span>Tarix: ____________</span><span>Bal: ______</span></div>" +
+      "</div>" +
+      qs.map(function (q) {
+        var b = '<div class="ppq"><div class="ppb">' + q.ord + ". " + esc(q.body) +
+          (q.kind === "multi"
+            ? ' <i class="ppmu">(bir neçə düzgün cavab)</i>' : "") + "</div>";
+        if (q.kind === "text") {
+          b += '<div class="ppl">Cavab: _______________________________</div>';
+        } else {
+          b += (q.options || []).map(function (o, i) {
+            return '<div class="ppo"><b>' + L.charAt(i) + ")</b> <span>" +
+              esc(o.body) + "</span></div>";
+          }).join("");
+        }
+        return b + "</div>";
+      }).join("");
+    if (withKey) {
+      h += '<div class="ppk"><h2>Cavab açarı — ' + esc(t.title || "") + "</h2>" +
+        '<div class="ppkn">Bu səhifə şagirdlərə paylanmır.</div>' +
+        '<div class="ppkg">' +
+        qs.map(function (q) {
+          var a;
+          if (q.kind === "text") {
+            a = (q.options || []).filter(function (o) { return o.correct; })
+              .map(function (o) { return esc(o.body); }).join(" / ");
+          } else {
+            a = (q.options || []).map(function (o, i) {
+              return o.correct ? L.charAt(i) : "";
+            }).filter(Boolean).join(", ");
+          }
+          return "<span><b>" + q.ord + ".</b> " + (a || "—") + "</span>";
+        }).join("") + "</div></div>";
+    }
+    //  Tekrarlanan altliq: <tfoot> her cap sehifesinde tekrarlanir VE
+    //  ozune yer ayirir - position:fixed kimi suallarin ustune dusmur.
+    box.innerHTML = '<table class="ppw"><tfoot><tr><td>' +
+      '<div class="ppfoot">' + foot + "</div></td></tr></tfoot>" +
+      "<tbody><tr><td>" + h + "</td></tr></tbody></table>";
+    document.body.classList.add("printing");
+    function off() {
+      document.body.classList.remove("printing");
+      window.removeEventListener("afterprint", off);
+    }
+    window.addEventListener("afterprint", off);
+    window.print();
+    //  afterprint bezi brauzerlerde gelmir - ehtiyat temizlik
+    //  (sinif yalniz @media print-e tesir edir, ekranda gorunmur)
+    setTimeout(off, 2000);
+  }
+
+  function drawPaper(t, classes, asgs, students) {
+    students = students || [];
+    //  Yalniz QRUP teyinatlari qrupu secimden cixarir; ferdi teyinat
+    //  cixarmir - hemin qrupun basqa sagirdine de vermek olar.
+    var asgMap = {}, soloN = {};
+    (asgs || []).forEach(function (a) {
+      if (a.student_id) soloN[a.class_id] = (soloN[a.class_id] || 0) + 1;
+      else asgMap[a.class_id] = a;
+    });
+    var given = classes.filter(function (c) { return asgMap[c.id]; });
+    var freeCls = classes.filter(function (c) { return !asgMap[c.id]; });
     var qs = t.questions || [];
     var done = Number(t.done) || 0;
     topTitle.textContent = t.title || "Test vərəqi";
@@ -1762,23 +3342,59 @@
           " · " + qs.length + " sual" +
           (done ? " · " + done + " şagird işləyib" : "") + "</p>" +
         '<div class="spacer"></div>' +
-        (t.gen_rule
-          ? (done
-              ? '<p class="muted">Bu testi artıq şagird işlədiyi üçün ' +
-                "yeniləmək olmaz — yeni test yığın.</p>"
-              : '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
-                "Yenidən yığ</button>")
+        '<div class="prnrow">' +
+          '<button class="btn sm" id="btnPrn">' + ic("print") +
+            "Çap / PDF</button>" +
+          '<button class="btn sm ghost" id="btnPrnK">' + ic("key") +
+            "Cavab açarı ilə</button>" +
+          (t.gen_rule && !done
+            ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
+              "Yenidən yığ</button>"
+            : "") +
+        "</div>" +
+        '<p class="muted" style="margin:10px 0 0">Çap pəncərəsində printer ' +
+          "əvəzinə «PDF olaraq saxla» seçsəniz, vərəq fayl kimi yüklənəcək. " +
+          "«Cavab açarı ilə» variantında açar ayrıca səhifədə çıxır.</p>" +
+        (t.gen_rule && done
+          ? '<p class="muted" style="margin:8px 0 0">Bu testi artıq şagird ' +
+            "işlədiyi üçün yeniləmək olmaz — yeni test yığın.</p>"
           : "") +
         '<div id="pErr"></div>' +
       "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Qrupa təyin et</h2>" +
       '<div class="card">' +
-        (classes.length
-          ? '<div class="fieldrow">' +
+        (given.length || Object.keys(soloN).length
+          ? '<div class="pgiven">' +
+            given.map(function (c) {
+              var a = asgMap[c.id];
+              return '<div class="pgrow">' + ic("check") +
+                "<span><b>" + esc(c.name) + "</b> — verilib" +
+                (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : " · açıq") +
+                "</span></div>";
+            }).join("") +
+            //  ferdi teyinatlar: qrupu bloklamir, amma gorunmelidir
+            classes.filter(function (c) { return soloN[c.id]; })
+              .map(function (c) {
+                return '<div class="pgrow">' + ic("person") +
+                  "<span><b>" + esc(c.name) + "</b> — " + soloN[c.id] +
+                  " şagirdə fərdi verilib</span></div>";
+              }).join("") + "</div>"
+          : "") +
+        (classes.length && !freeCls.length
+          ? '<p class="muted" style="margin:0">Bu test bütün qruplarınıza verilib.</p>'
+          : "") +
+        (freeCls.length
+          ? '<div><label for="pWho">Kimə</label>' +
+              '<select id="pWho"></select></div>' +
+            '<p class="muted" style="margin:-8px 0 14px">Tək şagird ' +
+              "seçsəniz, tapşırığı yalnız o görəcək — qrupun qalanı yox.</p>" +
+            '<div class="fieldrow">' +
               '<div><label for="pCls">Qrup</label><select id="pCls">' +
-                classes.map(function (c) {
-                  return '<option value="' + esc(c.id) + '">' + esc(c.name) + "</option>";
+                freeCls.map(function (c) {
+                  return '<option value="' + esc(c.id) + '">' + esc(c.name) +
+                    (soloN[c.id] ? " · " + soloN[c.id] + " şagirdə verilib" : "") +
+                    "</option>";
                 }).join("") + "</select></div>" +
               '<div><label for="pDate">Son tarix</label>' +
                 '<input type="date" id="pDate"></div>' +
@@ -1793,8 +3409,10 @@
               "ən yaxşı nəticə görünür.</p>" +
             '<div id="pAsgMsg"></div>' +
             '<button class="btn go" id="btnPAsg">' + ic("plus") + "Tapşırıq ver</button>"
-          : '<p class="muted">Əvvəlcə əsas səhifədə qrup yaradın — sonra bu ' +
-            "testi ona təyin edə biləcəksiniz.</p>") +
+          : (classes.length
+              ? ""
+              : '<p class="muted">Əvvəlcə əsas səhifədə qrup yaradın — sonra bu ' +
+                "testi ona təyin edə biləcəksiniz.</p>")) +
       "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Suallar</h2>" +
@@ -1809,7 +3427,9 @@
               "<span>·</span><span>" + (q.mine ? "öz sualınız" : "platforma") + "</span>" +
               (q.remedial
                 ? '<span class="rem">səhvə bənzər</span>' : "") +
+              '<button class="rlink" data-rq="' + esc(q.id) + '">Səhv bildir</button>' +
             "</div>" +
+            '<div class="rslot" id="rs-' + esc(q.id) + '"></div>' +
             (q.options || []).map(function (o) {
               return '<div class="popt' + (o.correct ? " ok" : "") + '">' +
                 (o.correct ? ic("check") : "") + "<span>" + esc(o.body) + "</span></div>";
@@ -1822,6 +3442,31 @@
     );
 
     on("btnBack", "click", function () { nav("#/gen"); });
+    bindReportLinks();
+
+    on("btnPrn",  "click", function () { paperPrint(t, false); });
+    on("btnPrnK", "click", function () { paperPrint(t, true); });
+
+    /* "Kime" siyahisi secilen qrupa baglidir - qrup deyisende yenilenir.
+       Artiq ferdi teyinat almis sagird tekrar teklif olunmur. */
+    function fillWho() {
+      var sel = $("pWho"), cls = ($("pCls") || {}).value;
+      if (!sel) return;
+      var mine = students.filter(function (st) { return st.class_id === cls; });
+      var taken = {};
+      (asgs || []).forEach(function (a) {
+        if (a.student_id && a.class_id === cls) taken[a.student_id] = true;
+      });
+      mine = mine.filter(function (st) { return !taken[st.id]; });
+      sel.innerHTML = '<option value="">Bütün qrup' +
+        (mine.length ? " (" + mine.length + " şagird)" : "") + "</option>" +
+        mine.map(function (st) {
+          return '<option value="' + esc(st.id) + '">yalnız ' +
+            esc(st.display_name || "") + "</option>";
+        }).join("");
+    }
+    fillWho();
+    on("pCls", "change", fillWho);
 
     on("btnRegen", "click", function () {
       if (busy) return;
@@ -1853,11 +3498,13 @@
       setBusy("btnPAsg", true, "Tapşırıq ver");
       sb.rpc("rpc_assign_test", {
         p_class_id: cls, p_test_id: t.id,
-        p_closes_at: closes, p_max_attempts: Number(($("pTry") || {}).value || 1)
+        p_closes_at: closes, p_max_attempts: Number(($("pTry") || {}).value || 1),
+        //  bos = butun qrup
+        p_student_id: (($("pWho") || {}).value || null)
       }).then(function () {
-        setBusy("btnPAsg", false, "Tapşırıq ver");
-        $("pAsgMsg").innerHTML = msg("ok",
-          "Tapşırıq verildi — şagirdlər testi artıq görür.");
+        //  sehife yenilenir - teze teyinat "verilib" siyahisinda gorunur
+        busy = false;
+        screenPaper(t.id);
       }).catch(function (e) {
         setBusy("btnPAsg", false, "Tapşırıq ver");
         $("pAsgMsg").innerHTML = msg("err", fail(e));
@@ -1879,6 +3526,37 @@
     return BF;
   }
 
+  /*  Movzu nisanlarinin heddi: bundan cox olanda sinif teleb olunur.
+      Telefonda ~20 nisan iki-uc setirdir, 60 nisan ekrani udur.  */
+  var TOPCAP = 20;
+
+  /*  SORGU NESLI.  guard() yalniz UNVANI tutusdurur - bank ekraninda
+      hovuz/suzgec deyisende unvan ("#/b") DEYISMIR, ona gore kohne
+      sorgunun cavabi teze render-in ustune dusurdu: seqmentde
+      "Platforma" yanirdi, siyahida ise muellimin oz suallari
+      qalirdi.  Her sorgu oz neslini goturur; cavab gelende nesil
+      hele de sonuncudursa yazilir.  */
+  var BFSEQ = 0;   // suzgec (rpc_bank_facets)
+  var BSEQ  = 0;   // netice sahesi (rpc_bank_list / rpc_bank_coverage)
+
+  /*  Siyahida nece sual atlanir.  rpc_bank_list offset-i onsuz da
+      desteklyirdi - ekran hemise 0 gonderirdi, ona gore 51-ci suala
+      catmaq MUMKUN DEYILDI.  Suzgec deyisende sifirlanir.  */
+  var BOFF = 0;
+
+  /*  KATALOG REJIMI.  Platforma hovuzunda duz 50 sual tokmek menasiz
+      idi: setirler disabled gelir (muellim platforma sualini ne acir,
+      ne redaktə edir), ustelik siralama created_at desc oldugu ucun
+      ekranda yalniz EN SON yazilan sinfin kesiyi gorunurdu.
+      Muellimin sorusdugu "MENIM sinfimde ne qeder var" sualidir -
+      ona siyahi yox, EHATE cavab verir.
+      Axtaris yazilanda ve ya movzu/cetinlik secilende adi siyahiya
+      qayidiriq: orada muellim konkret sual axtarir.  */
+  function catalogMode(f) {
+    return f.pool !== "mine" && !(f.q || "").trim() &&
+           !f.topics.length && !f.difficulty.length;
+  }
+
   /* Suzgeci RPC-nin gozledi formaya salir - bos sahələr getmir */
   function bankRule(f) {
     var r = { pool: f.pool };
@@ -1898,9 +3576,11 @@
     topTitle.textContent = "Sual bankı";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
 
-    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null, p_level: f.level || null })
+    var myf = ++BFSEQ;
+    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
+                                p_level: f.level || null, p_pool: f.pool || "mine" })
       .then(function (fac) {
-        if (!live()) return;
+        if (!live() || myf !== BFSEQ) return;
         FAC = fac || {};
         drawBank();
       })
@@ -1946,9 +3626,9 @@
           '<div><select id="bsub"><option value="">Bütün fənlər</option>' +
             /* Suali olmayan fenn siyahida cixmir - onu secmek menasizdir.
                Sual FORMASINDA ise butun fennler qalir. */
-            (FAC.subjects || []).filter(function (s) {
+            subFilter((FAC.subjects || []).filter(function (s) {
               return Number(s.n) > 0 || f.subject === s.slug;
-            }).map(function (s) {
+            }), f.subject).map(function (s) {
               return '<option value="' + esc(s.slug) + '"' +
                 (f.subject === s.slug ? " selected" : "") + ">" + esc(s.name) + "</option>";
             }).join("") + "</select></div>" +
@@ -1965,18 +3645,31 @@
               '" data-d="' + d + '">' + DIFF[d] + "</button>";
           }).join("") +
         "</div>" +
-        /* Movzular YALNIZ fenn secilende.  Fennsiz 110 nisan cixir -
-           suzgec ekrani udur. */
-        (!f.subject
-          ? '<p class="muted" style="margin:12px 0 0">Mövzuları görmək üçün ' +
-            "fənn seçin.</p>"
+        /* Movzu nisanlari.  Fennsiz 110 nisan cixirdi; platforma
+           hovuzunda tek fennle de 11 sinfin movzulari tokulurdu
+           (Ingilis dilinde 60 nisan) - suzgec ekrani udurdu.
+           Sert SAYA baglidir, hovuza yox: oz banki kicikdir, orada
+           sinif istemek lazimsiz maneedir; cox olanda sinif isteyirik. */
+        /* KATALOG REJIMINDE nisanlar umumiyyetle cixmir: asagidaki
+           ehate siyahisi eyni movzulari sayla, cetinlik bolgusu ve
+           numune ile gosterir - eyni 12 ad ekranda IKI DEFE yazilirdi.
+           "Sinif secin" ipucunu da ehate panelinin ozu verir.
+           Movzu ve ya cetinlik secilen kimi siyahiya keciririk;
+           nisanlar orada YENE lazimdir - secimi goturmek ucun. */
+        (catalogMode(f) ? "" :
+        (!f.subject || (!f.level && (FAC.topics || []).length > TOPCAP)
+          ? '<p class="muted" style="margin:12px 0 0">' +
+            (!f.subject
+              ? "Mövzuları görmək üçün fənn seçin."
+              : "Bu fənndə " + (FAC.topics || []).length +
+                " mövzu var — siyahını qısaltmaq üçün sinif də seçin.") + "</p>"
           : ((FAC.topics || []).length
               ? '<div class="chips" id="bTop">' + FAC.topics.map(function (t) {
                   return '<button class="chip' + (f.topics.indexOf(t.id) >= 0 ? " on" : "") +
                     '" data-t="' + esc(t.id) + '">' +
                     esc(topLabel(t, f.level)) + "</button>";
                 }).join("") + "</div>"
-              : '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>')) +
+              : '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>'))) +
         "</details>" +
       "</div>" +
       '<div class="spacer"></div>' +
@@ -1989,7 +3682,9 @@
     on("bPool", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
-      f.pool = b.getAttribute("data-v"); drawBank();
+      f.pool = b.getAttribute("data-v");
+      f.subject = ""; f.level = ""; f.topics = [];
+      screenBank();
     });
     on("bDiff", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-d]") : null;
@@ -2035,17 +3730,231 @@
       label + "</button>";
   }
 
-  function loadBank() {
+  /* ================================================================
+     EHATE GORUNTUSU — "menim sinfimde ne qeder var?"
+     Iki pille:  fenn -> siniflər (sayla)  ->  movzular (sayla,
+     cetinlik bolgusu ve 3 numune ile).
+     Movzuya basanda numuneler ACILIR - platforma sualinin
+     variantlarini ve duz cavabini yalniz burada gormek olur
+     (siyahida o setirler disabled-dir).
+     ================================================================ */
+  function loadCoverage(f, live) {
+    var box = $("bList");
+    if (box) box.innerHTML = '<div class="skel">Yüklənir…</div>';
+    var my = ++BSEQ;
+    sb.rpc("rpc_bank_coverage", {
+      p_subject: f.subject, p_level: f.level || null, p_pool: f.pool
+    }).then(function (d) {
+      if (!live() || my !== BSEQ) return;
+      drawCoverage(f, d || {});
+    }).catch(function (e) {
+      if (!live() || my !== BSEQ) return;
+      var b = $("bList");
+      if (b) b.innerHTML = msg("err", fail(e));
+    });
+  }
+
+  function subName(slug) {
+    var x = (FAC.subjects || []).filter(function (s) { return s.slug === slug; })[0];
+    return x ? x.name : slug;
+  }
+
+  function drawCoverage(f, d) {
+    var box = $("bList");
+    if (!box) return;
+    var total = Number(d.total) || 0;
+    /*  Sinfin ADI serverin oz cavabindan goturulur.  LEVELS kesine
+        guvenmek olmaz: onu loadLevels() doldurur, screenBank ise onu
+        cagirmir - "#/b" birbasa acilanda kes bos olur ve basliqda
+        "Riyaziyyat · 1 · 480 sual" kimi cilpaq kod qalirdi.
+        d.levels sinif secilende de tam gelir (server onu suzmur).  */
+    var head = '<div class="bcount">' + esc(subName(f.subject)) +
+      (f.level ? " · " + esc(covLevelName(d, f.level)) : "") +
+      " · " + total + " sual</div>";
+
+    if (!total) {
+      box.innerHTML = head + '<div class="empty"><div class="ic">' + ic("doc") +
+        "</div><b>Bu bölmədə hələ sual yoxdur</b>" +
+        "Başqa sinif və ya fənn seçin.</div>";
+      bindCovBack(f);
+      return;
+    }
+
+    //  --- pille 1: siniflər
+    if (!f.level) {
+      var lv = d.levels || [];
+      box.innerHTML = head +
+        '<div class="bpick"><p>Sinif seçin — həmin sinfin mövzuları ' +
+          "və hər mövzuda neçə sual olduğu görünəcək.</p>" +
+          '<div class="g">' + lv.map(function (l) {
+            return '<button class="pkb" data-l="' + esc(l.code) + '">' +
+              esc(l.name) + "<i>" + (Number(l.n) || 0) + " sual</i></button>";
+          }).join("") + "</div>" +
+          (Number(d.no_level) > 0
+            ? '<p class="muted" style="margin:12px 0 0">Bundan başqa ' +
+              Number(d.no_level) + " sual sinifsizdir — istənilən sinifdə " +
+              "işlənə bilər.</p>"
+            : "") +
+        "</div>";
+      Array.prototype.forEach.call(box.querySelectorAll("[data-l]"), function (b) {
+        b.addEventListener("click", function () {
+          f.level = b.getAttribute("data-l");
+          f.topics = [];
+          screenBank();          //  sinif deyisdi - movzu nisanlari da yenilenir
+        });
+      });
+      return;
+    }
+
+    //  --- pille 2: movzular
+    var tp = d.topics || [];
+    var max = tp.reduce(function (a, t) { return Math.max(a, Number(t.n) || 0); }, 0) || 1;
+    var min = tp.reduce(function (a, t) {
+      return Math.min(a, Number(t.n) || 0); }, max);
+    /*  Zolaq movzular arasindaki FERQI gosterir.  Hamisinda eyni say
+        varsa (generator movzu basina beraber doldurub) her zolaq 100%
+        olur - ekranda 12 dene tam dolu xett qalir, hec ne demir.
+        Bele halda zolagi umumiyyetle cizmirik.  */
+    var bars = max > min;
+    box.innerHTML = head +
+      '<div class="cov">' + tp.map(function (t) {
+        var n = Number(t.n) || 0;
+        var parts = [];
+        if (Number(t.d1)) parts.push("asan " + t.d1);
+        if (Number(t.d2)) parts.push("orta " + t.d2);
+        if (Number(t.d3)) parts.push("çətin " + t.d3);
+        return '<div class="cvw">' +
+          '<button class="cvr" data-t="' + esc(t.id) + '">' +
+            '<div class="g"><b>' + esc(t.name) + "</b>" +
+              (bars
+                ? '<div class="cbar"><i style="width:' +
+                  Math.round(n * 100 / max) + '%"></i></div>'
+                : "") +
+              "<i>" + esc(parts.join(" · ")) + "</i></div>" +
+            '<span class="n">' + n + "</span>" +
+            '<span class="arrow">' + ic("right") + "</span>" +
+          "</button>" +
+          '<div class="smp" id="smp-' + esc(t.id) + '"></div>' +
+        "</div>";
+      }).join("") + "</div>" +
+      (Number(d.no_topic) > 0
+        ? '<div class="bpick"><p style="margin:0">Bu sinifdə ' +
+          Number(d.no_topic) + " sual mövzusuzdur.</p></div>"
+        : "");
+
+    Array.prototype.forEach.call(box.querySelectorAll("[data-t]"), function (b) {
+      b.addEventListener("click", function () { toggleSamples(f, b); });
+    });
+    bindCovBack(f);
+  }
+
+  //  Sinifden geri qayitmaq ucun basliqdaki "geri" - suzgeci acmaga
+  //  ehtiyac qalmasin.  Ayrica setir deyil, movcud .bcount-a qosulur.
+  function bindCovBack(f) {
+    var c = document.querySelector("#bList .bcount");
+    if (!c || !f.level) return;
+    c.insertAdjacentHTML("beforeend",
+      ' <button class="btn sm ghost" id="covUp">' + ic("back") +
+      "bütün siniflər</button>");
+    on("covUp", "click", function () {
+      f.level = ""; f.topics = [];
+      screenBank();
+    });
+  }
+
+  function covLevelName(d, code) {
+    var l = (d.levels || []).filter(function (x) { return x.code === code; })[0];
+    if (l && l.name) return l.name;
+    //  ehtiyat: suzgecin oz siyahisi, sonra cilpaq kod
+    var f2 = (FAC.levels || []).filter(function (x) { return x.code === code; })[0];
+    return (f2 && f2.name) || code;
+  }
+
+  /*  Numuneler: server en coxu 3 verir (29_bank_katalog.sql).
+      Ikinci klik baglayir - eyni movzuya tekrar sorgu getmir.  */
+  function toggleSamples(f, btn) {
+    var id  = btn.getAttribute("data-t");
+    var box = $("smp-" + id);
+    if (!box) return;
+    if (box.innerHTML) { box.innerHTML = ""; btn.classList.remove("open"); return; }
+    btn.classList.add("open");
+    box.innerHTML = '<div class="skel">Yüklənir…</div>';
+    sb.rpc("rpc_bank_samples", { p_topic: id, p_limit: 3, p_pool: f.pool })
+      .then(function (list) {
+        if (!$("smp-" + id)) return;
+        list = list || [];
+        if (!list.length) { box.innerHTML = ""; return; }
+        box.innerHTML = list.map(function (q) {
+          return '<div class="sq"><b>' + esc(q.body) + "</b>" +
+            ((q.options || []).length
+              ? "<ul>" + q.options.map(function (o) {
+                  return '<li' + (o.correct ? ' class="c"' : "") + ">" +
+                    esc(o.body) + "</li>";
+                }).join("") + "</ul>"
+              : '<p class="muted">Açıq cavablı sual</p>') +
+            "</div>";
+        }).join("") +
+        '<button class="morebtn" data-all="' + esc(id) + '">' +
+          "Bu mövzunun bütün suallarını gör</button>";
+        var ab = box.querySelector("[data-all]");
+        if (ab) ab.addEventListener("click", function () {
+          f.topics = [id];
+          screenBank();      //  movzu secildi -> katalogdan siyahiya kecir
+        });
+      })
+      .catch(function (e) { box.innerHTML = msg("err", fail(e)); });
+  }
+
+  function loadBank(append) {
     var live = guard();
     var f = bankFilter();
-    sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: 50, p_offset: 0 })
+    /*  Suzgecsiz platforma/hamisi: minlerle suali tokmek evezine fenn
+        secimi teklif olunur.  Oz banki ise derhal acilir - muellim oz
+        suallarini gormek ucun gelir.  */
+    //  Fenn secilib, movzu/axtaris yoxdur -> siyahi yox, EHATE
+    if (catalogMode(f) && f.subject) return loadCoverage(f, live);
+
+    if (f.pool !== "mine" && nFilt(f) === 0 && !(f.q || "").trim()) {
+      BSEQ++;                      //  ucusdaki kohne cavab bura yazmasin
+      var box0 = $("bList");
+      if (box0) {
+        var subs = subFilter((FAC.subjects || []).filter(function (x) {
+          return (Number(x.n) || 0) > 0;
+        }));
+        var total = subs.reduce(function (a, x) {
+          return a + (Number(x.n) || 0);
+        }, 0);
+        box0.innerHTML = subs.length
+          ? '<div class="bpick"><p>Bankda <b>' + total + "</b> sual var. " +
+              "Siyahı üçün fənn seçin və ya yuxarıdan axtarın:</p>" +
+              '<div class="g">' + subs.map(function (x) {
+                return '<button class="pkb" data-s="' + esc(x.slug) + '">' +
+                  esc(x.name) + "<i>" + x.n + " sual</i></button>";
+              }).join("") + "</div></div>"
+          : '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
+            "<b>Bu hovuzda hələ sual yoxdur</b></div>";
+        Array.prototype.forEach.call(
+          box0.querySelectorAll("[data-s]"), function (b) {
+            b.addEventListener("click", function () {
+              f.subject = b.getAttribute("data-s");
+              f.topics = [];
+              screenBank();
+            });
+          });
+      }
+      return;
+    }
+    if (!append) BOFF = 0;
+    var my = ++BSEQ;
+    sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: 50, p_offset: BOFF })
       .then(function (d) {
-        if (!live()) return;
+        if (!live() || my !== BSEQ) return;
         var box = $("bList");
         if (!box) return;
         d = d || {};
         var items = d.items || [];
-        if (!items.length) {
+        var total = Number(d.total) || 0;
+        if (!items.length && !append) {
           box.innerHTML = '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
             "<b>Sual tapılmadı</b>" +
             (f.pool === "mine"
@@ -2053,34 +3962,62 @@
               : "Süzgəci genişləndirin.") + "</div>";
           return;
         }
-        box.innerHTML =
-          '<div class="bcount">' + (Number(d.total) || 0) + " sual" +
-            (items.length < (Number(d.total) || 0)
-              ? " · ilk " + items.length + "-i göstərilir" : "") + "</div>" +
-          items.map(function (q) {
-            var mine = !!q.mine;
-            return '<button class="qrow" data-q="' + esc(q.id) + '"' +
-              (mine ? "" : " disabled") + ">" +
-              '<div class="g"><b>' + esc(q.body) + "</b><i>" +
-                "<span>" + esc(q.subject || "") + "</span>" +
-                (q.level ? "<span>·</span><span>" + esc(q.level) + "</span>" : "") +
-                (q.topic ? "<span>·</span><span>" + esc(q.topic) + "</span>" : "") +
-                '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
-                  DIFF[Number(q.difficulty) || 2] + "</span>" +
-                (mine ? "" : "<span>·</span><span>platforma</span>") +
-              "</i></div>" +
-              (mine ? '<span class="arrow">' + ic("right") + "</span>" : "") +
-            "</button>";
-          }).join("");
+        var shown = BOFF + items.length;
+        var rows = items.map(function (q) {
+          var mine = !!q.mine;
+          /*  Suzgecde ONSUZ DA secilmis olani her setirde tekrarlamiriq:
+              50 setirde "Ingilis dili · 11-ci sinif" 50 defe yazilirdi
+              ve setri iki qat hundur edirdi.  */
+          var meta = [];
+          if (!f.subject && q.subject) meta.push(esc(q.subject));
+          if (!f.level && q.level)     meta.push(esc(q.level));
+          if (q.topic)                 meta.push(esc(q.topic));
+          if (!mine)                   meta.push("platforma");
+          return '<button class="qrow" data-q="' + esc(q.id) + '"' +
+            (mine ? "" : " disabled") + ">" +
+            '<div class="g"><b>' + esc(q.body) + "</b><i>" +
+              meta.map(function (m, i) {
+                return (i ? "<span>·</span>" : "") + "<span>" + m + "</span>";
+              }).join("") +
+              '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
+                DIFF[Number(q.difficulty) || 2] + "</span>" +
+            "</i></div>" +
+            (mine ? '<span class="arrow">' + ic("right") + "</span>" : "") +
+          "</button>";
+        }).join("");
 
+        var more = shown < total
+          ? '<button class="morebtn" id="bMore">Daha ' +
+            Math.min(50, total - shown) + " sual göstər (" + shown + "/" + total + ")</button>"
+          : "";
+
+        if (append) {
+          var mb0 = $("bMore");
+          if (mb0) mb0.remove();
+          box.insertAdjacentHTML("beforeend", rows + more);
+        } else {
+          box.innerHTML =
+            '<div class="bcount">' + total + " sual" +
+              (shown < total ? " · " + shown + "-i göstərilir" : "") + "</div>" +
+            rows + more;
+        }
+
+        on("bMore", "click", function () {
+          var mb = $("bMore");
+          if (mb) { mb.disabled = true; mb.textContent = "Yüklənir…"; }
+          BOFF += 50;
+          loadBank(true);
+        });
         Array.prototype.forEach.call(box.querySelectorAll("[data-q]"), function (b) {
+          if (b.dataset.bound) return;
+          b.dataset.bound = "1";
           b.addEventListener("click", function () {
             nav("#/q/" + b.getAttribute("data-q"));
           });
         });
       })
       .catch(function (e) {
-        if (!live()) return;
+        if (!live() || my !== BSEQ) return;
         var box = $("bList");
         if (box) box.innerHTML = msg("err", fail(e));
       });
@@ -2541,17 +4478,72 @@
     else location.hash = h;
   }
 
+  /* ------------------------------------------ alt naviqasiya (mobil)
+     Telefonda bes esas bolme bir toxunusdadir; masaustunde gorunmur.
+     Panel yalniz daxil olmus ve hesabi qurulmus istifadecide cixir. */
+  /* Zeng - siqnallar ustluk duymesi (nokteli isare = yeni siqnal var) */
+  var btnBell = document.createElement("button");
+  btnBell.id = "btnBell";
+  btnBell.className = "bellbtn hide";
+  btnBell.title = "Bildirişlər";
+  btnBell.setAttribute("aria-label", "Bildirişlər");
+  btnBell.innerHTML = ic("bell") + '<i id="bellDot" class="hide"></i>';
+  topWho.parentNode.insertBefore(btnBell, topWho);
+  btnBell.addEventListener("click", function () { nav("#/n"); });
+  function bellDot(n) {
+    var d = $("bellDot");
+    if (d) d.classList.toggle("hide", !(Number(n) > 0));
+  }
+
+  var bnav = document.createElement("nav");
+  bnav.id = "bnav";
+  bnav.className = "bnav";
+  document.body.appendChild(bnav);
+  var BNAV = [
+    ["",    "home",   "İcmal"],
+    ["b",   "doc",    "Bank"],
+    ["gen", "gen",    "Test yığ"],
+    ["p",   "star",   "Paket"],
+    ["me",  "person", "Profil"]
+  ].filter(function (it) {
+    return it[0] !== "p" || !!(window.CFG && window.CFG.SHOW_PLANS);
+  });
+  function bnavShow(cur) {
+    bnav.innerHTML = BNAV.map(function (it) {
+      return '<a href="#/' + it[0] + '"' +
+        (cur === it[0] ? ' class="on"' : "") + ">" +
+        ic(it[1]) + "<span>" + it[2] + "</span></a>";
+    }).join("");
+    document.body.classList.add("bnav-on");
+    btnBell.classList.remove("hide");
+  }
+  function bnavHide() {
+    bnav.innerHTML = "";
+    document.body.classList.remove("bnav-on");
+    btnBell.classList.add("hide");
+  }
+
   function route() {
-    if (!ACC) { screenSetup(); return; }
+    if (!ACC) { bnavHide(); screenSetup(); return; }
     var m = (location.hash || "#/").replace(/^#/, "").split("/").filter(Boolean);
+    /*  "Yeni test yig" niyyeti yalniz generator ekraninda yasayir.
+        Muellim oradan basqa yere kecirse niyyet de silinir - yoxsa
+        sonra adi "Test yig"dan girende gozlenilmeden tapsiriq
+        ekranina atilardi.  Suzgec deyisiklikleri screenGen()-i
+        birbasa cagirir, ora dusmur. */
+    if (GF && m[0] !== "gen") { GF.back = ""; GF.backName = ""; }
+    bnavShow({ b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "g" && m[1]) return screenGroup(m[1]);
     if (m[0] === "r" && m[1]) return screenReport(m[1]);
     if (m[0] === "a" && m[1]) return screenAssign(m[1]);
     if (m[0] === "b") return screenBank();
     if (m[0] === "gen") return screenGen();
     if (m[0] === "t" && m[1]) return screenPaper(m[1]);
-    if (m[0] === "p") return screenPaket();
+    //  gizli olanda unvanla da acilmir - ana sehifeye qaytarilir
+    if (m[0] === "p") return plansOn() ? screenPaket() : nav("#/");
     if (m[0] === "adm") return screenAdmin();
+    if (m[0] === "me") return screenMe();
+    if (m[0] === "n") return screenNotif();
     if (m[0] === "q" && m[1]) return screenQuestion(m[1]);
     if (m[0] === "s" && m[1] && m[2]) return screenStudent(m[1], m[2]);
     screenHome();
@@ -2559,6 +4551,11 @@
 
   window.addEventListener("hashchange", function () {
     if (sb.session() && CTX) route();
+  });
+
+  /* Ustlukdeki ad profil sehifesini acir */
+  topWho.addEventListener("click", function () {
+    if (sb.session() && CTX && ACC) nav("#/me");
   });
 
   /* Muellim basqa tetbiqe kecib qayidanda hesabat ozu yenilenir -
@@ -2596,11 +4593,42 @@
       btnOut.classList.remove("hide");
       topWho.textContent = (CTX.profile && CTX.profile.full_name) || "";
       route();
+      //  zeng noktesi - hansi sehifeden acilmasindan asili olmadan
+      if (ACC) sb.rpc("rpc_home", {}).then(function (v) {
+        bellDot(v && v.alerts ? v.alerts.length : 0);
+      }).catch(function () {});
     }).catch(function (e) {
       if (e && e.status === 401) { sb.signOut().then(function () { screenAuth("in"); }); return; }
       show(msg("err", fail(e)));
     });
   }
+
+  /* Sessiya bitende hec bir ekranda dalana diranmirik - giris ekrani
+     xos xeberdarliqla acilir */
+  window.addEventListener("sb:sessionend", function () {
+    CTX = null; ACC = null;
+    try { history.replaceState(null, "", location.pathname); } catch (e) {}
+    screenAuth("in", msg("warn",
+      "Sessiyanız bitdi — təhlükəsizlik üçün yenidən daxil olun."));
+  });
+
+  /* Loqo ve basliq klik = esas sehife */
+  (function () {
+    var head = document.querySelector(".mark");
+    function goHome() {
+      if (!sb.session()) { screenAuth("in"); return; }
+      if (location.hash === "#/" || location.hash === "") { boot(); }
+      else nav("#/");
+    }
+    if (head) {
+      head.style.cursor = "pointer";
+      head.addEventListener("click", goHome);
+    }
+    if (topTitle) {
+      topTitle.style.cursor = "pointer";
+      topTitle.addEventListener("click", goHome);
+    }
+  })();
 
   btnOut.addEventListener("click", function () {
     sb.signOut().then(function () {
@@ -2610,5 +4638,23 @@
     });
   });
 
-  boot();
+  /* Berpa linkinden qayidanda Supabase tokenleri hash-de gonderir:
+     #access_token=...&refresh_token=...&type=recovery
+     Bu, bizim #/ marsrutlarimiz deyil - evvel tutub sessiya qururuq. */
+  (function () {
+    var h = location.hash || "";
+    if (h.indexOf("type=recovery") < 0 || h.indexOf("access_token=") < 0) return;
+    var q = {};
+    h.replace(/^#/, "").split("&").forEach(function (kv) {
+      var i = kv.indexOf("=");
+      if (i > 0) q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1));
+    });
+    if (!q.access_token) return;
+    sb.setSession(q.access_token, q.refresh_token || "");
+    try { history.replaceState(null, "", location.pathname); } catch (e) {}
+    screenNewPass();
+    RECOVERY = true;
+  })();
+
+  if (!RECOVERY) boot();
 })();

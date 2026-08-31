@@ -18,6 +18,7 @@ import os
 import secrets
 import sys
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -29,6 +30,7 @@ DSN = os.environ.get("MOCK_DSN", "host=/tmp port=55432 user=postgres dbname=t3")
 TOKENS = {}          # access_token -> uid
 REFRESH = {}         # refresh_token -> uid
 PASSWORDS = {}       # email -> (uid, password)
+RECOVER = {}         # test ucun: son berpa sorgusunun tokenleri
 LOCK = threading.Lock()
 
 
@@ -52,6 +54,21 @@ class H(BaseHTTPRequestHandler):
         pass
 
     # ------------------------------------------------------------ komekci
+    def test_delay(self):
+        """YOXLAMA ucun: X-Test-Delay basligi (ms) qeder gozle.
+
+        Kes yoxlamalari ucun lazimdir - "kohne cavab teze ekranin
+        ustune dusmesin" kimi yarislari basqa cur deterministik
+        yaratmaq olmur.  Server COX AXINLIDIR, ona gore burada
+        gozlemek yalniz HEMIN sorgunu lengidir.
+        Yalniz mock-dadir; hegiqi Supabase belə bir baslıq tanimir."""
+        try:
+            ms = int(self.headers.get("X-Test-Delay") or 0)
+        except ValueError:
+            ms = 0
+        if 0 < ms <= 10000:
+            time.sleep(ms / 1000.0)
+
     def send(self, code, payload):
         body = json.dumps(payload, default=str).encode("utf-8")
         self.send_response(code)
@@ -85,6 +102,7 @@ class H(BaseHTTPRequestHandler):
 
     # -------------------------------------------------------------- POST
     def do_POST(self):
+        self.test_delay()
         u = urlparse(self.path)
         q = parse_qs(u.query)
         b = self.body()
@@ -99,6 +117,14 @@ class H(BaseHTTPRequestHandler):
                     return self.send(401, {"message": "Refresh token yanlisdir."})
                 return self.send(200, issue(uid))
             return self.signin(b)
+        if u.path == "/auth/v1/recover":
+            #  E-poct gonderilmir - "mektubdaki link"in tokenlerini
+            #  testin goture bilmesi ucun yadda saxlayiriq.
+            email = (b.get("email") or "").strip().lower()
+            rec = PASSWORDS.get(email)
+            #  issue() ozu LOCK goturur - burda LOCK altina salmaq olmaz
+            RECOVER["last"] = issue(rec[0]) if rec else None
+            return self.send(200, {})
         if u.path == "/auth/v1/logout":
             auth = self.headers.get("Authorization", "")
             if auth.startswith("Bearer "):
@@ -175,17 +201,25 @@ class H(BaseHTTPRequestHandler):
         if not name.startswith("rpc_"):
             return self.send(404, {"message": "Bele funksiya yoxdur."})
         keys = list(args.keys())
-        stmt = sql.SQL("select {}({}) as r").format(
-            sql.Identifier("public", name),
-            sql.SQL(", ").join(
-                sql.SQL("{} => %s").format(sql.Identifier(k)) for k in keys))
 
         # PostgREST parametrin TIPINE baxir: jsonb-dirse JSON kimi,
         # text[]-dirse ARRAY kimi gonderir.  Hamisini Json()-a bukmek
         # text[] parametrde "malformed array literal" verir - ve bu sehv
         # yalniz burda gorunerdi, canli Supabase-de yox.  Ona gore biz de
         # tipe baxiriq: eks halda mock hequiqetden ferqli davranir.
+        # Massiv parametre acik cast da lazimdir: psycopg2 siyahini
+        # text[] kimi gonderir, uuid[] parametr onu qebul etmir -
+        # PostgREST ise imzaya gore ozu cevirir.
         types = self.arg_types(name)
+
+        def piece(k):
+            t = types.get(k, "")
+            cast = sql.SQL("::" + t) if t.endswith("[]") else sql.SQL("")
+            return sql.SQL("{} => %s{}").format(sql.Identifier(k), cast)
+
+        stmt = sql.SQL("select {}({}) as r").format(
+            sql.Identifier("public", name),
+            sql.SQL(", ").join(piece(k) for k in keys))
 
         def val(k, v):
             if not isinstance(v, (dict, list)):
@@ -207,6 +241,26 @@ class H(BaseHTTPRequestHandler):
                                     "code": e.pgcode})
         except Exception as e:
             return self.send(400, {"message": str(e)})
+
+    # ------------------------------------------------------------- PUT
+    #  Yalniz parol yenilemesi (auth/v1/user) - berpa axini ucun.
+    def do_PUT(self):
+        u = urlparse(self.path)
+        if u.path != "/auth/v1/user":
+            return self.send(404, {"message": "Yoxdur: " + u.path})
+        auth = self.headers.get("Authorization", "")
+        uid = TOKENS.get(auth[7:]) if auth.startswith("Bearer ") else None
+        if not uid:
+            return self.send(401, {"message": "Token yanlisdir."})
+        b = self.body()
+        pw = (b or {}).get("password") or ""
+        if len(pw) < 6:
+            return self.send(400, {"message": "Parol qisadir."})
+        with LOCK:
+            for em, rec in list(PASSWORDS.items()):
+                if rec[0] == uid:
+                    PASSWORDS[em] = (uid, pw)
+        return self.send(200, {"id": uid})
 
     def do_PATCH(self):
         """PostgREST-in setir yenilemesi: PATCH /rest/v1/<cedvel>?id=eq.<x>"""
@@ -249,7 +303,13 @@ class H(BaseHTTPRequestHandler):
             return self.send(400, {"message": str(e)})
 
     def do_GET(self):
+        self.test_delay()
         u = urlparse(self.path)
+        if u.path == "/test/recovery":
+            t = RECOVER.get("last")
+            if not t:
+                return self.send(404, {"message": "Berpa sorgusu yoxdur"})
+            return self.send(200, t)
         if not u.path.startswith("/rest/v1/"):
             return self.send(404, {"message": "Yoxdur"})
         table = unquote(u.path[len("/rest/v1/"):])

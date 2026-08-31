@@ -29,11 +29,20 @@ def db(sql, args=None, one=False):
 db("""
 -- DIQQET: truncate ... cascade profiles-e istinad eden tests cedvelini de
 -- bosaldir - platforma testleri itir. Ona gore hedefli silme.
+delete from public.question_reports;
 delete from public.attempt_answers;
 delete from public.attempts;
+delete from public.assignments;
 delete from public.student_sessions;
 delete from public.students;
 delete from public.classes;
+-- muellim testleri/suallari da silinir - suite sirasindan asililiq olmasin
+delete from public.test_questions tq using public.tests t
+ where t.id = tq.test_id and t.owner_type = 'educator';
+delete from public.tests where owner_type = 'educator';
+delete from public.question_options o using public.questions q
+ where q.id = o.question_id and q.owner_type = 'educator';
+delete from public.questions where owner_type = 'educator';
 delete from public.account_members;
 delete from public.accounts;
 delete from public.user_roles;
@@ -98,6 +107,8 @@ with sync_playwright() as pw:
     ok(True, "kodla giris isleyir")
     ok("Aysu M." in pg.inner_text("#topTitle"), "ustlukde leqeb gorunur")
     ok("3-B qrupu" in pg.inner_text("#main"), "qrup adi gorunur")
+    ok(pg.locator(".shero .av").count() == 1, "salamlama basligi avatarlidir")
+    ok(pg.locator(".stiles").count() == 0, "islenmis test yoxdur - statlar gizlidir")
 
     print("B · Test siyahısı")
     n = pg.locator(".test").count()
@@ -250,9 +261,30 @@ with sync_playwright() as pw:
        pg.locator(".wrong").count())
     ok(len(pg.locator(".wrong i").first.inner_text()) > 5,
        "sehv sualda izah gosterilir", pg.locator(".wrong i").first.inner_text()[:45])
+    # sualda sehv bildirisi: link -> sebeb -> gonder -> tesekkur
+    pg.locator(".wrong .rlink").first.click()
+    pg.wait_for_selector(".wrong [data-rsend]", timeout=4000)
+    pg.locator(".wrong [data-rsend]").first.click()
+    pg.wait_for_selector(".wrong .rok", timeout=6000)
+    ok("Bildirildi" in pg.inner_text(".wrong .rok"), "sagird bildirisi gonderilir")
+    nr = db("select count(*) n from public.question_reports where student_id is not null",
+            one=True)["n"]
+    ok(nr == 1, "bildiris bazaya dusdu", nr)
+
+    print("H2 · Nəticələrim: statlar, qrafik, siyahı")
+    pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
+    ok(pg.locator(".stiles").count() == 1, "islenmis testden sonra statlar cixir")
+    pg.click("#btnMyRes")
+    pg.wait_for_selector(".myr", timeout=8000)
+    ok(pg.locator(".myr").count() >= 2, "neticeler siyahisi dolur",
+       pg.locator(".myr").count())
+    ok(pg.locator(".dyn i").count() >= 2, "mini qrafik cizilir",
+       pg.locator(".dyn i").count())
+    ok(pg.locator(".myr .best").count() >= 2, "faiz cipleri rənglidir")
+    pg.click("#btnB2"); pg.wait_for_selector(".test", timeout=8000)
 
     print("I · Yarımçıq testdə çıxış xəbərdarlığı")
-    pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
+    pg.wait_for_selector(".test", timeout=8000)
     pg.locator(".test:not(.lock)", has_text="Qarışıq").first.click()
     pg.wait_for_selector(".opt", timeout=8000)
     asked = {"v": False}
@@ -339,6 +371,65 @@ with sync_playwright() as pw:
                 where aa.is_correct is null""", one=True)["n"]
     ok(nn == nq2, "cavabsiz suallar bazada 'sehv' YOX, bos yazilir",
        "%d / %d" % (nn, nq2))
+
+    print("Q · Cavab qaralaması — bağlantı kəsilsə itmir")
+    #  Bu bloka qeder butun testler islenib.  Ona gore OZ TEZE
+    #  teyinatimizi acirik - blok siradan asili qalmasin.
+    QT = db("""select id::text i from public.tests
+                where owner_type='platform' and slug='riy-3-analiz'""", one=True)["i"]
+    db("""delete from public.attempt_answers aa using public.attempts a
+           where a.id = aa.attempt_id and a.test_id = %s;
+          delete from public.attempts where test_id = %s;
+          insert into public.assignments (class_id, test_id, max_attempts)
+          values ('c1c1c1c1-0000-0000-0000-000000000001', %s, 5)
+          on conflict do nothing;""", (QT, QT, QT))
+    #  Abune lazimdirsa acilsin - kilidli qalmasin
+    db("""insert into public.subscriptions (account_id, plan_id, status,
+                                            current_period_end)
+          select 'b1b1b1b1-0000-0000-0000-000000000001', p.id, 'active',
+                 now() + interval '30 days'
+            from public.plans p where p.slug = 'repetitor-25'
+           on conflict do nothing;""")
+    pg.reload(); pg.wait_for_selector(".test", timeout=8000)
+    pg.locator(".test:not(.lock):not(.done)").first.click()
+    pg.wait_for_selector(".opt", timeout=8000)
+    pg.locator("[data-o]").first.click()
+    pg.click("#btnNext"); pg.wait_for_timeout(200)
+    pg.locator("[data-o]").first.click()
+    pg.wait_for_timeout(200)
+
+    dr = pg.evaluate("JSON.parse(localStorage.getItem('sagird_qaralama')||'{}')")
+    ok(isinstance(dr, dict) and len(dr) == 1, "qaralama yazildi", list(dr.keys())[:1])
+    ent = list(dr.values())[0] if dr else {}
+    ok(len(ent.get("ans") or {}) == 2, "iki cavab saxlanilib",
+       len(ent.get("ans") or {}))
+    ok(ent.get("i") == 1, "movqe de saxlanilib", ent.get("i"))
+
+    #  "Telefon sondu" - sehife tam yenilenir, test yeniden acilir
+    pg.reload(); pg.wait_for_selector(".test", timeout=8000)
+    pg.locator(".test:not(.lock):not(.done)").first.click()
+    pg.wait_for_selector(".opt", timeout=8000)
+    ok(pg.locator(".ok.restored").count() == 1, "berpa bildirisi cixir")
+    ok("2 cavabınız qaytarıldı" in pg.inner_text(".ok.restored"),
+       "bildiris sayi duz gosterir", pg.inner_text(".ok.restored"))
+    #  Cari sual xeritede "cur" olur - "done" yalniz o birisidir
+    ok(pg.locator(".qnav .done").count() == 1, "evvelki sual cavabli isarelenib",
+       pg.locator(".qnav .done").count())
+    ok(pg.locator(".qnav .cur").count() == 1, "movqe berpa olunub")
+    #  ESAS SUBUT: berpa olunan cavab ekranda secili gorunur
+    ok(pg.locator(".opt.sel").count() == 1, "berpa olunan cavab secili gelir",
+       pg.locator(".opt.sel").count())
+    #  Bildiris bir defelikdir - novbeti suala kecende itir
+    pg.click("#btnNext"); pg.wait_for_timeout(200)
+    ok(pg.locator(".ok.restored").count() == 0, "bildiris bir defelikdir")
+
+    #  Testi bitirende qaralama silinir
+    while pg.locator("#btnNext").count():
+        pg.click("#btnNext"); pg.wait_for_timeout(120)
+    pg.click("#btnFinish")
+    pg.wait_for_selector(".score", timeout=8000)
+    dr2 = pg.evaluate("JSON.parse(localStorage.getItem('sagird_qaralama')||'{}')")
+    ok(len(dr2) == 0, "gonderisden sonra qaralama silinir", dr2)
 
     ctx.close(); br.close()
 

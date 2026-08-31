@@ -129,7 +129,8 @@ begin
           join public.tests t on t.id = a.test_id
          where a.status = 'submitted'
          order by a.finished_at desc
-         limit 8
+         --  qrup cipleri ile suzulur - suzgecden sonra da dolu qalsin
+         limit 20
       ) z), '[]'::jsonb));
 end $$;
 

@@ -65,9 +65,9 @@
 /* Menimseme zolagi */
 .meter{height:5px;border-radius:999px;background:var(--n-150);overflow:hidden;margin-top:8px}
 .meter i{display:block;height:100%;border-radius:999px;transition:width .35s}
-.meter.ok  i{background:var(--ok)}
-.meter.mid i{background:var(--warn)}
-.meter.low i{background:var(--err)}
+.meter.m-ok  i{background:var(--ok)}
+.meter.m-mid i{background:var(--warn)}
+.meter.m-low i{background:var(--err)}
 
 /* Movzu / tarixce setri */
 .trow{display:flex;align-items:center;gap:12px;padding:13px 16px;
@@ -188,7 +188,115 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
   box-shadow:0 1px 2px rgba(16,24,40,.07)}
 
 /* Cox secimli nisanlar: cetinlik, movzular */
+/* veraqde "verilib" siyahisi */
+.pgiven{margin:0 0 14px;display:flex;flex-direction:column;gap:7px}
+.pgrow{display:flex;align-items:center;gap:8px;font-size:13px}
+.pgrow svg{width:16px;height:16px;color:var(--ok);flex:0 0 auto}
+
+/* zeng duymesi - ustlukde, noktesi yeni siqnal demekdir */
+.bellbtn{position:relative;border:0;background:none;cursor:pointer;
+  padding:6px;color:var(--fg-2);display:inline-flex;border-radius:8px}
+.bellbtn:hover{color:var(--brand);background:var(--n-100)}
+.bellbtn svg{width:19px;height:19px}
+.bellbtn i{position:absolute;top:5px;right:5px;width:8px;height:8px;
+  border-radius:99px;background:var(--err);border:1.5px solid var(--surface)}
+.bellbtn i.hide{display:none}
+.bellbtn.hide{display:none}
+
+/* faiz cipleri - deyere gore reng */
+.pctv.pvh{color:var(--ok)}
+.pctv.pvm{color:var(--warn)}
+.pctv.pvl{color:var(--err)}
+
+/* derin hesabat: zeif movzu noktesi, az-melumat nisani, movzu teqi */
+.wdot{display:inline-block;width:8px;height:8px;border-radius:99px;
+  background:var(--err);margin-right:7px;vertical-align:1px}
+.lowtag{color:var(--fg-3);background:var(--n-100);border-radius:6px;
+  padding:1px 6px;font-size:10.5px}
+.wq .wtag{display:inline-block;margin:4px 0 2px;padding:1px 8px;
+  border-radius:99px;background:var(--brand-tint);color:var(--brand);
+  border:1px solid var(--brand-line);font-size:10.5px;font-weight:600}
+
+/* dinamika - mini sutun qrafiki */
+.dyn{display:flex;align-items:flex-end;gap:6px;height:92px}
+.dyn i{flex:1;max-width:36px;border-radius:6px 6px 2px 2px;min-height:5px}
+.dyn .dh{background:var(--ok)}
+.dyn .dm{background:var(--warn)}
+.dyn .dl{background:var(--err)}
+
+/* cavab vereqi - tarixce setrine klikle acilir */
+.atr{border:0;background:none;width:100%;font:inherit;cursor:pointer;
+  text-align:left}
+.atr .lnk2{color:var(--brand);text-decoration:underline;
+  text-underline-offset:2px}
+.sheet{border-bottom:1px solid var(--n-100);background:var(--n-25)}
+.sheet.hide{display:none}
+.shq{padding:11px 16px;border-top:1px dashed var(--n-150)}
+.shq b{display:block;font-size:13px;font-weight:600}
+.shq .sa{display:flex;gap:14px;flex-wrap:wrap;margin-top:5px;font-size:12.5px}
+.shq .sc{color:var(--ok)}
+.shq .sw{color:var(--err)}
+.shq .sex{display:block;margin-top:4px;font-size:12px;color:var(--fg-3);
+  font-style:normal}
+
+/* sagird hesabati basligi - avatarli */
+.shead{display:flex;align-items:center;gap:13px}
+.shead .av{width:44px;height:44px;flex:0 0 44px;border-radius:14px;
+  font-size:17px}
+.shead h1{margin:0}
+
+/* qrup siyahisinda herf-avatar (GPT eskizindeki fenn ikonu evezine) */
+.item .av{width:38px;height:38px;flex:0 0 38px;border-radius:12px;
+  font-size:15px;margin-right:2px}
+/* tapsiriq tablari */
+.segs.asgf{margin:0 0 10px}
+/* son neticeler lentinin qrup cipleri */
+.chips.recf{margin:0 0 10px}
+/* lentin "daha N netice goster" acici duymesi */
+.morebtn{display:block;width:100%;padding:11px 14px;border:none;
+  border-top:1px solid var(--line);background:transparent;
+  color:var(--brand);font:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;text-align:center}
+.morebtn:hover{background:var(--brand-tint)}
+
+/* ana sehife: suretli emeliyyatlar */
+.qhead{font-size:11.5px;font-weight:640;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--fg-3);margin:0 0 12px}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qact{display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  padding:13px 14px;border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--n-25);cursor:pointer;font:inherit;text-align:left;
+  transition:background .12s,border-color .12s,transform .06s}
+.qact:hover{background:var(--brand-tint);border-color:var(--brand-line)}
+.qact:active{transform:scale(.98)}
+.qact svg{width:21px;height:21px;margin-bottom:7px}
+.qact b{font-size:13.5px}
+.qact span{font-size:11px;color:var(--fg-3)}
+.qact.qa svg{color:var(--brand)}
+.qact.qb svg{color:var(--teal)}
+.qact.qc svg{color:var(--warn)}
+.qact.qd svg{color:var(--n-600)}
+
+/* alt naviqasiya - yalniz telefonda gorunur */
+.bnav{display:none}
+@media (max-width:720px){
+  body.bnav-on{padding-bottom:76px}
+  body.bnav-on .bnav{position:fixed;left:0;right:0;bottom:0;z-index:40;
+    display:flex;justify-content:space-around;
+    background:var(--surface);border-top:1px solid var(--line);
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+  .bnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:5px 0 3px;font-size:10px;font-weight:560;color:var(--fg-3);
+    text-decoration:none;border-radius:10px}
+  .bnav a svg{width:20px;height:20px}
+  .bnav a.on{color:var(--brand)}
+}
+
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+/* fenn secimi (qurulus + profil); ustlukdeki ad profili acir */
+.chips.subpick{margin:0 0 14px}
+.top .who{cursor:pointer}
+.top .who:hover{color:var(--brand)}
 .chip{
   min-height:30px;padding:0 11px;border:1px solid var(--n-200);
   background:var(--surface);border-radius:999px;font:inherit;font-size:12.5px;
@@ -274,7 +382,7 @@ details.more.filt .fn{
 .paper .pq{padding:16px;border-bottom:1px solid var(--n-100)}
 .paper .pq:last-child{border-bottom:0}
 .paper .qh b{font-size:14.5px;font-weight:590;letter-spacing:-.008em;line-height:1.45}
-.paper .qm{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+.paper .qm,.repc .qm{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
   font-size:12px;color:var(--fg-2);margin:6px 0 10px}
 .popt{display:flex;align-items:center;gap:8px;padding:6px 10px;
   border:1px solid var(--n-100);border-radius:var(--r);margin-top:6px;
@@ -335,6 +443,144 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:620;
   margin-top:2px}
 
+/* ders plani */
+.plock{display:flex;gap:12px;align-items:flex-start}
+.plock .lic{flex:0 0 40px;width:40px;height:40px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--brand-tint);color:var(--brand)}
+.plock .lic svg{width:20px;height:20px}
+.plan .plhead{display:flex;justify-content:space-between;align-items:baseline;
+  gap:10px;margin-bottom:8px}
+.plan .plhead b{font-size:14.5px;font-weight:620}
+.plan .plhead span{font-size:12px;color:var(--fg-2)}
+.plbar{height:7px;border-radius:999px;background:var(--n-100);
+  overflow:hidden;margin-bottom:14px}
+.plbar i{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--brand),#18b8a6);
+  transition:width .4s}
+.plcur{padding:14px;border:1px solid var(--brand-line);border-radius:12px;
+  background:var(--brand-tint)}
+.plcur.done{border-color:var(--ok-line);background:var(--ok-tint)}
+.plcur .pltag{display:inline-block;font-size:10.5px;font-weight:640;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--brand);
+  margin-bottom:4px}
+.plcur b{display:block;font-size:14px;font-weight:600;margin-bottom:10px}
+.plbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.plbtns input{flex:0 0 72px;text-align:center}
+.ploffer{margin-top:12px;padding:12px;border:1px dashed var(--ok-line);
+  border-radius:10px;background:var(--ok-tint)}
+.ploffer b{font-size:13px}
+.plan details{margin-top:12px}
+.plan summary{cursor:pointer;font-size:12.5px;font-weight:580;
+  color:var(--fg-2)}
+.pllist{margin-top:8px}
+.plrow{display:flex;align-items:center;gap:9px;padding:6px 4px;
+  font-size:13px;border-bottom:1px dashed var(--n-100)}
+.plrow:last-child{border-bottom:0}
+.plrow i{flex:0 0 22px;height:22px;border-radius:50%;font-style:normal;
+  font-size:11px;display:flex;align-items:center;justify-content:center;
+  background:var(--n-25);color:var(--fg-3);border:1px solid var(--n-100)}
+.plrow.ok i{background:var(--ok-tint);color:var(--ok);
+  border-color:var(--ok-line)}
+.plrow.ok span{color:var(--fg-3)}
+.plrow.cur span{font-weight:620}
+.plrow.cur i{background:var(--brand-tint);color:var(--brand);
+  border-color:var(--brand-line)}
+.plrow .pltest{margin-left:auto;font-size:11.5px}
+.plrow .plmk{margin-left:auto;border:0;background:none;cursor:pointer;
+  font:inherit;font-size:11.5px;color:var(--brand);text-decoration:underline;
+  text-underline-offset:2px}
+.plrow .plmk:disabled{color:var(--fg-3);cursor:default;text-decoration:none}
+.plrow .plundo{margin-left:auto;border:0;background:none;cursor:pointer;
+  font:inherit;font-size:11px;color:var(--fg-3);text-decoration:underline;
+  text-underline-offset:2px}
+.plrow .pltest + .plundo,.plrow .plmk + .plundo{margin-left:8px}
+.plrow .plck{margin-left:auto;flex:0 0 auto;width:15px;height:15px;
+  accent-color:var(--brand);cursor:pointer}
+.plrow .plck + .pltest,.plrow .plck + .plmk{margin-left:10px}
+/* adaptiv plan: kecilme tarixi, qrup ortalamasi, tekrar duymesi */
+.plrow .pldate{text-decoration:none;color:var(--fg-3);font-size:11px;
+  font-weight:400}
+.plrow .plavg{margin-left:auto;flex:0 0 auto;font-size:11.5px;font-weight:650}
+.plrow .plavg.pvh{color:var(--ok)}
+.plrow .plavg.pvm{color:var(--warn)}
+.plrow .plavg.pvl{color:var(--err)}
+.plrow .plavg ~ .plck{margin-left:10px}
+.plrow .plavg ~ .pltest,.plrow .plavg ~ .plmk{margin-left:10px}
+.plrow .plck ~ .pltest,.plrow .plck ~ .plmk{margin-left:10px}
+.plrow .plmk.plre{color:var(--err)}
+.plmbar{margin-top:10px}
+.plmbar:empty{display:none}
+
+/* sual sehvi bildirisi + admin bildiris kartlari + 2FA */
+.rlink{border:0;background:none;cursor:pointer;font:inherit;
+  font-size:11.5px;color:var(--fg-3);text-decoration:underline;
+  text-underline-offset:2px;padding:0;margin-left:auto}
+.rlink:hover{color:var(--err)}
+.rfrm{display:flex;gap:6px;flex-wrap:wrap;align-items:center;
+  margin-top:8px;padding:10px;border:1px dashed var(--n-300);
+  border-radius:10px;background:var(--n-25)}
+.rfrm select{flex:0 0 170px}
+.rfrm .rnote{flex:1;min-width:140px}
+.rok{margin-top:8px;font-size:12.5px;color:var(--ok);font-weight:560}
+.rerr{margin-top:6px;font-size:12px;color:var(--err)}
+.rcnt{display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:20px;padding:0 6px;border-radius:999px;
+  background:var(--err);color:#fff;font-size:11.5px;font-weight:640;
+  vertical-align:2px}
+.repc .rhead{display:flex;align-items:flex-start;gap:10px;
+  justify-content:space-between;margin-bottom:6px}
+.repc .rhead b{font-size:14px;font-weight:600}
+.repc .rwho{margin-top:10px;border-top:1px dashed var(--n-100);padding-top:8px}
+.repc .rline{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;
+  color:var(--fg-2);margin-bottom:4px}
+.repc .rline i{font-style:normal;color:var(--fg)}
+.repc .rbtns{display:flex;gap:8px;margin-top:12px}
+.ffrm{margin-top:12px;padding:14px;border:1px solid var(--brand-line);
+  border-radius:12px;background:var(--brand-tint)}
+.ffrm label{display:block;font-size:11.5px;font-weight:600;
+  color:var(--fg-2);margin:10px 0 4px}
+.ffrm label:first-child{margin-top:0}
+.ffrm textarea{width:100%;resize:vertical}
+.ffrm .fopt{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.ffrm .fopt input[type="radio"]{flex:0 0 auto;width:16px;height:16px;
+  accent-color:var(--ok)}
+.ffrm .fopt input[type="text"]{flex:1}
+/* kilid ekrani */
+.lock{max-width:420px;margin:48px auto 0;text-align:center}
+.lock .lic{width:48px;height:48px;border-radius:14px;margin:0 auto 12px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--brand-tint);color:var(--brand)}
+.lock .lic svg{width:24px;height:24px}
+.lock h1{margin-bottom:6px}
+.lrow{display:flex;gap:8px;margin-top:12px}
+.lrow input{flex:1;text-align:center;font-size:18px;letter-spacing:4px;
+  font-variant-numeric:tabular-nums}
+.s2setup{margin-top:14px;text-align:left}
+.s2setup p{font-size:13px;margin:12px 0 6px}
+.s2key{display:block;padding:10px 12px;border-radius:10px;
+  background:var(--n-25);border:1px solid var(--n-100);
+  font-size:15px;letter-spacing:2px;word-break:break-all;
+  font-family:ui-monospace,monospace}
+.s2bkp{display:flex;gap:8px;flex-wrap:wrap}
+.s2bkp code{padding:6px 10px;border-radius:8px;background:var(--n-25);
+  border:1px solid var(--n-100);font-family:ui-monospace,monospace;
+  font-size:13px}
+.okic{width:15px;height:15px;color:var(--ok);vertical-align:-2px}
+
+/* bank: suzgecsiz hovuzda fenn secimi paneli */
+.bpick{padding:18px 16px 16px}
+.bpick p{font-size:13px;color:var(--fg-2);margin:0 0 12px}
+.bpick .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.bpick .pkb{display:flex;flex-direction:column;gap:3px;align-items:flex-start;
+  padding:12px 14px;border:1px solid var(--n-100);border-radius:10px;
+  background:var(--surface);cursor:pointer;text-align:left;
+  font:inherit;font-size:13.5px;font-weight:580;color:var(--fg);
+  transition:border-color .15s,box-shadow .15s,transform .1s}
+.bpick .pkb:hover{border-color:var(--brand-line);
+  box-shadow:0 2px 8px rgba(20,30,70,.07);transform:translateY(-1px)}
+.bpick .pkb i{font-style:normal;font-size:11.5px;font-weight:460;color:var(--fg-3)}
+
 /* paket ve admin */
 .pkt.on{border-color:var(--brand-line);background:var(--brand-tint)}
 .admr{display:flex;align-items:center;gap:10px;padding:12px 16px;
@@ -344,8 +590,18 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .admr b{font-size:13.5px;font-weight:580}
 .admr i{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
   font-style:normal;font-size:12px;color:var(--fg-2);margin-top:3px}
-.admr .okt{color:var(--ok);font-weight:560}
+.admr:hover{background:var(--n-25)}
 .admr .btns{display:flex;gap:6px;flex:0 0 auto}
+/*  plan nisani: y=aktiv, z=bitmeye az qalib, n=paketsiz  */
+.admr .pb{display:inline-block;margin-left:8px;padding:2px 9px;
+  border-radius:999px;font-size:10.5px;font-weight:620;
+  vertical-align:1.5px;white-space:nowrap}
+.admr .pb.y{background:var(--ok-tint);color:var(--ok);
+  border:1px solid var(--ok-line)}
+.admr .pb.z{background:var(--warn-tint);color:var(--warn);
+  border:1px solid var(--warn-line)}
+.admr .pb.n{background:var(--n-25);color:var(--fg-3);
+  border:1px solid var(--n-100)}
 
 /* esas sehife - salam ve stat lovheleri */
 .hi{font-size:20px;font-weight:650;letter-spacing:-.02em;margin:2px 0 14px}
@@ -367,9 +623,9 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .stat:nth-child(1)::before{background:var(--brand)}
 .stat:nth-child(2)::before{background:var(--teal)}
 .stat:nth-child(3)::before{background:#175d97}
-.meter.ok  i{background:linear-gradient(90deg,#0e9384,#18b8a6)}
-.meter.mid i{background:linear-gradient(90deg,#b54708,#e08a2e)}
-.meter.low i{background:linear-gradient(90deg,#b42318,#e05b51)}
+.meter.m-ok  i{background:linear-gradient(90deg,#0e9384,#18b8a6)}
+.meter.m-mid i{background:linear-gradient(90deg,#b54708,#e08a2e)}
+.meter.m-low i{background:linear-gradient(90deg,#b42318,#e05b51)}
 .qrow{transition:background .12s}
 .trow{transition:background .12s}
 .trow:hover{background:var(--n-25)}
@@ -378,3 +634,129 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .al.weak{border-left-color:#e08a2e}
 .al.star{border-left-color:var(--ok)}
 .stu .l1 .av{width:30px;height:30px;flex:0 0 30px;font-size:13px;margin-right:2px}
+
+/* hesabat stat kartlari - ev lovheleri ile eyni dil */
+.stat.g1{background:linear-gradient(135deg,#2b4acb,#4a63e0);border:0;color:#fff}
+.stat.g2{background:linear-gradient(135deg,#0e9384,#18b8a6);border:0;color:#fff}
+.stat.g3{background:linear-gradient(135deg,#1c2a52,#31437a);border:0;color:#fff}
+.stat.g1::before,.stat.g2::before,.stat.g3::before{display:none}
+.stat.g1 span,.stat.g2 span,.stat.g3 span{color:rgba(255,255,255,.85)}
+
+/* parol berpasi linki - parol xanasinin altinda, sagda, zerif */
+.fglink{text-align:right;margin:-8px 0 14px}
+.lnk{border:0;background:none;cursor:pointer;font:inherit;
+  font-size:12px;font-weight:560;color:var(--brand);padding:0}
+.lnk:hover{text-decoration:underline;text-underline-offset:3px}
+
+/* ---------------- cap / PDF veraqi ----------------
+   #printBox ekranda hec vaxt gorunmur - yalniz cap zamani.
+   body.printing sinfi paperPrint() icinde qoyulub goturulur. */
+#printBox{display:none}
+.prnrow{display:flex;gap:8px;flex-wrap:wrap}
+@media print{
+  @page{margin:12mm}
+  body.printing>:not(#printBox){display:none!important}
+  body.printing{background:#fff}
+  body.printing #printBox{display:block;color:#000;background:#fff;
+    font:12.5px/1.5 Georgia,"Times New Roman",serif}
+  #printBox h1{font-size:18px;margin:0 0 4px;color:#000}
+  #printBox .pph{border-bottom:2px solid #000;padding:0 0 8px;margin:0 0 14px}
+  #printBox .ppm{font-size:11px;color:#333;margin:0 0 10px}
+  #printBox .ppf{display:flex;gap:20px;flex-wrap:wrap;font-size:12px}
+  #printBox .ppq{break-inside:avoid;page-break-inside:avoid;margin:0 0 12px}
+  #printBox .ppb{font-weight:700;margin:0 0 4px}
+  #printBox .ppmu{font-weight:400;font-style:italic;font-size:11px}
+  #printBox .ppo{margin:2px 0 2px 16px}
+  #printBox .ppl{margin:8px 0 2px 16px}
+  #printBox .ppk{break-before:page;page-break-before:always}
+  #printBox .ppk h2{font-size:15px;margin:0 0 10px;color:#000;
+    text-transform:none;letter-spacing:0}
+  #printBox .ppkg{display:grid;grid-template-columns:repeat(4,1fr);
+    gap:6px 14px;font-size:12.5px}
+  #printBox .ppkn{font-size:11px;color:#555;font-style:italic;margin:-6px 0 10px}
+  /*  Su nisani: <tfoot> her cap sehifesinde tekrarlanir ve ozune yer
+      ayirir - fixed altliq kimi metnin ustune dusmur. */
+  #printBox .ppw{width:100%;border-collapse:collapse}
+  #printBox .ppw>tbody>tr>td,#printBox .ppw>tfoot>tr>td{padding:0;border:0}
+  #printBox .ppw>tfoot{display:table-footer-group}
+  #printBox .ppfoot{font-size:9.5px;color:#8a8a8a;text-align:center;
+    letter-spacing:.02em;padding-top:4px;margin-top:10px;
+    border-top:.5px solid #d8d8d8}
+}
+
+/* ferdi tapsiriq nisani - "yalniz Lale" */
+.pill.solo{background:var(--brand-tint);color:var(--brand);
+  border-color:var(--brand-line);flex:0 0 auto}
+.pill.solo svg{width:12px;height:12px;stroke-width:1.9}
+.asg .l1{flex-wrap:wrap}
+
+/* ============================================ bank: ehate goruntusu
+   Platforma hovuzunda 50 sual tokmek evezine "hansi sinifde /
+   movzuda ne qeder var" gosterilir.  Setir basilanda 3 numune
+   acilir - platforma sualinin variantlarini yalniz burada gormek
+   olur (siyahida o setirler disabled-dir). */
+.bcount #covUp{margin-left:8px;vertical-align:-4px}
+
+.cvw{border-bottom:1px solid var(--n-100)}
+.cvw:last-child{border-bottom:0}
+.cvr{display:flex;align-items:center;gap:12px;width:100%;
+  padding:12px 16px;border:0;background:none;cursor:pointer;
+  font:inherit;text-align:left}
+.cvr:hover{background:var(--n-25)}
+.cvr .g{flex:1;min-width:0}
+.cvr b{display:block;font-size:13.5px;font-weight:570;color:var(--fg)}
+.cvr i{display:block;font-style:normal;font-size:11.5px;color:var(--fg-3);
+  margin-top:3px}
+.cvr .n{flex:0 0 auto;font-size:13px;font-weight:620;color:var(--fg-2)}
+.cvr .arrow{flex:0 0 auto;color:var(--fg-3);display:flex;
+  transition:transform .15s}
+.cvr .arrow svg{width:15px;height:15px}
+.cvr.open .arrow{transform:rotate(90deg)}
+/* movzunun nisbi cekisi - en boyuk movzu 100% */
+.cbar{height:3px;border-radius:2px;background:var(--n-100);margin:6px 0 0;
+  max-width:220px;overflow:hidden}
+.cbar i{display:block;height:100%;background:var(--brand);opacity:.55}
+
+/* numune suallar */
+.smp:empty{display:none}
+.smp{padding:2px 16px 14px;background:var(--n-25);
+  border-top:1px solid var(--n-100)}
+.smp .sq{padding:10px 0;border-bottom:1px solid var(--n-100)}
+.smp .sq:last-of-type{border-bottom:0}
+.smp .sq b{display:block;font-size:13px;font-weight:540;color:var(--fg);
+  line-height:1.45}
+.smp .sq ul{list-style:none;margin:7px 0 0;padding:0;
+  display:flex;flex-direction:column;gap:4px}
+.smp .sq li{font-size:12.5px;color:var(--fg-2);padding:3px 9px;
+  border-radius:7px;background:var(--surface);
+  border:1px solid var(--n-100)}
+/* duz cavab: muellim keyfiyyeti gormek ucun gelir, gizletmek menasizdir */
+.smp .sq li.c{background:var(--ok-tint);border-color:var(--ok-line);
+  color:#05603a;font-weight:560}
+.smp .morebtn{margin-top:6px;border-top:1px solid var(--n-100)}
+
+/* =================================== ders plani: fesil (alt movzular)
+   Setirler artiq DERSDIR, fesil ise onlari qruplasdirir.  Fesil
+   YIGILMIS gelir - 8-ci sinifde 11 fesil ~50 ders demekdir. */
+.plgrp{border-bottom:1px solid var(--n-100)}
+.plgrp:last-child{border-bottom:0}
+.plgrp>summary{display:flex;align-items:center;gap:8px;
+  padding:10px 14px;cursor:pointer;list-style:none;
+  font-size:13px;color:var(--fg)}
+.plgrp>summary::-webkit-details-marker{display:none}
+.plgrp>summary::before{content:"▸";color:var(--fg-3);font-size:11px;
+  transition:transform .15s;display:inline-block}
+.plgrp[open]>summary::before{transform:rotate(90deg)}
+.plgrp>summary:hover{background:var(--n-25)}
+.plgrp>summary b{font-weight:570;flex:1;min-width:0}
+.plgrp .plgc{flex:0 0 auto;font-size:11.5px;font-weight:600;
+  color:var(--fg-3);padding:1px 8px;border-radius:999px;
+  background:var(--n-50);border:1px solid var(--n-100)}
+.plgrp .plgc.ok{background:var(--ok-tint);border-color:var(--ok-line);
+  color:var(--ok)}
+/* fesil daxilindeki dersler bir az iceri */
+.plgrp .plrow{padding-left:30px}
+
+/* "Novbeti ders" kartinda feslin adi */
+.plcur .plgn{display:block;font-size:11.5px;font-weight:530;
+  color:var(--fg-3);margin:2px 0 1px}

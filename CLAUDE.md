@@ -67,6 +67,16 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    `insert into user_roles (user_id, role) select id,'admin' from
    auth.users where email='...'`. Mərhələ 2 (kart ödənişi,
    Payriff/Epoint) müştəri sayı artanda.
+   Admin **2FA ilə qorunur** (`db/24_admin_2fa.sql`): TOTP
+   (Authenticator tətbiqi) + 4 birdəfəlik ehtiyat kod; kilid 12 saat,
+   kod cəhdi 10 dəq/5. `app.admin_ok()` = rol + açılmış kilid — bütün
+   admin RPC-ləri bu qapıdan keçir. Telefon itsə: SQL Editor-də
+   `delete from admin_totp` kilidi sıfırlayır.
+   **Səhv bildirişləri** (`db/23_bildiris.sql`): müəllim vərəqdən,
+   şagird nəticə ekranından sualı bildirir (`question_reports`);
+   admin `#/adm`-də baxır, platforma sualını **yerində düzəldir**
+   (`rpc_admin_fix_question` — variant id-ləri qorunur) və ya rədd
+   edir. Bildiriş suala toxunmur — qərar həmişə admindədir.
 2. ~~Sual bankının davamı~~ — hazırdır: **1-11-ci siniflər**
    (ibtidai + orta + yuxarı, ingilis dili daxil, 11 fənn).
    Tarix **iki ayrı fənndir**: «Tarix» (Azərbaycan tarixi) və
@@ -115,7 +125,8 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    **20 sual**, ədəbiyyatda və ümumi tarixdə **31 sual**
    (cəmi ~18 870 platforma sualı).
    Mövzu ağacları `db/25/29/33/37/41/45/49_movzular_orta*.sql`,
-   banklar `db/23–52`, `54`, `56`, `59`, `60`, `62–65`, `67`, `69`, `71`.
+   banklar `db/30–52`, `54`, `56`, `59`, `60`, `62–65`, `67`, `69`, `71`,
+   `75–81` (1, 2 və 5-ci sinif — əvvəl 23–29-da idi, bölgüyə görə köçürüldü).
    **«Tarix» fənni artıq 5, 6, 8, 9, 11-ci siniflərdədir** — 7 və 10-cu
    sinifdə Azərbaycan tarixi dərsliyi portalda yoxdur, hər ikisinin
    məzmunu «Ümumi tarix»dədir.
@@ -136,43 +147,222 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    buraxılış hazırlığı **imtahan şablonu** kimi qurulacaq (bax yol
    xəritəsində «Buraxılış sınaq imtahanı»). Kataloq: **2 proqram**
    (ibtidai, orta), 11 sinif, 12 fənn.
-3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
-   hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
-   «köməkçi işçisi» olsun.
-4. **Vərəqin çap/PDF görünüşü** — cavabsız şagird + cavablı müəllim nüsxəsi.
-5. **Dinamika qrafiki** — şagirdin nəticəsi həftə-həftə.
-6. **«Səhvlər üzərində iş»** — səhv edilən sualların özündən bir kliklə test.
-7. PWA quraşdırma (manifest + ikon), Riyaziyyat 2 mövzularının yenilənməsi
+3. ~~Dərs planı bölgüsü~~ — hazırdır (`db/25_ders_plani.sql`): qrupda
+   fənn+sinif seçilir, mövzular dərslik ardıcıllığı ilə plana düzülür.
+   Plan TARİXLƏ yox, ARDICILLIQLA yaşayır («keçildi» deyilməyincə cari
+   mövzu dəyişmir). «Keçildi» → təklif: «N suallıq yoxlama testi
+   yığılsınmı?» → `rpc_plan_test` generatoru işlədir və qrupa dərhal
+   tapşırıq verir (+7 gün, 1 cəhd). Keçilmiş mövzudan sonradan da test
+   yığılır («test yığ»); bir neçə keçilmiş mövzu seçilib **birgə qarışıq
+   test** də mümkündür (`rpc_plan_test_multi` — item-ə bağlanmır).
+   Pullu qapı: yaratma/keçildi/test
+   abunə istəyir, baxış sərbəstdir. Mərhələ 2 (sonra): mövzu testi
+   zəif çıxanda növbəti dərsdən əvvəl xəbərdarlıq + düzəliş testi.
+   **Tədris fənləri** (`db/26_fenn.sql`): hesabda `subjects text[]`
+   (slug siyahısı) — quruluşda və `#/me` profilində (yuxarıdakı ada
+   klik) seçilir, `rpc_set_subjects` yazır. Bank/generator/plan fənn
+   siyahıları buna görə daralır — **filtrdir, məhdudiyyət deyil**: boş
+   siyahı və ya uyğunsuzluq = tam siyahı. `rpc_my_context` 26-da
+   genişləndirilib (06-nı dəyişəndə 26-dakı kopyanı da yenilə).
+   **Alt mövzular** (`topics.parent_id`, `db/101_ders_plani_alt.sql` +
+   `db/74_alt_movzular_riy8.sql`): plan yalnız mövzu başlığı ilə işləyəndə
+   müəllim «Kvadrat tənliklər»in 2 dərsini keçəndə qeyd edə bilmirdi —
+   ya hamısını «keçildi» edirdi (yalan), ya heç nə. **Sınaq: Riyaziyyat 8**
+   — 11 mövzu altında **74 alt mövzu**, adlar e-dərslikdən (book_id 393)
+   eynilə, dərslikdəki sıra ilə. Bəyənilsə qalan fənlərə keçilir;
+   mündəricat keşi (`mundericat/`) bütün 1-11 sinif üçün hazırdır.
+   **Alt mövzuya sual bağlanmır** — bank və generator yalnız sualı olan
+   mövzuları göstərir, ona görə alt mövzular o ekranlarda görünmür.
+4. ~~Vərəqin çap/PDF görünüşü~~ — hazırdır (`paperPrint()` + `@media
+   print` `muellim/app.css`-də). «Çap / PDF» şagird nüsxəsini verir
+   (ad/tarix/bal xanaları, A) B) C) hərflənmiş variantlar, açıq suala
+   cavab xətti — cavab izi YOXDUR); «Cavab açarı ilə» sonuna ayrıca
+   açar səhifəsi əlavə edir. Kitabxana yoxdur — brauzerin öz çap
+   pəncərəsi, orada «PDF olaraq saxla». Hər səhifənin altında **su
+   nişanı**: `Bil10 · çap edən müəllimin adı · tam tarix` — maneə deyil,
+   izlənəbilirlik (və vərəq valideynə gedəndə pulsuz reklam). Altlıq
+   `<tfoot>` ilə qurulub: `position:fixed` çoxsəhifəli vərəqdə mətnin
+   üstünə düşürdü.
+5. ~~Dinamika qrafiki~~ — şagird hesabatında mini sütun qrafiki var
+   (son 12 test, rəng dərəcəli); həftəlik aqreqasiya gələcəyə qalır.
+6. ~~«Səhvlər üzərində iş»~~ — hazırdır (`db/27_hesabat.sql`):
+   `rpc_remedial_test` şagirdin səhv etdiyi sualların özündən test yığıb
+   qrupa tapşırıq verir (hesabatda «Bu səhvlərdən təkrar testi yığ»).
+   Əlavə: `rpc_attempt_sheet` — cəhdin cavab vərəqi (seçilən/düz cavab);
+   `rpc_student_report` genişlənib (27-də override): mövzular eşiksiz +
+   `min_answers` («az məlumat» nişanı), weak-də mövzu teqi + `qid`.
+   Hamısı ödənişli qapının arxasındadır; 08-i dəyişəndə 27-dəki
+   kopyanı da yenilə.
+7. ~~Fərdi tapşırıq~~ — hazırdır (`db/28_ferdi_tapsiriq.sql`):
+   `assignments.student_id` (**boş = bütün qrup**, köhnə sətirlərdə boş
+   qalır — davranış dəyişmir). Unikallıq `(class_id, test_id, student_id)`
+   `nulls not distinct` ilə. Müəllim tapşırıq ekranında və vərəqdə «Kimə»
+   seçir. **Səbəb:** «səhvlər üzərində iş» testi bir şagirdin səhvlərindən
+   yığılır, amma qrupdakı hamıya — adında həmin şagirdin adı ilə —
+   görünürdü; indi yalnız sahibinə gedir. `rpc_assign_test`-ə beşinci
+   parametr əlavə olundu, ona görə **köhnə 4 arqumentli funksiya silinir**
+   (yoxsa PostgREST iki namizəd arasında seçim edə bilmir).
+   `rpc_available_tests`-də `assigned` artıq yalnız QRUP təyinatını
+   bildirir (`assigned_n` = neçə şagirdə fərdi verilib).
+   **Tələ:** `rpc_assign_test`-in mənbəyi `09_assignments.sql`-dir —
+   `10_teyinat_migrasiya.sql` `run.sh`-də yoxdur və orada abunə qapısı
+   yoxdur; oradan kopyalama.
+8. ~~PWA quraşdırma~~ — hazırdır. Hər iki tətbiq ayrıca quraşdırılır:
+   `muellim/manifest.json` və `sagird/manifest.json` (fərqli ad, start_url,
+   tema rəngi), ikonlar `assets/icons/` (192/512 + maskable). Kökdə **bir**
+   `sw.js` — hər iki tətbiqi əhatə edir (`register("../sw.js", {scope:"../"})`;
+   ehatə skriptin yerinə görə müəyyən olunur, ona görə alt qovluqdan da
+   qeydiyyat keçir). `assets/pwa.js` həm qeydiyyatı, həm «Ana ekrana əlavə et»
+   zolağını idarə edir.
+   **Qaydalar — pozma:** (1) Supabase sorğuları HEÇ VAXT keşlənmir — sw.js
+   yalnız öz mənşəyini emal edir; (2) HTML network-first, yoxsa `./bump.sh`
+   ilə buraxılan yeni versiya istifadəçiyə çatmaz; (3) service worker yalnız
+   `https`-də qeydiyyatdan keçir — e2e 127.0.0.1-də işləyir, keş yoxlamaları
+   qeyri-müəyyən etməsin. Oflayn rejim **vəd edilmir**: yalnız karkas keşlənir.
+   iOS-da `beforeinstallprompt` yoxdur — Safari üçün ayrıca izah zolağı çıxır.
+9. ~~Cavab qaralaması~~ — hazırdır (`sagird/app.js`). Şagird cavab
+   seçəndə və sual dəyişəndə vəziyyət `localStorage`-a yazılır
+   (açar `sagird_qaralama`, cəhd id-si ilə açarlanır, 2 gün / ən çox
+   5 cəhd saxlanılır). Eyni cəhd yenidən açılanda cavablar və mövqe
+   qaytarılır, bir dəfəlik «N cavabınız qaytarıldı» bildirişi çıxır;
+   uğurlu göndərişdən sonra qaralama silinir.
+   **Səbəb:** cavablar yalnız yaddaşda idi — telefon sönsə, brauzer
+   səhifəni atsa itirdi. **Server tərəfində heç nə dəyişmir**, bal
+   yenə serverdə hesablanır, düzgün cavab klientə düşmür.
+   Bu, oflayn rejim DEYİL — yalnız qısa bağlantı kəsilməsini keçirir.
+10. ~~Tapşırıq ekranından test yığmaq~~ — hazırdır (`muellim/app.js`).
+   «Yeni tapşırıq» bölməsi test YARATMIR, mövcud testi qrupa yönəldir —
+   müəllimlər bunu qarışdırırdı («siyahıda yalnız köhnələr var, yenisini
+   haradan yığım?»). İndi altında «Yeni test yığ» düyməsi var:
+   generatora keçir, qrupun sinfi süzgəcə avtomatik qoyulur, test hazır
+   olan kimi həmin tapşırıq ekranına qayıdır və siyahıda **seçilmiş**
+   gəlir. Son tarix / cəhd sayı / «tək şagird» seçimi müəllimdə qalır —
+   generator öz-özünə tapşırıq vermir (ona görə oradakı «Qrupa tapşırıq
+   ver» sahəsi bu yolda gizlənir).
+   Niyyət `GF.back`-də saxlanılır və `route()` generatordan çıxan kimi
+   onu **təmizləyir** — yoxsa sonra adi «Test yığ»dan girəndə müəllim
+   gözlənilmədən tapşırıq ekranına atılardı.
+   Testin sinfi qrupun sinfindən fərqlidirsə siyahıya düşmür — o halda
+   səbəb yazılır, test isə bazada qalır.
+11. ~~Sual bankında əhatə görüntüsü~~ — hazırdır
+   (`db/29_bank_katalog.sql` + `muellim/app.js`). Platforma hovuzu
+   düz 50 sual tökürdü, sətirlər `disabled` idi (müəllim platforma
+   sualını nə açır, nə redaktə edir), üstəlik `rpc_bank_list`
+   `order by created_at desc` işlədiyi üçün ekranda **yalnız ən son
+   yazılan sinfin kəsiyi** görünürdü — 1860 sualdan 50-si, hamısı
+   11-ci sinif. Müəllim elə bilirdi bankda ancaq bu var.
+   İndi platforma/hamısı hovuzunda siyahı yerinə **əhatə** gəlir:
+   fənn → siniflər (sayla) → mövzular (say + asan/orta/çətin bölgüsü).
+   Mövzuya basanda **3 nümunə sual** variantları və düz cavabı ilə
+   açılır — `rpc_bank_samples`, server 3-də kəsir, abunə tələb
+   olunmur (bu, satış ekranıdır: müəllim aldığı şeyin keyfiyyətini
+   almazdan əvvəl görməlidir; test yığmaq yenə abunə istəyir).
+   Əlavə üç düzəliş: «Daha 50 sual göstər» — `p_offset` həmişə 0
+   göndərilirdi, 51-ci suala çatmaq mümkün deyildi; sətirdə süzgəcdə
+   onsuz da seçilmiş fənn/sinif təkrarlanmır; mövzu nişanları 20-dən
+   çox olanda sinif tələb olunur (şərt **saya** bağlıdır, hovuza yox —
+   öz bankı kiçikdir, orada sinif istəmək artıq maneədir).
+   Axtarış yazılanda və ya mövzu/çətinlik seçiləndə adi siyahıya
+   qayıdılır — orada müəllim konkret sual axtarır; nişanlar da
+   yalnız orada çıxır (kataloqda eyni adlar iki dəfə yazılırdı).
+   **Sorğu nəsli:** `guard()` yalnız ünvanı tutuşdurur, bank
+   ekranında isə hovuz/süzgəc dəyişəndə ünvan (`#/b`) dəyişmir —
+   köhnə sorğunun cavabı təzə render-in üstünə düşürdü (seqmentdə
+   «Platforma», siyahıda müəllimin öz sualları). `BFSEQ`/`BSEQ`
+   sayğacları bunu bağlayır. Yoxlama üçün mock `X-Test-Delay`
+   başlığını tanıyır — yarışı deterministik yaratmağın başqa yolu
+   yoxdur (mock çoxaxınlıdır).
+12. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
+13. ~~Sinif (level) modeli~~ — hazırdır (`db/100_seviyye_modeli.sql`).
+   **Səhv:** panel qrup yaradanda həmişə `p_program_slug: "ibtidai"`
+   göndərirdi, `rpc_create_class` isə sinfi **həmin proqramın içində**
+   axtarırdı. 8-ci sinif `orta`-dadır → sorğu boş qayıdırdı → qrup
+   **səssizcə sinifsiz** yaranırdı (xəta yox, xəbərdarlıq yox).
+   1-4 işləyirdi, 5-11 yox. Zənciri uzundur: sinifsiz qrupda
+   `rpc_available_tests` sinif süzgəcini söndürür, ona görə tapşırıq
+   ekranına bütün fənlərin, bütün siniflərin testləri tökülürdü.
+   **Düzəliş:** sinif birincidir, proqram ondan **törəyir** —
+   çağıran tərəf proqramı bilmək məcburiyyətində deyil. Rəqəm kodlu
+   siniflər üzrə təkrarsızlıq **qismən unikal indekslə** qorunur
+   (`levels_sinif_kodu_tek`), yəni 9/10/11 təkrarı bir daha yarana
+   bilməz. MİQ/sertifikasiya səviyyələrinə toxunulmur — kodları
+   rəqəm deyil. Mövcud qruplarda `program_id` sinifə uyğunlaşdırılır.
+14. **Sınaq imtahanı rejimi** (buraxılış / qəbul) — araşdırılıb, təcili
+   deyil. Qərar: **məzmun məhsulu qurmuruq** (Hədəf/Araz tipli
+   nəşriyyatlarla məzmun yarışında şansımız yoxdur), **alət** qururuq:
+   qəlib → hər həftə yeni variant → sınaqdan-sınağa trend.
+   Rəsmi mənbə: DİM → Fəaliyyət → Qəbul və imtahanlar → Yekun
+   qiymətləndirmə (menyuda «Sənədlər»də deyil).
 
-8. **Buraxılış sınaq imtahanı (11-ci sinif)** — istifadəçi ilə
-   razılaşdırıldı. Məhsul «əlavə sual» deyil, **vaxtlı tam sınaq +
-   bal proqnozu**dur. Qərar verilmiş forma: buraxılış proqram deyil,
-   **imtahan şablonudur** — `tests`-in üstündə yeni qat
-   (`exam_blueprints` = hansı fənndən neçə sual, hansı mövzudan, hansı
-   çətinlikdə; `exam_sessions` = bir neçə testi birləşdirən, ümumi balı
-   olan imtahan). Şablon **məlumatdır**: DİM qaydası dəyişəndə SQL sətri
-   dəyişir, kod yox.
-   **Faza 1 üçün yeni sual lazım deyil** — mövcud 18 867 sual mövzu,
-   sinif və çətinlik üzrə nişanlıdır, imtahan onların üzərində seçimdir.
-   Hazır olan: `question_kind` = `{single,multi,text}`,
-   `rpc_submit_attempt` hər üç tipi düzgün sayır, şagird ekranında
-   `text` işləyir, `tests.time_limit_sec` var.
-   Əskik olan: `multi` üçün şagird ekranı (~20 sətir), bankda `text`
-   tipli sual (0 dənə), **kombinə suallar** — bizim «çətin» bir mövzu
-   daxilində çətindir (zəif mövzu hesabatı üçün qəsdən), DİM-in çətini
-   isə 2-3 mövzunu birləşdirən çoxaddımlıdır.
-   **Müəllif hüququ:** DİM-in **proqramı** (mövzu siyahısı) fakt sayılır
-   və mövzu ağacı üçün işlənə bilər — mündəricat qaydasının eynisi.
-   **Keçmiş illərin test bukletləri isə DİM-in müəllif hüququdur,
-   köçürülmür** — sual yenə öz yazdığımız olur.
-   Rəqib: DİM özü **otk.az**-da onlayn sınaq imtahanı satır. Bizim fərq
-   şagirdə tək sınaq deyil, **repetitorun aləti** olmalıdır: qrupa
-   təyinat, kim harada zəifdir, mövzu-mövzu diaqnoz.
+   | İmtahan | Tapşırıq | Vaxt | Bal | Avtomatik yığıla bilən |
+   |---|---|---|---|---|
+   | 11-illik buraxılış (qəbul I mərhələ) | 85 | 3 saat | 300 | **56%** |
+   | 9-illik buraxılış | 81 | 3 saat | 300 | **77%** |
+   | Qəbul II mərhələ | 90 | 3 saat | 400 | **~82%** |
+
+   I mərhələ 3 fənndir (tədris dili, riyaziyyat, xarici dil);
+   **qalan fənlər II mərhələdədir** — 6 ixtisas qrupu, çəki əmsalları
+   ilə, yəni bankın 11 fənnindən 10-u işlənir.
+
+   **Dizaynı müəyyən edən dörd fakt:**
+   - Yazılı açıq suallar **2× çəki** daşıyır. Ona görə yalnız qapalı
+     hissədən 300-lük şkalaya **proporsional keçmək OLMAZ** — 11-ci
+     sinifdə balı ~1,8 dəfə şişirdərdi. Ekranda dürüst yazılır:
+     «avtomatik hissə: N/61». 300-lük proqnoz yalnız müəllim açıq
+     sualları qiymətləndirəndən sonra.
+   - **II mərhələdə mənfi bal var**: `NBq = (Dq − ¼·Yq)·100/33`.
+     I mərhələdə yoxdur. `rpc_submit_attempt`-də mənfi bal anlayışı
+     ümumiyyətlə yoxdur — yeni tələbdir.
+   - Model **2027-dən dəyişir** (DİM 21.07.2026 tarixli sənədi).
+     Şablon ilk gündən `tedris_ili` ilə versiyalanmalıdır — sonradan
+     əlavə etmək olmaz.
+   - Tədris dili azərbaycanca olmayanlar **əlavə** «Azərbaycan dili
+     (dövlət dili kimi)» imtahanı verir: +30 tapşırıq, 100 bal.
+     Bu balın 300-ə qatılıb-qatılmadığı sənəddə yazılmayıb — **açıq
+     sual, təxmin etmirik**.
+
+   **Arxitektura:** sınaq = **seans**, üç mövcud testi qruplaşdıran
+   yeni cədvəl. `tests.subject_id` **not null**-dur (bir test = bir
+   fənn); onu çoxfənnli etmək bank/generator/hesabat/tapşırıq —
+   hamısına toxunardı. Seans yolu əlavədir, mövcud heç nəyi sökmür.
+
+   **Bağlı yol:** mövcud çoxvariantlı riyaziyyat suallarını açıq tipə
+   çevirmək ucuz qazanc DEYİL. 3680 sualdan 2337-də hesablanmış cavab
+   (`expect`) ümumiyyətlə yoxdur, 162-si variantlara istinad edir
+   («hansı düzdür»), asan namizədlərin çoxu isə 3-4-cü sinifdədir —
+   9-cu sinifdə 77, 11-ci sinifdə cəmi 21. Yəni məhz lazım olan yerdə
+   məhsul sıfıra yaxındır. İmtahan üçün açıq suallar **yenidən
+   yazılmalıdır**.
+
+   **Başlamazdan əvvəl:** «Azərbaycan dili (dövlət dili kimi)» balının
+   300-ə qatılıb-qatılmadığı DİM-dən (1653) dəqiqləşdirilməlidir.
+
+   **Sıra:** bu, `levels` modeli və pilotdan SONRA. İmtahan auditoriyası
+   ən bağışlamayandır — bir səhv cavab açarı etibarı birdəfəlik alır,
+   biz isə məhsulu hələ bir ay real şagirdlə işlətməmişik. Amma
+   imtahana hazırlaşdıran real bir repetitor «sınayaram» desə, sıra
+   dəyişir: onda təxminlə yox, konkret ehtiyacla qururuq.
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
-mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); DİM-in cari
-il qaydaları (sual sayı, vaxt, bal düsturu) — istifadəçi təsdiqləyəcək.
+mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
+
+## `db/` fayl nömrələri — iki sessiya arasında bölgü
+
+Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
+`claude/bil10-question-bank-expansion-eu6vkn` budağı `main`-ə
+birləşdirildikdən sonra 30…81 aralığındadır. Əvvəl nömrələr
+toqquşurdu (bankın 7 faylı 23–29-da idi, indi 75–81-ə köçürülüb).
+Bölgü belədir:
+
+| Aralıq | Kim | Nə |
+|---|---|---|
+| 01–29 | kod | sxem, RLS, RPC — doludur |
+| 30–99 | bank | sual/mövzu məlumatı (o biri sessiya) |
+| 100+ | kod | yeni RPC və miqrasiyalar |
+
+Yeni **kod** faylı 100-dən başlayır. Bank faylına toxunma; bank
+sessiyası da 100+ aralığına girmir.
 
 ## Yerli yoxlama
 

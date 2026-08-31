@@ -22,6 +22,66 @@
 
   var LS = "sagird_ses";
 
+  /* ================================================================
+     CAVAB QARALAMASI
+     Internet kesilse, telefon sonse, brauzer sehifeni atsa - secilmis
+     cavablar itmesin.  Her secimden sonra localStorage-e yazilir;
+     eyni cehd yeniden acilanda geri qaytarilir.
+     Server tərəfinde HEC NE deyismir - bu, yalniz brauzerdedir.
+     Bal yene serverdə hesablanir, duzgun cavab burada yoxdur.
+     ================================================================ */
+  var LSD = "sagird_qaralama";
+  var DGUN = 2;          // qaralama omru - gun
+  var DMAX = 5;          // en cox saxlanilan cehd sayi
+
+  function draftAll() {
+    try {
+      var o = JSON.parse(localStorage.getItem(LSD) || "{}");
+      return (o && typeof o === "object" && !Array.isArray(o)) ? o : {};
+    } catch (e) { return {}; }
+  }
+
+  //  Kohnelmis ve hedden artiq qaralamalar atilir - yer dolmasin
+  function draftPrune(o) {
+    var hedd = Date.now() - DGUN * 86400000;
+    var k, list = [];
+    for (k in o) {
+      if (!Object.prototype.hasOwnProperty.call(o, k)) continue;
+      var d = o[k];
+      if (!d || typeof d !== "object" || !(Number(d.at) > hedd)) { delete o[k]; continue; }
+      list.push([k, Number(d.at)]);
+    }
+    if (list.length > DMAX) {
+      list.sort(function (a, b) { return b[1] - a[1]; });
+      list.slice(DMAX).forEach(function (x) { delete o[x[0]]; });
+    }
+    return o;
+  }
+
+  function draftSave() {
+    if (!S || !S.attempt || S.done) return;
+    try {
+      var o = draftPrune(draftAll());
+      o[S.attempt] = { i: S.i, ans: S.answers, at: Date.now() };
+      localStorage.setItem(LSD, JSON.stringify(o));
+    } catch (e) { /* yer yoxdursa sakit kec - test yene isleyir */ }
+  }
+
+  //  Qaralama YALNIZ eyni cehde aiddir (attempt id uuid-dir, qarismir)
+  function draftLoad(attempt) {
+    var d = draftAll()[attempt];
+    if (!d || !d.ans || typeof d.ans !== "object") return null;
+    return d;
+  }
+
+  function draftClear(attempt) {
+    try {
+      var o = draftAll();
+      delete o[attempt];
+      localStorage.setItem(LSD, JSON.stringify(o));
+    } catch (e) {}
+  }
+
   var ICON = {
     doc:   '<path d="M11 2.5H5.5A1.5 1.5 0 0 0 4 4v11a1.5 1.5 0 0 0 1.5 1.5h8A1.5 1.5 0 0 0 15 15V6.5L11 2.5z"/>' +
            '<path d="M11 2.5v4h4"/>',
@@ -125,7 +185,7 @@
   function screenLogin(note) {
     topBar.classList.add("hide");
     show(
-      '<div class="hero"><div class="mark">T</div>' +
+      '<div class="hero"><div class="mark"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lgQ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4acb"/><stop offset="1" stop-color="#0e9384"/></linearGradient></defs><path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="url(#lgQ)"/><g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/></g><path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#ffc94d"/><path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#1a2233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
         "<h1>Testə başla</h1>" +
         "<p>Müəllimin verdiyi kodu yaz.</p></div>" +
       '<div class="card" style="margin-top:18px">' +
@@ -189,17 +249,34 @@
       '" data-t="' + esc(t.id) + '" data-mode="' + (over ? "view" : "start") + '"' +
       (lock ? " disabled" : "") + ">" +
       '<div class="ic">' + ic(lock ? "lock" : (over ? "check" : "doc")) + "</div>" +
-      '<div class="g"><b>' + esc(t.title) + "</b><i>" +
+      '<div class="g"><b>' + esc(t.title) +
+        //  Yalniz bu sagirde verilib - qrupun qalani gormur
+        (t.personal ? '<span class="solo">sənə</span>' : "") + "</b><i>" +
         "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
         "<span>" + (t.questions || 0) + " sual</span>" +
-        (isAsg && t.closes_at
-          ? "<span>·</span><span>son tarix " + esc(dateAz(t.closes_at)) + "</span>" : "") +
+        (isAsg && t.closes_at ? dueSpan(t.closes_at) : "") +
         (left > 0 ? "<span>·</span><span>" + left + " cəhd qalıb</span>" : "") +
         (lock ? "<span>·</span><span>abunə lazımdır</span>" : "") +
         (over ? "<span>·</span><span>işlənib — toxun, nəticəni gör</span>" : "") +
       "</i></div>" +
-      (done ? '<span class="best">' + Math.round(t.best) + "%</span>" : "") +
+      (done ? '<span class="best ' + pctCls(t.best) + '">' +
+        Math.round(t.best) + "%</span>" : "") +
       (lock ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
+  }
+
+  /* Faiz uzre reng sinfi: >=80 yasil, >=60 narinci, alti qirmizi */
+  function pctCls(p) {
+    var n = Number(p) || 0;
+    return n >= 80 ? "bh" : (n >= 60 ? "bm" : "bl");
+  }
+
+  /* Son tarix + qalan gun: yaxinlasanda qirmizi xeberdarliq */
+  function dueSpan(iso) {
+    var gun = Math.ceil((new Date(iso).getTime() - Date.now()) / 864e5);
+    var t = "son tarix " + esc(dateAz(iso));
+    if (gun > 0 && gun <= 7) t += " · " + gun + " gün qaldı";
+    return "<span>·</span><span" + (gun <= 2 ? ' class="due"' : "") + ">" +
+      t + "</span>";
   }
 
   /* Son tarix: "4 okt" */
@@ -220,9 +297,26 @@
       d = d || {};
       var asg  = d.assigned || [];
       var prac = d.practice || [];
-      var h = "";
-      if (CLS) {
-        h += '<p class="note" style="margin-bottom:14px">Qrup: <b>' + esc(CLS.name) + "</b></p>";
+
+      /* Salamlama + kicik gostericiler - "ireliledigimi gorurem" hissi */
+      var worked = asg.concat(prac).filter(function (t) {
+        return Number(t.done) > 0;
+      });
+      var avg = 0;
+      worked.forEach(function (t) { avg += Number(t.best) || 0; });
+      avg = worked.length ? Math.round(avg / worked.length) : 0;
+
+      var h = '<div class="shero">' + av(ME ? ME.display_name : "?") +
+        "<div><b>Salam, " + esc(ME ? ME.display_name : "") + "! 👋</b>" +
+        (CLS ? "<i>" + esc(CLS.name) + "</i>" : "") + "</div></div>";
+      if (worked.length) {
+        h += '<div class="stiles">' +
+          '<div class="st a"><b>' + worked.length +
+            "</b><span>işlənmiş test</span></div>" +
+          '<div class="st b"><b>' + avg + "%</b><span>ortalama</span></div>" +
+          '<button class="st c" id="btnMyRes"><b>' + ic("cup") + "</b>" +
+            "<span>nəticələrim</span></button>" +
+        "</div>";
       }
 
       /* 1. Muellimin verdiyi tapsiriqlar - hemise yuxarida */
@@ -247,6 +341,7 @@
       }
 
       show(h);
+      on("btnMyRes", "click", screenMyResults);
       Array.prototype.forEach.call(main.querySelectorAll("[data-t]"), function (b) {
         b.addEventListener("click", function () {
           var id = b.getAttribute("data-t");
@@ -273,6 +368,20 @@
           qs: d.questions || [], i: 0, answers: {}
         };
         if (!S.qs.length) { show(msg("warn", "Bu testdə hələ sual yoxdur.")); return; }
+        //  Yarimciq qalmis eyni cehd varsa cavablar geri qaytarilir.
+        //  Yalniz HEMIN testin suallarina aid cavablar goturulur.
+        var d0 = draftLoad(S.attempt);
+        if (d0) {
+          var mine = {}, n = 0;
+          S.qs.forEach(function (q) {
+            if (d0.ans[q.id]) { mine[q.id] = d0.ans[q.id]; n++; }
+          });
+          if (n) {
+            S.answers = mine;
+            S.i = Math.min(Math.max(Number(d0.i) || 0, 0), S.qs.length - 1);
+            S.restored = n;
+          }
+        }
         drawQuestion();
       })
       .catch(function (e) { errScreen(e, function () { startTest(testId); }); });
@@ -297,9 +406,17 @@
 
     var picked = S.answers[q.id];
 
+    //  Qaralamadan qayidib: bir defe bildiris goster, sonra sondur
+    var rest = "";
+    if (S.restored) {
+      rest = '<div class="ok restored">' + ic("check") + "<span>Əvvəlki " +
+        S.restored + " cavabınız qaytarıldı — davam edin.</span></div>";
+      S.restored = 0;
+    }
+
     show(
       '<div class="prog"><div class="bar"><i style="width:' + pct + '%"></i></div>' +
-        '<span class="cnt">' + (S.i + 1) + " / " + n + "</span></div>" +
+        '<span class="cnt">' + (S.i + 1) + " / " + n + "</span></div>" + rest +
       '<div class="q"><div class="body">' + esc(q.body) + "</div>" +
         '<button class="spk' + (VOICE ? "" : " hide") + '" id="spk" ' +
           'title="Sualı dinlə" aria-label="Sualı dinlə">' + ic("sound") + "</button>" +
@@ -341,6 +458,7 @@
     on("ans", "input", function () {
       var v = ($("ans").value || "").trim();
       if (v) S.answers[q.id] = v; else delete S.answers[q.id];
+      draftSave();
       var nx = $("btnNext");
       if (nx) {
         nx.classList.toggle("go", !!v);
@@ -356,6 +474,7 @@
         });
         b.classList.add("sel");
         S.answers[q.id] = b.getAttribute("data-o");
+        draftSave();
         var nx = $("btnNext");
         if (nx) { nx.classList.add("go"); nx.textContent = "Növbəti sual"; }
         markNav(true);
@@ -369,12 +488,12 @@
       back.id = "btnPrev";
       back.textContent = "Əvvəlki sual";
       main.appendChild(back);
-      back.addEventListener("click", function () { S.i--; drawQuestion(); });
+      back.addEventListener("click", function () { S.i--; draftSave(); drawQuestion(); });
     }
 
     on("btnNext", "click", function () {
       if (busy) return;
-      S.i++; drawQuestion();
+      S.i++; draftSave(); drawQuestion();
     });
 
     on("btnFinish", "click", function () {
@@ -392,6 +511,7 @@
       var b = e.target.closest ? e.target.closest("[data-j]") : null;
       if (!b || busy) return;
       S.i = Number(b.getAttribute("data-j"));
+      draftSave();
       drawQuestion();
     });
   }
@@ -413,7 +533,10 @@
     });
     sb.rpc("rpc_submit_attempt", {
       p_token: TOKEN, p_attempt_id: S.attempt, p_answers: payload
-    }).then(function (r) { screenResult(r); }).catch(function (e) {
+    }).then(function (r) {
+      draftClear(S.attempt);      //  gonderildi - qaralama lazim deyil
+      screenResult(r);
+    }).catch(function (e) {
       setBusy("btnFinish", false, "Testi bitir");
       /* Cavablar hele gonderilmeyib - tekrar cehd eyni cehdi bitirir */
       errScreen(e, finish);
@@ -431,7 +554,8 @@
     topTitle.textContent = "Nəticə";
     show(
       '<div class="card"><div class="score">' +
-        '<div class="ring' + (passed ? " pass" : "") + '">' +
+        '<div class="ring' +
+          (passed ? " pass" : (pct >= 60 ? " mid" : " lo")) + '">' +
           '<svg viewBox="0 0 132 132"><circle class="track" cx="66" cy="66" r="58" ' +
             'fill="none" stroke-width="9"/>' +
             '<circle class="fill" cx="66" cy="66" r="58" fill="none" stroke-width="9" ' +
@@ -457,9 +581,14 @@
         '<button class="btn" id="btnLb" style="flex:1">' + ic("cup") + "Lövhə</button></div>" +
 
       ((r.wrong && r.wrong.length)
-        ? "<h2>Səhv cavablar</h2><div class=\"card pad0\">" + r.wrong.map(function (w) {
+        ? "<h2>Səhv cavablar</h2><div class=\"card pad0\" id=\"wrongBox\">" +
+          r.wrong.map(function (w) {
             return '<div class="wrong"><b>' + esc(w.body) + "</b>" +
-              (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") + "</div>";
+              (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
+              '<button class="rlink" data-rq="' + esc(w.question_id || "") +
+                '">Sualda səhv var?</button>' +
+              '<div class="rslot" id="rs-' + esc(w.question_id || "") + '"></div>' +
+            "</div>";
           }).join("") + "</div>"
         : '<div class="ok" style="margin-top:16px">' + ic("check") +
           "<span>Bütün suallara düzgün cavab verdin.</span></div>")
@@ -467,12 +596,100 @@
 
     on("btnHome", "click", screenTests);
     on("btnLb", "click", function () { screenBoard(review); });
+    bindWrongReports();
+  }
+
+  /* Sualda sehv gorende sagird bir klikle bildirir.  Sual DEYISMIR -
+     muellim/admin baxandan sonra duzeldilir.  Server yalniz sagirdin
+     OZ gorduyu suali qebul edir. */
+  function bindWrongReports() {
+    var box = document.getElementById("wrongBox");
+    if (!box) return;
+    var RS = [["cavab", "Cavab səhvdir"], ["sert", "Sual qüsurludur"],
+              ["yazi", "Yazı xətası"], ["diger", "Digər"]];
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b) return;
+      var qid = b.getAttribute("data-rq");
+      if (qid) {
+        var slot = document.getElementById("rs-" + qid);
+        if (!slot) return;
+        slot.innerHTML = slot.innerHTML ? "" :
+          '<div class="rfrm"><select class="rsel">' + RS.map(function (x) {
+            return '<option value="' + x[0] + '">' + x[1] + "</option>";
+          }).join("") + "</select>" +
+          '<button class="btn sm" data-rsend="' + qid + '">Göndər</button></div>';
+        return;
+      }
+      qid = b.getAttribute("data-rsend");
+      if (qid) {
+        var slot2 = document.getElementById("rs-" + qid);
+        if (!slot2) return;
+        b.disabled = true;
+        sb.rpc("rpc_report_question_student", {
+          p_token: TOKEN, p_question: qid,
+          p_reason: (slot2.querySelector(".rsel") || {}).value || "diger",
+          p_note: ""
+        }).then(function () {
+          slot2.innerHTML = '<div class="rok">Bildirildi — təşəkkürlər! 🙌</div>';
+        }).catch(function () {
+          slot2.innerHTML = '<div class="rok">Bildirilə bilmədi. Bir az sonra yenidən yoxla.</div>';
+        });
+      }
+    });
+  }
+
+  /* Herf-avatar: muellim panelindeki ile eyni reng qaydasi */
+  function av(name) {
+    var n = String(name || "?").trim();
+    var ch = n.charAt(0).toUpperCase() || "?";
+    var k = 7;
+    for (var i = 0; i < n.length; i++) k = (k * 31 + n.charCodeAt(i)) % 100003;
+    return '<span class="av c' + (k % 6) + '">' + esc(ch) + "</span>";
   }
 
   function fmtTime(sec) {
     sec = Math.max(0, parseInt(sec, 10) || 0);
     var m = Math.floor(sec / 60), s = sec % 60;
     return m ? (m + " dəq " + s + " san") : (s + " san");
+  }
+
+  /* ---------------------------------------------------- neticelerim */
+  /* Sagird oz gedisatini gorur: mini qrafik + son testler.  Yalniz OZ
+     neticeleri - duzgun cavab ve basqa sagird melumati yoxdur. */
+  function screenMyResults() {
+    topTitle.textContent = "Nəticələrim";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_student_my_results", { p_token: TOKEN }).then(function (rows) {
+      rows = rows || [];
+      var h = '<button class="btn sm ghost" id="btnB2">' + ic("back") +
+        "Testlər</button>" + '<div class="spacer"></div>';
+      if (!rows.length) {
+        h += '<div class="card pad0"><div class="empty"><div class="ic">' +
+          ic("doc") + "</div><b>Hələ nəticə yoxdur</b>" +
+          "İlk testini işlə — burada görünəcək.</div></div>";
+      } else {
+        if (rows.length >= 2) {
+          var bars = rows.slice(0, 12).slice().reverse();
+          h += '<div class="card"><div class="dyn">' + bars.map(function (a) {
+            var p = Math.max(6, Math.round(Number(a.percent) || 0));
+            return '<i class="d' + pctCls(p).charAt(1) + '" style="height:' +
+              p + '%"></i>';
+          }).join("") + "</div>" +
+          '<p class="note" style="margin:10px 0 0">Soldan sağa: köhnədən ' +
+            "yeniyə. Yaşıl — əla, narıncı — orta, qırmızı — təkrar lazımdır.</p>" +
+          "</div>" + '<div class="spacer"></div>';
+        }
+        h += '<div class="card pad0">' + rows.map(function (a) {
+          var p = Math.round(Number(a.percent) || 0);
+          return '<div class="myr"><div class="g"><b>' + esc(a.test) + "</b>" +
+            "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max + "</i></div>" +
+            '<span class="best ' + pctCls(p) + '">' + p + "%</span></div>";
+        }).join("") + "</div>";
+      }
+      show(h);
+      on("btnB2", "click", screenTests);
+    }).catch(function (e) { errScreen(e, screenMyResults); });
   }
 
   /* ---------------------------------------------------------- lovhe */
@@ -546,6 +763,20 @@
       screenLogin();
     }
   }
+
+  /* Loqo klik = testler siyahisi (girissizse giris ekrani) */
+  (function () {
+    var mk = document.querySelector(".mark");
+    function goHome() {
+      if (S && S.attempt) return;   // imtahan zamani tesadufi cixis olmasin
+      if (TOKEN) screenTests(); else screenLogin();
+    }
+    if (mk) { mk.style.cursor = "pointer"; mk.addEventListener("click", goHome); }
+    if (topTitle) {
+      topTitle.style.cursor = "pointer";
+      topTitle.addEventListener("click", goHome);
+    }
+  })();
 
   boot();
 })();

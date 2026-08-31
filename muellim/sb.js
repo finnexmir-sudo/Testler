@@ -80,7 +80,14 @@
         // Token kohnelibse bir defe yenileyib tekrar cehd edirik
         if (r.status === 401 && !retry && S && S.refresh_token) {
           return refresh().then(function (ok) {
-            if (!ok) { saveSession(null); throw new Error("Sessiya bitib. Yeniden daxil olun."); }
+            if (!ok) {
+              saveSession(null);
+              //  butun ekranlar ucun merkezi siqnal - app giris ekranina qaytarir
+              try { window.dispatchEvent(new Event("sb:sessionend")); } catch (e2) {}
+              var e = new Error("Sessiya bitib. Yeniden daxil olun.");
+              e.session = true;
+              throw e;
+            }
             return request(path, opt, true);
           });
         }
@@ -131,6 +138,29 @@
         if (!d || !d.access_token) throw new Error("Giris alinmadi.");
         saveSession(d);
         return d;
+      });
+    },
+
+    /* Parol berpasi: e-pocta link gonderilir; linke kecende Supabase
+       istifadecini redirect_to unvanina token ile qaytarir. */
+    recover: function (email, redirectTo) {
+      return request("/auth/v1/recover?redirect_to=" +
+                     encodeURIComponent(redirectTo || ""), {
+        method: "POST", auth: false,
+        body: { email: email }
+      });
+    },
+
+    /* Berpa linkinden gelen tokenlerle sessiya qurulur */
+    setSession: function (accessToken, refreshToken) {
+      saveSession({ access_token: accessToken, refresh_token: refreshToken });
+    },
+
+    /* Yeni parol - aktiv sessiya ile */
+    updatePassword: function (newPass) {
+      return request("/auth/v1/user", {
+        method: "PUT",
+        body: { password: newPass }
       });
     },
 

@@ -13,7 +13,8 @@ TEST_CFG = """window.CFG = {
   SUPABASE_URL: "http://127.0.0.1:54321",
   SUPABASE_ANON_KEY: "test-anon-key",
   STUDENT_URL: "https://example.test/Testler/",
-  CONTACT_WHATSAPP: "+994501234567"
+  CONTACT_WHATSAPP: "+994501234567",
+  SHOW_PLANS: true
 };"""
 
 fails = []
@@ -92,18 +93,41 @@ with sync_playwright() as pw:
     ok(True, "admin rolunda Idareetme bendi gorunur")
     pg.click("#btnAdm")
     pg.wait_for_selector(".admr", timeout=8000)
+    ok(pg.locator(".tile").count() == 4, "gosterici lovheleri gorunur",
+       pg.locator(".tile").count())
+    tl = pg.inner_text(".tiles").replace("\n", " ")
+    ok("hesab" in tl and "pullu" in tl and "pulsuz" in tl and "gəlir" in tl,
+       "lovhelerde hesab/pullu/pulsuz/gelir var", tl[:70])
+    ok(pg.locator("#admF .chip").count() == 4,
+       "pullu/pulsuz/bitir suzgec cipleri var")
+    npo = pg.locator("#admPlan option").count()
+    ok(npo >= 2, "plan secimi bazadan dolur", npo)
     row = pg.inner_text(".admr").replace("\n", " ")
     ok("pkt@t.az" in row, "hesab siyahida e-poctla gorunur", row[:60])
-    ok("paketsiz" in row, "paketsiz statusu gorunur")
+    ok("paketsiz" in row, "paketsiz nisani gorunur")
+    ok("aktivlik" in row, "son aktivlik gorunur", row[:80])
 
     print("D · Bir kliklə abunə açmaq")
+    pg.on("dialog", lambda d: d.accept())
     pg.locator(".admr [data-m='6']").click()
-    pg.wait_for_selector(".admr .okt", timeout=8000)
-    ok("Repetitor" in pg.inner_text(".admr .okt"), "abune setirde gorunur",
-       pg.inner_text(".admr .okt")[:40])
+    pg.wait_for_selector(".admr .pb.y", timeout=8000)
+    ok("Repetitor" in pg.inner_text(".admr .pb.y"), "abune nisani setirde gorunur",
+       pg.inner_text(".admr .pb.y")[:40])
+    ok("yerinə yetirildi" in pg.inner_text("#admMsg"), "netice mesaji gorunur")
+    ok("1" in pg.inner_text(".tile.b"), "aktiv abune lovhesi yenilenir",
+       pg.inner_text(".tile.b").replace("\n", " "))
     a = db("""select s.status, s.provider from public.subscriptions s""", one=True)
     ok(a and a["status"] == "active" and a["provider"] == "manual",
        "bazada active/manual abune var")
+    pg.locator("#admF .chip[data-f='pulsuz']").click()
+    pg.wait_for_timeout(700)
+    ok("Hesab tapılmadı" in pg.inner_text("#admList"),
+       "pulsuz suzgecinde abuneli hesab cixmir")
+    pg.locator("#admF .chip[data-f='pullu']").click()
+    pg.wait_for_selector(".admr .pb.y", timeout=8000)
+    ok("pkt@t.az" in pg.inner_text(".admr"), "pullu suzgecinde hesab gorunur")
+    pg.locator("#admF .chip[data-f='']").click()
+    pg.wait_for_timeout(500)
 
     print("E · Paket səhifəsi abunəni göstərir")
     pg.goto(PANEL + "#/p"); pg.reload()
@@ -114,7 +138,6 @@ with sync_playwright() as pw:
     print("F · Dayandırmaq")
     pg.goto(PANEL + "#/adm"); pg.reload()
     pg.wait_for_selector(".admr", timeout=8000)
-    pg.on("dialog", lambda d: d.accept())
     pg.locator(".admr [data-stop]").click()
     pg.wait_for_timeout(900)
     pg.wait_for_selector(".admr", timeout=8000)
