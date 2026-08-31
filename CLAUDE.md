@@ -364,7 +364,7 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   `db/17_bank_sinif4.sql` (Az dili + Həyat bilgisi + İnformatika 4),
   `db/19_bank_riy3.sql` (Riyaziyyat 3), `db/20_bank_sinif3.sql`
   (Az dili + Həyat bilgisi + İnformatika 3), `db/23/24_bank_sinif1/2.sql`
-  (1-2-ci siniflər, 4 fənn bir yerdə), `db/28_bank_ing.sql` (İngilis
+  (1-2-ci siniflər, 4 fənn bir yerdə), `db/80_bank_ing.sql` (İngilis
   dili 1-4). Orta və yuxarı siniflər: hər sinif üçün əvvəl mövzu ağacı
   (`25/29/33/37/41/45/49_movzular_orta5…11.sql`), sonra banklar —
   `26/30/34/38/42/46/50_bank_riy5…11.sql` (riyaziyyat),

@@ -1,5 +1,5 @@
 -- =====================================================================
---  24_bank_sinif2.sql : 2-CI SINIF PLATFORMA SUAL BANKI
+--  76_bank_sinif2.sql : 2-CI SINIF PLATFORMA SUAL BANKI
 --
 --  BU FAYL ELLE YAZILMIR - tools/sinif2.py yaradir:
 --      python3 tools/sinif2.py

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Ingilis dili 1-4 platforma banki -> db/28_bank_ing.sql
+Ingilis dili 1-4 platforma banki -> db/80_bank_ing.sql
 
     Her sinifde 6 movzu x 20 sual = 120;  4 sinif = 480.
 
@@ -14,7 +14,7 @@ formalari islenib.
 Reqem-soz uygunluqlari SAY lugeti ile YOXLANILIR, elifba questionlari
 chr()/string ile hesablanir.
 
-DIQQET: 27_bank_sinif5.sql-in ing5- suallari ile eyni cumleler
+DIQQET: 79_bank_sinif5.sql-in ing5- suallari ile eyni cumleler
 islenmeyib.
 
 Isletmek:
@@ -25,7 +25,7 @@ import os
 import string
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CIXIS = os.path.join(KOK, "db", "28_bank_ing.sql")
+CIXIS = os.path.join(KOK, "db", "80_bank_ing.sql")
 
 SAY = {0: "zero", 1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
        6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
@@ -1791,7 +1791,7 @@ def sql_yaz(n):
                    q(opts[0]), q(opts[1]), q(opts[2]), q(opts[3]), correct))
     with io.open(CIXIS, "w", encoding="utf-8") as f:
         f.write("""-- =====================================================================
---  28_bank_ing.sql : INGILIS DILI 1-4 PLATFORMA SUAL BANKI
+--  80_bank_ing.sql : INGILIS DILI 1-4 PLATFORMA SUAL BANKI
 --
 --  BU FAYL ELLE YAZILMIR - tools/ing.py yaradir:
 --      python3 tools/ing.py

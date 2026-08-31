@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-5-ci sinfin qalan fennleri -> db/27_bank_sinif5.sql
+5-ci sinfin qalan fennleri -> db/79_bank_sinif5.sql
 
     Azerbaycan dili 5      8 movzu x 30 = 240
     Ingilis dili 5         8 movzu x 30 = 240
@@ -9,7 +9,7 @@
     Azerbaycan tarixi 5    5 movzu x 30 = 150
                                     cemi  730
 
-tools/sinif3.py qelibi ile.  Movzular 25_movzular_orta5.sql agacina
+tools/sinif3.py qelibi ile.  Movzular 77_movzular_orta5.sql agacina
 uygundur.  Ingilis dili suallari sade A1 seviyyesindedir; apostrof
 qadagan oldugu ucun "cannot", "The mother of my mother" kimi formalar
 islenib.  Tarix suallari yalniz derslik seviyyeli, subhesiz faktlardir.
@@ -26,7 +26,7 @@ import os
 import string
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CIXIS = os.path.join(KOK, "db", "27_bank_sinif5.sql")
+CIXIS = os.path.join(KOK, "db", "79_bank_sinif5.sql")
 
 QALIN = set("aıou")
 INCE = set("əeiöü")
@@ -2923,7 +2923,7 @@ def sql_yaz(n):
                    q(opts[0]), q(opts[1]), q(opts[2]), q(opts[3]), correct))
     with io.open(CIXIS, "w", encoding="utf-8") as f:
         f.write("""-- =====================================================================
---  27_bank_sinif5.sql : 5-CI SINIF - AZ DILI, INGILIS DILI,
+--  79_bank_sinif5.sql : 5-CI SINIF - AZ DILI, INGILIS DILI,
 --                       INFORMATIKA, AZERBAYCAN TARIXI
 --
 --  BU FAYL ELLE YAZILMIR - tools/sinif5.py yaradir:
@@ -2932,7 +2932,7 @@ def sql_yaz(n):
 --  Az dili 8 + Ingilis dili 8 + Informatika 5 + Tarix 5
 --  az/ing/tarix 21 movzu x 30 + inf 5 movzu x 20 = %d.
 --  ext_key: az5-/ing5-/inf5-/tarix5-...
---  ON SERT: 25_movzular_orta5.sql islenmis olmalidir.
+--  ON SERT: 77_movzular_orta5.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
 
@@ -2945,7 +2945,7 @@ begin
                                 ('informatika','inf-5-internet'),
                                 ('tarix','tarix-5-qedim'))
      having count(*) = 4) then
-    raise exception 'ONCE 25_movzular_orta5.sql isledilmelidir.';
+    raise exception 'ONCE 77_movzular_orta5.sql isledilmelidir.';
   end if;
 end $$;
 

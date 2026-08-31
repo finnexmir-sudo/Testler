@@ -8,7 +8,7 @@
 --  Az dili 8 + Ingilis dili 8 + Informatika 5 + Tarix 3
 --  az/ing/tarix 22 movzu x 30 + inf 5 movzu x 20 = 760.
 --  ext_key: az6-/ing6-/inf6-/tarix6-...
---  ON SERT: 29_movzular_orta6.sql islenmis olmalidir.
+--  ON SERT: 81_movzular_orta6.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
 
@@ -21,7 +21,7 @@ begin
                                 ('informatika','inf-6-internet'),
                                 ('tarix','tarix-6-ibtidai'))
      having count(*) = 4) then
-    raise exception 'ONCE 29_movzular_orta6.sql isledilmelidir.';
+    raise exception 'ONCE 81_movzular_orta6.sql isledilmelidir.';
   end if;
 end $$;
 

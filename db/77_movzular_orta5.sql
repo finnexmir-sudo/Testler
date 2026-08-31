@@ -1,5 +1,5 @@
 -- =====================================================================
---  25_movzular_orta5.sql : 5-CI SINIF (ORTA MEKTEB) MOVZU AGACI
+--  77_movzular_orta5.sql : 5-CI SINIF (ORTA MEKTEB) MOVZU AGACI
 --
 --  Menbe:  e-derslik.edu.az - Tehsil Nazirliyinin resmi elektron
 --          derslik portali.  Kitablarin MUNDERICATI (bolme adlari)

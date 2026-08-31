@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-2-ci sinif platforma banki -> db/24_bank_sinif2.sql
+2-ci sinif platforma banki -> db/76_bank_sinif2.sql
 
     Riyaziyyat 2         riy 9 movzu x 40 = 360
     Azerbaycan dili 2    7 movzu x 20 = 140
@@ -27,7 +27,7 @@ import io
 import os
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CIXIS = os.path.join(KOK, "db", "24_bank_sinif2.sql")
+CIXIS = os.path.join(KOK, "db", "76_bank_sinif2.sql")
 
 SAITLER = set("aeəiıoöuü")
 
@@ -2874,7 +2874,7 @@ def sql_yaz(n):
                    q(opts[0]), q(opts[1]), q(opts[2]), q(opts[3]), correct))
     with io.open(CIXIS, "w", encoding="utf-8") as f:
         f.write("""-- =====================================================================
---  24_bank_sinif2.sql : 2-CI SINIF PLATFORMA SUAL BANKI
+--  76_bank_sinif2.sql : 2-CI SINIF PLATFORMA SUAL BANKI
 --
 --  BU FAYL ELLE YAZILMIR - tools/sinif2.py yaradir:
 --      python3 tools/sinif2.py

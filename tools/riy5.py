@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Riyaziyyat 5 platforma banki -> db/26_bank_riy5.sql
+Riyaziyyat 5 platforma banki -> db/78_bank_riy5.sql
 
 tools/riy3.py qelibi ile: 8 movzu x 40 sual = 320, her riyazi cavab
 YENIDEN HESABLANIB duzgun variantla tutusdurulur (kesrler
-fractions.Fraction ile).  Movzular 25_movzular_orta5.sql agacina
+fractions.Fraction ile).  Movzular 77_movzular_orta5.sql agacina
 uygundur (e-derslik Riyaziyyat 5, kitab 840 + 841).
 
 DIQQET: 16_bank_riy4.sql-in qelibleri ve reqemleri ISLENMEYIB
@@ -20,7 +20,7 @@ import os
 from fractions import Fraction
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CIXIS = os.path.join(KOK, "db", "26_bank_riy5.sql")
+CIXIS = os.path.join(KOK, "db", "78_bank_riy5.sql")
 
 
 def fmt(n):
@@ -1280,13 +1280,13 @@ def sql_yaz(n):
                    q(opts[0]), q(opts[1]), q(opts[2]), q(opts[3]), correct))
     with io.open(CIXIS, "w", encoding="utf-8") as f:
         f.write("""-- =====================================================================
---  26_bank_riy5.sql : RIYAZIYYAT 5 PLATFORMA SUAL BANKI (orta mekteb)
+--  78_bank_riy5.sql : RIYAZIYYAT 5 PLATFORMA SUAL BANKI (orta mekteb)
 --
 --  BU FAYL ELLE YAZILMIR - tools/riy5.py yaradir:
 --      python3 tools/riy5.py
 --
 --  8 movzu x 40 sual = %d.  ext_key: riy5-<movzu>#<sira>.
---  ON SERT: 25_movzular_orta5.sql islenmis olmalidir.
+--  ON SERT: 77_movzular_orta5.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
 
@@ -1296,7 +1296,7 @@ begin
     select 1 from public.topics t
       join public.subjects s on s.id = t.subject_id
      where s.slug = 'riyaziyyat' and t.slug = 'riy-5-faiz') then
-    raise exception 'ONCE 25_movzular_orta5.sql isledilmelidir (riy-5-* movzulari yoxdur).';
+    raise exception 'ONCE 77_movzular_orta5.sql isledilmelidir (riy-5-* movzulari yoxdur).';
   end if;
 end $$;
 

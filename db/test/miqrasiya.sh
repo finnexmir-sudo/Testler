@@ -22,9 +22,9 @@ echo "kohne baza quruldu ($OLD)"
 for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          15_movzular_ederslik.sql \
          07_seed_tests.sql 16_bank_riy4.sql 17_bank_sinif4.sql 19_bank_riy3.sql \
-         20_bank_sinif3.sql 23_bank_sinif1.sql 24_bank_sinif2.sql \
-         25_movzular_orta5.sql 26_bank_riy5.sql 27_bank_sinif5.sql \
-         28_bank_ing.sql 29_movzular_orta6.sql 30_bank_riy6.sql \
+         20_bank_sinif3.sql 75_bank_sinif1.sql 76_bank_sinif2.sql \
+         77_movzular_orta5.sql 78_bank_riy5.sql 79_bank_sinif5.sql \
+         80_bank_ing.sql 81_movzular_orta6.sql 30_bank_riy6.sql \
          31_bank_sinif6.sql 32_bank_fenn6.sql 33_movzular_orta7.sql \
          34_bank_riy7.sql 35_bank_sinif7.sql 36_bank_fenn7.sql \
          37_movzular_orta8.sql 38_bank_riy8.sql 39_bank_sinif8.sql \

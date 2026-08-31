@@ -6,7 +6,7 @@ Riyaziyyat 6 platforma banki -> db/30_bank_riy6.sql
 tools/riy5.py qelibi ile: 9 movzu x 40 sual = 360, her riyazi cavab
 YENIDEN HESABLANIB duzgun variantla tutusdurulur (EBOB/EKOB math.gcd
 ile, ehtimallar Fraction ile, coxluqlar set ile).  Movzular
-29_movzular_orta6.sql agacina uygundur (e-derslik Riyaziyyat 6,
+81_movzular_orta6.sql agacina uygundur (e-derslik Riyaziyyat 6,
 kitab 906 + 907).
 
 Menfi ededler «−» (U+2212) isaresi ile yazilir - tam() koməkçisi.
@@ -1466,7 +1466,7 @@ def sql_yaz(n):
 --      python3 tools/riy6.py
 --
 --  9 movzu x 40 sual = %d.  ext_key: riy6-<movzu>#<sira>.
---  ON SERT: 29_movzular_orta6.sql islenmis olmalidir.
+--  ON SERT: 81_movzular_orta6.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
 
@@ -1476,7 +1476,7 @@ begin
     select 1 from public.topics t
       join public.subjects s on s.id = t.subject_id
      where s.slug = 'riyaziyyat' and t.slug = 'riy-6-coxluqlar') then
-    raise exception 'ONCE 29_movzular_orta6.sql isledilmelidir (riy-6-* movzulari yoxdur).';
+    raise exception 'ONCE 81_movzular_orta6.sql isledilmelidir (riy-6-* movzulari yoxdur).';
   end if;
 end $$;
 

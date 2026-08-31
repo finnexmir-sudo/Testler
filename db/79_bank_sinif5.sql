@@ -1,5 +1,5 @@
 -- =====================================================================
---  27_bank_sinif5.sql : 5-CI SINIF - AZ DILI, INGILIS DILI,
+--  79_bank_sinif5.sql : 5-CI SINIF - AZ DILI, INGILIS DILI,
 --                       INFORMATIKA, AZERBAYCAN TARIXI
 --
 --  BU FAYL ELLE YAZILMIR - tools/sinif5.py yaradir:
@@ -8,7 +8,7 @@
 --  Az dili 8 + Ingilis dili 8 + Informatika 5 + Tarix 5
 --  az/ing/tarix 21 movzu x 30 + inf 5 movzu x 20 = 730.
 --  ext_key: az5-/ing5-/inf5-/tarix5-...
---  ON SERT: 25_movzular_orta5.sql islenmis olmalidir.
+--  ON SERT: 77_movzular_orta5.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
 
@@ -21,7 +21,7 @@ begin
                                 ('informatika','inf-5-internet'),
                                 ('tarix','tarix-5-qedim'))
      having count(*) = 4) then
-    raise exception 'ONCE 25_movzular_orta5.sql isledilmelidir.';
+    raise exception 'ONCE 77_movzular_orta5.sql isledilmelidir.';
   end if;
 end $$;
 

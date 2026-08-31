@@ -1,5 +1,5 @@
 -- =====================================================================
---  29_movzular_orta6.sql : 6-CI SINIF (ORTA MEKTEB) MOVZU AGACI
+--  81_movzular_orta6.sql : 6-CI SINIF (ORTA MEKTEB) MOVZU AGACI
 --
 --  Menbe:  e-derslik.edu.az mundericatlari (tools/mundericat.py).
 --  Yalniz bolme adlari goturulub - derslik metni yox.
@@ -14,7 +14,7 @@
 --    Biologiya 6         538 - 8 fesil (fenn 6-da baslayir)
 --    Cografiya 6         859 + 860 - 7 bolme (fenn 6-da baslayir)
 --
---  ON SERT: 25_movzular_orta5.sql islenmis olmalidir.
+--  ON SERT: 77_movzular_orta5.sql islenmis olmalidir.
 --  Tekrar isledile biler.  SONRA: bank fayllari, en sonda 05_grants.sql.
 -- =====================================================================
 
@@ -23,7 +23,7 @@ begin
   if not exists (
     select 1 from public.topics t join public.subjects s on s.id = t.subject_id
      where s.slug = 'riyaziyyat' and t.slug = 'riy-5-faiz') then
-    raise exception 'ONCE 25_movzular_orta5.sql isledilmelidir.';
+    raise exception 'ONCE 77_movzular_orta5.sql isledilmelidir.';
   end if;
 end $$;
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-1-ci sinif platforma banki -> db/23_bank_sinif1.sql
+1-ci sinif platforma banki -> db/75_bank_sinif1.sql
 
     Riyaziyyat 1        12 movzu x 20 = 240
     Azerbaycan dili 1    6 movzu x 20 = 120
@@ -25,7 +25,7 @@ import io
 import os
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CIXIS = os.path.join(KOK, "db", "23_bank_sinif1.sql")
+CIXIS = os.path.join(KOK, "db", "75_bank_sinif1.sql")
 
 SAITLER = set("aeəiıoöuü")
 
@@ -3050,7 +3050,7 @@ def sql_yaz(n):
                    q(opts[0]), q(opts[1]), q(opts[2]), q(opts[3]), correct))
     with io.open(CIXIS, "w", encoding="utf-8") as f:
         f.write("""-- =====================================================================
---  23_bank_sinif1.sql : 1-CI SINIF PLATFORMA SUAL BANKI
+--  75_bank_sinif1.sql : 1-CI SINIF PLATFORMA SUAL BANKI
 --
 --  BU FAYL ELLE YAZILMIR - tools/sinif1.py yaradir:
 --      python3 tools/sinif1.py

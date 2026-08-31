@@ -21,7 +21,7 @@
 --  Kimya fenni orta proqrama burada elave olunur (04_seed-in kohne
 --  nusxelerinde yox idi).
 --
---  ON SERT: 29_movzular_orta6.sql islenmis olmalidir.
+--  ON SERT: 81_movzular_orta6.sql islenmis olmalidir.
 --  Tekrar isledile biler.  SONRA: bank fayllari, en sonda 05_grants.sql.
 -- =====================================================================
 
@@ -30,7 +30,7 @@ begin
   if not exists (
     select 1 from public.topics t join public.subjects s on s.id = t.subject_id
      where s.slug = 'riyaziyyat' and t.slug = 'riy-6-coxluqlar') then
-    raise exception 'ONCE 29_movzular_orta6.sql isledilmelidir.';
+    raise exception 'ONCE 81_movzular_orta6.sql isledilmelidir.';
   end if;
 end $$;
 

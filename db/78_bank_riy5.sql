@@ -1,11 +1,11 @@
 -- =====================================================================
---  26_bank_riy5.sql : RIYAZIYYAT 5 PLATFORMA SUAL BANKI (orta mekteb)
+--  78_bank_riy5.sql : RIYAZIYYAT 5 PLATFORMA SUAL BANKI (orta mekteb)
 --
 --  BU FAYL ELLE YAZILMIR - tools/riy5.py yaradir:
 --      python3 tools/riy5.py
 --
 --  8 movzu x 40 sual = 320.  ext_key: riy5-<movzu>#<sira>.
---  ON SERT: 25_movzular_orta5.sql islenmis olmalidir.
+--  ON SERT: 77_movzular_orta5.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
 
@@ -15,7 +15,7 @@ begin
     select 1 from public.topics t
       join public.subjects s on s.id = t.subject_id
      where s.slug = 'riyaziyyat' and t.slug = 'riy-5-faiz') then
-    raise exception 'ONCE 25_movzular_orta5.sql isledilmelidir (riy-5-* movzulari yoxdur).';
+    raise exception 'ONCE 77_movzular_orta5.sql isledilmelidir (riy-5-* movzulari yoxdur).';
   end if;
 end $$;
 

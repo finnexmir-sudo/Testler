@@ -9,7 +9,7 @@
                             cemi  630
 
 Bu fennler 6-ci sinifde baslayir - platforma banklarinin ilk fizika,
-biologiya ve cografiya suallari.  Movzular 29_movzular_orta6.sql
+biologiya ve cografiya suallari.  Movzular 81_movzular_orta6.sql
 agacina uygundur (e-derslik: fizika 546, biologiya 538, cografiya
 859/860).  Suallar yalniz derslik seviyyeli, subhesiz faktlardir;
 sixliq kimi hesablanan cavablar Python-da yoxlanilir.
@@ -2705,7 +2705,7 @@ def sql_yaz(n):
 --
 --  Fizika 6 + Biologiya 8 + Cografiya 7 = 21 movzu x 30 = %d.
 --  ext_key: fiz6-/bio6-/cog6-...
---  ON SERT: 29_movzular_orta6.sql islenmis olmalidir.
+--  ON SERT: 81_movzular_orta6.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
 
@@ -2717,7 +2717,7 @@ begin
                                 ('biologiya','bio-6-huceyre'),
                                 ('cografiya','cog-6-kainat'))
      having count(*) = 3) then
-    raise exception 'ONCE 29_movzular_orta6.sql isledilmelidir.';
+    raise exception 'ONCE 81_movzular_orta6.sql isledilmelidir.';
   end if;
 end $$;
 

@@ -1,5 +1,5 @@
 -- =====================================================================
---  28_bank_ing.sql : INGILIS DILI 1-4 PLATFORMA SUAL BANKI
+--  80_bank_ing.sql : INGILIS DILI 1-4 PLATFORMA SUAL BANKI
 --
 --  BU FAYL ELLE YAZILMIR - tools/ing.py yaradir:
 --      python3 tools/ing.py
