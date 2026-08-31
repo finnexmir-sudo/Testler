@@ -161,7 +161,9 @@ select v.fayl,
     ('72_bos_fennler.sql',
        (select count(*) from public.subjects where slug = 'kurikulum')
        + (select count(*) from public.programs
-           where slug in ('miq', 'sertifikasiya')) = 0)
+           where slug in ('miq', 'sertifikasiya')) = 0),
+    ('73_buraxilis_proqrami.sql',
+       (select count(*) from public.programs where slug = 'buraxilis') = 0)
   ) as v(fayl, var)
  order by 1;
 

@@ -5,13 +5,15 @@
 
 insert into public.programs (slug, name, sort) values
   ('ibtidai',       'İbtidai siniflər (1-4)',        10),
-  ('orta',          'Orta və yuxarı siniflər (5-11)', 20),
-  ('buraxilis',     'Buraxılış imtahanı',            30)
---  DIQQET: 'miq' (40) ve 'sertifikasiya' (50) proqramlari BURADAN
+  ('orta',          'Orta və yuxarı siniflər (5-11)', 20)
+--  DIQQET: 'buraxilis' (30), 'miq' (40) ve 'sertifikasiya' (50) proqramlari BURADAN
 --  CIXARILDI - illerle bos qalmisdilar, muellim panelde bos proqram
 --  gorurdu.  MIQ/sertifikasiya ayri mehsuldur: menbeyi e-derslik
---  derslikyi deyil, DIM proqramidir.  Hazir olanda eyni slug ile geri
---  qaytarila biler.  Kohne baza ucun: db/72_bos_fennler.sql.
+--  derslikyi deyil, DIM proqramidir.  'buraxilis' ise PROQRAM formasi
+--  sehv idi - buraxilis imtahani coxfennlidir ve muellim ona qrup
+--  yaratmir, ona gore imtahan SABLONU kimi qurulur (bax db/73).
+--  Hazir olanda eyni slug-lar geri qaytarila biler.
+--  Kohne baza ucun: db/72_bos_fennler.sql, db/73_buraxilis_proqrami.sql.
 on conflict (slug) do update set name = excluded.name, sort = excluded.sort;
 
 insert into public.subjects (slug, name, sort) values
@@ -68,7 +70,6 @@ insert into public.program_subjects (program_id, subject_id)
 select p.id, s.id from public.programs p, public.subjects s
  where (p.slug = 'ibtidai'  and s.slug in ('riyaziyyat','az-dili','ingilis-dili','hayat-bilgisi'))
     or (p.slug = 'orta'     and s.slug in ('riyaziyyat','az-dili','ingilis-dili','informatika','fizika','kimya','biologiya','tarix','cografiya'))
-    or (p.slug = 'buraxilis'and s.slug in ('riyaziyyat','az-dili','ingilis-dili','fizika','kimya','biologiya','tarix','cografiya','informatika'))
 on conflict do nothing;
 
 -- ----------------------------------------------------------------- paketler

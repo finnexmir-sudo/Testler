@@ -127,8 +127,15 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    Hazır olanda eyni slug-larla geri qaytarıla bilər — `04_seed.sql`-də
    nümunə sətirlər şərhdə saxlanılıb. `72` silmədən əvvəl hər sətrin boş
    olduğunu yoxlayır, bir mövzu/sual/qrup/test bağlıdırsa **dayanır**.
-   `buraxilis` proqramı toxunulmayıb (bax «Kataloq — hər sinif BİR dəfə»)
-   — hazırda kataloqdakı tək boş proqramdır.
+   `buraxilis` proqramı da silindi (`db/73_buraxilis_proqrami.sql`) —
+   **səbəb məzmun deyil, forma:** `programs → levels → classes` müəllimin
+   qrup yaratdığı ağacdır, repetitor isə «Buraxılış» qrupu yaratmır,
+   «11-ci sinif» qrupu yaradıb ona buraxılış **tipli test** verir. Üstəlik
+   real buraxılış imtahanı çoxfənnlidir, `tests.subject_id` isə tək və
+   `not null` — bir test sətri tam imtahanı tuta bilmir. Ona görə
+   buraxılış hazırlığı **imtahan şablonu** kimi qurulacaq (bax yol
+   xəritəsində «Buraxılış sınaq imtahanı»). Kataloq: **2 proqram**
+   (ibtidai, orta), 11 sinif, 12 fənn.
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
    «köməkçi işçisi» olsun.
@@ -138,9 +145,34 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
 7. PWA quraşdırma (manifest + ikon), Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
 
+8. **Buraxılış sınaq imtahanı (11-ci sinif)** — istifadəçi ilə
+   razılaşdırıldı. Məhsul «əlavə sual» deyil, **vaxtlı tam sınaq +
+   bal proqnozu**dur. Qərar verilmiş forma: buraxılış proqram deyil,
+   **imtahan şablonudur** — `tests`-in üstündə yeni qat
+   (`exam_blueprints` = hansı fənndən neçə sual, hansı mövzudan, hansı
+   çətinlikdə; `exam_sessions` = bir neçə testi birləşdirən, ümumi balı
+   olan imtahan). Şablon **məlumatdır**: DİM qaydası dəyişəndə SQL sətri
+   dəyişir, kod yox.
+   **Faza 1 üçün yeni sual lazım deyil** — mövcud 18 867 sual mövzu,
+   sinif və çətinlik üzrə nişanlıdır, imtahan onların üzərində seçimdir.
+   Hazır olan: `question_kind` = `{single,multi,text}`,
+   `rpc_submit_attempt` hər üç tipi düzgün sayır, şagird ekranında
+   `text` işləyir, `tests.time_limit_sec` var.
+   Əskik olan: `multi` üçün şagird ekranı (~20 sətir), bankda `text`
+   tipli sual (0 dənə), **kombinə suallar** — bizim «çətin» bir mövzu
+   daxilində çətindir (zəif mövzu hesabatı üçün qəsdən), DİM-in çətini
+   isə 2-3 mövzunu birləşdirən çoxaddımlıdır.
+   **Müəllif hüququ:** DİM-in **proqramı** (mövzu siyahısı) fakt sayılır
+   və mövzu ağacı üçün işlənə bilər — mündəricat qaydasının eynisi.
+   **Keçmiş illərin test bukletləri isə DİM-in müəllif hüququdur,
+   köçürülmür** — sual yenə öz yazdığımız olur.
+   Rəqib: DİM özü **otk.az**-da onlayn sınaq imtahanı satır. Bizim fərq
+   şagirdə tək sınaq deyil, **repetitorun aləti** olmalıdır: qrupa
+   təyinat, kim harada zəifdir, mövzu-mövzu diaqnoz.
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
-mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); boş qalan
-`buraxilis` proqramının taleyi.
+mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); DİM-in cari
+il qaydaları (sual sayı, vaxt, bal düsturu) — istifadəçi təsdiqləyəcək.
 
 ## Yerli yoxlama
 
