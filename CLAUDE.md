@@ -197,6 +197,61 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    yoxdur (mock çoxaxınlıdır).
 12. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
+13. **Sınaq imtahanı rejimi** (buraxılış / qəbul) — araşdırılıb, təcili
+   deyil. Qərar: **məzmun məhsulu qurmuruq** (Hədəf/Araz tipli
+   nəşriyyatlarla məzmun yarışında şansımız yoxdur), **alət** qururuq:
+   qəlib → hər həftə yeni variant → sınaqdan-sınağa trend.
+   Rəsmi mənbə: DİM → Fəaliyyət → Qəbul və imtahanlar → Yekun
+   qiymətləndirmə (menyuda «Sənədlər»də deyil).
+
+   | İmtahan | Tapşırıq | Vaxt | Bal | Avtomatik yığıla bilən |
+   |---|---|---|---|---|
+   | 11-illik buraxılış (qəbul I mərhələ) | 85 | 3 saat | 300 | **56%** |
+   | 9-illik buraxılış | 81 | 3 saat | 300 | **77%** |
+   | Qəbul II mərhələ | 90 | 3 saat | 400 | **~82%** |
+
+   I mərhələ 3 fənndir (tədris dili, riyaziyyat, xarici dil);
+   **qalan fənlər II mərhələdədir** — 6 ixtisas qrupu, çəki əmsalları
+   ilə, yəni bankın 11 fənnindən 10-u işlənir.
+
+   **Dizaynı müəyyən edən dörd fakt:**
+   - Yazılı açıq suallar **2× çəki** daşıyır. Ona görə yalnız qapalı
+     hissədən 300-lük şkalaya **proporsional keçmək OLMAZ** — 11-ci
+     sinifdə balı ~1,8 dəfə şişirdərdi. Ekranda dürüst yazılır:
+     «avtomatik hissə: N/61». 300-lük proqnoz yalnız müəllim açıq
+     sualları qiymətləndirəndən sonra.
+   - **II mərhələdə mənfi bal var**: `NBq = (Dq − ¼·Yq)·100/33`.
+     I mərhələdə yoxdur. `rpc_submit_attempt`-də mənfi bal anlayışı
+     ümumiyyətlə yoxdur — yeni tələbdir.
+   - Model **2027-dən dəyişir** (DİM 21.07.2026 tarixli sənədi).
+     Şablon ilk gündən `tedris_ili` ilə versiyalanmalıdır — sonradan
+     əlavə etmək olmaz.
+   - Tədris dili azərbaycanca olmayanlar **əlavə** «Azərbaycan dili
+     (dövlət dili kimi)» imtahanı verir: +30 tapşırıq, 100 bal.
+     Bu balın 300-ə qatılıb-qatılmadığı sənəddə yazılmayıb — **açıq
+     sual, təxmin etmirik**.
+
+   **Arxitektura:** sınaq = **seans**, üç mövcud testi qruplaşdıran
+   yeni cədvəl. `tests.subject_id` **not null**-dur (bir test = bir
+   fənn); onu çoxfənnli etmək bank/generator/hesabat/tapşırıq —
+   hamısına toxunardı. Seans yolu əlavədir, mövcud heç nəyi sökmür.
+
+   **Bağlı yol:** mövcud çoxvariantlı riyaziyyat suallarını açıq tipə
+   çevirmək ucuz qazanc DEYİL. 3680 sualdan 2337-də hesablanmış cavab
+   (`expect`) ümumiyyətlə yoxdur, 162-si variantlara istinad edir
+   («hansı düzdür»), asan namizədlərin çoxu isə 3-4-cü sinifdədir —
+   9-cu sinifdə 77, 11-ci sinifdə cəmi 21. Yəni məhz lazım olan yerdə
+   məhsul sıfıra yaxındır. İmtahan üçün açıq suallar **yenidən
+   yazılmalıdır**.
+
+   **Başlamazdan əvvəl:** «Azərbaycan dili (dövlət dili kimi)» balının
+   300-ə qatılıb-qatılmadığı DİM-dən (1653) dəqiqləşdirilməlidir.
+
+   **Sıra:** bu, `levels` modeli və pilotdan SONRA. İmtahan auditoriyası
+   ən bağışlamayandır — bir səhv cavab açarı etibarı birdəfəlik alır,
+   biz isə məhsulu hələ bir ay real şagirdlə işlətməmişik. Amma
+   imtahana hazırlaşdıran real bir repetitor «sınayaram» desə, sıra
+   dəyişir: onda təxminlə yox, konkret ehtiyacla qururuq.
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
