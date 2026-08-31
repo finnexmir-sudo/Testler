@@ -230,18 +230,18 @@ with sync_playwright() as pw:
     n_before = db("""select count(*) n from public.class_plan_items i
                        join public.class_plans p on p.id = i.plan_id
                       where p.class_id = %s""", (CLS,), one=True)["n"]
+    #  IKI fesle alt movzu veririk: "yalniz cari feslin bloku aciqdir"
+    #  serti tek fesille ozu-ozune kecirdi - yoxlama menasiz olurdu.
     db("""insert into public.topics (subject_id, level_id, parent_id, slug, name, sort)
           select t.subject_id, t.level_id, t.id, t.slug || '-d' || g,
                  'Ders ' || g, g * 10
-            from public.topics t
-            join public.class_plans p on p.subject_id = t.subject_id
-                                     and p.level_id  = t.level_id
+            from (select t2.*, row_number() over (order by t2.sort) rn
+                    from public.topics t2
+                    join public.class_plans p2 on p2.subject_id = t2.subject_id
+                                              and p2.level_id  = t2.level_id
+                   where p2.class_id = %s and t2.parent_id is null) t
             cross join generate_series(1,3) g
-           where p.class_id = %s and t.parent_id is null
-             and t.sort = (select min(t2.sort) from public.topics t2
-                            where t2.subject_id = t.subject_id
-                              and t2.level_id = t.level_id
-                              and t2.parent_id is null)""", (CLS,))
+           where t.rn <= 2""", (CLS,))
 
     #  plani silib yeniden qururuq - movcud planlar toxunulmur, bu
     #  qesdendir; muellim "Planı sil" ile teze quruluşa kecir
@@ -261,8 +261,8 @@ with sync_playwright() as pw:
     n_after = db("""select count(*) n from public.class_plan_items i
                       join public.class_plans p on p.id = i.plan_id
                      where p.class_id = %s""", (CLS,), one=True)["n"]
-    #  bir fesil 3 alt movzuya bolundu: 1 setir gedir, 3 setir gelir
-    ok(n_after == n_before + 2, "setir sayi yarpaqlara gore artir",
+    #  iki fesil 3-er alt movzuya bolundu: 2 setir gedir, 6 setir gelir
+    ok(n_after == n_before + 4, "setir sayi yarpaqlara gore artir",
        "%d -> %d" % (n_before, n_after))
     #  ovladi olan fesil setir kimi DUSMEMELIDIR
     bad = db("""select count(*) n from public.class_plan_items i
@@ -281,13 +281,16 @@ with sync_playwright() as pw:
        pg.inner_text(".plcur .plgn") if pg.locator(".plcur .plgn").count() else "")
 
     pg.locator(".plan > details > summary").first.click(); pg.wait_for_timeout(300)
-    ok(pg.locator(".plgrp").count() >= 1, "fesil bloklari cixir",
+    ok(pg.locator(".plgrp").count() == 2, "iki fesil bloku cixir",
        pg.locator(".plgrp").count())
     ok("0/3" in pg.inner_text(".plgrp .plgc"), "fesilde ders sayi gorunur",
        pg.inner_text(".plgrp .plgc"))
-    #  cari dersin fesli ACIQ, qalanlar yigilmis
+    #  cari dersin fesli ACIQ, O BIRISI yigilmis olmalidir
     ok(pg.locator(".plgrp[open]").count() == 1,
-       "yalniz cari feslin bloku aciqdir", pg.locator(".plgrp[open]").count())
+       "YALNIZ cari feslin bloku aciqdir", pg.locator(".plgrp[open]").count())
+    ok(pg.locator(".plgrp:not([open])").count() == 1,
+       "o biri fesil YIGILMIS gelir",
+       pg.locator(".plgrp:not([open])").count())
 
     print("J · «Test yığ» yalnız fəsil bitəndə")
     ok(pg.locator(".plgrp .plmk").count() == 0,
@@ -299,6 +302,9 @@ with sync_playwright() as pw:
     ok(pg.locator(".plgrp .plmk").count() == 1,
        "fesil bitende YALNIZ bir «test yığ» cixir",
        pg.locator(".plgrp .plmk").count())
+    #  birinci fesil bitdi -> cari ders IKINCI fesildedir -> indi o aciqdir
+    ok(pg.locator(".plgrp[open]").count() == 1,
+       "aciq blok NOVBETI fesle kecir", pg.locator(".plgrp[open]").count())
     ok("3/3" in pg.inner_text(".plgrp .plgc"), "fesil tam kecilmis gorunur",
        pg.inner_text(".plgrp .plgc"))
 
