@@ -167,7 +167,27 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    gözlənilmədən tapşırıq ekranına atılardı.
    Testin sinfi qrupun sinfindən fərqlidirsə siyahıya düşmür — o halda
    səbəb yazılır, test isə bazada qalır.
-11. Riyaziyyat 2 mövzularının yenilənməsi
+11. ~~Sual bankında əhatə görüntüsü~~ — hazırdır
+   (`db/29_bank_katalog.sql` + `muellim/app.js`). Platforma hovuzu
+   düz 50 sual tökürdü, sətirlər `disabled` idi (müəllim platforma
+   sualını nə açır, nə redaktə edir), üstəlik `rpc_bank_list`
+   `order by created_at desc` işlədiyi üçün ekranda **yalnız ən son
+   yazılan sinfin kəsiyi** görünürdü — 1860 sualdan 50-si, hamısı
+   11-ci sinif. Müəllim elə bilirdi bankda ancaq bu var.
+   İndi platforma/hamısı hovuzunda siyahı yerinə **əhatə** gəlir:
+   fənn → siniflər (sayla) → mövzular (say + asan/orta/çətin bölgüsü).
+   Mövzuya basanda **3 nümunə sual** variantları və düz cavabı ilə
+   açılır — `rpc_bank_samples`, server 3-də kəsir, abunə tələb
+   olunmur (bu, satış ekranıdır: müəllim aldığı şeyin keyfiyyətini
+   almazdan əvvəl görməlidir; test yığmaq yenə abunə istəyir).
+   Əlavə üç düzəliş: «Daha 50 sual göstər» — `p_offset` həmişə 0
+   göndərilirdi, 51-ci suala çatmaq mümkün deyildi; sətirdə süzgəcdə
+   onsuz da seçilmiş fənn/sinif təkrarlanmır; mövzu nişanları 20-dən
+   çox olanda sinif tələb olunur (şərt **saya** bağlıdır, hovuza yox —
+   öz bankı kiçikdir, orada sinif istəmək artıq maneədir).
+   Axtarış yazılanda və ya mövzu/çətinlik seçiləndə adi siyahıya
+   qayıdılır — orada müəllim konkret sual axtarır.
+12. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının

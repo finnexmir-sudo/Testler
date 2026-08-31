@@ -3455,6 +3455,28 @@
     return BF;
   }
 
+  /*  Movzu nisanlarinin heddi: bundan cox olanda sinif teleb olunur.
+      Telefonda ~20 nisan iki-uc setirdir, 60 nisan ekrani udur.  */
+  var TOPCAP = 20;
+
+  /*  Siyahida nece sual atlanir.  rpc_bank_list offset-i onsuz da
+      desteklyirdi - ekran hemise 0 gonderirdi, ona gore 51-ci suala
+      catmaq MUMKUN DEYILDI.  Suzgec deyisende sifirlanir.  */
+  var BOFF = 0;
+
+  /*  KATALOG REJIMI.  Platforma hovuzunda duz 50 sual tokmek menasiz
+      idi: setirler disabled gelir (muellim platforma sualini ne acir,
+      ne redaktə edir), ustelik siralama created_at desc oldugu ucun
+      ekranda yalniz EN SON yazilan sinfin kesiyi gorunurdu.
+      Muellimin sorusdugu "MENIM sinfimde ne qeder var" sualidir -
+      ona siyahi yox, EHATE cavab verir.
+      Axtaris yazilanda ve ya movzu/cetinlik secilende adi siyahiya
+      qayidiriq: orada muellim konkret sual axtarir.  */
+  function catalogMode(f) {
+    return f.pool !== "mine" && !(f.q || "").trim() &&
+           !f.topics.length && !f.difficulty.length;
+  }
+
   /* Suzgeci RPC-nin gozledi formaya salir - bos sahələr getmir */
   function bankRule(f) {
     var r = { pool: f.pool };
@@ -3542,11 +3564,17 @@
               '" data-d="' + d + '">' + DIFF[d] + "</button>";
           }).join("") +
         "</div>" +
-        /* Movzular YALNIZ fenn secilende.  Fennsiz 110 nisan cixir -
-           suzgec ekrani udur. */
-        (!f.subject
-          ? '<p class="muted" style="margin:12px 0 0">Mövzuları görmək üçün ' +
-            "fənn seçin.</p>"
+        /* Movzu nisanlari.  Fennsiz 110 nisan cixirdi; platforma
+           hovuzunda tek fennle de 11 sinfin movzulari tokulurdu
+           (Ingilis dilinde 60 nisan) - suzgec ekrani udurdu.
+           Sert SAYA baglidir, hovuza yox: oz banki kicikdir, orada
+           sinif istemek lazimsiz maneedir; cox olanda sinif isteyirik. */
+        (!f.subject || (!f.level && (FAC.topics || []).length > TOPCAP)
+          ? '<p class="muted" style="margin:12px 0 0">' +
+            (!f.subject
+              ? "Mövzuları görmək üçün fənn seçin."
+              : "Bu fənndə " + (FAC.topics || []).length +
+                " mövzu var — siyahını qısaltmaq üçün sinif də seçin.") + "</p>"
           : ((FAC.topics || []).length
               ? '<div class="chips" id="bTop">' + FAC.topics.map(function (t) {
                   return '<button class="chip' + (f.topics.indexOf(t.id) >= 0 ? " on" : "") +
@@ -3614,12 +3642,172 @@
       label + "</button>";
   }
 
-  function loadBank() {
+  /* ================================================================
+     EHATE GORUNTUSU — "menim sinfimde ne qeder var?"
+     Iki pille:  fenn -> siniflər (sayla)  ->  movzular (sayla,
+     cetinlik bolgusu ve 3 numune ile).
+     Movzuya basanda numuneler ACILIR - platforma sualinin
+     variantlarini ve duz cavabini yalniz burada gormek olur
+     (siyahida o setirler disabled-dir).
+     ================================================================ */
+  function loadCoverage(f, live) {
+    var box = $("bList");
+    if (box) box.innerHTML = '<div class="skel">Yüklənir…</div>';
+    sb.rpc("rpc_bank_coverage", {
+      p_subject: f.subject, p_level: f.level || null, p_pool: f.pool
+    }).then(function (d) {
+      if (!live()) return;
+      drawCoverage(f, d || {});
+    }).catch(function (e) {
+      if (!live()) return;
+      var b = $("bList");
+      if (b) b.innerHTML = msg("err", fail(e));
+    });
+  }
+
+  function subName(slug) {
+    var x = (FAC.subjects || []).filter(function (s) { return s.slug === slug; })[0];
+    return x ? x.name : slug;
+  }
+
+  function drawCoverage(f, d) {
+    var box = $("bList");
+    if (!box) return;
+    var total = Number(d.total) || 0;
+    var head = '<div class="bcount">' + esc(subName(f.subject)) +
+      (f.level ? " · " + esc(levelNameByCode(f.level)) : "") +
+      " · " + total + " sual</div>";
+
+    if (!total) {
+      box.innerHTML = head + '<div class="empty"><div class="ic">' + ic("doc") +
+        "</div><b>Bu bölmədə hələ sual yoxdur</b>" +
+        "Başqa sinif və ya fənn seçin.</div>";
+      bindCovBack(f);
+      return;
+    }
+
+    //  --- pille 1: siniflər
+    if (!f.level) {
+      var lv = d.levels || [];
+      box.innerHTML = head +
+        '<div class="bpick"><p>Sinif seçin — həmin sinfin mövzuları ' +
+          "və hər mövzuda neçə sual olduğu görünəcək.</p>" +
+          '<div class="g">' + lv.map(function (l) {
+            return '<button class="pkb" data-l="' + esc(l.code) + '">' +
+              esc(l.name) + "<i>" + (Number(l.n) || 0) + " sual</i></button>";
+          }).join("") + "</div>" +
+          (Number(d.no_level) > 0
+            ? '<p class="muted" style="margin:12px 0 0">Bundan başqa ' +
+              Number(d.no_level) + " sual sinifsizdir — istənilən sinifdə " +
+              "işlənə bilər.</p>"
+            : "") +
+        "</div>";
+      Array.prototype.forEach.call(box.querySelectorAll("[data-l]"), function (b) {
+        b.addEventListener("click", function () {
+          f.level = b.getAttribute("data-l");
+          f.topics = [];
+          screenBank();          //  sinif deyisdi - movzu nisanlari da yenilenir
+        });
+      });
+      return;
+    }
+
+    //  --- pille 2: movzular
+    var tp = d.topics || [];
+    var max = tp.reduce(function (a, t) { return Math.max(a, Number(t.n) || 0); }, 0) || 1;
+    box.innerHTML = head +
+      '<div class="cov">' + tp.map(function (t) {
+        var n = Number(t.n) || 0;
+        var parts = [];
+        if (Number(t.d1)) parts.push("asan " + t.d1);
+        if (Number(t.d2)) parts.push("orta " + t.d2);
+        if (Number(t.d3)) parts.push("çətin " + t.d3);
+        return '<div class="cvw">' +
+          '<button class="cvr" data-t="' + esc(t.id) + '">' +
+            '<div class="g"><b>' + esc(t.name) + "</b>" +
+              '<div class="cbar"><i style="width:' +
+                Math.round(n * 100 / max) + '%"></i></div>' +
+              "<i>" + esc(parts.join(" · ")) + "</i></div>" +
+            '<span class="n">' + n + "</span>" +
+            '<span class="arrow">' + ic("right") + "</span>" +
+          "</button>" +
+          '<div class="smp" id="smp-' + esc(t.id) + '"></div>' +
+        "</div>";
+      }).join("") + "</div>" +
+      (Number(d.no_topic) > 0
+        ? '<div class="bpick"><p style="margin:0">Bu sinifdə ' +
+          Number(d.no_topic) + " sual mövzusuzdur.</p></div>"
+        : "");
+
+    Array.prototype.forEach.call(box.querySelectorAll("[data-t]"), function (b) {
+      b.addEventListener("click", function () { toggleSamples(f, b); });
+    });
+    bindCovBack(f);
+  }
+
+  //  Sinifden geri qayitmaq ucun basliqdaki "geri" - suzgeci acmaga
+  //  ehtiyac qalmasin.  Ayrica setir deyil, movcud .bcount-a qosulur.
+  function bindCovBack(f) {
+    var c = document.querySelector("#bList .bcount");
+    if (!c || !f.level) return;
+    c.insertAdjacentHTML("beforeend",
+      ' <button class="btn sm ghost" id="covUp">' + ic("back") +
+      "bütün siniflər</button>");
+    on("covUp", "click", function () {
+      f.level = ""; f.topics = [];
+      screenBank();
+    });
+  }
+
+  function levelNameByCode(code) {
+    var l = (LEVELS || []).filter(function (x) { return x.code === code; })[0];
+    return l ? l.name : code;
+  }
+
+  /*  Numuneler: server en coxu 3 verir (29_bank_katalog.sql).
+      Ikinci klik baglayir - eyni movzuya tekrar sorgu getmir.  */
+  function toggleSamples(f, btn) {
+    var id  = btn.getAttribute("data-t");
+    var box = $("smp-" + id);
+    if (!box) return;
+    if (box.innerHTML) { box.innerHTML = ""; btn.classList.remove("open"); return; }
+    btn.classList.add("open");
+    box.innerHTML = '<div class="skel">Yüklənir…</div>';
+    sb.rpc("rpc_bank_samples", { p_topic: id, p_limit: 3, p_pool: f.pool })
+      .then(function (list) {
+        if (!$("smp-" + id)) return;
+        list = list || [];
+        if (!list.length) { box.innerHTML = ""; return; }
+        box.innerHTML = list.map(function (q) {
+          return '<div class="sq"><b>' + esc(q.body) + "</b>" +
+            ((q.options || []).length
+              ? "<ul>" + q.options.map(function (o) {
+                  return '<li' + (o.correct ? ' class="c"' : "") + ">" +
+                    esc(o.body) + "</li>";
+                }).join("") + "</ul>"
+              : '<p class="muted">Açıq cavablı sual</p>') +
+            "</div>";
+        }).join("") +
+        '<button class="morebtn" data-all="' + esc(id) + '">' +
+          "Bu mövzunun bütün suallarını gör</button>";
+        var ab = box.querySelector("[data-all]");
+        if (ab) ab.addEventListener("click", function () {
+          f.topics = [id];
+          screenBank();      //  movzu secildi -> katalogdan siyahiya kecir
+        });
+      })
+      .catch(function (e) { box.innerHTML = msg("err", fail(e)); });
+  }
+
+  function loadBank(append) {
     var live = guard();
     var f = bankFilter();
     /*  Suzgecsiz platforma/hamisi: minlerle suali tokmek evezine fenn
         secimi teklif olunur.  Oz banki ise derhal acilir - muellim oz
         suallarini gormek ucun gelir.  */
+    //  Fenn secilib, movzu/axtaris yoxdur -> siyahi yox, EHATE
+    if (catalogMode(f) && f.subject) return loadCoverage(f, live);
+
     if (f.pool !== "mine" && nFilt(f) === 0 && !(f.q || "").trim()) {
       var box0 = $("bList");
       if (box0) {
@@ -3649,14 +3837,16 @@
       }
       return;
     }
-    sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: 50, p_offset: 0 })
+    if (!append) BOFF = 0;
+    sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: 50, p_offset: BOFF })
       .then(function (d) {
         if (!live()) return;
         var box = $("bList");
         if (!box) return;
         d = d || {};
         var items = d.items || [];
-        if (!items.length) {
+        var total = Number(d.total) || 0;
+        if (!items.length && !append) {
           box.innerHTML = '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
             "<b>Sual tapılmadı</b>" +
             (f.pool === "mine"
@@ -3664,27 +3854,55 @@
               : "Süzgəci genişləndirin.") + "</div>";
           return;
         }
-        box.innerHTML =
-          '<div class="bcount">' + (Number(d.total) || 0) + " sual" +
-            (items.length < (Number(d.total) || 0)
-              ? " · ilk " + items.length + "-i göstərilir" : "") + "</div>" +
-          items.map(function (q) {
-            var mine = !!q.mine;
-            return '<button class="qrow" data-q="' + esc(q.id) + '"' +
-              (mine ? "" : " disabled") + ">" +
-              '<div class="g"><b>' + esc(q.body) + "</b><i>" +
-                "<span>" + esc(q.subject || "") + "</span>" +
-                (q.level ? "<span>·</span><span>" + esc(q.level) + "</span>" : "") +
-                (q.topic ? "<span>·</span><span>" + esc(q.topic) + "</span>" : "") +
-                '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
-                  DIFF[Number(q.difficulty) || 2] + "</span>" +
-                (mine ? "" : "<span>·</span><span>platforma</span>") +
-              "</i></div>" +
-              (mine ? '<span class="arrow">' + ic("right") + "</span>" : "") +
-            "</button>";
-          }).join("");
+        var shown = BOFF + items.length;
+        var rows = items.map(function (q) {
+          var mine = !!q.mine;
+          /*  Suzgecde ONSUZ DA secilmis olani her setirde tekrarlamiriq:
+              50 setirde "Ingilis dili · 11-ci sinif" 50 defe yazilirdi
+              ve setri iki qat hundur edirdi.  */
+          var meta = [];
+          if (!f.subject && q.subject) meta.push(esc(q.subject));
+          if (!f.level && q.level)     meta.push(esc(q.level));
+          if (q.topic)                 meta.push(esc(q.topic));
+          if (!mine)                   meta.push("platforma");
+          return '<button class="qrow" data-q="' + esc(q.id) + '"' +
+            (mine ? "" : " disabled") + ">" +
+            '<div class="g"><b>' + esc(q.body) + "</b><i>" +
+              meta.map(function (m, i) {
+                return (i ? "<span>·</span>" : "") + "<span>" + m + "</span>";
+              }).join("") +
+              '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
+                DIFF[Number(q.difficulty) || 2] + "</span>" +
+            "</i></div>" +
+            (mine ? '<span class="arrow">' + ic("right") + "</span>" : "") +
+          "</button>";
+        }).join("");
 
+        var more = shown < total
+          ? '<button class="morebtn" id="bMore">Daha ' +
+            Math.min(50, total - shown) + " sual göstər (" + shown + "/" + total + ")</button>"
+          : "";
+
+        if (append) {
+          var mb0 = $("bMore");
+          if (mb0) mb0.remove();
+          box.insertAdjacentHTML("beforeend", rows + more);
+        } else {
+          box.innerHTML =
+            '<div class="bcount">' + total + " sual" +
+              (shown < total ? " · " + shown + "-i göstərilir" : "") + "</div>" +
+            rows + more;
+        }
+
+        on("bMore", "click", function () {
+          var mb = $("bMore");
+          if (mb) { mb.disabled = true; mb.textContent = "Yüklənir…"; }
+          BOFF += 50;
+          loadBank(true);
+        });
         Array.prototype.forEach.call(box.querySelectorAll("[data-q]"), function (b) {
+          if (b.dataset.bound) return;
+          b.dataset.bound = "1";
           b.addEventListener("click", function () {
             nav("#/q/" + b.getAttribute("data-q"));
           });

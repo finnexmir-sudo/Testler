@@ -26,6 +26,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 25_ders_plani.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 26_fenn.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 27_hesabat.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 28_ferdi_tapsiriq.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 29_bank_katalog.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql
