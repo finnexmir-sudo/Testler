@@ -2918,7 +2918,8 @@
         (!f.subject || !f.level
           ? '<p class="muted" style="margin:12px 0 0">' +
             (!f.subject
-              ? "Mövzu seçmək üçün fənn və sinif seçin. "
+              ? (f.level ? "Mövzu seçmək üçün fənn seçin. "
+                         : "Mövzu seçmək üçün fənn və sinif seçin. ")
               : "Mövzu seçmək üçün sinif də seçin. ") +
             "Mövzu seçilməsə, hamısından götürüləcək.</p>"
           : ((FAC.topics || []).length
@@ -2943,10 +2944,9 @@
            teyinati ora qayidib veririk - orada son tarix, cehd sayi
            ve "tek sagird" secimi de var. */
         (f.back
-          ? '<div class="ok" style="margin:0 0 14px">' + ic("check") +
-            "<span>Hazır olan kimi «" + esc(f.backName || "qrup") +
-            "» tapşırıq ekranına qayıdacaqsınız — test orada seçilmiş " +
-            "gələcək.</span></div>"
+          ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi «' +
+            esc(f.backName || "qrup") + "» tapşırıq ekranına " +
+            "qayıdacaqsınız — test orada seçilmiş gələcək.</p>"
           : '<label for="gAsg">Qrupa tapşırıq ver (istəyə görə)</label>' +
             '<select id="gAsg"><option value="">Yalnız test yığılsın</option></select>' +
             '<p class="muted" style="margin:-8px 0 14px">Qrup seçsəniz, test yaranan ' +

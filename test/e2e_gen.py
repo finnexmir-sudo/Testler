@@ -495,6 +495,11 @@ with sync_playwright() as pw:
     ok(pg.locator("#gAsg").count() == 0,
        "qrup sahesi gizlidir - teyinati tapsiriq ekrani verecek")
     ok("4-A qrupu" in pg.inner_text("#main"), "hara qayidacagi yazilir")
+    #  Sinif artiq secilidir - ipucu onu tekrar istememelidir
+    ok("fənn və sinif seçin" not in pg.inner_text("#main"),
+       "ipucu hazir sinfi tekrar istemir")
+    ok("Mövzu seçmək üçün fənn seçin" in pg.inner_text("#main"),
+       "ipucu yalniz fenni isteyir")
     ok(pg.locator("#btnBack").inner_text().strip() == "4-A qrupu",
        "geri duymesi qrupun adini gosterir", pg.locator("#btnBack").inner_text())
 
