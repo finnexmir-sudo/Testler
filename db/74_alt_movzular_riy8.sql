@@ -13,6 +13,15 @@
 --  MENBE: e-derslik.edu.az, Riyaziyyat 8 (book_id 393), sag paneldeki
 --  "Movzular" agaci.  Adlar EYNILE goturulub - qisaltma, birlesdirme
 --  ve ya uydurma yoxdur.  Derslikdeki sira sort-a dusub.
+--
+--  YAZI QUSURLARI DUZELDILIB (mezmun deyismeyib - yalniz durgu
+--  isaresinden sonra dusen bosluq ve sondaki artiq noqte):
+--      "...helli.Kvadrat tenliyin..."      -> ". Kvadrat"
+--      "...vurulmasi,bolunmesi..."          -> ", bolunmesi"
+--      "Oxsar dordbucaqlilar,oxsar..."      -> ", oxsar"
+--      "Fiqurlarin cevrilmesi.Donme"        -> ". Donme"
+--      "Oxsarliq cevrilmesi.Homotetiya"     -> ". Homotetiya"
+--      "...oxsarliginin tetbiqi."           -> sondaki noqte atildi
 --  Keşdeki nusxe (mundericat/riyaziyyat-8-393.txt) canli portalla
 --  setir-setir tutusdurulub: 11 bolme, 77 movzu - eynidir.
 --
@@ -79,7 +88,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-8-kvadrat-tenlik', 'riy-8-kvadrat-tenlik-qrafik',
      'Kvadrat tənliyin qrafik üsulla həlli', 40),
     ('riy-8-kvadrat-tenlik', 'riy-8-kvadrat-tenlik-dustur',
-     'Kvadrat tənliklərin həlli.Kvadrat tənliyin kökləri düsturu', 50),
+     'Kvadrat tənliklərin həlli. Kvadrat tənliyin kökləri düsturu', 50),
     ('riy-8-kvadrat-tenlik', 'riy-8-kvadrat-tenlik-viyet',
      'Viyet teoremi', 60),
     ('riy-8-kvadrat-tenlik', 'riy-8-kvadrat-tenlik-getirilen',
@@ -113,7 +122,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-8-rasional-ifade', 'riy-8-rasional-ifade-sadelesdirme',
      'Rasional ifadələrin sadələşdirilməsi', 20),
     ('riy-8-rasional-ifade', 'riy-8-rasional-ifade-vurma-bolme',
-     'Rasional ifadələrin vurulması,bölünməsi və qüvvətə yüksəldilməsi', 30),
+     'Rasional ifadələrin vurulması, bölünməsi və qüvvətə yüksəldilməsi', 30),
     ('riy-8-rasional-ifade', 'riy-8-rasional-ifade-toplama-cixma',
      'Rasional ifadələrin toplanması və çıxılması', 40),
     ('riy-8-rasional-ifade', 'riy-8-rasional-ifade-emeller',
@@ -148,13 +157,13 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-8-oxsarliq', 'riy-8-oxsarliq-parca',
      'Mütənasib parçalar', 20),
     ('riy-8-oxsarliq', 'riy-8-oxsarliq-fiqurlar',
-     'Oxşar dördbucaqlılar,oxşar üçbucaqlar', 30),
+     'Oxşar dördbucaqlılar, oxşar üçbucaqlar', 30),
     ('riy-8-oxsarliq', 'riy-8-oxsarliq-elamet',
      'Üçbucaqların oxşarlıq əlamətləri', 40),
     ('riy-8-oxsarliq', 'riy-8-oxsarliq-duzbucaqli',
      'Düzbucaqlı üçbucaqların oxşarlığı', 50),
     ('riy-8-oxsarliq', 'riy-8-oxsarliq-tetbiq',
-     'Üçbucaqların oxşarlığının tətbiqi.', 60),
+     'Üçbucaqların oxşarlığının tətbiqi', 60),
     ('riy-8-oxsarliq', 'riy-8-oxsarliq-sahe',
      'Oxşar fiqurların sahəsi', 70),
     ('riy-8-oxsarliq', 'riy-8-oxsarliq-umumi',
@@ -188,9 +197,9 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-8-triqonometrik', 'riy-8-triqonometrik-duz-xett',
      'İki nöqtədən keçən düz xəttin tənliyi', 50),
     ('riy-8-triqonometrik', 'riy-8-triqonometrik-donme',
-     'Fiqurların çevrilməsi.Dönmə', 60),
+     'Fiqurların çevrilməsi. Dönmə', 60),
     ('riy-8-triqonometrik', 'riy-8-triqonometrik-homotetiya',
-     'Oxşarlıq çevrilməsi.Homotetiya', 70),
+     'Oxşarlıq çevrilməsi. Homotetiya', 70),
     ('riy-8-triqonometrik', 'riy-8-triqonometrik-umumi',
      'Ümumiləşdirici tapşırıqlar', 80),
     --  11. Məlumatın toplanması və təqdimi. Ehtimalın hesablanması
