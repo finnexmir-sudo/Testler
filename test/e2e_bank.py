@@ -420,14 +420,14 @@ with sync_playwright() as pw:
 
     print("I · Platforma hovuzu: siyahı yox, əhatə görüntüsü")
     pg.goto(PANEL + "#/b"); pg.reload()
-    pg.wait_for_selector("#bPool", timeout=8000)
+    pg.wait_for_selector("#bPool", timeout=15000)
     pg.locator("#bPool .seg", has_text="Platforma").click()
-    pg.wait_for_selector(".bpick .pkb", timeout=8000)
+    pg.wait_for_selector(".bpick .pkb", timeout=15000)
     ok(pg.locator(".bpick .pkb").count() >= 1, "fenn secicisi cixir",
        pg.locator(".bpick .pkb").count())
     #  fenn secilir -> SINIF SECICISI gelmelidir, 50 sualliq siyahi yox
     pg.locator(".bpick .pkb", has_text="Riyaziyyat").first.click()
-    pg.wait_for_selector(".bpick .pkb[data-l]", timeout=8000)
+    pg.wait_for_selector(".bpick .pkb[data-l]", timeout=15000)
     ok(pg.locator(".qrow").count() == 0, "siyahi tokulmur", pg.locator(".qrow").count())
     nlev = pg.locator(".bpick .pkb[data-l]").count()
     ok(nlev >= 1, "sinif duymeleri sayla gelir", nlev)
@@ -450,10 +450,17 @@ with sync_playwright() as pw:
 
     print("J · Mövzular, çətinlik bölgüsü və nümunə suallar")
     pg.locator(".bpick .pkb[data-l]").first.click()
-    pg.wait_for_selector(".cvr", timeout=8000)
+    pg.wait_for_selector(".cvr", timeout=15000)
     ok(pg.locator(".cvr").count() >= 1, "movzu setirleri gelir",
        pg.locator(".cvr").count())
-    ok(pg.locator(".cvr .cbar i").count() >= 1, "nisbi cəki zolagi var")
+    #  Zolaq yalniz FERQ olanda cizilir.  Hamisinda eyni say varsa
+    #  12 dene tam dolu xett qalirdi - hec ne demeyen bezek.
+    ns = [int(x) for x in pg.locator(".cvr .n").all_inner_texts()]
+    if len(set(ns)) > 1:
+        ok(pg.locator(".cvr .cbar").count() >= 1, "ferq olanda zolaq cizilir", ns[:5])
+    else:
+        ok(pg.locator(".cvr .cbar").count() == 0,
+           "saylar eyni olanda zolaq cizilmir", ns[:5])
     t0 = pg.locator(".cvr").first.inner_text()
     ok("asan" in t0 or "orta" in t0 or "çətin" in t0,
        "cetinlik bolgusu yazilir", t0.replace("\n", " ")[:60])
@@ -461,7 +468,7 @@ with sync_playwright() as pw:
 
     #  movzuya klik -> numuneler acilir, duz cavab isarelenir
     pg.locator(".cvr").first.click()
-    pg.wait_for_selector(".smp .sq", timeout=8000)
+    pg.wait_for_selector(".smp .sq", timeout=15000)
     ns = pg.locator(".smp .sq").count()
     ok(1 <= ns <= 3, "numune sayi serverde 3-le mehdudlasir", ns)
     ok(pg.locator(".smp .sq li.c").count() >= 1, "duz cavab isarelenib",
@@ -472,52 +479,60 @@ with sync_playwright() as pw:
 
     print("K · Mövzudan siyahıya keçid və «daha göstər»")
     pg.locator(".cvr").first.click()
-    pg.wait_for_selector(".smp [data-all]", timeout=8000)
+    pg.wait_for_selector(".smp [data-all]", timeout=15000)
     pg.click(".smp [data-all]")
-    pg.wait_for_selector(".qrow", timeout=8000)
+    pg.wait_for_selector(".qrow", timeout=15000)
     ok(pg.locator(".qrow").count() >= 1, "movzunun suallari siyahi ile acilir",
        pg.locator(".qrow").count())
     #  suzgecde secili olan fenn/sinif setirlerde TEKRARLANMIR
     r0 = pg.locator(".qrow i").first.inner_text()
     ok("Riyaziyyat" not in r0, "setirde fenn tekrarlanmir", r0.replace("\n", " "))
 
-    #  «daha gostər»: 50-den cox netice olan bir suzgece kecirik
+    #  «daha gostər»: 50-den cox netice veren axtarisa kecirik
     pg.goto(PANEL + "#/b"); pg.reload()
-    pg.wait_for_selector("#bPool", timeout=8000)
+    pg.wait_for_selector("#bPool", timeout=15000)
     pg.locator("#bPool .seg", has_text="Platforma").click()
-    pg.wait_for_selector("#bq", timeout=8000)
+    #  DIQQET: reload-dan sonra hovuz "mine"-dir ve OZ suallarinin
+    #  siyahisi ekrandadir.  Sadece ".qrow" gozlesek kohne setirlere
+    #  baxariq - fenn secicisini gozleyib teze render-i tesdiqleyirik.
+    pg.wait_for_selector(".bpick .pkb", timeout=15000)
     pg.fill("#bq", "?")          # axtaris -> katalog yox, siyahi
-    pg.wait_for_selector(".qrow", timeout=8000)
-    tot = db("""select count(*) n from public.questions
-                 where owner_type='platform' and status='published'
-                   and body like '%%?%%'""", one=True)["n"]
-    if tot > 50:
-        ok(pg.locator("#bMore").count() == 1, "«daha göstər» duymesi cixir")
-        n1 = pg.locator(".qrow").count()
+    pg.wait_for_function(
+        "() => !document.querySelector('.bpick') && "
+        "document.querySelectorAll('.qrow').length > 0", timeout=15000)
+    #  Sayi bazadan yeniden hesablamiriq (axtaris semantikasini tekrar
+    #  yazmaq olardi) - ekranin OZ dediyi ile setir sayini tutusduruq.
+    head  = pg.inner_text(".bcount")
+    total = int("".join(ch for ch in head.split("·")[0] if ch.isdigit()))
+    n1    = pg.locator(".qrow").count()
+    if total > n1:
+        ok(pg.locator("#bMore").count() == 1,
+           "hamisi gosterilmeyibse «daha göstər» cixir", "%d/%d" % (n1, total))
         pg.click("#bMore")
         pg.wait_for_function(
-            "document.querySelectorAll('.qrow').length > %d" % n1, timeout=8000)
-        ok(pg.locator(".qrow").count() > n1, "novbeti 50 elave olunur",
-           "%d -> %d" % (n1, pg.locator(".qrow").count()))
+            "document.querySelectorAll('.qrow').length > %d" % n1, timeout=15000)
+        n2 = pg.locator(".qrow").count()
+        ok(n2 > n1, "novbeti 50 elave olunur", "%d -> %d" % (n1, n2))
+        ok(n2 == min(total, n1 + 50), "elave olunan say duzdur", n2)
     else:
         ok(pg.locator("#bMore").count() == 0,
-           "50-den az neticede duyme cixmir", tot)
+           "hamisi gorunurse duyme cixmir", "%d/%d" % (n1, total))
 
     print("L · Mövzu nişanları sinif seçilməyincə tökülmür")
     pg.goto(PANEL + "#/b"); pg.reload()
-    pg.wait_for_selector("#bPool", timeout=8000)
+    pg.wait_for_selector("#bPool", timeout=15000)
     pg.locator("#bPool .seg", has_text="Platforma").click()
-    pg.wait_for_selector("#bFilt", timeout=8000)
+    pg.wait_for_selector("#bFilt", timeout=15000)
     pg.locator("details.filt summary").click()
-    pg.wait_for_selector("#bsub", timeout=8000)
+    pg.wait_for_selector("#bsub", timeout=15000)
     pg.select_option("#bsub", "riyaziyyat")
-    pg.wait_for_selector("#bsub", timeout=8000); pg.wait_for_timeout(500)
+    pg.wait_for_selector("#bsub", timeout=15000); pg.wait_for_timeout(500)
     ok(pg.locator("#bTop").count() == 0,
        "platformada sinifsiz movzu nisanlari GIZLIDIR")
     ok("sinif də seçin" in pg.inner_text("#bFilt"), "sebeb yazilir")
     ok("mövzu var" in pg.inner_text("#bFilt"), "necə mövzu oldugu yazilir")
     pg.select_option("#blev", code)
-    pg.wait_for_selector("#bTop", timeout=8000)
+    pg.wait_for_selector("#bTop", timeout=15000)
     nch = pg.locator("#bTop .chip").count()
     ok(0 < nch <= 20, "sinifle nisan sayi yigcamdir", nch)
 

@@ -526,7 +526,13 @@ with sync_playwright() as pw:
 
     pg.select_option("#aWho", "")
     pg.click("#btnAsg")
-    pg.wait_for_selector(".asg", timeout=8000)
+    #  DIQQET: ".asg" gozlemek AZDIR - bu qrupda onsuz da teyinat var,
+    #  selektor derhal qayidir ve baza yoxlamasi yazidan EVVEL isleyir.
+    #  Konkret teze setri gozleyirik.
+    pg.wait_for_function(
+        "document.querySelector('#asgList') && "
+        "document.querySelector('#asgList').innerText"
+        ".indexOf('Tapsiriqdan yigilan test') >= 0", timeout=8000)
     ok(bool(db("select 1 ok from public.assignments where test_id = %s "
                "and class_id = %s", (NEWT["i"], GID), one=True)),
        "«Tapsiriq ver» basilanda teyinat yazilir")

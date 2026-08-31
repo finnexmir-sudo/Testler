@@ -3715,6 +3715,13 @@
     //  --- pille 2: movzular
     var tp = d.topics || [];
     var max = tp.reduce(function (a, t) { return Math.max(a, Number(t.n) || 0); }, 0) || 1;
+    var min = tp.reduce(function (a, t) {
+      return Math.min(a, Number(t.n) || 0); }, max);
+    /*  Zolaq movzular arasindaki FERQI gosterir.  Hamisinda eyni say
+        varsa (generator movzu basina beraber doldurub) her zolaq 100%
+        olur - ekranda 12 dene tam dolu xett qalir, hec ne demir.
+        Bele halda zolagi umumiyyetle cizmirik.  */
+    var bars = max > min;
     box.innerHTML = head +
       '<div class="cov">' + tp.map(function (t) {
         var n = Number(t.n) || 0;
@@ -3725,8 +3732,10 @@
         return '<div class="cvw">' +
           '<button class="cvr" data-t="' + esc(t.id) + '">' +
             '<div class="g"><b>' + esc(t.name) + "</b>" +
-              '<div class="cbar"><i style="width:' +
-                Math.round(n * 100 / max) + '%"></i></div>' +
+              (bars
+                ? '<div class="cbar"><i style="width:' +
+                  Math.round(n * 100 / max) + '%"></i></div>'
+                : "") +
               "<i>" + esc(parts.join(" · ")) + "</i></div>" +
             '<span class="n">' + n + "</span>" +
             '<span class="arrow">' + ic("right") + "</span>" +
