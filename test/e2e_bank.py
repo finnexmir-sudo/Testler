@@ -465,6 +465,16 @@ with sync_playwright() as pw:
     ok("asan" in t0 or "orta" in t0 or "çətin" in t0,
        "cetinlik bolgusu yazilir", t0.replace("\n", " ")[:60])
     ok(pg.locator("#covUp").count() == 1, "«bütün siniflər» geri duymesi var")
+    #  Basliqda sinfin ADI olmalidir, cilpaq kod yox.  Bu blok reload-dan
+    #  sonra gelir, yeni LEVELS kesi BOSDUR - adi serverin cavabindan
+    #  goturduyumuzu mehz burada yoxlayiriq.
+    #  DIQQET: "sinif" sozunu butov metnde axtarmaq ALDADICIDIR -
+    #  "bütün siniflər" geri duymesi de eyni elementin icindedir.
+    #  Ortadaki hisseni ayirib baxiriq: cilpaq reqem olmamalidir.
+    hd  = pg.inner_text(".bcount")
+    seg = hd.split("·")[1].strip() if "·" in hd else hd
+    ok(not seg.isdigit(), "basliqda sinfin ADI var (cilpaq kod yox)",
+       hd.replace("\n", " "))
 
     #  movzuya klik -> numuneler acilir, duz cavab isarelenir
     pg.locator(".cvr").first.click()

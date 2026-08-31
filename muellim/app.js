@@ -3674,8 +3674,13 @@
     var box = $("bList");
     if (!box) return;
     var total = Number(d.total) || 0;
+    /*  Sinfin ADI serverin oz cavabindan goturulur.  LEVELS kesine
+        guvenmek olmaz: onu loadLevels() doldurur, screenBank ise onu
+        cagirmir - "#/b" birbasa acilanda kes bos olur ve basliqda
+        "Riyaziyyat · 1 · 480 sual" kimi cilpaq kod qalirdi.
+        d.levels sinif secilende de tam gelir (server onu suzmur).  */
     var head = '<div class="bcount">' + esc(subName(f.subject)) +
-      (f.level ? " · " + esc(levelNameByCode(f.level)) : "") +
+      (f.level ? " · " + esc(covLevelName(d, f.level)) : "") +
       " · " + total + " sual</div>";
 
     if (!total) {
@@ -3768,9 +3773,12 @@
     });
   }
 
-  function levelNameByCode(code) {
-    var l = (LEVELS || []).filter(function (x) { return x.code === code; })[0];
-    return l ? l.name : code;
+  function covLevelName(d, code) {
+    var l = (d.levels || []).filter(function (x) { return x.code === code; })[0];
+    if (l && l.name) return l.name;
+    //  ehtiyat: suzgecin oz siyahisi, sonra cilpaq kod
+    var f2 = (FAC.levels || []).filter(function (x) { return x.code === code; })[0];
+    return (f2 && f2.name) || code;
   }
 
   /*  Numuneler: server en coxu 3 verir (29_bank_katalog.sql).
