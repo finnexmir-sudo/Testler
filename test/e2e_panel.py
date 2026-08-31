@@ -2,7 +2,20 @@
 # -*- coding: utf-8 -*-
 """Muellim panelini real brauzerde, real sxem uzerinde surur."""
 import re, sys, time
+import psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright
+
+DSN = "host=/tmp port=55432 user=postgres dbname=panel_e2e"
+
+
+def db(sql, args=None, one=False):
+    """Bazani BIRBASA oxumaq - ekranin dedikleri ile uzlasirmi.
+       Ekran duz gostere biler, altda melumat yanlis yazilmis ola
+       biler (proqram/sinif uygunsuzlugu mehz bele gizlenirdi)."""
+    with psycopg2.connect(DSN, cursor_factory=psycopg2.extras.RealDictCursor) as c, c.cursor() as cur:
+        cur.execute(sql, args or ())
+        if cur.description:
+            return cur.fetchone() if one else cur.fetchall()
 
 PANEL = "http://127.0.0.1:8010/muellim/index.html"
 # Tehlukesizlik kilidi: yoxlama YALNIZ yerli mock-a getmelidir.
@@ -193,6 +206,31 @@ with sync_playwright() as pw:
     code = re.search(r"\b([A-Z2-9]{8})\b", txt.replace("\n", " "))
     ok(code is None, "qosulma kodu siyahida GORUNMUR",
        code.group(1) if code else "")
+
+    #  YUXARI SINIF.  Panel evvel hemise p_program_slug="ibtidai"
+    #  gonderirdi, server ise sinfi HEMIN proqramin icinde axtarirdi -
+    #  8-ci sinif orada olmadigi ucun qrup SINIFSIZ yaranirdi.
+    #  Sessizce: xeta yox, sadece sinif itirdi.  1-4 islerdi, 5-11 yox.
+    pg.fill("#gname", "Sekkizinci qrup")
+    pg.select_option("#glevel", "8")
+    pg.click("#btnGroup")
+    pg.wait_for_function(
+        "document.querySelector('#groups') && "
+        "document.querySelector('#groups').innerText.indexOf('Sekkizinci qrup') >= 0",
+        timeout=8000)
+    t8 = pg.inner_text("#groups")
+    ok("8-ci sinif" in t8, "YUXARI sinif (8) itmir - qrup sinifli yaranir",
+       [x for x in t8.split("\n") if "Sekkizinci" in x or "sinif" in x][:3])
+    row = db("""select l.code as sinif, p.slug as program
+                  from public.classes c
+                  left join public.levels   l on l.id = c.level_id
+                  left join public.programs p on p.id = c.program_id
+                 where c.name = 'Sekkizinci qrup'""", one=True)
+    ok(row is not None and row["sinif"] == "8", "bazada sinif 8-dir",
+       row and row["sinif"])
+    #  Proqram GONDERILENDEN yox, SINIFDEN toremelidir
+    ok(row is not None and row["program"] not in (None, "ibtidai"),
+       "proqram sinifden toreyib (ibtidai qalmayib)", row and row["program"])
 
     print("C · Şagird əlavə etmək")
     pg.click("#groups .item")

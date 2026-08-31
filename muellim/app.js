@@ -501,7 +501,10 @@
         p_account_id: ACC.id,
         p_name: name,
         p_kind: ACC.type === "school" ? "school_class" : "tutor_group",
-        p_program_slug: "ibtidai",
+        //  Proqram GONDERILMIR: server onu sinifden ozu tapir.
+        //  Evvel burada sert "ibtidai" yazilirdi, server ise sinfi
+        //  HEMIN proqramin icinde axtarirdi - 8-ci sinif orada
+        //  olmadigi ucun qrup SINIFSIZ yaranirdi (db/31).
         p_level_code: $("glevel").value || null
       }).then(function () {
         $("gname").value = "";
@@ -1163,7 +1166,11 @@
       if (nm === g.name && newLevel === g.level_id) { close(); return; }
       $("gRenErr").innerHTML = "";
       setBusy("gSave", true, "Yadda saxla");
-      sb.update("classes", { id: g.id }, { name: nm, level_id: newLevel })
+      //  Sinif deyisirse proqram da onunla getmelidir - yoxsa qrup
+      //  "orta" sinifde, "ibtidai" proqramda qalir (uygunsuz melumat).
+      var patch = { name: nm, level_id: newLevel };
+      if (lv) patch.program_id = lv.program_id || null;
+      sb.update("classes", { id: g.id }, patch)
         .then(function () {
           g.name = nm; g.level_id = newLevel;
           topTitle.textContent = nm;
@@ -1528,7 +1535,7 @@
     if (LEVELS) return Promise.resolve(LEVELS);
     //  Sinif esasli seviyyeler (kod reqemdir: 1-11). MIQ/sertifikasiya
     //  pilleleri sinif deyil - bura dusmur.
-    return sb.select("levels", { select: "id,code,name", order: "sort" })
+    return sb.select("levels", { select: "id,code,name,program_id", order: "sort" })
       .then(function (rows) {
         LEVELS = (rows || []).filter(function (l) {
           return /^[0-9]+$/.test(l.code);

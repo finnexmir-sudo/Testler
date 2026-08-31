@@ -197,7 +197,21 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    yoxdur (mock çoxaxınlıdır).
 12. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
-13. **Sınaq imtahanı rejimi** (buraxılış / qəbul) — araşdırılıb, təcili
+13. ~~Sinif (level) modeli~~ — hazırdır (`db/31_seviyye_modeli.sql`).
+   **Səhv:** panel qrup yaradanda həmişə `p_program_slug: "ibtidai"`
+   göndərirdi, `rpc_create_class` isə sinfi **həmin proqramın içində**
+   axtarırdı. 8-ci sinif `orta`-dadır → sorğu boş qayıdırdı → qrup
+   **səssizcə sinifsiz** yaranırdı (xəta yox, xəbərdarlıq yox).
+   1-4 işləyirdi, 5-11 yox. Zənciri uzundur: sinifsiz qrupda
+   `rpc_available_tests` sinif süzgəcini söndürür, ona görə tapşırıq
+   ekranına bütün fənlərin, bütün siniflərin testləri tökülürdü.
+   **Düzəliş:** sinif birincidir, proqram ondan **törəyir** —
+   çağıran tərəf proqramı bilmək məcburiyyətində deyil. Rəqəm kodlu
+   siniflər üzrə təkrarsızlıq **qismən unikal indekslə** qorunur
+   (`levels_sinif_kodu_tek`), yəni 9/10/11 təkrarı bir daha yarana
+   bilməz. MİQ/sertifikasiya səviyyələrinə toxunulmur — kodları
+   rəqəm deyil. Mövcud qruplarda `program_id` sinifə uyğunlaşdırılır.
+14. **Sınaq imtahanı rejimi** (buraxılış / qəbul) — araşdırılıb, təcili
    deyil. Qərar: **məzmun məhsulu qurmuruq** (Hədəf/Araz tipli
    nəşriyyatlarla məzmun yarışında şansımız yoxdur), **alət** qururuq:
    qəlib → hər həftə yeni variant → sınaqdan-sınağa trend.
