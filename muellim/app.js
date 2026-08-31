@@ -1544,6 +1544,14 @@
     return l ? l.name : "";
   }
 
+  //  Qrupun sinif kodu (1-11) - generator suzgeci kodla isleyir,
+  //  qrupda ise level_id (uuid) durur.
+  function levelCode(id) {
+    if (!id || !LEVELS) return "";
+    var l = LEVELS.filter(function (x) { return x.id === id; })[0];
+    return l ? l.code : "";
+  }
+
   function levelOptions(sel) {
     return '<option value="">Sinif seçilməyib</option>' +
       (LEVELS || []).map(function (l) {
@@ -1966,10 +1974,22 @@
       '<div id="asgList" class="card pad0"></div>' +
       '<div class="spacer"></div>' +
       "<h2>Yeni tapşırıq</h2>" +
-      '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>'
+      '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>' +
+      '<div class="spacer"></div>' +
+      /* Bu ekran test YARATMIR - hazir testi qrupa yoneldir.
+         Muellimler bunu qarisdirirdi: siyahida yalniz kohneler
+         gorunurdu, yenisini haradan yigmagi ekran demirdi. */
+      '<div class="card tight">' +
+        '<p class="muted" style="margin:0 0 12px">Siyahıda uyğun test ' +
+          "yoxdursa, sual bankından yenisini yığın — hazır olan kimi " +
+          "bura qayıdacaq və seçilmiş gələcək.</p>" +
+        '<button class="btn wide" id="btnGenHere">' + ic("gen") +
+          "Yeni test yığ</button>" +
+      "</div>"
     );
 
     on("btnBack", "click", function () { nav("#/g/" + g.id); });
+    on("btnGenHere", "click", function () { genForClass(g); });
     on("fp", "change", function () {
       var el = $("fp");
       var val = el.checked;
@@ -2067,6 +2087,28 @@
     });
   }
 
+  /* ---------------------------------------------- yeni test -> geri
+     Tapsiriq ekranindan "Yeni test yig" basilanda generatora kecirik,
+     amma hara qayidacagimizi yadda saxlayiriq (GF.back).  Test hazir
+     olanda hemin qrupun tapsiriq ekrani acilir ve teze test siyahida
+     SECILMIS gelir - muellim yalniz son tarixi qoyub gonderir.
+     PICKNEW bir defelikdir: ekran cizilen kimi silinir. */
+  var PICKNEW = "";
+
+  function genForClass(g) {
+    var f = genFilter();
+    //  Teze suzgec - kohne secimler yeni qrupa yapismasin
+    f.subject = ""; f.topics = []; f.difficulty = [];
+    f.title = ""; f.cls = ""; f.remNames = [];
+    //  Teyinati generator DEYIL, tapsiriq ekrani verecek: orada son
+    //  tarix, cehd sayi ve "tek sagird" secimi var.
+    f.asg = "";
+    f.level = levelCode(g.level_id);   // sinif teyin olunmayibsa bos qalir
+    f.back = g.id;
+    f.backName = g.name || "";
+    nav("#/gen");
+  }
+
   /* Teyin edile bilen testler: sinife uygun olanlar */
   function loadPick(g, students) {
     var live = guard();
@@ -2093,10 +2135,26 @@
         return !(elsew[t.id] &&
                  String(t.title || "").indexOf("səhvlər üzərində iş") >= 0);
       });
+
+      /* Generatordan teze qayitmisiqsa - bildiris ve secim.
+         Bir defelikdir: burada oxuyub derhal silirik. */
+      var neu = PICKNEW; PICKNEW = "";
+      var isNew = neu && free.filter(function (t) { return t.id === neu; }).length > 0;
+      var note = "";
+      if (neu) {
+        note = isNew
+          ? msg("ok", "Test yığıldı və aşağıda seçildi — son tarixi " +
+                      "təyin edib «Tapşırıq ver» düyməsini basın.")
+          //  Testin sinfi qrupun sinfinden ferqlidirse suzgec onu kesir.
+          //  Test ITMIR - generatorda sinfi duzeldib yeniden vermek olar.
+          : msg("warn", "Test yığıldı, amma bu siyahıya düşmür — sinfi " +
+                        "qrupun sinfindən fərqlidir. Generatorda «Sinif» " +
+                        "seçimini qrupla eyni edin.");
+      }
       /* Iki ayri hal - eyni mesaji vermek olmaz:
          siyahi tamam bosdursa bu sinif ucun hele test YAZILMAYIB. */
       if (!list.length) {
-        box.innerHTML = '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
+        box.innerHTML = note + '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
           "<b>Bu sinif üçün hələ test yoxdur</b>" +
           "Test bazasına " + esc(levelName(g.level_id) || "bu sinif") +
           " materialları hələ əlavə olunmayıb. Qrupun sinfini dəyişsəniz " +
@@ -2104,11 +2162,11 @@
         return;
       }
       if (!free.length) {
-        box.innerHTML = '<div class="empty"><div class="ic">' + ic("check") + "</div>" +
+        box.innerHTML = note + '<div class="empty"><div class="ic">' + ic("check") + "</div>" +
           "<b>Bütün testlər verilib</b>Bu sinif üçün başqa test qalmayıb.</div>";
         return;
       }
-      box.innerHTML =
+      box.innerHTML = note +
         '<label for="aTest">Test</label>' +
         '<select id="aTest">' + free.map(function (t) {
           /* Testin adi onsuz da fennle baslayirsa fenni tekrar yazmiriq:
@@ -2150,6 +2208,7 @@
           "tapşırıq siz götürənə qədər açıq qalır.</p>" +
         '<div id="aErr"></div>' +
         '<button class="btn go" id="btnAsg">' + ic("plus") + "Tapşırıq ver</button>";
+      if (isNew && $("aTest")) $("aTest").value = neu;
       on("btnAsg", "click", function () { doAssign(g); });
     }).catch(function (e) {
       if (!live()) return;
@@ -2746,8 +2805,10 @@
   function genFilter() {
     if (!GF) GF = { pool: (ACC && ACC.plan) ? "all" : "mine",
                     subject: "", level: "", topics: [], difficulty: [],
-                    count: 10, title: "",
-                    cls: "", remNames: [] };
+                    count: 10, title: "", asg: "",
+                    cls: "", remNames: [],
+                    //  tapsiriq ekranindan gelmisiksa hara qayidaq
+                    back: "", backName: "" };
     return GF;
   }
 
@@ -2801,7 +2862,8 @@
   function drawGen() {
     var f = genFilter();
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") +
+        (f.back ? esc(f.backName || "Tapşırıqlar") : "Əsas səhifə") + "</button>" +
       '<div class="spacer"></div>' +
       '<div class="card">' +
         "<h1>Avtomatik test</h1>" +
@@ -2877,17 +2939,29 @@
             '<input id="gCnt" type="number" min="1" max="100" inputmode="numeric" value="' +
             f.count + '"></div>' +
         "</div>" +
-        '<label for="gAsg">Qrupa tapşırıq ver (istəyə görə)</label>' +
-        '<select id="gAsg"><option value="">Yalnız test yığılsın</option></select>' +
-        '<p class="muted" style="margin:-8px 0 14px">Qrup seçsəniz, test yaranan ' +
-          "kimi ona tapşırıq gedəcək (son tarix 7 gün, 1 cəhd).</p>" +
+        /* Tapsiriq ekranindan gelmisiksa bu saheye ehtiyac yoxdur:
+           teyinati ora qayidib veririk - orada son tarix, cehd sayi
+           ve "tek sagird" secimi de var. */
+        (f.back
+          ? '<div class="ok" style="margin:0 0 14px">' + ic("check") +
+            "<span>Hazır olan kimi «" + esc(f.backName || "qrup") +
+            "» tapşırıq ekranına qayıdacaqsınız — test orada seçilmiş " +
+            "gələcək.</span></div>"
+          : '<label for="gAsg">Qrupa tapşırıq ver (istəyə görə)</label>' +
+            '<select id="gAsg"><option value="">Yalnız test yığılsın</option></select>' +
+            '<p class="muted" style="margin:-8px 0 14px">Qrup seçsəniz, test yaranan ' +
+              "kimi ona tapşırıq gedəcək (son tarix 7 gün, 1 cəhd).</p>") +
         '<div id="gPrev"><div class="skel">Hovuz yoxlanılır…</div></div>' +
         '<div id="gErr"></div>' +
         '<button class="btn go" id="btnMake">' + ic("gen") + "Testi yığ</button>" +
       "</div>"
     );
 
-    on("btnBack", "click", function () { nav("#/"); });
+    on("btnBack", "click", function () {
+      //  imtina: geri qayidis niyyetini de temizleyirik
+      if (f.back) { var gid = f.back; f.back = ""; f.backName = ""; nav("#/a/" + gid); return; }
+      nav("#/");
+    });
     on("gRemOff", "click", function (e) {
       e.preventDefault();
       f.cls = ""; f.remNames = []; f.topics = [];
@@ -2926,7 +3000,7 @@
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
     //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin
-    sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
+    if (!f.back) sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
                            order: "name" })
       .then(function (rows) {
         var sel = $("gAsg");
@@ -2996,6 +3070,15 @@
       })
       .then(function (v) {
         busy = false;
+        //  Tapsiriq ekranindan gelmisiksa ora qayidiriq - teze test
+        //  siyahida secili gelsin deye id-ni otururuk.
+        if (f.back) {
+          var gid = f.back;
+          f.back = ""; f.backName = "";
+          PICKNEW = v.test_id;
+          nav("#/a/" + gid);
+          return;
+        }
         nav("#/t/" + v.test_id);
       })
       .catch(function (e) {
@@ -4117,6 +4200,12 @@
   function route() {
     if (!ACC) { bnavHide(); screenSetup(); return; }
     var m = (location.hash || "#/").replace(/^#/, "").split("/").filter(Boolean);
+    /*  "Yeni test yig" niyyeti yalniz generator ekraninda yasayir.
+        Muellim oradan basqa yere kecirse niyyet de silinir - yoxsa
+        sonra adi "Test yig"dan girende gozlenilmeden tapsiriq
+        ekranina atilardi.  Suzgec deyisiklikleri screenGen()-i
+        birbasa cagirir, ora dusmur. */
+    if (GF && m[0] !== "gen") { GF.back = ""; GF.backName = ""; }
     bnavShow({ b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "g" && m[1]) return screenGroup(m[1]);
     if (m[0] === "r" && m[1]) return screenReport(m[1]);

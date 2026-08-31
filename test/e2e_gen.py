@@ -484,6 +484,87 @@ with sync_playwright() as pw:
     ok("səhvlər üzərində iş" not in opts,
        "sexsi sehv-testi basqa qrupa teklif olunmur")
 
+    print("O · Tapşırıq ekranından yeni test yığmaq (gediş-qayıdış)")
+    pg.goto(PANEL + "#/a/" + GID); pg.reload()
+    pg.wait_for_selector("#btnGenHere", timeout=8000)
+    pg.click("#btnGenHere")
+    pg.wait_for_selector("#btnMake", timeout=8000)
+    ok(pg.url.endswith("#/gen"), "generator acilir", pg.url[-12:])
+    ok(pg.input_value("#glev") == "4", "qrupun sinfi avtomatik secilir",
+       pg.input_value("#glev"))
+    ok(pg.locator("#gAsg").count() == 0,
+       "qrup sahesi gizlidir - teyinati tapsiriq ekrani verecek")
+    ok("4-A qrupu" in pg.inner_text("#main"), "hara qayidacagi yazilir")
+    ok(pg.locator("#btnBack").inner_text().strip() == "4-A qrupu",
+       "geri duymesi qrupun adini gosterir", pg.locator("#btnBack").inner_text())
+
+    pg.select_option("#gsub", "riyaziyyat")
+    pg.wait_for_selector("#gsub", timeout=8000); pg.wait_for_timeout(400)
+    pg.fill("#gCnt", "6"); pg.fill("#gTitle", "Tapsiriqdan yigilan test")
+    pg.wait_for_function(
+        "document.querySelector('#gPrev') && "
+        "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
+        "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
+    pg.click("#btnMake")
+    pg.wait_for_selector("#aTest", timeout=10000)
+    ok(pg.url.endswith("#/a/" + GID), "tapsiriq ekranina QAYIDIR", pg.url[-20:])
+    ok("seçildi" in pg.inner_text("#pick .ok"), "bildiris cixir",
+       pg.inner_text("#pick .ok")[:60].replace("\n", " "))
+    NEWT = db("""select id::text i from public.tests
+                  where title = 'Tapsiriqdan yigilan test'""", one=True)
+    ok(bool(NEWT), "test bazada yarandi")
+    ok(pg.input_value("#aTest") == NEWT["i"], "teze test siyahida SECILI gelir")
+    #  teyinat hele VERILMEYIB - son tarixi muellim ozu qoyur
+    ok(not db("select 1 ok from public.assignments where test_id = %s",
+              (NEWT["i"],), one=True),
+       "yigmaq tek basina tapsiriq vermir")
+
+    pg.select_option("#aWho", "")
+    pg.click("#btnAsg")
+    pg.wait_for_selector(".asg", timeout=8000)
+    ok(bool(db("select 1 ok from public.assignments where test_id = %s "
+               "and class_id = %s", (NEWT["i"], GID), one=True)),
+       "«Tapsiriq ver» basilanda teyinat yazilir")
+
+    #  bildiris bir defelikdir - ekran yenilenende qalmamalidir
+    pg.reload(); pg.wait_for_selector("#aTest", timeout=8000)
+    ok(pg.locator("#pick .ok").count() == 0, "bildiris bir defelikdir")
+
+    print("P · Sinif uyğun gəlməyəndə səbəb yazılır")
+    #  Muellim generatorda sinfi deyisirse, teze test qrupun suzgecine
+    #  DUSMUR (rpc_available_tests sinife gore suzur).  Test itmir -
+    #  ekran sebebi yazmalidir, yoxsa "yigdim, hara getdi?" olur.
+    pg.click("#btnGenHere"); pg.wait_for_selector("#btnMake", timeout=8000)
+    pg.select_option("#gsub", "riyaziyyat")
+    pg.wait_for_selector("#gsub", timeout=8000); pg.wait_for_timeout(400)
+    pg.select_option("#glev", "3")
+    pg.wait_for_selector("#glev", timeout=8000); pg.wait_for_timeout(400)
+    pg.fill("#gCnt", "5"); pg.fill("#gTitle", "Yanlis sinifle yigilan")
+    pg.wait_for_function(
+        "document.querySelector('#gPrev') && "
+        "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
+        "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
+    pg.click("#btnMake")
+    pg.wait_for_selector("#pick .warn", timeout=10000)
+    ok("sinfi" in pg.inner_text("#pick .warn"), "sebeb izah olunur",
+       pg.inner_text("#pick .warn")[:60].replace("\n", " "))
+    MIS = db("""select id::text i from public.tests
+                 where title = 'Yanlis sinifle yigilan'""", one=True)
+    ok(bool(MIS), "test ITMIR - bazada durur")
+    ok(pg.input_value("#aTest") != (MIS or {}).get("i"),
+       "uygun olmayan test secili gelmir")
+
+    print("R · İmtina və niyyətin təmizlənməsi")
+    pg.click("#btnGenHere"); pg.wait_for_selector("#btnMake", timeout=8000)
+    pg.click("#btnBack"); pg.wait_for_selector("#aTest", timeout=8000)
+    ok(pg.url.endswith("#/a/" + GID), "geri duymesi tapsiriq ekranina qaytarir",
+       pg.url[-20:])
+    #  niyyet silinir: adi "Test yig"dan girende qrup sahesi geri gelir
+    pg.goto(PANEL + "#/gen"); pg.reload()
+    pg.wait_for_selector("#gAsg", timeout=8000)
+    ok(pg.locator("#gAsg").count() == 1,
+       "adi girisde qrup sahesi geri gelir - niyyet yapismir")
+
     br.close()
 
 print()

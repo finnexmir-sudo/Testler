@@ -153,7 +153,21 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    səhifəni atsa itirdi. **Server tərəfində heç nə dəyişmir**, bal
    yenə serverdə hesablanır, düzgün cavab klientə düşmür.
    Bu, oflayn rejim DEYİL — yalnız qısa bağlantı kəsilməsini keçirir.
-10. Riyaziyyat 2 mövzularının yenilənməsi
+10. ~~Tapşırıq ekranından test yığmaq~~ — hazırdır (`muellim/app.js`).
+   «Yeni tapşırıq» bölməsi test YARATMIR, mövcud testi qrupa yönəldir —
+   müəllimlər bunu qarışdırırdı («siyahıda yalnız köhnələr var, yenisini
+   haradan yığım?»). İndi altında «Yeni test yığ» düyməsi var:
+   generatora keçir, qrupun sinfi süzgəcə avtomatik qoyulur, test hazır
+   olan kimi həmin tapşırıq ekranına qayıdır və siyahıda **seçilmiş**
+   gəlir. Son tarix / cəhd sayı / «tək şagird» seçimi müəllimdə qalır —
+   generator öz-özünə tapşırıq vermir (ona görə oradakı «Qrupa tapşırıq
+   ver» sahəsi bu yolda gizlənir).
+   Niyyət `GF.back`-də saxlanılır və `route()` generatordan çıxan kimi
+   onu **təmizləyir** — yoxsa sonra adi «Test yığ»dan girəndə müəllim
+   gözlənilmədən tapşırıq ekranına atılardı.
+   Testin sinfi qrupun sinfindən fərqlidirsə siyahıya düşmür — o halda
+   səbəb yazılır, test isə bazada qalır.
+11. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
