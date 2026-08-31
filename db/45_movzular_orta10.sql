@@ -73,13 +73,11 @@ select s.id, l.id, v.slug, v.name, v.sort
     ('informatika','10','inf-10-baza',        'Verilənlər bazası',            30),
     ('informatika','10','inf-10-sebeke',      'Kompüter şəbəkələri',          40),
     ('informatika','10','inf-10-veb',         'Veb və informasiya cəmiyyəti', 50),
-    -- ==================== UMUMI TARIX 10 (745) ========================
-    ('tarix','10','tarix-10-qedim-serq',  'Qədim Şərq sivilizasiyaları',     10),
-    ('tarix','10','tarix-10-antik',       'Qədim Yunanıstan və Roma',        20),
-    ('tarix','10','tarix-10-erken-orta',  'Erkən orta əsrlər (III-XI əsrlər)', 30),
-    ('tarix','10','tarix-10-orta-esrler', 'Orta əsrlər (XI-XV əsrlər)',      40),
-    ('tarix','10','tarix-10-yeni-dovr',   'Yeni dövr (XVI-XVIII əsrlər)',    50),
-    ('tarix','10','tarix-10-medeniyyet',  'Dövrlərin mədəniyyəti',           60),
+    -- ==================== TARIX 10 ====================================
+    --  DIQQET: 10-cu sinifde "Azerbaycan tarixi" derslikyi YOXDUR -
+    --  portalda (book_id 745) yalniz "Umumi tarix" var.  Ona gore bu
+    --  sinifin dunya tarixi movzulari 'tarix' fenninde deyil,
+    --  'umumi-tarix' fennindedir: db/68_movzular_umumi_tarix10.sql.
     -- ==================== FIZIKA 10 (734) =============================
     ('fizika','10','fiz-10-kinematika',    'Kinematikanın əsasları',         10),
     ('fizika','10','fiz-10-dinamika',      'Dinamika. Nyuton qanunları',     20),
@@ -128,8 +126,8 @@ begin
     join public.levels l on l.id = t.level_id
     join public.programs p on p.id = l.program_id
    where p.slug = 'orta' and l.code = '10';
-  if n < 63 then
-    raise exception '10-cu sinif movzulari: 63 gozlenilirdi, % tapildi', n;
+  if n < 57 then
+    raise exception '10-cu sinif movzulari: 57 gozlenilirdi, % tapildi', n;
   end if;
 
   select string_agg(x.slug || '=' || x.say, ', ') into bad from (
@@ -144,7 +142,6 @@ begin
       or (x.slug = 'az-dili'      and x.say <> 8)
       or (x.slug = 'ingilis-dili' and x.say <> 6)
       or (x.slug = 'informatika'  and x.say <> 5)
-      or (x.slug = 'tarix'        and x.say <> 6)
       or (x.slug = 'fizika'       and x.say <> 6)
       or (x.slug = 'kimya'        and x.say <> 6)
       or (x.slug = 'biologiya'    and x.say <> 8)
@@ -153,5 +150,5 @@ begin
     raise exception 'Fenn uzre movzu sayi gozlenilenden ferqlidir: %', bad;
   end if;
 
-  raise notice '10-cu sinif agaci: % movzu (riy 10, az 8, ing 6, inf 5, tarix 6, fiz 6, kim 6, bio 8, cog 8).', n;
+  raise notice '10-cu sinif agaci: % movzu (riy 10, az 8, ing 6, inf 5, fiz 6, kim 6, bio 8, cog 8). Tarix 10 - bax 68.', n;
 end $$;

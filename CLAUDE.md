@@ -71,13 +71,23 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    (ibtidai + orta + yuxarı, ingilis dili daxil, 11 fənn).
    Tarix **iki ayrı fənndir**: «Tarix» (Azərbaycan tarixi) və
    «Ümumi tarix» — məktəbdə də ayrı dərslik, ayrı qiymətdir.
-   Ümumi tarix **6-9 və 11-ci siniflərdədir**: 6 qədim dünya,
-   7 orta əsrlər, 8 yeni dövr (XVI-XVIII), 9 XIX əsr, 11 XX-XXI əsrlər
-   (`db/53`, `54` — 9 və 11; `db/66_movzular_umumi_tarix6_8.sql`,
-   `db/67_bank_tarix_umumi6_8.sql` — 6, 7, 8: 18 mövzu × 31 = 558 sual,
-   `tools/tarix_umumi68.py`). 10-cu sinifin dünya tarixi hələ «Tarix»
-   fənni altındadır — köçürülməsi ayrı addımdır (`45`, `47` fayllarına
-   toxunur və 47 53-dən əvvəl işlədiyi üçün sıra məsələsi var).
+   Ümumi tarix **6-11-ci siniflərdədir** (10 daxil): 6 qədim dünya,
+   7 orta əsrlər, 8 yeni dövr (XVI-XVIII), 9 XIX əsr, 10 icmal kursu,
+   11 XX-XXI əsrlər. Fayllar: `db/53`, `54` (9 və 11);
+   `db/66` + `db/67` (6, 7, 8 — 18 mövzu × 31 = 558,
+   `tools/tarix_umumi68.py`); `db/68` + `db/69` (10 — 6 mövzu × 31 = 186,
+   `tools/tarix_umumi10.py`).
+   **10-cu sinifdə «Tarix» (Azərbaycan tarixi) yoxdur** — e-dərslik
+   portalında o sinif üçün yalnız «Ümumi tarix» dərsliyi var
+   (`mundericat/tarix-10-745.txt`). `45` artıq `tarix-10-*` mövzularını
+   açmır, `47`/`tools/sinif10.py` isə həmin 180 sualı daşımır; köhnə
+   baza üçün `68` onları `umumi-tarix`ə köçürüb `archived` edir
+   (silinmir — hesabat tarixçəsi qorunur).
+   **Açıq məsələ:** 7-ci sinifdə də portalda yalnız «Ümumi tarix»
+   dərsliyi var (`mundericat/tarix-7-723.txt`), yəni `tarix-7-*`
+   mövzuları da dünya tarixidir. Onların köçürülməsi ayrıca qərardır —
+   həmin sinifdə artıq `utarix-7-*` ağacı var, ona görə köçürmə deyil,
+   BİRLƏŞDİRMƏ lazım gələcək.
    **Ədəbiyyat ayrıca fənndir** — «Az dili» mövzuları yalnız
    qrammatikadır, ədəbiyyatın öz dərsliyi və qiyməti var.
    Hazırdır: **5-11-ci siniflər** — 48 mövzu × 31 = 1488 sual
@@ -98,9 +108,9 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    ingilis 5-11, tarix 5-11 və təbiət fənləri
    (fizika/kimya/biologiya/coğrafiya) **30 sual**, qalanlarda
    **20 sual**, ədəbiyyatda və ümumi tarixdə **31 sual**
-   (cəmi ~18 860 platforma sualı).
+   (cəmi ~18 870 platforma sualı).
    Mövzu ağacları `db/25/29/33/37/41/45/49_movzular_orta*.sql`,
-   banklar `db/23–52`, `54`, `56`, `59`, `60`, `62–65`, `67`.
+   banklar `db/23–52`, `54`, `56`, `59`, `60`, `62–65`, `67`, `69`.
    Davamı: MİQ və sertifikasiya (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin

@@ -1,13 +1,17 @@
 -- =====================================================================
 --  47_bank_sinif10.sql : 10-CU SINIF - AZ DILI, INGILIS DILI,
---                        INFORMATIKA, UMUMI TARIX
+--                        INFORMATIKA
 --
 --  BU FAYL ELLE YAZILMIR - tools/sinif10.py yaradir:
 --      python3 tools/sinif10.py
 --
---  Az dili 8 + Ingilis dili 6 + Informatika 5 + Tarix 6
---  az/ing/tarix 20 movzu x 30 + inf 5 movzu x 20 = 700.
---  ext_key: az10-/ing10-/inf10-/tarix10-...
+--  Az dili 8 + Ingilis dili 6 + Informatika 5
+--  az/ing 14 movzu x 30 + inf 5 movzu x 20 = 520.
+--  ext_key: az10-/ing10-/inf10-...
+--
+--  10-cu sinif tarixi BU FAYLDA DEYIL: portalda o sinif ucun yalniz
+--  "Umumi tarix" derslikyi var, ona gore hemin bank 'umumi-tarix'
+--  fennindedir - db/69_bank_tarix_umumi10.sql.
 --  ON SERT: 45_movzular_orta10.sql islenmis olmalidir.
 --  SONRA:   05_grants.sql yeniden islet.
 -- =====================================================================
@@ -18,9 +22,8 @@ begin
       on s.id = t.subject_id
      where (s.slug, t.slug) in (('az-dili','az-10-leksika'),
                                 ('ingilis-dili','ing-10-kindness'),
-                                ('informatika','inf-10-baza'),
-                                ('tarix','tarix-10-antik'))
-     having count(*) = 4) then
+                                ('informatika','inf-10-baza'))
+     having count(*) = 3) then
     raise exception 'ONCE 45_movzular_orta10.sql isledilmelidir.';
   end if;
 end $$;
@@ -30,7 +33,7 @@ delete from public.question_options o
  where o.question_id = q.id
    and q.owner_type = 'platform'
    and (q.ext_key like 'az10-%' or q.ext_key like 'ing10-%'
-        or q.ext_key like 'inf10-%' or q.ext_key like 'tarix10-%');
+        or q.ext_key like 'inf10-%');
 
 with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('az10-dil-unsiyyet#1','az-dili','az-10-dil-unsiyyet',1,1,'Dilin cəmiyyətdəki ən əsas funksiyası hansıdır?','Dil hər şeydən əvvəl insanlar arasında ünsiyyət vasitəsidir.',array['Ünsiyyət vasitəsi olmaq','Yalnız bəzək olmaq','Yalnız sirr saxlamaq','Yalnız mahnı oxumaq'],1),
@@ -552,187 +555,7 @@ with d(ext, fenn, topic, diff, rub, body, why, opts, correct) as (values
 ('inf10-veb#17','informatika','inf-10-veb',3,4,'HTML səhifəsinə şəkil hansı teqlə əlavə olunur?','Şəkil img teqi ilə yerləşdirilir.',array['img','table','p','hr'],1),
 ('inf10-veb#18','informatika','inf-10-veb',2,4,'Veb səhifə faylı adətən hansı uzantı ilə saxlanılır?','Veb səhifələr .html uzantısı ilə saxlanılır.',array['.html','.mp3','.exe','.bmp'],1),
 ('inf10-veb#19','informatika','inf-10-veb',2,4,'«ASAN xidmət» mərkəzləri hansı konsepsiyaya misaldır?','ASAN dövlət xidmətlərinin rahat göstərilməsi - e-hökumət nümunəsidir.',array['Elektron hökumətə','Kompüter oyununa','Sosial şəbəkəyə','Onlayn kinoteatra'],1),
-('inf10-veb#20','informatika','inf-10-veb',2,4,'İnformasiya cəmiyyətinin iqtisadiyyatında əsas kapital nə sayılır?','Bilik və informasiya əsas kapital sayılır.',array['Bilik kapitalı','Yalnız neft','Yalnız torpaq','Yalnız qızıl'],1),
-('tarix10-qedim-serq#1','tarix','tarix-10-qedim-serq',1,1,'İbtidai insanların ilk məşğuliyyətləri hansılar olub?','İlk insanlar yığıcılıq və ovçuluqla dolanırdılar.',array['Yığıcılıq və ovçuluq','Zavod işçiliyi','Dəmiryolçuluq','Bankçılıq'],1),
-('tarix10-qedim-serq#2','tarix','tarix-10-qedim-serq',1,1,'İbtidai icma quruluşunda insanlar necə yaşayırdılar?','İnsanlar qohum icmalarda birgə yaşayıb birgə əmək edirdilər.',array['İcmalarda birgə','Tək-tək mağaralarda yalnız','Şəhər mənzillərində','Qatarlarda'],1),
-('tarix10-qedim-serq#3','tarix','tarix-10-qedim-serq',1,1,'Odun əldə edilməsi ibtidai insanın həyatını necə dəyişdi?','Od qidanı bişirməyə, isinməyə və qorunmağa imkan verdi.',array['Qida bişirmə və isinmə imkanı verdi','Heç nə dəyişmədi','Yalnız zərər verdi','Yazı yaratdı'],1),
-('tarix10-qedim-serq#4','tarix','tarix-10-qedim-serq',1,1,'Qədim Misir dövləti hansı çayın sahilində yaranmışdır?','Misir sivilizasiyası Nil çayının vadisində formalaşıb.',array['Nil çayının','Dunay çayının','Volqa çayının','Amazon çayının'],1),
-('tarix10-qedim-serq#5','tarix','tarix-10-qedim-serq',1,1,'Qədim Misirdə hökmdarlar necə adlanırdı?','Misir hökmdarları firon adlanırdı.',array['Firon','Xaqan','Kral','Sultan'],1),
-('tarix10-qedim-serq#6','tarix','tarix-10-qedim-serq',2,1,'Ehramlar Misirdə nə məqsədlə tikilirdi?','Ehramlar fironların sərdabəsi kimi tikilirdi.',array['Fironların sərdabəsi kimi','Məktəb kimi','Bazar kimi','Liman kimi'],1),
-('tarix10-qedim-serq#7','tarix','tarix-10-qedim-serq',1,1,'Mesopotamiya hansı iki çay arasında yerləşirdi?','Mesopotamiya Dəclə ilə Fərat arasındakı ərazidir.',array['Dəclə və Fərat','Nil və Konqo','Kür və Araz','Qanq və Hind'],1),
-('tarix10-qedim-serq#8','tarix','tarix-10-qedim-serq',2,1,'Mixi yazıdan hansı xalq ilk istifadə etmişdir?','Mixi yazını şumerlər yaratmışdır.',array['Şumerlər','Vikinqlər','Keltlər','Slavyanlar'],1),
-('tarix10-qedim-serq#9','tarix','tarix-10-qedim-serq',3,1,'Hammurapi qanunları hansı dövlətə aiddir?','Hammurapi Babil hökmdarı idi, məşhur qanunlar toplusu tərtib etdirdi.',array['Babilə','Misirə','Çinə','Romaya'],1),
-('tarix10-qedim-serq#10','tarix','tarix-10-qedim-serq',2,1,'Qədim İranda yaranmış qüdrətli dövlət hansıdır?','Əhəmənilər dövləti qədim İranın qüdrətli imperiyası idi.',array['Əhəmənilər dövləti','Rus knyazlığı','Frank krallığı','Osmanlı dövləti'],1),
-('tarix10-qedim-serq#11','tarix','tarix-10-qedim-serq',3,1,'Qədim Hindistanda cəmiyyət hansı qruplara bölünürdü?','Hind cəmiyyəti varnalara (kastalara) bölünürdü.',array['Varnalara (kastalara)','Kolxozlara','Partiyalara','Klublara'],1),
-('tarix10-qedim-serq#12','tarix','tarix-10-qedim-serq',2,1,'Şahmat oyununun vətəni hansı ölkə sayılır?','Şahmat qədim Hindistanda yaranmışdır.',array['Hindistan','İngiltərə','Braziliya','Norveç'],1),
-('tarix10-qedim-serq#13','tarix','tarix-10-qedim-serq',2,1,'Böyük Hun dövlətinin məşhur hökmdarı kim olmuşdur?','Mete xaqan Hun dövlətini qüdrətli imperiyaya çevirdi.',array['Mete xaqan','Yuli Sezar','Napoleon','Kolumb'],1),
-('tarix10-qedim-serq#14','tarix','tarix-10-qedim-serq',2,1,'Hunlar əsasən hansı təsərrüfat sahəsi ilə məşğul idilər?','Hunlar köçəri maldarlıqla məşğul olurdular.',array['Köçəri maldarlıqla','Gəmiqayırma ilə','Şüşə istehsalı ilə','Mətbəəçiliklə'],1),
-('tarix10-qedim-serq#15','tarix','tarix-10-qedim-serq',2,1,'Böyük Çin səddi nə məqsədlə tikilmişdir?','Sədd köçəri hücumlarından qorunmaq üçün tikilib.',array['Köçəri hücumlarından qorunmaq üçün','Turizm üçün','Su daşımaq üçün','Yarış keçirmək üçün'],1),
-('tarix10-qedim-serq#16','tarix','tarix-10-qedim-serq',2,1,'Kağız ilk dəfə harada icad edilmişdir?','Kağızı qədim çinlilər icad etmişlər.',array['Çində','Misirdə','Yunanıstanda','İspaniyada'],1),
-('tarix10-qedim-serq#17','tarix','tarix-10-qedim-serq',2,1,'İpək istehsalının sirri uzun müddət hansı ölkədə qorunurdu?','İpəkçilik Çinin sirri idi.',array['Çində','Romada','Hindistanda','Misirdə'],1),
-('tarix10-qedim-serq#18','tarix','tarix-10-qedim-serq',2,1,'Qədim Misirdə yazı hansı material üzərində aparılırdı?','Misirlilər papirus üzərində yazırdılar.',array['Papirus üzərində','Dəmir lövhələrdə','Şüşə üzərində','Plastik kartlarda'],1),
-('tarix10-qedim-serq#19','tarix','tarix-10-qedim-serq',2,1,'Qədim Şərq sivilizasiyalarını birləşdirən ümumi cəhət nədir?','Hamısı münbit çay vadilərində yaranmışdır.',array['Çay vadilərində yaranmaları','Dənizsiz olmaları','Yazısız olmaları','Şimalda yerləşmələri'],1),
-('tarix10-qedim-serq#20','tarix','tarix-10-qedim-serq',2,1,'Suvarma əkinçiliyi Qədim Şərqdə nə üçün həyati vacib idi?','Quraq iqlimdə məhsul yalnız süni suvarma ilə yetişirdi.',array['Quraq iqlimdə məhsul suvarmasız yetişmirdi','Bəzək üçün idi','Qadağan idi','Yalnız idman idi'],1),
-('tarix10-qedim-serq#21','tarix','tarix-10-qedim-serq',3,1,'Misir kahinləri cəmiyyətdə hansı rolu oynayırdılar?','Kahinlər dini ayinləri icra edir və böyük nüfuza malik idilər.',array['Dini ayinləri icra edirdilər','Yalnız əkin əkirdilər','Gəmi düzəldirdilər','Yol çəkirdilər'],1),
-('tarix10-qedim-serq#22','tarix','tarix-10-qedim-serq',3,1,'Zərdüştilik dini harada yaranmışdır?','Zərdüştilik qədim İran ərazisində yaranmışdır.',array['Qədim İranda','Yaponiyada','İtaliyada','Meksikada'],1),
-('tarix10-qedim-serq#23','tarix','tarix-10-qedim-serq',3,1,'Qədim Şərqdə dövlətin başında duran hökmdarın hakimiyyəti necə idi?','Hökmdarın hakimiyyəti qeyri-məhdud - despotik idi.',array['Qeyri-məhdud (despotik)','Seçkili və müvəqqəti','Yalnız məsləhətçi','Simvolik'],1),
-('tarix10-qedim-serq#24','tarix','tarix-10-qedim-serq',3,1,'Əlifba yazısını ilk dəfə hansı xalq yaratmışdır?','İlk əlifbanı finikiyalılar yaratmışlar.',array['Finikiyalılar','Almanlar','Ruslar','Ərəblər'],1),
-('tarix10-qedim-serq#25','tarix','tarix-10-qedim-serq',3,1,'Qədim Şərq təbabəti haqqında biliklər əsasən kimlərdə cəmlənmişdi?','Tibbi biliklər kahin və təbiblərdə idi.',array['Kahin və təbiblərdə','Uşaqlarda','Döyüşçülərdə yalnız','Çobanlarda'],1),
-('tarix10-qedim-serq#26','tarix','tarix-10-qedim-serq',3,1,'Hind rəqəmləri sonralar hansı ad ilə dünyaya yayıldı?','Hind rəqəmləri ərəblər vasitəsilə yayıldığı üçün ərəb rəqəmləri adlanır.',array['Ərəb rəqəmləri adı ilə','Roma rəqəmləri adı ilə','Yunan hərfləri adı ilə','Mixi işarələr adı ilə'],1),
-('tarix10-qedim-serq#27','tarix','tarix-10-qedim-serq',3,1,'Çin təqvimində illər nə ilə adlandırılır?','Çin təqvimində illər heyvan adları ilə işarələnir.',array['Heyvan adları ilə','Rəng adları ilə','Şəhər adları ilə','Çay adları ilə'],1),
-('tarix10-qedim-serq#28','tarix','tarix-10-qedim-serq',2,1,'Qədim dövrün tarixi hansı mənbələr əsasında öyrənilir?','Maddi qalıqlar və yazılı abidələr əsas mənbələrdir.',array['Maddi qalıqlar və yazılı abidələr','Yalnız filmlər','Yalnız rəvayətlər','Müasir qəzetlər'],1),
-('tarix10-qedim-serq#29','tarix','tarix-10-qedim-serq',3,1,'İlk şəhər-dövlətlər harada meydana gəlmişdir?','İlk şəhər-dövlətlər Şumerdə - Mesopotamiyada yaranıb.',array['Şumerdə','Skandinaviyada','Avstraliyada','Kanadada'],1),
-('tarix10-qedim-serq#30','tarix','tarix-10-qedim-serq',2,1,'Metal emalına keçid insan həyatında nəyi dəyişdi?','Metal alətlər əməyi xeyli məhsuldar etdi.',array['Əmək alətləri təkmilləşdi','Yazı itdi','Ovçuluq qadağan olundu','Heç nə dəyişmədi'],1),
-('tarix10-antik#1','tarix','tarix-10-antik',2,1,'Qədim Yunanıstanda şəhər-dövlətlər necə adlanırdı?','Yunan şəhər-dövlətləri polis adlanırdı.',array['Polis','Kolxoz','Qəza','Vilayət'],1),
-('tarix10-antik#2','tarix','tarix-10-antik',2,1,'Afinada idarəçiliyin hansı forması yaranmışdır?','Afinada demokratiya - xalq hakimiyyəti yaranmışdır.',array['Demokratiya','Monarxiya','Xilafət','İmperiya'],1),
-('tarix10-antik#3','tarix','tarix-10-antik',2,1,'Sparta polisi nə ilə məşhur idi?','Sparta sərt hərbi tərbiyəsi ilə seçilirdi.',array['Hərbi tərbiyəsi ilə','Teatrları ilə','Bağçılığı ilə','Gəmiqayırması ilə'],1),
-('tarix10-antik#4','tarix','tarix-10-antik',1,1,'Olimpiya oyunları ilk dəfə harada keçirilmişdir?','Olimpiya oyunları qədim Yunanıstanda keçirilib.',array['Qədim Yunanıstanda','Qədim Misirdə','Çində','Hindistanda'],1),
-('tarix10-antik#5','tarix','tarix-10-antik',2,1,'Makedoniyalı İsgəndər hansı istiqamətdə böyük yürüş etmişdir?','İsgəndər Şərqə - İran və Hindistana qədər yürüş etdi.',array['Şərqə - İrana və Hindistana','Şimala - Skandinaviyaya','Qərbə - Amerikaya','Cənuba - Antarktidaya'],1),
-('tarix10-antik#6','tarix','tarix-10-antik',3,1,'İsgəndərin yürüşlərindən sonra Şərqlə Qərb mədəniyyətinin qovuşması necə adlanır?','Bu dövr ellinizm dövrü adlanır.',array['Ellinizm','İntibah','Reformasiya','Romantizm'],1),
-('tarix10-antik#7','tarix','tarix-10-antik',2,1,'Roma dövləti hansı yarımadada yaranmışdır?','Roma Apennin yarımadasında - İtaliyada yaranıb.',array['Apennin yarımadasında','Pireney yarımadasında','Skandinaviya yarımadasında','Ərəbistan yarımadasında'],1),
-('tarix10-antik#8','tarix','tarix-10-antik',3,1,'Romada respublika dövründə dövləti kimlər idarə edirdi?','Respublikada hakimiyyət seçilmiş konsullara və senata məxsus idi.',array['Seçilmiş konsullar və senat','Yalnız fironlar','Yalnız kahinlər','Xaqanlar'],1),
-('tarix10-antik#9','tarix','tarix-10-antik',2,1,'Spartak üsyanı hansı təbəqənin üsyanı idi?','Spartak qulların üsyanına başçılıq edirdi.',array['Qulların','Tacirlərin','Kahinlərin','Sənətkarların'],1),
-('tarix10-antik#10','tarix','tarix-10-antik',2,1,'Yuli Sezar hansı dövlətin tarixinə aiddir?','Sezar Roma dövlətinin sərkərdəsi və diktatoru idi.',array['Roma','Yunanıstan','Misir','Çin'],1),
-('tarix10-antik#11','tarix','tarix-10-antik',3,1,'Roma imperiyası hansı əsrdə Qərb və Şərq hissələrə bölündü?','İmperiya 395-ci ildə - IV əsrin sonunda bölündü.',array['IV əsrin sonunda (395)','I əsrdə','X əsrdə','XV əsrdə'],1),
-('tarix10-antik#12','tarix','tarix-10-antik',2,1,'Qədim Yunan tanrılarının məskəni hansı dağ sayılırdı?','Yunan mifologiyasında tanrılar Olimp dağında yaşayırdı.',array['Olimp dağı','Everest','Alp dağları','Qaf dağı'],1),
-('tarix10-antik#13','tarix','tarix-10-antik',2,1,'Homerin məşhur əsərləri hansılardır?','Homerin «İliada» və «Odisseya» poemaları məşhurdur.',array['İliada və Odisseya','Hamlet və Otello','Leyli və Məcnun','Dədə Qorqud'],1),
-('tarix10-antik#14','tarix','tarix-10-antik',3,1,'Qədim yunan teatrında hansı janrlar yaranmışdır?','Teatrda tragediya və komediya janrları yaranıb.',array['Tragediya və komediya','Opera və balet','Sirk və kino','Serial və klip'],1),
-('tarix10-antik#15','tarix','tarix-10-antik',3,1,'Marafon qaçışının adı haradan götürülüb?','Ad Marafon döyüşü xəbərini çatdıran qasidin şərəfinə verilib.',array['Marafon döyüşündən','Bir çayın adından','Bir tanrının adından','Bir gəminin adından'],1),
-('tarix10-antik#16','tarix','tarix-10-antik',3,1,'Roma hüququ nə üçün əhəmiyyətlidir?','Roma hüququ müasir hüquq sistemlərinin əsasını qoyub.',array['Müasir hüququn əsasını qoyub','Yalnız tarixdə qalıb','Heç vaxt tətbiq olunmayıb','Yalnız şeirdir'],1),
-('tarix10-antik#17','tarix','tarix-10-antik',3,1,'Yunan-fars müharibələrində yunanlar hansı məşhur dəniz döyüşündə qalib gəldilər?','Salamin dəniz döyüşü yunanların qələbəsi ilə bitdi.',array['Salamin döyüşündə','Qadeş döyüşündə','Vaterloo döyüşündə','Kulikovo döyüşündə'],1),
-('tarix10-antik#18','tarix','tarix-10-antik',2,1,'Roma ordusunun əsas döyüş vahidi necə adlanırdı?','Roma ordusu legionlara bölünürdü.',array['Legion','Alay','Diviziya','Batalyon'],1),
-('tarix10-antik#19','tarix','tarix-10-antik',2,1,'Kolizey hansı şəhərdə tikilmişdir?','Kolizey amfiteatrı Romada tikilib.',array['Romada','Afinada','İsgəndəriyyədə','Babildə'],1),
-('tarix10-antik#20','tarix','tarix-10-antik',2,1,'Qladiator döyüşləri harada keçirilirdi?','Döyüşlər amfiteatrlarda, o cümlədən Kolizeydə keçirilirdi.',array['Amfiteatrlarda','Məktəblərdə','Limanlarda','Bazarlarda'],1),
-('tarix10-antik#21','tarix','tarix-10-antik',3,1,'Xristianlıq dini ilk əsrlərdə hansı imperiyada yayılmağa başladı?','Xristianlıq Roma imperiyasında yayılmağa başladı.',array['Roma imperiyasında','Hun imperiyasında','Monqol imperiyasında','Osmanlı imperiyasında'],1),
-('tarix10-antik#22','tarix','tarix-10-antik',3,1,'476-cı ildə baş vermiş hansı hadisə antik dövrün sonu sayılır?','Qərbi Roma imperiyasının süqutu antik dövrü başa çatdırdı.',array['Qərbi Romanın süqutu','Misirin birləşməsi','Amerikanın kəşfi','Olimpiya oyunlarının başlanması'],1),
-('tarix10-antik#23','tarix','tarix-10-antik',3,1,'Afina demokratiyasında dövlət işlərini hansı orqan həll edirdi?','Əsas məsələləri vətəndaşların Xalq yığıncağı həll edirdi.',array['Xalq yığıncağı','Tək hökmdar','Ordu qərargahı','Xarici səfirlər'],1),
-('tarix10-antik#24','tarix','tarix-10-antik',2,1,'«Tarixin atası» adlandırılan qədim yunan tarixçisi kimdir?','Herodot tarixin atası sayılır.',array['Herodot','Nyuton','Arximed','Homer'],1),
-('tarix10-antik#25','tarix','tarix-10-antik',2,1,'Arximed hansı sahənin görkəmli alimi idi?','Arximed riyaziyyat və mexanika alimi idi.',array['Riyaziyyat və mexanikanın','Musiqi sənətinin','Rəssamlığın','Aşpazlığın'],1),
-('tarix10-antik#26','tarix','tarix-10-antik',2,1,'Qədim Yunanıstanda fəlsəfənin görkəmli nümayəndələri kimlər idi?','Sokrat, Platon və Aristotel yunan fəlsəfəsinin zirvəsidir.',array['Sokrat, Platon, Aristotel','Sezar, Avqust, Neron','Mete, Attila, Teymur','Kolumb, Magellan, Kuk'],1),
-('tarix10-antik#27','tarix','tarix-10-antik',3,1,'Romalıların tikdiyi məşhur qurğular hansılardır?','Romalılar yollar, körpülər və su kəmərləri (akveduklar) tikirdilər.',array['Yollar və akveduklar','Ehramlar','Ziggurratlar','Minarələr'],1),
-('tarix10-antik#28','tarix','tarix-10-antik',2,1,'Antik mədəniyyət hansı iki sivilizasiyanı əhatə edir?','Antik dövr Qədim Yunanıstan və Roma mədəniyyətidir.',array['Yunanıstan və Roma','Misir və Babil','Çin və Hindistan','Maya və Aztek'],1),
-('tarix10-antik#29','tarix','tarix-10-antik',2,1,'İsgəndərin şərəfinə Misirdə salınmış şəhər hansıdır?','İsgəndəriyyə şəhəri onun adını daşıyır.',array['İsgəndəriyyə','Qahirə','Afina','Sparta'],1),
-('tarix10-antik#30','tarix','tarix-10-antik',3,1,'Antik dövrdə elm mərkəzi sayılan İsgəndəriyyə nə ilə məşhur idi?','İsgəndəriyyə kitabxanası dövrün ən böyük elm mərkəzi idi.',array['Böyük kitabxanası ilə','Dəmir yolu ilə','Futbol meydanı ilə','Metrosu ilə'],1),
-('tarix10-erken-orta#1','tarix','tarix-10-erken-orta',2,2,'Göytürk xaqanlığı hansı xalqların dövləti idi?','Göytürk xaqanlığı qədim türklərin dövləti idi.',array['Türklərin','Slavyanların','Germanların','Ərəblərin'],1),
-('tarix10-erken-orta#2','tarix','tarix-10-erken-orta',3,2,'Orxon-Yenisey abidələri nə ilə əhəmiyyətlidir?','Bu abidələr qədim türk yazısının nümunələridir.',array['Qədim türk yazısının nümunələridir','Roma qanunlarıdır','Misir ehramlarıdır','Çin səddinin hissəsidir'],1),
-('tarix10-erken-orta#3','tarix','tarix-10-erken-orta',3,2,'Xəzər xaqanlığının əhalisi əsasən hansı sahələrlə məşğul olurdu?','Xəzərlər ticarət və maldarlıqla məşğul idilər.',array['Ticarət və maldarlıqla','Gəmiqayırma ilə yalnız','Kitab çapı ilə','Şüşə istehsalı ilə'],1),
-('tarix10-erken-orta#4','tarix','tarix-10-erken-orta',2,2,'İslam dini hansı yarımadada meydana gəlmişdir?','İslam Ərəbistan yarımadasında yaranmışdır.',array['Ərəbistan yarımadasında','Apennin yarımadasında','Pireney yarımadasında','Krım yarımadasında'],1),
-('tarix10-erken-orta#5','tarix','tarix-10-erken-orta',1,2,'İslam dininin peyğəmbəri kimdir?','Məhəmməd peyğəmbər islam dininin banisidir.',array['Məhəmməd peyğəmbər','İsa','Musa','Budda'],1),
-('tarix10-erken-orta#6','tarix','tarix-10-erken-orta',3,2,'Hicrət - Məkkədən Mədinəyə köçmə hansı təqvimin başlanğıcı sayılır?','622-ci il hicrəti hicri təqvimin başlanğıcıdır.',array['Hicri təqvimin','Yuli təqviminin','Qriqori təqviminin','Çin təqviminin'],1),
-('tarix10-erken-orta#7','tarix','tarix-10-erken-orta',2,2,'Ərəb xilafətinin paytaxtlarından biri hansı şəhər olmuşdur?','Abbasilər dövründə xilafətin paytaxtı Bağdad idi.',array['Bağdad','London','Moskva','Pekin'],1),
-('tarix10-erken-orta#8','tarix','tarix-10-erken-orta',3,2,'Xilafət dövründə elmin inkişaf mərkəzlərindən biri hansı idi?','Bağdaddakı «Hikmət evi» dövrün elm mərkəzi idi.',array['Bağdadın Hikmət evi','Paris universiteti','Oksford','Sorbonna'],1),
-('tarix10-erken-orta#9','tarix','tarix-10-erken-orta',2,2,'Qərbi Avropada frankların məşhur hökmdarı kim olmuşdur?','Böyük Karl frank imperiyasını qüdrətli dövlətə çevirdi.',array['Böyük Karl','Çingiz xan','Fateh Mehmet','Sezar'],1),
-('tarix10-erken-orta#10','tarix','tarix-10-erken-orta',2,2,'Orta əsr Avropasında torpaq sahibi iri zadəganlar necə adlanırdı?','İri torpaq sahibləri feodallar adlanırdı.',array['Feodallar','Fəhlələr','Kosmonavtlar','Bankirlər'],1),
-('tarix10-erken-orta#11','tarix','tarix-10-erken-orta',3,2,'Feodaldan asılı olan kəndlilər hansı vəzifələri daşıyırdılar?','Asılı kəndlilər biyar və töycü ödəyirdilər.',array['Biyar və töycü ödəyirdilər','Yalnız istirahət edirdilər','Dövləti idarə edirdilər','Gəmi tikirdilər'],1),
-('tarix10-erken-orta#12','tarix','tarix-10-erken-orta',3,2,'Konstantinopol şəhəri hansı boğazın sahilində yerləşirdi?','Şəhər Bosfor boğazının sahilində salınmışdı.',array['Bosfor boğazının','Magellan boğazının','Berinq boğazının','Cəbəllütariq boğazının'],1),
-('tarix10-erken-orta#13','tarix','tarix-10-erken-orta',3,2,'Bizansın ən məşhur məbədi hansıdır?','Konstantinopoldakı Ayasofya məbədi memarlıq şah əsəridir.',array['Ayasofya','Kolizey','Parfenon','Tac-Mahal'],1),
-('tarix10-erken-orta#14','tarix','tarix-10-erken-orta',3,2,'Slavyan yazısının yaradıcıları kimlər sayılır?','Kirill və Mefodi qardaşları slavyan əlifbasını yaratdılar.',array['Kirill və Mefodi','Homer və Herodot','Sokrat və Platon','Adam və Robert'],1),
-('tarix10-erken-orta#15','tarix','tarix-10-erken-orta',3,2,'Erkən orta əsrlərdə Avropada təhsil əsasən harada cəmlənmişdi?','Təhsil monastır və kilsə məktəblərində idi.',array['Monastır məktəblərində','Dövlət universitetlərində','Zavod kurslarında','İdman klublarında'],1),
-('tarix10-erken-orta#16','tarix','tarix-10-erken-orta',3,2,'Qədim türklərdə mühüm dövlət məsələlərinin müzakirə edildiyi məclis necə adlanırdı?','Mühüm məsələlər qurultayda müzakirə olunurdu.',array['Qurultay','Senat','Baş ştatlar','Areopaq'],1),
-('tarix10-erken-orta#17','tarix','tarix-10-erken-orta',3,2,'Ərəb xilafəti hansı əraziləri fəth etmişdi?','Xilafət İspaniyadan Orta Asiyaya qədər uzanırdı.',array['İspaniyadan Orta Asiyaya qədər','Yalnız Ərəbistanı','Amerikanı','Avstraliyanı'],1),
-('tarix10-erken-orta#18','tarix','tarix-10-erken-orta',3,2,'Orta əsrlərdə Avropa cəmiyyətinin əsas təbəqələri hansılar idi?','Cəmiyyət ruhanilər, feodallar və kəndlilərdən ibarət idi.',array['Ruhanilər, feodallar, kəndlilər','Fəhlələr və mühəndislər','Bankirlər və proqramçılar','Yalnız tacirlər'],1),
-('tarix10-erken-orta#19','tarix','tarix-10-erken-orta',2,2,'Vikinqlər hansı ərazilərin sakinləri idi?','Vikinqlər Skandinaviyadan çıxan dənizçi döyüşçülər idi.',array['Skandinaviyanın','Afrikanın','Hindistanın','Misirin'],1),
-('tarix10-erken-orta#20','tarix','tarix-10-erken-orta',3,2,'Şəhərlərin dirçəlişi orta əsrlərdə nə ilə bağlı idi?','Sənətkarlıq və ticarətin inkişafı şəhərləri dirçəltdi.',array['Sənətkarlıq və ticarətin inkişafı ilə','Müharibələrlə yalnız','İqlim soyuması ilə','Yazının itməsi ilə'],1),
-('tarix10-erken-orta#21','tarix','tarix-10-erken-orta',3,2,'Sənətkarlar orta əsr şəhərlərində hansı birliklərdə birləşirdilər?','Eyni peşəli sənətkarlar sexlərdə birləşirdi.',array['Sexlərdə','Partiyalarda','Klublarda','Legionlarda'],1),
-('tarix10-erken-orta#22','tarix','tarix-10-erken-orta',3,2,'Bizansda dövlət və mədəniyyət dili tədricən hansı dil oldu?','Bizansda latın dilini tədricən yunan dili əvəz etdi.',array['Yunan dili','Ərəb dili','Fars dili','Alman dili'],1),
-('tarix10-erken-orta#23','tarix','tarix-10-erken-orta',2,2,'İslamda elm öyrənməyə münasibət necə idi?','İslam elmi biliyə yüksək qiymət verirdi.',array['Elm yüksək qiymətləndirilirdi','Elm qadağan idi','Elm yalnız oyun sayılırdı','Elmə laqeyd idilər'],1),
-('tarix10-erken-orta#24','tarix','tarix-10-erken-orta',2,2,'Ərəb alimləri hansı elm sahələrində irəli getmişdilər?','Riyaziyyat, astronomiya və təbabətdə böyük nailiyyətlər əldə etdilər.',array['Riyaziyyat, astronomiya, təbabət','Yalnız futbolda','Yalnız teatrda','Heç bir sahədə'],1),
-('tarix10-erken-orta#25','tarix','tarix-10-erken-orta',3,2,'«Cəbr» sözü hansı dildən elm tarixinə düşüb?','Cəbr ərəbcə əl-cəbr sözündən yaranıb.',array['Ərəb dilindən','Fransız dilindən','Rus dilindən','Çin dilindən'],1),
-('tarix10-erken-orta#26','tarix','tarix-10-erken-orta',2,2,'Kilsənin orta əsr Avropasındakı rolu necə idi?','Kilsə cəmiyyətdə böyük siyasi-mənəvi qüvvə idi.',array['Böyük siyasi-mənəvi qüvvə idi','Heç bir rolu yox idi','Yalnız idmanla məşğul idi','Yalnız ticarətlə məşğul idi'],1),
-('tarix10-erken-orta#27','tarix','tarix-10-erken-orta',2,2,'Rıtsar kimə deyilirdi?','Rıtsar zirehli atlı döyüşçü - hərbi xidmətli zadəgan idi.',array['Zirehli atlı döyüşçüyə','Kilsə xadiminə','Şəhər tacirinə','Kəndli əkinçiyə'],1),
-('tarix10-erken-orta#28','tarix','tarix-10-erken-orta',3,2,'Feodal təsərrüfatında məhsullar əsasən kimin ehtiyacı üçün istehsal olunurdu?','Natural təsərrüfatda məhsul satış üçün deyil, öz ehtiyacı üçün istehsal edilirdi.',array['Öz təsərrüfatının ehtiyacı üçün','Yalnız xarici bazar üçün','Yalnız fabriklər üçün','Muzeylər üçün'],1),
-('tarix10-erken-orta#29','tarix','tarix-10-erken-orta',3,2,'843-cü il Verden bölgüsü hansı imperiyanın taleyini həll etdi?','Verden müqaviləsi ilə Frank imperiyası varislər arasında bölündü.',array['Frank imperiyasının','Roma respublikasının','Osmanlı dövlətinin','Əhəmənilərin'],1),
-('tarix10-erken-orta#30','tarix','tarix-10-erken-orta',3,2,'Erkən orta əsrlər hansı dövrü əhatə edir?','Erkən orta əsrlər təqribən V-XI əsrləri əhatə edir.',array['V-XI əsrləri','XV-XX əsrləri','Er. əvvəl X-V əsrləri','XIX-XXI əsrləri'],1),
-('tarix10-orta-esrler#1','tarix','tarix-10-orta-esrler',2,3,'Böyük Səlcuq dövlətini hansı türk sülaləsi qurmuşdur?','Dövləti Səlcuq oğuzlarının başçıları qurmuşdur.',array['Səlcuqlar','Romanovlar','Habsburqlar','Tüdorlar'],1),
-('tarix10-orta-esrler#2','tarix','tarix-10-orta-esrler',3,3,'Malazgird döyüşü (1071) hansı dövlətlər arasında olmuşdur?','Səlcuqlarla Bizans arasında olmuş, Səlcuqlar qalib gəlmişdir.',array['Səlcuqlarla Bizans arasında','Roma ilə Karfagen arasında','İngiltərə ilə Fransa arasında','Rusiya ilə İsveç arasında'],1),
-('tarix10-orta-esrler#3','tarix','tarix-10-orta-esrler',3,3,'Malazgird qələbəsinin əsas nəticəsi nə oldu?','Anadolunun qapıları türklərin üzünə açıldı.',array['Anadolu türklərə açıldı','Roma süqut etdi','Amerika kəşf olundu','Çin səddi tikildi'],1),
-('tarix10-orta-esrler#4','tarix','tarix-10-orta-esrler',2,3,'Osmanlı dövlətinin əsasını kim qoymuşdur?','Dövlətin əsasını Osman bəy qoymuşdur.',array['Osman bəy','Böyük Karl','Sezar','Mete xaqan'],1),
-('tarix10-orta-esrler#5','tarix','tarix-10-orta-esrler',2,3,'Konstantinopolu 1453-cü ildə hansı hökmdar fəth etdi?','Şəhəri II Mehmet (Fateh) fəth etdi.',array['Fateh Sultan Mehmet','Süleyman şah','Çingiz xan','Böyük Pyotr'],1),
-('tarix10-orta-esrler#6','tarix','tarix-10-orta-esrler',2,3,'Konstantinopolun fəthi ilə hansı imperiya süqut etdi?','1453-cü ildə Bizans imperiyası süqut etdi.',array['Bizans imperiyası','Roma respublikası','Frank imperiyası','Əhəmənilər'],1),
-('tarix10-orta-esrler#7','tarix','tarix-10-orta-esrler',3,3,'Osmanlı imperiyası ən qüdrətli dövrünü hansı sultanın vaxtında yaşadı?','Qanuni Sultan Süleymanın dövrü imperiyanın zirvəsi idi.',array['Qanuni Sultan Süleymanın','I Pyotrun','XIV Lüdovikin','Napoleonun'],1),
-('tarix10-orta-esrler#8','tarix','tarix-10-orta-esrler',3,3,'Dehli sultanlığında dövlət idarəçiliyi hansı dinin daşıyıcılarının əlində idi?','Sultanlıqda hakimiyyət müsəlman sülalələrə məxsus idi.',array['Müsəlmanların','Buddistlərin','Xristianların','Şintoistlərin'],1),
-('tarix10-orta-esrler#9','tarix','tarix-10-orta-esrler',3,3,'Çingiz xanın qurduğu imperiyanın ilk paytaxtı hansı şəhər idi?','Monqol imperiyasının paytaxtı Qaraqorum idi.',array['Qaraqorum','Səmərqənd','Bağdad','Konstantinopol'],1),
-('tarix10-orta-esrler#10','tarix','tarix-10-orta-esrler',3,3,'Qızıl Ordu dövləti hansı imperiyanın parçalanması ilə bağlıdır?','Qızıl Ordu Monqol imperiyasının qərb hissəsində yarandı.',array['Monqol imperiyasının','Roma imperiyasının','Osmanlı imperiyasının','Bizansın'],1),
-('tarix10-orta-esrler#11','tarix','tarix-10-orta-esrler',2,3,'Əmir Teymur hansı şəhəri öz dövlətinin paytaxtı etmişdi?','Teymurun paytaxtı Səmərqənd idi.',array['Səmərqənd','Paris','Vyana','Qahirə'],1),
-('tarix10-orta-esrler#12','tarix','tarix-10-orta-esrler',2,3,'Xaçlı yürüşləri hansı məqsədlə təşkil olunurdu?','Rəsmi məqsəd müqəddəs torpaqları ələ keçirmək idi.',array['Müqəddəs torpaqları ələ keçirmək','Kosmosu öyrənmək','Ticarəti qadağan etmək','İdman yarışı keçirmək'],1),
-('tarix10-orta-esrler#13','tarix','tarix-10-orta-esrler',3,3,'Xaçlı yürüşlərini hansı qurum çağırışları ilə başladırdı?','Yürüşlərə Roma papası çağırış edirdi.',array['Roma papası','Çin imperatoru','Misir fironu','Hun xaqanı'],1),
-('tarix10-orta-esrler#14','tarix','tarix-10-orta-esrler',3,3,'Orta əsrlərdə İngiltərədə qəbul edilmiş məşhur azadlıqlar sənədi hansıdır?','1215-ci ildə Böyük azadlıqlar xartiyası qəbul edildi.',array['Böyük azadlıqlar xartiyası','İnsan hüquqları bəyannaməsi','Roma konstitusiyası','Vyana konqresi aktı'],1),
-('tarix10-orta-esrler#15','tarix','tarix-10-orta-esrler',3,3,'İngiltərədə parlament hansı əsrdə yaranmışdır?','İngilis parlamenti XIII əsrdə formalaşmışdır.',array['XIII əsrdə','V əsrdə','XX əsrdə','Er. əvvəl I əsrdə'],1),
-('tarix10-orta-esrler#16','tarix','tarix-10-orta-esrler',2,3,'Yüzillik müharibə hansı dövlətlər arasında olmuşdur?','Yüzillik müharibə İngiltərə ilə Fransa arasında getmişdir.',array['İngiltərə ilə Fransa','İspaniya ilə Portuqaliya','Rusiya ilə Yaponiya','Roma ilə Misir'],1),
-('tarix10-orta-esrler#17','tarix','tarix-10-orta-esrler',3,3,'Janna dArk adı hansı hadisə ilə bağlıdır?','Janna dArk Yüzillik müharibədə Fransanın qəhrəmanıdır.',array['Yüzillik müharibə ilə','Xaçlı yürüşü ilə','Olimpiya oyunları ilə','Kitab çapı ilə'],1),
-('tarix10-orta-esrler#18','tarix','tarix-10-orta-esrler',3,3,'Mərkəzləşdirilmiş dövlət nə deməkdir?','Bütün ölkənin vahid hökmdar hakimiyyətinə tabe olmasıdır.',array['Ölkənin vahid hakimiyyətə tabeliyi','Hər şəhərin ayrıca dövləti','Hakimiyyətsizlik','Yalnız şuralar idarəsi'],1),
-('tarix10-orta-esrler#19','tarix','tarix-10-orta-esrler',3,3,'Osmanlı ordusunun seçmə piyada qoşunu necə adlanırdı?','Seçmə piyada qoşun yeniçərilər idi.',array['Yeniçərilər','Legionerlər','Vikinqlər','Kazaklar'],1),
-('tarix10-orta-esrler#20','tarix','tarix-10-orta-esrler',3,3,'Monqol yürüşləri hansı əraziləri əhatə etmişdi?','Monqollar Çindən Şərqi Avropaya qədər irəliləmişdilər.',array['Çindən Şərqi Avropaya qədər','Yalnız Monqolustanı','Yalnız Afrikanı','Amerikanı'],1),
-('tarix10-orta-esrler#21','tarix','tarix-10-orta-esrler',3,3,'Teymurla Osmanlı sultanı İldırım Bəyazid arasındakı döyüş harada olmuşdur?','1402-ci ildə Ankara döyüşü baş vermişdir.',array['Ankarada','Vyanada','Parisdə','Bağdadda'],1),
-('tarix10-orta-esrler#22','tarix','tarix-10-orta-esrler',3,3,'Orta əsrlərdə Avropa universitetlərinin ilkləri harada yarandı?','İlk universitetlər Bolonya və Parisdə yarandı.',array['Bolonya və Parisdə','Nyu-Yorkda','Sidneydə','Tokioda'],1),
-('tarix10-orta-esrler#23','tarix','tarix-10-orta-esrler',3,3,'Səlcuq dövlətində vəzir Nizamülmülk nə ilə məşhurdur?','Nizamülmülk dövlət idarəçiliyi və mədrəsələr şəbəkəsi ilə məşhurdur.',array['İdarəçilik islahatları və mədrəsələrlə','Dəniz səyahətləri ilə','Kitab çapı ilə','Futbol qaydaları ilə'],1),
-('tarix10-orta-esrler#24','tarix','tarix-10-orta-esrler',2,3,'Orta əsr ticarətində Şərqlə Qərbi birləşdirən yol necə adlanırdı?','Bu, Böyük İpək Yolu idi.',array['Böyük İpək Yolu','Şimal dəniz yolu','Trans-Sibir yolu','Panamerika yolu'],1),
-('tarix10-orta-esrler#25','tarix','tarix-10-orta-esrler',3,3,'Hansa nədir?','Hansa Şimali Avropa ticarət şəhərlərinin birliyi idi.',array['Ticarət şəhərləri birliyi','Hərbi orden','Dini təriqət','Kral sülaləsi'],1),
-('tarix10-orta-esrler#26','tarix','tarix-10-orta-esrler',3,3,'Rekonkista nədir?','Pireney yarımadasının ərəblərdən geri alınması prosesidir.',array['Pireneyin geri alınması','Amerikanın fəthi','Çinin birləşdirilməsi','Misirin bölünməsi'],1),
-('tarix10-orta-esrler#27','tarix','tarix-10-orta-esrler',3,3,'Moskva knyazlığının yüksəlişi hansı əsrlərə təsadüf edir?','Moskva XIV-XV əsrlərdə gücləndi.',array['XIV-XV əsrlərə','V-VI əsrlərə','XIX əsrə','Er. əvvəl II əsrə'],1),
-('tarix10-orta-esrler#28','tarix','tarix-10-orta-esrler',3,3,'Osmanlı dövlətində fəth olunmuş torpaqlar hansı sistemlə paylanırdı?','Torpaqlar timar sistemi ilə hərbçilərə verilirdi.',array['Timar sistemi ilə','Lotereya ilə','Hərrac ilə','Satış ilə yalnız'],1),
-('tarix10-orta-esrler#29','tarix','tarix-10-orta-esrler',3,3,'Qriqori təqvimindən əvvəl Avropada hansı təqvim işlənirdi?','Əvvəllər Yuli təqvimi işlənirdi.',array['Yuli təqvimi','Ay təqvimi yalnız','Maya təqvimi','Çin təqvimi'],1),
-('tarix10-orta-esrler#30','tarix','tarix-10-orta-esrler',3,3,'Orta əsrlərin sonu hansı hadisə ilə şərti bağlanır?','1453-cü il - Konstantinopolun fəthi şərti sərhəd sayılır.',array['Konstantinopolun fəthi ilə','Olimpiya oyunları ilə','İnternetin yaranması ilə','Ayın fəthi ilə'],1),
-('tarix10-yeni-dovr#1','tarix','tarix-10-yeni-dovr',2,4,'Reformasiya hərəkatı hansı əsrdə başlamışdır?','Reformasiya XVI əsrdə Almaniyada başladı.',array['XVI əsrdə','X əsrdə','XX əsrdə','V əsrdə'],1),
-('tarix10-yeni-dovr#2','tarix','tarix-10-yeni-dovr',2,4,'Reformasiyanın banisi kim sayılır?','Martin Lüter 1517-ci ildə kilsəyə qarşı tezislərlə çıxış etdi.',array['Martin Lüter','Napoleon','Kolumb','Qaliley'],1),
-('tarix10-yeni-dovr#3','tarix','tarix-10-yeni-dovr',3,4,'Reformasiya hansı quruma qarşı yönəlmişdi?','Hərəkat katolik kilsəsinin nüfuzuna qarşı yönəlmişdi.',array['Katolik kilsəsinə','Universitetlərə','Ticarət birliklərinə','Ordulara'],1),
-('tarix10-yeni-dovr#4','tarix','tarix-10-yeni-dovr',3,4,'Otuzillik müharibə (1618-1648) əsasən harada gedirdi?','Müharibə əsasən Almaniya ərazisində gedirdi.',array['Almaniya ərazisində','Afrikada','Amerikada','Çində'],1),
-('tarix10-yeni-dovr#5','tarix','tarix-10-yeni-dovr',1,4,'Amerikanı 1492-ci ildə kim kəşf etmişdir?','Xristofor Kolumb Amerika sahillərinə çatmışdır.',array['Xristofor Kolumb','Vasko da Qama','Magellan','Kuk'],1),
-('tarix10-yeni-dovr#6','tarix','tarix-10-yeni-dovr',2,4,'Hindistana dəniz yolunu hansı səyyah açmışdır?','Vasko da Qama Afrikanı dolanaraq Hindistana çatdı.',array['Vasko da Qama','Kolumb','Amerigo Vespuççi','Marko Polo'],1),
-('tarix10-yeni-dovr#7','tarix','tarix-10-yeni-dovr',2,4,'İlk dünya səyahətini hansı ekspedisiya etmişdir?','Magellanın ekspedisiyası Yeri ilk dəfə dolandı.',array['Magellanın ekspedisiyası','Kolumbun ekspedisiyası','Kukun ekspedisiyası','Nansenin ekspedisiyası'],1),
-('tarix10-yeni-dovr#8','tarix','tarix-10-yeni-dovr',2,4,'Böyük coğrafi kəşflərin əsas səbəblərindən biri nə idi?','Şərqə yeni ticarət yolları axtarışı əsas səbəb idi.',array['Yeni ticarət yolları axtarışı','İdman marağı','Kino çəkilişi','Təsadüf'],1),
-('tarix10-yeni-dovr#9','tarix','tarix-10-yeni-dovr',3,4,'İngiltərədə XVII əsr inqilabının nəticələrindən biri nə oldu?','Kral hakimiyyəti parlamentlə məhdudlaşdırıldı.',array['Kral hakimiyyəti məhdudlaşdı','Parlament ləğv olundu','Ölkə imperiyadan çıxdı','Yazı qadağan olundu'],1),
-('tarix10-yeni-dovr#10','tarix','tarix-10-yeni-dovr',2,4,'ABŞ neçənci ildə müstəqilliyini elan etmişdir?','ABŞ 1776-cı ildə müstəqillik bəyannaməsini qəbul etdi.',array['1776-cı ildə','1492-ci ildə','1918-ci ildə','1991-ci ildə'],1),
-('tarix10-yeni-dovr#11','tarix','tarix-10-yeni-dovr',2,4,'ABŞ-ın ilk prezidenti kim olmuşdur?','Corc Vaşinqton ABŞ-ın ilk prezidentidir.',array['Corc Vaşinqton','Avraam Linkoln','Tomas Edison','Henri Ford'],1),
-('tarix10-yeni-dovr#12','tarix','tarix-10-yeni-dovr',3,4,'Rusiyanı Avropa dövlətinə çevirməyə çalışan islahatçı çar kim idi?','I Pyotr geniş islahatlar apardı.',array['I Pyotr','II Nikolay','Aleksandr Nevski','Boris Qodunov'],1),
-('tarix10-yeni-dovr#13','tarix','tarix-10-yeni-dovr',3,4,'I Pyotrun saldırdığı yeni paytaxt hansı şəhərdir?','1703-cü ildə Sankt-Peterburq salındı.',array['Sankt-Peterburq','Moskva','Kiyev','Novqorod'],1),
-('tarix10-yeni-dovr#14','tarix','tarix-10-yeni-dovr',3,4,'XVI-XVII əsrlərdə Osmanlı imperiyası hansı qitələrdə torpaqlara malik idi?','İmperiya Avropa, Asiya və Afrikada torpaqlara malik idi.',array['Avropa, Asiya və Afrikada','Yalnız Asiyada','Amerikada','Antarktidada'],1),
-('tarix10-yeni-dovr#15','tarix','tarix-10-yeni-dovr',3,4,'Böyük Moğol dövləti hansı ölkədə qurulmuşdu?','Moğol dövləti Hindistanda Babur tərəfindən qurulmuşdu.',array['Hindistanda','Türkiyədə','Misirdə','İspaniyada'],1),
-('tarix10-yeni-dovr#16','tarix','tarix-10-yeni-dovr',3,4,'Tac-Mahal abidəsi hansı dövlətin dövründə tikilmişdir?','Tac-Mahal Moğol hökmdarı Cahan şahın dövründə tikilib.',array['Böyük Moğol dövləti dövründə','Səlcuqlar dövründə','Roma dövründə','Hun dövründə'],1),
-('tarix10-yeni-dovr#17','tarix','tarix-10-yeni-dovr',3,4,'Coğrafi kəşflərdən sonra dünya ticarətinin mərkəzi haraya keçdi?','Ticarət Aralıq dənizindən Atlantik okeanı sahillərinə keçdi.',array['Atlantik sahillərinə','Sakit okeana','Şimal Buzlu okeanına','Xəzərə'],1),
-('tarix10-yeni-dovr#18','tarix','tarix-10-yeni-dovr',2,4,'Müstəmləkəçilik nədir?','Güclü dövlətlərin başqa ölkələri asılı hala salmasıdır.',array['Başqa ölkələrin asılı hala salınması','Mədəni yardım','Sərbəst ticarət','İdman mübadiləsi'],1),
-('tarix10-yeni-dovr#19','tarix','tarix-10-yeni-dovr',3,4,'Amerika qitəsinin adı hansı səyyahın adı ilə bağlıdır?','Qitə Ameriqo Vespuççinin adı ilə adlandırılıb.',array['Ameriqo Vespuççinin','Kolumbun','Magellanın','Kukun'],1),
-('tarix10-yeni-dovr#20','tarix','tarix-10-yeni-dovr',3,4,'Niderland inqilabının nəticəsində hansı dövlət yarandı?','İspaniyadan azad olan Hollandiya respublikası yarandı.',array['Hollandiya','Portuqaliya','Norveç','Polşa'],1),
-('tarix10-yeni-dovr#21','tarix','tarix-10-yeni-dovr',3,4,'Fransada mütləqiyyətin zirvəsi hansı kralın adı ilə bağlıdır?','XIV Lüdovik «Dövlət mənəm» deyimi ilə tanınır.',array['XIV Lüdovikin','IX Karlın','Filippin','Herodotun'],1),
-('tarix10-yeni-dovr#22','tarix','tarix-10-yeni-dovr',3,4,'Manufaktura nədir?','Əl əməyinə əsaslanan, əmək bölgülü iri emalatxanadır.',array['Əmək bölgülü iri emalatxana','Tam avtomatik zavod','Kənd təsərrüfatı sahəsi','Ticarət gəmisi'],1),
-('tarix10-yeni-dovr#23','tarix','tarix-10-yeni-dovr',3,4,'Qul ticarəti hansı qitələr arasında aparılırdı?','Afrikadan Amerikaya qul daşınırdı.',array['Afrikadan Amerikaya','Avropadan Asiyaya','Asiyadan Avstraliyaya','Amerikadan Afrikaya'],1),
-('tarix10-yeni-dovr#24','tarix','tarix-10-yeni-dovr',2,4,'Kitab çapı dəzgahını Avropada kim təkmilləşdirmişdir?','İohan Qutenberq XV əsrdə çap dəzgahını yaratdı.',array['İohan Qutenberq','Martin Lüter','Nyuton','Vatt'],1),
-('tarix10-yeni-dovr#25','tarix','tarix-10-yeni-dovr',2,4,'Kitab çapının yayılması cəmiyyətə nə verdi?','Biliklər kütləviləşdi, savadlılıq artdı.',array['Biliklərin kütləviləşməsini','Kitabların bahalaşmasını','Savadsızlığın artmasını','Heç nə'],1),
-('tarix10-yeni-dovr#26','tarix','tarix-10-yeni-dovr',3,4,'Vestfal sülhü hansı müharibəni başa çatdırdı?','1648-ci il Vestfal sülhü Otuzillik müharibəni bitirdi.',array['Otuzillik müharibəni','Yüzillik müharibəni','Birinci dünya müharibəsini','Krım müharibəsini'],1),
-('tarix10-yeni-dovr#27','tarix','tarix-10-yeni-dovr',3,4,'Yeni dövrdə İngiltərənin dəniz qüdrətinin əsası nə idi?','Güclü donanma və müstəmləkə ticarəti əsas idi.',array['Güclü donanma və ticarət','Yalnız əkinçilik','Dağ-mədən işi yalnız','Turizm'],1),
-('tarix10-yeni-dovr#28','tarix','tarix-10-yeni-dovr',3,4,'Osmanlı imperiyasının zəifləməsinin səbəblərindən biri nə idi?','Hərbi-texniki geriləmə və daxili çəkişmələr zəiflədirdi.',array['Hərbi-texniki geriləmə','Həddən artıq sülhsevərlik','Torpaqsızlıq','Dənizsizlik'],1),
-('tarix10-yeni-dovr#29','tarix','tarix-10-yeni-dovr',3,4,'«Qızıl» və «gümüş» axını Avropaya haradan gəlirdi?','Qiymətli metallar Amerika müstəmləkələrindən daşınırdı.',array['Amerika müstəmləkələrindən','Sibirdən','Avstraliyadan','Antarktidadan'],1),
-('tarix10-yeni-dovr#30','tarix','tarix-10-yeni-dovr',2,4,'Yeni dövr tarixi şərti olaraq hansı hadisə ilə başlayır?','Yeni dövr böyük coğrafi kəşflərlə başlayır.',array['Böyük coğrafi kəşflərlə','Roma süqutu ilə','İnternetin yaranması ilə','Daş dövrü ilə'],1),
-('tarix10-medeniyyet#1','tarix','tarix-10-medeniyyet',2,4,'İntibah (Renessans) mədəniyyəti ilk olaraq harada yaranmışdır?','İntibah XIV əsrdə İtaliyada başladı.',array['İtaliyada','Rusiyada','Norveçdə','Misirdə'],1),
-('tarix10-medeniyyet#2','tarix','tarix-10-medeniyyet',3,4,'İntibah dövrü nəyə qayıdışı əsas götürürdü?','İntibah antik mədəniyyət ənənələrini dirçəldirdi.',array['Antik mədəniyyət ənənələrinə','Daş dövrünə','Buz dövrünə','Kosmik dövrə'],1),
-('tarix10-medeniyyet#3','tarix','tarix-10-medeniyyet',2,4,'«Mona Liza» tablosunun müəllifi kimdir?','Tablonu Leonardo da Vinçi çəkmişdir.',array['Leonardo da Vinçi','Mikelancelo','Rafael','Rembrandt'],1),
-('tarix10-medeniyyet#4','tarix','tarix-10-medeniyyet',3,4,'Mikelancelonun məşhur heykəli hansıdır?','Davud heykəli Mikelancelonun şah əsəridir.',array['Davud','Venera','Sfinks','Diskatan'],1),
-('tarix10-medeniyyet#5','tarix','tarix-10-medeniyyet',2,4,'Vilyam Şekspir hansı ölkənin dramaturqudur?','Şekspir ingilis dramaturqudur.',array['İngiltərənin','Fransanın','İspaniyanın','Yunanıstanın'],1),
-('tarix10-medeniyyet#6','tarix','tarix-10-medeniyyet',2,4,'«Hamlet» əsərinin müəllifi kimdir?','Hamlet faciəsini Şekspir yazmışdır.',array['Şekspir','Servantes','Höte','Balzak'],1),
-('tarix10-medeniyyet#7','tarix','tarix-10-medeniyyet',3,4,'«Don Kixot» romanını kim yazmışdır?','Romanı ispan yazıçısı Servantes yazmışdır.',array['Servantes','Şekspir','Dante','Molyer'],1),
-('tarix10-medeniyyet#8','tarix','tarix-10-medeniyyet',3,4,'Nikolay Kopernikin elmə gətirdiyi əsas ideya nədir?','Kopernik Yerin Günəş ətrafında fırlandığını əsaslandırdı.',array['Yer Günəş ətrafında fırlanır','Yer kainatın mərkəzidir','Ulduzlar hərəkətsizdir','Ay süni peykdir'],1),
-('tarix10-medeniyyet#9','tarix','tarix-10-medeniyyet',3,4,'Qalileo Qaliley elm tarixinə hansı ixtirası ilə düşüb?','Qaliley teleskopla göy cisimlərini müşahidə edən ilk alimlərdəndir.',array['Teleskopla müşahidələri ilə','Buxar maşını ilə','Telefonla','Təyyarə ilə'],1),
-('tarix10-medeniyyet#10','tarix','tarix-10-medeniyyet',2,4,'Orta əsr Şərqinin böyük alimi İbn Sina hansı sahədə məşhurdur?','İbn Sina təbabət sahəsində «Tibb qanunu» əsəri ilə məşhurdur.',array['Təbabətdə','Memarlıqda','Dənizçilikdə','Rəssamlıqda'],1),
-('tarix10-medeniyyet#11','tarix','tarix-10-medeniyyet',3,4,'Əl-Xarəzminin adı hansı elm sahəsi ilə bağlıdır?','Əl-Xarəzmi cəbrin banisi sayılır.',array['Riyaziyyatla (cəbrlə)','Musiqiylə','Teatrla','İdmanla'],1),
-('tarix10-medeniyyet#12','tarix','tarix-10-medeniyyet',2,4,'Nizami Gəncəvi dünya ədəbiyyatına hansı əsərlər toplusu ilə daxil olub?','Nizaminin «Xəmsə»si beş poemadan ibarətdir.',array['Xəmsə ilə','İliada ilə','Hamlet ilə','Don Kixot ilə'],1),
-('tarix10-medeniyyet#13','tarix','tarix-10-medeniyyet',3,4,'Qədim dünyanın yeddi möcüzəsindən dövrümüzə qalan hansıdır?','Yalnız Misir ehramları dövrümüzə çatmışdır.',array['Misir ehramları','Asma bağlar','Rodos heykəli','İsgəndəriyyə mayakı'],1),
-('tarix10-medeniyyet#14','tarix','tarix-10-medeniyyet',2,4,'Orta əsr müsəlman Şərqində ali təhsil ocağı necə adlanırdı?','Ali dini-elmi təhsil mədrəsələrdə verilirdi.',array['Mədrəsə','Gimnaziya','Kollec','Litsey'],1),
-('tarix10-medeniyyet#15','tarix','tarix-10-medeniyyet',2,4,'Kitabxanalar qədim dövrdə hansı funksiyanı daşıyırdı?','Kitabxanalar biliyin toplandığı elm mərkəzləri idi.',array['Elm və bilik mərkəzi idi','Yalnız anbar idi','İdman zalı idi','Bazar idi'],1),
-('tarix10-medeniyyet#16','tarix','tarix-10-medeniyyet',2,4,'Teatr sənətinin vətəni hansı ölkə sayılır?','Teatr qədim Yunanıstanda yaranmışdır.',array['Qədim Yunanıstan','Qədim Roma','Finikiya','Şumer'],1),
-('tarix10-medeniyyet#17','tarix','tarix-10-medeniyyet',3,4,'İntibah dövrü insana münasibətdə hansı ideyanı irəli sürürdü?','İnsan və onun dəyəri önə çəkilirdi - humanizm.',array['Humanizm - insanın dəyəri','İnsanın əhəmiyyətsizliyi','Yalnız sərvətin dəyəri','Elmi inkar'],1),
-('tarix10-medeniyyet#18','tarix','tarix-10-medeniyyet',3,4,'Memarlıqda günbəz və minarələr hansı mədəniyyətə xasdır?','Günbəz və minarələr islam Şərqi memarlığına xasdır.',array['İslam Şərqi memarlığına','Vikinq memarlığına','Aztek memarlığına','Yapon bağlarına'],1),
-('tarix10-medeniyyet#19','tarix','tarix-10-medeniyyet',2,4,'Avropa İntibahının məşhur rəssamları kimlərdir?','Leonardo, Mikelancelo və Rafael İntibahın dahiləridir.',array['Leonardo, Mikelancelo, Rafael','Nyuton, Vatt, Faradey','Sezar, Avqust, Neron','Kolumb, Maqellan, Kuk'],1),
-('tarix10-medeniyyet#20','tarix','tarix-10-medeniyyet',3,4,'Qutenberqin çap dəzgahında ilk çap olunmuş iri kitab hansıdır?','İlk iri çap kitabı Bibliya olmuşdur.',array['Bibliya','Ensiklopediya','Lüğət','Atlas'],1),
-('tarix10-medeniyyet#21','tarix','tarix-10-medeniyyet',3,4,'Universitetlərdə orta əsrlərdə tədris hansı dildə aparılırdı?','Avropa universitetlərində tədris latın dilində idi.',array['Latın dilində','İngilis dilində','Ərəb dilində','Rus dilində'],1),
-('tarix10-medeniyyet#22','tarix','tarix-10-medeniyyet',3,4,'Şərq miniatür sənəti nə üçün istifadə olunurdu?','Miniatürlər əlyazma kitablarını bəzəyirdi.',array['Əlyazmaları bəzəmək üçün','Evləri qızdırmaq üçün','Yol göstərmək üçün','Pul kimi'],1),
-('tarix10-medeniyyet#23','tarix','tarix-10-medeniyyet',3,4,'«Avesta» hansı dinin müqəddəs kitabıdır?','Avesta zərdüştiliyin müqəddəs kitabıdır.',array['Zərdüştiliyin','İslamın','Xristianlığın','Buddizmin'],1),
-('tarix10-medeniyyet#24','tarix','tarix-10-medeniyyet',3,4,'Yunan əlifbası hansı əlifba əsasında yaranmışdır?','Yunanlar finikiya əlifbasını təkmilləşdirdilər.',array['Finikiya əlifbası əsasında','Çin heroqlifləri əsasında','Mixi yazı əsasında','Latın əlifbası əsasında'],1),
-('tarix10-medeniyyet#25','tarix','tarix-10-medeniyyet',2,4,'Böyük coğrafi kəşflər elmin hansı sahəsini xüsusilə inkişaf etdirdi?','Kəşflər coğrafiya və xəritəçiliyi inkişaf etdirdi.',array['Coğrafiya və xəritəçiliyi','Yalnız musiqini','Yalnız teatrı','Heç bir sahəni'],1),
-('tarix10-medeniyyet#26','tarix','tarix-10-medeniyyet',3,4,'İntibah dövründə elm kilsə ehkamlarına münasibətdə necə mövqe tuturdu?','Elm təcrübəyə və müşahidəyə əsaslanmağa başladı.',array['Təcrübə və müşahidəyə əsaslanırdı','Ehkamları təkrar edirdi','Elm dayandırıldı','Yalnız fala baxırdı'],1),
-('tarix10-medeniyyet#27','tarix','tarix-10-medeniyyet',3,4,'Dünya mədəniyyətində «Min bir gecə» nağılları hansı Şərq mədəniyyətinin abidəsidir?','Bu nağıllar ərəb Şərqinin folklor abidəsidir.',array['Ərəb Şərqinin','Skandinaviyanın','Yaponiyanın','İnklərin'],1),
-('tarix10-medeniyyet#28','tarix','tarix-10-medeniyyet',3,4,'Memarlıqda qotik üslub nə ilə səciyyələnir?','Qotika şişuclu tağlar və hündür pəncərələrlə seçilir.',array['Şişuclu tağlar və hündürlük','Alçaq yastı damlar','Yalnız taxta tikililər','Şüşə gödəkliyi'],1),
-('tarix10-medeniyyet#29','tarix','tarix-10-medeniyyet',3,4,'Elm və mədəniyyətin himayəçilərinə tarixdə necə deyilirdi?','İncəsənət himayəçiləri mesenat adlanırdı.',array['Mesenat','Legioner','Feodal','Yeniçəri'],1),
-('tarix10-medeniyyet#30','tarix','tarix-10-medeniyyet',1,4,'Mədəniyyət abidələrinin qorunması nə üçün vacibdir?','Abidələr bəşəriyyətin yaddaşı və irsidir.',array['Bəşəriyyətin irsi olduğu üçün','Yalnız turizm üçün','Vacib deyil','Yalnız bəzək üçün'],1)
+('inf10-veb#20','informatika','inf-10-veb',2,4,'İnformasiya cəmiyyətinin iqtisadiyyatında əsas kapital nə sayılır?','Bilik və informasiya əsas kapital sayılır.',array['Bilik kapitalı','Yalnız neft','Yalnız torpaq','Yalnız qızıl'],1)
 ),
 ins as (
   insert into public.questions
@@ -764,13 +587,13 @@ begin
   select count(*) into n from public.questions
    where owner_type = 'platform'
      and (ext_key like 'az10-%' or ext_key like 'ing10-%'
-          or ext_key like 'inf10-%' or ext_key like 'tarix10-%');
-  if n <> 700 then
-    raise exception 'sinif10 suallari: 700 gozlenilirdi, % tapildi', n;
+          or ext_key like 'inf10-%');
+  if n <> 520 then
+    raise exception 'sinif10 suallari: 520 gozlenilirdi, % tapildi', n;
   end if;
   select count(*) into k from public.questions q
    where (q.ext_key like 'az10-%' or q.ext_key like 'ing10-%'
-          or q.ext_key like 'inf10-%' or q.ext_key like 'tarix10-%')
+          or q.ext_key like 'inf10-%')
      and ((select count(*) from public.question_options o
             where o.question_id = q.id) <> 4
        or (select count(*) from public.question_options o
@@ -780,9 +603,9 @@ begin
   end if;
   select count(distinct topic_id) into k from public.questions
    where ext_key like 'az10-%' or ext_key like 'ing10-%'
-      or ext_key like 'inf10-%' or ext_key like 'tarix10-%';
-  if k <> 25 then
-    raise exception 'movzu sayi 25 deyil: %', k;
+      or ext_key like 'inf10-%';
+  if k <> 19 then
+    raise exception 'movzu sayi 19 deyil: %', k;
   end if;
-  raise notice '10-cu sinif humanitar banki: % sual, 25 movzu.', n;
+  raise notice '10-cu sinif humanitar banki: % sual, 19 movzu.', n;
 end $$;
