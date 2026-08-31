@@ -127,17 +127,18 @@ begin
     raise exception 'Umumi tarix 9/11: 12 movzu gozlenilirdi, % tapildi', k;
   end if;
 
-  --  'tarix' fenninin qalan sinifleri toxunulmamis qalmalidir.
-  --  QEYD: 7-ci sinifde de portalda yalniz "Umumi tarix" derslikyi var
-  --  (mundericat/tarix-7-723.txt) - hemin sinifin kocurulmesi AYRI
-  --  addimdir, bu fayl ona toxunmur.
+  --  Azerbaycan tarixi 5, 6, 8, 9, 11-ci sinifde toxunulmamis qalmalidir.
+  --  QEYD: 7-ci sinif bu siyahida YOXDUR - orada da portalda yalniz
+  --  "Umumi tarix" derslikyi var (mundericat/tarix-7-723.txt), hemin
+  --  sinifi 70/71 fayllari kocurur.  Bu yoxlama 7-den asili olmasin
+  --  deye onu sadece saymir: 68 hem 71-den evvel, hem sonra isleyir.
   select count(distinct l.code) into k
     from public.topics t
     join public.subjects s on s.id = t.subject_id and s.slug = 'tarix'
     join public.levels   l on l.id = t.level_id
-   where l.code in ('5', '6', '7', '8', '9', '11');
-  if k <> 6 then
-    raise exception '"tarix" fenninde 6 sinif gozlenilirdi, % tapildi', k;
+   where l.code in ('5', '6', '8', '9', '11');
+  if k <> 5 then
+    raise exception '"tarix" fenninde 5 sinif gozlenilirdi, % tapildi', k;
   end if;
 
   raise notice 'Umumi tarix 10: 6 movzu hazir, "tarix" fenni 10-cu sinifden cixdi.';

@@ -83,11 +83,16 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    açmır, `47`/`tools/sinif10.py` isə həmin 180 sualı daşımır; köhnə
    baza üçün `68` onları `umumi-tarix`ə köçürüb `archived` edir
    (silinmir — hesabat tarixçəsi qorunur).
-   **Açıq məsələ:** 7-ci sinifdə də portalda yalnız «Ümumi tarix»
-   dərsliyi var (`mundericat/tarix-7-723.txt`), yəni `tarix-7-*`
-   mövzuları da dünya tarixidir. Onların köçürülməsi ayrıca qərardır —
-   həmin sinifdə artıq `utarix-7-*` ağacı var, ona görə köçürmə deyil,
-   BİRLƏŞDİRMƏ lazım gələcək.
+   **7-ci sinifdə də «Tarix» yoxdur** — eyni səbəbdən
+   (`mundericat/tarix-7-723.txt` «Umumi tarix» yazır). `db/70` + `db/71`
+   həmin 180 sualı `umumi-tarix`ə köçürür. Köhnə altı mövzudan yalnız
+   **ikisi** yeni mövzudur (türk dövlətləri; Səlcuq-Monqol-Osmanlı),
+   qalan dördü **icmal** mövzusu olduğu üçün sualları `66`-nın altı
+   mövzusuna **dənə-dənə** paylanıb — yoxsa eyni mövzu iki dəfə yaranıb
+   zəif nöqtə hesabatını bölərdi. 7-ci sinif Ümumi tarix: 8 mövzu,
+   366 sual. Köçürülənlərin `ext_key`-i **`tarix7-` olaraq qalır**
+   (canlı bazadakı sətirlər yerində yenilənsin deyə; `utarix7-`
+   prefiksi `67`-də artıq işlənib).
    **Ədəbiyyat ayrıca fənndir** — «Az dili» mövzuları yalnız
    qrammatikadır, ədəbiyyatın öz dərsliyi və qiyməti var.
    Hazırdır: **5-11-ci siniflər** — 48 mövzu × 31 = 1488 sual
@@ -110,7 +115,10 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    **20 sual**, ədəbiyyatda və ümumi tarixdə **31 sual**
    (cəmi ~18 870 platforma sualı).
    Mövzu ağacları `db/25/29/33/37/41/45/49_movzular_orta*.sql`,
-   banklar `db/23–52`, `54`, `56`, `59`, `60`, `62–65`, `67`, `69`.
+   banklar `db/23–52`, `54`, `56`, `59`, `60`, `62–65`, `67`, `69`, `71`.
+   **«Tarix» fənni artıq 5, 6, 8, 9, 11-ci siniflərdədir** — 7 və 10-cu
+   sinifdə Azərbaycan tarixi dərsliyi portalda yoxdur, hər ikisinin
+   məzmunu «Ümumi tarix»dədir.
    Davamı: MİQ və sertifikasiya (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
