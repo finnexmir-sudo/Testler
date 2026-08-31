@@ -270,6 +270,31 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
 
+## Şagird arxivi
+
+Yer limiti `students.is_active`-ə baxır (`app.account_student_count`),
+amma paneldə şagirdi deaktiv etmək yolu **yox idi**: yer bir dəfə
+tutulurdu və geri qayıtmırdı — keçən ilin şagirdi bu ilin yerini
+yeyirdi. Repetitor-25 paketində ikinci ildən problemə çevriləcəkdi.
+
+İndi hər aktiv şagird sətrində «Arxivə sal», arxivdəkilər isə ayrıca
+**yığılmış** bölmədədir (aktivlərlə qarışanda müəllim «niyə 8 şagird
+görünür, 6 yer tutulub?» deyə çaşırdı).
+
+**Yeni RPC yoxdur** — mövcud mexanizm onsuz da kifayət edir və
+`db/test/smoke_arxiv.sql` bunu sübut edir:
+
+- RLS (`p_students_upd`) yalnız öz şagirdinə icazə verir
+- `trg_students_seat_limit` geri qaytarmada limiti **yenidən yoxlayır**
+  → arxivlə-əlavə et-geri qaytar ilə limiti yan keçmək mümkün deyil
+- `app.session_student` `is_active` yoxlayır → arxivdə **açıq sessiya
+  da dərhal kəsilir**, kod işləmir
+- Arxiv **silmək deyil**: sətir və keçmiş nəticələr qalır, «Hesabat»
+  keçidi arxivdə də var
+
+Arxivdəki sətirdə kod və «Göndər» **göstərilmir** — kod onsuz da
+işləmir, göstərmək aldadıcı olardı.
+
 ## E-dərslik yenilənməsi — hər il avqustda
 
 Mövzu ağacımız e-dərslikdən gəlir. Dərslik hər il yenilənə bilər: ad

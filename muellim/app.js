@@ -622,8 +622,10 @@
     }).then(function (rows) {
       groups = rows || [];
       if (!groups.length) return [];
+      //  Arxivdeki sagird qrupda GORUNMEMELIDIR - yer limiti de
+      //  yalniz aktivleri sayir (app.account_student_count).
       return sb.select("students", {
-        select: "id,class_id", eq: { account_id: ACC.id }
+        select: "id,class_id", eq: { account_id: ACC.id, is_active: true }
       });
     }).then(function (studs) {
       var cnt = {};
@@ -1327,7 +1329,36 @@
           "<b>Hələ şagird yoxdur</b>Aşağıdan əlavə edin.</div>";
         return;
       }
-      box.innerHTML = rows.map(function (s) {
+      /*  Arxiv AYRICA bolmededir.  Sebeb: yer limiti yalniz aktivleri
+          sayir, ona gore arxivdeki sagird siyahida aktivlerle qarisib
+          muellimi caşdirirdi ("niye 8 sagird gorunur, 6 yer tutulub?").
+          Arxiv yigilmis gelir - adeten ora baxilmir.  */
+      var aktiv = rows.filter(function (s) { return s.is_active !== false; });
+      var arxiv = rows.filter(function (s) { return s.is_active === false; });
+
+      box.innerHTML = aktiv.map(stuRow).join("") +
+        (arxiv.length
+          ? '<details class="arxiv"><summary>Arxiv <span>' + arxiv.length +
+            "</span></summary>" + arxiv.map(stuRow).join("") + "</details>"
+          : "");
+
+      function stuRow(s) {
+        //  Arxivdeki sagirdin kodu ONSUZ DA islemir (app.session_student
+        //  is_active yoxlayir), ona gore kod/gonder duymeleri cixmir.
+        //  "Hesabat" qalir - kecmis neticeler itmeyib.
+        if (s.is_active === false) {
+          return '<div class="stu off" data-row="' + esc(s.id) + '">' +
+            '<div class="l1">' + av(s.full_name) + "<b>" + esc(s.full_name) + "</b>" +
+              '<button class="btn sm ghost link" data-rep="' + esc(s.id) + '">' +
+                "Hesabat" + ic("right") + "</button></div>" +
+            '<div class="l2"><span class="muted">Arxivdə — yer tutmur</span>' +
+              '<button class="btn sm" data-unarch="' + esc(s.id) + '">' +
+                "Geri qaytar</button></div></div>";
+        }
+        return stuRowActive(s);
+      }
+
+      function stuRowActive(s) {
         /* Telefonda bes duymenin hamisi eyni cekide idi ve setir
            dord sətirə dagilirdi.  Indi ierarxiya var: kodu GONDERMEK
            esas isdir, kopyalamaq ikinci, ad ve kod ise qelemin altinda. */
@@ -1345,8 +1376,10 @@
               'title="Kodu kopyala" aria-label="Kodu kopyala">' + ic("copy") + "</button>" +
             '<button class="btn sm" data-wa="' + esc(s.id) + '">' +
               ic("send") + "Göndər</button>" +
+            '<button class="btn sm ghost link arch" data-arch="' + esc(s.id) + '">' +
+              "Arxivə sal</button>" +
           "</div></div>";
-      }).join("");
+      }
 
       Array.prototype.forEach.call(box.querySelectorAll("[data-copy]"), function (b) {
         b.addEventListener("click", function () {
@@ -1370,10 +1403,54 @@
           nav("#/s/" + b.getAttribute("data-rep") + "/" + classId);
         });
       });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-arch]"), function (b) {
+        b.addEventListener("click", function () {
+          var st = rows.filter(function (x) {
+            return x.id === b.getAttribute("data-arch"); })[0];
+          if (!st) return;
+          if (!confirm("«" + st.full_name + "» arxivə salınsın?\n\n" +
+                       "Giriş kodu dərhal işləməyi dayandırır və şagird " +
+                       "paketdə yer tutmur. Keçmiş nəticələri qalır — " +
+                       "istənilən vaxt geri qaytara bilərsiniz.")) return;
+          setActive(st, false, b, classId);
+        });
+      });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-unarch]"), function (b) {
+        b.addEventListener("click", function () {
+          var st = rows.filter(function (x) {
+            return x.id === b.getAttribute("data-unarch"); })[0];
+          if (st) setActive(st, true, b, classId);
+        });
+      });
     }).catch(function (e) {
       var box = $("stu");
       if (box) box.innerHTML = '<div class="skel">' + esc(fail(e)) + "</div>";
     });
+  }
+
+  /*  Arxive salmaq / geri qaytarmaq.
+      Ayrica RPC lazim deyil: RLS onsuz da yalniz oz sagirdine icaze
+      verir, yer limiti ise BAZA TRIGGER-indedir (trg_students_seat_limit).
+      Trigger geri qaytarmada limiti YENIDEN yoxlayir - yerler dolubsa
+      xeta atir ve mesaji oldugu kimi gosteririk.  */
+  function setActive(st, aktiv, btn, classId) {
+    if (busy) return;
+    busy = true; btn.disabled = true;
+    btn.textContent = aktiv ? "Qaytarılır…" : "Arxivlənir…";
+    sb.update("students", { id: st.id }, { is_active: aktiv })
+      .then(function () {
+        busy = false;
+        loadStudents(classId);      //  siyahi yeniden bolunsun
+        //  Yer sayğaci ACC-de kesledirilib (rpc_my_context) - arxiv
+        //  onu deyisdiyi ucun kesi tezelemek lazimdir, yoxsa ev
+        //  sehifesinde kohne rəqəm qalir.
+        refreshContext().catch(function () {});
+      })
+      .catch(function (e) {
+        busy = false; btn.disabled = false;
+        btn.textContent = aktiv ? "Geri qaytar" : "Arxivə sal";
+        alert(fail(e));
+      });
   }
 
   function waLink(s) {

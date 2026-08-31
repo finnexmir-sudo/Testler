@@ -760,3 +760,26 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 /* "Novbeti ders" kartinda feslin adi */
 .plcur .plgn{display:block;font-size:11.5px;font-weight:530;
   color:var(--fg-3);margin:2px 0 1px}
+
+/* ============================== sagird arxivi
+   Arxivdeki sagird yer tutmur ve giris kodu islemir.  Ayrica,
+   YIGILMIS bolmededir: aktivlerle qarisanda muellim "niye 8 sagird
+   gorunur, 6 yer tutulub?" deye caşırdı. */
+.stu .btn.arch{margin-left:auto;color:var(--fg-3);font-weight:480}
+.stu .btn.arch:hover{color:var(--err);background:var(--err-tint)}
+
+details.arxiv{border-top:1px solid var(--n-100);margin-top:2px}
+details.arxiv>summary{display:flex;align-items:center;gap:8px;
+  padding:11px 16px;cursor:pointer;list-style:none;
+  font-size:12.5px;font-weight:560;color:var(--fg-3)}
+details.arxiv>summary::-webkit-details-marker{display:none}
+details.arxiv>summary::before{content:"▸";font-size:11px;
+  transition:transform .15s;display:inline-block}
+details.arxiv[open]>summary::before{transform:rotate(90deg)}
+details.arxiv>summary:hover{background:var(--n-25)}
+details.arxiv>summary span{padding:1px 8px;border-radius:999px;
+  background:var(--n-50);border:1px solid var(--n-100);font-size:11.5px}
+/* arxiv setri sonuk gorunur - amma oxunaqli qalir */
+.stu.off{background:var(--n-25)}
+.stu.off b{color:var(--fg-2);font-weight:520}
+.stu.off .l2 .muted{font-size:12px}
