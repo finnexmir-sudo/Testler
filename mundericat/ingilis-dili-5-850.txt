@@ -1,0 +1,14 @@
+# ingilis-dili 5 esas xarici dil
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=850
+# səhifə: 120 · bölmə: 1 · mövzu: 8
+
+== UNITS
+    11  UNIT 1. Who am I?
+    21  UNIT 2. English Everywhere!
+    33  UNIT 3. Where’s home?
+    43  UNIT 4. Family Matters
+    55  UNIT 5. A Day in the Life
+    65  UNIT 6. School Time
+    77  UNIT 7. What's he wearing?
+    87  UNIT 8. Get Moving!
+

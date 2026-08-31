@@ -322,11 +322,21 @@ declare v jsonb;
 begin
   v := public.rpc_bank_facets('riyaziyyat', '3');
   assert jsonb_array_length(v->'subjects') >= 10, 'fenn siyahisi bos';
-  --  test bazasinda yalniz 3-4-cu sinif banklari var - siyahida da
-  --  yalniz onlar olmalidir (suali olmayan sinif gorunmur)
   assert jsonb_array_length(v->'levels') >= 2, 'sinif siyahisi bos';
-  assert not exists (select 1 from jsonb_array_elements(v->'levels') e
-                      where e->>'code' = '11'), 'sualsiz sinif siyahidadir';
+  --  DIQQET: konkret sinif nomresine baglanmaq OLMAZ.  Evvel test
+  --  bazasinda yalniz 3-4-cu sinif banki vardi, ona gore 11-ci sinif
+  --  "sualsiz" idi ve siyahida gorunmemeliydi.  Indi bank 1-11-i tam
+  --  ortur - sualsiz sinif umumiyyetle qalmayib.  Ona gore MELUMATA
+  --  deyil, XASSEYE baxiriq: siyahiya dusen her sinifde hemin fenn
+  --  uzre en azi bir gorunen sual olmalidir.
+  assert (select bool_and(exists (
+            select 1 from public.questions q
+              join public.levels   l on l.id = q.level_id
+              join public.subjects s on s.id = q.subject_id
+             where s.slug = 'riyaziyyat' and l.code = e->>'code'
+               and q.owner_type = 'platform' and q.status = 'published'))
+            from jsonb_array_elements(v->'levels') e),
+         'sualsiz sinif siyahidadir';
   assert jsonb_array_length(v->'topics') >= 1, 'movzu siyahisi bos';
   assert (v->'usage'->>'limit')::int = 3, 'hedd gorunmur';
   assert (v->'usage'->>'used')::int = 3, 'istifade gorunmur';

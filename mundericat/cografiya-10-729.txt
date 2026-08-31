@@ -1,0 +1,84 @@
+# cografiya 10
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=729
+# səhifə: 208 · bölmə: 3 · mövzu: 74
+
+== Giriş
+     6  1. Coğrafiya təbiət elmləri sistemində
+     9  2. Coğrafiya elminin tədqiqat metodları
+
+== 1. YERİN TƏBİƏTİ
+    15  I. Yer səma cismidir
+    15  3. Kainat və Günəş sisteminin yaranması haqqında fərziyyələr. Diskussiya dərsi
+    19  4. Yerin planetar inkişaf mərhələsi
+    22  5. Yerin maqnetizmi
+    26  6. Yerin forması və ölçüləri
+    29  7. Yer səthində günəş şüalarının düşmə bucağının və vaxt fərqlərinin hesablanması. Praktik dərs
+    32  • Ümumiləşdirici tapşırıqlar
+    33  II. Yer səthinin təsviri
+    33  8. Kartoqrafik proyeksiyalar və təhriflər
+    39  9. Xəritə ümumiləşdirilmiş təsvirdir
+    42  10. Miqyas və təhriflər. Praktik dərs
+    44  • Ümumiləşdirici tapşırıqlar
+    45  III. Yer qabığının inkişaf tarixi
+    45  11. Yerin geoloji inkişafı
+    48  12. Qırışıqlıq vilayətləri və platformalar
+    52  13. Dağəmələgəmə mərhələləri
+    54  14. Azərbaycanın geoloji quruluşu
+    58  15. Azərbaycanın endogen relyef formaları
+    62  16. Azərbaycanın ekzogen relyef formaları
+    66  17. Azərbaycanın faydalı qazıntıları və onların geoloji quruluşla əlaqəsi. Praktik dərs
+    70  • Ümumiləşdirici tapşırıqlar
+    71  IV. İqlim ehtiyatları
+    71  18. Yer səthində istilik və buxarlanma
+    74  19. Azərbaycanda günəşli saatların və istiliyin paylanması
+    76  20. Havanın nisbi və mütləq rütubətliliyinin, rütubətlilik əmsalının hesablanması. Praktik dərs
+    78  21. Azərbaycanda rütubətin paylanması
+    81  22. Dünyanın iqlim qurşaqları və iqlim tipləri
+    86  23. Azərbaycanın iqlim tiplər
+    89  24. Dünyanın aqroiqlim ehtiyatları
+    92  25. Qlobal iqlim dəyişmələri
+    96  • Ümumiləşdirici tapşırıqlar
+    97  V. Quru suları
+    97  26. Yer kürəsinin çayları
+   100  27. Azərbaycanın çayları
+   105  28. Çayların hidroloji xüsusiyyətlərinin təyini. Praktik dərs
+   107  29. Buzlaqlar və bataqlıqlar
+   111  30. Yeraltı sular
+   114  31. Xəzər dənizi
+   117  32. Xəzər dənizinin iqtisadi əhəmiyyəti. Layihə dərsi
+   119  • Ümumiləşdirici tapşırıqlar
+   121  VI. Coğrafi təbəqə
+   121  33. Coğrafi təbəqənin inkişafı
+   123  34. Coğrafi təbəqənin qanunauyğunluqları
+   126  35. Azərbaycanın qoruqları və yasaqlıqları
+   130  36. Azərbaycanın fiziki-coğrafi vilayətləri: Böyük Qafqaz
+   134  37. Kür dağarası çökəkliyi vilayəti
+   136  38. Kiçik Qafqaz vilayəti
+   139  39. Lənkəran və Orta Araz (Naxçıvan) vilayətləri
+   142  • Ümumiləşdirici tapşırıqlar
+
+== 2. DÜNYANIN SİYASİ VƏ İQTİSADİ MƏNZƏRƏSİ
+   144  VII. Dünya əhalisi
+   144  40. Əhali artımı və onun yaratdığı problemlər
+   147  41. Əhalinin yerləşməsi
+   150  42. Urbanizasiya. Böyük şəhərlər
+   154  43. Urbanizasiya. Regional fərqlər
+   158  44. Azərbaycanda əhalinin sıxlığı və urbanizasiya
+   162  • Ümumiləşdirici tapşırıqlar
+   163  VIII. Siyasi münasibətlər
+   163  45. Dünyanın siyasi xəritəsinin formalaşması
+   167  46. Ölkələrin geosiyasi mövqeyi
+   169  47. Azərbaycanın türk dünyasında və dünyada geosiyasi mövqeyi. Layihə
+   170  48. Qarabağ - qələbənin coğrafi amilləri
+   174  • Ümumiləşdirici tapşırıqlar
+   175  IX. Elmi-texniki inqilab və iqtisadiyyat
+   175  49. Elmi-texniki inqilab
+   178  50. Elmi-texniki inqilabın dünya təsərrüfatına təsiri
+   183  51. Dünyada hasilat sənayesinin coğrafiyası
+   187  52. Dünyada emaledici sənayenin coğrafiyası
+   191  53. Dünyanın kənd təsərrüfatı
+   196  54. Nəqliyyatın coğrafiyası
+   200  55. Qlobal ekoloji problemlər
+   204  56. Azərbaycanın ekoloji problemləri. Layihə
+   206  • Ümumiləşdirici tapşırıqlar
+

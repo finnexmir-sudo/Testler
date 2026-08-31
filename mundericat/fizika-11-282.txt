@@ -1,0 +1,63 @@
+# fizika 11
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=282
+# səhifə: 208 · bölmə: 4 · mövzu: 51
+
+== I fəsil ELEKTROMAQNİT SAHƏSİ
+    10  1.1. Elektrik yükü. Elektromaqnit sahəsi
+    14  1.2. Elektrostatik sahə. Elektrostatik sahənin intensivliyi
+    18  1.3. Bircins elektrik sahəsinin işi. Potensial. Gərginlik
+    23  1.4. Kondensator. Elektrik tutumu
+    27  1.5. Kondensatorların birləşdirilməsi
+    31  1.6. Yüklü zərrəciyin maqnit sahəsində hərəkəti. Lorens qüvvəsi
+    34  1.7. Maqnit sahəsinin cərəyanlı naqilə təsiri. Amper qüvvəsi
+    38  1.8. Maqnit seli. Elektromaqnit induksiyası hadisəsi
+    42  1.9. Elektromaqnit induksiyası qanunu. Maqnit sahəsində hərəkət edən naqillərdə induksiya elektrik hərəkət qüvvəsi
+    46  1.10. Öz-özünə induksiya EHQ. Maqnit sahəsinin enerjisi
+    50  I fəslə aid məsələlər
+
+== II fəsil MÜXTƏLİF MÜHİTLƏRDƏ SABİT CƏRƏYAN QANUNLARI
+    54  2.1. Metalların elektrik keçiriciliyinin elektron nəzəriyyəsinin elementləri
+    58  2.2. Dövrə hissəsi üçün Om qanunu. Müqavimət. İfrat keçiricilik
+    62  2.3. Elektrik hərəkət qüvvəsi. Tam dövrə üçün Om qanunu
+    66  2.4. Vakuumda elektrik cərəyanı
+    70  2.5. Qazlarda elektrik cərəyanı
+    74  2.6. Elektrolit məhlullarında elektrik cərəyanı. Elektroliz qanunu
+    78  2.7. Yarımkeçiricilərdə elektrik cərəyanı
+    82  2.8. Yarımkeçirici diod. Tranzistor
+    86  2.9. Yarımkeçirici qurğular: onların elm, texnika və istehsalatda tətbiqi (təqdimat dərs)
+    87  II fəslə aid məsələlər
+
+== III fəsil ELEKTROMAQNİT RƏQSLƏRİ VƏ DALĞALARI
+    92  3.1. Sərbəst elektromaqnit rəqsləri
+    97  3.2. Elektromaqnit rəqslərində enerji çevrilmələri (təqdimat dərs)
+    99  3.3. Məcburi elektromaqnit rəqsləri: dəyişən cərəyan
+   104  3.4. Rezistor, kondensator və sarğac qoşulmuş dəyişən cərəyan dövrələri
+   109  3.5. Aktiv, induktiv və tutum müqavimətlərinin ardıcıl birləşdirildiyi dəyişən cərəyan dövrəsi üçün Om qanunu
+   113  3.6. Elektrik enerjisinin ötürülməsi. Transformator
+   117  3.7. Elektromaqnit dalğaları
+   122  3.8. Elektromaqnit dalğasının enerjisi. Elektromaqnit dalğaları şkalası (təqdimat dərs)
+   124  3.9. Radiorabitənin prinsipləri
+   128  3.10. İşığın dalğa təbiəti. İşığın dispersiyası
+   132  3.11. Dalğaların interferensiyası. İşığın interferensiyası
+   136  3.12. Dalğaların difraksiyası. İşığın difraksiyası
+   140  3.13. İşığın polyarlaşması
+   144  III fəslə aid məsələlər
+
+== IV fəsil ATOM FİZİKASI
+   148  4.1. Elektromaqnit şüalanmasının kvant təbiəti. Foton
+   152  4.2. Fotoeffekt. Fotoeffekt nəzəriyyə
+   157  4.3. Kompton effekti və de Broyl dalğaları (təqdimat dərs)
+   159  4.4. Atomun quruluşu haqqında Borun kvant postulatları. Atomun enerji səviyyələri
+   163  4.5. Şüalanmanın növləri və onların tətbiqləri (təqdimat dərs)
+   167  4.6. Atom nüvəsi. Atom nüvəsinin quruluşu
+   171  4.7. Nüvənin rabitə enerjisi
+   174  4.8. Radioaktivlik. Nüvələrin radioaktiv çevrilməsi
+   178  4.9. Radioaktiv çevrilmə qanunu
+   181  4.10. Nüvə reaksiyası
+   184  4.11. Uran nüvəsinin bölünməsi. Zəncirvarı nüvə reaksiyası
+   189  4.12. İstilik nüvə reaksiyası
+   192  4.13. Elementar zərrəciklər və onların qeydəalınma üsulları
+   197  4.14. Fizika və müasir həyat (təqdimat dərs)
+   201  IV fəslə aid məsələlər
+   204  Fəsillərə aid məsələlərin cavabları
+
