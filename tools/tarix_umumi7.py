@@ -1403,6 +1403,7 @@ def sql_yaz(n):
 -- =====================================================================
 
 do $$
+declare n int;
 begin
   if not exists (select 1 from public.topics t join public.subjects s
       on s.id = t.subject_id
@@ -1410,6 +1411,15 @@ begin
            ('utarix-7-turk-dovletleri', 'utarix-7-selcuq-osmanli')
      having count(*) = 2) then
     raise exception 'ONCE 70_movzular_umumi_tarix7.sql isledilmelidir.';
+  end if;
+  --  Kocurulen suallar 67-nin alti movzusunun USTUNE gelir.  67
+  --  islenmeyibse sondaki 366-liq yoxlama qaranliq xeta verer, ona
+  --  gore ferqi burada, ADI ile deyirik.
+  select count(*) into n from public.questions
+   where ext_key like 'utarix7-%%';
+  if n <> 186 then
+    raise exception 'ONCE 67_bank_tarix_umumi6_8.sql isledilmelidir '
+                    '(7-ci sinifin 186 baza sualindan %% tapildi).', n;
   end if;
 end $$;
 
