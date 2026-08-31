@@ -270,6 +270,32 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
 
+## E-dərslik yenilənməsi — hər il avqustda
+
+Mövzu ağacımız e-dərslikdən gəlir. Dərslik hər il yenilənə bilər: ad
+dəyişir, sıra dəyişir, mövzu əlavə olunur və ya **çıxarılır**.
+**Sistem bunu özü yoxlamır və yoxlaya bilməz** — tətbiqin xarici
+şəbəkə müraciəti yoxdur (CSP və layihə qaydası). Yoxlama insan işidir,
+bank sessiyası edir, dərslər başlamamış.
+
+Nə qorunur:
+
+- Açar `slug`-dur, ad deyil → **ad dəyişikliyi təhlükəsizdir**
+  (`on conflict (subject_id, slug) do update`)
+- `questions.topic_id` və `attempt_answers.topic_id` → `on delete set
+  null`: mövzu silinsə suallar və keçmiş nəticələr **qalır**
+- `class_plan_items.topic_id` → **`on delete restrict`**
+  (`db/102_movzu_qoruyucu.sql`). Əvvəl `cascade` idi: silinən mövzu
+  hər müəllimin planından «keçildi» tarixçəsi ilə birlikdə **səssizcə**
+  yox olurdu. İndi baza xəta atır — itki səssiz olmur.
+- `app.topu_islekdir(uuid)` — mövzu istifadədədirmi: sual, plan sətri,
+  generator qaydası, alt mövzu. İllik yeniləmə skriptləri bunu
+  çağırsın, öz-özünə şərt yazmasın. Yalnız baxım üçündür, `anon` və
+  `authenticated` çağıra bilmir.
+
+Praktikada: silmək əvəzinə **adı yeniləmək** demək olar həmişə
+düzgündür — slug qalır, tarixçə qalır.
+
 ## `db/` fayl nömrələri — iki sessiya arasında bölgü
 
 Bankı ayrı sessiya doldurur və onun faylları **hələ repoya
