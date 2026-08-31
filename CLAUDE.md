@@ -119,7 +119,16 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    **«Tarix» fənni artıq 5, 6, 8, 9, 11-ci siniflərdədir** — 7 və 10-cu
    sinifdə Azərbaycan tarixi dərsliyi portalda yoxdur, hər ikisinin
    məzmunu «Ümumi tarix»dədir.
-   Davamı: MİQ və sertifikasiya (eyni qəliblə).
+   **MİQ və sertifikasiya kataloqdan çıxarıldı** (`db/72_bos_fennler.sql`):
+   «Kurikulum» fənni, `miq` və `sertifikasiya` proqramları illərlə boş
+   qalmışdı — müəllim paneldə boş fənn və boş proqram görürdü. Bunlar
+   **ayrı məhsuldur**: mənbəyi e-dərslik dərsliyi deyil, DİM proqramıdır;
+   mövzu ağacı, çətinlik ölçüsü və qiymətləndirmə məntiqi də başqadır.
+   Hazır olanda eyni slug-larla geri qaytarıla bilər — `04_seed.sql`-də
+   nümunə sətirlər şərhdə saxlanılıb. `72` silmədən əvvəl hər sətrin boş
+   olduğunu yoxlayır, bir mövzu/sual/qrup/test bağlıdırsa **dayanır**.
+   `buraxilis` proqramı toxunulmayıb (bax «Kataloq — hər sinif BİR dəfə»)
+   — hazırda kataloqdakı tək boş proqramdır.
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
    «köməkçi işçisi» olsun.
@@ -130,7 +139,8 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    (portala yeni nəşr gələndə).
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
-mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
+mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); boş qalan
+`buraxilis` proqramının taleyi.
 
 ## Yerli yoxlama
 

@@ -157,7 +157,11 @@ select v.fayl,
     ('71_bank_tarix_umumi7.sql',
        (select count(*) from public.topics t join public.subjects s
           on s.id = t.subject_id and s.slug = 'tarix'
-          join public.levels l on l.id = t.level_id and l.code = '7') = 0)
+          join public.levels l on l.id = t.level_id and l.code = '7') = 0),
+    ('72_bos_fennler.sql',
+       (select count(*) from public.subjects where slug = 'kurikulum')
+       + (select count(*) from public.programs
+           where slug in ('miq', 'sertifikasiya')) = 0)
   ) as v(fayl, var)
  order by 1;
 
