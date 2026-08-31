@@ -22,6 +22,66 @@
 
   var LS = "sagird_ses";
 
+  /* ================================================================
+     CAVAB QARALAMASI
+     Internet kesilse, telefon sonse, brauzer sehifeni atsa - secilmis
+     cavablar itmesin.  Her secimden sonra localStorage-e yazilir;
+     eyni cehd yeniden acilanda geri qaytarilir.
+     Server tərəfinde HEC NE deyismir - bu, yalniz brauzerdedir.
+     Bal yene serverdə hesablanir, duzgun cavab burada yoxdur.
+     ================================================================ */
+  var LSD = "sagird_qaralama";
+  var DGUN = 2;          // qaralama omru - gun
+  var DMAX = 5;          // en cox saxlanilan cehd sayi
+
+  function draftAll() {
+    try {
+      var o = JSON.parse(localStorage.getItem(LSD) || "{}");
+      return (o && typeof o === "object" && !Array.isArray(o)) ? o : {};
+    } catch (e) { return {}; }
+  }
+
+  //  Kohnelmis ve hedden artiq qaralamalar atilir - yer dolmasin
+  function draftPrune(o) {
+    var hedd = Date.now() - DGUN * 86400000;
+    var k, list = [];
+    for (k in o) {
+      if (!Object.prototype.hasOwnProperty.call(o, k)) continue;
+      var d = o[k];
+      if (!d || typeof d !== "object" || !(Number(d.at) > hedd)) { delete o[k]; continue; }
+      list.push([k, Number(d.at)]);
+    }
+    if (list.length > DMAX) {
+      list.sort(function (a, b) { return b[1] - a[1]; });
+      list.slice(DMAX).forEach(function (x) { delete o[x[0]]; });
+    }
+    return o;
+  }
+
+  function draftSave() {
+    if (!S || !S.attempt || S.done) return;
+    try {
+      var o = draftPrune(draftAll());
+      o[S.attempt] = { i: S.i, ans: S.answers, at: Date.now() };
+      localStorage.setItem(LSD, JSON.stringify(o));
+    } catch (e) { /* yer yoxdursa sakit kec - test yene isleyir */ }
+  }
+
+  //  Qaralama YALNIZ eyni cehde aiddir (attempt id uuid-dir, qarismir)
+  function draftLoad(attempt) {
+    var d = draftAll()[attempt];
+    if (!d || !d.ans || typeof d.ans !== "object") return null;
+    return d;
+  }
+
+  function draftClear(attempt) {
+    try {
+      var o = draftAll();
+      delete o[attempt];
+      localStorage.setItem(LSD, JSON.stringify(o));
+    } catch (e) {}
+  }
+
   var ICON = {
     doc:   '<path d="M11 2.5H5.5A1.5 1.5 0 0 0 4 4v11a1.5 1.5 0 0 0 1.5 1.5h8A1.5 1.5 0 0 0 15 15V6.5L11 2.5z"/>' +
            '<path d="M11 2.5v4h4"/>',
@@ -308,6 +368,20 @@
           qs: d.questions || [], i: 0, answers: {}
         };
         if (!S.qs.length) { show(msg("warn", "Bu testdə hələ sual yoxdur.")); return; }
+        //  Yarimciq qalmis eyni cehd varsa cavablar geri qaytarilir.
+        //  Yalniz HEMIN testin suallarina aid cavablar goturulur.
+        var d0 = draftLoad(S.attempt);
+        if (d0) {
+          var mine = {}, n = 0;
+          S.qs.forEach(function (q) {
+            if (d0.ans[q.id]) { mine[q.id] = d0.ans[q.id]; n++; }
+          });
+          if (n) {
+            S.answers = mine;
+            S.i = Math.min(Math.max(Number(d0.i) || 0, 0), S.qs.length - 1);
+            S.restored = n;
+          }
+        }
         drawQuestion();
       })
       .catch(function (e) { errScreen(e, function () { startTest(testId); }); });
@@ -332,9 +406,17 @@
 
     var picked = S.answers[q.id];
 
+    //  Qaralamadan qayidib: bir defe bildiris goster, sonra sondur
+    var rest = "";
+    if (S.restored) {
+      rest = '<div class="ok restored">' + ic("check") + "<span>Əvvəlki " +
+        S.restored + " cavabınız qaytarıldı — davam edin.</span></div>";
+      S.restored = 0;
+    }
+
     show(
       '<div class="prog"><div class="bar"><i style="width:' + pct + '%"></i></div>' +
-        '<span class="cnt">' + (S.i + 1) + " / " + n + "</span></div>" +
+        '<span class="cnt">' + (S.i + 1) + " / " + n + "</span></div>" + rest +
       '<div class="q"><div class="body">' + esc(q.body) + "</div>" +
         '<button class="spk' + (VOICE ? "" : " hide") + '" id="spk" ' +
           'title="Sualı dinlə" aria-label="Sualı dinlə">' + ic("sound") + "</button>" +
@@ -376,6 +458,7 @@
     on("ans", "input", function () {
       var v = ($("ans").value || "").trim();
       if (v) S.answers[q.id] = v; else delete S.answers[q.id];
+      draftSave();
       var nx = $("btnNext");
       if (nx) {
         nx.classList.toggle("go", !!v);
@@ -391,6 +474,7 @@
         });
         b.classList.add("sel");
         S.answers[q.id] = b.getAttribute("data-o");
+        draftSave();
         var nx = $("btnNext");
         if (nx) { nx.classList.add("go"); nx.textContent = "Növbəti sual"; }
         markNav(true);
@@ -404,12 +488,12 @@
       back.id = "btnPrev";
       back.textContent = "Əvvəlki sual";
       main.appendChild(back);
-      back.addEventListener("click", function () { S.i--; drawQuestion(); });
+      back.addEventListener("click", function () { S.i--; draftSave(); drawQuestion(); });
     }
 
     on("btnNext", "click", function () {
       if (busy) return;
-      S.i++; drawQuestion();
+      S.i++; draftSave(); drawQuestion();
     });
 
     on("btnFinish", "click", function () {
@@ -427,6 +511,7 @@
       var b = e.target.closest ? e.target.closest("[data-j]") : null;
       if (!b || busy) return;
       S.i = Number(b.getAttribute("data-j"));
+      draftSave();
       drawQuestion();
     });
   }
@@ -448,7 +533,10 @@
     });
     sb.rpc("rpc_submit_attempt", {
       p_token: TOKEN, p_attempt_id: S.attempt, p_answers: payload
-    }).then(function (r) { screenResult(r); }).catch(function (e) {
+    }).then(function (r) {
+      draftClear(S.attempt);      //  gonderildi - qaralama lazim deyil
+      screenResult(r);
+    }).catch(function (e) {
       setBusy("btnFinish", false, "Testi bitir");
       /* Cavablar hele gonderilmeyib - tekrar cehd eyni cehdi bitirir */
       errScreen(e, finish);

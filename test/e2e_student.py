@@ -372,6 +372,65 @@ with sync_playwright() as pw:
     ok(nn == nq2, "cavabsiz suallar bazada 'sehv' YOX, bos yazilir",
        "%d / %d" % (nn, nq2))
 
+    print("Q · Cavab qaralaması — bağlantı kəsilsə itmir")
+    #  Bu bloka qeder butun testler islenib.  Ona gore OZ TEZE
+    #  teyinatimizi acirik - blok siradan asili qalmasin.
+    QT = db("""select id::text i from public.tests
+                where owner_type='platform' and slug='riy-3-analiz'""", one=True)["i"]
+    db("""delete from public.attempt_answers aa using public.attempts a
+           where a.id = aa.attempt_id and a.test_id = %s;
+          delete from public.attempts where test_id = %s;
+          insert into public.assignments (class_id, test_id, max_attempts)
+          values ('c1c1c1c1-0000-0000-0000-000000000001', %s, 5)
+          on conflict do nothing;""", (QT, QT, QT))
+    #  Abune lazimdirsa acilsin - kilidli qalmasin
+    db("""insert into public.subscriptions (account_id, plan_id, status,
+                                            current_period_end)
+          select 'b1b1b1b1-0000-0000-0000-000000000001', p.id, 'active',
+                 now() + interval '30 days'
+            from public.plans p where p.slug = 'repetitor-25'
+           on conflict do nothing;""")
+    pg.reload(); pg.wait_for_selector(".test", timeout=8000)
+    pg.locator(".test:not(.lock):not(.done)").first.click()
+    pg.wait_for_selector(".opt", timeout=8000)
+    pg.locator("[data-o]").first.click()
+    pg.click("#btnNext"); pg.wait_for_timeout(200)
+    pg.locator("[data-o]").first.click()
+    pg.wait_for_timeout(200)
+
+    dr = pg.evaluate("JSON.parse(localStorage.getItem('sagird_qaralama')||'{}')")
+    ok(isinstance(dr, dict) and len(dr) == 1, "qaralama yazildi", list(dr.keys())[:1])
+    ent = list(dr.values())[0] if dr else {}
+    ok(len(ent.get("ans") or {}) == 2, "iki cavab saxlanilib",
+       len(ent.get("ans") or {}))
+    ok(ent.get("i") == 1, "movqe de saxlanilib", ent.get("i"))
+
+    #  "Telefon sondu" - sehife tam yenilenir, test yeniden acilir
+    pg.reload(); pg.wait_for_selector(".test", timeout=8000)
+    pg.locator(".test:not(.lock):not(.done)").first.click()
+    pg.wait_for_selector(".opt", timeout=8000)
+    ok(pg.locator(".ok.restored").count() == 1, "berpa bildirisi cixir")
+    ok("2 cavabınız qaytarıldı" in pg.inner_text(".ok.restored"),
+       "bildiris sayi duz gosterir", pg.inner_text(".ok.restored"))
+    #  Cari sual xeritede "cur" olur - "done" yalniz o birisidir
+    ok(pg.locator(".qnav .done").count() == 1, "evvelki sual cavabli isarelenib",
+       pg.locator(".qnav .done").count())
+    ok(pg.locator(".qnav .cur").count() == 1, "movqe berpa olunub")
+    #  ESAS SUBUT: berpa olunan cavab ekranda secili gorunur
+    ok(pg.locator(".opt.sel").count() == 1, "berpa olunan cavab secili gelir",
+       pg.locator(".opt.sel").count())
+    #  Bildiris bir defelikdir - novbeti suala kecende itir
+    pg.click("#btnNext"); pg.wait_for_timeout(200)
+    ok(pg.locator(".ok.restored").count() == 0, "bildiris bir defelikdir")
+
+    #  Testi bitirende qaralama silinir
+    while pg.locator("#btnNext").count():
+        pg.click("#btnNext"); pg.wait_for_timeout(120)
+    pg.click("#btnFinish")
+    pg.wait_for_selector(".score", timeout=8000)
+    dr2 = pg.evaluate("JSON.parse(localStorage.getItem('sagird_qaralama')||'{}')")
+    ok(len(dr2) == 0, "gonderisden sonra qaralama silinir", dr2)
+
     ctx.close(); br.close()
 
 print()

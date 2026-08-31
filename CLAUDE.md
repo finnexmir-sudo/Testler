@@ -143,7 +143,17 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    `https`-də qeydiyyatdan keçir — e2e 127.0.0.1-də işləyir, keş yoxlamaları
    qeyri-müəyyən etməsin. Oflayn rejim **vəd edilmir**: yalnız karkas keşlənir.
    iOS-da `beforeinstallprompt` yoxdur — Safari üçün ayrıca izah zolağı çıxır.
-9. Riyaziyyat 2 mövzularının yenilənməsi
+9. ~~Cavab qaralaması~~ — hazırdır (`sagird/app.js`). Şagird cavab
+   seçəndə və sual dəyişəndə vəziyyət `localStorage`-a yazılır
+   (açar `sagird_qaralama`, cəhd id-si ilə açarlanır, 2 gün / ən çox
+   5 cəhd saxlanılır). Eyni cəhd yenidən açılanda cavablar və mövqe
+   qaytarılır, bir dəfəlik «N cavabınız qaytarıldı» bildirişi çıxır;
+   uğurlu göndərişdən sonra qaralama silinir.
+   **Səbəb:** cavablar yalnız yaddaşda idi — telefon sönsə, brauzer
+   səhifəni atsa itirdi. **Server tərəfində heç nə dəyişmir**, bal
+   yenə serverdə hesablanır, düzgün cavab klientə düşmür.
+   Bu, oflayn rejim DEYİL — yalnız qısa bağlantı kəsilməsini keçirir.
+10. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
