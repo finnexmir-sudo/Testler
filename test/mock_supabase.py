@@ -18,6 +18,7 @@ import os
 import secrets
 import sys
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -53,6 +54,21 @@ class H(BaseHTTPRequestHandler):
         pass
 
     # ------------------------------------------------------------ komekci
+    def test_delay(self):
+        """YOXLAMA ucun: X-Test-Delay basligi (ms) qeder gozle.
+
+        Kes yoxlamalari ucun lazimdir - "kohne cavab teze ekranin
+        ustune dusmesin" kimi yarislari basqa cur deterministik
+        yaratmaq olmur.  Server COX AXINLIDIR, ona gore burada
+        gozlemek yalniz HEMIN sorgunu lengidir.
+        Yalniz mock-dadir; hegiqi Supabase belə bir baslıq tanimir."""
+        try:
+            ms = int(self.headers.get("X-Test-Delay") or 0)
+        except ValueError:
+            ms = 0
+        if 0 < ms <= 10000:
+            time.sleep(ms / 1000.0)
+
     def send(self, code, payload):
         body = json.dumps(payload, default=str).encode("utf-8")
         self.send_response(code)
@@ -86,6 +102,7 @@ class H(BaseHTTPRequestHandler):
 
     # -------------------------------------------------------------- POST
     def do_POST(self):
+        self.test_delay()
         u = urlparse(self.path)
         q = parse_qs(u.query)
         b = self.body()
@@ -286,6 +303,7 @@ class H(BaseHTTPRequestHandler):
             return self.send(400, {"message": str(e)})
 
     def do_GET(self):
+        self.test_delay()
         u = urlparse(self.path)
         if u.path == "/test/recovery":
             t = RECOVER.get("last")

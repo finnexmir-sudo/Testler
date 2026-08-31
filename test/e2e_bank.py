@@ -15,6 +15,28 @@ TEST_CFG = """window.CFG = {
   STUDENT_URL: "https://example.test/Testler/"
 };"""
 
+def pool_click(pg, name):
+    """Hovuz seqmentine klik + kliyin TUTDUGUNU tesdiq.
+
+    Sehife tezece qurulanda ekran ard-arda iki defe cizile bilir
+    (kontekst -> route -> screenBank).  Klik ikinci cizilisin altina
+    dusse itir: DOM deyisir, hadise hec kime catmir.  Bu, istifadeci
+    ucun kicik meseledir (bir daha basir), amma yoxlamada kes verir.
+    Ona gore seqmentin AKTIV oldugunu gozleyirik, tutmayibsa bir
+    defe tekrar basiriq."""
+    for attempt in (1, 2):
+        pg.locator("#bPool .seg", has_text=name).click()
+        try:
+            pg.wait_for_function(
+                "n => { const s = document.querySelector('#bPool .seg.on');"
+                "       return !!s && s.innerText.indexOf(n) >= 0; }",
+                arg=name, timeout=6000)
+            return
+        except Exception:
+            if attempt == 2:
+                raise
+
+
 def empty_icons(pg):
     """Terif olunmayan ikon: <svg> var, icinde hec ne yoxdur."""
     return pg.evaluate(
@@ -225,7 +247,7 @@ with sync_playwright() as pw:
     pg.locator("#bDiff .chip", has_text="Asan").click(); pg.wait_for_timeout(500)
     ok(pg.locator(".qrow").count() == 1, "suzgec geri qaytarilir")
 
-    pg.locator("#bPool .seg", has_text="Platforma").click()
+    pool_click(pg, "Platforma")
     # suzgecsiz platforma hovuzu siyahi tokmur - fenn secimi teklif edir
     pg.wait_for_selector(".bpick .pkb", timeout=8000)
     ok(pg.locator(".qrow").count() == 0,
@@ -421,7 +443,7 @@ with sync_playwright() as pw:
     print("I · Platforma hovuzu: siyahı yox, əhatə görüntüsü")
     pg.goto(PANEL + "#/b"); pg.reload()
     pg.wait_for_selector("#bPool", timeout=15000)
-    pg.locator("#bPool .seg", has_text="Platforma").click()
+    pool_click(pg, "Platforma")
     pg.wait_for_selector(".bpick .pkb", timeout=15000)
     ok(pg.locator(".bpick .pkb").count() >= 1, "fenn secicisi cixir",
        pg.locator(".bpick .pkb").count())
@@ -465,6 +487,11 @@ with sync_playwright() as pw:
     ok("asan" in t0 or "orta" in t0 or "çətin" in t0,
        "cetinlik bolgusu yazilir", t0.replace("\n", " ")[:60])
     ok(pg.locator("#covUp").count() == 1, "«bütün siniflər» geri duymesi var")
+    #  Katalogda movzu nisanlari ARTIQDIR - asagidaki setirler eyni
+    #  movzulari sayla ve numune ile gosterir.  Eyni 12 ad iki defe
+    #  yazilirdi.
+    ok(pg.locator("#bTop").count() == 0,
+       "katalogda movzu nisanlari tekrarlanmir")
     #  Basliqda sinfin ADI olmalidir, cilpaq kod yox.  Bu blok reload-dan
     #  sonra gelir, yeni LEVELS kesi BOSDUR - adi serverin cavabindan
     #  goturduyumuzu mehz burada yoxlayiriq.
@@ -497,11 +524,18 @@ with sync_playwright() as pw:
     #  suzgecde secili olan fenn/sinif setirlerde TEKRARLANMIR
     r0 = pg.locator(".qrow i").first.inner_text()
     ok("Riyaziyyat" not in r0, "setirde fenn tekrarlanmir", r0.replace("\n", " "))
+    #  Siyahi rejimde nisanlar geri gelir - secilmis movzunu goturmek
+    #  ucun basqa yol yoxdur
+    if pg.locator("details.filt:not([open])").count():
+        pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
+    ok(pg.locator("#bTop .chip.on").count() == 1,
+       "siyahida secilmis movzu nisani gorunur",
+       pg.locator("#bTop .chip.on").count())
 
     #  «daha gostər»: 50-den cox netice veren axtarisa kecirik
     pg.goto(PANEL + "#/b"); pg.reload()
     pg.wait_for_selector("#bPool", timeout=15000)
-    pg.locator("#bPool .seg", has_text="Platforma").click()
+    pool_click(pg, "Platforma")
     #  DIQQET: reload-dan sonra hovuz "mine"-dir ve OZ suallarinin
     #  siyahisi ekrandadir.  Sadece ".qrow" gozlesek kohne setirlere
     #  baxariq - fenn secicisini gozleyib teze render-i tesdiqleyirik.
@@ -528,23 +562,63 @@ with sync_playwright() as pw:
         ok(pg.locator("#bMore").count() == 0,
            "hamisi gorunurse duyme cixmir", "%d/%d" % (n1, total))
 
-    print("L · Mövzu nişanları sinif seçilməyincə tökülmür")
+    print("L · Siyahı rejimində mövzu nişanları sinif istəyir")
+    #  Katalogda nisan bloku umumiyyetle yoxdur (blok J).  Qayda
+    #  SIYAHI rejiminde qalir: cetinlik secilen kimi katalogdan
+    #  cixiriq ve 113 nisan tokulmesin deye sinif teleb olunur.
     pg.goto(PANEL + "#/b"); pg.reload()
     pg.wait_for_selector("#bPool", timeout=15000)
-    pg.locator("#bPool .seg", has_text="Platforma").click()
-    pg.wait_for_selector("#bFilt", timeout=15000)
+    pool_click(pg, "Platforma")
+    pg.wait_for_selector(".bpick .pkb", timeout=15000)
     pg.locator("details.filt summary").click()
     pg.wait_for_selector("#bsub", timeout=15000)
     pg.select_option("#bsub", "riyaziyyat")
-    pg.wait_for_selector("#bsub", timeout=15000); pg.wait_for_timeout(500)
-    ok(pg.locator("#bTop").count() == 0,
-       "platformada sinifsiz movzu nisanlari GIZLIDIR")
-    ok("sinif də seçin" in pg.inner_text("#bFilt"), "sebeb yazilir")
+    pg.wait_for_selector("#bsub", timeout=15000); pg.wait_for_timeout(600)
+    ok(pg.locator("#bTop").count() == 0, "katalogda nisan bloku yoxdur")
+    ok("mövzu var" not in pg.inner_text("#bFilt"),
+       "katalogda ipucu da tekrarlanmir - ehate paneli onu ozu verir")
+
+    #  cetinlik secilir -> siyahi rejimi -> nisan bloku qayidir
+    pg.locator("#bDiff .chip", has_text="Asan").click()
+    pg.wait_for_selector(".qrow", timeout=15000)
+    ok("sinif də seçin" in pg.inner_text("#bFilt"),
+       "cox movzu olanda siyahida sinif istenilir")
     ok("mövzu var" in pg.inner_text("#bFilt"), "necə mövzu oldugu yazilir")
+    ok(pg.locator("#bTop").count() == 0, "sinifsiz nisanlar hele tokulmur")
     pg.select_option("#blev", code)
     pg.wait_for_selector("#bTop", timeout=15000)
     nch = pg.locator("#bTop .chip").count()
     ok(0 < nch <= 20, "sinifle nisan sayi yigcamdir", nch)
+
+    print("M · Köhnə cavab təzə ekranın üstünə düşmür")
+    #  guard() yalniz UNVANI tutusdurur; bank ekraninda hovuz
+    #  deyisende unvan ("#/b") DEYISMIR.  Ona gore "mine" hovuzunun
+    #  ucusdaki cavabi "Platforma" render-inin ustune dusurdu:
+    #  seqmentde Platforma yanirdi, siyahida ise muellimin OZ
+    #  suallari qalirdi.  Yarisi deterministik etmek ucun BIRINCI
+    #  rpc_bank_list-i mock-da 2 saniye lengidirik (X-Test-Delay).
+    calls = {"n": 0}
+
+    def slow_first_list(route, request):
+        calls["n"] += 1
+        h = dict(request.headers)
+        if calls["n"] == 1:
+            h["x-test-delay"] = "2000"
+        route.continue_(headers=h)
+
+    pg.route("**/rpc/rpc_bank_list", slow_first_list)
+    pg.goto(PANEL + "#/b"); pg.reload()
+    pg.wait_for_selector("#bPool", timeout=20000)
+    pool_click(pg, "Platforma")           # kohne sorgu HELE ucusdadir
+    pg.wait_for_selector(".bpick .pkb", timeout=20000)
+    ok(calls["n"] >= 1, "lengidilen sorgu hequiqeten gedib", calls["n"])
+    pg.wait_for_timeout(2600)             # lengidilen cavab bu araliqda gelir
+    seg  = pg.locator("#bPool .seg.on").inner_text()
+    rows = pg.locator(".qrow").count()
+    ok(seg == "Platforma", "seqment Platforma qalir", seg)
+    ok(rows == 0, "KOHNE hovuzun siyahisi ustune DUSMUR", "%d setir" % rows)
+    ok(pg.locator(".bpick .pkb").count() >= 1, "fenn secicisi yerinde qalir")
+    pg.unroute("**/rpc/rpc_bank_list")
 
     print("H2 · Telefonda səliqə")
     ok(pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"),

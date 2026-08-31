@@ -186,7 +186,15 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    çox olanda sinif tələb olunur (şərt **saya** bağlıdır, hovuza yox —
    öz bankı kiçikdir, orada sinif istəmək artıq maneədir).
    Axtarış yazılanda və ya mövzu/çətinlik seçiləndə adi siyahıya
-   qayıdılır — orada müəllim konkret sual axtarır.
+   qayıdılır — orada müəllim konkret sual axtarır; nişanlar da
+   yalnız orada çıxır (kataloqda eyni adlar iki dəfə yazılırdı).
+   **Sorğu nəsli:** `guard()` yalnız ünvanı tutuşdurur, bank
+   ekranında isə hovuz/süzgəc dəyişəndə ünvan (`#/b`) dəyişmir —
+   köhnə sorğunun cavabı təzə render-in üstünə düşürdü (seqmentdə
+   «Platforma», siyahıda müəllimin öz sualları). `BFSEQ`/`BSEQ`
+   sayğacları bunu bağlayır. Yoxlama üçün mock `X-Test-Delay`
+   başlığını tanıyır — yarışı deterministik yaratmağın başqa yolu
+   yoxdur (mock çoxaxınlıdır).
 12. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
 

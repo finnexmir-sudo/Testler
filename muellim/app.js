@@ -3459,6 +3459,15 @@
       Telefonda ~20 nisan iki-uc setirdir, 60 nisan ekrani udur.  */
   var TOPCAP = 20;
 
+  /*  SORGU NESLI.  guard() yalniz UNVANI tutusdurur - bank ekraninda
+      hovuz/suzgec deyisende unvan ("#/b") DEYISMIR, ona gore kohne
+      sorgunun cavabi teze render-in ustune dusurdu: seqmentde
+      "Platforma" yanirdi, siyahida ise muellimin oz suallari
+      qalirdi.  Her sorgu oz neslini goturur; cavab gelende nesil
+      hele de sonuncudursa yazilir.  */
+  var BFSEQ = 0;   // suzgec (rpc_bank_facets)
+  var BSEQ  = 0;   // netice sahesi (rpc_bank_list / rpc_bank_coverage)
+
   /*  Siyahida nece sual atlanir.  rpc_bank_list offset-i onsuz da
       desteklyirdi - ekran hemise 0 gonderirdi, ona gore 51-ci suala
       catmaq MUMKUN DEYILDI.  Suzgec deyisende sifirlanir.  */
@@ -3496,10 +3505,11 @@
     topTitle.textContent = "Sual bankı";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
 
+    var myf = ++BFSEQ;
     sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
                                 p_level: f.level || null, p_pool: f.pool || "mine" })
       .then(function (fac) {
-        if (!live()) return;
+        if (!live() || myf !== BFSEQ) return;
         FAC = fac || {};
         drawBank();
       })
@@ -3569,6 +3579,13 @@
            (Ingilis dilinde 60 nisan) - suzgec ekrani udurdu.
            Sert SAYA baglidir, hovuza yox: oz banki kicikdir, orada
            sinif istemek lazimsiz maneedir; cox olanda sinif isteyirik. */
+        /* KATALOG REJIMINDE nisanlar umumiyyetle cixmir: asagidaki
+           ehate siyahisi eyni movzulari sayla, cetinlik bolgusu ve
+           numune ile gosterir - eyni 12 ad ekranda IKI DEFE yazilirdi.
+           "Sinif secin" ipucunu da ehate panelinin ozu verir.
+           Movzu ve ya cetinlik secilen kimi siyahiya keciririk;
+           nisanlar orada YENE lazimdir - secimi goturmek ucun. */
+        (catalogMode(f) ? "" :
         (!f.subject || (!f.level && (FAC.topics || []).length > TOPCAP)
           ? '<p class="muted" style="margin:12px 0 0">' +
             (!f.subject
@@ -3581,7 +3598,7 @@
                     '" data-t="' + esc(t.id) + '">' +
                     esc(topLabel(t, f.level)) + "</button>";
                 }).join("") + "</div>"
-              : '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>')) +
+              : '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>'))) +
         "</details>" +
       "</div>" +
       '<div class="spacer"></div>' +
@@ -3653,13 +3670,14 @@
   function loadCoverage(f, live) {
     var box = $("bList");
     if (box) box.innerHTML = '<div class="skel">Yüklənir…</div>';
+    var my = ++BSEQ;
     sb.rpc("rpc_bank_coverage", {
       p_subject: f.subject, p_level: f.level || null, p_pool: f.pool
     }).then(function (d) {
-      if (!live()) return;
+      if (!live() || my !== BSEQ) return;
       drawCoverage(f, d || {});
     }).catch(function (e) {
-      if (!live()) return;
+      if (!live() || my !== BSEQ) return;
       var b = $("bList");
       if (b) b.innerHTML = msg("err", fail(e));
     });
@@ -3826,6 +3844,7 @@
     if (catalogMode(f) && f.subject) return loadCoverage(f, live);
 
     if (f.pool !== "mine" && nFilt(f) === 0 && !(f.q || "").trim()) {
+      BSEQ++;                      //  ucusdaki kohne cavab bura yazmasin
       var box0 = $("bList");
       if (box0) {
         var subs = subFilter((FAC.subjects || []).filter(function (x) {
@@ -3855,9 +3874,10 @@
       return;
     }
     if (!append) BOFF = 0;
+    var my = ++BSEQ;
     sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: 50, p_offset: BOFF })
       .then(function (d) {
-        if (!live()) return;
+        if (!live() || my !== BSEQ) return;
         var box = $("bList");
         if (!box) return;
         d = d || {};
@@ -3926,7 +3946,7 @@
         });
       })
       .catch(function (e) {
-        if (!live()) return;
+        if (!live() || my !== BSEQ) return;
         var box = $("bList");
         if (box) box.innerHTML = msg("err", fail(e));
       });
