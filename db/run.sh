@@ -63,6 +63,11 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 57_sinif_dubli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 58_movzular_edebiyyat9_10.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 59_bank_edebiyyat10.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 60_bank_edebiyyat9.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 61_movzular_edebiyyat5_8.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 62_bank_edebiyyat5.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 63_bank_edebiyyat6.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 64_bank_edebiyyat7.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 65_bank_edebiyyat8.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql

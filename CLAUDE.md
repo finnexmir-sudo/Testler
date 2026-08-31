@@ -76,11 +76,16 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    10-cu sinifin dünya tarixi «Tarix» fənni altında qalır.
    **Ədəbiyyat ayrıca fənndir** — «Az dili» mövzuları yalnız
    qrammatikadır, ədəbiyyatın öz dərsliyi və qiyməti var.
-   Hazırdır: **9, 10, 11-ci siniflər** — hər sinifdə 8 mövzu × 31 =
-   744 sual (`db/55`, `db/56`, `db/58`, `db/59`, `db/60`;
-   `tools/edebiyyat9/10/11.py`). Mövzu bölgüsü dərsliyin öz bölmələri
-   (dövr / müəllif qrupu) üzrədir, tək-tək şair üzrə yox: bir şair üzrə
-   31 keyfiyyətli sual çıxmır. Davamı: 5-8.
+   Hazırdır: **5-11-ci siniflər** — 48 mövzu × 31 = 1488 sual
+   (`db/55`, `56`, `58`, `59`, `60`, `61`, `62`, `63`, `64`, `65`;
+   `tools/edebiyyat5…11.py`). Mövzu sayı dərsliyin **öz bölmə sayıdır**:
+   5→7, 6→5, 7→5, 8→7, 9/10/11→8. 5-7-ci sinifdə bölmələr **tema**
+   üzrədir («Yurd sevgisi», «Təbiətin gözəlliyi»), 8-11-də isə **dövr**
+   üzrə — dərslik özü belə qurub, süni bölgü edilməyib.
+   **Müasir müəlliflərin tələsi:** 5-7-ci sinif dərsliyində mətnini
+   bilmədiyim çoxlu müasir müəllif var. Onların süjet təfərrüatı
+   uydurulmur — sual mündəricatdan çıxan faktlar üzərində qurulur:
+   müəllif-əsər cütü, bölmə, ədəbi növ, mündəricatın göstərdiyi janr.
    **Tələ:** eyni müəllif iki sinifdə olur (Vurğun, R.Rza, Şıxlı,
    Vahabzadə…), amma dərslik hər sinifdə BAŞQA əsərini verir. Sual
    həmin sinfin əsərinə görə yazılmalıdır — yoxsa siniflər arasında
@@ -88,9 +93,9 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    Riyaziyyat 1-11-də hər mövzuda **40 sual**, Az dili 3-11,
    ingilis 5-11, tarix 5-11 və təbiət fənləri
    (fizika/kimya/biologiya/coğrafiya) **30 sual**, qalanlarda
-   **20 sual**, ədəbiyyatda **31 sual** (cəmi ~17 560 platforma sualı).
+   **20 sual**, ədəbiyyatda **31 sual** (cəmi ~18 300 platforma sualı).
    Mövzu ağacları `db/25/29/33/37/41/45/49_movzular_orta*.sql`,
-   banklar `db/23–52`, `54`, `56`, `59`, `60`.
+   banklar `db/23–52`, `54`, `56`, `59`, `60`, `62–65`.
    Davamı: MİQ və sertifikasiya (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
