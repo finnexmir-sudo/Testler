@@ -734,3 +734,29 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .smp .sq li.c{background:var(--ok-tint);border-color:var(--ok-line);
   color:#05603a;font-weight:560}
 .smp .morebtn{margin-top:6px;border-top:1px solid var(--n-100)}
+
+/* =================================== ders plani: fesil (alt movzular)
+   Setirler artiq DERSDIR, fesil ise onlari qruplasdirir.  Fesil
+   YIGILMIS gelir - 8-ci sinifde 11 fesil ~50 ders demekdir. */
+.plgrp{border-bottom:1px solid var(--n-100)}
+.plgrp:last-child{border-bottom:0}
+.plgrp>summary{display:flex;align-items:center;gap:8px;
+  padding:10px 14px;cursor:pointer;list-style:none;
+  font-size:13px;color:var(--fg)}
+.plgrp>summary::-webkit-details-marker{display:none}
+.plgrp>summary::before{content:"▸";color:var(--fg-3);font-size:11px;
+  transition:transform .15s;display:inline-block}
+.plgrp[open]>summary::before{transform:rotate(90deg)}
+.plgrp>summary:hover{background:var(--n-25)}
+.plgrp>summary b{font-weight:570;flex:1;min-width:0}
+.plgrp .plgc{flex:0 0 auto;font-size:11.5px;font-weight:600;
+  color:var(--fg-3);padding:1px 8px;border-radius:999px;
+  background:var(--n-50);border:1px solid var(--n-100)}
+.plgrp .plgc.ok{background:var(--ok-tint);border-color:var(--ok-line);
+  color:var(--ok)}
+/* fesil daxilindeki dersler bir az iceri */
+.plgrp .plrow{padding-left:30px}
+
+/* "Novbeti ders" kartinda feslin adi */
+.plcur .plgn{display:block;font-size:11.5px;font-weight:530;
+  color:var(--fg-3);margin:2px 0 1px}

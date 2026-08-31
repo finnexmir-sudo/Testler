@@ -808,12 +808,31 @@
         if (items[i].done) lastDone = items[i];
       }
       var pct = p.total ? Math.round(p.done * 100 / p.total) : 0;
+      /*  Alt movzular varsa setirler artiq FESIL deyil, DERSDIR -
+          "2 / 47 ders" demek "2 / 11 movzu"dan durustdur.  */
+      var grouped = items.some(function (x) { return !!x.group_id; });
+      var unit = grouped ? " dərs · " : " mövzu · ";
+      /*  Ardicil setirleri feslere boluruk.  Fesil DB-de setir deyil -
+          server onu topics.parent_id-den toredir, biz burada yigiriq.  */
+      var blocks = [];
+      items.forEach(function (it) {
+        var last = blocks[blocks.length - 1];
+        if (it.group_id && last && last.gid === it.group_id) {
+          last.items.push(it); return;
+        }
+        blocks.push({ gid: it.group_id || null, name: it.group || "", items: [it] });
+      });
       return '<div class="card plan" data-p="' + esc(p.id) + '">' +
         '<div class="plhead"><b>' + esc(p.subject) + " · " + esc(p.level) + "</b>" +
-          "<span>" + p.done + " / " + p.total + " mövzu · " + pct + "%</span></div>" +
+          "<span>" + p.done + " / " + p.total + unit + pct + "%</span></div>" +
         '<div class="plbar"><i style="width:' + pct + '%"></i></div>' +
         (cur
-          ? '<div class="plcur"><span class="pltag">Növbəti mövzu</span>' +
+          ? '<div class="plcur"><span class="pltag">Növbəti ' +
+              (cur.group ? "dərs" : "mövzu") + "</span>" +
+            (cur.group
+              ? '<span class="plgn">' + esc(cur.group) +
+                (cur.gtotal ? " · " + cur.gpos + "/" + cur.gtotal : "") + "</span>"
+              : "") +
             "<b>" + cur.ord + ". " + esc(cur.topic) + "</b>" +
             '<div class="plbtns">' +
               '<button class="btn go sm" data-pldone="' + esc(cur.id) + '"' +
@@ -825,7 +844,28 @@
             '<p class="muted" style="margin:6px 0 0">Plan tamamlanıb — ' +
             "hesabatda zəif mövzulara baxıb təkrar testlər verə bilərsiniz.</p></div>") +
         "<details><summary>Bütün mövzular</summary>" +
-          '<div class="pllist">' + items.map(function (it) {
+          '<div class="pllist">' + blocks.map(function (bl) {
+            var rows = bl.items.map(plRow).join("");
+            if (!bl.gid) return rows;          //  fesilsiz - duz setir
+            /*  Fesil YIGILMIS gelir.  8-ci sinifde 11 fesil ~50 ders
+                demekdir - hamisi acıq olsa telefonda ekran udulur.
+                Yalniz cari dersin fesli acıq acilir.  */
+            var nd = bl.items.filter(function (x) { return x.done; }).length;
+            var acik = cur && bl.items.some(function (x) { return x.id === cur.id; });
+            return '<details class="plgrp"' + (acik ? " open" : "") + ">" +
+              "<summary><b>" + esc(bl.name) + "</b>" +
+              '<span class="plgc' + (nd === bl.items.length ? " ok" : "") + '">' +
+                nd + "/" + bl.items.length + "</span></summary>" +
+              rows + "</details>";
+          }).join("") + "</div>" +
+          '<div class="plmbar" id="plmb-' + esc(p.id) + '"></div>' +
+          '<button class="btn sm ghost" data-pldel="' + esc(p.id) +
+            '" style="margin-top:10px">Planı sil</button>' +
+        "</details>" +
+        '<div id="plm-' + esc(p.id) + '"></div>' +
+      "</div>";
+
+      function plRow(it) {
             /* Movzu testinin qrup ortalamasi - plan adaptiv olsun:
                zeif cixan movzu qirmizi gorunur, "tekrar yig" teklif olunur */
             var avgN = it.avg == null ? null : Number(it.avg);
@@ -851,7 +891,11 @@
                 : "") +
               (it.test_id
                 ? '<a href="#/t/' + esc(it.test_id) + '" class="pltest">vərəq</a>'
-                : (it.done
+                /*  can_test serverden gelir: fesilsiz movzuda ozu,
+                    fesildə ise YALNIZ son dersde.  Suallar fesle
+                    baglidir - hər dersde teklif etsek bes ders eyni
+                    hovuzdan demek olar eyni testi yigardi.  */
+                : (it.can_test
                     ? '<button class="plmk" data-plmk="' + esc(it.id) + '"' +
                       (d.paid ? "" : ' disabled title="Abunə paketi ilə"') +
                       ">test yığ</button>"
@@ -865,13 +909,7 @@
                 ? '<button class="plundo" data-plundo="' + esc(it.id) +
                   '" title="Geri qaytar">geri</button>' : "") +
             "</div>";
-          }).join("") + "</div>" +
-          '<div class="plmbar" id="plmb-' + esc(p.id) + '"></div>' +
-          '<button class="btn sm ghost" data-pldel="' + esc(p.id) +
-            '" style="margin-top:10px">Planı sil</button>' +
-        "</details>" +
-        '<div id="plm-' + esc(p.id) + '"></div>' +
-      "</div>";
+      }
     }).join("");
     bindPlan(g);
   }
@@ -940,6 +978,25 @@
     function rebindOnly() {}
   }
 
+  /*  can_test-i YERLI olaraq yeniden hesablayir.
+      Serverin qaydasi ile eynidir (db/32): fesilsiz movzuda ozu,
+      fesildə ise YALNIZ son ders.  Niye tekrarlanir: "Kecildi"
+      basilanda ekran DERHAL yenilenir, serverden yeniden sorusmuruq -
+      yoxsa acilan "test yigilsinmi?" teklifi silinerdi.  Server yene
+      de esas menbedir: sehife yenilenende onun deyeri gelir.  */
+  function planCanTest(p) {
+    var items = p.items || [];
+    items.forEach(function (it, i) {
+      if (!it.done) { it.can_test = false; return; }
+      if (!it.group_id) { it.can_test = true; return; }
+      var son = true;
+      for (var j = i + 1; j < items.length; j++) {
+        if (items[j].group_id === it.group_id) { son = false; break; }
+      }
+      it.can_test = son;
+    });
+  }
+
   function planDone(g, b, itemId) {
     busy = true; b.disabled = true;
     sb.rpc("rpc_plan_done", { p_item_id: itemId }).then(function () {
@@ -948,8 +1005,15 @@
       var plan = null, topic = "";
       (PLD.plans || []).forEach(function (p) {
         (p.items || []).forEach(function (it) {
-          if (it.id === itemId) { it.done = true; p.done++; plan = p; topic = it.topic; }
+          if (it.id === itemId) {
+            it.done = true;
+            //  done_at-i da qoyuruq: yoxsa setirde tarix yalniz
+            //  sehife yenilenenden sonra cixirdi
+            it.done_at = new Date().toISOString();
+            p.done++; plan = p; topic = it.topic;
+          }
         });
+        planCanTest(p);
       });
       drawPlan(g);
       var slot = plan && $("pls-" + plan.id);

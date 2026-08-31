@@ -1,5 +1,5 @@
 -- =====================================================================
---  31_seviyye_modeli.sql — sinif (level) modelinin duzelisi
+--  100_seviyye_modeli.sql — sinif (level) modelinin duzelisi
 --
 --  TAPILAN SEHV
 --  Panel qrup yaradanda HEMISE p_program_slug = 'ibtidai' gonderirdi,

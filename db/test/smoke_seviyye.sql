@@ -1,6 +1,6 @@
 -- =====================================================================
 --  smoke_seviyye.sql : qrup yaradilanda sinif ITMIR
---                      (db/31_seviyye_modeli.sql)
+--                      (db/100_seviyye_modeli.sql)
 -- =====================================================================
 \set ON_ERROR_STOP on
 set client_min_messages = warning;

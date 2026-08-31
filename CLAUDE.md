@@ -197,7 +197,7 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    yoxdur (mock çoxaxınlıdır).
 12. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
-13. ~~Sinif (level) modeli~~ — hazırdır (`db/31_seviyye_modeli.sql`).
+13. ~~Sinif (level) modeli~~ — hazırdır (`db/100_seviyye_modeli.sql`).
    **Səhv:** panel qrup yaradanda həmişə `p_program_slug: "ibtidai"`
    göndərirdi, `rpc_create_class` isə sinfi **həmin proqramın içində**
    axtarırdı. 8-ci sinif `orta`-dadır → sorğu boş qayıdırdı → qrup
@@ -269,6 +269,21 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
+
+## `db/` fayl nömrələri — iki sessiya arasında bölgü
+
+Bankı ayrı sessiya doldurur və onun faylları **hələ repoya
+verilməyib** (yerli nüsxədə 30…73 aralığındadır). Ona görə nömrələr
+toqquşurdu. Bölgü belədir:
+
+| Aralıq | Kim | Nə |
+|---|---|---|
+| 01–29 | kod | sxem, RLS, RPC — doludur |
+| 30–99 | bank | sual/mövzu məlumatı (o biri sessiya) |
+| 100+ | kod | yeni RPC və miqrasiyalar |
+
+Yeni **kod** faylı 100-dən başlayır. Bank faylına toxunma; bank
+sessiyası da 100+ aralığına girmir.
 
 ## Yerli yoxlama
 

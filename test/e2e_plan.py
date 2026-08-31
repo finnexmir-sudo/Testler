@@ -221,6 +221,87 @@ with sync_playwright() as pw:
                (t1b,), one=True)), "tekrar teste tapsiriq verildi")
 
 
+    print("I · Alt mövzular: plan dərs səviyyəsinə enir")
+    #  Bu ana qeder bazada alt movzu YOX idi - plan feslerle isleyirdi
+    #  (bugunku hal).  Indi bir fesle 3 alt movzu elave edib plani
+    #  yeniden yigiriq: setirler artiq DERSDIR, fesil ise onlari
+    #  qruplasdiran etiketdir.
+    CLS = "cccc1111-0000-0000-0000-0000000000e9"
+    n_before = db("""select count(*) n from public.class_plan_items i
+                       join public.class_plans p on p.id = i.plan_id
+                      where p.class_id = %s""", (CLS,), one=True)["n"]
+    db("""insert into public.topics (subject_id, level_id, parent_id, slug, name, sort)
+          select t.subject_id, t.level_id, t.id, t.slug || '-d' || g,
+                 'Ders ' || g, g * 10
+            from public.topics t
+            join public.class_plans p on p.subject_id = t.subject_id
+                                     and p.level_id  = t.level_id
+            cross join generate_series(1,3) g
+           where p.class_id = %s and t.parent_id is null
+             and t.sort = (select min(t2.sort) from public.topics t2
+                            where t2.subject_id = t.subject_id
+                              and t2.level_id = t.level_id
+                              and t2.parent_id is null)""", (CLS,))
+
+    #  plani silib yeniden qururuq - movcud planlar toxunulmur, bu
+    #  qesdendir; muellim "Planı sil" ile teze quruluşa kecir
+    pg.reload(); pg.wait_for_selector(".plan summary", timeout=8000)
+    pg.locator(".plan summary").first.click(); pg.wait_for_timeout(300)
+    #  dialoq dinleyicisi suite-in evvelinde onsuz da qeydiyyatdadir
+    #  (setir 55) - ikincisini elave etmek "already handled" verir
+    pg.locator("[data-pldel]").click()
+    pg.wait_for_selector("#btnPlMk", timeout=8000)
+    pg.wait_for_function(
+        "document.querySelectorAll('#plSub option').length > 1", timeout=8000)
+    pg.select_option("#plSub", "riyaziyyat")
+    pg.select_option("#plLev", "3")
+    pg.click("#btnPlMk")
+    pg.wait_for_selector(".plan", timeout=10000)
+
+    n_after = db("""select count(*) n from public.class_plan_items i
+                      join public.class_plans p on p.id = i.plan_id
+                     where p.class_id = %s""", (CLS,), one=True)["n"]
+    #  bir fesil 3 alt movzuya bolundu: 1 setir gedir, 3 setir gelir
+    ok(n_after == n_before + 2, "setir sayi yarpaqlara gore artir",
+       "%d -> %d" % (n_before, n_after))
+    #  ovladi olan fesil setir kimi DUSMEMELIDIR
+    bad = db("""select count(*) n from public.class_plan_items i
+                  join public.class_plans p on p.id = i.plan_id
+                  join public.topics t on t.id = i.topic_id
+                 where p.class_id = %s
+                   and exists (select 1 from public.topics c
+                                where c.parent_id = t.id)""", (CLS,), one=True)["n"]
+    ok(bad == 0, "ovladi olan fesil plan setiri kimi dusmur", bad)
+
+    head = pg.inner_text(".plan .plhead").replace("\n", " ")
+    ok("dərs" in head, "basliqda vahid «ders»dir (fesil yox)", head)
+    ok("Ders 1" in pg.inner_text(".plcur"), "novbeti setir ARTIQ dersdir",
+       pg.inner_text(".plcur").replace("\n", " ")[:60])
+    ok(pg.locator(".plcur .plgn").count() == 1, "novbeti kartda feslin adi var",
+       pg.inner_text(".plcur .plgn") if pg.locator(".plcur .plgn").count() else "")
+
+    pg.locator(".plan > details > summary").first.click(); pg.wait_for_timeout(300)
+    ok(pg.locator(".plgrp").count() >= 1, "fesil bloklari cixir",
+       pg.locator(".plgrp").count())
+    ok("0/3" in pg.inner_text(".plgrp .plgc"), "fesilde ders sayi gorunur",
+       pg.inner_text(".plgrp .plgc"))
+    #  cari dersin fesli ACIQ, qalanlar yigilmis
+    ok(pg.locator(".plgrp[open]").count() == 1,
+       "yalniz cari feslin bloku aciqdir", pg.locator(".plgrp[open]").count())
+
+    print("J · «Test yığ» yalnız fəsil bitəndə")
+    ok(pg.locator(".plgrp .plmk").count() == 0,
+       "fesil bitmeden hec bir dersde «test yığ» yoxdur")
+    for i in range(3):
+        pg.locator("[data-pldone]").first.click()
+        pg.wait_for_timeout(900)
+    pg.locator(".plan > details > summary").first.click(); pg.wait_for_timeout(300)
+    ok(pg.locator(".plgrp .plmk").count() == 1,
+       "fesil bitende YALNIZ bir «test yığ» cixir",
+       pg.locator(".plgrp .plmk").count())
+    ok("3/3" in pg.inner_text(".plgrp .plgc"), "fesil tam kecilmis gorunur",
+       pg.inner_text(".plgrp .plgc"))
+
     br.close()
 
 print()
