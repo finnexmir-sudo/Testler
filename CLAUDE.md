@@ -71,9 +71,13 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    (ibtidai + orta + yuxarı, ingilis dili daxil, 11 fənn).
    Tarix **iki ayrı fənndir**: «Tarix» (Azərbaycan tarixi) və
    «Ümumi tarix» — məktəbdə də ayrı dərslik, ayrı qiymətdir.
-   Ümumi tarix: 9-cu sinif XIX əsr, 11-ci sinif XX-XXI əsrlər
-   (`db/53_movzular_umumi_tarix.sql`, `db/54_bank_tarix_umumi.sql`);
-   10-cu sinifin dünya tarixi «Tarix» fənni altında qalır.
+   Ümumi tarix **6-9 və 11-ci siniflərdədir**: 6 qədim dünya,
+   7 orta əsrlər, 8 yeni dövr (XVI-XVIII), 9 XIX əsr, 11 XX-XXI əsrlər
+   (`db/53`, `54` — 9 və 11; `db/66_movzular_umumi_tarix6_8.sql`,
+   `db/67_bank_tarix_umumi6_8.sql` — 6, 7, 8: 18 mövzu × 31 = 558 sual,
+   `tools/tarix_umumi68.py`). 10-cu sinifin dünya tarixi hələ «Tarix»
+   fənni altındadır — köçürülməsi ayrı addımdır (`45`, `47` fayllarına
+   toxunur və 47 53-dən əvvəl işlədiyi üçün sıra məsələsi var).
    **Ədəbiyyat ayrıca fənndir** — «Az dili» mövzuları yalnız
    qrammatikadır, ədəbiyyatın öz dərsliyi və qiyməti var.
    Hazırdır: **5-11-ci siniflər** — 48 mövzu × 31 = 1488 sual
@@ -93,9 +97,10 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    Riyaziyyat 1-11-də hər mövzuda **40 sual**, Az dili 3-11,
    ingilis 5-11, tarix 5-11 və təbiət fənləri
    (fizika/kimya/biologiya/coğrafiya) **30 sual**, qalanlarda
-   **20 sual**, ədəbiyyatda **31 sual** (cəmi ~18 300 platforma sualı).
+   **20 sual**, ədəbiyyatda və ümumi tarixdə **31 sual**
+   (cəmi ~18 860 platforma sualı).
    Mövzu ağacları `db/25/29/33/37/41/45/49_movzular_orta*.sql`,
-   banklar `db/23–52`, `54`, `56`, `59`, `60`, `62–65`.
+   banklar `db/23–52`, `54`, `56`, `59`, `60`, `62–65`, `67`.
    Davamı: MİQ və sertifikasiya (eyni qəliblə).
 3. **Dərs planı bölgüsü** — real tədris planına uyğun mövzu təqvimi,
    hər mövzunun ardınca hazır yoxlama testi. Məqsəd: proqram müəllimin
