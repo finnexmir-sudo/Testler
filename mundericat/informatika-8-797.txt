@@ -1,0 +1,48 @@
+# informatika 8
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=797
+# səhifə: 104 · bölmə: 6 · mövzu: 32
+
+== 1. İNFORMASİYA
+     8  1. İnformasiyanın kodlaşdırılması
+    11  2. 2-lik, 8-lik və 16-lıq say sistemləri
+    14  3. Bir say sistemindən başqasına keçid
+    17  4. İnformasiyanın ölçülməsi
+    20  Ümumiləşdirici sual və tapşırıqlar
+
+== 2. MULTİMEDİA
+    22  5. Multimedia qurğuları
+    25  6. Elektron təqdimatda animasiya
+    29  7. Təqdimatda səs və video
+    32  Ümumiləşdirici sual və tapşırıqlar
+
+== 3. PROQRAMLAŞDIRMA
+    34  8. Proqram necə hazırlanır
+    37  9. Python dilində ilk proqram
+    40  10. Proqramda kəmiyyətlər
+    43  11. Şərt operatoru
+    47  12. Proqramda dövr
+    50  13. Sayğaclı dövrlər
+    54  Ümumiləşdirici sual və tapşırıqlar
+
+== 4. KOMPÜTER
+    56  14. İş masasının nizamlanması
+    59  15. İnformasiya modelinin ağac forması
+    63  16. Faylların axtarışı
+    66  17. Ağacşəkilli struktur əsasında məsələ həlli
+    70  Ümumiləşdirici sual və tapşırıqlar
+
+== 5. TƏTBİQİ PROQRAMLAR
+    72  18. Üçölçülü qrafika
+    75  19. Tillər və üzlər
+    78  20. Üçölçülü modellərin qurulması
+    82  21. Mətn redaktorunun obyektləri
+    85  21. Elektron cədvəl
+    88  23. Düsturlarla iş
+    92  Ümumiləşdirici sual və tapşırıqlar
+
+== 6. İNFORMASİYA CƏMİYYƏTİ VƏ İNTERNET
+    94  24. Cəmiyyətin informasiyalaşdırılması
+    98  25. Kompüter şəbəkələri
+   101  26. İnternet xidmətləri
+   103  Ümumiləşdirici sual və tapşırıqlar
+

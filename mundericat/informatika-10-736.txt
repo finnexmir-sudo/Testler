@@ -1,0 +1,64 @@
+# informatika 10
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=736
+# səhifə: 208 · bölmə: 6 · mövzu: 48
+
+== 1. İNFORMASİYA
+    11  1.1. İnformasiya və informatika
+    15  1.2. İnformasiya prosesləri
+    21  1.3. İnformasiyanın miqdarı
+    25  1.4. İnformasiyanın qorunması
+    29  1.5. Kompüter virusları
+    33  1.6. Antivirus proqramları
+    37  1.7. Kompüter cinayətkarlığı
+    41  1.8. Kriptoqrafiya
+    45  Ümumiləşdirici sual və tapşırıqlar
+
+== 2. MODELLƏŞDİRMƏ
+    49  2.1. "Model" anlayışı
+    54  2.2. Modellərin növləri
+    58  2.3. İnformasiya modellərinin təqdimolunması
+    62  2.4. İnformasiya modelinin hazırlanması
+    66  2.5. Kompüter modeli
+    70  2.6. İnteraktiv kompüter modelləri
+    73  2.7. Kompüter qrafikası
+    76  2.8. Üçölçülü kompüter modellərinin hazırlanması
+    81  Ümumiləşdirici sual və tapşırıqlar
+
+== 3. VERİLƏNLƏR BAZASI
+    85  3.1. "Verilənlər bazası" anlayışı
+    89  3.2. Verilənlər modeli
+    94  3.4. Verilənlər bazasının idarəolunması sistemi
+    98  3.4. Cədvəl strukturunun yaradılması
+   104  3.5. Cədvəllərarası əlaqələr
+   109  3.6. Sorğular
+   113  3.7. Formalar
+   118  3.8. Verilənləlrin axtarışı və çeşidlənməsi
+   122  3.9. Hesabatlar
+   127  Ümumiləşdirici sual və tapşırıqlar
+
+== 4. ŞƏBƏKƏLƏR
+   131  4.1. Kompüter şəbəkələri və onların təsnifatı
+   135  4.2. Şəbəkə avadanlıqları
+   140  4.3. Kompüterin lokal şəbəkəyə qoşulması
+   144  4.4. Şəbəkə qurğularından birgə istifadə
+   148  4.5. Kompüterin fiziki olaraq İnternetə bağlanması
+   152  4.6. Əməliyyat sisteminin köməyi ilə İnternetə qoşulma
+   155  Ümumiləşdirici sual və tapşırıqlar
+
+== 5. VEB-PROQRAMLAŞDIRMA
+   159  5.1. Veb-proqramlaşdırma nədir
+   163  5.2. Hipermətni nişanlama dili - HTML
+   169  5.3. Saytın tərtibatının özəllikləri
+   174  5.4. Cədvəllər və istinadlar
+   179  Ümumiləşdirici sual və tapşırıqlar
+
+== 6. İNFORMASİYA CƏMİYYƏTİ
+   183  6.1. İnformasiya cəmiyyətinin inkişaf mərhələləri
+   186  6.2. İnformasiya mədəniyyəti
+   189  6.3. İnternetdə ünsiyyət. Şəbəkə etikası
+   192  6.4. Telekonfrans
+   196  6.5. Elektron hökumət
+   200  6.6. Elektron təhsil
+   204  6.7. E-kitabxana, e-seçki, e-ticarət
+   207  Ümumiləşdirici sual və tapşırıqlar
+

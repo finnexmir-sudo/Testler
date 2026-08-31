@@ -1,0 +1,42 @@
+# azerbaycan-dili 10 I
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=725
+# səhifə: 200 · bölmə: 4 · mövzu: 30
+
+== 1-ci bölmə: Dil və ünsiyyət
+    10  1. Dil ünsiyyət vasitəsidir
+    16  2. Dilim
+    20  3. Afrika inciləri
+    32  4. Eşitmədən yaradan bəstəkar
+    38  5. Yazının əmələ gəlməsi
+    46  6. Mətn
+
+== 2-ci bölmə: Təbiət və biz
+    54  1. Qeyri-adi Səttar
+    60  2. Vardır
+    66  3. Zümrüd gözlü gözəllər
+    74  4. Azərbaycan torpağı
+    78  5. Dənizdən böyük
+    88  6. Qartal
+
+== 3-cü bölmə: İnsan və cəmiyyət
+    94  1. Mətn
+    96  2. Uşaq qalmaq istəyirəm
+   102  3. Məni xalqımın dilində danışdır
+   106  4. Bir ana qucağında bir körpə aparırdı.
+   112  5. Pəncərə
+   118  6. Bilmək ən böyük xəzinədir
+   124  7. Nobel mükafatı almış ilk amerikalı qadın
+   130  8. Millətin xeyirxah anası
+
+== 4-cü bölmə: Vətən,torpaq,yurd...
+   140  1. "Coğrafi obyektlərin adları haqqında" Azərbaycan Respublikasının Qanunu
+   146  2. Mətn
+   152  3. Bakı kəndləri
+   156  4. Qoşa məzar
+   162  5. Şahablı
+   172  6. Çaytikanı
+   176  7. Toponimlər - dilimizin "tarix kitabı"
+   182  8. Şəki
+   190  Lüğət
+   200  İstifadə olunmuş ədəbiyyat
+

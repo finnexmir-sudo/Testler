@@ -1,0 +1,44 @@
+# azerbaycan-dili 11
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=812
+# səhifə: 200 · bölmə: 4 · mövzu: 32
+
+== 1-ci bölmə. Vətəndaş və cəmiyyət
+    10  1. Böyük ömrün dan yeri
+    16  2. Şəbi-hicran
+    24  3. Sizin də bir basketbol səbətiniz varmı?
+    30  4. Hər uşağın ən yaxşı tərəfini üzə çıxarmaq
+    36  5. Gəncə Müsəlman Qız Məktəbi
+    42  6. Mətn
+    50  7. Doroti Meri Kroufut Hodgkin
+
+== 2-ci bölmə. Ətraf aləm və biz
+    58  1. Təbiət Allahın şah əsəridi
+    64  2. Ömürdən etüdlər
+    70  3. Təmiz su sağlamlığın təməlidir
+    78  4. Təbii bulaqlar muzeyi - Naxçıvan
+    88  5. Bu torpaq üçün yaşa!
+    92  6. Üç ağacın sirri
+    96  7. Çanaqqalanı ölümsüzləşdirən ruh
+
+== 3-cü bölmə. Fərd və cəmiyyət
+   102  1. Oğluma nəsihət
+   110  2. Referat
+   112  3. Uşağın cavabı
+   120  4. Deyə bilmədiyimiz sözlər
+   128  5. Əfsanəyə bənzər eşq
+   134  6. Yengəclər evi necə tapırlar?
+   140  7. Bundan yaxşı ola bilməz
+
+== 4-cü bölmə. Azərbaycan
+   148  1. Ölkələrin əlifba ilə sıralanması
+   156  2. Mətn
+   160  3. Azərbaycan memarlığı
+   166  4. Qarabağ xalçaçılıq məktəbi
+   174  5. "Məcnun Leylinin məzarı üstündə"
+   178  6. Azərbaycan mətbuatı
+   184  7. Azərbaycan mətbəxi
+   188  8. Azərbaycan Respublikası
+   192  Lüğət
+   197  Dərslikdə ixtisarla verilmiş şəxs adları
+   199  İstifadə olunmuş ədəbiyyat
+

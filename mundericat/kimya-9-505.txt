@@ -1,0 +1,85 @@
+# kimya 9
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=505
+# səhifə: 204 · bölmə: 4 · mövzu: 73
+
+== I. METALLAR
+     8  Fəsil 1. Metalların ümumi xarakteristikası
+     8  1. Metalların icmalı, təbiətdə tapılması və alınmasının ümumi üsulları. Metalların ərintiləri
+    13  2. Metalların ümumi fiziki və kimyəvi xassələri. Metalların elektrokimyəvi gərginlik sırası
+    18  3. Metalların korroziyası. Korroziyadan mühafizə
+    22  Ümumiləşdirici tapşırıqlar
+    23  Fəsil 2. Əsas yarımqrup metalları
+    23  4. Litium yarımqrupu elementləri. Natrium, kalium və onların birləşmələri
+    27  5. Berillium yarımqrupu elementləri. Kalsium
+    30  6. Kalsiumun sənayedə alınan mühüm birləşmələri. Suyun codluğu və onun aradan qaldırılması üsulları
+    34  7. Bor yarımqrupu elementləri. Alüminium və onun birləşmələri
+    39  Ümumiləşdirici tapşırıqlar
+    40  Fəsil 3. Əlavə yarımqrup metalları
+    40  8. Əlavə yarımqrup metallarının qısa icmalı. Dəmir. Dəmirin oksid və hidroksidləri
+    44  9. Çuqun və polad istehsalı
+    48  10. Mis, sink və xrom
+    54  11. Praktik iş – 1. Metalların və onların birləşmələrinin xassələri
+    55  Ümumiləşdirici tapşırıqlar
+
+== II. QEYRİ-METALLAR
+    56  12. Qeyri-metalların ümumi xarakteristikası
+    60  Fəsil 4. Flüor yarımqrupu elementləri
+    60  13. Flüor yarımqrupu elementlərinin icmalı
+    62  14. Xlor
+    65  15. Hidrogen-xlorid və xlorid turşusu
+    68  16. Halogenlərin müqayisəli xarakteristikası
+    73  Ümumiləşdirici tapşırıqlar
+    74  Fəsil 5. Oksigen yarımqrupu elementləri
+    74  17. Oksigen yarımqrupu elementlərinin icmalı
+    76  18. Kükürd
+    79  19. Hidrogen-sulfid
+    81  20. Kükürd-dioksid. Sulfit turşusu. Kükürd-trioksid
+    84  21. Sulfat turşusu
+    88  Ümumiləşdirici tapşırıqlar
+    89  Fəsil 6. Azot yarımqrupu elementləri
+    89  22. Azot yarımqrupu elementlərinin icmalı. Azot və onun oksidləri
+    93  23. Ammonyak
+    96  24. Ammonium duzları
+    98  25. Nitrat turşusu
+   103  26. Nitrat turşusunun duzları. Təbiətdə azot dövranı
+   106  27. Fosfor
+   109  28. Difosfor-pentaoksid və ortofosfat turşusu
+   113  29. Praktik iş – 2. Qeyri-metalların və onların birləşmələrinin xassələri
+   114  30. Mineral gübrələr və onların təsnifatı. Azotlu gübrələr
+   117  31. Fosforlu və kaliumlu gübrələr
+   120  Ümumiləşdirici tapşırıqlar
+   121  Fəsil 7. Karbon yarımqrupu elementləri
+   121  32. Karbon yarımqrupu elementlərinin icmalı. Karbon
+   125  33. Karbon oksidləri
+   128  34. Karbonat turşusu və onun duzları. Təbiətdə karbon dövranı
+   132  35. Silisium
+   134  36. Silisium-dioksid və metasilikat turşusu
+   138  37. Silisiumun təbii birləşmələri və onların texnikada tətbiqi
+   142  Ümumiləşdirici tapşırıqlar
+
+== III. ÜZVİ KİMYAYA GİRİŞ SADƏ ÜZVİ BİRLƏŞMƏLƏRLƏ TANIŞLIQ
+   143  SADƏ ÜZVİ BİRLƏŞMƏLƏRLƏ TANIŞLIQ
+   143  38. Üzvi kimya nəyi öyrənir
+   147  39. Üzvi birləşmələrin kimyəvi quruluş nəzəriyyəsi. Üzvi birləşmələrin təsnifatı
+   151  Fəsil 8. Karbohidrogenlər
+   151  40. Doymuş karbohidrogenlər (alkanlar). Metan
+   154  41. Doymamış karbohidrogenlər. Etilen sırası karbohidrogenləri (alkenlər). Etilen
+   158  42. Asetilen və dien karbohidrogenləri. Asetilen
+   162  43. Tsiklik karbohidrogenlər – tsikloparafinlər və aromatik karbohidrogenlər
+   165  44. Karbohidrogenlərin təbii mənbələri və onların emalı
+   168  Ümumiləşdirici tapşırıqlar
+   169  Fəsil 9. Karbohidrogenlərin oksigenli və azotlu törəmələri
+   169  45. Doymuş spirtlər. Etanol, etilenqlikol və qliserin
+   173  46. Doymuş aldehidlər. Sirkə aldehidi
+   176  47. Karbon turşuları. Sirkə turşusu və ali karbon turşuları
+   179  48. Mürəkkəb efirlər. Yağlar. Sabun və digər yuyucu vasitələr
+   182  49. Karbohidratlar
+   186  50. Zülallar
+   190  51. İrimolekullu birləşmələr – polimerlər
+   194  52. Praktik iş 3. Üzvi birləşmələrin xassələri
+   195  Ümumiləşdirici tapşırıqlar
+
+== Əlavələr
+   197  Terminlər və kimyəvi anlayışlar
+   201  Əlavələr
+

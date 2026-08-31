@@ -109,7 +109,11 @@ reset role; reset request.jwt.claim.sub;
 do $$
 declare ok boolean := false; v_prog uuid;
 begin
-  select id into v_prog from public.programs where slug = 'miq';
+  --  DIQQET: evvel burada 'miq' proqrami islenirdi.  Bank sessiyasi
+  --  bos qalan 'miq'/'sertifikasiya' proqramlarini kataloqdan cixarib
+  --  (db/72_bos_fennler.sql), ona gore movcud proqram goturulur.
+  --  Indeks onsuz da QLOBALDIR - proqramdan asili deyil.
+  select id into v_prog from public.programs where slug = 'orta';
   begin
     insert into public.levels (program_id, code, name, sort)
     values (v_prog, '8', 'Sekkiz - tekrar', 999);
@@ -121,16 +125,30 @@ end $$;
 \echo 'OK  6 · sinif kodu tekrari baza seviyyesinde bloklanir'
 
 -- =====================================================================
---  7. MIQ/sertifikasiya seviyyeleri toxunulmayib (kodlari reqem deyil)
+--  7. Indeks YALNIZ reqem kodlarina aiddir - reqem olmayan kod
+--     tekrarlana biler
+--
+--  Evvel bu yoxlama MIQ/sertifikasiya seviyyelerini sayirdi ('riyaziyyat'
+--  kodu iki defe olmali idi).  Bank sessiyasi hemin bos proqramlari
+--  kataloqdan cixarandan sonra (db/72_bos_fennler.sql) reqem olmayan
+--  seviyye umumiyyetle qalmayib.  Ona gore MELUMATA deyil, indeksin
+--  OZ SERTINE baxiriq: qismen unikal indeks reqem olmayan kodu
+--  bloklamamalidir.
 -- =====================================================================
 do $$
-declare v_n int;
+declare v_a uuid; v_b uuid; v_n int;
 begin
-  select count(*) into v_n from public.levels
-   where code = 'riyaziyyat';
-  assert v_n >= 2,
-    'MIQ/sertifikasiya seviyyeleri pozulub: riyaziyyat kodu ' || v_n || ' defe';
+  --  unique(program_id, code) da var, ona gore IKI AYRI proqram
+  select id into v_a from public.programs where slug = 'orta';
+  select id into v_b from public.programs where slug = 'ibtidai';
+  insert into public.levels (program_id, code, name, sort) values
+    (v_a, 'yox-reqem-kod', 'Yoxlama A', 9001),
+    (v_b, 'yox-reqem-kod', 'Yoxlama B', 9002);
+  select count(*) into v_n from public.levels where code = 'yox-reqem-kod';
+  assert v_n = 2,
+    'reqem olmayan kod tekrarlana bilmedi - indeks hedden genisdir';
+  delete from public.levels where code = 'yox-reqem-kod';
 end $$;
-\echo 'OK  7 · MIQ/sertifikasiya seviyyelerine toxunulmayib'
+\echo 'OK  7 · indeks yalniz reqem kodlarini baglayir'
 
 \echo 'SEVIYYE: BUTUN YOXLAMALAR KECDI'

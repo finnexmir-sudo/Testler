@@ -22,8 +22,32 @@ echo "kohne baza quruldu ($OLD)"
 for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          15_movzular_ederslik.sql \
          07_seed_tests.sql 16_bank_riy4.sql 17_bank_sinif4.sql 19_bank_riy3.sql \
-         20_bank_sinif3.sql \
-         08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql 23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql 27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql 100_seviyye_modeli.sql 101_ders_plani_alt.sql 102_movzu_qoruyucu.sql 05_grants.sql; do
+         20_bank_sinif3.sql 75_bank_sinif1.sql 76_bank_sinif2.sql \
+         77_movzular_orta5.sql 78_bank_riy5.sql 79_bank_sinif5.sql \
+         80_bank_ing.sql 81_movzular_orta6.sql 30_bank_riy6.sql \
+         31_bank_sinif6.sql 32_bank_fenn6.sql 33_movzular_orta7.sql \
+         34_bank_riy7.sql 35_bank_sinif7.sql 36_bank_fenn7.sql \
+         37_movzular_orta8.sql 38_bank_riy8.sql 39_bank_sinif8.sql \
+         40_bank_fenn8.sql 41_movzular_orta9.sql 42_bank_riy9.sql 43_bank_sinif9.sql \
+         44_bank_fenn9.sql 45_movzular_orta10.sql 46_bank_riy10.sql \
+         47_bank_sinif10.sql 48_bank_fenn10.sql 49_movzular_orta11.sql \
+         50_bank_riy11.sql 51_bank_sinif11.sql 52_bank_fenn11.sql \
+         53_movzular_umumi_tarix.sql 54_bank_tarix_umumi.sql \
+         55_movzular_edebiyyat11.sql 56_bank_edebiyyat11.sql \
+         57_sinif_dubli.sql 58_movzular_edebiyyat9_10.sql \
+         59_bank_edebiyyat10.sql 60_bank_edebiyyat9.sql \
+         61_movzular_edebiyyat5_8.sql 62_bank_edebiyyat5.sql \
+         63_bank_edebiyyat6.sql 64_bank_edebiyyat7.sql \
+         65_bank_edebiyyat8.sql 66_movzular_umumi_tarix6_8.sql \
+         67_bank_tarix_umumi6_8.sql 68_movzular_umumi_tarix10.sql \
+         69_bank_tarix_umumi10.sql 70_movzular_umumi_tarix7.sql \
+         71_bank_tarix_umumi7.sql 72_bos_fennler.sql \
+         73_buraxilis_proqrami.sql 74_alt_movzular_riy8.sql \
+         08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
+         23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
+         27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
+         100_seviyye_modeli.sql 101_ders_plani_alt.sql 102_movzu_qoruyucu.sql \
+         05_grants.sql; do
   printf "  %-22s" "$f"
   if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then
     echo "OK"

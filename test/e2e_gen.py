@@ -122,7 +122,18 @@ with sync_playwright() as pw:
     if pg.locator("details.filt:not([open])").count():
         pg.locator("details.filt summary").click(); pg.wait_for_timeout(200)
     subs = pg.locator("#bsub option").all_inner_texts()
-    ok("Fizika" not in " ".join(subs), "bank suzgecinde sualsiz fenn yoxdur", subs)
+    #  DIQQET: ne ADA, ne de SAYA baglanmaq olmaz.  Ada gore: bank
+    #  boyudukce "sualsiz fenn" deyisdi (Fizika -> Kimya -> Kurikulum),
+    #  indi ise sualsiz fenn umumiyyetle qalmayib.  Saya gore:
+    #  26_fenn.sql siyahini muellimin OZ fennleri ile daraldir, yeni
+    #  siyahi butun sualli fennler demek deyil.
+    #  Ona gore XASSEYE baxiriq: siyahiya dusen her fennin suali var.
+    sualli = {r["name"] for r in db(
+        "select distinct s.name from public.subjects s "
+        "join public.questions q on q.subject_id = s.id")}
+    adlar = [x.strip() for x in subs[1:] if x.strip()]   # [0] = «Butun fennler»
+    ok(adlar and all(a in sualli for a in adlar),
+       "bank suzgecinde yalniz suali olan fennler var", (adlar,))
     ok(any("Riyaziyyat" in x for x in subs), "sualli fenn var")
     pg.goto(PANEL + "#/q/new"); pg.wait_for_selector("#qsub", timeout=8000)
     pg.wait_for_function("document.querySelectorAll('#qsub option').length > 3", timeout=8000)

@@ -1,0 +1,42 @@
+# fizika 8 II hisse
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=932
+# səhifə: 100 · bölmə: 3 · mövzu: 32
+
+== Bölmə 4 Dalğalar
+     6  4.1 Mexaniki dalğalar və onların növləri
+    10  4.2 Dalğanı xarakterizə edən fiziki kəmiyyətlər
+    13  4.3 Səs dalğası
+    17  4.4 Səsin xarakteristikaları
+    22  4.5 Dalğaların xassələri
+    26  4.6 Elektromaqnit dalğaları. Elektromaqnit dalğaları şkalası
+    31  Elm, texnologiya, həyat
+    32  Xülasə
+    33  Ümumiləşdirici tapşırıqlar
+
+== Bölmə 5 Molekulların istilik hərəkəti. Daxili enerji
+    36  5.1 Molekulların istilik hərəkəti. Temperatur
+    40  5.2 Cisimlərin istidən genişlənməsi
+    43  5.3 İstilik tarazlığı. Temperatur şkalaları
+    46  5.4 Daxili enerji. Daxili enerjinin dəyişmə üsulları
+    49  5.5 İstilikvermənin növləri: istilikkeçirmə, konveksiya və şüalanma
+    53  Elm, texnologiya, həyat
+    54  Xülasə
+    55  Ümumiləşdirici tapşırıqlar
+
+== Bölmə 6 İstilik hadisələrində enerjinin saxlanması qanunu
+    58  6.1 İstilik miqdarı. Xüsusi istilik tutumu
+    62  6.2 İstilik proseslərində enerjinin saxlanması qanunu
+    65  6.3 Bərk cismin xüsusi istilik tutumunun təyini (praktik iş)
+    66  6.4 Maddənin aqreqat halının dəyişməsi: ərimə və bərkimə
+    69  6.5 Maddənin aqreqat halının dəyişməsi: buxarlanma və kondensasiya
+    72  6.6 Maddənin aqreqat hallarının dəyişmə proseslərində tələb olunan istilik miqdarı
+    76  6.7 İstilik mühərriki. İstilik mühərrikinin faydalı iş əmsalı
+    80  6.8 Buxar mühərriki
+    83  6.9 Daxiliyanma mühərriki
+    87  6.10 Reaktiv mühərrik
+    90  6.11 İstilik mühərrikləri və ekoloji problemlər
+    93  Elm, texnologiya, həyat
+    94  Xülasə
+    95  Ümumiləşdirici tapşırıqlar
+    97  Sözlük
+

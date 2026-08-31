@@ -77,8 +77,76 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    admin `#/adm`-də baxır, platforma sualını **yerində düzəldir**
    (`rpc_admin_fix_question` — variant id-ləri qorunur) və ya rədd
    edir. Bildiriş suala toxunmur — qərar həmişə admindədir.
-2. **Sual bankının davamı** — 3-4-cü siniflər hazır; qalır 1-2-ci
-   siniflər və ingilis dili.
+2. ~~Sual bankının davamı~~ — hazırdır: **1-11-ci siniflər**
+   (ibtidai + orta + yuxarı, ingilis dili daxil, 11 fənn).
+   Tarix **iki ayrı fənndir**: «Tarix» (Azərbaycan tarixi) və
+   «Ümumi tarix» — məktəbdə də ayrı dərslik, ayrı qiymətdir.
+   Ümumi tarix **6-11-ci siniflərdədir** (10 daxil): 6 qədim dünya,
+   7 orta əsrlər, 8 yeni dövr (XVI-XVIII), 9 XIX əsr, 10 icmal kursu,
+   11 XX-XXI əsrlər. Fayllar: `db/53`, `54` (9 və 11);
+   `db/66` + `db/67` (6, 7, 8 — 18 mövzu × 31 = 558,
+   `tools/tarix_umumi68.py`); `db/68` + `db/69` (10 — 6 mövzu × 31 = 186,
+   `tools/tarix_umumi10.py`).
+   **10-cu sinifdə «Tarix» (Azərbaycan tarixi) yoxdur** — e-dərslik
+   portalında o sinif üçün yalnız «Ümumi tarix» dərsliyi var
+   (`mundericat/tarix-10-745.txt`). `45` artıq `tarix-10-*` mövzularını
+   açmır, `47`/`tools/sinif10.py` isə həmin 180 sualı daşımır; köhnə
+   baza üçün `68` onları `umumi-tarix`ə köçürüb `archived` edir
+   (silinmir — hesabat tarixçəsi qorunur).
+   **7-ci sinifdə də «Tarix» yoxdur** — eyni səbəbdən
+   (`mundericat/tarix-7-723.txt` «Umumi tarix» yazır). `db/70` + `db/71`
+   həmin 180 sualı `umumi-tarix`ə köçürür. Köhnə altı mövzudan yalnız
+   **ikisi** yeni mövzudur (türk dövlətləri; Səlcuq-Monqol-Osmanlı),
+   qalan dördü **icmal** mövzusu olduğu üçün sualları `66`-nın altı
+   mövzusuna **dənə-dənə** paylanıb — yoxsa eyni mövzu iki dəfə yaranıb
+   zəif nöqtə hesabatını bölərdi. 7-ci sinif Ümumi tarix: 8 mövzu,
+   366 sual. Köçürülənlərin `ext_key`-i **`tarix7-` olaraq qalır**
+   (canlı bazadakı sətirlər yerində yenilənsin deyə; `utarix7-`
+   prefiksi `67`-də artıq işlənib).
+   **Ədəbiyyat ayrıca fənndir** — «Az dili» mövzuları yalnız
+   qrammatikadır, ədəbiyyatın öz dərsliyi və qiyməti var.
+   Hazırdır: **5-11-ci siniflər** — 48 mövzu × 31 = 1488 sual
+   (`db/55`, `56`, `58`, `59`, `60`, `61`, `62`, `63`, `64`, `65`;
+   `tools/edebiyyat5…11.py`). Mövzu sayı dərsliyin **öz bölmə sayıdır**:
+   5→7, 6→5, 7→5, 8→7, 9/10/11→8. 5-7-ci sinifdə bölmələr **tema**
+   üzrədir («Yurd sevgisi», «Təbiətin gözəlliyi»), 8-11-də isə **dövr**
+   üzrə — dərslik özü belə qurub, süni bölgü edilməyib.
+   **Müasir müəlliflərin tələsi:** 5-7-ci sinif dərsliyində mətnini
+   bilmədiyim çoxlu müasir müəllif var. Onların süjet təfərrüatı
+   uydurulmur — sual mündəricatdan çıxan faktlar üzərində qurulur:
+   müəllif-əsər cütü, bölmə, ədəbi növ, mündəricatın göstərdiyi janr.
+   **Tələ:** eyni müəllif iki sinifdə olur (Vurğun, R.Rza, Şıxlı,
+   Vahabzadə…), amma dərslik hər sinifdə BAŞQA əsərini verir. Sual
+   həmin sinfin əsərinə görə yazılmalıdır — yoxsa siniflər arasında
+   pg_trgm təkrarı çıxır.
+   Riyaziyyat 1-11-də hər mövzuda **40 sual**, Az dili 3-11,
+   ingilis 5-11, tarix 5-11 və təbiət fənləri
+   (fizika/kimya/biologiya/coğrafiya) **30 sual**, qalanlarda
+   **20 sual**, ədəbiyyatda və ümumi tarixdə **31 sual**
+   (cəmi ~18 870 platforma sualı).
+   Mövzu ağacları `db/25/29/33/37/41/45/49_movzular_orta*.sql`,
+   banklar `db/30–52`, `54`, `56`, `59`, `60`, `62–65`, `67`, `69`, `71`,
+   `75–81` (1, 2 və 5-ci sinif — əvvəl 23–29-da idi, bölgüyə görə köçürüldü).
+   **«Tarix» fənni artıq 5, 6, 8, 9, 11-ci siniflərdədir** — 7 və 10-cu
+   sinifdə Azərbaycan tarixi dərsliyi portalda yoxdur, hər ikisinin
+   məzmunu «Ümumi tarix»dədir.
+   **MİQ və sertifikasiya kataloqdan çıxarıldı** (`db/72_bos_fennler.sql`):
+   «Kurikulum» fənni, `miq` və `sertifikasiya` proqramları illərlə boş
+   qalmışdı — müəllim paneldə boş fənn və boş proqram görürdü. Bunlar
+   **ayrı məhsuldur**: mənbəyi e-dərslik dərsliyi deyil, DİM proqramıdır;
+   mövzu ağacı, çətinlik ölçüsü və qiymətləndirmə məntiqi də başqadır.
+   Hazır olanda eyni slug-larla geri qaytarıla bilər — `04_seed.sql`-də
+   nümunə sətirlər şərhdə saxlanılıb. `72` silmədən əvvəl hər sətrin boş
+   olduğunu yoxlayır, bir mövzu/sual/qrup/test bağlıdırsa **dayanır**.
+   `buraxilis` proqramı da silindi (`db/73_buraxilis_proqrami.sql`) —
+   **səbəb məzmun deyil, forma:** `programs → levels → classes` müəllimin
+   qrup yaratdığı ağacdır, repetitor isə «Buraxılış» qrupu yaratmır,
+   «11-ci sinif» qrupu yaradıb ona buraxılış **tipli test** verir. Üstəlik
+   real buraxılış imtahanı çoxfənnlidir, `tests.subject_id` isə tək və
+   `not null` — bir test sətri tam imtahanı tuta bilmir. Ona görə
+   buraxılış hazırlığı **imtahan şablonu** kimi qurulacaq (bax yol
+   xəritəsində «Buraxılış sınaq imtahanı»). Kataloq: **2 proqram**
+   (ibtidai, orta), 11 sinif, 12 fənn.
 3. ~~Dərs planı bölgüsü~~ — hazırdır (`db/25_ders_plani.sql`): qrupda
    fənn+sinif seçilir, mövzular dərslik ardıcıllığı ilə plana düzülür.
    Plan TARİXLƏ yox, ARDICILLIQLA yaşayır («keçildi» deyilməyincə cari
@@ -96,6 +164,15 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    siyahıları buna görə daralır — **filtrdir, məhdudiyyət deyil**: boş
    siyahı və ya uyğunsuzluq = tam siyahı. `rpc_my_context` 26-da
    genişləndirilib (06-nı dəyişəndə 26-dakı kopyanı da yenilə).
+   **Alt mövzular** (`topics.parent_id`, `db/101_ders_plani_alt.sql` +
+   `db/74_alt_movzular_riy8.sql`): plan yalnız mövzu başlığı ilə işləyəndə
+   müəllim «Kvadrat tənliklər»in 2 dərsini keçəndə qeyd edə bilmirdi —
+   ya hamısını «keçildi» edirdi (yalan), ya heç nə. **Sınaq: Riyaziyyat 8**
+   — 11 mövzu altında **74 alt mövzu**, adlar e-dərslikdən (book_id 393)
+   eynilə, dərslikdəki sıra ilə. Bəyənilsə qalan fənlərə keçilir;
+   mündəricat keşi (`mundericat/`) bütün 1-11 sinif üçün hazırdır.
+   **Alt mövzuya sual bağlanmır** — bank və generator yalnız sualı olan
+   mövzuları göstərir, ona görə alt mövzular o ekranlarda görünmür.
 4. ~~Vərəqin çap/PDF görünüşü~~ — hazırdır (`paperPrint()` + `@media
    print` `muellim/app.css`-də). «Çap / PDF» şagird nüsxəsini verir
    (ad/tarix/bal xanaları, A) B) C) hərflənmiş variantlar, açıq suala
@@ -298,9 +375,11 @@ düzgündür — slug qalır, tarixçə qalır.
 
 ## `db/` fayl nömrələri — iki sessiya arasında bölgü
 
-Bankı ayrı sessiya doldurur və onun faylları **hələ repoya
-verilməyib** (yerli nüsxədə 30…73 aralığındadır). Ona görə nömrələr
-toqquşurdu. Bölgü belədir:
+Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
+`claude/bil10-question-bank-expansion-eu6vkn` budağı `main`-ə
+birləşdirildikdən sonra 30…81 aralığındadır. Əvvəl nömrələr
+toqquşurdu (bankın 7 faylı 23–29-da idi, indi 75–81-ə köçürülüb).
+Bölgü belədir:
 
 | Aralıq | Kim | Nə |
 |---|---|---|
@@ -338,6 +417,37 @@ testini tapmır və «Test tapılmadı» verir, kod düzgün olsa belə.
 
 ---
 
+## Kataloq — hər sinif BİR dəfə
+
+`programs` təhsil kateqoriyasıdır, `levels` onun içindəki pillə.
+Sinif kodu (`1`…`11`) bütün kataloqda **bir dəfə** olmalıdır.
+
+Bir dəfə pozuldu: `04_seed.sql` 9-11-i `buraxilis` proqramında
+yaradırdı, `41/45/49_movzular_orta*.sql` isə eyni sinifləri `orta`da
+yaradıb bütün mövzu və sualları oraya yığdı. Nəticə: qrup yaratma
+formasında siniflər ikiləşdi, dərs planı isə sinfi
+`where code = ... limit 1` ilə tapdığı üçün **boş** sətri seçə bilirdi
+— plan yaranmırdı, kod düzgün olsa belə.
+
+Qərar: məzmun `orta`dadır (adı «Orta və yuxarı siniflər (5-11)»),
+`buraxilis` sinif saxlamır. Səbəb: bankın məzmunu e-dərslik
+dərsliyidir — adi məktəb proqramıdır, buraxılış imtahanı hazırlığı
+deyil. 9-cu sinif şagirdinin həftəlik testini «Buraxılış imtahanı»
+adı altında göstərmək yanlış olardı; `buraxilis` slug-ı sonra **əsl**
+imtahan hazırlığı üçün boş qalır (slug ilə mənanın ayrılması
+uzunmüddətli tələdir).
+
+Köhnə baza üçün: `db/57_sinif_dubli.sql` — boş sətirə bağlanmış
+qrup/test/sual **silinmir**, eyni kodlu `orta` səviyyəsinə köçürülür
+(`classes`/`tests` həm `program_id`, həm `level_id` saxlayır — ikisi
+də köçürülməlidir).
+
+`test/smoke.sql` bunu daimi iddia kimi yoxlayır (12-ci yoxlama);
+`db/test/hardayam.sql` isə bazaya baxıb «57 lazımdır/lazım deyil»
+deyir. Yeni sinif və ya proqram əlavə edəndə əvvəlcə kataloqa bax.
+
+---
+
 ## Mövcud bazanı yeniləmək
 
 Təzə baza: `db/run.sh` bütün faylları düzgün sıra ilə işlədir.
@@ -357,7 +467,10 @@ işlədilməyibsə, faylın başında aydın desin (`ÖNCƏ 11_... işlədilməl
 qaranlıq xəta çıxır və səbəb görünmür.
 
 Baza harada qaldığını bilmək üçün: `db/test/hardayam.sql` — heç nə
-dəyişmir, hansı faylın işlədildiyini və növbəti faylı deyir.
+dəyişmir. Hansı struktur faylının işlədildiyini və növbəti faylı deyir;
+sonra sinif dublikatını yoxlayır və bankın vəziyyətini fənn-fənn
+göstərir (mövzu/sual sayı, sualsız qalmış mövzu varsa xəbərdarlıq —
+o, işlədilməmiş bank faylı deməkdir).
 
 **`revoke ... from public` funksiya üçün kifayət deyil.** Supabase yeni
 funksiyalara `anon` üçün EXECUTE-u **birbaşa** verir — PUBLIC-dən geri
@@ -466,12 +579,30 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
 - Platforma sual bankı: `db/16_bank_riy4.sql` (Riyaziyyat 4),
   `db/17_bank_sinif4.sql` (Az dili + Həyat bilgisi + İnformatika 4),
   `db/19_bank_riy3.sql` (Riyaziyyat 3), `db/20_bank_sinif3.sql`
-  (Az dili + Həyat bilgisi + İnformatika 3). **Əllə yazılmır** —
-  `tools/riy4.py`, `tools/sinif4.py`, `tools/riy3.py`, `tools/sinif3.py`
+  (Az dili + Həyat bilgisi + İnformatika 3), `db/23/24_bank_sinif1/2.sql`
+  (1-2-ci siniflər, 4 fənn bir yerdə), `db/80_bank_ing.sql` (İngilis
+  dili 1-4). Orta və yuxarı siniflər: hər sinif üçün əvvəl mövzu ağacı
+  (`25/29/33/37/41/45/49_movzular_orta5…11.sql`), sonra banklar —
+  `26/30/34/38/42/46/50_bank_riy5…11.sql` (riyaziyyat),
+  `27/31/35/39/43/47/51_bank_sinif5…11.sql` (az dili, ingilis,
+  informatika, tarix), `32/36/40/44/48/52_bank_fenn6…11.sql`
+  (fizika/kimya/biologiya/coğrafiya — hansı fənn o sinifdə varsa).
+  9-11-ci siniflərdə tarix Azərbaycan tarixidir, 10-cu sinifdə ümumi
+  tarix. **Əllə yazılmır** —
+  `tools/riyN.py`, `tools/sinifN.py`, `tools/fennN.py`, `tools/ing.py`
   yaradır. Skript hər riyazi cavabı yenidən hesablayıb düzgün variantla
   tutuşdurur; düzəliş skriptdə edilir, sonra SQL yenidən çıxarılır.
   Yeni fənn/sinif bankı üçün eyni qəlibi izlə: `tools/<fənn><sinif>.py`
-  → `db/1X_bank_<fənn><sinif>.sql`, ext_key `<qısaad>-<mövzu>#<sıra>`.
+  → `db/NN_bank_<fənn><sinif>.sql`, ext_key `<qısaad>-<mövzu>#<sıra>`.
+  Yeni bank hazır olanda: movzu daxilində və qonşu siniflərlə pg_trgm
+  ≥0.95 təkrar yoxla, fənn üzrə eyni düzgün cavab ≤2 olsun,
+  `rpc_generate_test` balans yoxlaması işlət (nümunə:
+  `test/smoke_generator.sql`).
+- **Kiril oxşarı hərf tələsi.** `а е о р с х у М Т В` latın hərfləri
+  ilə eyni görünür, amma fərqli koddur — belə hərf düşən sual
+  axtarışda tapılmır və pg_trgm yoxlaması onu təkrar saymır.
+  `tools/fenn11.py`-dəki `yoxla()` bunu tutur (`Ѐ`–`ӿ` aralığı);
+  yeni skript yazanda həmin yoxlamanı da köçür.
 
 ---
 
@@ -535,3 +666,46 @@ sanacaqsan.
 - Panel açıq temadır, toxunma sahələri ən azı 44px
 - Xarici kitabxana yoxdur — CDN yüklənmir. `muellim/sb.js` Supabase üçün
   öz yüngül qatımızdır; onu böyütməkdənsə lazım olan hissəni əlavə et.
+
+---
+
+## Çətinlik səviyyəsi — ölçülür, təxmin edilmir
+
+Real sınaqda «çətin» suallar çətin çıxmadı. Səbəb faktın nadirliyi
+deyil, **variantların qurulusu** idi: bir düzgün cavab + üç «təhlükəsiz»
+yanlış → şagird faktı bilməsə də eliminasiya ilə tapır.
+
+**Çətin (3) sualın şərtləri:**
+
+- ən azı **iki faktın tutuşdurulması** tələb olunur;
+- dörd variantın hamısı **eyni dövrdən və eyni kateqoriyadan**;
+- düzgün variant qalanlardan **uzun olmamalı** (uzunluq özü nişandır);
+- yanlışlarda «yalnız / heç / tamamilə» kimi mütləq sözlər olmamalı;
+- düzgün cavab sualın açar sözünü təkrarlamamalı.
+
+**Beş çətinləşdirmə qəlibi:** xronoloji düzülüş (`2 - 4 - 1 - 3`),
+yaxın tarixlər (aralıq ≤ 12 il), səbəb-nəticə (dörd variant da real
+hadisə), «hansı SƏHVDİR» (üç doğru, bir yanlış), «şəxs - vəzifə» /
+«sənəd - il» cütlük uyğunluğu.
+
+Yeni bank yazanda çətinlik bölgüsü **hər mövzuda 12 çətin sual**
+olmalıdır. Az olsa, müəllim bir mövzu + «Çətin» seçəndə generator
+«yalnız 8 fərqli sual tapıldı» deyir (`tools/tarix_umumi.py` bunu
+`BOLGU` ilə yoxlayır).
+
+`tools/cetinlik_analiz.py` bunu ölçür — banka toxunmur, yalnız
+variantların qurulusuna baxır (həm humanitar, həm riyaziyyat sətir
+formasını tanıyır):
+
+```bash
+python3 tools/cetinlik_analiz.py tarix11        # yalnız difficulty=3
+python3 tools/cetinlik_analiz.py tarix9 --hamisi
+```
+
+Nişanlar: `ILLER-ARALIQ` (çılpaq il variantları, aralıq > 12 il),
+`ERA-QARISIQ`, `UZUN-CAVAB` (düzgün ≥ 1.6 dəfə uzun), `MUTLEQ-SOZ`,
+`EKO-CAVAB`. **Yeni bank hazır olanda bu yoxlama 0 verməlidir** —
+pg_trgm və cavab balansı ilə bir sırada.
+
+Xronoloji sualda cavab sətri (`2 - 3 - 1`) da cavab sayılır — eyni
+sıralama bir bankda ikidən çox təkrarlanmamalıdır.

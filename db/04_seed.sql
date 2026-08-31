@@ -5,10 +5,15 @@
 
 insert into public.programs (slug, name, sort) values
   ('ibtidai',       'İbtidai siniflər (1-4)',        10),
-  ('orta',          'Orta məktəb (5-8)',             20),
-  ('buraxilis',     'Buraxılış imtahanı (9-11)',     30),
-  ('miq',           'MİQ - müəllimlərin işə qəbulu', 40),
-  ('sertifikasiya', 'Müəllim sertifikasiyası',       50)
+  ('orta',          'Orta və yuxarı siniflər (5-11)', 20)
+--  DIQQET: 'buraxilis' (30), 'miq' (40) ve 'sertifikasiya' (50) proqramlari BURADAN
+--  CIXARILDI - illerle bos qalmisdilar, muellim panelde bos proqram
+--  gorurdu.  MIQ/sertifikasiya ayri mehsuldur: menbeyi e-derslik
+--  derslikyi deyil, DIM proqramidir.  'buraxilis' ise PROQRAM formasi
+--  sehv idi - buraxilis imtahani coxfennlidir ve muellim ona qrup
+--  yaratmir, ona gore imtahan SABLONU kimi qurulur (bax db/73).
+--  Hazir olanda eyni slug-lar geri qaytarila biler.
+--  Kohne baza ucun: db/72_bos_fennler.sql, db/73_buraxilis_proqrami.sql.
 on conflict (slug) do update set name = excluded.name, sort = excluded.sort;
 
 insert into public.subjects (slug, name, sort) values
@@ -21,8 +26,9 @@ insert into public.subjects (slug, name, sort) values
   ('kimya',        'Kimya',            70),
   ('biologiya',    'Biologiya',        80),
   ('tarix',        'Tarix',            90),
-  ('cografiya',    'Coğrafiya',       100),
-  ('kurikulum',    'Kurikulum',       110)
+  ('cografiya',    'Coğrafiya',       100)
+--  'kurikulum' (110) fenni de cixarildi - yalniz MIQ/sertifikasiya
+--  ucun nezerde tutulmusdu, movzusu ve suali hec vaxt olmayib.
 on conflict (slug) do update set name = excluded.name, sort = excluded.sort;
 
 -- Azerbaycanca sira sayi sekilcisi sait ahengine gore deyisir:
@@ -43,38 +49,27 @@ select p.id, g::text, app.ordinal_az(g) || ' sinif', g * 10
  where p.slug = 'ibtidai'
 on conflict (program_id, code) do nothing;
 
--- Orta: 5-8
+-- Orta ve yuxari siniflar: 5-11
+--  DIQQET: 9-11 EVVEL 'buraxilis' proqraminda yaradilirdi, movzu ve
+--  suallar ise 41/45/49_movzular_orta*.sql ile 'orta'ya yigilirdi -
+--  her sinif iki defe gorunurdu.  Mezmun mektebi proqramidir, imtahan
+--  hazirligi deyil; ona gore 5-11 burada, 'orta'dadir.  Kohne bazada
+--  qalan bos setirleri 57_sinif_dubli.sql silir.
 insert into public.levels (program_id, code, name, sort)
 select p.id, g::text, app.ordinal_az(g) || ' sinif', g * 10
-  from public.programs p, generate_series(5, 8) g
+  from public.programs p, generate_series(5, 11) g
  where p.slug = 'orta'
 on conflict (program_id, code) do nothing;
 
--- Buraxilis: 9-11
-insert into public.levels (program_id, code, name, sort)
-select p.id, g::text, app.ordinal_az(g) || ' sinif', g * 10
-  from public.programs p, generate_series(9, 11) g
- where p.slug = 'buraxilis'
-on conflict (program_id, code) do nothing;
-
--- MIQ ve sertifikasiya: sinif yox, ixtisas pilleleri
-insert into public.levels (program_id, code, name, sort)
-select p.id, v.code, v.name, v.sort
-  from public.programs p,
-       (values ('ibtidai-muellimi','İbtidai sinif müəllimi',10),
-               ('riyaziyyat',      'Riyaziyyat müəllimi',   20),
-               ('az-dili',         'Azərbaycan dili müəllimi',30),
-               ('ingilis-dili',    'İngilis dili müəllimi', 40)) as v(code,name,sort)
- where p.slug in ('miq','sertifikasiya')
-on conflict (program_id, code) do nothing;
+-- MIQ ve sertifikasiya ixtisas pilleleri de cixarildi (yuxaridaki
+-- serhe bax).  Numune ucun kod-ad cutleri: ibtidai-muellimi,
+-- riyaziyyat, az-dili, ingilis-dili.
 
 -- Hansi fenn hansi programda var
 insert into public.program_subjects (program_id, subject_id)
 select p.id, s.id from public.programs p, public.subjects s
  where (p.slug = 'ibtidai'  and s.slug in ('riyaziyyat','az-dili','ingilis-dili','hayat-bilgisi'))
-    or (p.slug = 'orta'     and s.slug in ('riyaziyyat','az-dili','ingilis-dili','informatika','fizika','biologiya','tarix','cografiya'))
-    or (p.slug = 'buraxilis'and s.slug in ('riyaziyyat','az-dili','ingilis-dili','fizika','kimya','biologiya','tarix','cografiya','informatika'))
-    or (p.slug in ('miq','sertifikasiya') and s.slug in ('kurikulum','riyaziyyat','az-dili','ingilis-dili'))
+    or (p.slug = 'orta'     and s.slug in ('riyaziyyat','az-dili','ingilis-dili','informatika','fizika','kimya','biologiya','tarix','cografiya'))
 on conflict do nothing;
 
 -- ----------------------------------------------------------------- paketler

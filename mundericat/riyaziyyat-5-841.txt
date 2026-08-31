@@ -1,0 +1,53 @@
+# riyaziyyat 5 II hisse
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=841
+# səhifə: 108 · bölmə: 4 · mövzu: 41
+
+== Bölmə 5. Dəyişəni olan ifadələr. Tənlik. Bərabərsizlik
+     6  İlkin yoxlama
+     7  5.1 Dəyişəni olan ifadələr
+    10  5.2 Birdəyişənli ifadələrin sadələşdirilməsi
+    13  5.3 Bərabərlik və tənlik
+    19  5.4 Tənlik qurmaqla məsələ həlli
+    23  5.5 Bərabərsizliklər
+    27  5.6 Asılı dəyişənlər və asılı olmayan dəyişənlər
+    32  Xülasə
+    33  Ümumiləşdirici tapşırıqlar
+    34  STEAM. Qlobal istiləşmə
+
+== Bölmə 6. Müstəvi fiqurlar
+    36  İlkin yoxlama
+    37  6.1 Konqruyent bucaqlar. Bucağın tənböləni
+    41  6.2 Qonşu və qarşılıqlı bucaqlar
+    44  Məsələlər
+    46  6.3 Düzbucaqlı üçbucağın sahəsi
+    49  6.4 Düzbucaqlı və düzbucaqlı üçbucaqdan təşkil olunmuş fiqurun sahəsi
+    52  6.5 Paralel və perpendikulyar düz xətlərin çəkilməsi
+    56  6.6 Üçbucağın çəkilməsi
+    58  Xülasə
+    59  Ümumiləşdirici tapşırıqlar
+    60  STEAM. Avtomobil dayanacağı
+
+== Bölmə 7. Fəza fiqurları
+    62  İlkin yoxlama
+    63  7.1 Kub və kuboidın səthinin sahəsi
+    68  7.2 Oturacağı düzbucaqlı üçbucaq olan düz prizmanın səthinin sahəsi
+    70  Məsələlər
+    71  7.3 Düz prizmanın həcmi
+    76  7.4 Sahə vahidləri
+    79  7.5 Həcm vahidləri
+    82  Xülasə
+    83  Ümumiləşdirici tapşırıqlar
+    84  STEAM. "Quşlar bizim dostlarımızdır".
+
+== Bölmə 8. Statistika və məlumatların təsviri
+    86  İlkin yoxlama
+    87  8.1 Ədədi orta
+    91  8.2 Dairəvi diaqram
+    93  8.3 Məlumatların təsviri
+    96  Xülasə
+    97  Ümumiləşdirici tapşırıqlar
+    98  STEAM. "COVİD-19" infeksiyasının yayılma statistikası
+    99  5-ci sinif üzrə ümumiləşdirici tapşırıqlar
+   104  Sözlük
+   107  Cavablar
+

@@ -1,0 +1,34 @@
+# kimya 7 II hisse
+# mənbə: https://www.e-derslik.edu.az/player/index3.php?book_id=872
+# səhifə: 72 · bölmə: 3 · mövzu: 24
+
+== Bölmə 5. Qarışıqların ayrılma üsulları
+     6  5.1 Kristallaşdırma üsulu
+    11  5.2 Sadə distillə və fraksiyalı distillə üsulları
+    15  5.3 Durultma üsulu
+    17  5.4 Kağız xromatoqrafiyası
+    20  Elm, texnologiya, həyat
+    22  Layihə
+    24  Xülasə
+    25  Ümumiləşdirici tapşırıqlar
+
+== Bölmə 6. Kimyəvi reaksiyalar
+    28  6.1 Fiziki və kimyəvi hadisələr
+    32  6.2 Kimyəvi reaksiyaların əlamətləri
+    35  6.3 Ekzotermik və endotermik reaksiyalar
+    38  Elm, texnologiya, həyat
+    40  Layihə
+    42  Xülasə
+    43  Ümumiləşdirici tapşırıqlar
+
+== Bölmə 7. Turşular və əsaslar
+    46  7.1 Turşular və turş mühit
+    50  7.2 Əsaslar və əsasi mühit
+    53  7.3 İndikatorlar və pH şkalası
+    58  7.4 Neytrallaşma reaksiyaları
+    64  Elm, texnologiya, həyat
+    66  Layihə
+    68  Xülasə
+    69  Ümumiləşdirici tapşırıqlar
+    71  Sözlük
+
