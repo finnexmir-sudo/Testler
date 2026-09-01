@@ -364,6 +364,68 @@ BASLIQ_KIM = """\
 --
 --  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
 
+BASLIQ_BIO = """\
+--  88_alt_movzular_biologiya6_11.sql : BIOLOGIYA 6-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Yeddinci fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika,
+--  kimya hazirdir.  Biologiya 6-ci sinifden baslayir (1-5-de yoxdur).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 538 (6),
+--  863/864 (7), 927/928 (8), 727 (10), 276 (11).  Adlar EYNILE
+--  goturulub.
+--
+--  9-CU SINIF BU FAYLDA YOXDUR: kitab id 467-nin server terefi
+--  BOS qayidir (Cemi sehife: 0) - portal bu derslik ucun meznunu
+--  hele yuklemeyib, umumi mundericat.py scraperi de bunu tesdiq edir.
+--  Ust movzular (bio-9-*) ondan evvel, basqa menbeden qurulub -
+--  toxunulmur, sadece bu merhelede alt movzu almir.  Portal
+--  meznunu yukleyende elave olunacaq.
+--
+--  DERSLIYIN QURULUSU:
+--
+--  6-ci sinif: 8 Fesil, hamisi bire-bir movzuya (birbasa).
+--
+--  7-ci sinif: kitab 863-un "Giris" bolmesi (2 ders, basliq yoxdur)
+--  ayri "==" bolme kimi gelir, bazada ayri movzusu yoxdur - ilk
+--  movzuya (bio-7-huceyre-orqanizm) elave edildi.
+--
+--  8-ci sinif: 8 Bolme, hamisi bire-bir movzuya (birbasa).
+--
+--  10-cu sinif: derslikde 5 boyuk boluk (I-V), bazada 8 movzu -
+--  ILK boluk ("I. Biosferde istehsal ve istehlak") sehife 31-den
+--  IKI movzuya bolunur (heyat-prosesleri/istehsal).  "II" ve "III"
+--  boluklerin ICINDE nomresiz "Bolme N." alt-basliqlari var (novbeti
+--  dersle EYNI sehifede, alt-basliq qaydasi ile tutulur) - "II"
+--  UC movzuya (deyiskenlik/saglam-heyat/epidemiologiya), "III" ISE
+--  IKI alt-basliqla da EYNI movzuya (tekamul) gedir - dersllik iki
+--  hisseye bolse de bazada tek movzudur.  "IV" ve "V" birbasa.
+--
+--  11-ci sinif: derslikde 7 boyuk boluk (I-VII), bazada 8 movzu -
+--  "II. Mikrobiologiya"nin 9 dersi TAM bakteriyalar movzusuna
+--  (bio-11-bakteriyalar) yonledi.  Sebeb: dersliyin mundericat
+--  panelinde bu bolmenin icinde virus-a aid AYRI basliq YOXDUR (butun
+--  9 ders "Mikroorqanizmler/menfur muhit/infeksion proses" basliqli,
+--  sehife araliqlari da bolunme gostermir) - uydurma sehife serhedi
+--  qoymaqdansa, movcud movzunun (bio-11-viruslar) bu merhelede 0 alt
+--  movzu qalmasi seçildi.  Qalan 6 boluk birbasa bire-bir movzuya.
+--
+--  BURAXILAN BENDLER: "Layihə", "Təqdimat mövzuları" / "Təqdimat və
+--  referat mövzuları" / "Təqdimat üçün mövzular" - ders deyil, elavedir
+--  (10 ve 11-ci sinifde tekrar-tekrar cixir).  "İstifadə edilmiş
+--  ədəbiyyat" da eyni sebeble xaric edilib.
+--
+--  "•" ILE BASLAYAN BENDLER (6-ci sinif): dusterin ozu, silinir.
+--
+--  YAZI QUSURLARI: 6-ci sinifde "Xəstəliktörədən" (bosluq dusub),
+--  7-ci sinifde iki bend sonunda artiq nöqte ("Tozlanma.",
+--  "Çiçək və onun quruluşu."), 8-ci sinifde bir bend sonunda ("İnsan
+--  ürəyinin quruluşu və işi."), 7-ci sinif II hissede iki bendde
+--  noqteden sonra bosluq yoxdur ("hissələri.Buğumayaqlılar",
+--  "hissələri.Molyusklar").
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -670,6 +732,67 @@ PAKETLER = [
                           (float("inf"), "kim-11-karbohidrat")],
                          "kim-11-azotlu",
                          "kim-11-polimer"])]),
+        ],
+    },
+    {
+        "ad": "bio6_11",
+        "etiket": "Biologiya 6-11 (9-cu sinif menbesi bos)",
+        "fayl": "88_alt_movzular_biologiya6_11.sql",
+        "fenn": "biologiya",
+        "fayl_on": "biologiya",
+        "basliq": BASLIQ_BIO,
+        "bolmebasliq": True,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "Layihə", "Təqdimat mövzuları",
+            "Təqdimat və referat mövzuları", "Təqdimat üçün mövzular",
+            "İstifadə edilmiş ədəbiyyat",
+        },
+        "duzelis": {
+            "9. Bakteriyaların yayılması və təbiətdə rolu."
+            " Xəstəliktörədən bakteriyalar. Viruslar":
+                ("Bakteriyaların yayılması və təbiətdə rolu."
+                 " Xəstəlik törədən bakteriyalar. Viruslar", "yazi"),
+            "3.1 Çiçək və onun quruluşu.":
+                ("Çiçək və onun quruluşu", "yazi"),
+            "3.2 Tozlanma.": ("Tozlanma", "yazi"),
+            "4.4 Onurğasız heyvanlarda bədənin əsas hissələri."
+            "Buğumayaqlılar":
+                ("Onurğasız heyvanlarda bədənin əsas hissələri."
+                 " Buğumayaqlılar", "yazi"),
+            "4.5 Onurğasız heyvanlarda bədənin əsas hissələri."
+            "Molyusklar":
+                ("Onurğasız heyvanlarda bədənin əsas hissələri."
+                 " Molyusklar", "yazi"),
+            "3.2 İnsan ürəyinin quruluşu və işi.":
+                ("İnsan ürəyinin quruluşu və işi", "yazi"),
+        },
+        "ust": ("Biologiya ust movzu sayi 47 deyil", "true", 47),
+        "sinifler": [
+            (6, [(538, ["bio-6-tedqiqat", "bio-6-huceyre",
+                        "bio-6-vegetativ", "bio-6-generativ",
+                        "bio-6-hereket-qida", "bio-6-dasinma-coxalma",
+                        "bio-6-muhit", "bio-6-rol"])]),
+            (7, [(863, ["bio-7-huceyre-orqanizm", "bio-7-huceyre-orqanizm",
+                        "bio-7-bitki", "bio-7-coxalma"]),
+                 (864, ["bio-7-heyvanlar", "bio-7-muxteliflik",
+                        "bio-7-ekosistem", "bio-7-saglam-heyat"])]),
+            (8, [(927, ["bio-8-heyat-kimyasi", "bio-8-bitki",
+                        "bio-8-qan-dovrani", "bio-8-teneffus"]),
+                 (928, ["bio-8-hezm", "bio-8-coxalma",
+                        "bio-8-tesnifat", "bio-8-saglamliq"])]),
+            (10, [(727, [("bio-10-heyat-prosesleri", 31,
+                          "bio-10-istehsal"),
+                         {"Bölmə 1. Dəyişkənlik": "bio-10-deyiskenlik",
+                          "Bölmə 2. Sağlam həyat": "bio-10-saglam-heyat",
+                          "Bölmə 3. Epidemiologiya": "bio-10-epidemiologiya"},
+                         {"Bölmə 1. Makrotəkamül": "bio-10-tekamul",
+                          "Bölmə 2. İnsanın tarixi inkişafı": "bio-10-tekamul"},
+                         "bio-10-genetika", "bio-10-ekologiya"])]),
+            (11, [(276, ["bio-11-heyatin-yaranmasi", "bio-11-bakteriyalar",
+                         "bio-11-seleksiya", "bio-11-biotexnologiya",
+                         "bio-11-biosfer", "bio-11-insan-muhit",
+                         "bio-11-bolunme-nezaret"])]),
         ],
     },
 ]

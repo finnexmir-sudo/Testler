@@ -864,3 +864,34 @@ pg_trgm və cavab balansı ilə bir sırada.
 
 Xronoloji sualda cavab sətri (`2 - 3 - 1`) da cavab sayılır — eyni
 sıralama bir bankda ikidən çox təkrarlanmamalıdır.
+
+---
+
+## Çoxmülahizəli birləşmə sualı — təsdiqlənmiş format (növbəti mərhələ)
+
+Real DİM səviyyəsinə yaxınlaşdırmaq üçün sınanıb təsdiqlənmiş əlavə
+qəlib: **4 nömrələnmiş mülahizə + kombinasiya variantları**
+(`A) 1,3  B) yalnız 1  C) 2,4  D) 1,2,3  E) 3,4`). Sxemə toxunmur —
+mövcud `single` növünün içindədir, sual mətni sadəcə çoxsətirli yazılır.
+
+Pilot: `utarix-9-birlesme` mövzusunda real şagird üzərində sınandı.
+Nəticə: format işlədi («vaxt aparan, düşündürücü, çətin orta»),
+amma **əl ilə yazılan yeni fakt riskli oldu** — bir sınaq sualında
+Qaribaldi/Kavur haqqında əlavə diplomatik detal yazılmışdı, şagird
+«dərslikdə yoxdur» dedi. Səbəb detalın yalançı olması deyildi —
+mündəricatın göstərdiyi dərinlikdən kənara çıxmışdı.
+
+**Qayda: retrofit yalnız mövzunun ÖZ bankında artıq mövcud olan
+faktlardan qurulur.** Yəni 4 mülahizə yeni tarixi bilik yazmaqla yox,
+həmin mövzunun mövcud (asan/orta/çətin) suallarının cütlük, ardıcıllıq
+və müqayisə faktlarını bir sualda birləşdirməklə alınır. Bu, iki şeyi
+eyni anda verir: mündəricat sərhədini aşmır (bütün faktlar onsuz da
+təsdiqlənib) və analitik çətinliyi artırır (şagird 4 ayrı faktı
+yadda saxlayıb müqayisə etməlidir, təkini yox).
+
+**Sıra:** əvvəlcə mövzu ağacları (alt-mövzular) bitsin — bu, ayrı
+məsələdir. Sonra bu format bütün fənlərə (təkcə tarixə yox) mövcud
+"çətin" sualların üzərində tətbiq olunacaq. Venn diaqramı formatı
+(şəkilli/analitik) ayrı, sonrakı qərardır — `media_url` heç bir
+ekranda render olunmur, ona görə real frontend işi tələb edir; hələ
+başlanmayıb.
