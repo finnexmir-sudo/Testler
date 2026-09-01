@@ -1,5 +1,5 @@
 -- =====================================================================
---  smoke_arxiv.sql : sagird arxivi - yer azad olur, kod dayanir
+--  smoke_dayandir.sql : sagird dayandirilir - yer azad olur, kod dayanir
 --                    (baza terefinde yeni kod YOXDUR: RLS + movcud
 --                     trg_students_seat_limit kifayet edir; bu suite
 --                     onlarin HEQIQETEN kifayet etdiyini yoxlayir)
@@ -17,7 +17,7 @@ delete from public.user_roles;       delete from public.profiles;
 delete from auth.users;
 
 insert into auth.users (id, email, raw_user_meta_data) values
-  ('11110000-0000-0000-0000-0000000000ba','a@t.az','{"full_name":"Arxiv M"}');
+  ('11110000-0000-0000-0000-0000000000ba','a@t.az','{"full_name":"Dayandirma M"}');
 insert into public.accounts (id, type, name, owner_id) values
   ('aaaa0000-0000-0000-0000-0000000000ba','tutor','A hesabi',
    '11110000-0000-0000-0000-0000000000ba');
@@ -50,7 +50,7 @@ end $$;
 \echo 'OK  1 · yer dolanda yeni sagird qebul olunmur'
 
 -- =====================================================================
---  2. Bir sagird ARXIVE salinir -> yer AZAD OLUR
+--  2. Bir sagird DAYANDIRILIR -> yer AZAD OLUR
 --     (kohne davranis: paneldə bunu etmek MUMKUN DEYILDI, yer bir
 --      defe tutulurdu ve geri qayitmirdi)
 -- =====================================================================
@@ -60,17 +60,17 @@ begin
   select id into sid from public.students where full_name = 'Sagird 1';
   update public.students set is_active = false where id = sid;
   select app.account_student_count('aaaa0000-0000-0000-0000-0000000000ba') into n;
-  assert n = 4, 'arxivden sonra say azalmadi: ' || n;
+  assert n = 4, 'dayandirmadan sonra say azalmadi: ' || n;
   --  indi yeni sagird YENE girmelidir
   perform public.rpc_add_student('cccc0000-0000-0000-0000-0000000000ba', 'Altinci');
   select app.account_student_count('aaaa0000-0000-0000-0000-0000000000ba') into n;
   assert n = 5, 'azad yere yeni sagird girmedi: ' || n;
 end $$;
-\echo 'OK  2 · arxiv yeri azad edir, yerine yeni sagird girir'
+\echo 'OK  2 · dayandirma yeri azad edir, yerine yeni sagird girir'
 
 -- =====================================================================
 --  3. Geri qaytarma yerler DOLU ikən BLOKLANIR
---     (yoxsa limit yan kecilerdi: arxivle, elave et, geri qaytar)
+--     (yoxsa limit yan kecilerdi: dayandir, elave et, davam etdir)
 -- =====================================================================
 do $$
 declare sid uuid; ok boolean := false;
@@ -80,7 +80,7 @@ begin
     update public.students set is_active = true where id = sid;
   exception when others then ok := true;
   end;
-  assert ok, 'yerler dolu ikən arxivden geri qaytarmaq alindi - limit yan kecilir';
+  assert ok, 'yerler dolu ikən dayandirilmisdan geri qaytarmaq alindi - limit yan kecilir';
 end $$;
 \echo 'OK  3 · yer yoxdursa geri qaytarma bloklanir'
 
@@ -102,7 +102,7 @@ end $$;
 \echo 'OK  4 · yer acilanda geri qaytarma isleyir'
 
 -- =====================================================================
---  5. Arxivdeki sagirdin GIRIS KODU dayanir - acıq sessiya da olsa
+--  5. Dayandirilmis sagirdin GIRIS KODU dayanir - acıq sessiya da olsa
 -- =====================================================================
 reset role; reset request.jwt.claim.sub;
 do $$
@@ -115,19 +115,19 @@ begin
   tok := r->>'token';
   assert app.session_student(tok) is not null, 'sessiya qurulmadi';
 
-  --  arxive salinir - ACIQ sessiya derhal etibarsiz olmalidir
+  --  dayandirilir - ACIQ sessiya derhal etibarsiz olmalidir
   update public.students set is_active = false where id = sid;
   assert app.session_student(tok) is null,
-    'ARXIVDEKI sagirdin acıq sessiyasi hele de isleyir';
+    'DAYANDIRILMIS sagirdin acıq sessiyasi hele de isleyir';
 
   --  yeniden giris de alinmamalidir
   r := public.rpc_student_login(kod);
-  assert not (r->>'ok')::boolean, 'arxivdeki sagird yeniden daxil ola bildi';
+  assert not (r->>'ok')::boolean, 'dayandirilmis sagird yeniden daxil ola bildi';
 end $$;
-\echo 'OK  5 · arxivde kod dayanir, acıq sessiya da kesilir'
+\echo 'OK  5 · dayandirilmisda kod dayanir, acıq sessiya da kesilir'
 
 -- =====================================================================
---  6. Kecmis neticeler QALIR - arxiv silmek deyil
+--  6. Kecmis neticeler QALIR - dayandirma silmek deyil
 -- =====================================================================
 do $$
 declare sid uuid; n int;
@@ -137,11 +137,11 @@ begin
   select sid, t.id, 'submitted', 80, now() from public.tests t
     where status = 'published' limit 1;
   select count(*) into n from public.attempts where student_id = sid;
-  assert n = 1, 'arxivdeki sagirde netice yazila bilmir';
+  assert n = 1, 'dayandirilmis sagirde netice yazila bilmir';
   --  sagird setri de yerindedir
   select count(*) into n from public.students where id = sid;
-  assert n = 1, 'arxiv sagirdi SILIB - bu, arxiv deyil';
+  assert n = 1, 'dayandirma sagirdi SILIB - bu, dayandirma deyil';
 end $$;
-\echo 'OK  6 · arxiv silmek deyil - setir ve neticeler qalir'
+\echo 'OK  6 · dayandirma silmek deyil - setir ve neticeler qalir'
 
-\echo 'ARXIV: BUTUN YOXLAMALAR KECDI'
+\echo 'DAYANDIRMA: BUTUN YOXLAMALAR KECDI'
