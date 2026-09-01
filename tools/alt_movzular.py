@@ -426,6 +426,55 @@ BASLIQ_BIO = """\
 --
 --  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
 
+BASLIQ_ING = """\
+--  89_alt_movzular_ingilis6_11.sql : INGILIS DILI 6-7, 10-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Sekkizinci fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika,
+--  kimya, biologiya hazirdir.
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 916 (6),
+--  710 (7), 738 (10), 805 (11).  Adlar EYNILE goturulub.
+--
+--  BU FAYLDA YALNIZ 4 SINIF VAR - qalan 7 sinifin sebebi ferqlidir:
+--
+--  1-4-CU SINIF: bazadaki movzular ("Alphabet - elifba", "Colours -
+--  renglor" kimi ikidilli adlarla) e-derslik dersliyinden GOTURULMEYIB
+--  - elle qurulmus lugetevi movzulardir, arxasinda kitab id yoxdur.
+--  Alt movzu ucun menbe HEC vaxt olmayacaq.
+--
+--  5 VE 9-CU SINIF: kitab id 850 (5) ve 886 (9) - dersliyin oz
+--  mundericat paneli YALNIZ UNIT basliqlarini verir, hech bir alt
+--  ders sadalanmir (bax: sehife: 120/160, amma bolme: 1, hamisi tek
+--  "UNITS" basligi altinda).  Bazadaki 6-8 movzu artiq bu tek-sevi-
+--  yeli mundericatin ozudur - alt movzu cixaracaq basqa sey yoxdur.
+--
+--  8-Cİ SINIF: kitab id 824-un server terefi TAM BOSDUR (Cemi sehife:
+--  0) - portal bu derslik ucun meznunu hele yuklemeyib (biologiya
+--  9-la eyni veziyyet, bax db/88). Portal meznunu yukleyende elave
+--  olunacaq.
+--
+--  10-CU SINIFDE 9 UNIT, BAZADA 6 MOVZU: iki movzu adinin ozu
+--  birlesmeni gosterir - "Success and Health" (ing-10-success)
+--  Unit 5 (Success) + Unit 6 (Health is Wealth) deyir, "Stages of
+--  Life. Media" (ing-10-media) ise Unit 7 (Stages of Life) + Unit 9
+--  (Media) - aralarindaki Unit 8 (Happiness) adda gorunmese de bu
+--  ikisinin arasinda basqa yeri yoxdur, ona gore de ing-10-media-ya
+--  gedir.  Qalan 4 unit (Kindness/Victorious/Environmental Problems/
+--  Cultures) birbasa bire-bir.
+--
+--  BURAXILAN BENDLER: dersliyin sonundaki aparat - "Tests",
+--  "Grammar bank/Bank", "Communication activities", "Audio scripts",
+--  "Wordlist", "List/Irregular verb(s) list", "References", "Tracks",
+--  "Activities", "Text credits, video credits and references" -
+--  ders deyil, elavedir (7, 10 ve 11-ci sinifin son unitinde gelir).
+--
+--  YAZI QUSURLARI: 11-ci sinifde iki bend noqteden sonra bosluqsuz
+--  ("Reading.A text...", "topic.A lead-in..."), bir bend apostrofu
+--  SQL-de tehlukelidir ("shouldn't" -> "should not").
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -793,6 +842,48 @@ PAKETLER = [
                          "bio-11-seleksiya", "bio-11-biotexnologiya",
                          "bio-11-biosfer", "bio-11-insan-muhit",
                          "bio-11-bolunme-nezaret"])]),
+        ],
+    },
+    {
+        "ad": "ing6_11",
+        "etiket": "Ingilis dili 6, 7, 10, 11 (1-4, 5, 8, 9 menbesiz/bos)",
+        "fayl": "89_alt_movzular_ingilis6_11.sql",
+        "fenn": "ingilis-dili",
+        "fayl_on": "ingilis-dili",
+        "basliq": BASLIQ_ING,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "Tests", "Grammar bank", "Grammar Bank",
+            "Communication activities", "Audio scripts", "Wordlist",
+            "List of irregular verbs", "Irregular verb list",
+            "Irregular verbs list", "References", "Activities", "Tracks",
+            "Text credits, video credits and references",
+        },
+        "duzelis": {
+            "Reading.A text about an unusual natural phenomenon":
+                ("Reading. A text about an unusual natural phenomenon",
+                 "yazi"),
+            "Focus on the topic.A lead-in to the topic: No Regrets":
+                ("Focus on the topic. A lead-in to the topic: No Regrets",
+                 "yazi"),
+            "Grammar A. Past Regrets or Mistakes should/shouldn't have done":
+                ("Grammar A. Past Regrets or Mistakes should/should not"
+                 " have done", "yazi"),
+        },
+        "ust": ("Ingilis dili ust movzu sayi 70 deyil", "true", 70),
+        "sinifler": [
+            (6, [(916, ["ing-6-town", "ing-6-food", "ing-6-holiday",
+                        "ing-6-stories", "ing-6-journeys", "ing-6-heroes",
+                        "ing-6-ideas", "ing-6-nature"])]),
+            (7, [(710, ["ing-7-schools", "ing-7-technology", "ing-7-talent",
+                        "ing-7-travel", "ing-7-friends", "ing-7-future"])]),
+            (10, [(738, ["ing-10-kindness", "ing-10-victory",
+                         "ing-10-cultures", "ing-10-environment",
+                         "ing-10-success", "ing-10-success",
+                         "ing-10-media", "ing-10-media", "ing-10-media"])]),
+            (11, [(805, ["ing-11-whys", "ing-11-experiences",
+                         "ing-11-conversation", "ing-11-regrets",
+                         "ing-11-creativity", "ing-11-news"])]),
         ],
     },
 ]
