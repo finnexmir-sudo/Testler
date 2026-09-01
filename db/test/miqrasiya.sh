@@ -43,11 +43,13 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          69_bank_tarix_umumi10.sql 70_movzular_umumi_tarix7.sql \
          71_bank_tarix_umumi7.sql 72_bos_fennler.sql \
          73_buraxilis_proqrami.sql 74_alt_movzular_riy8.sql \
-         82_alt_movzular_riy5_11.sql \
+         82_alt_movzular_riy5_11.sql 83_alt_movzular_riy1_4.sql \
+         84_alt_movzular_hb1_4.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
          100_seviyye_modeli.sql 101_ders_plani_alt.sql 102_movzu_qoruyucu.sql \
+         103_alt_movzu_duzelisleri.sql \
          05_grants.sql; do
   printf "  %-22s" "$f"
   if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then

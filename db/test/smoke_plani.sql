@@ -69,11 +69,17 @@ declare v jsonb; n int; ok1 boolean := false; ok2 boolean := false;
 begin
   v := public.rpc_plan_create('cccc0000-0000-0000-0000-0000000000f1',
                               'riyaziyyat', '3');
+  --  Plan YARPAQLARDAN dolur (db/101): alt movzusu olan movzu ozu
+  --  ders deyil, onun alt movzulari dersdir.  Ona gore burada butun
+  --  movzular yox, yalniz yarpaqlar sayilir - yoxsa alt movzu elave
+  --  edilen kimi bu yoxlama sinardi (bir defe sindi).
   select count(*) into n from public.topics t
     join public.subjects s on s.id = t.subject_id
     join public.levels   l on l.id = t.level_id
-   where s.slug = 'riyaziyyat' and l.code = '3';
+   where s.slug = 'riyaziyyat' and l.code = '3'
+     and not exists (select 1 from public.topics c where c.parent_id = t.id);
   assert (v->>'topics')::int = n, format('movzu sayi: %s / %s', v->>'topics', n);
+  assert n > 0, 'yarpaq movzu yoxdur';
 
   --  tekrar plan / bos movzu agaci - acıq imtina
   begin
@@ -180,12 +186,16 @@ begin
   reset role; reset request.jwt.claim.sub;
   assert (select count(*) from public.test_questions where test_id = tid) = 5,
          'test 5 sualliq deyil';
-  --  butun suallar mehz bu movzudandir
+  --  Butun suallar mehz bu movzudandir.  Bend ALT MOVZUDURSA hovuz
+  --  valideyndedir (db/101 bele qurub - alt movzuya sual baglanmir),
+  --  ona gore valideynin movzusu da qanunidir.
   assert not exists (
     select 1 from public.test_questions tq
       join public.questions q on q.id = tq.question_id
       join public.class_plan_items i on i.id = it1
-     where tq.test_id = tid and q.topic_id <> i.topic_id),
+      join public.topics t on t.id = i.topic_id
+     where tq.test_id = tid
+       and q.topic_id is distinct from coalesce(t.parent_id, t.id)),
     'basqa movzunun suali dusdu';
   --  tapsiriq avtomatik verilib
   assert exists (select 1 from public.assignments
@@ -229,14 +239,27 @@ begin
 
   --  cedvel oxunuslari ucun superuser kontekstine kecirik
   reset role; reset request.jwt.claim.sub;
+  --  Bu yoxlamanin qiymeti alt movzudadir: db/103-den evvel iki alt
+  --  movzudan qarisiq test "0 ferqli sual tapildi" verirdi.  Bendler
+  --  alt movzu olmasa yoxlama hec ne subut etmir - ona gore israr et.
+  assert exists (select 1 from public.class_plan_items i
+                   join public.topics t on t.id = i.topic_id
+                  where i.id in (it1, it2) and t.parent_id is not null),
+         'bendlerin hec biri alt movzu deyil - yoxlama bos qalir';
+
   assert (select count(*) from public.test_questions where test_id = tid) = 6,
          'qarisiq test 6 sualliq deyil';
+  --  Alt movzuda sual olmadigi ucun hovuz valideyndedir (db/103) -
+  --  qanuni movzular: bendin oz movzusu ve ya onun valideyni.
   assert not exists (
     select 1 from public.test_questions tq
       join public.questions q on q.id = tq.question_id
      where tq.test_id = tid
-       and q.topic_id not in (select topic_id from public.class_plan_items
-                               where id in (it1, it2))),
+       and q.topic_id not in (
+             select coalesce(t.parent_id, t.id)
+               from public.class_plan_items i
+               join public.topics t on t.id = i.topic_id
+              where i.id in (it1, it2))),
     'kenar movzunun suali dusdu';
   assert exists (select 1 from public.assignments where test_id = tid),
          'qarisiq teste tapsiriq verilmedi';

@@ -179,7 +179,19 @@ select v.fayl,
           join public.subjects s
             on s.id = p.subject_id and s.slug = 'riyaziyyat'
           join public.levels l on l.id = p.level_id
-         where l.code in ('5','6','7','9','10','11')) = 483)
+         where l.code in ('5','6','7','9','10','11')) = 483),
+    ('83_alt_movzular_riy1_4.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'riyaziyyat'
+          join public.levels l on l.id = p.level_id
+         where l.code in ('1','3','4')) = 212),
+    ('84_alt_movzular_hb1_4.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'hayat-bilgisi') = 125)
   ) as v(fayl, var)
  order by 1;
 

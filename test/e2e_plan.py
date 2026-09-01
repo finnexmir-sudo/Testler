@@ -18,6 +18,14 @@ TEST_CFG = """window.CFG = {
   STUDENT_URL: "https://example.test/Testler/"
 };"""
 
+#  A-I bolmeleri DUZ plani (fesilsiz) yoxlayir: "kecilmis movzuda test
+#  yig" yalniz fesilsiz movzuda ve ya feslin SON dersinde cixir.  J
+#  bolmesi fesilleri OZU qurur.  Ona gore burada hele alt movzusu
+#  olmayan sinif secilir - riyaziyyat 2 (portaldaki nesr kohne oldugu
+#  ucun alt movzu almir).  Bir gun o sinfe de alt movzu gelse
+#  asagidaki assert susmayacaq.
+SINIF = "2"
+
 fails = []
 def ok(cond, label, extra=""):
     print(("  OK   " if cond else "  FAIL ") + label + (("  " + str(extra)) if extra else ""),
@@ -85,13 +93,27 @@ with sync_playwright() as pw:
              "where level_id is not null", one=True)["n"]
     ok(len(subs) == ndb, "yalniz movzu agaci olan fennler", (len(subs), ndb))
     pg.select_option("#plSub", "riyaziyyat")
-    pg.select_option("#plLev", "3")
+    pg.select_option("#plLev", SINIF)
     pg.click("#btnPlMk")
     pg.wait_for_selector(".plan", timeout=8000)
+    # Plan YARPAQLARDAN dolur (db/101): alt movzusu olan movzu ozu ders
+    # deyil, onun alt movzulari dersdir.  Butun movzulari saysaq, alt
+    # movzu elave edilen kimi bu yoxlama sinar (bir defe sindi).
     ntop = db("""select count(*) n from public.topics t
                   join public.subjects s on s.id=t.subject_id
                   join public.levels l on l.id=t.level_id
-                 where s.slug='riyaziyyat' and l.code='3'""", one=True)["n"]
+                 where s.slug='riyaziyyat' and l.code=%s
+                   and not exists (select 1 from public.topics c
+                                    where c.parent_id = t.id)""",
+              (SINIF,), one=True)["n"]
+    assert ntop > 0, "yarpaq movzu yoxdur"
+    duz = db("""select count(*) n from public.topics t
+                  join public.subjects s on s.id=t.subject_id
+                  join public.levels l on l.id=t.level_id
+                 where s.slug='riyaziyyat' and l.code=%s
+                   and t.parent_id is not null""", (SINIF,), one=True)["n"]
+    assert duz == 0, ("SINIF=%s artiq fesillidir - A-I bolmeleri duz plan "
+                      "isteyir, basqa sinif sec" % SINIF)
     head = pg.inner_text(".plan .plhead").replace("\n", " ")
     ok(("0 / %d" % ntop) in head, "irelileyis 0/N gorunur", head)
     # CSS text-transform metni boyutdur - metn yox, quruluş yoxlanır
@@ -118,7 +140,7 @@ with sync_playwright() as pw:
     ok(("1 / %d" % ntop) in head, "irelileyis 1/N oldu", head)
 
     print("D · Siyahı, vərəq linki, geri qaytarma")
-    pg.locator(".plan summary").click(); pg.wait_for_timeout(300)
+    pg.locator(".plan details:not(.plgrp) > summary").click(); pg.wait_for_timeout(300)
     ok(pg.locator(".plrow").count() == ntop, "butun movzular siyahida",
        pg.locator(".plrow").count())
     ok(pg.locator(".plrow.ok").count() == 1, "kecilmis isarelenib")
@@ -140,7 +162,7 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".ploffer", timeout=8000)
     pg.locator("[data-plskip]").click()          # helelik test yigilmir
     pg.wait_for_timeout(300)
-    pg.locator(".plan summary").click(); pg.wait_for_timeout(300)
+    pg.locator(".plan details:not(.plgrp) > summary").click(); pg.wait_for_timeout(300)
     ok(pg.locator("[data-plmk]").count() == 1, "kecilmis movzuda «test yığ» var",
        pg.locator("[data-plmk]").count())
     pg.locator("[data-plmk]").click()
@@ -153,7 +175,7 @@ with sync_playwright() as pw:
     n2 = db("select count(*) n from public.tests where owner_type='educator'",
             one=True)["n"]
     ok(n2 == 2, "ikinci test bazada var", n2)
-    pg.locator(".plan summary").click(); pg.wait_for_timeout(300)
+    pg.locator(".plan details:not(.plgrp) > summary").click(); pg.wait_for_timeout(300)
     ok(pg.locator("[data-plmk]").count() == 0, "test yigilandan sonra duyme itir")
     ok(pg.locator(".plrow .pltest").count() == 2, "iki movzuda veraq linki var",
        pg.locator(".plrow .pltest").count())
@@ -199,10 +221,10 @@ with sync_playwright() as pw:
           select s.id, %s, s.class_id, 'submitted', now(), 2, 5, 40
             from public.students s where s.login_code = 'PLANSGE1'""", (t1,))
     pg.reload()
-    pg.wait_for_selector(".plan summary", timeout=8000)
+    pg.wait_for_selector(".plan details:not(.plgrp) > summary", timeout=8000)
     head = pg.inner_text(".plan .plhead").replace("\n", " ")
     ok("%" in head, "basliqda faiz gorunur", head)
-    pg.locator(".plan summary").click(); pg.wait_for_timeout(300)
+    pg.locator(".plan details:not(.plgrp) > summary").click(); pg.wait_for_timeout(300)
     ok(pg.locator(".plavg").count() == 1, "movzu ortalamasi cipi var",
        pg.locator(".plavg").count())
     ok("40%" in pg.inner_text(".plavg"), "ortalama 40%-dir")
@@ -245,8 +267,8 @@ with sync_playwright() as pw:
 
     #  plani silib yeniden qururuq - movcud planlar toxunulmur, bu
     #  qesdendir; muellim "Planı sil" ile teze quruluşa kecir
-    pg.reload(); pg.wait_for_selector(".plan summary", timeout=8000)
-    pg.locator(".plan summary").first.click(); pg.wait_for_timeout(300)
+    pg.reload(); pg.wait_for_selector(".plan details:not(.plgrp) > summary", timeout=8000)
+    pg.locator(".plan details:not(.plgrp) > summary").first.click(); pg.wait_for_timeout(300)
     #  dialoq dinleyicisi suite-in evvelinde onsuz da qeydiyyatdadir
     #  (setir 55) - ikincisini elave etmek "already handled" verir
     pg.locator("[data-pldel]").click()
@@ -254,7 +276,7 @@ with sync_playwright() as pw:
     pg.wait_for_function(
         "document.querySelectorAll('#plSub option').length > 1", timeout=8000)
     pg.select_option("#plSub", "riyaziyyat")
-    pg.select_option("#plLev", "3")
+    pg.select_option("#plLev", SINIF)
     pg.click("#btnPlMk")
     pg.wait_for_selector(".plan", timeout=10000)
 

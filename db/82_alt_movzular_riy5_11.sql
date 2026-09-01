@@ -9,20 +9,20 @@
 --  tam bir sey olsun.
 --
 --  EHATE: yalniz Riyaziyyat, 5, 6, 7, 9, 10, 11-ci sinifler.
---  8-ci sinif db/74-dedir, tekrarlanmir.  Basqa fenne toxunulmur.
+--  8-ci sinif db/74-dedir, 1-4 ise db/83-de.
 --
 --  MENBE: e-derslik.edu.az sag paneldeki "Movzular" agaci -
 --  kitab id 840/841 (5), 906/907 (6), 714 (7), 507 (9), 741 (10),
 --  817 (11).  Adlar EYNILE goturulub.  Derslikdeki sira sort-a
 --  dusub; her valideyn altinda 10-dan baslayir.
 --
---  ELLE YAZILMIR: tools/alt_movzular_riy.py cixarir.  Duzelis
---  skriptde edilir, sonra SQL yeniden yaradilir.
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir.  Duzelis skriptde
+--  edilir, sonra SQL yeniden yaradilir.
 --
 --  XARIC EDILEN BENDLER: kitabin sonundaki aparat - "Sozluk",
---  "Cavablar", "Ozunuzu yoxlayin", "Birinci yarimil / sinif uzre
---  umumilesdirici tapsiriqlar".  Bolmenin dersi deyil.  db/74 de
---  eyni qaydani tutub.
+--  "Cavablar", "Ozunuzu yoxlayin", "Mesele hellline numune",
+--  "yarimil / sinif uzre umumilesdirici tapsiriqlar".  Bolmenin
+--  dersi deyil.  db/74 de eyni qaydani tutub.
 --
 --  DIQQET
 --   * questions cedveline TOXUNULMUR - suallar alt movzulara
@@ -129,7 +129,7 @@ insert into public.topics (subject_id, level_id, parent_id, slug, name, sort)
 select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
   from (values
     --  ============  5-ci sinif  ============
-    --  bolme 1 natural ededler ve onlar uzerinde emeller
+    --  Bolme 1. Natural ededler ve onlar uzerinde emeller  (riy-5-natural-ededler)
     ('riy-5-natural-ededler', 'riy-5-natural-ededler-ilkin',
      'İlkin yoxlama', 10),
     ('riy-5-natural-ededler', 'riy-5-natural-ededler-natural-ededler',
@@ -154,7 +154,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 110),
     ('riy-5-natural-ededler', 'riy-5-natural-ededler-parker-gunes',
      'STEAM. "Parker" Günəş Zondu', 120),
-    --  bolme 2 adi kesrler
+    --  Bolme 2. Adi kesrler  (riy-5-adi-kesrler)
     ('riy-5-adi-kesrler', 'riy-5-adi-kesrler-ilkin',
      'İlkin yoxlama', 10),
     ('riy-5-adi-kesrler', 'riy-5-adi-kesrler-duzgun-olmayan',
@@ -185,7 +185,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 140),
     ('riy-5-adi-kesrler', 'riy-5-adi-kesrler-qurama',
      'STEAM. Qurama', 150),
-    --  bolme 3 onluq kesrler
+    --  Bolme 3. Onluq kesrler  (riy-5-onluq-kesrler)
     ('riy-5-onluq-kesrler', 'riy-5-onluq-kesrler-ilkin',
      'İlkin yoxlama', 10),
     ('riy-5-onluq-kesrler', 'riy-5-onluq-kesrler-onluq-kesrler',
@@ -218,7 +218,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 150),
     ('riy-5-onluq-kesrler', 'riy-5-onluq-kesrler-yukseksuretli-qatarlar',
      'STEAM. Yüksəksürətli qatarlar', 160),
-    --  bolme 4 faiz
+    --  Bolme 4. Faiz  (riy-5-faiz)
     ('riy-5-faiz', 'riy-5-faiz-ilkin',
      'İlkin yoxlama', 10),
     ('riy-5-faiz', 'riy-5-faiz-adi-kesr',
@@ -235,7 +235,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 70),
     ('riy-5-faiz', 'riy-5-faiz-genealogiya',
      'STEAM. Genealogiya', 80),
-    --  bolme 5 deyiseni olan ifadeler tenlik berabersizlik
+    --  Bolme 5. Deyiseni olan ifadeler. Tenlik. Berabersizlik  (riy-5-ifade-tenlik)
     ('riy-5-ifade-tenlik', 'riy-5-ifade-tenlik-ilkin',
      'İlkin yoxlama', 10),
     ('riy-5-ifade-tenlik', 'riy-5-ifade-tenlik-deyiseni',
@@ -256,7 +256,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 90),
     ('riy-5-ifade-tenlik', 'riy-5-ifade-tenlik-qlobal-istilesme',
      'STEAM. Qlobal istiləşmə', 100),
-    --  bolme 6 mustevi fiqurlar
+    --  Bolme 6. Mustevi fiqurlar  (riy-5-mustevi-fiqurlar)
     ('riy-5-mustevi-fiqurlar', 'riy-5-mustevi-fiqurlar-ilkin',
      'İlkin yoxlama', 10),
     ('riy-5-mustevi-fiqurlar', 'riy-5-mustevi-fiqurlar-konqruyent-bucagin',
@@ -279,7 +279,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 100),
     ('riy-5-mustevi-fiqurlar', 'riy-5-mustevi-fiqurlar-avtomobil-dayanacagi',
      'STEAM. Avtomobil dayanacağı', 110),
-    --  bolme 7 feza fiqurlari
+    --  Bolme 7. Feza fiqurlari  (riy-5-feza-fiqurlari)
     ('riy-5-feza-fiqurlari', 'riy-5-feza-fiqurlari-ilkin',
      'İlkin yoxlama', 10),
     ('riy-5-feza-fiqurlari', 'riy-5-feza-fiqurlari-kub-kuboidin',
@@ -300,7 +300,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 90),
     ('riy-5-feza-fiqurlari', 'riy-5-feza-fiqurlari-quslar-bizim',
      'STEAM. "Quşlar bizim dostlarımızdır"', 100),
-    --  bolme 8 statistika ve melumatlarin tesviri
+    --  Bolme 8. Statistika ve melumatlarin tesviri  (riy-5-statistika)
     ('riy-5-statistika', 'riy-5-statistika-ilkin',
      'İlkin yoxlama', 10),
     ('riy-5-statistika', 'riy-5-statistika-ededi-orta',
@@ -316,7 +316,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-5-statistika', 'riy-5-statistika-covid-19',
      'STEAM. "COVİD-19" infeksiyasının yayılma statistikası', 70),
     --  ============  6-ci sinif  ============
-    --  bolme 1 natural ededler ve onlar uzerinde emeller
+    --  Bolme 1. Natural ededler ve onlar uzerinde emeller  (riy-6-natural-ededler)
     ('riy-6-natural-ededler', 'riy-6-natural-ededler-ilkin',
      'İlkin yoxlama', 10),
     ('riy-6-natural-ededler', 'riy-6-natural-ededler-ededin-quvveti',
@@ -333,7 +333,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 70),
     ('riy-6-natural-ededler', 'riy-6-natural-ededler-kriptoqrafiya',
      'STEAM. "Kriptoqrafiya"', 80),
-    --  bolme 2 nisbet tenasub faiz
+    --  Bolme 2. Nisbet. Tenasub. Faiz  (riy-6-nisbet-faiz)
     ('riy-6-nisbet-faiz', 'riy-6-nisbet-faiz-ilkin',
      'İlkin yoxlama', 10),
     ('riy-6-nisbet-faiz', 'riy-6-nisbet-faiz-nisbet',
@@ -362,7 +362,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 130),
     ('riy-6-nisbet-faiz', 'riy-6-nisbet-faiz-ekran-cozumluluk',
      'STEAM. "Ekran nisbəti və çözümlülük"', 140),
-    --  bolme 3 tam ededler
+    --  Bolme 3. Tam ededler  (riy-6-tam-ededler)
     ('riy-6-tam-ededler', 'riy-6-tam-ededler-ilkin',
      'İlkin yoxlama', 10),
     ('riy-6-tam-ededler', 'riy-6-tam-ededler-tam',
@@ -387,7 +387,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 110),
     ('riy-6-tam-ededler', 'riy-6-tam-ededler-ekstremal-temperatur',
      'STEAM. "Ekstremal temperatur və mütləq sıfır"', 120),
-    --  bolme 4 duzbucaqli koordinat sistemi
+    --  Bolme 4. Duzbucaqli koordinat sistemi  (riy-6-koordinat)
     ('riy-6-koordinat', 'riy-6-koordinat-ilkin',
      'İlkin yoxlama', 10),
     ('riy-6-koordinat', 'riy-6-koordinat-duzbucaqli-sistemi',
@@ -402,7 +402,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 60),
     ('riy-6-koordinat', 'riy-6-koordinat-kriptoqrafiya',
      'STEAM. "Kriptoqrafiya"', 70),
-    --  bolme 5 coxluqlar ve onlar uzerinde emeller
+    --  Bolme 5. Coxluqlar ve onlar uzerinde emeller  (riy-6-coxluqlar)
     ('riy-6-coxluqlar', 'riy-6-coxluqlar-ilkin',
      'İlkin yoxlama', 10),
     ('riy-6-coxluqlar', 'riy-6-coxluqlar-coxluq',
@@ -417,7 +417,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 60),
     ('riy-6-coxluqlar', 'riy-6-coxluqlar-axtaris-sistemleri',
      'STEAM. "Axtarış sistemləri"', 70),
-    --  bolme 6 deyiseni olan ifadeler tenlik berabersizlik
+    --  Bolme 6. Deyiseni olan ifadeler. Tenlik. Berabersizlik  (riy-6-ifade-tenlik)
     ('riy-6-ifade-tenlik', 'riy-6-ifade-tenlik-ilkin',
      'İlkin yoxlama', 10),
     ('riy-6-ifade-tenlik', 'riy-6-ifade-tenlik-deyiseni',
@@ -438,7 +438,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 90),
     ('riy-6-ifade-tenlik', 'riy-6-ifade-tenlik-riyazi-modellesdirme',
      'STEAM. "Riyazi modelləşdirmə"', 100),
-    --  bolme 7 ucbucaqlar
+    --  Bolme 7. Ucbucaqlar  (riy-6-ucbucaqlar)
     ('riy-6-ucbucaqlar', 'riy-6-ucbucaqlar-ilkin',
      'İlkin yoxlama', 10),
     ('riy-6-ucbucaqlar', 'riy-6-ucbucaqlar-mediani-tenboleni',
@@ -457,7 +457,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 80),
     ('riy-6-ucbucaqlar', 'riy-6-ucbucaqlar-geodeziya-qubbeleri',
      'STEAM. "Geodeziya qübbələri"', 90),
-    --  bolme 8 hendesi fiqurlarin sahesi ve hecmi
+    --  Bolme 8. Hendesi fiqurlarin sahesi ve hecmi  (riy-6-sahe-hecm)
     ('riy-6-sahe-hecm', 'riy-6-sahe-hecm-ilkin',
      'İlkin yoxlama', 10),
     ('riy-6-sahe-hecm', 'riy-6-sahe-hecm-ucbucagin',
@@ -478,7 +478,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ümumiləşdirici tapşırıqlar', 90),
     ('riy-6-sahe-hecm', 'riy-6-sahe-hecm-mars-seherciyi',
      'STEAM. "Mars şəhərciyi"', 100),
-    --  bolme 9 statistika ve ehtimal
+    --  Bolme 9. Statistika ve ehtimal  (riy-6-statistika)
     ('riy-6-statistika', 'riy-6-statistika-ilkin',
      'İlkin yoxlama', 10),
     ('riy-6-statistika', 'riy-6-statistika-median-moda',
@@ -496,7 +496,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-6-statistika', 'riy-6-statistika-genealoji-dnt',
      'STEAM. "Genealoji DNT testi və ehtimal nəzəriyyəsi"', 80),
     --  ============  7-ci sinif  ============
-    --  bolme 1 statistika ehtimal
+    --  BOLME 1. STATISTIKA. EHTIMAL  (riy-7-statistika)
     ('riy-7-statistika', 'riy-7-statistika-melumatin-toplanmasi',
      'Məlumatın toplanması', 10),
     ('riy-7-statistika', 'riy-7-statistika-melumatin-teqdimati',
@@ -509,7 +509,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Hadisələrin cəmi', 50),
     ('riy-7-statistika', 'riy-7-statistika-umumi',
      'Ümumiləşdirici tapşırıqlar', 60),
-    --  bolme 2 rasional ededler
+    --  BOLME 2. RASIONAL EDEDLER  (riy-7-rasional)
     ('riy-7-rasional', 'riy-7-rasional-yazilisi-oxunusu',
      'Rasional ədədlərin yazılışı və oxunuşu', 10),
     ('riy-7-rasional', 'riy-7-rasional-dovri-kesrler',
@@ -526,7 +526,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Rasional ədədlər üzərində əməllər və xassələri', 70),
     ('riy-7-rasional', 'riy-7-rasional-umumi',
      'Ümumiləşdirici tapşırıqlar', 80),
-    --  bolme 3 paralellik perpendikulyarliq
+    --  BOLME 3. PARALELLIK. PERPENDIKULYARLIQ  (riy-7-paralellik)
     ('riy-7-paralellik', 'riy-7-paralellik-perpendikulyar-mail',
      'Perpendikulyar və mail', 10),
     ('riy-7-paralellik', 'riy-7-paralellik-parcanin-orta',
@@ -541,7 +541,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Uyğun tərəfləri paralel və ya perpendikulyar olan bucaqlar', 60),
     ('riy-7-paralellik', 'riy-7-paralellik-umumi',
      'Ümumiləşdirici tapşırıqlar', 70),
-    --  bolme 4 birhedliler coxhedliler
+    --  BOLME 4. BIRHEDLILER. COXHEDLILER  (riy-7-coxhedliler)
     ('riy-7-coxhedliler', 'riy-7-coxhedliler-birhedliler-onlarin',
      'Birhədlilər və onların hasili', 10),
     ('riy-7-coxhedliler', 'riy-7-coxhedliler-birhedlilerin-nisbeti',
@@ -560,7 +560,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Çoxhədlinin vuruqlara ayrılması', 80),
     ('riy-7-coxhedliler', 'riy-7-coxhedliler-umumi',
      'Ümumiləşdirici tapşırıqlar', 90),
-    --  bolme 5 ucbucaqlar
+    --  BOLME 5. UCBUCAQLAR  (riy-7-ucbucaqlar)
     ('riy-7-ucbucaqlar', 'riy-7-ucbucaqlar-terefine-qurulmasi',
      'Üç tərəfinə görə üçbucağın qurulması', 10),
     ('riy-7-ucbucaqlar', 'riy-7-ucbucaqlar-bucaqlari-terefleri',
@@ -569,7 +569,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Üçbucağın elementləri: tənbölən, median, hündürlük', 30),
     ('riy-7-ucbucaqlar', 'riy-7-ucbucaqlar-umumi',
      'Ümumiləşdirici tapşırıqlar', 40),
-    --  bolm9 6 muxteser vurma dusturlari
+    --  BOLM9 6. MUXTESER VURMA DUSTURLARI  (riy-7-muxteser)
     ('riy-7-muxteser', 'riy-7-muxteser-ikihedlilerin-kvadrata',
      'İkihədlilərin kvadrata yüksəldilməsi', 10),
     ('riy-7-muxteser', 'riy-7-muxteser-kvadrati-dusturlarindan',
@@ -584,7 +584,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Müxtəsər vurma düsturlarının tətbiqi', 60),
     ('riy-7-muxteser', 'riy-7-muxteser-umumi',
      'Ümumiləşdirici tapşırıqlar', 70),
-    --  bulm9 7 funksiya
+    --  BULM9 7. FUNKSIYA  (riy-7-funksiya)
     ('riy-7-funksiya', 'riy-7-funksiya-verilmesi',
      'Funksiyanın verilməsi', 10),
     ('riy-7-funksiya', 'riy-7-funksiya-xetti',
@@ -595,7 +595,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'İkidəyişənli xətti tənlik və onun qrafiki', 40),
     ('riy-7-funksiya', 'riy-7-funksiya-umumi',
      'Ümumiləşdirici tapşırıqlar', 50),
-    --  bolme 8 xetti tenlikler sistemi
+    --  BOLME 8. XETTI TENLIKLER SISTEMI  (riy-7-tenlikler-sistemi)
     ('riy-7-tenlikler-sistemi', 'riy-7-tenlikler-sistemi-ikideyisenli-xetti',
      'İkidəyişənli xətti tənliklər sistemi', 10),
     ('riy-7-tenlikler-sistemi', 'riy-7-tenlikler-sistemi-qrafik-usulla',
@@ -608,7 +608,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'İkidəyişənli xətti tənliklər sistemi qurmaqla məsələ həlli', 50),
     ('riy-7-tenlikler-sistemi', 'riy-7-tenlikler-sistemi-umumi',
      'Ümumiləşdirici tapşırıqlar', 60),
-    --  bolme 9 ucbucaqlarin konqruyentliyi
+    --  BOLME 9. UCBUCAQLARIN KONQRUYENTLIYI  (riy-7-konqruyentlik)
     ('riy-7-konqruyentlik', 'riy-7-konqruyentlik-ucbucaqlar',
      'Konqruyent üçbucaqlar', 10),
     ('riy-7-konqruyentlik', 'riy-7-konqruyentlik-birinci-elameti',
@@ -621,7 +621,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Bərabəryanlı və bərabərtərəfli üçbucağın xassələri', 50),
     ('riy-7-konqruyentlik', 'riy-7-konqruyentlik-umumi',
      'Ümumiləşdirici tapşırıqlar', 60),
-    --  bolme 10 situasiya meseleleri
+    --  BOLME 10.SITUASIYA MESELELERI  (riy-7-situasiya)
     ('riy-7-situasiya', 'riy-7-situasiya-xeta-mutleq',
      'Xəta məsələləri. Mütləq xəta', 10),
     ('riy-7-situasiya', 'riy-7-situasiya-nisbi-xeta',
@@ -633,7 +633,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-7-situasiya', 'riy-7-situasiya-arasdirma-meseleleri',
      'Araşdırma məsələləri', 50),
     --  ============  9-cu sinif  ============
-    --  1 ci dereceden kok rasional ustlu quvvet
+    --  1. -ci dereceden kok. Rasional ustlu quvvet  (riy-9-kok)
     ('riy-9-kok', 'riy-9-kok-heqiqi-ededler',
      'Həqiqi ədədlər', 10),
     ('riy-9-kok', 'riy-9-kok-eded-oxu',
@@ -656,7 +656,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Rasional üstlü qüvvətin xassələri', 100),
     ('riy-9-kok', 'riy-9-kok-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 110),
-    --  2 cevre
+    --  2. Cevre  (riy-9-cevre)
     ('riy-9-cevre', 'riy-9-cevre-merkezi-qovsu',
      'Mərkəzi bucaq. Çevrə qövsü', 10),
     ('riy-9-cevre', 'riy-9-cevre-qovsun-uzunlugu',
@@ -673,7 +673,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Çevrədə vətər və kəsənlərin parçalarının mütənasibliyi', 70),
     ('riy-9-cevre', 'riy-9-cevre-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 80),
-    --  3 funksiyalar qrafikler
+    --  3. Funksiyalar. Qrafikler  (riy-9-funksiya)
     ('riy-9-funksiya', 'riy-9-funksiya-kvadratik-qrafiki',
      'Kvadratik funksiya və onun qrafiki', 10),
     ('riy-9-funksiya', 'riy-9-funksiya-muxtelif-formalarda',
@@ -690,7 +690,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'y = x³ funksiyası və onun qrafiki', 70),
     ('riy-9-funksiya', 'riy-9-funksiya-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 80),
-    --  4 cevrenin tenliyi
+    --  4. Cevrenin tenliyi  (riy-9-cevre-tenliyi)
     ('riy-9-cevre-tenliyi', 'riy-9-cevre-tenliyi-noqte-arasindaki',
      'İki nöqtə arasındakı məsafə düsturu', 10),
     ('riy-9-cevre-tenliyi', 'riy-9-cevre-tenliyi-cevrenin-tenliyi',
@@ -701,7 +701,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Dairə sektoru və seqmentinin sahəsi', 40),
     ('riy-9-cevre-tenliyi', 'riy-9-cevre-tenliyi-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 50),
-    --  5 tenlikler tenlikler sistemi
+    --  5. Tenlikler. Tenlikler sistemi  (riy-9-tenlikler)
     ('riy-9-tenlikler', 'riy-9-tenlikler-yuksek-dereceli',
      'Yüksək dərəcəli tənliklər', 10),
     ('riy-9-tenlikler', 'riy-9-tenlikler-rasional-tetbiqi',
@@ -722,7 +722,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Tənliklər sisteminə gətirilən məsələlər həlli', 90),
     ('riy-9-tenlikler', 'riy-9-tenlikler-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 100),
-    --  6 coxbucaqlilar
+    --  6. Coxbucaqlilar  (riy-9-coxbucaqli)
     ('riy-9-coxbucaqli', 'riy-9-coxbucaqli-coxbucaqlilar',
      'Çoxbucaqlılar', 10),
     ('riy-9-coxbucaqli', 'riy-9-coxbucaqli-qabariq-daxili',
@@ -739,7 +739,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Düzgün çoxbucaqlının sahəsi', 70),
     ('riy-9-coxbucaqli', 'riy-9-coxbucaqli-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 80),
-    --  7 berabersizlikler
+    --  7. Berabersizlikler  (riy-9-berabersizlik)
     ('riy-9-berabersizlik', 'riy-9-berabersizlik-xetti-sistemi',
      'Xətti bərabərsizliklər sistemi. Bərabərsizliklər heyəti', 10),
     ('riy-9-berabersizlik', 'riy-9-berabersizlik-modullu',
@@ -754,7 +754,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'İrrasional bərabərsizliklər', 60),
     ('riy-9-berabersizlik', 'riy-9-berabersizlik-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 70),
-    --  8 vektorlar
+    --  8. Vektorlar  (riy-9-vektorlar)
     ('riy-9-vektorlar', 'riy-9-vektorlar-vektorlar',
      'Vektorlar', 10),
     ('riy-9-vektorlar', 'riy-9-vektorlar-dekart-koordinat',
@@ -781,7 +781,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Hərəkət və konqruyent fiqurlar', 120),
     ('riy-9-vektorlar', 'riy-9-vektorlar-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 130),
-    --  9 ededi ardicilliqlar
+    --  9. Ededi ardicilliqlar  (riy-9-silsile)
     ('riy-9-silsile', 'riy-9-silsile-ededi-ardicilliq',
      'Ədədi ardıcıllıq', 10),
     ('riy-9-silsile', 'riy-9-silsile-ededi',
@@ -804,7 +804,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Sonsuz azalan həndəsi silsilənin cəmi', 100),
     ('riy-9-silsile', 'riy-9-silsile-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 110),
-    --  10 melumatin teqdimi birlesmeler ehtimal
+    --  10. Melumatin teqdimi. Birlesmeler. Ehtimal  (riy-9-ehtimal)
     ('riy-9-ehtimal', 'riy-9-ehtimal-paylanmasi-cedveli',
      'Tezlik paylanması cədvəli', 10),
     ('riy-9-ehtimal', 'riy-9-ehtimal-nisbi-tezlik',
@@ -828,7 +828,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-9-ehtimal', 'riy-9-ehtimal-umumi',
      'Bölmə üzrə ümumiləşdirici tapşırıqlar', 110),
     --  ============  10-cu sinif  ============
-    --  1 funksiyalar
+    --  1.Funksiyalar  (riy-10-funksiya)
     ('riy-10-funksiya', 'riy-10-funksiya-verilme-usullari',
      'Funksiya və onun verilmə üsulları', 10),
     ('riy-10-funksiya', 'riy-10-funksiya-xasseleri',
@@ -851,7 +851,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Bəzi funksiyaların təyin oblastı və qiymətlər çoxluğu', 100),
     ('riy-10-funksiya', 'riy-10-funksiya-umumi',
      'Ümumiləşdirici tapşırıqlar', 110),
-    --  2 fezada noqte duz xett mustevi
+    --  2. Fezada noqte, duz xett, mustevi  (riy-10-feza)
     ('riy-10-feza', 'riy-10-feza-noqte-xett',
      'Fəzada nöqtə, düz xətt və müstəvi', 10),
     ('riy-10-feza', 'riy-10-feza-duz-paralelliyi',
@@ -870,7 +870,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Paralel müstəvilər', 80),
     ('riy-10-feza', 'riy-10-feza-umumi',
      'Ümumiləşdirici tapşırıqlar', 90),
-    --  3 triqonometrik ifadeler ve onlarin cevrilmeleri
+    --  3. Triqonometrik ifadeler ve onlarin cevrilmeleri  (riy-10-triq-ifade)
     ('riy-10-triq-ifade', 'riy-10-triq-ifade-donme-bucaqlari',
      'Dönmə bucaqları', 10),
     ('riy-10-triq-ifade', 'riy-10-triq-ifade-bucagin-radian',
@@ -895,14 +895,14 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Triqonometrik ifadələrin sadələşdirilməsi', 110),
     ('riy-10-triq-ifade', 'riy-10-triq-ifade-umumi',
      'Ümumiləşdirici tapşırıqlar', 120),
-    --  4 sinuslar teoremi ve kosinuslar teoremi
+    --  4.Sinuslar teoremi ve kosinuslar teoremi  (riy-10-sinus-kosinus)
     ('riy-10-sinus-kosinus', 'riy-10-sinus-kosinus-teoremi',
      'Sinuslar teoremi', 10),
     ('riy-10-sinus-kosinus', 'riy-10-sinus-kosinus-kosinuslar-teoremi',
      'Kosinuslar teoremi', 20),
     ('riy-10-sinus-kosinus', 'riy-10-sinus-kosinus-umumi',
      'Ümumiləşdirici tapşırıqlar', 30),
-    --  5 triqonometrik funksiyalar ve onlarin qrafikleri
+    --  5. Triqonometrik funksiyalar ve onlarin qrafikleri  (riy-10-triq-qrafik)
     ('riy-10-triq-qrafik', 'riy-10-triq-qrafik-dovri-funksiyalar',
      'Dövri funksiyalar', 10),
     ('riy-10-triq-qrafik', 'riy-10-triq-qrafik-sin-funksiyalarini',
@@ -915,7 +915,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'y = tan x və y = ctg x funksiyalarının qrafikləri', 50),
     ('riy-10-triq-qrafik', 'riy-10-triq-qrafik-umumi',
      'Ümumiləşdirici tapşırıqlar', 60),
-    --  6 coxuzluler
+    --  6. Coxuzluler  (riy-10-coxuzlu)
     ('riy-10-coxuzlu', 'riy-10-coxuzlu-coxuzluler',
      'Çoxüzlülər', 10),
     ('riy-10-coxuzlu', 'riy-10-coxuzlu-prizmalar',
@@ -932,7 +932,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Kəsik piramida', 70),
     ('riy-10-coxuzlu', 'riy-10-coxuzlu-umumi',
      'Ümumiləşdirici tapşırıqlar', 80),
-    --  7 triqonometrik tenlikler
+    --  7. Triqonometrik tenlikler  (riy-10-triq-tenlik)
     ('riy-10-triq-tenlik', 'riy-10-triq-tenlik-ters-funksiyalar',
      'Tərs triqonometrik funksiyalar', 10),
     ('riy-10-triq-tenlik', 'riy-10-triq-tenlik-sade',
@@ -943,7 +943,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Triqonometrik tənliklərin tətbiqi ilə məsələ həlli', 40),
     ('riy-10-triq-tenlik', 'riy-10-triq-tenlik-umumi',
      'Ümumiləşdirici tapşırıqlar', 50),
-    --  8 feza fiqurlarinin hecmi
+    --  8. Feza fiqurlarinin hecmi  (riy-10-hecm)
     ('riy-10-hecm', 'riy-10-hecm-prizmanin',
      'Prizmanın həcmi', 10),
     ('riy-10-hecm', 'riy-10-hecm-piramidanin',
@@ -958,7 +958,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Fəzada simmetriya', 60),
     ('riy-10-hecm', 'riy-10-hecm-umumi',
      'Ümumiləşdirici tapşırıqlar', 70),
-    --  9
+    --  9. Pokazatelnaya i logarifmicheskaya funktsii  (riy-10-ustlu-loqarifm)
     ('riy-10-ustlu-loqarifm', 'riy-10-ustlu-loqarifm-heqiqi-quvvet',
      'Həqiqi üstlü qüvvət', 10),
     ('riy-10-ustlu-loqarifm', 'riy-10-ustlu-loqarifm-funksiya',
@@ -981,7 +981,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Loqarifmik bərabərsizliklər', 100),
     ('riy-10-ustlu-loqarifm', 'riy-10-ustlu-loqarifm-umumi',
      'Ümumiləşdirici tapşırıqlar', 110),
-    --  10
+    --  10.Informatsiya i prognoz  (riy-10-statistika)
     ('riy-10-statistika', 'riy-10-statistika-kulliyyat-secim',
      'Külliyyat və seçim. Təsadüfi seçim və növləri', 10),
     ('riy-10-statistika', 'riy-10-statistika-melumatin-teqdimi',
@@ -993,7 +993,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-10-statistika', 'riy-10-statistika-umumi',
      'Ümumiləşdirici tapşırıqlar', 50),
     --  ============  11-ci sinif  ============
-    --  1 coxhedliler
+    --  1. Coxhedliler  (riy-11-coxhedli)
     ('riy-11-coxhedli', 'riy-11-coxhedli-bolunmesi',
      'Çoxhədlinin çoxhədliyə bölünməsi', 10),
     ('riy-11-coxhedli', 'riy-11-coxhedli-qaliq-teorem',
@@ -1012,7 +1012,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Rasional funksiya', 80),
     ('riy-11-coxhedli', 'riy-11-coxhedli-umumi',
      'Ümumiləşdirici tapşırıqlar', 90),
-    --  2 fezada vektorlar
+    --  2. Fezada vektorlar  (riy-11-feza-vektor)
     ('riy-11-feza-vektor', 'riy-11-feza-vektor-dekart-koordinat',
      'Fəzada Dekart koordinat sistemi', 10),
     ('riy-11-feza-vektor', 'riy-11-feza-vektor-fezada-vektorlar',
@@ -1031,7 +1031,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Fəzada və müstəvidə çevrilmələr', 80),
     ('riy-11-feza-vektor', 'riy-11-feza-vektor-umumi',
      'Ümumiləşdirici tapşırıqlar', 90),
-    --  3 limit
+    --  3. Limit  (riy-11-limit)
     ('riy-11-limit', 'riy-11-limit-funksiyanin-noqtede',
      'Funksiyanın nöqtədə limiti', 10),
     ('riy-11-limit', 'riy-11-limit-xasseleri',
@@ -1046,7 +1046,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ədədi ardıcıllığın limiti', 60),
     ('riy-11-limit', 'riy-11-limit-umumi',
      'Ümumiləşdirici tapşırıqlar', 70),
-    --  4 firlanma fiqurlari silindr konus kure
+    --  4. Firlanma fiqurlari. Silindr, konus, kure  (riy-11-firlanma)
     ('riy-11-firlanma', 'riy-11-firlanma-fiqurlari',
      'Fırlanma fiqurları', 10),
     ('riy-11-firlanma', 'riy-11-firlanma-silindr',
@@ -1069,7 +1069,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Oxşar fiqurların səthinin sahəsi', 100),
     ('riy-11-firlanma', 'riy-11-firlanma-umumi',
      'Ümumiləşdirici tapşırıqlar', 110),
-    --  5 funksiyanin toremesi
+    --  5. Funksiyanin toremesi  (riy-11-toreme)
     ('riy-11-toreme', 'riy-11-toreme-deyismenin-orta',
      'Dəyişmənin orta sürəti, dəyişmənin ani sürəti', 10),
     ('riy-11-toreme', 'riy-11-toreme-funksiyanin',
@@ -1094,7 +1094,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Triqonometrik funksiyaların törəməsi', 110),
     ('riy-11-toreme', 'riy-11-toreme-umumi',
      'Ümumiləşdirici tapşırıqlar', 120),
-    --  6 firlanma fiqurlarinin hecmi
+    --  6. Firlanma fiqurlarinin hecmi  (riy-11-firlanma-hecm)
     ('riy-11-firlanma-hecm', 'riy-11-firlanma-hecm-silindrin',
      'Silindrin həcmi', 10),
     ('riy-11-firlanma-hecm', 'riy-11-firlanma-hecm-konusun',
@@ -1107,7 +1107,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Oxşar fiqurların həcmi', 50),
     ('riy-11-firlanma-hecm', 'riy-11-firlanma-hecm-umumi',
      'Ümumiləşdirici tapşırıqlar', 60),
-    --  7 toremenin tetbiqi ile funksiyanin arasdirilmasi
+    --  7. Toremenin tetbiqi ile funksiyanin arasdirilmasi  (riy-11-arasdirma)
     ('riy-11-arasdirma', 'riy-11-arasdirma-artma-azalma',
      'Funksiyanın artma və azalma aralıqlarının tapılması', 10),
     ('riy-11-arasdirma', 'riy-11-arasdirma-bohran-noqteleri',
@@ -1118,7 +1118,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Ekstremumun tapılmasına aid məsələ həlli. Optimallaşdırma', 40),
     ('riy-11-arasdirma', 'riy-11-arasdirma-umumi',
      'Ümumiləşdirici tapşırıqlar', 50),
-    --  8 inteqral
+    --  8. Inteqral  (riy-11-inteqral)
     ('riy-11-inteqral', 'riy-11-inteqral-ibtidai-funksiya',
      'İbtidai funksiya. Qeyri-müəyyən inteqral', 10),
     ('riy-11-inteqral', 'riy-11-inteqral-mueyyen-sahe',
@@ -1135,7 +1135,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Müəyyən inteqral və fırlanmadan alınan fiqurların həcmi', 70),
     ('riy-11-inteqral', 'riy-11-inteqral-umumi',
      'Ümumiləşdirici tapşırıqlar', 80),
-    --  9 statistika ve ehtimal
+    --  9. Statistika ve ehtimal  (riy-11-statistika)
     ('riy-11-statistika', 'riy-11-statistika-gostericiler',
      'Statistik göstəricilər', 10),
     ('riy-11-statistika', 'riy-11-statistika-melumatin-formalari',
@@ -1148,7 +1148,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
      'Təsadüfi hadisələr və ehtimal', 50),
     ('riy-11-statistika', 'riy-11-statistika-umumi',
      'Ümumiləşdirici tapşırıqlar', 60),
-    --  10 tenlikler berabersizlikler tenlikler sistemi
+    --  10. Tenlikler, berabersizlikler, tenlikler sistemi  (riy-11-tenlikler)
     ('riy-11-tenlikler', 'riy-11-tenlikler-irrasional-berabersizlikl',
      'İrrasional tənliklər və bərabərsizliklər', 10),
     ('riy-11-tenlikler', 'riy-11-tenlikler-ustlu-sistemi',
@@ -1223,7 +1223,7 @@ begin
     raise exception '% sual alt movzuya baglanib - bu merhelede olmamalidir', k;
   end if;
 
-  --  ust movzu sayi deyismemelidir (5..11: 8+9+10+11+10+10+10)
+  --  ust movzu sayi deyismemelidir
   select count(*) into k from public.topics t
     join public.subjects s on s.id = t.subject_id and s.slug = 'riyaziyyat'
     join public.levels   l on l.id = t.level_id
@@ -1232,5 +1232,5 @@ begin
     raise exception 'Riyaziyyat 5-11 ust movzu sayi 68 deyil: %', k;
   end if;
 
-  raise notice 'Riyaziyyat 5-11: 483 alt movzu hazir (8-ci sinif db/74-de).';
+  raise notice 'Riyaziyyat 5-11 (8-ci sinif db/74-de): 483 alt movzu hazir.';
 end $$;

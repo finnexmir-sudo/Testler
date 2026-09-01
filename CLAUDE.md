@@ -170,14 +170,26 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    2 dərsini keçəndə qeyd edə bilmirdi — ya hamısını «keçildi» edirdi
    (yalan), ya heç nə. **Riyaziyyat 1-11-in 5-11 hissəsi bitib**:
    8-ci sinif `74`-də (müəllim yoxlayıb təsdiqləyib), qalan altı sinif
-   `82`-də — cəmi **557 alt mövzu** (5:89, 6:85, 7:63, 8:74, 9:92,
-   10:77, 11:77). Adlar e-dərslikdən eynilə, dərslikdəki sıra ilə.
-   `82` əllə yazılmır — `tools/alt_movzular_riy.py` çıxarır.
+   `82`-də, ibtidai `83`-də — cəmi **769 alt mövzu** (1:70, 3:73,
+   4:69, 5:89, 6:85, 7:63, 8:74, 9:92, 10:77, 11:77). **Həyat bilgisi
+   1-4** də hazırdır (`84`, 125 alt mövzu — dərslik və baza dörd
+   sinifdə də bire-bir uyğundur). Adlar e-dərslikdən eynilə,
+   dərslikdəki sıra ilə. `82`/`83`/`84` əllə yazılmır —
+   `tools/alt_movzular.py` çıxarır (paket-paket konfiqurasiya).
+   **Alt mövzu gələn kimi iki yer sındı** (`db/103` düzəldir):
+   `rpc_plan_test_multi` alt mövzunu valideynə yönəltmirdi (birgə
+   qarışıq test «0 fərqli sual tapıldı» verirdi), `rpc_bank_facets`
+   isə `p_pool` verilmədikdə alt mövzuları da qaytarırdı — sual yazma
+   formasında siyahı 12-dən 85-ə çıxır, «Ümumiləşdirici tapşırıqlar»
+   11 dəfə təkrarlanırdı. İkisi də `db/74` ilə artıq canlı idi.
+   **Test yazanda**: plan YARPAQLARDAN dolur — mövzu sayını yox,
+   yarpaq sayını gözlə; `.plan summary` seçicisi fəsil `<summary>`-si
+   ilə toqquşur (`.plan details:not(.plgrp) > summary` yaz).
    **Alt mövzuya sual bağlanmır** — bank və generator yalnız sualı olan
    mövzuları göstərir, ona görə alt mövzular o ekranlarda görünmür.
-   İbtidai siniflər də ikipilləlidir (1: 12 bölmə / 75 mövzu,
-   3: 11/77, 4: 10/73); **Riyaziyyat 2 istisnadır** — portaldakı nəşr
-   köhnədir (yalnız 20-yə qədər, 2 bölmə), ona görə 1-4 hələ yazılmayıb.
+   **Riyaziyyat 2 istisnadır** — portaldakı nəşr köhnədir (yalnız
+   20-yə qədər, 2 bölmə), ona görə alt mövzusu yoxdur; `test/e2e_plan.py`
+   məhz buna görə düz plan yoxlamalarını 2-ci sinifdə aparır.
    **Portalın mündəricat paneli etibarlı deyil**: düstur simvollarını
    atır (9-cu sinifdə 11 ad, 8-ci sinifdə 1), 10-cu sinfin 9/10-cu
    bölməsini isə rus nəşrindən yığıb (16 ad). Doğru ad kitabın öz
@@ -388,7 +400,7 @@ düzgündür — slug qalır, tarixçə qalır.
 
 Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
 `claude/bil10-question-bank-expansion-eu6vkn` budağı `main`-ə
-birləşdirildikdən sonra 30…82 aralığındadır. Əvvəl nömrələr
+birləşdirildikdən sonra 30…84 aralığındadır. Əvvəl nömrələr
 toqquşurdu (bankın 7 faylı 23–29-da idi, indi 75–81-ə köçürülüb).
 Bölgü belədir:
 

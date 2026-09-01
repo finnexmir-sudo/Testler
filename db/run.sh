@@ -30,6 +30,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 29_bank_katalog.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 100_seviyye_modeli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 101_ders_plani_alt.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 102_movzu_qoruyucu.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 103_alt_movzu_duzelisleri.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql
@@ -88,6 +89,8 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 72_bos_fennler.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 73_buraxilis_proqrami.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 74_alt_movzular_riy8.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 82_alt_movzular_riy5_11.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 83_alt_movzular_riy1_4.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 84_alt_movzular_hb1_4.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
