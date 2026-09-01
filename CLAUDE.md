@@ -358,6 +358,34 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
 
+## Test yığanda bir neçə sinif
+
+Generatorda sinif seçimi **tək seçimli** idi: ya bir sinif, ya
+«Hamısı». Ortası yox idi — repetitor 8-ci sinfi hazırlayarkən 7-ci
+sinfin materialını qatmaq istəyəndə ya ayrıca test yığmalı, ya da
+süzgəci tam açıb 1-11-i qarışdırmalı idi.
+
+İndi `#gLevs` çipləridir, qayda `levels` **massivi** alır: `["8","7"]`.
+
+- **Çəki qoyulmur.** Generator sualları mövzular arasında bərabər
+  paylayır; müəllim 8 və 7-ni bilərəkdən seçirsə, bərabər paylama
+  onun seçiminin dürüst oxunuşudur. «Cari sinif ağır, aşağılar
+  yüngül» kimi gizli çəki müəllimin görmədiyi sehrdir. Ekranda
+  açıq yazılır: «Seçilmiş N sinif arasında bərabər paylanır».
+- **Köhnə qaydalar pozulmur** — mövcud testlərin `gen_rule`-unda
+  `level` tək dəyər kimi durur («yenilə» onu təkrar işlədir), ona
+  görə süzgəc hər iki formanı tanıyır (`db/103_cox_sinif.sql`).
+- **Testin öz sinfi seçilənlərin ən yuxarısıdır**: 8+7 testi 8-ci
+  sinif testidir (7 təkrardır), `rpc_available_tests` onu 8-ci sinif
+  qrupuna göstərməlidir.
+- **Mövzu nişanları yalnız TƏK sinif seçiləndə çıxır** — iki sinifdə
+  siyahı ikiqat olur, mövzu seçimi onsuz da tək sinif işidir.
+
+`103` faylı `13_generator.sql`-dən **proqramla** çıxarılıb: iki
+funksiyanın gövdəsi hərfən eynidir, yalnız iki sətir dəyişib. Əl ilə
+köçürməkdən qaçmağın səbəbi var — əvvəl `rpc_remedial_test`-i
+əlqolla köçürəndə dörd şey təsadüfən dəyişmişdi.
+
 ## Şagirdi dayandırmaq
 
 Yer limiti `students.is_active`-ə baxır (`app.account_student_count`),

@@ -2251,7 +2251,10 @@
     //  Teyinati generator DEYIL, tapsiriq ekrani verecek: orada son
     //  tarix, cehd sayi ve "tek sagird" secimi var.
     f.asg = "";
-    f.level = levelCode(g.level_id);   // sinif teyin olunmayibsa bos qalir
+    //  Qrupun sinfi susmaya secili gelir; muellim istese asagi
+    //  sinifleri de elave edir (cox secim).
+    var kod = levelCode(g.level_id);
+    f.levels = kod ? [kod] : [];
     f.back = g.id;
     f.backName = g.name || "";
     nav("#/gen");
@@ -2952,7 +2955,10 @@
 
   function genFilter() {
     if (!GF) GF = { pool: (ACC && ACC.plan) ? "all" : "mine",
-                    subject: "", level: "", topics: [], difficulty: [],
+                    subject: "",
+                    //  COX SECIM: muellim 8 ve 7-ni birlikde secе bilir.
+                    //  Bos = sinif suzgeci yoxdur (butun sinifler).
+                    levels: [], topics: [], difficulty: [],
                     count: 10, title: "", asg: "",
                     cls: "", remNames: [],
                     //  tapsiriq ekranindan gelmisiksa hara qayidaq
@@ -2963,7 +2969,13 @@
   function genRule(f) {
     var r = { pool: f.pool, count: f.count };
     if (f.subject) r.subject = f.subject;
-    if (f.level) r.level = f.level;
+    /*  Sinifler massiv kimi gedir.  Tek sinif secilibse "level" de
+        elave olunur - kohne qaydalari oxuyan yerler pozulmasin
+        (db/103 ikisini de taniyir).  */
+    if (f.levels.length) {
+      r.levels = f.levels.slice();
+      if (f.levels.length === 1) r.level = f.levels[0];
+    }
     if (f.topics.length) r.topics = f.topics;
     if (f.difficulty.length) r.difficulty = f.difficulty;
     if (f.cls) r["class"] = f.cls;
@@ -2992,7 +3004,7 @@
     });
     var sk = Object.keys(subs), lk = Object.keys(levs);
     f.subject = sk.length === 1 ? sk[0] : "";
-    f.level   = lk.length === 1 ? lk[0] : "";
+    f.levels  = lk.length === 1 ? [lk[0]] : [];
     nav("#/gen");
   }
 
@@ -3001,8 +3013,11 @@
     var f = genFilter();
     topTitle.textContent = "Test yığ";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    //  Facets tek sinif qebul edir - movzu nisanlari onsuz da
+    //  yalniz TEK sinif secilende cixir (asagida).
     sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
-                                p_level: f.level || null, p_pool: f.pool })
+                                p_level: f.levels.length === 1 ? f.levels[0] : null,
+                                p_pool: f.pool })
       .then(function (fac) { if (!live()) return; FAC = fac || {}; drawGen(); })
       .catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -3038,43 +3053,56 @@
             "<span>Platforma hovuzu abunə paketinə daxildir. " +
             "Öz suallarınızdan yığa bilərsiniz.</span></div>"
           : "") +
-        '<div class="fieldrow" style="margin-top:12px">' +
-          '<div><label for="gsub">Fənn</label>' +
-            '<select id="gsub"><option value="">Bütün fənlər</option>' +
-            subFilter((FAC.subjects || []).filter(function (x) {
-              return Number(x.n) > 0 || f.subject === x.slug;
-            }), f.subject).map(function (x) {
-              return '<option value="' + esc(x.slug) + '"' +
-                (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
-            }).join("") + "</select></div>" +
-          '<div style="flex:0 0 140px"><label for="glev">Sinif</label>' +
-            '<select id="glev"><option value="">Hamısı</option>' +
-            (FAC.levels || []).map(function (l) {
-              return '<option value="' + esc(l.code) + '"' +
-                (f.level === l.code ? " selected" : "") + ">" + esc(l.name) + "</option>";
-            }).join("") + "</select></div>" +
+        '<div style="margin-top:12px"><label for="gsub">Fənn</label>' +
+          '<select id="gsub"><option value="">Bütün fənlər</option>' +
+          subFilter((FAC.subjects || []).filter(function (x) {
+            return Number(x.n) > 0 || f.subject === x.slug;
+          }), f.subject).map(function (x) {
+            return '<option value="' + esc(x.slug) + '"' +
+              (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
+          }).join("") + "</select></div>" +
+        /*  SINIF - COX SECIM.  Repetitor 8-ci sinfi hazirlayarken
+            7-ci sinfin materialini da qatmaq isteyirdi; select tek
+            secimli oldugu ucun ya bir sinif, ya "Hamisi" idi.
+            Ceki QOYULMUR: secilen sinifler arasinda beraber paylanir,
+            cunki muellim onlari bilerekden secib.  */
+        '<label>Sinif</label>' +
+        '<div class="chips" id="gLevs">' +
+          (FAC.levels || []).map(function (l) {
+            return '<button class="chip' +
+              (f.levels.indexOf(l.code) >= 0 ? " on" : "") +
+              '" data-l="' + esc(l.code) + '">' + esc(l.name) + "</button>";
+          }).join("") +
         "</div>" +
+        '<p class="muted" style="margin:-6px 0 12px">' +
+          (f.levels.length > 1
+            ? "Seçilmiş " + f.levels.length + " sinif arasında bərabər paylanır."
+            : "Bir neçəsini seçə bilərsiniz — seçilməsə bütün siniflərdən götürülür.") +
+        "</p>" +
         '<div class="chips" id="gDiff">' +
           [1, 2, 3].map(function (d) {
             return '<button class="chip' + (f.difficulty.indexOf(d) >= 0 ? " on" : "") +
               '" data-d="' + d + '">' + DIFF[d] + "</button>";
           }).join("") +
         "</div>" +
-        /* Movzu nisanlari yalniz FENN + SINIF secilende cixir.  Sinifsiz
-           fennin DORD sinfinin movzulari tokulur - telefonda 40+ nisan
-           gozu yorurdu.  Sinifle en coxu ~12 nisan olur. */
-        (!f.subject || !f.level
+        /* Movzu nisanlari yalniz FENN + TEK SINIF secilende cixir.
+           Sinifsiz fennin butun siniflerinin movzulari tokulur;
+           iki sinif secilende de siyahi ikiqat olur.  Movzu secmek
+           onsuz da tek sinif isi ile baglidir. */
+        (!f.subject || f.levels.length !== 1
           ? '<p class="muted" style="margin:12px 0 0">' +
             (!f.subject
-              ? (f.level ? "Mövzu seçmək üçün fənn seçin. "
-                         : "Mövzu seçmək üçün fənn və sinif seçin. ")
-              : "Mövzu seçmək üçün sinif də seçin. ") +
+              ? (f.levels.length === 1 ? "Mövzu seçmək üçün fənn seçin. "
+                                       : "Mövzu seçmək üçün fənn və bir sinif seçin. ")
+              : (f.levels.length > 1
+                  ? "Mövzu seçmək üçün tək sinif saxlayın. "
+                  : "Mövzu seçmək üçün sinif də seçin. ")) +
             "Mövzu seçilməsə, hamısından götürüləcək.</p>"
           : ((FAC.topics || []).length
               ? '<div class="chips" id="gTop">' + FAC.topics.map(function (t) {
                   return '<button class="chip' + (f.topics.indexOf(t.id) >= 0 ? " on" : "") +
                     '" data-t="' + esc(t.id) + '">' +
-                    esc(topLabel(t, f.level)) + "</button>";
+                    esc(topLabel(t, f.levels[0])) + "</button>";
                 }).join("") + "</div>"
               : '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>')) +
       "</div>" +
@@ -3121,7 +3149,7 @@
       //  hovuz deyisende siyahilar da deyisir - fenn/sinif/movzu
       //  secimleri sifirdan, serverden teze suzulur
       f.pool = b.getAttribute("data-v");
-      f.subject = ""; f.level = ""; f.topics = [];
+      f.subject = ""; f.levels = []; f.topics = [];
       screenGen();
     });
     on("gDiff", "click", function (e) {
@@ -3143,8 +3171,15 @@
     on("gsub", "change", function () {
       f.subject = $("gsub").value; f.topics = []; screenGen();
     });
-    on("glev", "change", function () {
-      f.level = $("glev").value; f.topics = []; screenGen();
+    on("gLevs", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-l]") : null;
+      if (!b) return;
+      var k = b.getAttribute("data-l");
+      var i = f.levels.indexOf(k);
+      if (i >= 0) f.levels.splice(i, 1); else f.levels.push(k);
+      //  Movzular sinife baglidir - sinif deyisdise secim menasizdir
+      f.topics = [];
+      screenGen();
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
     //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin

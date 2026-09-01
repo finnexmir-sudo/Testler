@@ -30,6 +30,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 29_bank_katalog.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 100_seviyye_modeli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 101_ders_plani_alt.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 102_movzu_qoruyucu.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 103_cox_sinif.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql

@@ -13,7 +13,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 DB="${1:-tehsil_t}"
 SUITES=(smoke.sql smoke_educator.sql smoke_reports.sql smoke_assign.sql smoke_siqnal.sql smoke_paket.sql smoke_bildiris.sql smoke_plani.sql
-        smoke_fenn.sql smoke_hesabat.sql smoke_ferdi.sql smoke_katalog.sql smoke_seviyye.sql smoke_plan_alt.sql smoke_qoruyucu.sql smoke_dayandir.sql smoke_bank.sql smoke_bank_rpc.sql smoke_generator.sql)
+        smoke_fenn.sql smoke_hesabat.sql smoke_ferdi.sql smoke_katalog.sql smoke_seviyye.sql smoke_plan_alt.sql smoke_qoruyucu.sql smoke_dayandir.sql smoke_cox_sinif.sql smoke_bank.sql smoke_bank_rpc.sql smoke_generator.sql)
 umumi=0; xeta=0
 for s in "${SUITES[@]}"; do
   dropdb --if-exists "$DB" >/dev/null 2>&1
