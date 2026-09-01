@@ -165,14 +165,25 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    siyahı və ya uyğunsuzluq = tam siyahı. `rpc_my_context` 26-da
    genişləndirilib (06-nı dəyişəndə 26-dakı kopyanı da yenilə).
    **Alt mövzular** (`topics.parent_id`, `db/101_ders_plani_alt.sql` +
-   `db/74_alt_movzular_riy8.sql`): plan yalnız mövzu başlığı ilə işləyəndə
-   müəllim «Kvadrat tənliklər»in 2 dərsini keçəndə qeyd edə bilmirdi —
-   ya hamısını «keçildi» edirdi (yalan), ya heç nə. **Sınaq: Riyaziyyat 8**
-   — 11 mövzu altında **74 alt mövzu**, adlar e-dərslikdən (book_id 393)
-   eynilə, dərslikdəki sıra ilə. Bəyənilsə qalan fənlərə keçilir;
-   mündəricat keşi (`mundericat/`) bütün 1-11 sinif üçün hazırdır.
+   `db/74_alt_movzular_riy8.sql` + `db/82_alt_movzular_riy5_11.sql`):
+   plan yalnız mövzu başlığı ilə işləyəndə müəllim «Kvadrat tənliklər»in
+   2 dərsini keçəndə qeyd edə bilmirdi — ya hamısını «keçildi» edirdi
+   (yalan), ya heç nə. **Riyaziyyat 1-11-in 5-11 hissəsi bitib**:
+   8-ci sinif `74`-də (müəllim yoxlayıb təsdiqləyib), qalan altı sinif
+   `82`-də — cəmi **557 alt mövzu** (5:89, 6:85, 7:63, 8:74, 9:92,
+   10:77, 11:77). Adlar e-dərslikdən eynilə, dərslikdəki sıra ilə.
+   `82` əllə yazılmır — `tools/alt_movzular_riy.py` çıxarır.
    **Alt mövzuya sual bağlanmır** — bank və generator yalnız sualı olan
    mövzuları göstərir, ona görə alt mövzular o ekranlarda görünmür.
+   İbtidai siniflər də ikipilləlidir (1: 12 bölmə / 75 mövzu,
+   3: 11/77, 4: 10/73); **Riyaziyyat 2 istisnadır** — portaldakı nəşr
+   köhnədir (yalnız 20-yə qədər, 2 bölmə), ona görə 1-4 hələ yazılmayıb.
+   **Portalın mündəricat paneli etibarlı deyil**: düstur simvollarını
+   atır (9-cu sinifdə 11 ad, 8-ci sinifdə 1), 10-cu sinfin 9/10-cu
+   bölməsini isə rus nəşrindən yığıb (16 ad). Doğru ad kitabın öz
+   səhifə başlığından götürülür — `82`-nin başlığında hamısı sadalanıb.
+   Silmək əvəzinə **adı yenilə** (`db/102` silməni bloklayır): slug
+   qalır, plan və «keçildi» tarixçəsi qalır.
 4. ~~Vərəqin çap/PDF görünüşü~~ — hazırdır (`paperPrint()` + `@media
    print` `muellim/app.css`-də). «Çap / PDF» şagird nüsxəsini verir
    (ad/tarix/bal xanaları, A) B) C) hərflənmiş variantlar, açıq suala
@@ -403,7 +414,7 @@ düzgündür — slug qalır, tarixçə qalır.
 
 Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
 `claude/bil10-question-bank-expansion-eu6vkn` budağı `main`-ə
-birləşdirildikdən sonra 30…81 aralığındadır. Əvvəl nömrələr
+birləşdirildikdən sonra 30…82 aralığındadır. Əvvəl nömrələr
 toqquşurdu (bankın 7 faylı 23–29-da idi, indi 75–81-ə köçürülüb).
 Bölgü belədir:
 
