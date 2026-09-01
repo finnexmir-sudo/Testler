@@ -268,6 +268,59 @@ BASLIQ_INF = """\
 --  (s.6 basligi <h3>1. INSAN VE INFORMASIYA</h3>).  Bu, portal
 --  qusuru deyil - dersliyin dizaynidir, ona gore toxunulmur."""
 
+BASLIQ_FIZ = """\
+--  86_alt_movzular_fizika6_11.sql : FIZIKA 6-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Dorduncu fenn.  Riyaziyyat, heyat bilgisi ve informatika hazirdir.
+--  Fizika 6-cı sinifden baslayir (1-5-de yoxdur).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 546 (6),
+--  867/868 (7), 931/932 (8), 472 (9), 734 (10), 282 (11).  Adlar
+--  EYNILE goturulub.
+--
+--  DERSLIYIN QURULUSU BIZIMKINDEN FERQLIDIR - HER SINIFDE AYRI SEBEB:
+--
+--  6-cı sinif: derslikde 4 bolme, bazada 6 movzu - iki bolme
+--  SEHIFEYE GORE ikiye bolunur ("1 FIZIKA NEYI OYRENIR?" ->
+--  fiz-6-giris + fiz-6-olcmeler, sehife 22-den; "4 QARSILIQLI
+--  TESIRLER VE HEREKET" -> fiz-6-hereket + fiz-6-enerji, sehife 83-den).
+--
+--  7-ci sinif: kitab 867-nin "Giris" bolmesi (3 hemin dersin adi ile -
+--  "Fizikler tebiet haqqinda ne bilirler?" ve s.) NOMRESIZ ve derslikde
+--  ayri "==" bolme kimi gorunur, amma bazada ayri movzusu yoxdur -
+--  ilk movzuya (fiz-7-olcme) elave edilib.  Daha ciddi tele: kitabin
+--  öz mundericat sehifesinde "Bolme 4. Atomun qurulusu ve olcusu"
+--  basligi mundericat SCRAPER-inde "==" kimi DEYIL, adi bir sətir
+--  kimi "Bolme 3. Eyrixetli hereket"in daxilinde gorunur (portal
+--  qusuru).  Bu setir ozu XARIC edilib (movzu deyil, basliqdir),
+--  sehife 76-dan sonrasi fiz-7-atom-a gedir.
+--
+--  9-cu sinif: 4 fesil, bazada 6 movzu.  Fesil 3 (ISIQ HADISELERI)
+--  ISIQ ve GUZGU-LINZA arasinda İKİ DEFE novbelesir (dersler movzu
+--  uzre deyil, dersliyin oz ardicilligi ilə düzülüb): yayilma+qayitma
+--  (isiq) -> guzgu (guzgu-linza) -> sinma+tam-daxili-qayitma (isiq) ->
+--  linza+goz (guzgu-linza).  Sehife serhedleri: 123, 133, 145.
+--  Fesil 4 (ATOM VE ATOM NUVESI) bir sehifede (193) radioaktivlik/
+--  nuve arasinda bolunur.
+--
+--  10-cu sinif: derslikde 7 fesil, bazada 6 movzu - V fesil
+--  (RELYATIVISTIK MEXANIKA, cemi 2 ders: nisbilik nezeriyyesi ve
+--  enerji-kutle elaqesi) III fesle (SAXLANMA QANUNLARI) birlesir -
+--  hər ikisi enerjinin saxlanmasi movzusudur.
+--
+--  11-ci sinif: 4 fesil, bazada 6 movzu.  I fesil (ELEKTROMAQNIT
+--  SAHESI) sehife 31-den ELEKTROSTATIKA/MAQNIT-INDUKSIYA arasinda,
+--  III fesil (ELEKTROMAQNIT REQSLERI VE DALGALARI) sehife 128-den
+--  REQS/OPTIKA arasinda bolunur.
+--
+--  "•" ILE BASLAYAN BENDLER (6-cı sinif: "• Ümumiləşdirici
+--  tapşırıqlar"): dusterin ozu, movzu adinin hissesi deyil - silinir.
+--
+--  BURAXILAN BOLMELER: yoxdur - hamisi hardasa bir movzuya baglanir.
+--  Arxa hisse (Sozluk/Terminler lugeti/fesil cavab acari/Elaveler)
+--  xaric edilir."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -466,6 +519,49 @@ PAKETLER = [
                          None, None])]),
         ],
     },
+    {
+        "ad": "fiz6_11",
+        "etiket": "Fizika 6-11",
+        "fayl": "86_alt_movzular_fizika6_11.sql",
+        "fenn": "fizika",
+        "fayl_on": "fizika",
+        "basliq": BASLIQ_FIZ,
+        "xaric_seh": {(867, 75), (282, 204)},
+        "xaric_ad": {"Terminlər lüğəti", "Əlavələr",
+                     "Fəsillərə aid məsələlərin cavabları"},
+        "duzelis": {
+            "1.7 Elastiklik qüvvəsi.": ("Elastiklik qüvvəsi", "yazi"),
+        },
+        "ust": ("Fizika ust movzu sayi 37 deyil", "true", 37),
+        "sinifler": [
+            (6, [(546, [("fiz-6-giris", 22, "fiz-6-olcmeler"),
+                        "fiz-6-materiya", "fiz-6-madde",
+                        ("fiz-6-hereket", 83, "fiz-6-enerji")])]),
+            (7, [(867, ["fiz-7-olcme", "fiz-7-olcme", "fiz-7-duzxetli",
+                        ("fiz-7-eyrixetli", 76, "fiz-7-atom")]),
+                 (868, ["fiz-7-elektrik-sahe", "fiz-7-dovre",
+                        "fiz-7-maqnit"])]),
+            (8, [(931, ["fiz-8-quvve", "fiz-8-is-enerji",
+                        "fiz-8-tezyiq"]),
+                 (932, ["fiz-8-dalgalar", "fiz-8-istilik",
+                        "fiz-8-istilik-qanun"])]),
+            (9, [(472, ["fiz-9-cereyan-muhit", "fiz-9-maqnit-sahe",
+                        [(123, "fiz-9-isiq"), (133, "fiz-9-guzgu-linza"),
+                         (145, "fiz-9-isiq"),
+                         (float("inf"), "fiz-9-guzgu-linza")],
+                        [(193, "fiz-9-radioaktivlik"),
+                         (float("inf"), "fiz-9-nuve")]])]),
+            (10, [(734, ["fiz-10-kinematika", "fiz-10-dinamika",
+                         "fiz-10-saxlanma", "fiz-10-reqs-dalga",
+                         "fiz-10-saxlanma", "fiz-10-molekulyar",
+                         "fiz-10-termodinamika"])]),
+            (11, [(282, [("fiz-11-elektrostatika", 31,
+                          "fiz-11-maqnit-induksiya"),
+                         "fiz-11-cereyan-qanunlari",
+                         ("fiz-11-em-reqs", 128, "fiz-11-optika"),
+                         "fiz-11-atom"])]),
+        ],
+    },
 ]
 
 
@@ -612,6 +708,7 @@ def yigim(paket):
                         qrup = xam.strip()
                         continue
                     ad = nomre.sub("", xam).strip()
+                    ad = re.sub(r"^[•]\s*", "", ad).strip()
                     if ad in xaric or (kid, seh) in paket["xaric_seh"]:
                         continue
                     acar = xam if xam in duzelis else ad
@@ -624,6 +721,23 @@ def yigim(paket):
                     a, kesik, b = spec
                     paylar = [(a, [x for x in adlar if x[0] < kesik]),
                               (b, [x for x in adlar if x[0] >= kesik])]
+                elif isinstance(spec, list):
+                    #  COX SERHEDLI bolunme: sinif fesli mundericati
+                    #  interleaved ola biler (fizika 9 - isiq/guzgu
+                    #  novbelesir).  spec = [(esh_qeder, valideyn), ...,
+                    #  (float("inf"), son valideyn)] - sehife < esh olan
+                    #  ilk cutu goturur.
+                    sira_v, gorulmus = [], set()
+                    for _, v in spec:
+                        if v not in gorulmus:
+                            sira_v.append(v); gorulmus.add(v)
+                    def hansi(seh):
+                        for esh, v in spec:
+                            if seh < esh:
+                                return v
+                        return spec[-1][1]
+                    paylar = [(v, [x for x in adlar if hansi(x[0]) == v])
+                              for v in sira_v]
                 elif isinstance(spec, dict):
                     sira_v = []
                     for _, q_ad, _ in adlar:
