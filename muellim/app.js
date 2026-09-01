@@ -2972,6 +2972,40 @@
     return l ? l.name : code;
   }
 
+  /*  FAC hazirda hansi suzgec ucun yuklenib.  Iki isi gorur:
+      - eyni suzgec ucun ikinci defe server sorgusu getmir;
+      - suzgec deyisib, cavab hele gelmeyibse KOHNE movzu nisanlari
+        yanlis sinifle gosterilmir.  */
+  var GFKEY = null;
+  var GFSEQ = 0;
+
+  function genFacKey(f) {
+    return (f.pool || "") + "|" + (f.subject || "") + "|" +
+           (f.levels.length === 1 ? f.levels[0] : "");
+  }
+
+  /*  Suzgeci FONDA yenileyir: ekran silinmir, "Yuklenir" skeleti
+      cixmir, surusme yerinde qalir.  Evvel her sinif klikinde
+      screenGen() cagirilirdi - butun forma sokulub yeniden qurulurdu
+      ve sehife basa qacirdi.  Cavab gelende genRefresh() yalniz
+      deyisen hisseleri yerinde tezeleyir.  */
+  function genFacets() {
+    var f = genFilter();
+    var key = genFacKey(f);
+    if (key === GFKEY) return;
+    var live = guard();
+    var seq = ++GFSEQ;
+    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
+                                p_level: f.levels.length === 1 ? f.levels[0] : null,
+                                p_pool: f.pool })
+      .then(function (fac) {
+        //  Ardicilliq nomresi: gec gelen kohne cavab tezesini ezmesin
+        if (!live() || seq !== GFSEQ) return;
+        FAC = fac || {}; GFKEY = key; genRefresh();
+      })
+      .catch(function () {});
+  }
+
   function genRule(f) {
     var r = { pool: f.pool, count: f.count };
     if (f.subject) r.subject = f.subject;
@@ -3024,8 +3058,124 @@
     sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
                                 p_level: f.levels.length === 1 ? f.levels[0] : null,
                                 p_pool: f.pool })
-      .then(function (fac) { if (!live()) return; FAC = fac || {}; drawGen(); })
+      .then(function (fac) {
+        if (!live()) return;
+        FAC = fac || {}; GFKEY = genFacKey(f); GFSEQ++;
+        drawGen();
+      })
       .catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+
+  /*  ---- generatorun HISSELERI --------------------------------------
+      Ekran bir defe qurulur; nisan basilanda YALNIZ deyisen hisse
+      tezelenir (genSync).  Butun formani yeniden cizmek iki zerer
+      verirdi: ekran yanib-sonurdu, ve ara merhelede sehife bir anliq
+      QISALDIGI ucun brauzer surusmeni sifira sixirdi - muellim
+      yerini itirirdi.  Indi forma yerinde qalir.  */
+  function genSubOpts(f) {
+    return '<option value="">Bütün fənlər</option>' +
+      subFilter((FAC.subjects || []).filter(function (x) {
+        return Number(x.n) > 0 || f.subject === x.slug;
+      }), f.subject).map(function (x) {
+        return '<option value="' + esc(x.slug) + '"' +
+          (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
+      }).join("");
+  }
+
+  /*  Cipde YALNIZ reqem yazilir - basliq onsuz da "Sinif"dir.
+      "1-ci sinif" yazsaq 11 cip iki setre dagilir; adi title-dadir.  */
+  function genLevChips(f) {
+    return (FAC.levels || []).map(function (l) {
+      return '<button class="chip' +
+        (f.levels.indexOf(l.code) >= 0 ? " on" : "") +
+        '" data-l="' + esc(l.code) + '" title="' + esc(l.name) + '">' +
+        esc(l.code) + "</button>";
+    }).join("");
+  }
+
+  function genLevHint(f) {
+    if (f.levels.length > 1) {
+      return "Seçilmiş " + f.levels.length + " sinif arasında bərabər paylanır.";
+    }
+    if (f.levels.length === 1) {
+      return levelNameByCode2(f.levels[0]) + " — başqasını da seçə bilərsiniz.";
+    }
+    return "Seçilməyib — bütün siniflərdən götürülür.";
+  }
+
+  /* Movzu nisanlari yalniz FENN + TEK SINIF secilende cixir.
+     Sinifsiz fennin butun siniflerinin movzulari tokulur;
+     iki sinif secilende de siyahi ikiqat olur.  Movzu secmek
+     onsuz da tek sinif isi ile baglidir. */
+  function genTopHtml(f) {
+    if (!f.subject || f.levels.length !== 1) {
+      return '<p class="muted" style="margin:12px 0 0">' +
+        (!f.subject
+          ? (f.levels.length === 1 ? "Mövzu seçmək üçün fənn seçin. "
+                                   : "Mövzu seçmək üçün fənn və bir sinif seçin. ")
+          : (f.levels.length > 1
+              ? "Mövzu seçmək üçün tək sinif saxlayın. "
+              : "Mövzu seçmək üçün sinif də seçin. ")) +
+        "Mövzu seçilməsə, hamısından götürüləcək.</p>";
+    }
+    //  Suzgec deyisib, movzular hele gelmeyib.  Kohneleri gostermek
+    //  olmaz - onlar BASQA sinfin movzularidir.
+    if (genFacKey(f) !== GFKEY) {
+      return '<p class="muted" style="margin:12px 0 0">Mövzular yüklənir…</p>';
+    }
+    if (!(FAC.topics || []).length) {
+      return '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>';
+    }
+    return '<div class="chips" id="gTop">' + FAC.topics.map(function (t) {
+      return '<button class="chip' + (f.topics.indexOf(t.id) >= 0 ? " on" : "") +
+        '" data-t="' + esc(t.id) + '">' +
+        esc(topLabel(t, f.levels[0])) + "</button>";
+    }).join("") + "</div>";
+  }
+
+  /*  Nisan basilanda: formanin ozu YERINDE qalir, yalniz nisanlarin
+      yanili-sonuk halı, altindaki izah ve movzu qutusu deyisir.  */
+  function genSync() {
+    /*  Movzu qutusu bir anliq QISALIR (nisanlar -> bir setirlik yazi).
+        Sened qisalanda brauzer surusmeni oz hedine sixir ve geri
+        qaytarmir - muellim yerini itirir.  keepY() eyni derdi sual
+        formasinda da hell edir.  */
+    var back = keepY();
+    var f = genFilter();
+    var lv = $("gLevs");
+    if (lv) {
+      [].forEach.call(lv.querySelectorAll("[data-l]"), function (b) {
+        var on = f.levels.indexOf(b.getAttribute("data-l")) >= 0;
+        if (on) b.classList.add("on"); else b.classList.remove("on");
+      });
+    }
+    var cd = $("gDiff");
+    if (cd) {
+      [].forEach.call(cd.querySelectorAll("[data-d]"), function (b) {
+        var on = f.difficulty.indexOf(Number(b.getAttribute("data-d"))) >= 0;
+        if (on) b.classList.add("on"); else b.classList.remove("on");
+      });
+    }
+    var h = $("gLevHint");
+    if (h) h.textContent = genLevHint(f);
+    var tb = $("gTopBox");
+    if (tb) tb.innerHTML = genTopHtml(f);
+    back();
+    genPreview();
+  }
+
+  /*  Suzgec cavabi gelende: fenn siyahisi ve sinif nisanlari da
+      deyise biler (bos fenn gizledilir), ona gore onlar da
+      tezelenir - amma yene YERINDE, ekrani sokmeden.  */
+  function genRefresh() {
+    var back = keepY();
+    var f = genFilter();
+    var sub = $("gsub");
+    if (sub) sub.innerHTML = genSubOpts(f);
+    var lv = $("gLevs");
+    if (lv) lv.innerHTML = genLevChips(f);
+    genSync();
+    back();
   }
 
   function drawGen() {
@@ -3060,37 +3210,18 @@
             "Öz suallarınızdan yığa bilərsiniz.</span></div>"
           : "") +
         '<div style="margin-top:12px"><label for="gsub">Fənn</label>' +
-          '<select id="gsub"><option value="">Bütün fənlər</option>' +
-          subFilter((FAC.subjects || []).filter(function (x) {
-            return Number(x.n) > 0 || f.subject === x.slug;
-          }), f.subject).map(function (x) {
-            return '<option value="' + esc(x.slug) + '"' +
-              (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
-          }).join("") + "</select></div>" +
+          '<select id="gsub">' + genSubOpts(f) + "</select></div>" +
         /*  SINIF - COX SECIM.  Repetitor 8-ci sinfi hazirlayarken
             7-ci sinfin materialini da qatmaq isteyirdi; select tek
             secimli oldugu ucun ya bir sinif, ya "Hamisi" idi.
             Ceki QOYULMUR: secilen sinifler arasinda beraber paylanir,
             cunki muellim onlari bilerekden secib.  */
-        /*  Cipde YALNIZ reqem yazilir - basliq onsuz da "Sinif"dir.
-            "1-ci sinif" yazsaq 11 cip iki setre dagilir ve ekran
-            qarisir; reqemle hamisi bir setre sigir.  */
         '<label>Sinif</label>' +
-        '<div class="chips num" id="gLevs">' +
-          (FAC.levels || []).map(function (l) {
-            return '<button class="chip' +
-              (f.levels.indexOf(l.code) >= 0 ? " on" : "") +
-              '" data-l="' + esc(l.code) + '" title="' + esc(l.name) + '">' +
-              esc(l.code) + "</button>";
-          }).join("") +
-        "</div>" +
-        '<p class="muted" style="margin:-4px 0 14px">' +
-          (f.levels.length > 1
-            ? "Seçilmiş " + f.levels.length + " sinif arasında bərabər paylanır."
-            : (f.levels.length === 1
-                ? esc(levelNameByCode2(f.levels[0])) + " — başqasını da seçə bilərsiniz."
-                : "Seçilməyib — bütün siniflərdən götürülür.")) +
-        "</p>" +
+        '<div class="chips num" id="gLevs">' + genLevChips(f) + "</div>" +
+        //  Nisanlarla yazi arasi: menfi kenar onlari bir-birine
+        //  yapisdirmisdi, oxumaq cetin idi
+        '<p class="muted" id="gLevHint" style="margin:8px 0 18px">' +
+          esc(genLevHint(f)) + "</p>" +
         /*  Cetinliyin de basligi var: iki nisan setri yan-yana
             durende hansinin ne oldugu bilinmirdi.  */
         '<label>Çətinlik</label>' +
@@ -3100,26 +3231,7 @@
               '" data-d="' + d + '">' + DIFF[d] + "</button>";
           }).join("") +
         "</div>" +
-        /* Movzu nisanlari yalniz FENN + TEK SINIF secilende cixir.
-           Sinifsiz fennin butun siniflerinin movzulari tokulur;
-           iki sinif secilende de siyahi ikiqat olur.  Movzu secmek
-           onsuz da tek sinif isi ile baglidir. */
-        (!f.subject || f.levels.length !== 1
-          ? '<p class="muted" style="margin:12px 0 0">' +
-            (!f.subject
-              ? (f.levels.length === 1 ? "Mövzu seçmək üçün fənn seçin. "
-                                       : "Mövzu seçmək üçün fənn və bir sinif seçin. ")
-              : (f.levels.length > 1
-                  ? "Mövzu seçmək üçün tək sinif saxlayın. "
-                  : "Mövzu seçmək üçün sinif də seçin. ")) +
-            "Mövzu seçilməsə, hamısından götürüləcək.</p>"
-          : ((FAC.topics || []).length
-              ? '<div class="chips" id="gTop">' + FAC.topics.map(function (t) {
-                  return '<button class="chip' + (f.topics.indexOf(t.id) >= 0 ? " on" : "") +
-                    '" data-t="' + esc(t.id) + '">' +
-                    esc(topLabel(t, f.levels[0])) + "</button>";
-                }).join("") + "</div>"
-              : '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>')) +
+        '<div id="gTopBox">' + genTopHtml(f) + "</div>" +
       "</div>" +
       '<div class="spacer"></div>' +
       '<div class="card">' +
@@ -3173,18 +3285,22 @@
       var d = Number(b.getAttribute("data-d"));
       var i = f.difficulty.indexOf(d);
       if (i >= 0) f.difficulty.splice(i, 1); else f.difficulty.push(d);
-      drawGen();
+      genSync();
     });
-    on("gTop", "click", function (e) {
+    //  Dinleyici gTopBox-a baglanir, gTop-a yox: movzu qutusunun
+    //  ICI genSync-de yeniden yazilir, qutunun ozu ise yerinde qalir.
+    on("gTopBox", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-t]") : null;
       if (!b) return;
       var t = b.getAttribute("data-t");
       var i = f.topics.indexOf(t);
       if (i >= 0) f.topics.splice(i, 1); else f.topics.push(t);
-      drawGen();
+      genSync();
     });
     on("gsub", "change", function () {
-      f.subject = $("gsub").value; f.topics = []; screenGen();
+      //  Sinif nisanlari ile eyni yol - ekran silinmir
+      f.subject = $("gsub").value; f.topics = [];
+      genSync(); genFacets();
     });
     on("gLevs", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-l]") : null;
@@ -3194,11 +3310,13 @@
       if (i >= 0) f.levels.splice(i, 1); else f.levels.push(k);
       //  Movzular sinife baglidir - sinif deyisdise secim menasizdir
       f.topics = [];
-      /*  Serverden suzgeci YALNIZ tek sinif qalanda cekirik - movzu
-          nisanlari yalniz o halda gosterilir.  Qalan hallarda yerli
-          cizmek kifayetdir; her klikde tam yeniden yukleme ekrani
-          yandirib-sondururdu.  drawGen() onizlemeni ozu tezeleyir.  */
-      if (f.levels.length === 1) screenGen(); else drawGen();
+      /*  Evvelce YERLI cizilir - nisan derhal yanir, sehife yerinde
+          qalir.  Suzgec siyahilari (fenn saylari, movzular) sinifden
+          asilidir, ona gore arxadan yenilenir; geldiyi anda ekran
+          sakitce tezelenir.  Ilk sinif, ikinci sinif, secimi silmek -
+          UCU DE eyni yolla gedir, yoxsa bezi klikde ekran yanib
+          sonur, bezisinde yox.  */
+      genSync(); genFacets();
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
     //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin
