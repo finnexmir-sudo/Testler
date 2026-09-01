@@ -44,7 +44,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          71_bank_tarix_umumi7.sql 72_bos_fennler.sql \
          73_buraxilis_proqrami.sql 74_alt_movzular_riy8.sql \
          82_alt_movzular_riy5_11.sql 83_alt_movzular_riy1_4.sql \
-         84_alt_movzular_hb1_4.sql \
+         84_alt_movzular_hb1_4.sql 85_alt_movzular_inf1_11.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \

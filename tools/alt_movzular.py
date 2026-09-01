@@ -231,6 +231,43 @@ BASLIQ_HB1_4 = """\
 --  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 762 (1),
 --  829 (2), 900 (3), 769 (4).  Adlar EYNILE goturulub."""
 
+BASLIQ_INF = """\
+--  85_alt_movzular_inf1_11.sql : INFORMATIKA 1-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Ucuncu fenn.  Riyaziyyat (74/82/83) ve heyat bilgisi (84) hazirdir;
+--  informatika ile IBTIDAI SINIFLER de tam bitir (az dili istisnadir -
+--  derslik temaya gore bolunub, bizim agac qrammatikadir).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 417 (1),
+--  520 (2), 676 (3), 360 (4), 846 (5), 912 (6), 708 (7), 797 (8),
+--  884 (9), 736 (10), 822 (11).  Adlar EYNILE goturulub.
+--
+--  DERSLIYIN QURULUSU UC YERDE BIZIMKINDEN FERQLIDIR:
+--
+--  1) 1, 3 ve 4-cu sinifde bolmenin icinde ALT BASLIQ var - nomresiz,
+--     ozunden sonraki dersle EYNI sehifede ("QRAFIK REDAKTOR" s.52,
+--     "20. PAINT PROQRAMI" s.52).  O, ders deyil, ona gore siyahiya
+--     dusmur; bizim iki movzuya bolunen bolmelerde ise sarhed kimi
+--     islenir (inf-3-kompyuter | inf-3-qrafik).
+--  2) 2-ci sinifde alt basliq YOXDUR, amma bazada "Kompüter" ve
+--     "Proqramlarla iş" ayri movzudur.  Sarhed s.53-dur: 21-ci ders
+--     "Metn redaktoru"ndan etibaren proqramlarla is baslayir; 20-ci
+--     ders ("İş masası və proqram pəncərəsi") hele komputerin ozudur.
+--  3) 10 ve 11-ci sinifde derslikde bolme COXDUR: 10-da "Veb-
+--     proqramlasdirma" + "Informasiya cemiyyeti" bizde bir movzudur
+--     ("Veb və informasiya cəmiyyəti"), 11-de "Komputer" + "Veb-
+--     layihe" birdir.  Setirler birlesir, sira davam edir.
+--
+--  BURAXILAN BOLMELER: 5-ci sinifde "Giriş" (derslikle nece
+--  islemeli), 11-ci sinifde "Layihələr üçün yardımçı materiallar" ve
+--  "Informatika kursu uzre testler" - ders deyil, elavedir.
+--
+--  ADLARIN BOYUK HERFLE YAZILISI DEYISDIRILMIR: 1, 3 ve 4-cu sinif
+--  dersliyi basliqlari kitabin OZUNDE de tam boyuk herfle verib
+--  (s.6 basligi <h3>1. INSAN VE INFORMASIYA</h3>).  Bu, portal
+--  qusuru deyil - dersliyin dizaynidir, ona gore toxunulmur."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -349,6 +386,86 @@ PAKETLER = [
                         "hey-4-hereket-enerji"])]),
         ],
     },
+    {
+        "ad": "inf1_11",
+        "etiket": "Informatika 1-11",
+        "fayl": "85_alt_movzular_inf1_11.sql",
+        "fenn": "informatika",
+        "fayl_on": "informatika",
+        "basliq": BASLIQ_INF,
+        "bolmebasliq": True,
+        "nomre": "bos",
+        "xaric_seh": set(),
+        "xaric_ad": {"Terminlər", "Terminlər lüğəti", "Ədəbiyyat",
+                     "ALPLogo proqramlaşdırma mühitinin komandaları",
+                     "Dərslikdə işlənmiş ingiliscə söz və ifadələr",
+                     "Dərslikdə işlənmiş qısaltmalar"},
+        "duzelis": {
+            "4.Əşyalarınmüqayisəsi": ("Əşyaların müqayisəsi", "yazi"),
+            "21. Fiqurlarınçəkilməsi": ("Fiqurların çəkilməsi", "yazi"),
+            "8. “VƏ”, “VƏ YA\" SÖZLƏRİ OLAN MÜRƏKKƏB MÜLAHİZƏLƏR":
+                ("“VƏ”, “VƏ YA” SÖZLƏRİ OLAN MÜRƏKKƏB MÜLAHİZƏLƏR", "yazi"),
+            "10. “ƏGƏR - ONDA\" QAYDASI":
+                ("“ƏGƏR - ONDA” QAYDASI", "yazi"),
+            "12. Verilənlərin vizuallaşdırılması.Diaqramlar":
+                ("Verilənlərin vizuallaşdırılması. Diaqramlar", "yazi"),
+            "3.8. Verilənləlrin axtarışı və çeşidlənməsi":
+                ("Verilənlərin axtarışı və çeşidlənməsi", "yazi"),
+            "1.1. informasiya sistemi və onun elementləri":
+                ("İnformasiya sistemi və onun elementləri", "yazi"),
+            "1.2. informasiya sistemlərinin təsnifatı":
+                ("İnformasiya sistemlərinin təsnifatı", "yazi"),
+            "1.7. \"Böyük verilənlər\"texnologiyası":
+                ("\"Böyük verilənlər\" texnologiyası", "yazi"),
+            "1.8. informasiya cəmiyyəti": ("İnformasiya cəmiyyəti", "yazi"),
+            "4.5. internet xidmətləri": ("İnternet xidmətləri", "yazi"),
+            "5.1. idarəetmə paneli": ("İdarəetmə paneli", "yazi"),
+        },
+        "ust": ("Informatika ust movzu sayi 56 deyil", "true", 56),
+        "sinifler": [
+            (1, [(417, ["inf-1-esyalar", "inf-1-ardicilliq",
+                        "inf-1-informasiya",
+                        {None: "inf-1-kompyuter",
+                         "KOMPÜTERLƏ TANIŞLIQ": "inf-1-kompyuter",
+                         "KOMPÜTERİN İMKANLARI": "inf-1-komp-imkanlar"}])]),
+            (2, [(520, ["inf-2-obyekt", "inf-2-informasiya", "inf-2-alqoritm",
+                        ("inf-2-kompyuter", 53, "inf-2-proqramlar")])]),
+            (3, [(676, ["inf-3-informasiya", "inf-3-alqoritm",
+                        {None: "inf-3-kompyuter",
+                         "KOMPÜTERDƏ ƏMƏLİYYATLAR": "inf-3-kompyuter",
+                         "QRAFİK REDAKTOR": "inf-3-qrafik"},
+                        "inf-3-metn"])]),
+            (4, [(360, ["inf-4-informasiya",
+                        {None: "inf-4-mentiq",
+                         "MƏNTİQ": "inf-4-mentiq",
+                         "ALQORİTM VƏ İCRAÇILAR": "inf-4-alqoritm"},
+                        {None: "inf-4-qrafik",
+                         "QRAFİK REDAKTOR": "inf-4-qrafik",
+                         "MƏTN REDAKTORU": "inf-4-kompyuter"}])]),
+            (5, [(846, [None, "inf-5-informasiya", "inf-5-kompyuter",
+                        "inf-5-tetbiqi", "inf-5-alqoritm",
+                        "inf-5-internet"])]),
+            (6, [(912, ["inf-6-kompyuter", "inf-6-proqram-teminati",
+                        "inf-6-alqoritm", "inf-6-proqramlasdirma",
+                        "inf-6-internet"])]),
+            (7, [(708, ["inf-7-kompyuter", "inf-7-tetbiqi",
+                        "inf-7-informasiya", "inf-7-proqramlasdirma",
+                        "inf-7-internet"])]),
+            (8, [(797, ["inf-8-informasiya", "inf-8-multimedia",
+                        "inf-8-proqramlasdirma", "inf-8-kompyuter",
+                        "inf-8-tetbiqi", "inf-8-internet"])]),
+            (9, [(884, ["inf-9-kodlasdirma", "inf-9-komputer",
+                        "inf-9-cedvel", "inf-9-proqramlasdirma",
+                        "inf-9-texnologiya"])]),
+            (10, [(736, ["inf-10-informasiya", "inf-10-model",
+                         "inf-10-baza", "inf-10-sebeke",
+                         "inf-10-veb", "inf-10-veb"])]),
+            (11, [(822, ["inf-11-sistemler", "inf-11-modellesdirme",
+                         "inf-11-baza-layihe", "inf-11-sebeke-tex",
+                         "inf-11-komputer-veb", "inf-11-komputer-veb",
+                         None, None])]),
+        ],
+    },
 ]
 
 
@@ -421,6 +538,10 @@ BEND = re.compile(r"^\s+(\d+)\s\s(.*)$")
 #  NOMRELEMEDE HOKMEN NOQTE VAR - ona gore "10-a qeder sayma" ve
 #  "9 ve 10 ededleri" toxunulmaz qalir (bir defe elden getdi).
 NOMRE = re.compile(r"^(\d+\.\d+\.?\s+|\d+\.(?=\D)\s*)")
+#  Informatika dersliklerinde nomre bezen noqtesizdir ("8 OBYEKTLER
+#  QRUPU").  Riyaziyyatda bu qaydani ISLETMEK OLMAZ - "9 ve 10
+#  ededleri" adinin ozudur.  Ona gore paketde acilir.
+NOMRE_BOS = re.compile(r"^(\d+\.\d+\.?\s+|\d+[.\s]\s*)")
 
 
 def oxu(kid, fayl_on):
@@ -445,48 +566,88 @@ def oxu(kid, fayl_on):
 
 
 def yigim(paket):
-    """[(sinif, valideyn, bolme_adi, [(slug, ad, sort), ...]), ...]"""
+    """[(sinif, valideyn, bolme_adi, [(slug, ad, sort), ...]), ...]
+
+    Valideyn gostericisi dord formada ola biler:
+      "slug"                       - butun bolme bir movzuya
+      None                         - bolme buraxilir (elave, test bloku)
+      ("slug_a", sehife, "slug_b") - sehifeden sonrasi ikinci movzuya
+      {None: "slug_a", "BASLIQ": "slug_b"}
+                                   - bolme daxilindeki ALT BASLIQLARA gore
+    Eyni slug iki bolmede tekrarlansa setirler BIRLESIR (sort davam edir).
+    """
     duzelis = paket["duzelis"]
+    nomre = NOMRE_BOS if paket.get("nomre") == "bos" else NOMRE
+    xaric = XARIC_UMUMI | set(paket.get("xaric_ad", ()))
     netice, duzelen = [], []
     for sinif, kitablar in paket["sinifler"]:
         gorulen = set()
+        siracli = {}          #  valideyn -> son sort (birlesen bolmeler ucun)
         for kid, valideynler in kitablar:
             bolmeler = oxu(kid, paket["fayl_on"])
-            uygun = [b for b in bolmeler
-                     if b[0] not in XARIC_UMUMI and b[1]]
+            uygun = [b for b in bolmeler if b[0] not in xaric and b[1]]
             if len(uygun) != len(valideynler):
                 raise SystemExit(
                     "kitab %d: %d bolme gozlenilirdi, %d tapildi\n  %s"
                     % (kid, len(valideynler), len(uygun),
                        "\n  ".join(b[0] for b in uygun)))
             for spec, (bolme_adi, bendler) in zip(valideynler, uygun):
-                #  bolmenin butun adlarini once duzelt
-                adlar = []
-                for seh, xam in bendler:
-                    ad = NOMRE.sub("", xam).strip()
-                    if ad in XARIC_UMUMI or (kid, seh) in paket["xaric_seh"]:
+                if spec is None:
+                    continue
+                #  Bolme daxilindeki ALT BASLIQ: nomresizdir ve NOVBETI
+                #  bendle EYNI sehifededir (kitabda basliq dersin ustunde
+                #  durur).  Ders deyil - siyahiya dusmur; iki movzuya
+                #  bolunen bolmede ise sarhed kimi islenir.
+                basliq = set()
+                if paket.get("bolmebasliq"):
+                    for i, (seh, xam) in enumerate(bendler):
+                        if nomre.match(xam) or i + 1 >= len(bendler):
+                            continue
+                        if (bendler[i + 1][0] == seh
+                                and nomre.match(bendler[i + 1][1])):
+                            basliq.add(i)
+                adlar, qrup = [], None
+                for i, (seh, xam) in enumerate(bendler):
+                    if i in basliq:
+                        qrup = xam.strip()
+                        continue
+                    ad = nomre.sub("", xam).strip()
+                    if ad in xaric or (kid, seh) in paket["xaric_seh"]:
                         continue
                     acar = xam if xam in duzelis else ad
                     if acar in duzelis:
                         ad, sebeb = duzelis[acar]
                         duzelen.append((sinif, seh, xam, ad, sebeb))
-                    adlar.append((seh, ad))
-                #  bolme iki movzuya bolunurse - sehifeye gore
+                    adlar.append((seh, qrup, ad))
+                #  bendleri valideynlere payla
                 if isinstance(spec, tuple):
                     a, kesik, b = spec
                     paylar = [(a, [x for x in adlar if x[0] < kesik]),
                               (b, [x for x in adlar if x[0] >= kesik])]
+                elif isinstance(spec, dict):
+                    sira_v = []
+                    for _, q_ad, _ in adlar:
+                        v = spec.get(q_ad, spec.get(None))
+                        if not v:
+                            raise SystemExit(
+                                "kitab %d: '%s' alt basligi xeritede yoxdur"
+                                % (kid, q_ad))
+                        if v not in sira_v:
+                            sira_v.append(v)
+                    paylar = [(v, [x for x in adlar
+                                   if spec.get(x[1], spec.get(None)) == v])
+                              for v in sira_v]
                 else:
                     paylar = [(spec, adlar)]
                 for valideyn, pay in paylar:
                     tezlik_f, tezlik_u = {}, {}
-                    for _, ad in pay:
+                    for _, _, ad in pay:
                         for w in sozler(ad, valideyn):
                             tezlik_f[w] = tezlik_f.get(w, 0) + 1
                         for w in sozler(ad):
                             tezlik_u[w] = tezlik_u.get(w, 0) + 1
-                    sira, cixis = 0, []
-                    for _, ad in pay:
+                    cixis = []
+                    for _, _, ad in pay:
                         nm = namizedler(ad, valideyn, tezlik_f, tezlik_u)
                         slug = None
                         for quyruq in nm:
@@ -501,9 +662,10 @@ def yigim(paket):
                                 if slug not in gorulen:
                                     break
                         gorulen.add(slug)
-                        sira += 10
-                        cixis.append((slug, ad, sira))
-                    netice.append((sinif, valideyn, bolme_adi, cixis))
+                        siracli[valideyn] = siracli.get(valideyn, 0) + 10
+                        cixis.append((slug, ad, siracli[valideyn]))
+                    if cixis:
+                        netice.append((sinif, valideyn, bolme_adi, cixis))
     return netice, duzelen
 
 
