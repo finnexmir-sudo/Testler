@@ -622,8 +622,10 @@
     }).then(function (rows) {
       groups = rows || [];
       if (!groups.length) return [];
+      //  Dayandirilmis sagird qrupda GORUNMEMELIDIR - yer limiti de
+      //  yalniz aktivleri sayir (app.account_student_count).
       return sb.select("students", {
-        select: "id,class_id", eq: { account_id: ACC.id }
+        select: "id,class_id", eq: { account_id: ACC.id, is_active: true }
       });
     }).then(function (studs) {
       var cnt = {};
@@ -1327,7 +1329,36 @@
           "<b>Hələ şagird yoxdur</b>Aşağıdan əlavə edin.</div>";
         return;
       }
-      box.innerHTML = rows.map(function (s) {
+      /*  Dayandirilmislar AYRICA bolmededir.  Sebeb: yer limiti yalniz
+          aktivleri sayir, ona gore dayandirilmis sagird siyahida
+          aktivlerle qarisib muellimi caşdirirdi ("niye 8 sagird
+          gorunur, 6 yer tutulub?").  Bolme yigilmis gelir.  */
+      var aktiv = rows.filter(function (s) { return s.is_active !== false; });
+      var dayan = rows.filter(function (s) { return s.is_active === false; });
+
+      box.innerHTML = aktiv.map(stuRow).join("") +
+        (dayan.length
+          ? '<details class="arxiv"><summary>Dayandırılmış <span>' + dayan.length +
+            "</span></summary>" + dayan.map(stuRow).join("") + "</details>"
+          : "");
+
+      function stuRow(s) {
+        //  Dayandirilmis sagirdin kodu ONSUZ DA islemir (app.session_student
+        //  is_active yoxlayir), ona gore kod/gonder duymeleri cixmir.
+        //  "Hesabat" qalir - kecmis neticeler itmeyib.
+        if (s.is_active === false) {
+          return '<div class="stu off" data-row="' + esc(s.id) + '">' +
+            '<div class="l1">' + av(s.full_name) + "<b>" + esc(s.full_name) + "</b>" +
+              '<button class="btn sm ghost link" data-rep="' + esc(s.id) + '">' +
+                "Hesabat" + ic("right") + "</button></div>" +
+            '<div class="l2"><span class="muted">Dayandırılıb — yer tutmur</span>' +
+              '<button class="btn sm" data-unarch="' + esc(s.id) + '">' +
+                "Davam etdir</button></div></div>";
+        }
+        return stuRowActive(s);
+      }
+
+      function stuRowActive(s) {
         /* Telefonda bes duymenin hamisi eyni cekide idi ve setir
            dord sətirə dagilirdi.  Indi ierarxiya var: kodu GONDERMEK
            esas isdir, kopyalamaq ikinci, ad ve kod ise qelemin altinda. */
@@ -1345,8 +1376,10 @@
               'title="Kodu kopyala" aria-label="Kodu kopyala">' + ic("copy") + "</button>" +
             '<button class="btn sm" data-wa="' + esc(s.id) + '">' +
               ic("send") + "Göndər</button>" +
+            '<button class="btn sm ghost link arch" data-arch="' + esc(s.id) + '">' +
+              "Dayandır</button>" +
           "</div></div>";
-      }).join("");
+      }
 
       Array.prototype.forEach.call(box.querySelectorAll("[data-copy]"), function (b) {
         b.addEventListener("click", function () {
@@ -1370,10 +1403,54 @@
           nav("#/s/" + b.getAttribute("data-rep") + "/" + classId);
         });
       });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-arch]"), function (b) {
+        b.addEventListener("click", function () {
+          var st = rows.filter(function (x) {
+            return x.id === b.getAttribute("data-arch"); })[0];
+          if (!st) return;
+          if (!confirm("«" + st.full_name + "» dayandırılsın?\n\n" +
+                       "Giriş kodu dərhal işləməyi dayandırır və şagird " +
+                       "paketdə yer tutmur. Keçmiş nəticələri qalır — " +
+                       "istənilən vaxt davam etdirə bilərsiniz.")) return;
+          setActive(st, false, b, classId);
+        });
+      });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-unarch]"), function (b) {
+        b.addEventListener("click", function () {
+          var st = rows.filter(function (x) {
+            return x.id === b.getAttribute("data-unarch"); })[0];
+          if (st) setActive(st, true, b, classId);
+        });
+      });
     }).catch(function (e) {
       var box = $("stu");
       if (box) box.innerHTML = '<div class="skel">' + esc(fail(e)) + "</div>";
     });
+  }
+
+  /*  Dayandirmaq / davam etdirmek.
+      Ayrica RPC lazim deyil: RLS onsuz da yalniz oz sagirdine icaze
+      verir, yer limiti ise BAZA TRIGGER-indedir (trg_students_seat_limit).
+      Trigger geri qaytarmada limiti YENIDEN yoxlayir - yerler dolubsa
+      xeta atir ve mesaji oldugu kimi gosteririk.  */
+  function setActive(st, aktiv, btn, classId) {
+    if (busy) return;
+    busy = true; btn.disabled = true;
+    btn.textContent = aktiv ? "Açılır…" : "Dayandırılır…";
+    sb.update("students", { id: st.id }, { is_active: aktiv })
+      .then(function () {
+        busy = false;
+        loadStudents(classId);      //  siyahi yeniden bolunsun
+        //  Yer sayğaci ACC-de kesledirilib (rpc_my_context) - dayandirma
+        //  onu deyisdiyi ucun kesi tezelemek lazimdir, yoxsa ev
+        //  sehifesinde kohne rəqəm qalir.
+        refreshContext().catch(function () {});
+      })
+      .catch(function (e) {
+        busy = false; btn.disabled = false;
+        btn.textContent = aktiv ? "Davam etdir" : "Dayandır";
+        alert(fail(e));
+      });
   }
 
   function waLink(s) {
@@ -2174,7 +2251,10 @@
     //  Teyinati generator DEYIL, tapsiriq ekrani verecek: orada son
     //  tarix, cehd sayi ve "tek sagird" secimi var.
     f.asg = "";
-    f.level = levelCode(g.level_id);   // sinif teyin olunmayibsa bos qalir
+    //  Qrupun sinfi susmaya secili gelir; muellim istese asagi
+    //  sinifleri de elave edir (cox secim).
+    var kod = levelCode(g.level_id);
+    f.levels = kod ? [kod] : [];
     f.back = g.id;
     f.backName = g.name || "";
     nav("#/gen");
@@ -2875,7 +2955,10 @@
 
   function genFilter() {
     if (!GF) GF = { pool: (ACC && ACC.plan) ? "all" : "mine",
-                    subject: "", level: "", topics: [], difficulty: [],
+                    subject: "",
+                    //  COX SECIM: muellim 8 ve 7-ni birlikde secе bilir.
+                    //  Bos = sinif suzgeci yoxdur (butun sinifler).
+                    levels: [], topics: [], difficulty: [],
                     count: 10, title: "", asg: "",
                     cls: "", remNames: [],
                     //  tapsiriq ekranindan gelmisiksa hara qayidaq
@@ -2883,10 +2966,22 @@
     return GF;
   }
 
+  //  Sinif kodundan adi - generatorun oz FAC siyahisindan
+  function levelNameByCode2(code) {
+    var l = (FAC.levels || []).filter(function (x) { return x.code === code; })[0];
+    return l ? l.name : code;
+  }
+
   function genRule(f) {
     var r = { pool: f.pool, count: f.count };
     if (f.subject) r.subject = f.subject;
-    if (f.level) r.level = f.level;
+    /*  Sinifler massiv kimi gedir.  Tek sinif secilibse "level" de
+        elave olunur - kohne qaydalari oxuyan yerler pozulmasin
+        (db/103 ikisini de taniyir).  */
+    if (f.levels.length) {
+      r.levels = f.levels.slice();
+      if (f.levels.length === 1) r.level = f.levels[0];
+    }
     if (f.topics.length) r.topics = f.topics;
     if (f.difficulty.length) r.difficulty = f.difficulty;
     if (f.cls) r["class"] = f.cls;
@@ -2915,7 +3010,7 @@
     });
     var sk = Object.keys(subs), lk = Object.keys(levs);
     f.subject = sk.length === 1 ? sk[0] : "";
-    f.level   = lk.length === 1 ? lk[0] : "";
+    f.levels  = lk.length === 1 ? [lk[0]] : [];
     nav("#/gen");
   }
 
@@ -2924,8 +3019,11 @@
     var f = genFilter();
     topTitle.textContent = "Test yığ";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    //  Facets tek sinif qebul edir - movzu nisanlari onsuz da
+    //  yalniz TEK sinif secilende cixir (asagida).
     sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
-                                p_level: f.level || null, p_pool: f.pool })
+                                p_level: f.levels.length === 1 ? f.levels[0] : null,
+                                p_pool: f.pool })
       .then(function (fac) { if (!live()) return; FAC = fac || {}; drawGen(); })
       .catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -2961,43 +3059,65 @@
             "<span>Platforma hovuzu abunə paketinə daxildir. " +
             "Öz suallarınızdan yığa bilərsiniz.</span></div>"
           : "") +
-        '<div class="fieldrow" style="margin-top:12px">' +
-          '<div><label for="gsub">Fənn</label>' +
-            '<select id="gsub"><option value="">Bütün fənlər</option>' +
-            subFilter((FAC.subjects || []).filter(function (x) {
-              return Number(x.n) > 0 || f.subject === x.slug;
-            }), f.subject).map(function (x) {
-              return '<option value="' + esc(x.slug) + '"' +
-                (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
-            }).join("") + "</select></div>" +
-          '<div style="flex:0 0 140px"><label for="glev">Sinif</label>' +
-            '<select id="glev"><option value="">Hamısı</option>' +
-            (FAC.levels || []).map(function (l) {
-              return '<option value="' + esc(l.code) + '"' +
-                (f.level === l.code ? " selected" : "") + ">" + esc(l.name) + "</option>";
-            }).join("") + "</select></div>" +
+        '<div style="margin-top:12px"><label for="gsub">Fənn</label>' +
+          '<select id="gsub"><option value="">Bütün fənlər</option>' +
+          subFilter((FAC.subjects || []).filter(function (x) {
+            return Number(x.n) > 0 || f.subject === x.slug;
+          }), f.subject).map(function (x) {
+            return '<option value="' + esc(x.slug) + '"' +
+              (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
+          }).join("") + "</select></div>" +
+        /*  SINIF - COX SECIM.  Repetitor 8-ci sinfi hazirlayarken
+            7-ci sinfin materialini da qatmaq isteyirdi; select tek
+            secimli oldugu ucun ya bir sinif, ya "Hamisi" idi.
+            Ceki QOYULMUR: secilen sinifler arasinda beraber paylanir,
+            cunki muellim onlari bilerekden secib.  */
+        /*  Cipde YALNIZ reqem yazilir - basliq onsuz da "Sinif"dir.
+            "1-ci sinif" yazsaq 11 cip iki setre dagilir ve ekran
+            qarisir; reqemle hamisi bir setre sigir.  */
+        '<label>Sinif</label>' +
+        '<div class="chips num" id="gLevs">' +
+          (FAC.levels || []).map(function (l) {
+            return '<button class="chip' +
+              (f.levels.indexOf(l.code) >= 0 ? " on" : "") +
+              '" data-l="' + esc(l.code) + '" title="' + esc(l.name) + '">' +
+              esc(l.code) + "</button>";
+          }).join("") +
         "</div>" +
+        '<p class="muted" style="margin:-4px 0 14px">' +
+          (f.levels.length > 1
+            ? "Seçilmiş " + f.levels.length + " sinif arasında bərabər paylanır."
+            : (f.levels.length === 1
+                ? esc(levelNameByCode2(f.levels[0])) + " — başqasını da seçə bilərsiniz."
+                : "Seçilməyib — bütün siniflərdən götürülür.")) +
+        "</p>" +
+        /*  Cetinliyin de basligi var: iki nisan setri yan-yana
+            durende hansinin ne oldugu bilinmirdi.  */
+        '<label>Çətinlik</label>' +
         '<div class="chips" id="gDiff">' +
           [1, 2, 3].map(function (d) {
             return '<button class="chip' + (f.difficulty.indexOf(d) >= 0 ? " on" : "") +
               '" data-d="' + d + '">' + DIFF[d] + "</button>";
           }).join("") +
         "</div>" +
-        /* Movzu nisanlari yalniz FENN + SINIF secilende cixir.  Sinifsiz
-           fennin DORD sinfinin movzulari tokulur - telefonda 40+ nisan
-           gozu yorurdu.  Sinifle en coxu ~12 nisan olur. */
-        (!f.subject || !f.level
+        /* Movzu nisanlari yalniz FENN + TEK SINIF secilende cixir.
+           Sinifsiz fennin butun siniflerinin movzulari tokulur;
+           iki sinif secilende de siyahi ikiqat olur.  Movzu secmek
+           onsuz da tek sinif isi ile baglidir. */
+        (!f.subject || f.levels.length !== 1
           ? '<p class="muted" style="margin:12px 0 0">' +
             (!f.subject
-              ? (f.level ? "Mövzu seçmək üçün fənn seçin. "
-                         : "Mövzu seçmək üçün fənn və sinif seçin. ")
-              : "Mövzu seçmək üçün sinif də seçin. ") +
+              ? (f.levels.length === 1 ? "Mövzu seçmək üçün fənn seçin. "
+                                       : "Mövzu seçmək üçün fənn və bir sinif seçin. ")
+              : (f.levels.length > 1
+                  ? "Mövzu seçmək üçün tək sinif saxlayın. "
+                  : "Mövzu seçmək üçün sinif də seçin. ")) +
             "Mövzu seçilməsə, hamısından götürüləcək.</p>"
           : ((FAC.topics || []).length
               ? '<div class="chips" id="gTop">' + FAC.topics.map(function (t) {
                   return '<button class="chip' + (f.topics.indexOf(t.id) >= 0 ? " on" : "") +
                     '" data-t="' + esc(t.id) + '">' +
-                    esc(topLabel(t, f.level)) + "</button>";
+                    esc(topLabel(t, f.levels[0])) + "</button>";
                 }).join("") + "</div>"
               : '<p class="muted" style="margin:12px 0 0">Bu fənn üçün mövzu yoxdur.</p>')) +
       "</div>" +
@@ -3044,7 +3164,7 @@
       //  hovuz deyisende siyahilar da deyisir - fenn/sinif/movzu
       //  secimleri sifirdan, serverden teze suzulur
       f.pool = b.getAttribute("data-v");
-      f.subject = ""; f.level = ""; f.topics = [];
+      f.subject = ""; f.levels = []; f.topics = [];
       screenGen();
     });
     on("gDiff", "click", function (e) {
@@ -3066,8 +3186,19 @@
     on("gsub", "change", function () {
       f.subject = $("gsub").value; f.topics = []; screenGen();
     });
-    on("glev", "change", function () {
-      f.level = $("glev").value; f.topics = []; screenGen();
+    on("gLevs", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-l]") : null;
+      if (!b) return;
+      var k = b.getAttribute("data-l");
+      var i = f.levels.indexOf(k);
+      if (i >= 0) f.levels.splice(i, 1); else f.levels.push(k);
+      //  Movzular sinife baglidir - sinif deyisdise secim menasizdir
+      f.topics = [];
+      /*  Serverden suzgeci YALNIZ tek sinif qalanda cekirik - movzu
+          nisanlari yalniz o halda gosterilir.  Qalan hallarda yerli
+          cizmek kifayetdir; her klikde tam yeniden yukleme ekrani
+          yandirib-sondururdu.  drawGen() onizlemeni ozu tezeleyir.  */
+      if (f.levels.length === 1) screenGen(); else drawGen();
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
     //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin

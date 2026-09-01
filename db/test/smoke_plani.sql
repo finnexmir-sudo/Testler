@@ -239,7 +239,7 @@ begin
 
   --  cedvel oxunuslari ucun superuser kontekstine kecirik
   reset role; reset request.jwt.claim.sub;
-  --  Bu yoxlamanin qiymeti alt movzudadir: db/103-den evvel iki alt
+  --  Bu yoxlamanin qiymeti alt movzudadir: db/105-den evvel iki alt
   --  movzudan qarisiq test "0 ferqli sual tapildi" verirdi.  Bendler
   --  alt movzu olmasa yoxlama hec ne subut etmir - ona gore israr et.
   assert exists (select 1 from public.class_plan_items i
@@ -249,7 +249,7 @@ begin
 
   assert (select count(*) from public.test_questions where test_id = tid) = 6,
          'qarisiq test 6 sualliq deyil';
-  --  Alt movzuda sual olmadigi ucun hovuz valideyndedir (db/103) -
+  --  Alt movzuda sual olmadigi ucun hovuz valideyndedir (db/105) -
   --  qanuni movzular: bendin oz movzusu ve ya onun valideyni.
   assert not exists (
     select 1 from public.test_questions tq

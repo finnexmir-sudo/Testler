@@ -398,6 +398,76 @@ with sync_playwright() as pw:
     pg.click("#btnB"); pg.wait_for_selector("#btnStu", timeout=8000)
     pg.click("#btnBack"); pg.wait_for_selector("#btnGroup", timeout=8000)
 
+    print("I2 · Şagirdi dayandırmaq — yer azad olur")
+    #  Yer limiti "is_active"e baxir, amma panelde sagirdi deaktiv
+    #  etmek yolu YOX idi: yer bir defe tutulurdu ve geri qayitmirdi.
+    #  Kecen ilin sagirdi bu ilin yerini yeyirdi.
+    pg.goto(PANEL + "#/"); pg.reload()
+    pg.wait_for_selector("#groups .item", timeout=8000)
+    used0 = pg.inner_text(".seat .num").split("/")[0].strip()
+    pg.locator("#groups .item").first.click()
+    pg.wait_for_selector(".stu", timeout=8000)
+    n0 = pg.locator(".stu").count()
+    ok(pg.locator("[data-arch]").count() == n0,
+       "her aktiv sagirdde «Dayandır» var", (pg.locator("[data-arch]").count(), n0))
+    ok(pg.locator("details.arxiv").count() == 0, "dayandirilmis bolmesi hele yoxdur")
+
+    ad = pg.locator(".stu b").first.inner_text()
+    pg.locator("[data-arch]").first.click()
+    pg.wait_for_selector("details.arxiv", timeout=8000)
+    ok(pg.locator("details.arxiv").count() == 1, "dayandirilmis bolmesi cixir")
+    ok(pg.locator(".stu.off").count() == 1, "sagird dayandirilmis gorunusune kecir",
+       pg.locator(".stu.off").count())
+    #  DIQQET: bolme YIGILMIS gelir - inner_text bagli <details>-in
+    #  icini QAYTARMIR.  Acib oxuyuruq (istifadeci de bele edir).
+    pg.locator("details.arxiv summary").click()
+    pg.wait_for_selector("details.arxiv[open]", timeout=8000)
+    ok(ad in pg.inner_text("details.arxiv"), "bolmede DUZ sagird var", ad)
+    ok("Dayandırılıb" in pg.inner_text(".stu.off"), "sebeb yazilir",
+       pg.inner_text(".stu.off").replace("\n", " ")[:70])
+    #  arxivdeki setirde kod/gonder duymeleri OLMAMALIDIR - kod onsuz
+    #  da islemir, gostermek aldadici olardi
+    ok(pg.locator(".stu.off [data-wa]").count() == 0,
+       "dayandirilmisda «Göndər» duymesi yoxdur")
+    ok(pg.locator(".stu.off .code").count() == 0, "dayandirilmisda giris kodu gosterilmir")
+    ok(pg.locator(".stu.off [data-rep]").count() == 1,
+       "«Hesabat» qalir - kecmis neticeler itmeyib")
+
+    row = db("select is_active from public.students where full_name = %s",
+             (ad,), one=True)
+    ok(row is not None and row["is_active"] is False, "bazada dayandirilib",
+       row and row["is_active"])
+
+    #  yer sayğaci ASAGI dusmelidir - kes tezelenmelidir
+    pg.goto(PANEL + "#/"); pg.reload()
+    pg.wait_for_selector(".seat .num", timeout=8000)
+    used1 = pg.inner_text(".seat .num").split("/")[0].strip()
+    ok(int(used1) == int(used0) - 1, "yer sayğaci azalir",
+       "%s -> %s" % (used0, used1))
+    #  qrup setrindeki sagird sayi da azalmalidir
+    pg.wait_for_function(
+        "!/Yüklənir/.test(document.getElementById('groups').textContent)",
+        timeout=8000)
+    ok("%d şagird" % (n0 - 1) in pg.inner_text("#groups"),
+       "qrup setrinde de dayandirilmis sayilmir",
+       pg.inner_text("#groups").replace("\n", " ")[:70])
+
+    print("I3 · Davam etdirmək")
+    pg.locator("#groups .item").first.click()
+    pg.wait_for_selector("details.arxiv", timeout=8000)
+    if pg.locator("details.arxiv:not([open])").count():
+        pg.locator("details.arxiv summary").click()
+    pg.locator("[data-unarch]").first.click()
+    pg.wait_for_function(
+        "n => document.querySelectorAll('.stu:not(.off)').length === n",
+        arg=n0, timeout=8000)
+    ok(pg.locator(".stu.off").count() == 0, "dayandirilmis siyahisi bosaldi")
+    ok(pg.locator("details.arxiv").count() == 0, "bolme itir")
+    row = db("select is_active from public.students where full_name = %s",
+             (ad,), one=True)
+    ok(row is not None and row["is_active"] is True, "bazada davam etdirilib",
+       row and row["is_active"])
+
     print("J · Başqa müəllim heç nə görmür")
     pg2 = new_page(ctx)
     pg2.goto(PANEL)

@@ -191,7 +191,7 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    **Azərbaycan dilinə alt mövzu yazıla bilməz** — dərslik temaya görə
    bölünüb («Fərd və toplum»), bizim ağac isə qrammatikadır; mündəricat
    plana «Qəribə heyvanlar» yazardı.
-   **Alt mövzu gələn kimi iki yer sındı** (`db/103` düzəldir):
+   **Alt mövzu gələn kimi iki yer sındı** (`db/105` düzəldir):
    `rpc_plan_test_multi` alt mövzunu valideynə yönəltmirdi (birgə
    qarışıq test «0 fərqli sual tapıldı» verirdi), `rpc_bank_facets`
    isə `p_pool` verilmədikdə alt mövzuları da qaytarırdı — sual yazma
@@ -385,6 +385,60 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
 
+## Test yığanda bir neçə sinif
+
+Generatorda sinif seçimi **tək seçimli** idi: ya bir sinif, ya
+«Hamısı». Ortası yox idi — repetitor 8-ci sinfi hazırlayarkən 7-ci
+sinfin materialını qatmaq istəyəndə ya ayrıca test yığmalı, ya da
+süzgəci tam açıb 1-11-i qarışdırmalı idi.
+
+İndi `#gLevs` çipləridir, qayda `levels` **massivi** alır: `["8","7"]`.
+
+- **Çəki qoyulmur.** Generator sualları mövzular arasında bərabər
+  paylayır; müəllim 8 və 7-ni bilərəkdən seçirsə, bərabər paylama
+  onun seçiminin dürüst oxunuşudur. «Cari sinif ağır, aşağılar
+  yüngül» kimi gizli çəki müəllimin görmədiyi sehrdir. Ekranda
+  açıq yazılır: «Seçilmiş N sinif arasında bərabər paylanır».
+- **Köhnə qaydalar pozulmur** — mövcud testlərin `gen_rule`-unda
+  `level` tək dəyər kimi durur («yenilə» onu təkrar işlədir), ona
+  görə süzgəc hər iki formanı tanıyır (`db/103_cox_sinif.sql`).
+- **Testin öz sinfi seçilənlərin ən yuxarısıdır**: 8+7 testi 8-ci
+  sinif testidir (7 təkrardır), `rpc_available_tests` onu 8-ci sinif
+  qrupuna göstərməlidir.
+- **Mövzu nişanları yalnız TƏK sinif seçiləndə çıxır** — iki sinifdə
+  siyahı ikiqat olur, mövzu seçimi onsuz da tək sinif işidir.
+
+`103` faylı `13_generator.sql`-dən **proqramla** çıxarılıb: iki
+funksiyanın gövdəsi hərfən eynidir, yalnız iki sətir dəyişib. Əl ilə
+köçürməkdən qaçmağın səbəbi var — əvvəl `rpc_remedial_test`-i
+əlqolla köçürəndə dörd şey təsadüfən dəyişmişdi.
+
+## Şagirdi dayandırmaq
+
+Yer limiti `students.is_active`-ə baxır (`app.account_student_count`),
+amma paneldə şagirdi deaktiv etmək yolu **yox idi**: yer bir dəfə
+tutulurdu və geri qayıtmırdı — keçən ilin şagirdi bu ilin yerini
+yeyirdi. Repetitor-25 paketində ikinci ildən problemə çevriləcəkdi.
+
+İndi hər aktiv şagird sətrində «**Dayandır**», dayandırılmışlar isə
+ayrıca **yığılmış** bölmədədir (aktivlərlə qarışanda müəllim «niyə 8
+şagird görünür, 6 yer tutulub?» deyə çaşırdı). Geri qayıdış:
+«Davam etdir».
+
+**Yeni RPC yoxdur** — mövcud mexanizm onsuz da kifayət edir və
+`db/test/smoke_dayandir.sql` bunu sübut edir:
+
+- RLS (`p_students_upd`) yalnız öz şagirdinə icazə verir
+- `trg_students_seat_limit` geri qaytarmada limiti **yenidən yoxlayır**
+  → dayandır-əlavə et-davam etdir ilə limiti yan keçmək mümkün deyil
+- `app.session_student` `is_active` yoxlayır → dayandırılanda **açıq
+  sessiya da dərhal kəsilir**, kod işləmir
+- Dayandırmaq **silmək deyil**: sətir və keçmiş nəticələr qalır,
+  «Hesabat» keçidi orada da var
+
+Dayandırılmış sətirdə kod və «Göndər» **göstərilmir** — kod onsuz da
+işləmir, göstərmək aldadıcı olardı.
+
 ## E-dərslik yenilənməsi — hər il avqustda
 
 Mövzu ağacımız e-dərslikdən gəlir. Dərslik hər il yenilənə bilər: ad
@@ -410,6 +464,33 @@ Nə qorunur:
 
 Praktikada: silmək əvəzinə **adı yeniləmək** demək olar həmişə
 düzgündür — slug qalır, tarixçə qalır.
+
+## Cavabsız qalan sual «səhv» deyil
+
+`rpc_submit_attempt` **iki faylda** yazılıb: `03_rpc.sql` (doğru,
+təzə) və `11_sual_banki.sql` (köhnə surət). Hansı sonuncu işləyirsə,
+o qalır. Təzə baza qurulanda `03` axırda olur; tarixi ardıcıllıqla
+gedəndə isə `11` axırda qalır və **köhnə gövdə qayıdır**:
+
+| | toxunulmamış sual |
+|---|---|
+| köhnə gövdə | `is_correct = false` — «səhv etdi» |
+| təzə gövdə | `is_correct = null` — «çatdırmadı» |
+
+Bal ikisində də sıfırdır, ona görə görünmürdü. Amma hesabatda
+«mövzunu bilmir» ilə «vaxtı çatmadı» bir-birindən ayrılmalıdır —
+müəllim ikisinə ayrı reaksiya verir.
+
+`db/104_cavabsiz_sual.sql` sıranın sonunda doğru gövdəni bərpa edir.
+Fayl `03_rpc.sql`-dən **proqramla** çıxarılıb. Köhnə cəhdlərə
+toxunulmur: keçmiş nəticəni sonradan dəyişmək müəllimin gördüyü
+hesabatı pozardı.
+
+**Bu, `miqrasiya.sh` sərtləşdiriləndə tapıldı.** Əvvəl o, yalnız
+`questions` indekslərini və üç cədvəlin sütunlarını tutuşdururdu —
+funksiya gövdəsinə baxmırdı, ona görə `103` faylı siyahıdan düşdüyü
+halda da yoxlama səssizcə keçirdi. İndi `public`/`app` sxemindəki
+bütün funksiyaların gövdəsi də tutuşdurulur.
 
 ## `db/` fayl nömrələri — iki sessiya arasında bölgü
 

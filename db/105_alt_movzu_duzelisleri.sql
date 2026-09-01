@@ -1,5 +1,5 @@
 -- =====================================================================
---  103_alt_movzu_duzelisleri.sql : ALT MOVZULARIN IKI ACIQ YERI
+--  105_alt_movzu_duzelisleri.sql : ALT MOVZULARIN IKI ACIQ YERI
 --
 --  ONCE db/12_bank_rpc.sql, db/25_ders_plani.sql ve
 --  db/101_ders_plani_alt.sql isledilmelidir.
