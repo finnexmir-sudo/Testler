@@ -98,3 +98,8 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 85_alt_movzular_inf1_11.sql
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 05_grants.sql
+# Statistika toplanir.  Teze qurulmus bazada planlayicinin hec bir
+# statistikasi olmur ve TAM BASQA plan secir: olcduk, rpc_bank_facets
+# 620 ms cekirdi, "analyze"den sonra 20 ms.  Yeni surat olcen her kes
+# (biz de daxil) bu tələyə dusurdu.  251 ms cekir - pulsuzdur.
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -c "analyze;"

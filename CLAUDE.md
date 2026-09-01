@@ -509,6 +509,32 @@ Bölgü belədir:
 Yeni **kod** faylı 100-dən başlayır. Bank faylına toxunma; bank
 sessiyası da 100+ aralığına girmir.
 
+## Sürət ölçəndə: əvvəlcə `ANALYZE`
+
+Təzə qurulmuş bazada planlayıcının **heç bir statistikası olmur** və
+tamam başqa plan seçir. Ölçdük:
+
+| | `rpc_bank_facets` |
+|---|---|
+| statistikasız | **620 ms** |
+| `analyze;`-dən sonra | **20 ms** |
+
+Otuz dəfə fərq, kodda bir hərf dəyişmədən. Bu tələyə düşmək asandır:
+bir dəfə «bankın süzgəci ağırdır, yenidən yazmaq lazımdır» deyə səhv
+nəticə çıxarıldı — halbuki qüsur yox idi, sadəcə ölçü yalan idi.
+
+`db/run.sh` artıq sonda `analyze` işlədir, ona görə yerli sınaq
+bazaları düzgün ölçülür. **Canlıda** isə: bankın böyük yüklənməsindən
+sonra (illik e-dərslik yeniləməsi, yeni fənn paketi) SQL Editor-da bir
+dəfə `analyze;` işlədin. Supabase-in avtomatik `autoanalyze`-ı bunu
+özü də edir, amma bir neçə dəqiqə gec — həmin aralıqda panel ağır
+görünür.
+
+Ölçmə qaydası: **əvvəl `analyze`, sonra ən azı iki dəfə çağır** (birinci
+çağırış disk oxuyur), və nəticəni funksiyanın həqiqətən hesablandığı
+formada al — `select 1 from (select f(...)) z` funksiyanı ümumiyyətlə
+işlətmir.
+
 ## Yerli yoxlama
 
 ```bash
