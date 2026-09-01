@@ -331,13 +331,25 @@ with sync_playwright() as pw:
     ok(any(" · " in x and "sinif" in x for x in riy),
        "sinif secilmeyende movzunun sinfi gorunur",
        [x for x in riy if " · " in x][:2])
-    # sinif secilende yalniz onun movzulari, ad tekrarsiz
-    pg.select_option("#qlev", "3"); pg.wait_for_timeout(900)
+    # sinif secilende yalniz onun movzulari, ad tekrarsiz.  Bank
+    # cedveli boyudukce (butun fennlerin alt movzulari ile) rpc_bank_facets
+    # bezen 900ms-den gec qayidir - sabit gozleme yerine loadTopics-in
+    # #qtop-u yeniden aktivlesdirmesini gozleyirik (sel.disabled=true/false).
+    pg.select_option("#qlev", "3")
+    pg.wait_for_function(
+        "document.getElementById('qtop') && !document.getElementById('qtop').disabled",
+        timeout=8000)
     r3 = [x for x in pg.locator("#qtop option").all_inner_texts() if x != "Seçilməyib"]
     ok(len(r3) == len(set(r3)), "sinif secilende ad tekrarlanmir", r3)
     ok(all(" · " not in x for x in r3), "sinif secilibse ada tekrar yazilmir", r3[:3])
     ok(0 < len(r3) <= 12, "yalniz o sinifin movzulari", len(r3))
-    pg.select_option("#qsub", "az-dili"); pg.wait_for_timeout(900)
+    pg.select_option("#qsub", "az-dili")
+    pg.wait_for_function(
+        "document.getElementById('qtop') && !document.getElementById('qtop').disabled",
+        timeout=8000)
+    pg.wait_for_function(
+        "!Array.from(document.querySelectorAll('#qtop option'))"
+        ".some(o => o.textContent.includes('Vurma cədvəli'))", timeout=8000)
     az = pg.locator("#qtop option").all_inner_texts()
     ok(any("Sait və samit" in x for x in az),
        "fenn deyisende movzular da deyisir", az[:3])
