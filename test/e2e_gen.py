@@ -535,37 +535,80 @@ with sync_playwright() as pw:
     ok(pg.locator("#gTop").count() == 0, "iki sinifde movzu nisanlari cixmir")
     ok("tək sinif saxlayın" in pg.inner_text("#main"), "sebeb yazilir")
 
-    #  UCUNCU SINIF: ekran YENIDEN YUKLENMEMELIDIR.  Evvel her klik
-    #  screenGen()-i cagirirdi - o, rpc_bank_facets-i tekrar cekib
-    #  butun formani sifirdan cizirdi: ekran yanib-sonurdu ve surusme
-    #  yuxari qacirdi.  Movzu nisanlari yalniz TEK sinif qalanda
-    #  lazimdir, ona gore coxluqda serverden hec ne istenmir.
-    #  Olcu menali olsun deye evvelce asagi surusduruk.
-    pg.evaluate("""() => {
-      const t = document.getElementById('gCnt').getBoundingClientRect().top
-                + window.scrollY;
-      window.scrollTo(0, Math.max(0, t - 120));
-    }""")
-    pg.wait_for_timeout(300)
-    y0 = pg.evaluate("window.scrollY")
-    ok(y0 > 60, "olcu menalidir - sehife asagidadir", y0)
+    #  EKRAN HEC BIR KLIKDE YENIDEN YUKLENMEMELIDIR.
+    #  Evvel ilk sinif secilende (ve 2->1 dusende) screenGen()
+    #  cagirilirdi: "Yuklenir" skeleti cixir, butun forma sokulub
+    #  yeniden qurulur, surusme basa qacirdi.  Ikinci-ucuncu sinifde
+    #  ise bu olmurdu - muellim ucun davranis GOZLENILMEZ idi.
+    #  Burada uc halin UCUNU DE olcuruk: ilk secim, novbeti secim,
+    #  secimi silmek.
+    #
+    #  OLCU USULU: formanin bir sahesine nisan qoyuruq.  Forma yeniden
+    #  qurulsa, o saha ARTIQ BASQA elementdir ve nisan itir.  Bu,
+    #  "ekran yeniden cizildi"nin birbasa subutudur.  (Skelet saymaq
+    #  ise yaramir - onizleme qutusu her hesablamada oz skeletini
+    #  gosterir, o normaldir.)
+    def nisanla():
+        pg.evaluate("() => { document.getElementById('gCnt').dataset.nis = 'x'; }")
 
-    #  Sorgulari sayiriq: bu, "yenidən yuklendi"nin birbasa subutudur.
-    say = {"n": 0}
-    def tut(rq):
-        if "rpc_bank_facets" in rq.url:
-            say["n"] += 1
-    pg.on("request", tut)
-    sinif_sec("5", 3)
-    pg.wait_for_timeout(600)
-    pg.remove_listener("request", tut)
-    ok(say["n"] == 0, "ucuncu sinif secende server sorgusu getmir", say["n"])
-    ok(abs(pg.evaluate("window.scrollY") - y0) < 40,
-       "ucuncu sinif secende sehife qacmir",
-       "%d -> %d" % (y0, pg.evaluate("window.scrollY")))
-    #  Testi asagidaki hisse ucun yeniden IKI sinife qaytaririq
-    sinif_sec("5", 2)
-    ok(pg.locator("#gLevs .chip.on").count() == 2, "sinif geri goturulur",
+    def nisan_qaldimi():
+        return pg.evaluate(
+            "() => { const e = document.getElementById('gCnt');"
+            "        return !!e && e.dataset.nis === 'x'; }")
+
+    def asagi_sur():
+        #  Olcu MENALI olsun: sehife sifirdan ferqli yerde dayanmalidir,
+        #  yoxsa "0 -> 0" hec ne subut etmir.
+        #
+        #  Amma nisan EKRANDA QALMALIDIR: Playwright klik edende
+        #  elementi ozu gorunen sahəyə cekir.  Cox asagi sursek,
+        #  sehifeni TEST qaldirir ve olcu tetbiqi yox, ozunu yoxlayir
+        #  (evvel mehz bu olurdu: her halda "-> 0").  Ona gore sinif
+        #  nisanlarini ekranin yuxarisina dayayiriq.
+        pg.evaluate("""() => {
+          const t = document.getElementById('gLevs').getBoundingClientRect().top
+                    + window.scrollY;
+          window.scrollTo(0, Math.max(0, t - 60));
+        }""")
+        pg.wait_for_timeout(300)
+        return pg.evaluate("window.scrollY")
+
+    def sakit_qalirmi(ad, kod, say):
+        y0 = asagi_sur()
+        ok(y0 > 60, "olcu menalidir (%s) - sehife asagidadir" % ad, y0)
+        nisanla()
+        sinif_sec(kod, say)
+        #  Fondaki suzgec cavabi gelib movzu qutusunu tezeleyir - onu
+        #  da gozleyirik, yoxsa olcunu cavab GELMEDEN gotururuk.
+        if say == 1:
+            pg.wait_for_selector("#gTop", timeout=8000)
+        pg.wait_for_timeout(700)
+        ok(nisan_qaldimi(), "%s: forma yeniden qurulmur" % ad)
+        y1 = pg.evaluate("window.scrollY")
+        ok(abs(y1 - y0) < 40, "%s: sehife qacmir" % ad, "%d -> %d" % (y0, y1))
+
+    #  Hazirki veziyyet: 3 ve 4 secilidir.  Sifirlayib ucunu de kecirik.
+    while pg.locator("#gLevs .chip.on").count():
+        n = pg.locator("#gLevs .chip.on").count()
+        pg.locator("#gLevs .chip.on").first.click()
+        pg.wait_for_function(
+            "n => document.querySelectorAll('#gLevs .chip.on').length === n",
+            arg=n - 1, timeout=8000)
+    pg.wait_for_timeout(700)
+
+    sakit_qalirmi("ilk sinif", "3", 1)
+    sakit_qalirmi("ikinci sinif", "4", 2)
+    sakit_qalirmi("secimi silmek", "4", 1)
+
+    #  Movzu nisanlari TEK sinif qalanda DOGRU sinifin movzulari
+    #  olmalidir - kohnesi ekranda qalmamalidir.
+    ok(pg.locator("#gTop").count() == 1, "tek sinifde movzu nisanlari qayidir")
+    ok("Mövzular yüklənir" not in pg.inner_text("#main"),
+       "movzular yuklenib qurtarib")
+
+    #  Testin qalan hissesi ucun yeniden IKI sinif
+    sinif_sec("4", 2)
+    ok(pg.locator("#gLevs .chip.on").count() == 2, "iki sinif geri qayidir",
        pg.locator("#gLevs .chip.on").all_inner_texts())
 
     pg.fill("#gCnt", "12"); pg.fill("#gTitle", "Uc ve dord birlikde")

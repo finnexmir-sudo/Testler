@@ -785,6 +785,9 @@ details.arxiv>summary span{padding:1px 8px;border-radius:999px;
 .stu.off b{color:var(--fg-2);font-weight:520}
 .stu.off .l2 .muted{font-size:12px}
 
-/* reqemli nisanlar (sinif secimi): 11 dene bir setre sigsin */
-.chips.num .chip{min-width:34px;padding-left:8px;padding-right:8px;
-  text-align:center;font-variant-numeric:tabular-nums}
+/* Reqemli nisanlar (sinif secimi): 11 dene bir setre sigsin.
+   Kunc radiusu AYRICA verilir - .chip-in 999px-i tek reqemde
+   dairəyə cevrilirdi, o da qalan nisanlarla bir aileden gorunmurdu.
+   Burada eni hundurluyunden boyuk saxlanilir ki, "ramka" qalsin. */
+.chips.num .chip{min-width:42px;padding-left:10px;padding-right:10px;
+  border-radius:9px;text-align:center;font-variant-numeric:tabular-nums}

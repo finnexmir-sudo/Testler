@@ -331,25 +331,28 @@ with sync_playwright() as pw:
     ok(any(" · " in x and "sinif" in x for x in riy),
        "sinif secilmeyende movzunun sinfi gorunur",
        [x for x in riy if " · " in x][:2])
-    # sinif secilende yalniz onun movzulari, ad tekrarsiz.  Bank
-    # cedveli boyudukce (butun fennlerin alt movzulari ile) rpc_bank_facets
-    # bezen 900ms-den gec qayidir - sabit gozleme yerine loadTopics-in
-    # #qtop-u yeniden aktivlesdirmesini gozleyirik (sel.disabled=true/false).
+    # sinif secilende yalniz onun movzulari, ad tekrarsiz
+    #  Sabit gozleme YOX: movzu siyahisi serverden gelir ve baza
+    #  soyuq olanda 900 ms catmirdi - yoxlama kohne siyahini olcub
+    #  "670 movzu" deyirdi.  Veziyyetin ozunu gozleyirik: sinif
+    #  secilende adlara " · sinif" yazilmir.
     pg.select_option("#qlev", "3")
     pg.wait_for_function(
-        "document.getElementById('qtop') && !document.getElementById('qtop').disabled",
-        timeout=8000)
+        """() => {
+          const o = [...document.querySelectorAll('#qtop option')]
+                      .map(x => x.textContent)
+                      .filter(x => x !== 'Seçilməyib');
+          return o.length > 0 && o.every(x => x.indexOf(' · ') < 0);
+        }""", timeout=10000)
     r3 = [x for x in pg.locator("#qtop option").all_inner_texts() if x != "Seçilməyib"]
     ok(len(r3) == len(set(r3)), "sinif secilende ad tekrarlanmir", r3)
     ok(all(" · " not in x for x in r3), "sinif secilibse ada tekrar yazilmir", r3[:3])
     ok(0 < len(r3) <= 12, "yalniz o sinifin movzulari", len(r3))
     pg.select_option("#qsub", "az-dili")
     pg.wait_for_function(
-        "document.getElementById('qtop') && !document.getElementById('qtop').disabled",
-        timeout=8000)
-    pg.wait_for_function(
-        "!Array.from(document.querySelectorAll('#qtop option'))"
-        ".some(o => o.textContent.includes('Vurma cədvəli'))", timeout=8000)
+        """() => [...document.querySelectorAll('#qtop option')]
+                   .some(x => x.textContent.indexOf('Sait və samit') >= 0)""",
+        timeout=10000)
     az = pg.locator("#qtop option").all_inner_texts()
     ok(any("Sait və samit" in x for x in az),
        "fenn deyisende movzular da deyisir", az[:3])
