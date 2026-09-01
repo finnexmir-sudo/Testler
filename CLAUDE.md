@@ -173,9 +173,24 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    `82`-də, ibtidai `83`-də — cəmi **769 alt mövzu** (1:70, 3:73,
    4:69, 5:89, 6:85, 7:63, 8:74, 9:92, 10:77, 11:77). **Həyat bilgisi
    1-4** də hazırdır (`84`, 125 alt mövzu — dərslik və baza dörd
-   sinifdə də bire-bir uyğundur). Adlar e-dərslikdən eynilə,
-   dərslikdəki sıra ilə. `82`/`83`/`84` əllə yazılmır —
-   `tools/alt_movzular.py` çıxarır (paket-paket konfiqurasiya).
+   sinifdə də bire-bir uyğundur), **İnformatika 1-11** də (`85`,
+   348 alt mövzu). Adlar e-dərslikdən eynilə, dərslikdəki sıra ilə.
+   `82`/`83`/`84`/`85` əllə yazılmır — `tools/alt_movzular.py`
+   çıxarır (paket-paket konfiqurasiya).
+   **Ağac hər fənndə eyni formada deyil** — generator dörd hal tanıyır:
+   bölmə → bir mövzu; bölmə **buraxılır** (informatika 5 «Giriş»,
+   11 «Layihələr üçün yardımçı materiallar»); bölmə **səhifəyə görə**
+   ikiyə bölünür (riyaziyyat 4 «Adi və onluq kəsrlər», informatika 2);
+   bölmə **alt başlığa görə** bölünür (informatika 1, 3, 4 — alt başlıq
+   nömrəsizdir və özündən sonrakı dərslə eyni səhifədədir, ona görə
+   dərs sayılmır). İki bölmə bir mövzuya da düşə bilər (informatika
+   10, 11) — sətirlər birləşir, sort davam edir.
+   **Böyük hərflə yazılış toxunulmur**: informatika 3 və 4-ün
+   başlıqları kitabın özündə də tam böyük hərflədir
+   (`<h3>1. İNSAN VƏ İNFORMASİYA`), portal qüsuru deyil.
+   **Azərbaycan dilinə alt mövzu yazıla bilməz** — dərslik temaya görə
+   bölünüb («Fərd və toplum»), bizim ağac isə qrammatikadır; mündəricat
+   plana «Qəribə heyvanlar» yazardı.
    **Alt mövzu gələn kimi iki yer sındı** (`db/103` düzəldir):
    `rpc_plan_test_multi` alt mövzunu valideynə yönəltmirdi (birgə
    qarışıq test «0 fərqli sual tapıldı» verirdi), `rpc_bank_facets`
@@ -400,7 +415,7 @@ düzgündür — slug qalır, tarixçə qalır.
 
 Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
 `claude/bil10-question-bank-expansion-eu6vkn` budağı `main`-ə
-birləşdirildikdən sonra 30…84 aralığındadır. Əvvəl nömrələr
+birləşdirildikdən sonra 30…85 aralığındadır. Əvvəl nömrələr
 toqquşurdu (bankın 7 faylı 23–29-da idi, indi 75–81-ə köçürülüb).
 Bölgü belədir:
 
