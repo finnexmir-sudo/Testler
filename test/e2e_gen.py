@@ -289,7 +289,9 @@ with sync_playwright() as pw:
     # gozu yorurdu.  Sinif secilenden sonra en coxu ~12 nisan gelir.
     ok(pg.locator("#gTop").count() == 0, "sinifsiz movzu nisanlari gizlidir")
     ok("sinif də seçin" in pg.inner_text("#main"), "sebeb yazilir - sinif secilsin")
-    pg.locator("#gLevs .chip", has_text="4-cü sinif").click()
+    #  Cipde artiq yalniz reqem yazilir - meten uzre axtaris "1"i "11"e
+    #  de uydururdu, ona gore data-l ile gedirik
+    pg.locator('#gLevs [data-l="4"]').click()
     pg.wait_for_selector("#gTop", timeout=8000)
     nt = pg.locator("#gTop .chip").count()
     ok(0 < nt <= 15, "sinifle movzu nisanlari yigcamdir", nt)
@@ -376,7 +378,7 @@ with sync_playwright() as pw:
     # Fenn ve sinif AVTOMATIK secilir - muellim yalniz "Testi yig" basir
     ok(pg.input_value("#gsub") == "riyaziyyat", "fenn avtomatik secilir",
        pg.input_value("#gsub"))
-    ok(pg.locator("#gLevs .chip.on").inner_text() == "4-cü sinif",
+    ok(pg.locator("#gLevs .chip.on").inner_text() == "4",
        "sinif avtomatik secilir", pg.locator("#gLevs .chip.on").all_inner_texts())
     pg.wait_for_selector("#gTop", timeout=8000)
     ok(pg.locator("#gTop .chip.on").count() >= 1,
@@ -512,24 +514,59 @@ with sync_playwright() as pw:
         pg.wait_for_function(
             "n => document.querySelectorAll('#gLevs .chip.on').length === n",
             arg=n - 1, timeout=8000)
-    #  DIQQET: her klik screenGen()-i cagirir, o da facets sorgusundan
-    #  SONRA yeniden cizir.  Sabit gozleme azdir - ciplerin ozunun
-    #  yanmasini gozleyirik.
-    def sinif_sec(ad, say):
-        pg.locator("#gLevs .chip", has_text=ad).click()
+    #  DIQQET: birinci sinif secilende ekran serverden yeniden yuklenir
+    #  (movzu nisanlari ucun facets lazimdir), sonrakilarda ise yerli
+    #  cizilir.  Sabit gozleme hər iki hal ucun azdir - ciplerin
+    #  ozunun yanmasini gozleyirik.
+    def sinif_sec(kod, say):
+        pg.locator('#gLevs [data-l="%s"]' % kod).click()
         pg.wait_for_function(
             "n => document.querySelectorAll('#gLevs .chip.on').length === n",
             arg=say, timeout=8000)
 
-    sinif_sec("3-cü sinif", 1)
-    sinif_sec("4-cü sinif", 2)
+    sinif_sec("3", 1)
+    sinif_sec("4", 2)
     ok(pg.locator("#gLevs .chip.on").count() == 2, "iki sinif secili qalir",
        pg.locator("#gLevs .chip.on").all_inner_texts())
+    ok("Çətinlik" in pg.inner_text("#main"), "cetinlik nisanlarinin basligi var")
     ok("bərabər paylanır" in pg.inner_text("#main"),
        "paylama qaydasi ekranda yazilir")
     #  iki sinif secilende movzu nisanlari CIXMIR - siyahi ikiqat olardi
     ok(pg.locator("#gTop").count() == 0, "iki sinifde movzu nisanlari cixmir")
     ok("tək sinif saxlayın" in pg.inner_text("#main"), "sebeb yazilir")
+
+    #  UCUNCU SINIF: ekran YENIDEN YUKLENMEMELIDIR.  Evvel her klik
+    #  screenGen()-i cagirirdi - o, rpc_bank_facets-i tekrar cekib
+    #  butun formani sifirdan cizirdi: ekran yanib-sonurdu ve surusme
+    #  yuxari qacirdi.  Movzu nisanlari yalniz TEK sinif qalanda
+    #  lazimdir, ona gore coxluqda serverden hec ne istenmir.
+    #  Olcu menali olsun deye evvelce asagi surusduruk.
+    pg.evaluate("""() => {
+      const t = document.getElementById('gCnt').getBoundingClientRect().top
+                + window.scrollY;
+      window.scrollTo(0, Math.max(0, t - 120));
+    }""")
+    pg.wait_for_timeout(300)
+    y0 = pg.evaluate("window.scrollY")
+    ok(y0 > 60, "olcu menalidir - sehife asagidadir", y0)
+
+    #  Sorgulari sayiriq: bu, "yenidən yuklendi"nin birbasa subutudur.
+    say = {"n": 0}
+    def tut(rq):
+        if "rpc_bank_facets" in rq.url:
+            say["n"] += 1
+    pg.on("request", tut)
+    sinif_sec("5", 3)
+    pg.wait_for_timeout(600)
+    pg.remove_listener("request", tut)
+    ok(say["n"] == 0, "ucuncu sinif secende server sorgusu getmir", say["n"])
+    ok(abs(pg.evaluate("window.scrollY") - y0) < 40,
+       "ucuncu sinif secende sehife qacmir",
+       "%d -> %d" % (y0, pg.evaluate("window.scrollY")))
+    #  Testi asagidaki hisse ucun yeniden IKI sinife qaytaririq
+    sinif_sec("5", 2)
+    ok(pg.locator("#gLevs .chip.on").count() == 2, "sinif geri goturulur",
+       pg.locator("#gLevs .chip.on").all_inner_texts())
 
     pg.fill("#gCnt", "12"); pg.fill("#gTitle", "Uc ve dord birlikde")
     pg.wait_for_function(
@@ -567,7 +604,7 @@ with sync_playwright() as pw:
     pg.click("#btnGenHere")
     pg.wait_for_selector("#btnMake", timeout=8000)
     ok(pg.url.endswith("#/gen"), "generator acilir", pg.url[-12:])
-    ok(pg.locator("#gLevs .chip.on").inner_text() == "4-cü sinif",
+    ok(pg.locator("#gLevs .chip.on").inner_text() == "4",
        "qrupun sinfi avtomatik secilir",
        pg.locator("#gLevs .chip.on").all_inner_texts())
     ok(pg.locator("#gAsg").count() == 0,
@@ -630,7 +667,7 @@ with sync_playwright() as pw:
     if pg.locator("#gLevs .chip.on").count():
         pg.locator("#gLevs .chip.on").first.click()
         pg.wait_for_selector("#gLevs", timeout=8000); pg.wait_for_timeout(300)
-    pg.locator("#gLevs .chip", has_text="3-cü sinif").click()
+    pg.locator('#gLevs [data-l="3"]').click()
     pg.wait_for_selector("#gLevs", timeout=8000); pg.wait_for_timeout(400)
     pg.fill("#gCnt", "5"); pg.fill("#gTitle", "Yanlis sinifle yigilan")
     pg.wait_for_function(

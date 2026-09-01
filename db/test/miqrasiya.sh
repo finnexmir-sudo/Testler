@@ -48,6 +48,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
          100_seviyye_modeli.sql 101_ders_plani_alt.sql 102_movzu_qoruyucu.sql \
+         103_cox_sinif.sql 104_cavabsiz_sual.sql \
          05_grants.sql; do
   printf "  %-22s" "$f"
   if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then
@@ -68,9 +69,27 @@ for db in miq_teze miq_test; do
        from information_schema.columns
       where table_schema='public' and table_name in ('questions','test_questions','attempt_answers')
      order by 1" > "/tmp/$db.txt"
+  #  Funksiya govdeleri de tutusdurulur.  Ustunden yazan fayl
+  #  (mes. 103_cox_sinif.sql) yuxaridaki siyahiya salinmasa, teze
+  #  bazada YENI, miqrasiya olunmusda KOHNE govde qalir - bu setir
+  #  onu tapir.  Evvel yalniz sutun/indeks baxilirdi, ona gore
+  #  103 siyahidan dusdugu halda yoxlama sakitce kecirdi.
+  psql -Atq -d "$db" -c "
+    select p.oid::regprocedure::text || md5(pg_get_functiondef(p.oid))
+      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname in ('public','app') and p.prokind = 'f'
+     order by 1" > "/tmp/$db.fn.txt"
 done
 if diff -q /tmp/miq_teze.txt /tmp/miq_test.txt >/dev/null; then
   echo "  OK   teze ve miqrasiya olunmus sxem eynidir"
 else
   echo "  FERQ:"; diff /tmp/miq_teze.txt /tmp/miq_test.txt | head -20; exit 1
+fi
+if diff -q /tmp/miq_teze.fn.txt /tmp/miq_test.fn.txt >/dev/null; then
+  echo "  OK   funksiya govdeleri de eynidir"
+else
+  echo "  FERQ (funksiya):"
+  diff /tmp/miq_teze.fn.txt /tmp/miq_test.fn.txt | head -20
+  echo "  Ehtimal: run.sh-de olan bir fayl bu skriptdeki siyahida yoxdur."
+  exit 1
 fi

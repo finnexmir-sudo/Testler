@@ -784,3 +784,7 @@ details.arxiv>summary span{padding:1px 8px;border-radius:999px;
 .stu.off{background:var(--n-25)}
 .stu.off b{color:var(--fg-2);font-weight:520}
 .stu.off .l2 .muted{font-size:12px}
+
+/* reqemli nisanlar (sinif secimi): 11 dene bir setre sigsin */
+.chips.num .chip{min-width:34px;padding-left:8px;padding-right:8px;
+  text-align:center;font-variant-numeric:tabular-nums}

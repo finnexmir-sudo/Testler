@@ -2966,6 +2966,12 @@
     return GF;
   }
 
+  //  Sinif kodundan adi - generatorun oz FAC siyahisindan
+  function levelNameByCode2(code) {
+    var l = (FAC.levels || []).filter(function (x) { return x.code === code; })[0];
+    return l ? l.name : code;
+  }
+
   function genRule(f) {
     var r = { pool: f.pool, count: f.count };
     if (f.subject) r.subject = f.subject;
@@ -3066,19 +3072,28 @@
             secimli oldugu ucun ya bir sinif, ya "Hamisi" idi.
             Ceki QOYULMUR: secilen sinifler arasinda beraber paylanir,
             cunki muellim onlari bilerekden secib.  */
+        /*  Cipde YALNIZ reqem yazilir - basliq onsuz da "Sinif"dir.
+            "1-ci sinif" yazsaq 11 cip iki setre dagilir ve ekran
+            qarisir; reqemle hamisi bir setre sigir.  */
         '<label>Sinif</label>' +
-        '<div class="chips" id="gLevs">' +
+        '<div class="chips num" id="gLevs">' +
           (FAC.levels || []).map(function (l) {
             return '<button class="chip' +
               (f.levels.indexOf(l.code) >= 0 ? " on" : "") +
-              '" data-l="' + esc(l.code) + '">' + esc(l.name) + "</button>";
+              '" data-l="' + esc(l.code) + '" title="' + esc(l.name) + '">' +
+              esc(l.code) + "</button>";
           }).join("") +
         "</div>" +
-        '<p class="muted" style="margin:-6px 0 12px">' +
+        '<p class="muted" style="margin:-4px 0 14px">' +
           (f.levels.length > 1
             ? "Seçilmiş " + f.levels.length + " sinif arasında bərabər paylanır."
-            : "Bir neçəsini seçə bilərsiniz — seçilməsə bütün siniflərdən götürülür.") +
+            : (f.levels.length === 1
+                ? esc(levelNameByCode2(f.levels[0])) + " — başqasını da seçə bilərsiniz."
+                : "Seçilməyib — bütün siniflərdən götürülür.")) +
         "</p>" +
+        /*  Cetinliyin de basligi var: iki nisan setri yan-yana
+            durende hansinin ne oldugu bilinmirdi.  */
+        '<label>Çətinlik</label>' +
         '<div class="chips" id="gDiff">' +
           [1, 2, 3].map(function (d) {
             return '<button class="chip' + (f.difficulty.indexOf(d) >= 0 ? " on" : "") +
@@ -3179,7 +3194,11 @@
       if (i >= 0) f.levels.splice(i, 1); else f.levels.push(k);
       //  Movzular sinife baglidir - sinif deyisdise secim menasizdir
       f.topics = [];
-      screenGen();
+      /*  Serverden suzgeci YALNIZ tek sinif qalanda cekirik - movzu
+          nisanlari yalniz o halda gosterilir.  Qalan hallarda yerli
+          cizmek kifayetdir; her klikde tam yeniden yukleme ekrani
+          yandirib-sondururdu.  drawGen() onizlemeni ozu tezeleyir.  */
+      if (f.levels.length === 1) screenGen(); else drawGen();
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
     //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin

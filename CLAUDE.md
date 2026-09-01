@@ -438,6 +438,33 @@ Nə qorunur:
 Praktikada: silmək əvəzinə **adı yeniləmək** demək olar həmişə
 düzgündür — slug qalır, tarixçə qalır.
 
+## Cavabsız qalan sual «səhv» deyil
+
+`rpc_submit_attempt` **iki faylda** yazılıb: `03_rpc.sql` (doğru,
+təzə) və `11_sual_banki.sql` (köhnə surət). Hansı sonuncu işləyirsə,
+o qalır. Təzə baza qurulanda `03` axırda olur; tarixi ardıcıllıqla
+gedəndə isə `11` axırda qalır və **köhnə gövdə qayıdır**:
+
+| | toxunulmamış sual |
+|---|---|
+| köhnə gövdə | `is_correct = false` — «səhv etdi» |
+| təzə gövdə | `is_correct = null` — «çatdırmadı» |
+
+Bal ikisində də sıfırdır, ona görə görünmürdü. Amma hesabatda
+«mövzunu bilmir» ilə «vaxtı çatmadı» bir-birindən ayrılmalıdır —
+müəllim ikisinə ayrı reaksiya verir.
+
+`db/104_cavabsiz_sual.sql` sıranın sonunda doğru gövdəni bərpa edir.
+Fayl `03_rpc.sql`-dən **proqramla** çıxarılıb. Köhnə cəhdlərə
+toxunulmur: keçmiş nəticəni sonradan dəyişmək müəllimin gördüyü
+hesabatı pozardı.
+
+**Bu, `miqrasiya.sh` sərtləşdiriləndə tapıldı.** Əvvəl o, yalnız
+`questions` indekslərini və üç cədvəlin sütunlarını tutuşdururdu —
+funksiya gövdəsinə baxmırdı, ona görə `103` faylı siyahıdan düşdüyü
+halda da yoxlama səssizcə keçirdi. İndi `public`/`app` sxemindəki
+bütün funksiyaların gövdəsi də tutuşdurulur.
+
 ## `db/` fayl nömrələri — iki sessiya arasında bölgü
 
 Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
