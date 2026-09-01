@@ -321,6 +321,49 @@ BASLIQ_FIZ = """\
 --  Arxa hisse (Sozluk/Terminler lugeti/fesil cavab acari/Elaveler)
 --  xaric edilir."""
 
+BASLIQ_KIM = """\
+--  87_alt_movzular_kimya7_11.sql : KIMYA 7-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Altinci fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika
+--  hazirdir.  Kimya 7-ci sinifden baslayir (1-6-da yoxdur).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 871/872 (7),
+--  935/936 (8), 505 (9), 739 (10), 349 (11).  Adlar EYNILE goturulub.
+--
+--  DERSLIYIN QURULUSU 9 VE 11-CI SINIFDE COX PILLELIDIR:
+--
+--  9-cu sinif: derslikde YALNIZ 3 boyuk boluk var ("I. METALLAR",
+--  "II. QEYRİ-METALLAR", "III. ÜZVİ KİMYAYA GİRİŞ...") - hər biri
+--  ozunun icinde "Fəsil N." basliqlari ile bolunub, bazada ise 6
+--  movzu var.  "I" boluk sehife 23-den iki movzuya (metal-umumi/
+--  metallar), "II" boluk sehife 89 ve 121-den UC movzuya (halogen-
+--  kukurd/azot-fosfor/karbon-silisium) bolunur.  "Fəsil N." basliqlari
+--  ozleri movzu deyil - novbeti derslə eyni sehifede olsalar da,
+--  bezen basqa sehifede oldugu ucun umumi qaydayla (bolmebasliq)
+--  tutulmur, ona gore herfi mетnleri xaric siyahisindadir.
+--
+--  11-ci sinif: daha da derindir - "I. Hissə" YEGANE boluk daxilinde
+--  DORD movzu gizlenib (spirtler/aldehid-tursu/efir-yag/karbohidrat),
+--  sehife 50/97/118-den bolunur.  "fəsil N." basliqlari (kicik herflə)
+--  eyni sebeble xaric siyahisindadir.  Bir yazi qusuru var:
+--  "Ümumiləşdİrİcl sual və tapşırıqlar" (s.47) - boyuk/kicik herf
+--  qarisigi. "3.5.Sabun..." bosluqsuz nomrelidir (s.109).
+--
+--  7-ci sinifin "Giriş" bolmesi (1 ders - laboratoriya tehlukesizliyi)
+--  nomresiz ayri "==" bolme kimi gelir, bazada ayri movzusu yoxdur -
+--  ilk movzuya (kim-7-elementler) elave edildi.
+--
+--  10-cu sinifin "Kimya" / "Giriş" bolmesi (1 ders, dersliyin ozunun
+--  "bu kitabla nece isləmeli" tipli girisidir - real kimya mezmunu
+--  deyil) ATILIB, informatika 5-in "Giriş"i kimi.
+--
+--  10-cu sinifde III BÖLMƏ (Alkadienlər) ve V BÖLMƏ (Tsikloalkanlar)
+--  EYNI movzuya (kim-10-dien-tsiklo) gedir, aralarinda IV BÖLMƏ
+--  (Alkinler, oz movzusu) olsa da - setirler birlesir, sort davam edir.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -562,6 +605,73 @@ PAKETLER = [
                          "fiz-11-atom"])]),
         ],
     },
+    {
+        "ad": "kim7_11",
+        "etiket": "Kimya 7-11",
+        "fayl": "87_alt_movzular_kimya7_11.sql",
+        "fenn": "kimya",
+        "fayl_on": "kimya",
+        "basliq": BASLIQ_KIM,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "Terminlər və kimyəvi anlayışlar", "Bəzi tapşırıqların cavabları",
+            "Əlavələr",
+            #  9-cu sinif: "Fəsil N." basliqlari + tekrarlanan ust basliq
+            "Fəsil 1. Metalların ümumi xarakteristikası",
+            "Fəsil 2. Əsas yarımqrup metalları",
+            "Fəsil 3. Əlavə yarımqrup metalları",
+            "Fəsil 4. Flüor yarımqrupu elementləri",
+            "Fəsil 5. Oksigen yarımqrupu elementləri",
+            "Fəsil 6. Azot yarımqrupu elementləri",
+            "Fəsil 7. Karbon yarımqrupu elementləri",
+            "Fəsil 8. Karbohidrogenlər",
+            "Fəsil 9. Karbohidrogenlərin oksigenli və azotlu törəmələri",
+            "SADƏ ÜZVİ BİRLƏŞMƏLƏRLƏ TANIŞLIQ",
+            #  11-ci sinif: "fəsil N." basliqlari (kicik herflə)
+            "fəsil 1. SPİRTLƏR VƏ FENOLLAR",
+            "fəsil 2. ALDEHİDLƏR",
+            "fəsil 3. KARBON TURŞULARI VƏ ONLARIN TÖRƏMƏLƏRİ",
+            "fəsil 4. KARBOHİDRATLAR (SAXARİDLƏR)",
+            "fəsil 5. NİTROBİRLƏŞMƏLƏR, AMİNLƏR, AMİNTURŞULAR VƏ ZÜLALLAR",
+            "fəsil 6. POLİMERLƏR",
+        },
+        "duzelis": {
+            "Məişətdə istifadə edilən mühüm kimyəvi birləşmələr.":
+                ("Məişətdə istifadə edilən mühüm kimyəvi birləşmələr", "yazi"),
+            "Ümumiləşdİrİcl sual və tapşırıqlar":
+                ("Ümumiləşdirici sual və tapşırıqlar", "yazi"),
+            "3.5.Sabun və sintetik yuyucu maddələr":
+                ("Sabun və sintetik yuyucu maddələr", "yazi"),
+        },
+        "ust": ("Kimya ust movzu sayi 31 deyil", "true", 31),
+        "sinifler": [
+            (7, [(871, ["kim-7-elementler", "kim-7-elementler",
+                        "kim-7-atom", "kim-7-birlesmeler",
+                        "kim-7-qarisiqlar"]),
+                 (872, ["kim-7-ayrilma", "kim-7-reaksiyalar",
+                        "kim-7-tursu-esas"])]),
+            (8, [(935, ["kim-8-dovri-cedvel", "kim-8-rabite",
+                        "kim-8-reaksiya-tesnifat"]),
+                 (936, ["kim-8-reaksiya-sureti", "kim-8-oksidlesme",
+                        "kim-8-tursu-esas"])]),
+            (9, [(505, [[(23, "kim-9-metal-umumi"),
+                         (float("inf"), "kim-9-metallar")],
+                        [(89, "kim-9-halogen-kukurd"),
+                         (121, "kim-9-azot-fosfor"),
+                         (float("inf"), "kim-9-karbon-silisium")],
+                        "kim-9-uzvi"])]),
+            (10, [(739, [None, "kim-10-alkan", "kim-10-alken",
+                         "kim-10-dien-tsiklo", "kim-10-alkin",
+                         "kim-10-dien-tsiklo", "kim-10-aromatik",
+                         "kim-10-neft"])]),
+            (11, [(349, [[(50, "kim-11-spirtler"),
+                          (97, "kim-11-aldehid-tursu"),
+                          (118, "kim-11-efir-yag"),
+                          (float("inf"), "kim-11-karbohidrat")],
+                         "kim-11-azotlu",
+                         "kim-11-polimer"])]),
+        ],
+    },
 ]
 
 
@@ -615,7 +725,10 @@ def namizedler(ad, valideyn, tezlik_f, tezlik_u):
                 yan = ws[-1] if ws[-1] != tek[0] else ws[0]
                 cut = sorted({tek[0], yan}, key=ws.index)
                 n.append("-".join(cut))
-            n.append(tek[0] if len(tek) == 1 else "-".join(tek))
+            #  "-".join(tek) hamisi TEK ola biler (dar qrupda ferdi
+            #  basliq) - o zaman butun sozler qeder uzanmasin deye 3-e
+            #  kesilir; qisa namizedler (C/D/E) onsuz da asagida gelir.
+            n.append(tek[0] if len(tek) == 1 else "-".join(tek[:3]))
         n.append("-".join([ws[0], ws[-1]] if len(ws) > 1 else ws))
         if len(ws) > 2:
             n.append("-".join(ws[:3]))
@@ -633,7 +746,10 @@ BEND = re.compile(r"^\s+(\d+)\s\s(.*)$")
 #  "1.1. Natural...", "26. Kesisen...", "9.Oxsarliq...".
 #  NOMRELEMEDE HOKMEN NOQTE VAR - ona gore "10-a qeder sayma" ve
 #  "9 ve 10 ededleri" toxunulmaz qalir (bir defe elden getdi).
-NOMRE = re.compile(r"^(\d+\.\d+\.?\s+|\d+\.(?=\D)\s*)")
+#  Kimya 11-de UC SEVIYYELI nomre var ("1.1.1. Adlandirilmasi") -
+#  ikinci qrup {1,2} defe teklana biler.  Iki seviyyeli ("1.1. ")
+#  ucun eyni neticeni verir - geriye uygundur.
+NOMRE = re.compile(r"^(\d+(\.\d+){1,2}\.?\s+|\d+\.(?=\D)\s*)")
 #  Informatika dersliklerinde nomre bezen noqtesizdir ("8 OBYEKTLER
 #  QRUPU").  Riyaziyyatda bu qaydani ISLETMEK OLMAZ - "9 ve 10
 #  ededleri" adinin ozudur.  Ona gore paketde acilir.
