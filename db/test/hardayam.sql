@@ -83,7 +83,7 @@ select s.name as "fenn",
        count(distinct t.id) as "movzu",
        count(q.id) as "sual"
   from public.subjects s
-  join public.topics t on t.subject_id = s.id
+  join public.topics t on t.subject_id = s.id and t.parent_id is null
   left join public.questions q
          on q.topic_id = t.id and q.owner_type = 'platform'
  group by s.id, s.name, s.sort
@@ -92,8 +92,11 @@ select s.name as "fenn",
 do $$
 declare k int; n int;
 begin
+  --  alt movzular (parent_id dolu) qesden sualsizdir - ders plani
+  --  ucundur, bank ucun yox.  Onlari saymiriq.
   select count(*) into k from public.topics t
-   where not exists (select 1 from public.questions q
+   where t.parent_id is null
+     and not exists (select 1 from public.questions q
                       where q.topic_id = t.id and q.owner_type = 'platform');
   select count(*) into n from public.questions where owner_type = 'platform';
   if k > 0 then
@@ -163,7 +166,20 @@ select v.fayl,
        + (select count(*) from public.programs
            where slug in ('miq', 'sertifikasiya')) = 0),
     ('73_buraxilis_proqrami.sql',
-       (select count(*) from public.programs where slug = 'buraxilis') = 0)
+       (select count(*) from public.programs where slug = 'buraxilis') = 0),
+    ('74_alt_movzular_riy8.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'riyaziyyat'
+          join public.levels l on l.id = p.level_id and l.code = '8') = 74),
+    ('82_alt_movzular_riy5_11.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'riyaziyyat'
+          join public.levels l on l.id = p.level_id
+         where l.code in ('5','6','7','9','10','11')) = 483)
   ) as v(fayl, var)
  order by 1;
 

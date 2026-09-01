@@ -22,6 +22,12 @@
 --      "Fiqurlarin cevrilmesi.Donme"        -> ". Donme"
 --      "Oxsarliq cevrilmesi.Homotetiya"     -> ". Homotetiya"
 --      "...oxsarliginin tetbiqi."           -> sondaki noqte atildi
+--
+--  DUSEN DUSTER SIMVOLU DUZELDILIB (2026-08, illik yoxlama):
+--      "y = x ve y = kok(x) funksiyalari"  ->  "y = x^2 ve y = kok(x)"
+--  Portalin mundericat paneli ust indeksi atir; dogru ad kitabin
+--  s.18 basligindan goturuldu.  Slug deyismir - ders plani ve
+--  "kecildi" tarixcesi oldugu kimi qalir.
 --  Keşdeki nusxe (mundericat/riyaziyyat-8-393.txt) canli portalla
 --  setir-setir tutusdurulub: 11 bolme, 77 movzu - eynidir.
 --
@@ -62,7 +68,7 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     ('riy-8-kvadrat-kok', 'riy-8-kvadrat-kok-heqiqi',
      'Həqiqi ədədlər', 20),
     ('riy-8-kvadrat-kok', 'riy-8-kvadrat-kok-funksiya',
-     'y = x və y = √x funksiyaları', 30),
+     'y = x² və y = √x funksiyaları', 30),
     ('riy-8-kvadrat-kok', 'riy-8-kvadrat-kok-xasse',
      'Hesabi kvadrat kökün xassələri', 40),
     ('riy-8-kvadrat-kok', 'riy-8-kvadrat-kok-xasse-tetbiq',
