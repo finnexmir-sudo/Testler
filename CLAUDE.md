@@ -174,10 +174,10 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    4:69, 5:89, 6:85, 7:63, 8:74, 9:92, 10:77, 11:77). **Həyat bilgisi
    1-4** də hazırdır (`84`, 125 alt mövzu — dərslik və baza dörd
    sinifdə də bire-bir uyğundur), **İnformatika 1-11** də (`85`,
-   348 alt mövzu), **Fizika 6-11** də (`86`, 344 alt mövzu). Adlar
-   e-dərslikdən eynilə, dərslikdəki sıra ilə. `82`/`83`/`84`/`85`/`86`
-   əllə yazılmır — `tools/alt_movzular.py` çıxarır (paket-paket
-   konfiqurasiya).
+   348 alt mövzu), **Fizika 6-11** də (`86`, 344 alt mövzu),
+   **Kimya 7-11** də (`87`, 280 alt mövzu). Adlar e-dərslikdən eynilə,
+   dərslikdəki sıra ilə. `82`/`83`/`84`/`85`/`86`/`87` əllə yazılmır —
+   `tools/alt_movzular.py` çıxarır (paket-paket konfiqurasiya).
    **Ağac hər fənndə eyni formada deyil** — generator dörd hal tanıyır:
    bölmə → bir mövzu; bölmə **buraxılır** (informatika 5 «Giriş»,
    11 «Layihələr üçün yardımçı materiallar»); bölmə **səhifəyə görə**
@@ -195,6 +195,23 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    panelində ayrıca bölmə kimi deyil, əvvəlki bölmənin sətri kimi
    görünür (portal qüsuru) — generator bu sətri silib sərhəd kimi
    işlədir.
+   **Kimya 9 və 11-ci sinifdə daha da dərindir**: dərslikdə cəmi
+   3-4 böyük bölük var («I. METALLAR», «I. Hissə»), hər biri özünün
+   içində «Fəsil N.» başlıqları ilə bir neçə mövzuya bölünür (kimya 9:
+   sərhədlər 23/89/121; kimya 11: 50/97/118). «Fəsil N.» başlıqları
+   (bəzən böyük, bəzən kiçik hərflə) mövzu deyil — hər biri ayrıca
+   `xaric_ad`da adı ilə sadalanıb, səhifə üst-üstə düşmə riski
+   olduğu üçün ümumi «bölmə başlığı» qaydasına (informatika kimi)
+   güvənilmədi.
+   **Slug generatorunda tələ tapıldı və düzəldildi**: bir bölmədə
+   iki fərqli mövzunun başlıqları demək olar eyni sözlərlə qurulubsa
+   (kimya 10 — «Alkadienlərin homoloji sırası…» / «Tsikloalkanların
+   homoloji sırası…»), hər sözün öz kiçik qrupda «təkrarsız» sayılması
+   səhv uzun slug seçirdi (`"-".join(tek)` heç bir hədd qoymadan bütün
+   sözləri birləşdirirdi, halbuki qısa `ilk+son söz` namizədi
+   arxada qalırdı). İndi bu namizəd 3 sözlə həddlənib — köhnə
+   fayllar (82-86) təsirlənmədi, çünki fərq yalnız NƏ vaxt hədd
+   aşılanda işə düşür.
    **Böyük hərflə yazılış toxunulmur**: informatika 3 və 4-ün
    başlıqları kitabın özündə də tam böyük hərflədir
    (`<h3>1. İNSAN VƏ İNFORMASİYA`), portal qüsuru deyil.
@@ -515,7 +532,7 @@ bütün funksiyaların gövdəsi də tutuşdurulur.
 
 Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
 `claude/bil10-question-bank-expansion-eu6vkn` budağı `main`-ə
-birləşdirildikdən sonra 30…86 aralığındadır. Əvvəl nömrələr
+birləşdirildikdən sonra 30…87 aralığındadır. Əvvəl nömrələr
 toqquşurdu (bankın 7 faylı 23–29-da idi, indi 75–81-ə köçürülüb).
 Bölgü belədir:
 
