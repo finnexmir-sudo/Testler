@@ -636,6 +636,62 @@ BASLIQ_EDEB = """\
 --
 --  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
 
+BASLIQ_TARIX = """\
+--  92_alt_movzular_tarix5_8_9_11.sql : TARIX 5,6,8,9,11 - ALT MOVZULAR
+--
+--  NIYE
+--  On birinci fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika,
+--  kimya, biologiya, ingilis dili, cografiya, edebiyyat hazirdir.
+--  Bu, Azerbaycan tarixi dersliyidir (Umumi tarix ayri fenndir, ayri
+--  merhelede - bax roadmap qeydi).  7 ve 10-cu sinifde "Tarix" yoxdur
+--  (portalda o siniflər ucun yalniz "Umumi tarix" derslikdir).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 844 (5),
+--  910 (6), 801 (8), 877 (9), 807 (11).  Adlar EYNILE goturulub.
+--
+--  5-CI SINIF: 5 bolme, bire-bir movzuya - problemsiz.
+--
+--  6-CI SINIF: dersliyin oz mundericati COX SEYREKDIR (cemi 9 ders!),
+--  bazada 6 movzu var.  "II Bolme. Azerbaycanda qedim dovletler"nin
+--  4 dersi (Manna/Atropatena/Albaniya/umumi baxis) HƏR BİRİ artiq
+--  bazada OZ AYRI ust movzusudur - alt movzu ucun daha derinlik
+--  yoxdur, bu bolme BURAXILIR (None).  Qalan iki bolme (I - ibtidai
+--  cemiyyet, III - erken orta esrler) bire-bir öz movzusuna gedir.
+--
+--  8-Cİ SINIF: 4 bolme, bazada 6 movzu - son bolme ("4. AZƏRBAYCAN
+--  XIX ƏSRİN ƏVVƏLLƏRİNDƏ") İKİ movzuya bolunur: Gulustan (31) ve
+--  Turkmencay (34) muqavileleri ozleri ile bağlı dersler ARADAN-ARADAN
+--  sepelenib (34-cu ders 30-31-32-33-un arasindadir), COX SERHEDLI
+--  (list) spec ile hər dersin oz sehifesi qeyd olunub - tesadufi
+--  bolgu yoxdur, hər sinir muellifin/mueqavilenin oz sehifesidir.
+--
+--  9-CU SINIF: 4 bolme, icinde "I/II fesil" (ve b.) NOMRELENMIS
+--  basliqlarla daha da bolunur - basliqlar HERFI basliq kimi xaric
+--  edilmir (biologiya-11-in tələsi ile eyni sebeb: basqa sinifde
+--  eyni metn HƏQIQI bolme ola bilerdi), sadece sehife serhedine gore
+--  duz movzuya dusurler.  "I bolme" I fesil (xix) / II fesil
+--  (xx-evvel) - sehife 50-den bolunur.  "II bolme" TAM cumhuriyyete
+--  (III fesil tekdir).  "III bolme" TAM sovete (IV+V fesil EYNI
+--  movzuya - hər ikisi sovet dovrudur).  "IV bolme" VI fesil
+--  (musteqillik) / VII fesil (yeni-dovr) - sehife 172-den bolunur.
+--
+--  11-Cİ SINIF: 4 bolme, icinde "I/II/...XII fesil" basliqlarla
+--  daha da bolunur (9-cu sinifle eyni qelib).  "I bolme" I fesil
+--  (isgal) / II-V fesil (mustemleke - hamisi mustemleke dovrunun
+--  fərqli teref-i: idare, sosial-iqtisadi, Cenubi Azerbaycan,
+--  medeniyyet) - sehife 21-den bolunur.  "II bolme" TAM cumhuriyyete
+--  (VI+VII fesil).  "III bolme" TAM sovete (VIII+IX fesil).
+--  "IV bolme" X+XI fesil (musteqillik) / XII fesil (zefer - basliq
+--  "Boyuk Zefer" movzu adi ile HƏRFI eynidir) - sehife 203-den.
+--
+--  YAZI QUSURLARI: 6-ci sinifde "1." evezine dotless "ı." (herf,
+--  reqem deyil), 8-ci sinifde iki kesik/yanlis soz (Abbasm ->
+--  Abbasın, yansı -> yarısı), 9-cu sinifde kesik soz (Azərbayca ->
+--  Azərbaycanda) ve "Azarbaycan" (ə evezine a), 11-ci sinifde bir
+--  bendde bosluqsuz nöqte (fəsil.Şimali -> fəsil. Şimali).
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -1213,6 +1269,59 @@ PAKETLER = [
                           "edeb-11-rza-mircelal"),
                          "edeb-11-ozunuderk", "edeb-11-istiqlal",
                          "edeb-11-cenub-dunya"])]),
+        ],
+    },
+    {
+        "ad": "tarix5_8_9_11",
+        "etiket": "Tarix 5, 6, 8, 9, 11 (7 ve 10-da yoxdur)",
+        "fayl": "92_alt_movzular_tarix5_8_9_11.sql",
+        "fenn": "tarix",
+        "fayl_on": "tarix",
+        "basliq": BASLIQ_TARIX,
+        "xaric_seh": set(),
+        "xaric_ad": set(),
+        "duzelis": {
+            "ı. Əsas tarixi anlayışlar və zaman ölçü vahidləri":
+                ("Əsas tarixi anlayışlar və zaman ölçü vahidləri", "yazi"),
+            "Cəlalilər hərəkatı. Şah I Abbasm hərbi uğurları":
+                ("Cəlalilər hərəkatı. Şah I Abbasın hərbi uğurları",
+                 "yazi"),
+            "XVI əsrin ikinci yansı - XVII əsrdə sosial-iqtisadi və"
+            " ictimai həyat":
+                ("XVI əsrin ikinci yarısı - XVII əsrdə sosial-iqtisadi"
+                 " və ictimai həyat", "yazi"),
+            "İran İslam inqilabı və Cənubi Azərbayca":
+                ("İran İslam inqilabı və Cənubi Azərbaycanda", "yazi"),
+            "V fəsil. Azarbaycan İkinci dünya müharibəsindən sonrakı"
+            " dövrdə":
+                ("V fəsil. Azərbaycan İkinci dünya müharibəsindən"
+                 " sonrakı dövrdə", "yazi"),
+            "II fəsil.Şimali Azərbaycan Rusiya işğalı dövründə":
+                ("II fəsil. Şimali Azərbaycan Rusiya işğalı dövründə",
+                 "yazi"),
+        },
+        "ust": ("Tarix ust movzu sayi 29 deyil", "true", 29),
+        "sinifler": [
+            (5, [(844, ["tarix-5-qedim", "tarix-5-dovletler",
+                        "tarix-5-qalalar", "tarix-5-respublika",
+                        "tarix-5-medeniyyet"])]),
+            (6, [(910, ["tarix-6-ibtidai", None, "tarix-6-erken-orta"])]),
+            (8, [(801, ["tarix-8-xvi-xvii", "tarix-8-xviii-1",
+                        "tarix-8-xanliqlar",
+                        [(163, "tarix-8-xix"),
+                         (169, "tarix-8-muqavileler"),
+                         (179, "tarix-8-xix"),
+                         (184, "tarix-8-muqavileler"),
+                         (193, "tarix-8-xix"),
+                         (float("inf"), "tarix-8-muqavileler")]])]),
+            (9, [(877, [("tarix-9-xix", 50, "tarix-9-xx-evvel"),
+                        "tarix-9-cumhuriyyet", "tarix-9-sovet",
+                        ("tarix-9-musteqillik", 172,
+                         "tarix-9-yeni-dovr")])]),
+            (11, [(807, [("tarix-11-isgal", 21, "tarix-11-mustemleke"),
+                         "tarix-11-cumhuriyyet", "tarix-11-sovet",
+                         ("tarix-11-musteqillik", 203,
+                          "tarix-11-zefer")])]),
         ],
     },
 ]
