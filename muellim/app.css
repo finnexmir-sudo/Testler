@@ -316,6 +316,23 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
   border-bottom:1px solid var(--n-100);transition:background .12s;cursor:pointer;
 }
 .qrow:last-child{border-bottom:0}
+
+/* Sual + variantlari bir blokdur.  Serhed artiq BLOKUN altindadir:
+   evvel setrin altinda idi ve variantlar serhedin o tayinda qalirdi -
+   hansi cavabin hansi suala aid oldugu bilinmirdi. */
+.qitem{border-bottom:1px solid var(--n-100)}
+.qitem:last-child{border-bottom:0}
+.qitem .qrow{border-bottom:0}
+/* Sual metni TAM oxunur - variantlarin ustunde yarimciq basliq
+   qalmasin.  ":has()" isletmirik - kohne brauzerlerde susur. */
+.qitem .qrow .g b{-webkit-line-clamp:unset;display:block;overflow:visible}
+.qopts{list-style:none;margin:0;padding:0 16px 13px 16px;
+  display:flex;flex-direction:column;gap:4px}
+.qopts li{font-size:12.5px;color:var(--fg-2);padding:3px 9px;
+  border-radius:7px;background:var(--surface);border:1px solid var(--n-100)}
+/* duz cavab - numune kartlari ile eyni gorunus */
+.qopts li.c{background:var(--ok-tint);border-color:var(--ok-line);
+  color:#05603a;font-weight:560}
 .qrow:hover{background:var(--n-25)}
 .qrow[disabled]{cursor:default;opacity:.72}
 .qrow .g{flex:1;min-width:0}

@@ -530,6 +530,14 @@ with sync_playwright() as pw:
     ok(pg.locator(".smp .sq").count() == 0, "tekrar klik numuneleri baglayir")
 
     print("K · Mövzudan siyahıya keçid və «daha göstər»")
+    #  Variantlar siyahida ABUNE ile gorunur (106_bank_siyahi_variantlar).
+    #  Abunesiz hal SQL suitlerinde olculur - burada muellimin ekranda
+    #  gorduyu esas hali yoxlayiriq.
+    db("""insert into public.subscriptions
+            (account_id, plan_id, status, seats, current_period_end)
+          select a.id, p.id, 'active', 25, now() + interval '30 days'
+            from public.accounts a, public.plans p
+           where p.slug = 'repetitor-25' limit 1""")
     pg.locator(".cvr").first.click()
     pg.wait_for_selector(".smp [data-all]", timeout=15000)
     pg.click(".smp [data-all]")
@@ -539,6 +547,18 @@ with sync_playwright() as pw:
     #  suzgecde secili olan fenn/sinif setirlerde TEKRARLANMIR
     r0 = pg.locator(".qrow i").first.inner_text()
     ok("Riyaziyyat" not in r0, "setirde fenn tekrarlanmir", r0.replace("\n", " "))
+
+    #  Numunede cavablar gorunurdu, siyahida ise yox olurdu - muellim
+    #  "butun suallari gor" deyende DAHA AZ melumat alirdi.
+    ok(pg.locator(".qopts").count() >= 1, "siyahida variantlar gorunur",
+       pg.locator(".qopts").count())
+    ok(pg.locator(".qopts li.c").count() >= 1, "siyahida duz cavab isarelenib",
+       pg.locator(".qopts li.c").count())
+    ok(pg.locator(".qitem").first.locator(".qopts li").count() == 4,
+       "setirde dord variant var",
+       pg.locator(".qitem").first.locator(".qopts li").count())
+    db("delete from public.subscriptions")
+
     #  Siyahi rejimde nisanlar geri gelir - secilmis movzunu goturmek
     #  ucun basqa yol yoxdur
     if pg.locator("details.filt:not([open])").count():

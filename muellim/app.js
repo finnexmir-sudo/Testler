@@ -4222,17 +4222,32 @@
           if (!f.level && q.level)     meta.push(esc(q.level));
           if (q.topic)                 meta.push(esc(q.topic));
           if (!mine)                   meta.push("platforma");
-          return '<button class="qrow" data-q="' + esc(q.id) + '"' +
-            (mine ? "" : " disabled") + ">" +
-            '<div class="g"><b>' + esc(q.body) + "</b><i>" +
-              meta.map(function (m, i) {
-                return (i ? "<span>·</span>" : "") + "<span>" + m + "</span>";
-              }).join("") +
-              '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
-                DIFF[Number(q.difficulty) || 2] + "</span>" +
-            "</i></div>" +
-            (mine ? '<span class="arrow">' + ic("right") + "</span>" : "") +
-          "</button>";
+          /*  Variantlar setrin ALTINDA gosterilir - numune kartlari
+              ile eyni gorunusde.  Evvel siyahida yalniz basliq vardi:
+              muellim "butun suallari gor" deyende numunede gorduyu
+              cavablari ITIRIRDI - genislendirdikce az melumat.
+              Duymenin ICINE qoymaq olmaz: platforma suallarinda duyme
+              "disabled"-dir, icindeki her sey solgunlasir.  */
+          var opts = q.options || [];
+          return '<div class="qitem">' +
+            '<button class="qrow" data-q="' + esc(q.id) + '"' +
+              (mine ? "" : " disabled") + ">" +
+              '<div class="g"><b>' + esc(q.body) + "</b><i>" +
+                meta.map(function (m, i) {
+                  return (i ? "<span>·</span>" : "") + "<span>" + m + "</span>";
+                }).join("") +
+                '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
+                  DIFF[Number(q.difficulty) || 2] + "</span>" +
+              "</i></div>" +
+              (mine ? '<span class="arrow">' + ic("right") + "</span>" : "") +
+            "</button>" +
+            (opts.length
+              ? '<ul class="qopts">' + opts.map(function (o) {
+                  return '<li' + (o.correct ? ' class="c"' : "") + ">" +
+                    esc(o.body) + "</li>";
+                }).join("") + "</ul>"
+              : "") +
+          "</div>";
         }).join("");
 
         var more = shown < total

@@ -509,6 +509,29 @@ Bölgü belədir:
 Yeni **kod** faylı 100-dən başlayır. Bank faylına toxunma; bank
 sessiyası da 100+ aralığına girmir.
 
+## Bank siyahısında variantlar — abunə ilə
+
+`rpc_bank_list` **abunə tələb etmir**: pulsuz qeydiyyatdan keçən
+istənilən hesab 100-lük səhifələrlə bütün platforma bankını oxuya
+bilər. Ona görə sual mətnləri açıq, **düz cavablar isə bağlıdır** —
+`rpc_bank_samples`-in 3-lük həddi də elə bunun üçündür.
+
+`db/106_bank_siyahi_variantlar.sql` siyahıya variantları əlavə etdi,
+amma bu qapını **açmadan**:
+
+| Kim | Nə görür |
+|---|---|
+| öz sualı (`owner_type = 'educator'`) | həmişə variantlar |
+| aktiv abunə və ya admin | variantlar |
+| abunəsiz hesab, platforma sualı | `options: []` |
+
+Abunəçi cavabları onsuz da görür (mövzudan test yığıb vərəqi açır) —
+yəni yeni sızma yolu yaranmır, mövcud hüquq rahat göstərilir.
+
+**Bunu dəyişməzdən əvvəl:** `smoke_bank_rpc.sql`-in 8-ci yoxlaması və
+`smoke_siyahi_variant.sql`-in 6-cısı bu qapını qoruyur. Onlar sınırsa,
+bank pulsuz yüklənə bilir deməkdir.
+
 ## Sürət ölçəndə: əvvəlcə `ANALYZE`
 
 Təzə qurulmuş bazada planlayıcının **heç bir statistikası olmur** və

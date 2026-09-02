@@ -230,13 +230,21 @@ end $$;
 do $$
 declare v jsonb; t text;
 begin
+  --  Bu hesabin ABUNESI YOXDUR (yuxarida subscriptions temizlenir).
+  --  Abunesizin siyahisi PLATFORMA suallarinin cavablarini gormemelidir:
+  --  eks halda pulsuz hesab 100-luk sehifelerle butun banki cavablari
+  --  ile yuklerdi.  106_bank_siyahi_variantlar.sql variantlari elave
+  --  etdi, amma mehz bu qapini acmadi - yoxlayirig.
   v := public.rpc_bank_list('{"pool":"platform"}'::jsonb, 50, 0);
   t := v::text;
   assert t not like '%is_correct%', 'siyahida is_correct var';
-  assert t not like '%"correct"%', 'siyahida duzgun cavab nisani var';
-  assert t not like '%"options"%', 'siyahi variantlari da gonderir';
+  assert t not like '%"correct"%', 'abunesiz hesab duz cavabi gorur';
+  --  'options' acari indi var, amma BOS olmalidir
+  assert not exists (select 1 from jsonb_array_elements(v->'items') x
+                      where jsonb_array_length(coalesce(x->'options','[]'::jsonb)) > 0),
+    'abunesiz hesaba platforma variantlari geldi';
 end $$;
-\echo 'OK  8 · siyahi cavab acarini sizdirmir'
+\echo 'OK  8 · abunesiz siyahi cavab acarini sizdirmir'
 
 -- =====================================================================
 --  9. Platformanin sualı OXUNUR, amma DEYISILMIR
