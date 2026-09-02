@@ -102,6 +102,18 @@ with sync_playwright() as pw:
         return Math.round(s.top - d.bottom);
       }""")
     ok(ara <= 80, "telefonda bolmeler arasi bosluq olculudur", "%dpx" % ara)
+    #  Valideyn zolagi: kecid olmalidir (evvel cilpaq <p> idi) ve
+    #  kartlarla eyni enle durmalidir - iki seliqeli kartin altinda
+    #  yarimciq gorunmesin.
+    ok(pg.locator("a.pdoor[href='valideyn/']").count() == 1,
+       "valideyn zolagi kecidddir")
+    en = pg.evaluate("""() => {
+        const d = document.querySelector('.doors').getBoundingClientRect();
+        const p = document.querySelector('.pdoor').getBoundingClientRect();
+        return Math.round(Math.abs(p.width - d.width));
+      }""")
+    ok(en <= 2, "valideyn zolagi kartlarla eyni endedir", "%dpx ferq" % en)
+    ok(pg.locator(".pdoor .ic svg").count() == 1, "zolaqda ikon var")
 
     ok(pg.locator('a[href="muellim/"]').count() >= 1, "muellim kecidi var")
     ok(pg.locator('a[href="sagird/"]').count() == 1, "sagird kecidi var")
