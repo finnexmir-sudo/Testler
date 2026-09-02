@@ -113,6 +113,7 @@ KITABLAR = [
     (507, "riyaziyyat", 9, ""),
     (875, "azerbaycan-dili", 9, "tedris dili"),
     (886, "ingilis-dili", 9, "esas xarici dil"),
+    (887, "ingilis-dili", 9, "ikinci xarici dil"),
     (884, "informatika", 9, ""),
     (877, "tarix", 9, "Azerbaycan tarixi"),
     (879, "tarix", 9, "Umumi tarix"),
