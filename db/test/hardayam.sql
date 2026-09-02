@@ -141,18 +141,23 @@ select v.fayl,
     ('62-65_bank_edebiyyat5..8.sql',
        (select count(*) from public.questions
          where ext_key ~ '^edeb[5-8]-') = 744),
-    --  >= 18, cunki 70 fayli 7-ci sinife daha iki movzu elave edir
+    --  >= 14 (asagi hedd), cunki iki sonraki fayl bu sayi deyisir:
+    --  70 7-ci sinife 2 movzu elave edir (6->8), 94 8-ci sinifi
+    --  6-dan 2-ye endirir (bolme seviyyesine birlesir) - hansi
+    --  isleyib/islememesinden asili olmayaraq >= 14 hemise dogrudur.
+    --  parent_id is null - yoxsa 95/96-nin alt movzulari (eyni slug
+    --  prefiksi) sayi yuxari qaldirir (58/61-de tapilan eyni tele)
     ('66_movzular_umumi_tarix6_8.sql',
        (select count(*) from public.topics t join public.subjects s
           on s.id = t.subject_id and s.slug = 'umumi-tarix'
-         where t.slug ~ '^utarix-[678]-') >= 18),
+         where t.parent_id is null and t.slug ~ '^utarix-[678]-') >= 14),
     ('67_bank_tarix_umumi6_8.sql',
        (select count(*) from public.questions
          where ext_key ~ '^utarix[678]-') = 558),
     ('68_movzular_umumi_tarix10.sql',
        (select count(*) from public.topics t join public.subjects s
           on s.id = t.subject_id and s.slug = 'umumi-tarix'
-         where t.slug like 'utarix-10-%') = 6),
+         where t.parent_id is null and t.slug like 'utarix-10-%') = 6),
     ('69_bank_tarix_umumi10.sql',
        (select count(*) from public.questions where ext_key like 'utarix10-%') = 186),
     ('70_movzular_umumi_tarix7.sql',
