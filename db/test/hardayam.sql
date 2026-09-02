@@ -274,7 +274,13 @@ select v.fayl,
        (select count(*) from public.topics c
           join public.topics p on p.id = c.parent_id and p.slug = 'cog-11-enerji-erzaq'
           join public.subjects s
-            on s.id = p.subject_id and s.slug = 'cografiya') = 2)
+            on s.id = p.subject_id and s.slug = 'cografiya') = 2),
+    ('99_bank_ingilis8_788.sql',
+       (select count(*) from public.questions q
+          join public.topics t on t.id = q.topic_id
+          join public.subjects s on s.id = t.subject_id and s.slug = 'ingilis-dili'
+          join public.levels l on l.id = t.level_id and l.code = '8'
+         where q.ext_key like 'ing8v2-%') = 360)
   ) as v(fayl, var)
  order by 1;
 
