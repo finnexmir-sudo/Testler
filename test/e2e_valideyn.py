@@ -165,7 +165,7 @@ with sync_playwright() as pw:
       values ('c1c1c1c1-0000-0000-0000-0000000000c1',
               'e1e1e1e1-0000-0000-0000-0000000000c2',
               now() - interval '1 day', now() + interval '1 day', 1);
-      --  SEXSI (duzelis) test: yalniz bu usaga verilib
+      --  DUZELIS testi: is_remedial ile nisanlanir (db/109)
       insert into public.tests (id, owner_type, owner_id, class_id, program_id,
                                 subject_id, title, status)
       select 'e1e1e1e1-0000-0000-0000-0000000000c3','educator', a.owner_id,
@@ -174,6 +174,16 @@ with sync_playwright() as pw:
              (select id from public.subjects where slug='riyaziyyat'),
              'Ayan Q. — sehvler uzerinde is','published'
         from public.accounts a limit 1;
+      update public.tests set is_remedial = true
+       where id = 'e1e1e1e1-0000-0000-0000-0000000000c3';
+      --  ADI test de FERDI verilir - kohne "sexsi" mentiqi bunu da
+      --  nisanlayirdi; yeni nisan onu nisanlamamalidir.
+      insert into public.assignments (class_id, test_id, student_id,
+                                      opens_at, closes_at, max_attempts)
+      values ('c1c1c1c1-0000-0000-0000-0000000000c1',
+              'e1e1e1e1-0000-0000-0000-0000000000c1',
+              'd1d1d1d1-0000-0000-0000-0000000000c1',
+              now() - interval '4 days', now() + interval '9 days', 1);
       insert into public.assignments (class_id, test_id, student_id,
                                       opens_at, closes_at, max_attempts)
       values ('c1c1c1c1-0000-0000-0000-0000000000c1',
@@ -229,10 +239,16 @@ with sync_playwright() as pw:
     #  testle qarisirdi ve valideyn 100%-i "ela yazdi" kimi oxuyurdu.
     fix = vp.locator(".row:has-text('sehvler uzerinde is')")
     ok(fix.count() == 1, "duzelis testi neticelerde var", fix.count())
-    ok(fix.locator(".tag").count() == 1, "duzelis testi «şəxsi» nisanlanib")
-    #  ADI test nisanlanmamalidir - nisan hər setre yapisdirilmayib
+    ok(fix.locator(".tag").count() == 1, "duzelis testi «düzəliş» nisanlanib")
+    #  ADI test FERDI verilse de nisanlanmamalidir.  Kohne mentiq
+    #  (teyinata baxmaq) bunu sehven nisanlayirdi - alti neticenin
+    #  ucunde nisan cixirdi ve nisan hec ne ayirmirdi.
     adi = vp.locator(".row:has-text('Kesrler - 1')")
-    ok(adi.locator(".tag").count() == 0, "adi test nisanlanmir")
+    ok(adi.locator(".tag").count() == 0,
+       "FERDI verilmis adi test nisanlanmir",
+       adi.locator(".tag").count())
+    ok(vp.locator(".row .tag").count() == 1,
+       "butun siyahida YALNIZ BIR nisan var", vp.locator(".row .tag").count())
 
     print("C2 · Boş bölmələr səssizcə yox olmur")
     ok("ZƏİF MÖVZULAR" in metn2 or "ZƏİF MÖVZULAR" in vp.inner_text("#main"),

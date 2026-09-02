@@ -198,7 +198,7 @@
       out += '<div class="card pad0">' + pend.map(function (p) {
         return '<div class="row">' +
           "<div><b>" + esc(p.title) + "</b>" +
-            (p.personal ? '<em class="tag">şəxsi</em>' : "") +
+            (p.fix ? '<em class="tag">düzəliş</em>' : "") +
             "<i>" + [ p.subject, (p.questions || 0) + " sual" ]
               .filter(Boolean).map(esc).join(" · ") + "</i></div>" +
           (p.closes_at
@@ -216,13 +216,14 @@
     if (res.length) {
       out += "<h2>Son nəticələr</h2><div class='card pad0'>" +
         res.map(function (r) {
-          /*  Sexsi tapsiriq nisanlanir: "sehvler uzerinde is" testi
-              adi testle qarisirdi ve valideyn 100%-i "ela yazdi" kimi
-              oxuyurdu.  Gizletmek melumat gizletmek olardi - nisan
-              dogru yoldur.  */
+          /*  DUZELIS testi nisanlanir: valideyn 100%-i "ela yazdi"
+              kimi oxumasin - o, usagin OZ sehvlerini tekrar islediyi
+              testdir.  Nisan bazadaki sutundan gelir (109), teyinatdan
+              tehmin edilmir: evvel "ferdi verilib"e baxirdiq ve alti
+              neticenin ucunde cixirdi - hec ne ayirmirdi.  */
           return '<div class="row">' +
             "<div><b>" + esc(r.test) + "</b>" +
-              (r.personal ? '<em class="tag">şəxsi</em>' : "") +
+              (r.fix ? '<em class="tag">düzəliş</em>' : "") +
             "<i>" +
               [ r.subject, dateAz(r.at) ].filter(Boolean).map(esc).join(" · ") +
             "</i></div>" +
