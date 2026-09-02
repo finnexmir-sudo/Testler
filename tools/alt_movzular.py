@@ -550,6 +550,92 @@ BASLIQ_COG = """\
 --
 --  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
 
+BASLIQ_EDEB = """\
+--  91_alt_movzular_edebiyyat5_11.sql : EDEBIYYAT 5-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Onuncu fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika,
+--  kimya, biologiya, ingilis dili, cografiya hazirdir.
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 845 (5),
+--  911 (6), 701 (7), 793 (8), 883 (9), 732 (10), 821 (11).  Adlar
+--  EYNILE goturulub.
+--
+--  DERSLIYIN QURULUSU HER SINIFDE FERQLIDIR - movzu adlari 5-7-de
+--  TEMA (Yurd sevgisi, Tebietin gozelliyi), 8-11-de DOVR uzredir
+--  (bu, derslikdeki bolgu - suni deyil).
+--
+--  5-7-ci sinif: "Giris"/"Edebiyyat" basliqli ilk bolme (dersliklo
+--  nece isleməli - meznun deyil) ve son bolme ("Insani nece yazmali"
+--  / "Insa ve esseni nece yazmali") - hər ikisi BURAXILIR (None).
+--  Qalan bolmeler bire-bir movzuya.  5-ci sinifde son (7-ci) movzunun
+--  bendleri arasina kitabin sonundaki aparat (Layihələr, Luget ve s.)
+--  qarisib - xaric edilib; 6 ve 7-ci sinifde bu aparat dusen bolmenin
+--  daxilindedir, ayrica xaric lazim gelmir.
+--
+--  8-ci sinif: ilk ve son bolme (Dərsliklə/İnformasiya xarakterli)
+--  buraxilir.  Qalan 6 bolmeden 5-i bire-bir, "TƏNQİDİ REALİZM VƏ
+--  ROMANTİZM DÖVRÜ" bolmesi ise İKİ movzuya bolunur - muellif adlari
+--  ozu sinir cekir: Memmedquluzade+Sabir (tenqidi realizm) sehife
+--  123-e qeder, Hadi+Cavid (romantizm, dunya edebiyyatindan Ersoy
+--  daxil) sonrasi.
+--
+--  9-cu sinif: dersliyde 4 boyuk boluk var, ICINDE nomrelenmis
+--  "merhele"lerlə (I-III) daha da bolunur.  "II merhele"nin ICINDƏ
+--  3 alt-dovr var (repressiya 1920-40, muharibe 1941-60, ozunuderk
+--  1961-90) - ve ozunuderk ozu bazada İKİ movzuya (poeziya/nesr)
+--  ayrilib.  Muellifleri janrina gore taniyiriq (R.Rza, Kurcayli,
+--  Araz, Azeroglu, Eli Kerim, Rustemxanli = seir; Sixli, Huseynov,
+--  Anar, Elcin = nesr) - sehife sirasi bunlari NOVBELESDIRIR (aydin
+--  bir kesim yoxdur), ona gore COX SERHEDLI (list) spec ile hər
+--  muellifin oz sehifesi ayri-ayri qeyd olunub (biologiya-11-in
+--  Mikrobiologiya teleside olan kimi tesadufi bolunme YOXDUR - bu,
+--  hər addimda meydana cixan real sehife serhedidir).
+--  "III merhele" de eyni qelible 3 movzuya bolunur (mustaqillik/
+--  cenub/dunya) - "CƏNUBİ AZƏRBAYCAN ƏDƏBİYYATI" ve "DÜNYA
+--  ƏDƏBİYYATI" basliqlari sehife serhedine gore duz movzuya dusur;
+--  xaric edilmir, cunki EYNI metn 11-ci sinifde HƏQIQI bolmə
+--  basligidir (xaric etsək 11-ci sinifin bolmesi yox olardi - bir
+--  defe belə oldu, tapilib duzeldildi).
+--
+--  10-cu sinif: derslikde CEMI BIR bolme var ("bölmə: 1") - butun
+--  kitab boyu 6 boyuk dovr basligi (AZƏRBAYCAN ŞİFAHİ.../QƏDİM
+--  DOVR.../İNTİBAH.../ORTA ƏSRLƏR.../ERKƏN YENİ DOVR.../MAARİFÇİ-
+--  REALİZM...) novbeti bendlə EYNI sehifede DEYIL (basliq-teleside
+--  olan "eyni sehife" qaydasi bunu tutmur).  Bu basliqlar 8-ci
+--  sinifin bezi bolme adlari ilə HƏRFİ EYNIDIR (herfi xaric etmek
+--  8-ci sinifin real bolmelerini de silerdi - bir defe belə oldu,
+--  tapilib duzeldildi) - ona gore xaric edilmir, sadece butun kitab
+--  TEK bir COX SERHEDLI (list) spec ile 8 movzuya bolunur; basliqlar
+--  ozleri hər movzunun ilk (bir az artiq) bendi kimi qalir.
+--  "ORTA ƏSRLƏR" Nesimi+Xetayi / Fuzuli-ye,
+--  "MAARİFÇİ-REALİZM" ise Zakir+Elesger+Sirvani+Vezirov / Axundzade-
+--  ye bolunur - Axundzadenin bendleri (sehife 125-153) Zakirlə
+--  Elesger arasinda YERLESIB (üç seqmentli list: Zakir <125,
+--  Axundzade 125-153, qalanlari >=154 - iki qonsu seqment eyni
+--  movzuya (maarifci) gedir).
+--
+--  11-ci sinif: derslikde 6 bolme, bazada 8 movzu.  "TƏNQİDİ REALİZM
+--  VƏ ROMANTİZM DÖVRÜ" bolmesi 8-ci sinifdəki eyni prinsiple bolunur
+--  (Memmedquluzade+Sabir / Cavid+Ehmed Cavad, sehife 37-den).
+--  "CƏNUBİ AZƏRBAYCAN ƏDƏBİYYATI" (Şəhriyar) ve son bolme "DÜNYA
+--  ƏDƏBİYYATINDAN SEÇMƏ" (Aytmatov) EYNI movzuya (cenub-dunya) gedir
+--  - iki bolme arasinda basqa heç bir elaqe yoxdur, sadece hər ikisi
+--  movzu adinin ("Cənubi Azərbaycan və dünya ədəbiyyatı") iki yarisidir.
+--  "SOVET DÖVRÜ..." bolmesi Cabbarli+Vurgun / R.Rza+Mir Celala bolunur
+--  (sehife 108-den).  edeb-11-nezeriyye (Edebi cereyanlar ve
+--  nezeriyye) ucun mundericatda HEC bir isare yoxdur - biologiya-11-
+--  viruslar ile eyni qerar: uydurma sehife qoyulmadi, 0 alt movzu
+--  qalir.
+--
+--  YAZI QUSURLARI: bir necə muellif adinda bosluq/herf sehvi
+--  (CəfərCabbarlı -> Cəfər Cabbarlı, SViktor Hüqo -> Viktor Hüqo,
+--  İlsmayıl -> İsmayıl, İldınm -> İldırım) ve tirnaqdan sonra
+--  bosluq (dastanında/poemasından bitisik yazilib) - mezmun
+--  deyismeden duzeldilib.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -1041,6 +1127,92 @@ PAKETLER = [
                          "cog-11-demoqrafiya", "cog-11-iqtisadi-inkisaf",
                          "cog-11-ekoloji-qlobal",
                          ("cog-11-inteqrasiya", 182, "cog-11-qloballasma")])]),
+        ],
+    },
+    {
+        "ad": "edeb5_11",
+        "etiket": "Edebiyyat 5-11 (11-ci sinif nezeriyye hele bos)",
+        "fayl": "91_alt_movzular_edebiyyat5_11.sql",
+        "fenn": "edebiyyat",
+        "fayl_on": "edebiyyat",
+        "basliq": BASLIQ_EDEB,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "Layihələr", "Layihələr üzrə iş",
+            "İfadəli oxuda istifadə edilən şərti işarələr",
+            "Dərslikdəki bəzi terminlərin izahı",
+            "Oxumağı məsləhət görürük",
+            "Qısa ədəbiyyatşünaslıq terminləri lüğəti",
+            "Sinifdən xaric oxu materialları",
+            "Özünü qiymətləndirmə meyarları",
+            "Mövzular üzrə internet mənbələri",
+            "Mənbələr", "Mənbələlər",
+            "Müqayisə xarakterli mətni - inşa, esse və məruzəni necə"
+            " yazmalı?",
+        },
+        "duzelis": {
+            "SViktor Hüqo. KOZETTA": ("Viktor Hüqo. KOZETTA", "yazi"),
+            'Qazan bəyin oğlu Uruz bəyin dustaq olduğu boy ("Kitabi-Dədə'
+            ' Qorqud"dastanında)':
+                ('Qazan bəyin oğlu Uruz bəyin dustaq olduğu boy'
+                 ' ("Kitabi-Dədə Qorqud" dastanında)', "yazi"),
+            'Nizami Gəncəvi. Sultan Səncər və qarı ("Sirlər'
+            ' xəzinəsi"poemasından)':
+                ('Nizami Gəncəvi. Sultan Səncər və qarı ("Sirlər'
+                 ' xəzinəsi" poemasından)', "yazi"),
+            'Şah İlsmayıl Xətayi. Bahariyyə("Dəhnamə"poemasından)':
+                ('Şah İsmayıl Xətayi. Bahariyyə ("Dəhnamə"'
+                 ' poemasından)', "yazi"),
+            "CəfərCabbarlı. Ana": ("Cəfər Cabbarlı. Ana", "yazi"),
+            "Almas İldınm. Əsir Azərbaycanım":
+                ("Almas İldırım. Əsir Azərbaycanım", "yazi"),
+            "Əli Kərim .Qaytar ana borcunu":
+                ("Əli Kərim. Qaytar ana borcunu", "yazi"),
+            "Həbib Sahir.Səhənd dağı (qiymətləndirmə materialı)":
+                ("Həbib Sahir. Səhənd dağı (qiymətləndirmə materialı)",
+                 "yazi"),
+        },
+        "ust": ("Edebiyyat ust movzu sayi 48 deyil", "true", 48),
+        "sinifler": [
+            (5, [(845, [None, "edeb-5-sifahi", "edeb-5-yurd",
+                        "edeb-5-menevi", "edeb-5-muharibe", "edeb-5-usaq",
+                        "edeb-5-emek", "edeb-5-tebiet"])]),
+            (6, [(911, ["edeb-6-sifahi", "edeb-6-usaq", "edeb-6-yurd",
+                        "edeb-6-menevi", "edeb-6-tebiet", None])]),
+            (7, [(701, [None, "edeb-7-sifahi", "edeb-7-veten",
+                        "edeb-7-menevi", "edeb-7-usaq", "edeb-7-tebiet",
+                        None])]),
+            (8, [(793, [None, "edeb-8-qedim", "edeb-8-intibah",
+                        "edeb-8-orta", "edeb-8-erken", "edeb-8-maarifci",
+                        ("edeb-8-tenqidi", 123, "edeb-8-romantizm"),
+                        None])]),
+            (9, [(883, [None, "edeb-9-milli-demokratik",
+                        [(40, "edeb-9-repressiya"),
+                         (74, "edeb-9-muharibe"),
+                         (83, "edeb-9-ozunuderk-seir"),
+                         (98, "edeb-9-ozunuderk-nesr"),
+                         (109, "edeb-9-ozunuderk-seir"),
+                         (136, "edeb-9-ozunuderk-nesr"),
+                         (float("inf"), "edeb-9-ozunuderk-seir")],
+                        [(159, "edeb-9-mustaqillik"),
+                         (170, "edeb-9-cenub"),
+                         (float("inf"), "edeb-9-dunya")]])]),
+            (10, [(732, [[(17, "edeb-10-sifahi"),
+                          (38, "edeb-10-dede-qorqud"),
+                          (57, "edeb-10-nizami"),
+                          (79, "edeb-10-nesimi-xetayi"),
+                          (91, "edeb-10-fuzuli"),
+                          (113, "edeb-10-koroglu-vaqif"),
+                          (125, "edeb-10-maarifci"),
+                          (154, "edeb-10-axundzade"),
+                          (float("inf"), "edeb-10-maarifci")]])]),
+            (11, [(821, [("edeb-11-tenqidi-realizm", 37,
+                          "edeb-11-romantizm"),
+                         "edeb-11-cenub-dunya",
+                         ("edeb-11-cabbarli-vurgun", 108,
+                          "edeb-11-rza-mircelal"),
+                         "edeb-11-ozunuderk", "edeb-11-istiqlal",
+                         "edeb-11-cenub-dunya"])]),
         ],
     },
 ]
