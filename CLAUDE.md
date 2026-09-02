@@ -481,6 +481,40 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     «Narahatlıq» → könüllü qururuq. Bunu **əvvəlcədən** bilmək iki
     həftəlik işi xilas edir.
 
+    **BİR REPETİTORDAN CAVAB GƏLDİ** (n=1, sentyabr 2026): «əksinə, bu
+    çox yaxşı fikirdir — mən gecə-gündüz valideynlərlə danışıram: bu
+    belə oldu, bunu keçdim, burda zəifdir».
+
+    Bu, çərçivəni dəyişir: biz müəllimə **nəzarət qurmuruq**, onun
+    artıq gördüyü işi avtomatlaşdırırıq. Mövcud vərdişin üstündəki yükü
+    götürən funksiyalar, yeni vərdiş yaratmağa çalışanlardan həmişə
+    yaxşı tutur.
+
+    Amma **şəffaflıq riski təkzib olunmadı** — seçim təsiri var:
+    valideynlə gecə-gündüz danışan müəllim məhz bu fikri bəyənəcək
+    adamdır; danışmayan isə narahat olacaq və bunu ilk söhbətdə
+    deməyəcək, sadəcə istifadə etməyəcək. Yaxşı ki həll onsuz da
+    yazılıb: **müəllim özü açır, susmaya görə bağlı**. Mübahisəni
+    qazanmağa ehtiyac yoxdur.
+
+    **Onun sözlərindən çıxan ƏSAS nəticə — bu, MESAJDIR, portal
+    deyil.** Valideynə kod versək, o ayda bir dəfə açacaq, müəllim isə
+    WhatsApp mesajını yenə yazacaq: yük azalmayacaq. Müəllimə **hazır
+    həftəlik xülasə** versək (bir düymə → mətn/link → WhatsApp-a
+    yapışdırır), əsl yük elə həmin anda düşür.
+
+    İkinci variant birincidən **qat-qat kiçikdir**: üçüncü tətbiq yox,
+    müəllim panelində bir ekran. Ona görə **birinci sürüm xülasə
+    olmalıdır**, valideyn portalı isə sonra — əgər tələb qalsa.
+
+    Növbəti sual həmin repetitora: «Bunu indi WhatsApp-da yazırsınız?
+    Nə qədər vaxt aparır? Hansı daha rahatdır — hazır mesajı
+    göndərmək, yoxsa valideynə kod verib istədiyi vaxt baxsın?»
+
+    **Sıra hələ dəyişmir** — n=1-ə görə sıra dəyişdirmək, pilotdan
+    əvvəl funksiya yığmamaq qaydasını pozmaq deməkdir. Üç-dörd müəllim
+    eyni şeyi desə, dəyişir.
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi);
 valideyn girişində qiymət modeli (valideyn ayrıca ödəyir, yoxsa
