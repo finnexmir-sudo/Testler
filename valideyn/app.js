@@ -135,7 +135,9 @@
      ================================================================ */
   function screenHome() {
     topBar.classList.remove("hide");
-    topTitle.textContent = (CHILD && CHILD.name) || "Uşağım";
+    //  Ad sehifenin ozunde iri yazilir - zolaqda tekrarlamaq telefonda
+    //  ekranin basindan yer yeyirdi.
+    topTitle.textContent = "Uşağım";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_parent_home", { p_token: TOKEN })
       .then(function (d) { drawHome(d || {}); })
@@ -158,7 +160,9 @@
       '<div class="who">' +
         "<b>" + esc((d.child && d.child.name) || "Uşağım") + "</b>" +
         '<span class="muted">' +
-          [ (d.child && d.child.class) || "", d.teacher ? "müəllim: " + d.teacher : "" ]
+          //  Adi bos olan muellimde "müəllim: " yazib bos qoymuruq
+          [ (d.child && d.child.class) || "",
+            (d.teacher || "").trim() ? "müəllim: " + d.teacher.trim() : "" ]
             .filter(Boolean).map(esc).join(" · ") +
         "</span>" +
       "</div>";
@@ -194,6 +198,7 @@
       out += '<div class="card pad0">' + pend.map(function (p) {
         return '<div class="row">' +
           "<div><b>" + esc(p.title) + "</b>" +
+            (p.personal ? '<em class="tag">şəxsi</em>' : "") +
             "<i>" + [ p.subject, (p.questions || 0) + " sual" ]
               .filter(Boolean).map(esc).join(" · ") + "</i></div>" +
           (p.closes_at
@@ -211,8 +216,14 @@
     if (res.length) {
       out += "<h2>Son nəticələr</h2><div class='card pad0'>" +
         res.map(function (r) {
+          /*  Sexsi tapsiriq nisanlanir: "sehvler uzerinde is" testi
+              adi testle qarisirdi ve valideyn 100%-i "ela yazdi" kimi
+              oxuyurdu.  Gizletmek melumat gizletmek olardi - nisan
+              dogru yoldur.  */
           return '<div class="row">' +
-            "<div><b>" + esc(r.test) + "</b><i>" +
+            "<div><b>" + esc(r.test) + "</b>" +
+              (r.personal ? '<em class="tag">şəxsi</em>' : "") +
+            "<i>" +
               [ r.subject, dateAz(r.at) ].filter(Boolean).map(esc).join(" · ") +
             "</i></div>" +
             '<span class="pct ' + faizSinif(r.percent) + '">' +
@@ -222,10 +233,22 @@
     }
 
     /* ---- zeif movzular ---- */
+    /*  Bos bolme SESSIZCE yox olmamalidir.  Valideyn ekrani yarimciq
+        gorur ve sebebini bilmir - halbuki sebebler tam ferqlidir:
+        "hele az cavab var" ile "zeif movzu yoxdur" eyni sey deyil,
+        ikincisi ise YAXSI xeberdir ve deyilmelidir.  */
     var weak = d.weak;
     if (weak === null) {
       out += "<h2>Zəif mövzular</h2>" +
         '<div class="card muted">Bu bölmə müəllimin abunə paketinə daxildir.</div>';
+    } else if (!(weak || []).length) {
+      out += "<h2>Zəif mövzular</h2>" +
+        '<div class="card ok-box">' +
+        ((d.results || []).length
+          ? "Zəif mövzu görünmür. Bir mövzu siyahıya düşmək üçün ən azı " +
+            "üç cavab lazımdır."
+          : "Test yazıldıqca burada hansı mövzunun axsadığı görünəcək.") +
+        "</div>";
     } else if ((weak || []).length) {
       out += "<h2>Zəif mövzular</h2><div class='card pad0'>" +
         weak.map(function (w) {
@@ -241,7 +264,11 @@
 
     /* ---- kecilen dersler ---- */
     var les = d.lessons || [];
-    if (les.length) {
+    if (!les.length) {
+      out += "<h2>Keçilən dərslər</h2>" +
+        '<div class="card muted">Müəllim hələ dərs planını işlətmir — ' +
+        "keçilən mövzular burada görünəcək.</div>";
+    } else if (les.length) {
       out += "<h2>Keçilən dərslər</h2><div class='card pad0'>" +
         les.map(function (l) {
           return '<div class="row">' +

@@ -35,6 +35,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 104_cavabsiz_sual.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 105_alt_movzu_duzelisleri.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 106_bank_siyahi_variantlar.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 107_valideyn.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 108_valideyn_duzelis.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql

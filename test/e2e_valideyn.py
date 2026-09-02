@@ -165,6 +165,27 @@ with sync_playwright() as pw:
       values ('c1c1c1c1-0000-0000-0000-0000000000c1',
               'e1e1e1e1-0000-0000-0000-0000000000c2',
               now() - interval '1 day', now() + interval '1 day', 1);
+      --  SEXSI (duzelis) test: yalniz bu usaga verilib
+      insert into public.tests (id, owner_type, owner_id, class_id, program_id,
+                                subject_id, title, status)
+      select 'e1e1e1e1-0000-0000-0000-0000000000c3','educator', a.owner_id,
+             'c1c1c1c1-0000-0000-0000-0000000000c1',
+             (select id from public.programs limit 1),
+             (select id from public.subjects where slug='riyaziyyat'),
+             'Ayan Q. — sehvler uzerinde is','published'
+        from public.accounts a limit 1;
+      insert into public.assignments (class_id, test_id, student_id,
+                                      opens_at, closes_at, max_attempts)
+      values ('c1c1c1c1-0000-0000-0000-0000000000c1',
+              'e1e1e1e1-0000-0000-0000-0000000000c3',
+              'd1d1d1d1-0000-0000-0000-0000000000c1',
+              now() - interval '2 days', now() + interval '5 days', 1);
+      insert into public.attempts (student_id, test_id, class_id, status,
+                                   score, max_score, percent, finished_at)
+      values ('d1d1d1d1-0000-0000-0000-0000000000c1',
+              'e1e1e1e1-0000-0000-0000-0000000000c3',
+              'c1c1c1c1-0000-0000-0000-0000000000c1','submitted',
+              10, 10, 100, now() - interval '1 day');
     """)
     vp = ctx.new_page()
     vp.route("**/config.js*", lambda r: r.fulfill(
@@ -179,6 +200,7 @@ with sync_playwright() as pw:
     vp.fill("#code", kod); vp.click("#btnIn")
     vp.wait_for_selector(".who", timeout=15000)
     metn = vp.inner_text("#main")
+    metn2 = metn
     ok("Ayan Q." in metn, "usagin GORUNEN adi cixir")
     ok("Qasimova" not in metn, "TAM AD ekranda YOXDUR")
     ok("SAGIRD11" not in metn, "usagin giris kodu ekranda YOXDUR")
@@ -202,6 +224,26 @@ with sync_playwright() as pw:
     #  ARTIQ YAZILMIS test gozleyenler arasinda OLMAMALIDIR
     pend = vp.locator("h2:has-text('Gözləyən') + .card").inner_text()
     ok("Kesrler" not in pend, "yazilmis test gozleyenlerde gorunmur", pend.replace("\n", " "))
+
+    #  SEXSI tapsiriq nisanlanmalidir: "sehvler uzerinde is" testi adi
+    #  testle qarisirdi ve valideyn 100%-i "ela yazdi" kimi oxuyurdu.
+    fix = vp.locator(".row:has-text('sehvler uzerinde is')")
+    ok(fix.count() == 1, "duzelis testi neticelerde var", fix.count())
+    ok(fix.locator(".tag").count() == 1, "duzelis testi «şəxsi» nisanlanib")
+    #  ADI test nisanlanmamalidir - nisan hər setre yapisdirilmayib
+    adi = vp.locator(".row:has-text('Kesrler - 1')")
+    ok(adi.locator(".tag").count() == 0, "adi test nisanlanmir")
+
+    print("C2 · Boş bölmələr səssizcə yox olmur")
+    ok("ZƏİF MÖVZULAR" in metn2 or "ZƏİF MÖVZULAR" in vp.inner_text("#main"),
+       "zeif movzu bolmesi bos olanda da gorunur")
+    ok("KEÇİLƏN DƏRSLƏR" in vp.inner_text("#main"),
+       "kecilen ders bolmesi bos olanda da gorunur")
+    ok("dərs planını" in vp.inner_text("#main"),
+       "bos ders bolmesinde SEBEB yazilir")
+    #  Ust zolaqda ad TEKRARLANMIR
+    ok(vp.inner_text("#topTitle").strip() == "Uşağım",
+       "ust zolaqda ad tekrarlanmir", vp.inner_text("#topTitle"))
 
     print("D · Sessiya saxlanılır, çıxış işləyir")
     vp.reload(); vp.wait_for_selector(".who", timeout=15000)
