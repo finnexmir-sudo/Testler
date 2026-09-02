@@ -206,4 +206,35 @@ begin
                       where p->>'slug' = 'pulsuz'), 'pulsuz plan satis siyahisindadir';
 end $$;
 reset role; reset request.jwt.claim.sub;
+
+
+
 \echo 'OK  9 · gostericiler: yalniz admin, saylar duzgun'
+
+-- =====================================================================
+--  10. Admin panelinde TEST SAYI - class_id qusuru
+--      Muellimin yigdigi testde class_id HEC VAXT dolmur; say ona gore
+--      butun hesablarda hemise 0 gorunurdu.
+-- =====================================================================
+do $$
+declare v jsonb; n int; acc uuid; usr uuid;
+begin
+  select a.id, a.owner_id into acc, usr from public.accounts a limit 1;
+  --  class_id-SIZ test - eynen generatorun yaratdigi kimi
+  insert into public.tests (owner_type, owner_id, program_id, subject_id,
+                            title, status)
+  select 'educator', usr, (select id from public.programs limit 1),
+         (select id from public.subjects limit 1), 'Sayğac testi', 'published';
+
+  set role authenticated;
+  set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
+  v := public.rpc_admin_accounts(null, null);
+  reset role; reset request.jwt.claim.sub;
+
+  select (x->>'tests')::int into n from jsonb_array_elements(v) x
+   where (x->>'id')::uuid = acc;
+  assert n >= 1,
+    'class_id-siz test sayilmir - admin panelinde "0 test" gorunur (say: '
+    || coalesce(n::text,'null') || ')';
+end $$;
+\echo 'OK 10 · class_id-siz test admin sayğacinda gorunur'
