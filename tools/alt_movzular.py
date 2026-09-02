@@ -426,6 +426,216 @@ BASLIQ_BIO = """\
 --
 --  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
 
+BASLIQ_ING = """\
+--  89_alt_movzular_ingilis6_11.sql : INGILIS DILI 6-7, 10-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Sekkizinci fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika,
+--  kimya, biologiya hazirdir.
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 916 (6),
+--  710 (7), 738 (10), 805 (11).  Adlar EYNILE goturulub.
+--
+--  BU FAYLDA YALNIZ 4 SINIF VAR - qalan 7 sinifin sebebi ferqlidir:
+--
+--  1-4-CU SINIF: bazadaki movzular ("Alphabet - elifba", "Colours -
+--  renglor" kimi ikidilli adlarla) e-derslik dersliyinden GOTURULMEYIB
+--  - elle qurulmus lugetevi movzulardir, arxasinda kitab id yoxdur.
+--  Alt movzu ucun menbe HEC vaxt olmayacaq.
+--
+--  5 VE 9-CU SINIF: kitab id 850 (5) ve 886 (9) - dersliyin oz
+--  mundericat paneli YALNIZ UNIT basliqlarini verir, hech bir alt
+--  ders sadalanmir (bax: sehife: 120/160, amma bolme: 1, hamisi tek
+--  "UNITS" basligi altinda).  Bazadaki 6-8 movzu artiq bu tek-sevi-
+--  yeli mundericatin ozudur - alt movzu cixaracaq basqa sey yoxdur.
+--
+--  8-Cİ SINIF: kitab id 824-un server terefi TAM BOSDUR (Cemi sehife:
+--  0) - portal bu derslik ucun meznunu hele yuklemeyib (biologiya
+--  9-la eyni veziyyet, bax db/88). Portal meznunu yukleyende elave
+--  olunacaq.
+--
+--  10-CU SINIFDE 9 UNIT, BAZADA 6 MOVZU: iki movzu adinin ozu
+--  birlesmeni gosterir - "Success and Health" (ing-10-success)
+--  Unit 5 (Success) + Unit 6 (Health is Wealth) deyir, "Stages of
+--  Life. Media" (ing-10-media) ise Unit 7 (Stages of Life) + Unit 9
+--  (Media) - aralarindaki Unit 8 (Happiness) adda gorunmese de bu
+--  ikisinin arasinda basqa yeri yoxdur, ona gore de ing-10-media-ya
+--  gedir.  Qalan 4 unit (Kindness/Victorious/Environmental Problems/
+--  Cultures) birbasa bire-bir.
+--
+--  BURAXILAN BENDLER: dersliyin sonundaki aparat - "Tests",
+--  "Grammar bank/Bank", "Communication activities", "Audio scripts",
+--  "Wordlist", "List/Irregular verb(s) list", "References", "Tracks",
+--  "Activities", "Text credits, video credits and references" -
+--  ders deyil, elavedir (7, 10 ve 11-ci sinifin son unitinde gelir).
+--
+--  YAZI QUSURLARI: 11-ci sinifde iki bend noqteden sonra bosluqsuz
+--  ("Reading.A text...", "topic.A lead-in..."), bir bend apostrofu
+--  SQL-de tehlukelidir ("shouldn't" -> "should not").
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
+BASLIQ_COG = """\
+--  90_alt_movzular_cografiya6_11.sql : COGRAFIYA 6-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Doqquzuncu fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika,
+--  kimya, biologiya, ingilis dili hazirdir.  Cografiya 6-ci sinifden
+--  baslayir (1-5-de yoxdur).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 859/860 (6),
+--  922/923 (7), 799 (8), 881 (9), 729 (10), 814 (11).  Adlar EYNILE
+--  goturulub.
+--
+--  DERSLIYIN QURULUSU HER SINIFDE FERQLIDIR:
+--
+--  6-ci sinif: kitab 859-un "Bolme 3. COL TEDQIQATI"-nin mundericat
+--  sehifesinde "Bolme 4. KAINATI SEYR EDIREM" basligi "==" bolme kimi
+--  DEYIL, adi bir setir kimi bolme 3-un daxilinde gorunur (fizika 7-
+--  nin "Bolme 4" teləsi ile eyni portal qusuru, bax db/86).  Bu setir
+--  ozu xaric edilib, sehife 68-den sonrasi cog-6-kainat-a gedir.
+--
+--  7-ci sinif: 7 bolme birbasa bire-bir - problemsiz.
+--
+--  8-ci sinif: dersliyde 10 Roma reqemli bolme (I-X) var, bazada 8
+--  movzu - iki movzunun ozu birlesmeni gosterir: "Su tebeqesi ve
+--  biosfer" (cog-8-hidrosfer) VI (Yerin su tebeqesi) + VII (Biosfer)
+--  bolmelerini birlesdirir, "Dunya olkeleri ve ehali" (cog-8-olkeler)
+--  ise VIII (Dunya olkelerinin tesnifati) + IX (Ehali ve tesserrufatin
+--  erazi teskili) bolmelerini - IX-un basligindaki "Ehali" sozu movzu
+--  adindaki "ehali" ile birbasa uygunlasir.
+--
+--  9-cu sinif: dersliyde 3 boyuk boluk var ("Giris", "I Bolme", "II
+--  Bolme"), her BOLME oz icinde Roma reqemli alt-basliqlarla (I-VII)
+--  bolunub - novbeti dersle EYNI sehifede olduqları ucun alt-basliq
+--  qaydasi ile tutulur (informatika/kimya/biologiya-dan tanis
+--  mexanizm).  "Giris" -> cog-9-xerite (movzuca uygun gelir), "I
+--  Bolme" 4 alt-basliqla 4 movzuya (relyef/iqlim/sular/bioehtiyat),
+--  "II Bolme" 3 alt-basliqla 3 movzuya (sivilizasiya/ehali/
+--  iqtisadiyyat) - hamisi basligin ozunde adlanib.
+--
+--  10-cu sinif: dersliyde "Giris" + iki boyuk boluk ("1. YERIN
+--  TEBIETI", "2. DUNYANIN SIYASI VE IQTISADI MENZERESI"), bunlarin da
+--  icinde Roma reqemli alt-basliqlar (I-IX) var.  "Giris" ve "I.
+--  YER SEMA CISMIDIR" eyni movzuya (cog-10-yer-kainat) gedir - adlari
+--  demek olar eynidir.  "VII. Dunya ehalisi" ve "VIII. Siyasi
+--  munasibetler" de eyni movzuye (cog-10-ehali-siyasi) - movzu adinin
+--  ozu ("Ehali ve siyasi xeritə") hər ikisini eyni anda cagirir.
+--
+--  11-ci sinif: dersliyde 6 boyuk boluk (1-6), bazada 8 movzu.
+--  "5. QLOBAL PROBLEMLER VE ONLARIN HELLI YOLLARI"-nin 6 dersi arasinda
+--  enerji/erzaq ve ekoloji mövzular qarisiqdir (5.1 enerji, 5.4 erzaq,
+--  qalanlari - bioloji ehtiyat/su/alicilq/tullanti - aydin ekoloji
+--  deyil), sehife serhedi ile aydin bolunmur.  Boluk basliginin ozu
+--  ("Qlobal problemler") cog-11-ekoloji-qlobal-in adina ("Qlobal
+--  ekoloji problemler") daha yaxindir, ona gore 6 ders də ora getdi -
+--  cog-11-enerji-erzaq hele 0 alt movzu qalir (biologiya-11-viruslar
+--  ile eyni qerar: uydurma sehife serhedi qoyulmadi).
+--  "6. BEYNELXALQ INTEQRASIYA VE QLOBALLASMA" ise aydindir - ilk ders
+--  (6.1) hərfi-hərfinə "Beynelxalq inteqrasiya" adlanir, sehife 182-
+--  den qalani cog-11-qloballasma-ya gedir.
+--
+--  BURAXILAN BENDLER: "SOZLUK" (boyuk herfle - XARIC_UMUMI-deki
+--  "Sozluk" bunu tutmur, boyuk-kicik herf fərqlidir), "Terminlerin
+--  izahli lugeti", "Terminler lugeti".
+--
+--  YAZI VE EDED QUSURLARI: 9-cu sinifde iki bend "20" evezine "2O"
+--  (herf O reqem 0 evezine) yazilib - NOMRE bunlari tanimir, elle
+--  duzeldildi.  Bir necə bend soz birlesmesi ("Amerikanındaxilisuları"),
+--  kesik soz ("daxili sul" -> "daxili sulari", "sahə qurulus" ->
+--  "sahə qurulusu", "iqlim tiplər" -> "iqlim tipləri") ve bosluqsuz
+--  vergul/baglayici ("Avropa,Şimali Amerikavə") - hamisi mezmunu
+--  deyismeden duzeldilib.  11-ci sinifde iki bend "Praktik ders"
+--  evezine "Praktikders" yazilib.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
+BASLIQ_EDEB = """\
+--  91_alt_movzular_edebiyyat5_11.sql : EDEBIYYAT 5-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Onuncu fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika,
+--  kimya, biologiya, ingilis dili, cografiya hazirdir.
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 845 (5),
+--  911 (6), 701 (7), 793 (8), 883 (9), 732 (10), 821 (11).  Adlar
+--  EYNILE goturulub.
+--
+--  DERSLIYIN QURULUSU HER SINIFDE FERQLIDIR - movzu adlari 5-7-de
+--  TEMA (Yurd sevgisi, Tebietin gozelliyi), 8-11-de DOVR uzredir
+--  (bu, derslikdeki bolgu - suni deyil).
+--
+--  5-7-ci sinif: "Giris"/"Edebiyyat" basliqli ilk bolme (dersliklo
+--  nece isleməli - meznun deyil) ve son bolme ("Insani nece yazmali"
+--  / "Insa ve esseni nece yazmali") - hər ikisi BURAXILIR (None).
+--  Qalan bolmeler bire-bir movzuya.  5-ci sinifde son (7-ci) movzunun
+--  bendleri arasina kitabin sonundaki aparat (Layihələr, Luget ve s.)
+--  qarisib - xaric edilib; 6 ve 7-ci sinifde bu aparat dusen bolmenin
+--  daxilindedir, ayrica xaric lazim gelmir.
+--
+--  8-ci sinif: ilk ve son bolme (Dərsliklə/İnformasiya xarakterli)
+--  buraxilir.  Qalan 6 bolmeden 5-i bire-bir, "TƏNQİDİ REALİZM VƏ
+--  ROMANTİZM DÖVRÜ" bolmesi ise İKİ movzuya bolunur - muellif adlari
+--  ozu sinir cekir: Memmedquluzade+Sabir (tenqidi realizm) sehife
+--  123-e qeder, Hadi+Cavid (romantizm, dunya edebiyyatindan Ersoy
+--  daxil) sonrasi.
+--
+--  9-cu sinif: dersliyde 4 boyuk boluk var, ICINDE nomrelenmis
+--  "merhele"lerlə (I-III) daha da bolunur.  "II merhele"nin ICINDƏ
+--  3 alt-dovr var (repressiya 1920-40, muharibe 1941-60, ozunuderk
+--  1961-90) - ve ozunuderk ozu bazada İKİ movzuya (poeziya/nesr)
+--  ayrilib.  Muellifleri janrina gore taniyiriq (R.Rza, Kurcayli,
+--  Araz, Azeroglu, Eli Kerim, Rustemxanli = seir; Sixli, Huseynov,
+--  Anar, Elcin = nesr) - sehife sirasi bunlari NOVBELESDIRIR (aydin
+--  bir kesim yoxdur), ona gore COX SERHEDLI (list) spec ile hər
+--  muellifin oz sehifesi ayri-ayri qeyd olunub (biologiya-11-in
+--  Mikrobiologiya teleside olan kimi tesadufi bolunme YOXDUR - bu,
+--  hər addimda meydana cixan real sehife serhedidir).
+--  "III merhele" de eyni qelible 3 movzuya bolunur (mustaqillik/
+--  cenub/dunya) - "CƏNUBİ AZƏRBAYCAN ƏDƏBİYYATI" ve "DÜNYA
+--  ƏDƏBİYYATI" basliqlari sehife serhedine gore duz movzuya dusur;
+--  xaric edilmir, cunki EYNI metn 11-ci sinifde HƏQIQI bolmə
+--  basligidir (xaric etsək 11-ci sinifin bolmesi yox olardi - bir
+--  defe belə oldu, tapilib duzeldildi).
+--
+--  10-cu sinif: derslikde CEMI BIR bolme var ("bölmə: 1") - butun
+--  kitab boyu 6 boyuk dovr basligi (AZƏRBAYCAN ŞİFAHİ.../QƏDİM
+--  DOVR.../İNTİBAH.../ORTA ƏSRLƏR.../ERKƏN YENİ DOVR.../MAARİFÇİ-
+--  REALİZM...) novbeti bendlə EYNI sehifede DEYIL (basliq-teleside
+--  olan "eyni sehife" qaydasi bunu tutmur).  Bu basliqlar 8-ci
+--  sinifin bezi bolme adlari ilə HƏRFİ EYNIDIR (herfi xaric etmek
+--  8-ci sinifin real bolmelerini de silerdi - bir defe belə oldu,
+--  tapilib duzeldildi) - ona gore xaric edilmir, sadece butun kitab
+--  TEK bir COX SERHEDLI (list) spec ile 8 movzuya bolunur; basliqlar
+--  ozleri hər movzunun ilk (bir az artiq) bendi kimi qalir.
+--  "ORTA ƏSRLƏR" Nesimi+Xetayi / Fuzuli-ye,
+--  "MAARİFÇİ-REALİZM" ise Zakir+Elesger+Sirvani+Vezirov / Axundzade-
+--  ye bolunur - Axundzadenin bendleri (sehife 125-153) Zakirlə
+--  Elesger arasinda YERLESIB (üç seqmentli list: Zakir <125,
+--  Axundzade 125-153, qalanlari >=154 - iki qonsu seqment eyni
+--  movzuya (maarifci) gedir).
+--
+--  11-ci sinif: derslikde 6 bolme, bazada 8 movzu.  "TƏNQİDİ REALİZM
+--  VƏ ROMANTİZM DÖVRÜ" bolmesi 8-ci sinifdəki eyni prinsiple bolunur
+--  (Memmedquluzade+Sabir / Cavid+Ehmed Cavad, sehife 37-den).
+--  "CƏNUBİ AZƏRBAYCAN ƏDƏBİYYATI" (Şəhriyar) ve son bolme "DÜNYA
+--  ƏDƏBİYYATINDAN SEÇMƏ" (Aytmatov) EYNI movzuya (cenub-dunya) gedir
+--  - iki bolme arasinda basqa heç bir elaqe yoxdur, sadece hər ikisi
+--  movzu adinin ("Cənubi Azərbaycan və dünya ədəbiyyatı") iki yarisidir.
+--  "SOVET DÖVRÜ..." bolmesi Cabbarli+Vurgun / R.Rza+Mir Celala bolunur
+--  (sehife 108-den).  edeb-11-nezeriyye (Edebi cereyanlar ve
+--  nezeriyye) ucun mundericatda HEC bir isare yoxdur - biologiya-11-
+--  viruslar ile eyni qerar: uydurma sehife qoyulmadi, 0 alt movzu
+--  qalir.
+--
+--  YAZI QUSURLARI: bir necə muellif adinda bosluq/herf sehvi
+--  (CəfərCabbarlı -> Cəfər Cabbarlı, SViktor Hüqo -> Viktor Hüqo,
+--  İlsmayıl -> İsmayıl, İldınm -> İldırım) ve tirnaqdan sonra
+--  bosluq (dastanında/poemasından bitisik yazilib) - mezmun
+--  deyismeden duzeldilib.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -793,6 +1003,216 @@ PAKETLER = [
                          "bio-11-seleksiya", "bio-11-biotexnologiya",
                          "bio-11-biosfer", "bio-11-insan-muhit",
                          "bio-11-bolunme-nezaret"])]),
+        ],
+    },
+    {
+        "ad": "ing6_11",
+        "etiket": "Ingilis dili 6, 7, 10, 11 (1-4, 5, 8, 9 menbesiz/bos)",
+        "fayl": "89_alt_movzular_ingilis6_11.sql",
+        "fenn": "ingilis-dili",
+        "fayl_on": "ingilis-dili",
+        "basliq": BASLIQ_ING,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "Tests", "Grammar bank", "Grammar Bank",
+            "Communication activities", "Audio scripts", "Wordlist",
+            "List of irregular verbs", "Irregular verb list",
+            "Irregular verbs list", "References", "Activities", "Tracks",
+            "Text credits, video credits and references",
+        },
+        "duzelis": {
+            "Reading.A text about an unusual natural phenomenon":
+                ("Reading. A text about an unusual natural phenomenon",
+                 "yazi"),
+            "Focus on the topic.A lead-in to the topic: No Regrets":
+                ("Focus on the topic. A lead-in to the topic: No Regrets",
+                 "yazi"),
+            "Grammar A. Past Regrets or Mistakes should/shouldn't have done":
+                ("Grammar A. Past Regrets or Mistakes should/should not"
+                 " have done", "yazi"),
+        },
+        "ust": ("Ingilis dili ust movzu sayi 70 deyil", "true", 70),
+        "sinifler": [
+            (6, [(916, ["ing-6-town", "ing-6-food", "ing-6-holiday",
+                        "ing-6-stories", "ing-6-journeys", "ing-6-heroes",
+                        "ing-6-ideas", "ing-6-nature"])]),
+            (7, [(710, ["ing-7-schools", "ing-7-technology", "ing-7-talent",
+                        "ing-7-travel", "ing-7-friends", "ing-7-future"])]),
+            (10, [(738, ["ing-10-kindness", "ing-10-victory",
+                         "ing-10-cultures", "ing-10-environment",
+                         "ing-10-success", "ing-10-success",
+                         "ing-10-media", "ing-10-media", "ing-10-media"])]),
+            (11, [(805, ["ing-11-whys", "ing-11-experiences",
+                         "ing-11-conversation", "ing-11-regrets",
+                         "ing-11-creativity", "ing-11-news"])]),
+        ],
+    },
+    {
+        "ad": "cog6_11",
+        "etiket": "Cografiya 6-11 (11-ci sinif enerji-erzaq hele bos)",
+        "fayl": "90_alt_movzular_cografiya6_11.sql",
+        "fenn": "cografiya",
+        "fayl_on": "cografiya",
+        "basliq": BASLIQ_COG,
+        "bolmebasliq": True,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "SÖZLÜK", "Bölmə 4. KAİNATI SEYR EDİRƏM",
+            "Terminlərin izahlı lüğəti", "Terminlər lüğəti",
+        },
+        "duzelis": {
+            "Azərbaycan təbiətinin formalaşmas":
+                ("Azərbaycan təbiətinin formalaşması", "yazi"),
+            "2O. Praktik dərs. Azərbaycanın iqlimi":
+                ("Praktik dərs. Azərbaycanın iqlimi", "yazi"),
+            "Şimali Amerikanındaxilisuları":
+                ("Şimali Amerikanın daxili suları", "yazi"),
+            "Avstraliyanın daxili sul":
+                ("Avstraliyanın daxili suları", "yazi"),
+            "Avropa,Şimali Amerikavə Avstraliyanın əhalisi":
+                ("Avropa, Şimali Amerika və Avstraliyanın əhalisi", "yazi"),
+            "Təsərrüfatın sahə quruluş":
+                ("Təsərrüfatın sahə quruluşu", "yazi"),
+            "5O. İstehsal və qeyri-istehsal sahələri":
+                ("İstehsal və qeyri-istehsal sahələri", "yazi"),
+            "Azərbaycanın iqlim tiplər":
+                ("Azərbaycanın iqlim tipləri", "yazi"),
+            "Praktikdərs. Azərbaycanın iqtisadi rayonlarının səciyyəsi":
+                ("Praktik dərs. Azərbaycanın iqtisadi rayonlarının"
+                 " səciyyəsi", "yazi"),
+            "Praktikdərs.Türk dünyası birliyi":
+                ("Praktik dərs. Türk dünyası birliyi", "yazi"),
+        },
+        "ust": ("Cografiya ust movzu sayi 46 deyil", "true", 46),
+        "sinifler": [
+            (6, [(859, ["cog-6-mekan", "cog-6-beledci",
+                        ("cog-6-col", 68, "cog-6-kainat")]),
+                 (860, ["cog-6-tebiet", "cog-6-yurdumuz", "cog-6-dunya"])]),
+            (7, [(922, ["cog-7-movqe", "cog-7-daxili", "cog-7-seth"]),
+                 (923, ["cog-7-hava", "cog-7-iqlim", "cog-7-mesken",
+                        "cog-7-iqtisadi"])]),
+            (8, [(799, ["cog-8-kesfler", "cog-8-xerite",
+                        "cog-8-yer-hereketi", "cog-8-tektonik",
+                        "cog-8-atmosfer", "cog-8-hidrosfer",
+                        "cog-8-hidrosfer", "cog-8-olkeler",
+                        "cog-8-olkeler", "cog-8-ekologiya"])]),
+            (9, [(881, ["cog-9-xerite",
+                        {"I. Relyef və onun təsərrüfata təsiri":
+                             "cog-9-relyef",
+                         "II. İqlim və onun təsərrüfatda rolu":
+                             "cog-9-iqlim",
+                         "III. Su ehtiyatları və onların iqtisadi"
+                         " əhəmiyyəti": "cog-9-sular",
+                         "IV. Bioehtiyatların müxtəlifliyi və ondan"
+                         " istifadə": "cog-9-bioehtiyat"},
+                        {"V. Qədim və müasir sivilizasiyalar":
+                             "cog-9-sivilizasiya",
+                         "VI. Dünya əhalisinin müxtəlifliyi":
+                             "cog-9-ehali",
+                         "VII. İqtisadi-sosial həyat və onun inkişaf"
+                         " yolları": "cog-9-iqtisadiyyat"}])]),
+            (10, [(729, ["cog-10-yer-kainat",
+                         {"I. Yer səma cismidir": "cog-10-yer-kainat",
+                          "II. Yer səthinin təsviri": "cog-10-kartoqrafiya",
+                          "III. Yer qabığının inkişaf tarixi":
+                              "cog-10-geologiya",
+                          "IV. İqlim ehtiyatları": "cog-10-iqlim-ehtiyat",
+                          "V. Quru suları": "cog-10-quru-sulari",
+                          "VI. Coğrafi təbəqə": "cog-10-tebeqe"},
+                         {"VII. Dünya əhalisi": "cog-10-ehali-siyasi",
+                          "VIII. Siyasi münasibətlər": "cog-10-ehali-siyasi",
+                          "IX. Elmi-texniki inqilab və iqtisadiyyat":
+                              "cog-10-eti"}])]),
+            (11, [(814, ["cog-11-xerite-cis", "cog-11-tebii-ehtiyat",
+                         "cog-11-demoqrafiya", "cog-11-iqtisadi-inkisaf",
+                         "cog-11-ekoloji-qlobal",
+                         ("cog-11-inteqrasiya", 182, "cog-11-qloballasma")])]),
+        ],
+    },
+    {
+        "ad": "edeb5_11",
+        "etiket": "Edebiyyat 5-11 (11-ci sinif nezeriyye hele bos)",
+        "fayl": "91_alt_movzular_edebiyyat5_11.sql",
+        "fenn": "edebiyyat",
+        "fayl_on": "edebiyyat",
+        "basliq": BASLIQ_EDEB,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "Layihələr", "Layihələr üzrə iş",
+            "İfadəli oxuda istifadə edilən şərti işarələr",
+            "Dərslikdəki bəzi terminlərin izahı",
+            "Oxumağı məsləhət görürük",
+            "Qısa ədəbiyyatşünaslıq terminləri lüğəti",
+            "Sinifdən xaric oxu materialları",
+            "Özünü qiymətləndirmə meyarları",
+            "Mövzular üzrə internet mənbələri",
+            "Mənbələr", "Mənbələlər",
+            "Müqayisə xarakterli mətni - inşa, esse və məruzəni necə"
+            " yazmalı?",
+        },
+        "duzelis": {
+            "SViktor Hüqo. KOZETTA": ("Viktor Hüqo. KOZETTA", "yazi"),
+            'Qazan bəyin oğlu Uruz bəyin dustaq olduğu boy ("Kitabi-Dədə'
+            ' Qorqud"dastanında)':
+                ('Qazan bəyin oğlu Uruz bəyin dustaq olduğu boy'
+                 ' ("Kitabi-Dədə Qorqud" dastanında)', "yazi"),
+            'Nizami Gəncəvi. Sultan Səncər və qarı ("Sirlər'
+            ' xəzinəsi"poemasından)':
+                ('Nizami Gəncəvi. Sultan Səncər və qarı ("Sirlər'
+                 ' xəzinəsi" poemasından)', "yazi"),
+            'Şah İlsmayıl Xətayi. Bahariyyə("Dəhnamə"poemasından)':
+                ('Şah İsmayıl Xətayi. Bahariyyə ("Dəhnamə"'
+                 ' poemasından)', "yazi"),
+            "CəfərCabbarlı. Ana": ("Cəfər Cabbarlı. Ana", "yazi"),
+            "Almas İldınm. Əsir Azərbaycanım":
+                ("Almas İldırım. Əsir Azərbaycanım", "yazi"),
+            "Əli Kərim .Qaytar ana borcunu":
+                ("Əli Kərim. Qaytar ana borcunu", "yazi"),
+            "Həbib Sahir.Səhənd dağı (qiymətləndirmə materialı)":
+                ("Həbib Sahir. Səhənd dağı (qiymətləndirmə materialı)",
+                 "yazi"),
+        },
+        "ust": ("Edebiyyat ust movzu sayi 48 deyil", "true", 48),
+        "sinifler": [
+            (5, [(845, [None, "edeb-5-sifahi", "edeb-5-yurd",
+                        "edeb-5-menevi", "edeb-5-muharibe", "edeb-5-usaq",
+                        "edeb-5-emek", "edeb-5-tebiet"])]),
+            (6, [(911, ["edeb-6-sifahi", "edeb-6-usaq", "edeb-6-yurd",
+                        "edeb-6-menevi", "edeb-6-tebiet", None])]),
+            (7, [(701, [None, "edeb-7-sifahi", "edeb-7-veten",
+                        "edeb-7-menevi", "edeb-7-usaq", "edeb-7-tebiet",
+                        None])]),
+            (8, [(793, [None, "edeb-8-qedim", "edeb-8-intibah",
+                        "edeb-8-orta", "edeb-8-erken", "edeb-8-maarifci",
+                        ("edeb-8-tenqidi", 123, "edeb-8-romantizm"),
+                        None])]),
+            (9, [(883, [None, "edeb-9-milli-demokratik",
+                        [(40, "edeb-9-repressiya"),
+                         (74, "edeb-9-muharibe"),
+                         (83, "edeb-9-ozunuderk-seir"),
+                         (98, "edeb-9-ozunuderk-nesr"),
+                         (109, "edeb-9-ozunuderk-seir"),
+                         (136, "edeb-9-ozunuderk-nesr"),
+                         (float("inf"), "edeb-9-ozunuderk-seir")],
+                        [(159, "edeb-9-mustaqillik"),
+                         (170, "edeb-9-cenub"),
+                         (float("inf"), "edeb-9-dunya")]])]),
+            (10, [(732, [[(17, "edeb-10-sifahi"),
+                          (38, "edeb-10-dede-qorqud"),
+                          (57, "edeb-10-nizami"),
+                          (79, "edeb-10-nesimi-xetayi"),
+                          (91, "edeb-10-fuzuli"),
+                          (113, "edeb-10-koroglu-vaqif"),
+                          (125, "edeb-10-maarifci"),
+                          (154, "edeb-10-axundzade"),
+                          (float("inf"), "edeb-10-maarifci")]])]),
+            (11, [(821, [("edeb-11-tenqidi-realizm", 37,
+                          "edeb-11-romantizm"),
+                         "edeb-11-cenub-dunya",
+                         ("edeb-11-cabbarli-vurgun", 108,
+                          "edeb-11-rza-mircelal"),
+                         "edeb-11-ozunuderk", "edeb-11-istiqlal",
+                         "edeb-11-cenub-dunya"])]),
         ],
     },
 ]
