@@ -123,10 +123,13 @@ select v.fayl,
        (select count(*) from public.questions where ext_key like 'edeb11-%') = 248),
     ('57_sinif_dubli.sql',
        (select count(*) from public.levels where code ~ '^[0-9]+$') = 11),
+    --  parent_id is null saxlanilir - yoxsa 91-in alt movzulari eyni
+    --  slug prefiksini pay layib sayi 16-dan yuxari qaldirir
     ('58_movzular_edebiyyat9_10.sql',
        (select count(*) from public.topics t join public.subjects s
           on s.id = t.subject_id and s.slug = 'edebiyyat'
-         where t.slug like 'edeb-9-%' or t.slug like 'edeb-10-%') = 16),
+         where t.parent_id is null
+           and (t.slug like 'edeb-9-%' or t.slug like 'edeb-10-%')) = 16),
     ('59_bank_edebiyyat10.sql',
        (select count(*) from public.questions where ext_key like 'edeb10-%') = 248),
     ('60_bank_edebiyyat9.sql',
@@ -134,7 +137,7 @@ select v.fayl,
     ('61_movzular_edebiyyat5_8.sql',
        (select count(*) from public.topics t join public.subjects s
           on s.id = t.subject_id and s.slug = 'edebiyyat'
-         where t.slug ~ '^edeb-[5-8]-') = 24),
+         where t.parent_id is null and t.slug ~ '^edeb-[5-8]-') = 24),
     ('62-65_bank_edebiyyat5..8.sql',
        (select count(*) from public.questions
          where ext_key ~ '^edeb[5-8]-') = 744),
