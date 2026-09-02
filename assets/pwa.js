@@ -1,5 +1,5 @@
 /* =====================================================================
-   pwa.js — tetbiqin telefona qurasdirilmasi (muellim + sagird ortaq)
+   pwa.js — tetbiqin qurasdirilmasi (muellim + sagird + valideyn)
 
    Iki is gorur:
    1. service worker-i qeydiyyatdan kecirir (yalniz https-de);
@@ -58,9 +58,22 @@
     if (no) no.addEventListener("click", hide);
   }
 
+  /*  Toxunma ekrani var, yoxsa siçan?  "beforeinstallprompt" masaustu
+      Chrome-da da isə dusur - eyni metni gostersek kompüterde
+      "Tətbiqi telefona qur" yazirdiq, ki bu, sadəcə yalandir.  */
+  function isTouch() {
+    return (window.matchMedia &&
+            window.matchMedia("(pointer: coarse)").matches) ||
+           (navigator.maxTouchPoints || 0) > 0;
+  }
+
   function showInstall() {
-    bar('<span><b>Tətbiqi telefona qur</b>' +
+    bar(isTouch()
+      ? '<span><b>Tətbiqi telefona qur</b>' +
         "Ana ekrandan bir toxunuşla açılsın.</span>" +
+        '<button class="btn sm go" id="pwaYes">Quraşdır</button>'
+      : '<span><b>Tətbiqi kompüterə qur</b>' +
+        "Ayrıca pəncərədə, brauzer sətri olmadan açılsın.</span>" +
         '<button class="btn sm go" id="pwaYes">Quraşdır</button>');
     var yes = document.getElementById("pwaYes");
     if (!yes) return;
