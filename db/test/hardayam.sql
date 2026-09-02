@@ -246,7 +246,25 @@ select v.fayl,
           join public.subjects s
             on s.id = t.subject_id and s.slug = 'umumi-tarix'
           join public.levels l on l.id = t.level_id and l.code in ('8','9','11')
-         where t.parent_id is null) = 8)
+         where t.parent_id is null) = 8),
+    ('95_alt_movzular_utarix7.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'umumi-tarix'
+          join public.levels l on l.id = p.level_id and l.code = '7') = 23),
+    ('96_alt_movzular_utarix8_9_11.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'umumi-tarix'
+          join public.levels l on l.id = p.level_id and l.code in ('8','9','11')) = 60),
+    ('97_alt_movzular_utarix10.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'umumi-tarix'
+          join public.levels l on l.id = p.level_id and l.code = '10') = 25)
   ) as v(fayl, var)
  order by 1;
 
