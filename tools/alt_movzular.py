@@ -475,6 +475,81 @@ BASLIQ_ING = """\
 --
 --  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
 
+BASLIQ_COG = """\
+--  90_alt_movzular_cografiya6_11.sql : COGRAFIYA 6-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Doqquzuncu fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika,
+--  kimya, biologiya, ingilis dili hazirdir.  Cografiya 6-ci sinifden
+--  baslayir (1-5-de yoxdur).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 859/860 (6),
+--  922/923 (7), 799 (8), 881 (9), 729 (10), 814 (11).  Adlar EYNILE
+--  goturulub.
+--
+--  DERSLIYIN QURULUSU HER SINIFDE FERQLIDIR:
+--
+--  6-ci sinif: kitab 859-un "Bolme 3. COL TEDQIQATI"-nin mundericat
+--  sehifesinde "Bolme 4. KAINATI SEYR EDIREM" basligi "==" bolme kimi
+--  DEYIL, adi bir setir kimi bolme 3-un daxilinde gorunur (fizika 7-
+--  nin "Bolme 4" teləsi ile eyni portal qusuru, bax db/86).  Bu setir
+--  ozu xaric edilib, sehife 68-den sonrasi cog-6-kainat-a gedir.
+--
+--  7-ci sinif: 7 bolme birbasa bire-bir - problemsiz.
+--
+--  8-ci sinif: dersliyde 10 Roma reqemli bolme (I-X) var, bazada 8
+--  movzu - iki movzunun ozu birlesmeni gosterir: "Su tebeqesi ve
+--  biosfer" (cog-8-hidrosfer) VI (Yerin su tebeqesi) + VII (Biosfer)
+--  bolmelerini birlesdirir, "Dunya olkeleri ve ehali" (cog-8-olkeler)
+--  ise VIII (Dunya olkelerinin tesnifati) + IX (Ehali ve tesserrufatin
+--  erazi teskili) bolmelerini - IX-un basligindaki "Ehali" sozu movzu
+--  adindaki "ehali" ile birbasa uygunlasir.
+--
+--  9-cu sinif: dersliyde 3 boyuk boluk var ("Giris", "I Bolme", "II
+--  Bolme"), her BOLME oz icinde Roma reqemli alt-basliqlarla (I-VII)
+--  bolunub - novbeti dersle EYNI sehifede olduqları ucun alt-basliq
+--  qaydasi ile tutulur (informatika/kimya/biologiya-dan tanis
+--  mexanizm).  "Giris" -> cog-9-xerite (movzuca uygun gelir), "I
+--  Bolme" 4 alt-basliqla 4 movzuya (relyef/iqlim/sular/bioehtiyat),
+--  "II Bolme" 3 alt-basliqla 3 movzuya (sivilizasiya/ehali/
+--  iqtisadiyyat) - hamisi basligin ozunde adlanib.
+--
+--  10-cu sinif: dersliyde "Giris" + iki boyuk boluk ("1. YERIN
+--  TEBIETI", "2. DUNYANIN SIYASI VE IQTISADI MENZERESI"), bunlarin da
+--  icinde Roma reqemli alt-basliqlar (I-IX) var.  "Giris" ve "I.
+--  YER SEMA CISMIDIR" eyni movzuya (cog-10-yer-kainat) gedir - adlari
+--  demek olar eynidir.  "VII. Dunya ehalisi" ve "VIII. Siyasi
+--  munasibetler" de eyni movzuye (cog-10-ehali-siyasi) - movzu adinin
+--  ozu ("Ehali ve siyasi xeritə") hər ikisini eyni anda cagirir.
+--
+--  11-ci sinif: dersliyde 6 boyuk boluk (1-6), bazada 8 movzu.
+--  "5. QLOBAL PROBLEMLER VE ONLARIN HELLI YOLLARI"-nin 6 dersi arasinda
+--  enerji/erzaq ve ekoloji mövzular qarisiqdir (5.1 enerji, 5.4 erzaq,
+--  qalanlari - bioloji ehtiyat/su/alicilq/tullanti - aydin ekoloji
+--  deyil), sehife serhedi ile aydin bolunmur.  Boluk basliginin ozu
+--  ("Qlobal problemler") cog-11-ekoloji-qlobal-in adina ("Qlobal
+--  ekoloji problemler") daha yaxindir, ona gore 6 ders də ora getdi -
+--  cog-11-enerji-erzaq hele 0 alt movzu qalir (biologiya-11-viruslar
+--  ile eyni qerar: uydurma sehife serhedi qoyulmadi).
+--  "6. BEYNELXALQ INTEQRASIYA VE QLOBALLASMA" ise aydindir - ilk ders
+--  (6.1) hərfi-hərfinə "Beynelxalq inteqrasiya" adlanir, sehife 182-
+--  den qalani cog-11-qloballasma-ya gedir.
+--
+--  BURAXILAN BENDLER: "SOZLUK" (boyuk herfle - XARIC_UMUMI-deki
+--  "Sozluk" bunu tutmur, boyuk-kicik herf fərqlidir), "Terminlerin
+--  izahli lugeti", "Terminler lugeti".
+--
+--  YAZI VE EDED QUSURLARI: 9-cu sinifde iki bend "20" evezine "2O"
+--  (herf O reqem 0 evezine) yazilib - NOMRE bunlari tanimir, elle
+--  duzeldildi.  Bir necə bend soz birlesmesi ("Amerikanındaxilisuları"),
+--  kesik soz ("daxili sul" -> "daxili sulari", "sahə qurulus" ->
+--  "sahə qurulusu", "iqlim tiplər" -> "iqlim tipləri") ve bosluqsuz
+--  vergul/baglayici ("Avropa,Şimali Amerikavə") - hamisi mezmunu
+--  deyismeden duzeldilib.  11-ci sinifde iki bend "Praktik ders"
+--  evezine "Praktikders" yazilib.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -884,6 +959,88 @@ PAKETLER = [
             (11, [(805, ["ing-11-whys", "ing-11-experiences",
                          "ing-11-conversation", "ing-11-regrets",
                          "ing-11-creativity", "ing-11-news"])]),
+        ],
+    },
+    {
+        "ad": "cog6_11",
+        "etiket": "Cografiya 6-11 (11-ci sinif enerji-erzaq hele bos)",
+        "fayl": "90_alt_movzular_cografiya6_11.sql",
+        "fenn": "cografiya",
+        "fayl_on": "cografiya",
+        "basliq": BASLIQ_COG,
+        "bolmebasliq": True,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "SÖZLÜK", "Bölmə 4. KAİNATI SEYR EDİRƏM",
+            "Terminlərin izahlı lüğəti", "Terminlər lüğəti",
+        },
+        "duzelis": {
+            "Azərbaycan təbiətinin formalaşmas":
+                ("Azərbaycan təbiətinin formalaşması", "yazi"),
+            "2O. Praktik dərs. Azərbaycanın iqlimi":
+                ("Praktik dərs. Azərbaycanın iqlimi", "yazi"),
+            "Şimali Amerikanındaxilisuları":
+                ("Şimali Amerikanın daxili suları", "yazi"),
+            "Avstraliyanın daxili sul":
+                ("Avstraliyanın daxili suları", "yazi"),
+            "Avropa,Şimali Amerikavə Avstraliyanın əhalisi":
+                ("Avropa, Şimali Amerika və Avstraliyanın əhalisi", "yazi"),
+            "Təsərrüfatın sahə quruluş":
+                ("Təsərrüfatın sahə quruluşu", "yazi"),
+            "5O. İstehsal və qeyri-istehsal sahələri":
+                ("İstehsal və qeyri-istehsal sahələri", "yazi"),
+            "Azərbaycanın iqlim tiplər":
+                ("Azərbaycanın iqlim tipləri", "yazi"),
+            "Praktikdərs. Azərbaycanın iqtisadi rayonlarının səciyyəsi":
+                ("Praktik dərs. Azərbaycanın iqtisadi rayonlarının"
+                 " səciyyəsi", "yazi"),
+            "Praktikdərs.Türk dünyası birliyi":
+                ("Praktik dərs. Türk dünyası birliyi", "yazi"),
+        },
+        "ust": ("Cografiya ust movzu sayi 46 deyil", "true", 46),
+        "sinifler": [
+            (6, [(859, ["cog-6-mekan", "cog-6-beledci",
+                        ("cog-6-col", 68, "cog-6-kainat")]),
+                 (860, ["cog-6-tebiet", "cog-6-yurdumuz", "cog-6-dunya"])]),
+            (7, [(922, ["cog-7-movqe", "cog-7-daxili", "cog-7-seth"]),
+                 (923, ["cog-7-hava", "cog-7-iqlim", "cog-7-mesken",
+                        "cog-7-iqtisadi"])]),
+            (8, [(799, ["cog-8-kesfler", "cog-8-xerite",
+                        "cog-8-yer-hereketi", "cog-8-tektonik",
+                        "cog-8-atmosfer", "cog-8-hidrosfer",
+                        "cog-8-hidrosfer", "cog-8-olkeler",
+                        "cog-8-olkeler", "cog-8-ekologiya"])]),
+            (9, [(881, ["cog-9-xerite",
+                        {"I. Relyef və onun təsərrüfata təsiri":
+                             "cog-9-relyef",
+                         "II. İqlim və onun təsərrüfatda rolu":
+                             "cog-9-iqlim",
+                         "III. Su ehtiyatları və onların iqtisadi"
+                         " əhəmiyyəti": "cog-9-sular",
+                         "IV. Bioehtiyatların müxtəlifliyi və ondan"
+                         " istifadə": "cog-9-bioehtiyat"},
+                        {"V. Qədim və müasir sivilizasiyalar":
+                             "cog-9-sivilizasiya",
+                         "VI. Dünya əhalisinin müxtəlifliyi":
+                             "cog-9-ehali",
+                         "VII. İqtisadi-sosial həyat və onun inkişaf"
+                         " yolları": "cog-9-iqtisadiyyat"}])]),
+            (10, [(729, ["cog-10-yer-kainat",
+                         {"I. Yer səma cismidir": "cog-10-yer-kainat",
+                          "II. Yer səthinin təsviri": "cog-10-kartoqrafiya",
+                          "III. Yer qabığının inkişaf tarixi":
+                              "cog-10-geologiya",
+                          "IV. İqlim ehtiyatları": "cog-10-iqlim-ehtiyat",
+                          "V. Quru suları": "cog-10-quru-sulari",
+                          "VI. Coğrafi təbəqə": "cog-10-tebeqe"},
+                         {"VII. Dünya əhalisi": "cog-10-ehali-siyasi",
+                          "VIII. Siyasi münasibətlər": "cog-10-ehali-siyasi",
+                          "IX. Elmi-texniki inqilab və iqtisadiyyat":
+                              "cog-10-eti"}])]),
+            (11, [(814, ["cog-11-xerite-cis", "cog-11-tebii-ehtiyat",
+                         "cog-11-demoqrafiya", "cog-11-iqtisadi-inkisaf",
+                         "cog-11-ekoloji-qlobal",
+                         ("cog-11-inteqrasiya", 182, "cog-11-qloballasma")])]),
         ],
     },
 ]

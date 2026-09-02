@@ -216,7 +216,12 @@ select v.fayl,
        (select count(*) from public.topics c
           join public.topics p on p.id = c.parent_id
           join public.subjects s
-            on s.id = p.subject_id and s.slug = 'ingilis-dili') = 229)
+            on s.id = p.subject_id and s.slug = 'ingilis-dili') = 229),
+    ('90_alt_movzular_cografiya6_11.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'cografiya') = 406)
   ) as v(fayl, var)
  order by 1;
 
