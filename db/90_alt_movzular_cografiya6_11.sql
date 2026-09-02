@@ -49,11 +49,15 @@
 --  "5. QLOBAL PROBLEMLER VE ONLARIN HELLI YOLLARI"-nin 6 dersi arasinda
 --  enerji/erzaq ve ekoloji mövzular qarisiqdir (5.1 enerji, 5.4 erzaq,
 --  qalanlari - bioloji ehtiyat/su/alicilq/tullanti - aydin ekoloji
---  deyil), sehife serhedi ile aydin bolunmur.  Boluk basliginin ozu
---  ("Qlobal problemler") cog-11-ekoloji-qlobal-in adina ("Qlobal
---  ekoloji problemler") daha yaxindir, ona gore 6 ders də ora getdi -
---  cog-11-enerji-erzaq hele 0 alt movzu qalir (biologiya-11-viruslar
---  ile eyni qerar: uydurma sehife serhedi qoyulmadi).
+--  deyil), sehife serhedi ile AYRILMIR (hamisi ardıcıl sehifededir).
+--  Ilk versiya bunu tesadufi hesab edib hamisini cog-11-ekoloji-
+--  qlobal-a salmisdi (cog-11-enerji-erzaq 0 alt movzu qalirdi) -
+--  amma 5.1 ve 5.4-un öz METNI mövzunun adi ile ("Enerji ve erzaq
+--  tehlukesizliyi") birbasa uygun gelir, qalan 4 ders ise ekoloji/
+--  sosial mezmundur.  Ona gore MEZMUNA gore bolgu (tarix7-de
+--  qurulan "callable" valideyn formasi) islenir: 5.1 ve 5.4 oz
+--  METNLERI ile cog-11-enerji-erzaq-a, qalan 4-u cog-11-ekoloji-
+--  qlobal-a gedir - sehife sizma yoxdur, hər bend öz adına gore.
 --  "6. BEYNELXALQ INTEQRASIYA VE QLOBALLASMA" ise aydindir - ilk ders
 --  (6.1) hərfi-hərfinə "Beynelxalq inteqrasiya" adlanir, sehife 182-
 --  den qalani cog-11-qloballasma-ya gedir.
@@ -945,26 +949,27 @@ select p.subject_id, p.level_id, p.id, v.slug, v.name, v.sort
     --  5. QLOBAL PROBLEMLER VE ONLARIN HELLI YOLLARI  (cog-11-ekoloji-qlobal)
     ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-diaqnostik-qiymetlendirme',
      'Diaqnostik qiymətləndirmə', 10),
-    ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-alternativ-enerji',
-     'Alternativ enerji mənbələri', 20),
     ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-bioloji-ehtiyatlar',
-     'Bioloji ehtiyatlar və onlardan istifadə', 30),
-    ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-icmeli-problemi',
-     'Dünyanın içməli su problemi', 40),
+     'Bioloji ehtiyatlar və onlardan istifadə', 20),
+    ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-dunyanin-icmeli',
+     'Dünyanın içməli su problemi', 30),
     ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-hovzelerinin-cirklenmesi',
-     'Layihə: "Su hövzələrinin çirklənməsi və mühafizə tədbirləri"', 50),
-    ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-erzaq-problemi',
-     'Dünyanın ərzaq problemi', 60),
+     'Layihə: "Su hövzələrinin çirklənməsi və mühafizə tədbirləri"', 40),
     ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-insanlarin-aliciliq',
-     'İnsanların alıcılıq qabiliyyəti', 70),
+     'İnsanların alıcılıq qabiliyyəti', 50),
     ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-istehlak-sebeti',
-     'Layihə: "Ailənin istehlak səbəti"', 80),
+     'Layihə: "Ailənin istehlak səbəti"', 60),
     ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-tullantilar-istifade',
-     'Tullantılar və onlardan istifadə', 90),
+     'Tullantılar və onlardan istifadə', 70),
     ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-meiset-tullantilari',
-     'Layihə:"Ailənin məişət tullantıları"', 100),
+     'Layihə:"Ailənin məişət tullantıları"', 80),
     ('cog-11-ekoloji-qlobal', 'cog-11-ekoloji-qlobal-umumilesdirici-sual',
-     'Ümumiləşdirici sual və tapşırıqlar', 110),
+     'Ümumiləşdirici sual və tapşırıqlar', 90),
+    --  5. QLOBAL PROBLEMLER VE ONLARIN HELLI YOLLARI  (cog-11-enerji-erzaq)
+    ('cog-11-enerji-erzaq', 'cog-11-enerji-erzaq-alternativ-menbeleri',
+     'Alternativ enerji mənbələri', 10),
+    ('cog-11-enerji-erzaq', 'cog-11-enerji-erzaq-dunyanin-problemi',
+     'Dünyanın ərzaq problemi', 20),
     --  6. BEYNELXALQ INTEQRASIYA VE QLOBALLASMA  (cog-11-inteqrasiya)
     ('cog-11-inteqrasiya', 'cog-11-inteqrasiya-diaqnostik-qiymetlendirme',
      'Diaqnostik qiymətləndirmə', 10),
@@ -1058,5 +1063,5 @@ begin
     raise exception 'Cografiya ust movzu sayi 46 deyil: %', k;
   end if;
 
-  raise notice 'Cografiya 6-11 (11-ci sinif enerji-erzaq hele bos): 406 alt movzu hazir.';
+  raise notice 'Cografiya 6-11: 406 alt movzu hazir.';
 end $$;

@@ -269,7 +269,12 @@ select v.fayl,
           join public.topics p on p.id = c.parent_id
           join public.subjects s
             on s.id = p.subject_id and s.slug = 'umumi-tarix'
-          join public.levels l on l.id = p.level_id and l.code = '10') = 25)
+          join public.levels l on l.id = p.level_id and l.code = '10') = 25),
+    ('98_cografiya11_enerji_erzaq_duzelis.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id and p.slug = 'cog-11-enerji-erzaq'
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'cografiya') = 2)
   ) as v(fayl, var)
  order by 1;
 
