@@ -1324,6 +1324,52 @@ PAKETLER = [
                           "tarix-11-zefer")])]),
         ],
     },
+    {
+        "ad": "utarix6",
+        "etiket": "Umumi tarix 6 (8/9/11 uygunsuzluq - bax CLAUDE.md)",
+        "fayl": "93_alt_movzular_utarix6.sql",
+        "fenn": "umumi-tarix",
+        "fayl_on": "tarix",
+        "basliq": """\
+--  93_alt_movzular_utarix6.sql : UMUMI TARIX 6 - ALT MOVZULAR
+--
+--  NIYE
+--  On ikinci fenn.  Kitab id 920 - şagird gostərdi (link
+--  bu sessiyada mundericat.py-a elave edildi).
+--
+--  YALNIZ 6-CI SINIF: 8, 9 ve 11-ci sinifin kitablari (791/879/809,
+--  eyni yolla tapilib) HEC BIR halda bazadaki movzu adlarina UYGUN
+--  GəLMIR - dersliyin real bolmeleri REGIONAL-OLKE icindir (Qizilbas/
+--  Mogol/Cin/Osmanli/Qafqaz, Amerika/Britaniya/Fransa/Rusiya), baza
+--  ise TEMATIK dovr adlari gozleyir (Boyuk cografi kesfler/Intibah/
+--  Inqilablar/Maarifcilik, Senaye cevrilisi/Napoleon/Birlesme/ABS).
+--  Bu, tesadufi adlandirma ferqi deyil - iki AYRI dersliyin mundericati
+--  kimi gorunur.  CLAUDE.md-de qeyd edildi, davam etmezden evvel
+--  istifadeci ile aydinlasdirilmalidir.
+--
+--  MENBE: e-derslik.edu.az kitab id 920.  Adlar EYNILE goturulub.
+--
+--  DERSLIYIN QURULUSU: 3 bolme - "Tarix" (2 ders) -> utarix-6-ibtidai,
+--  "Qedim Serq sivilizasiyalari" (8 ders, sehife 50-den ikiye bolunur:
+--  Ehramlar/Sumer/Ikicayarasi -> mesopotamiya, Oda sitayis/Parfiya/
+--  Tanrinin doyusculeri/Ipek yolu/Sahmat -> serq) ve "Qedim Qerb
+--  sivilizasiyalari" (2 ders, sehife 116-dan bolunur: Avropa
+--  medeniyyetinin besiyi -> yunanistan, ilk Respublika yaradanlar ->
+--  roma).  utarix-6-medeniyyet ucun mundericatda isare yoxdur -
+--  biologiya-11-viruslar ile eyni qerar, 0 alt movzu qalir.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir.""",
+        "xaric_seh": set(),
+        "xaric_ad": set(),
+        "duzelis": {},
+        "ust": ("Umumi tarix ust movzu sayi (6,8,9,11) 24 deyil",
+                "l.code in ('6','8','9','11')", 24),
+        "sinifler": [
+            (6, [(920, ["utarix-6-ibtidai",
+                        ("utarix-6-mesopotamiya", 50, "utarix-6-serq"),
+                        ("utarix-6-yunanistan", 116, "utarix-6-roma")])]),
+        ],
+    },
 ]
 
 
