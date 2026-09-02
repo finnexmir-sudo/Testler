@@ -526,11 +526,15 @@ BASLIQ_COG = """\
 --  "5. QLOBAL PROBLEMLER VE ONLARIN HELLI YOLLARI"-nin 6 dersi arasinda
 --  enerji/erzaq ve ekoloji mövzular qarisiqdir (5.1 enerji, 5.4 erzaq,
 --  qalanlari - bioloji ehtiyat/su/alicilq/tullanti - aydin ekoloji
---  deyil), sehife serhedi ile aydin bolunmur.  Boluk basliginin ozu
---  ("Qlobal problemler") cog-11-ekoloji-qlobal-in adina ("Qlobal
---  ekoloji problemler") daha yaxindir, ona gore 6 ders də ora getdi -
---  cog-11-enerji-erzaq hele 0 alt movzu qalir (biologiya-11-viruslar
---  ile eyni qerar: uydurma sehife serhedi qoyulmadi).
+--  deyil), sehife serhedi ile AYRILMIR (hamisi ardıcıl sehifededir).
+--  Ilk versiya bunu tesadufi hesab edib hamisini cog-11-ekoloji-
+--  qlobal-a salmisdi (cog-11-enerji-erzaq 0 alt movzu qalirdi) -
+--  amma 5.1 ve 5.4-un öz METNI mövzunun adi ile ("Enerji ve erzaq
+--  tehlukesizliyi") birbasa uygun gelir, qalan 4 ders ise ekoloji/
+--  sosial mezmundur.  Ona gore MEZMUNA gore bolgu (tarix7-de
+--  qurulan "callable" valideyn formasi) islenir: 5.1 ve 5.4 oz
+--  METNLERI ile cog-11-enerji-erzaq-a, qalan 4-u cog-11-ekoloji-
+--  qlobal-a gedir - sehife sizma yoxdur, hər bend öz adına gore.
 --  "6. BEYNELXALQ INTEQRASIYA VE QLOBALLASMA" ise aydindir - ilk ders
 --  (6.1) hərfi-hərfinə "Beynelxalq inteqrasiya" adlanir, sehife 182-
 --  den qalani cog-11-qloballasma-ya gedir.
@@ -691,6 +695,46 @@ BASLIQ_TARIX = """\
 --  bendde bosluqsuz nöqte (fəsil.Şimali -> fəsil. Şimali).
 --
 --  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
+#  Tarix 7 (kitab 723) - bolmeler (III-XI evr, XI-XVI evr) bazadaki 8
+#  movzu ile HEC BIR seviyyede uygun gelmir (movzular mundericatdan
+#  deyil, tematik toplanib - db/70-de izah olunub).  Sehife/altbaslıq
+#  serhedi ile bolunmur - hər bendin öz MƏZMUNUNA gore tesnif olunur.
+UTARIX7_TESNIF = {
+    "Feodal münasibətlərinin meydana gəlməsi": "utarix-7-feodal",
+    "Xalqların böyük köçü. Avropa Hun və Ağ Hun dövlətləri":
+        "utarix-7-turk-dovletleri",
+    "Göytürk və Uyğur xaqanlıqları": "utarix-7-turk-dovletleri",
+    "Avar, Xəzər və Bulqar dövlətləri": "utarix-7-turk-dovletleri",
+    "Sasani dövləti. Qafqaz": "utarix-7-erken",
+    "Ərəb xilafəti": "utarix-7-ereb",
+    "Samani, Oğuz, Qaraxanlı, Qəznəli dövlətləri": "utarix-7-turk-dovletleri",
+    "Frank dövləti": "utarix-7-erken",
+    "Bizans. Slavyanlar": "utarix-7-erken",
+    "Mədəniyyət": "utarix-7-medeniyyet",
+    "Böyük Səlcuq dövləti": "utarix-7-selcuq-osmanli",
+    "Böyük Monqol imperiyası. Qızıl Ordu. Moskva knyazlığı":
+        "utarix-7-selcuq-osmanli",
+    "Dehli sultanlığı. Böyük Moğol dövləti": "utarix-7-serq",
+    "Osmanlı imperiyası": "utarix-7-selcuq-osmanli",
+    "Teymuri dövləti": "utarix-7-selcuq-osmanli",
+    "Xaçlı yürüşləri": "utarix-7-avropa",
+    "İtaliya": "utarix-7-avropa",
+    "Fransa": "utarix-7-avropa",
+    "İngiltərə": "utarix-7-avropa",
+    "Reformasiya": "utarix-7-avropa",
+    "Texniki ixtiralar. Böyük coğrafi kəşflər": "utarix-7-avropa",
+    "Şərq xalqlarının mədəniyyəti": "utarix-7-medeniyyet",
+    "Avropa və Amerika xalqlarının mədəniyyəti": "utarix-7-medeniyyet",
+}
+
+
+def utarix7_valideyn(seh, ad):
+    v = UTARIX7_TESNIF.get(ad)
+    if v is None:
+        raise SystemExit("utarix7: '%s' tesnifat xeritesinde yoxdur" % ad)
+    return v
+
 
 PAKETLER = [
     {
@@ -1105,7 +1149,7 @@ PAKETLER = [
     },
     {
         "ad": "cog6_11",
-        "etiket": "Cografiya 6-11 (11-ci sinif enerji-erzaq hele bos)",
+        "etiket": "Cografiya 6-11",
         "fayl": "90_alt_movzular_cografiya6_11.sql",
         "fenn": "cografiya",
         "fayl_on": "cografiya",
@@ -1181,7 +1225,10 @@ PAKETLER = [
                               "cog-10-eti"}])]),
             (11, [(814, ["cog-11-xerite-cis", "cog-11-tebii-ehtiyat",
                          "cog-11-demoqrafiya", "cog-11-iqtisadi-inkisaf",
-                         "cog-11-ekoloji-qlobal",
+                         (lambda seh, ad: "cog-11-enerji-erzaq"
+                          if ad in ("Alternativ enerji mənbələri",
+                                    "Dünyanın ərzaq problemi")
+                          else "cog-11-ekoloji-qlobal"),
                          ("cog-11-inteqrasiya", 182, "cog-11-qloballasma")])]),
         ],
     },
@@ -1368,6 +1415,141 @@ PAKETLER = [
             (6, [(920, ["utarix-6-ibtidai",
                         ("utarix-6-mesopotamiya", 50, "utarix-6-serq"),
                         ("utarix-6-yunanistan", 116, "utarix-6-roma")])]),
+        ],
+    },
+    {
+        "ad": "utarix7",
+        "etiket": "Umumi tarix 7 (mezmuna gore tesnif - bax CLAUDE.md)",
+        "fayl": "95_alt_movzular_utarix7.sql",
+        "fenn": "umumi-tarix",
+        "fayl_on": "tarix",
+        "nomre": "bos",
+        "basliq": """\
+--  95_alt_movzular_utarix7.sql : UMUMI TARIX 7 - ALT MOVZULAR
+--
+--  NIYE AYRI PAKET (8/9/10/11-den, hamisi 96-da)
+--  Kitab 723-un OZ bolmeleri ("Dunya olkeleri III-XI yuzillikde",
+--  "...XI-XVI yuzillikde") bazadaki 8 movzu ile HEC BIR seviyyede
+--  uygun gəlmir - bu movzular (erken/ereb/feodal/serq/avropa/
+--  medeniyyet/turk-dovletleri/selcuq-osmanli) db/66/70-de MEZMUNA
+--  gore tesnif edilib, kitabin oz bolme basliqlarindan yox (izah
+--  db/70-de var).  Ona gore sehife/altbaslıq serhedi ISLEMIR - hər
+--  bendin METNİ UTARIX7_TESNIF xeritesi ile duz movzuya baglanir
+--  (23 bend, hamisi xeritede var - yoxlanilib).  "Teymuri dovleti"
+--  Selcuq/Monqol/Osmanli qrupuna (temporal qonşuluq), "Avropa Hun ve
+--  Ag Hun dovletleri" turk-dovletleri qrupuna (erkən köç dovru turk
+--  xalqlari kimi oxunur) verilib - ikisi de mueyyen deqreje
+--  mubahiseli ola biler, amma her ikisi mundericatdaki mezmuna
+--  esaslanir, uydurma yoxdur.
+--
+--  Ayri paketdir, cunki bu kitabin "10 Mədəniyyət" bendi 10-cu
+--  sinifin eyni herfi bendi ile TEXTUAL toqquşur - eyni paketde eyni
+--  duzelis acari ikisine de tetbiq olardi (bax 96-nin basliq serhi).
+--
+--  MENBE: e-derslik.edu.az kitab id 723.  Adlar EYNILE goturulur.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir.""",
+        "xaric_seh": set(),
+        "xaric_ad": set(),
+        "duzelis": {},
+        "ust": ("Umumi tarix ust movzu sayi (7) 8 deyil",
+                "l.code = '7'", 8),
+        "sinifler": [
+            (7, [(723, [utarix7_valideyn, utarix7_valideyn])]),
+        ],
+    },
+    {
+        "ad": "utarix8_9_11",
+        "etiket": "Umumi tarix 8, 9, 11",
+        "fayl": "96_alt_movzular_utarix8_9_11.sql",
+        "fenn": "umumi-tarix",
+        "fayl_on": "tarix",
+        "nomre": "bos",
+        "basliq": """\
+--  96_alt_movzular_utarix8_9_11.sql : UMUMI TARIX 8,9,11 - ALT MOVZULAR
+--
+--  db/94-den sonra bu uc sinfin movzulari kitabin oz bolmelerine
+--  bire-bir uygundur - hər bolme birbaşa öz movzusuna (8: serq/
+--  avropa-amerika, 9 ve 11: dunya-1/2/3).  8-ci sinifin kitabinda
+--  basdaki bos "1.Многочлены" bolmesi (basqa fennden qalma scraper
+--  artefaktı) avtomatik xaric olunur - bendi yoxdur.
+--
+--  10-cu sinif AYRI paketdedir (97) - onun "Mədəniyyət" duzelisi bu
+--  siniflerin oz "N. Mədəniyyət" bendlerine de tesadufen tetbiq
+--  olardi (eyni paketde umumi ad-fallback toqquşurdu, bax 97-nin
+--  basliq serhi).  Burada hər sinifin "Mədəniyyət" bendi zaten oz
+--  ayrica bolmesinin (dunya-1/2/3) daxilindedir - toqquşma yoxdur,
+--  duzelise ehtiyac da yoxdur.
+--
+--  YAZI QUSURU: 11-ci sinifde "2 .Fransa ve Almaniya" - nomre ile soz
+--  arasinda sehv boşluqlu nöqte, dogru yazi "Fransa ve Almaniya".
+--
+--  MENBE: e-derslik.edu.az.  8: kitab 791.  9: 879.  11: 809.
+--  Adlar EYNILE goturulur.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir.""",
+        "xaric_seh": set(),
+        "xaric_ad": set(),
+        "duzelis": {
+            "2 .Fransa və Almaniya": ("Fransa və Almaniya", "yazi"),
+        },
+        "ust": ("Umumi tarix ust movzu sayi (8,9,11) 8 deyil",
+                "l.code in ('8','9','11')", 8),
+        "sinifler": [
+            (8, [(791, ["utarix-8-serq", "utarix-8-avropa-amerika"])]),
+            (9, [(879, ["utarix-9-dunya-1", "utarix-9-dunya-2",
+                        "utarix-9-dunya-3"])]),
+            (11, [(809, ["utarix-11-dunya-1", "utarix-11-dunya-2",
+                         "utarix-11-dunya-3"])]),
+        ],
+    },
+    {
+        "ad": "utarix10",
+        "etiket": "Umumi tarix 10",
+        "fayl": "97_alt_movzular_utarix10.sql",
+        "fenn": "umumi-tarix",
+        "fayl_on": "tarix",
+        "nomre": "bos",
+        "basliq": """\
+--  97_alt_movzular_utarix10.sql : UMUMI TARIX 10 - ALT MOVZULAR
+--
+--  Kitabin 4 bolmesi bazadaki 6 movzuya deyisir - I bolme ("Qedim
+--  Serq ve Avropa sivilizasiyalari") sehife 30-dan bolunur (Ibtidai/
+--  Misir-Mesopotamiya/Iran-Hindistan/Hun-Cin -> qedim-serq,
+--  Yunanistan/Makedoniya/Roma -> antik) - eyni qayda 6-ci sinifde
+--  artiq islenib.  II/III/IV bolmelerin HƏR BIRININ öz "Mədəniyyət"
+--  bendi standalone "medeniyyet" movzusuna dusur (sehife serhedi ile
+--  ayrilir) - uc bend eyni HƏRFI adla ("Mədəniyyət") gəldiyi ucun
+--  aydinliq ucun dovr adi elave olunub (asagida AD DUZELISLERI).
+--
+--  AYRI PAKETDIR (96-dan): duzelis xeritesi RAW METNI TAPMAYANDA
+--  strip-lenmis ada (yeni "Mədəniyyət"-e) geri düşür - bu, 8/9/11-in
+--  oz "N. Mədəniyyət" bendlerine də TESADUFEN tetbiq olardi, cunki
+--  onlarin da strip-lenmis adi eyni "Mədəniyyət"-dir.  Ayri paketde
+--  bu problem yoxdur, cunki bu kitabda hər üç bend RAW METNLƏ
+--  ("10 Mədəniyyət", "18 Mədəniyyət", bare "Mədəniyyət") birbaşa
+--  tapılır - ad-fallback-a ehtiyac qalmır.
+--
+--  MENBE: e-derslik.edu.az kitab id 745.  Adlar EYNILE goturulur.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir.""",
+        "xaric_seh": set(),
+        "xaric_ad": set(),
+        "duzelis": {
+            "10 Mədəniyyət": ("Mədəniyyət (III-XI əsrlər)", "aydinliq"),
+            "18 Mədəniyyət": ("Mədəniyyət (XI-XV əsrlər)", "aydinliq"),
+            "Mədəniyyət": ("Mədəniyyət (XVI-XVIII əsrlər)", "aydinliq"),
+        },
+        "ust": ("Umumi tarix ust movzu sayi (10) 6 deyil",
+                "l.code = '10'", 6),
+        "sinifler": [
+            (10, [(745, [("utarix-10-qedim-serq", 30, "utarix-10-antik"),
+                         ("utarix-10-erken-orta", 62,
+                          "utarix-10-medeniyyet"),
+                         ("utarix-10-orta-esrler", 106,
+                          "utarix-10-medeniyyet"),
+                         ("utarix-10-yeni-dovr", 146,
+                          "utarix-10-medeniyyet")])]),
         ],
     },
 ]
@@ -1565,6 +1747,19 @@ def yigim(paket):
                     paylar = [(v, [x for x in adlar
                                    if spec.get(x[1], spec.get(None)) == v])
                               for v in sira_v]
+                elif callable(spec):
+                    #  MEZMUNA gore bolgu: sehife/altbaslıq serhedi
+                    #  kifayet etmir, hər bendin öz METNİNƏ baxılmalıdır
+                    #  (mes. tarix7 - bolme daxilinde bendlər qarışıq
+                    #  sırayla fərqli valideynə aiddir).
+                    sira_v, tesnif = [], []
+                    for x in adlar:
+                        v = spec(x[0], x[2])
+                        if v not in sira_v:
+                            sira_v.append(v)
+                        tesnif.append((x, v))
+                    paylar = [(v, [x for x, vv in tesnif if vv == v])
+                              for v in sira_v]
                 else:
                     paylar = [(spec, adlar)]
                 for valideyn, pay in paylar:
@@ -1623,6 +1818,9 @@ SEBEBLER = {
     "rusca": "portal 10-cu sinfin 9/10-cu bolmesini rus nesrinden"
              " yigib - dogru ad kitabin oz sehife basligindan",
     "yazi": "yazi qusuru (bosluq, herf)",
+    "aydinliq": "eyni ad (mes. 'Medeniyyet') bir nece dovrden bir"
+                " movzuya birlesir - siyahida aydin gorunmesi ucun"
+                " dovr elave edilib, mezmun deyismeyib",
 }
 
 
@@ -1635,7 +1833,7 @@ def sql_yaz(paket, netice, duzelen):
     p = ["-- " + "=" * 69, paket["basliq"], "--", ORTAK]
     if duzelen:
         p.append("--  AD DUZELISLERI (mezmun deyismeyib):")
-        for k in ("duster", "rusca", "yazi"):
+        for k in ("duster", "rusca", "yazi", "aydinliq"):
             say = [d for d in duzelen if d[4] == k]
             if not say:
                 continue

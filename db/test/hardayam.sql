@@ -123,10 +123,13 @@ select v.fayl,
        (select count(*) from public.questions where ext_key like 'edeb11-%') = 248),
     ('57_sinif_dubli.sql',
        (select count(*) from public.levels where code ~ '^[0-9]+$') = 11),
+    --  parent_id is null saxlanilir - yoxsa 91-in alt movzulari eyni
+    --  slug prefiksini pay layib sayi 16-dan yuxari qaldirir
     ('58_movzular_edebiyyat9_10.sql',
        (select count(*) from public.topics t join public.subjects s
           on s.id = t.subject_id and s.slug = 'edebiyyat'
-         where t.slug like 'edeb-9-%' or t.slug like 'edeb-10-%') = 16),
+         where t.parent_id is null
+           and (t.slug like 'edeb-9-%' or t.slug like 'edeb-10-%')) = 16),
     ('59_bank_edebiyyat10.sql',
        (select count(*) from public.questions where ext_key like 'edeb10-%') = 248),
     ('60_bank_edebiyyat9.sql',
@@ -134,22 +137,27 @@ select v.fayl,
     ('61_movzular_edebiyyat5_8.sql',
        (select count(*) from public.topics t join public.subjects s
           on s.id = t.subject_id and s.slug = 'edebiyyat'
-         where t.slug ~ '^edeb-[5-8]-') = 24),
+         where t.parent_id is null and t.slug ~ '^edeb-[5-8]-') = 24),
     ('62-65_bank_edebiyyat5..8.sql',
        (select count(*) from public.questions
          where ext_key ~ '^edeb[5-8]-') = 744),
-    --  >= 18, cunki 70 fayli 7-ci sinife daha iki movzu elave edir
+    --  >= 14 (asagi hedd), cunki iki sonraki fayl bu sayi deyisir:
+    --  70 7-ci sinife 2 movzu elave edir (6->8), 94 8-ci sinifi
+    --  6-dan 2-ye endirir (bolme seviyyesine birlesir) - hansi
+    --  isleyib/islememesinden asili olmayaraq >= 14 hemise dogrudur.
+    --  parent_id is null - yoxsa 95/96-nin alt movzulari (eyni slug
+    --  prefiksi) sayi yuxari qaldirir (58/61-de tapilan eyni tele)
     ('66_movzular_umumi_tarix6_8.sql',
        (select count(*) from public.topics t join public.subjects s
           on s.id = t.subject_id and s.slug = 'umumi-tarix'
-         where t.slug ~ '^utarix-[678]-') >= 18),
+         where t.parent_id is null and t.slug ~ '^utarix-[678]-') >= 14),
     ('67_bank_tarix_umumi6_8.sql',
        (select count(*) from public.questions
          where ext_key ~ '^utarix[678]-') = 558),
     ('68_movzular_umumi_tarix10.sql',
        (select count(*) from public.topics t join public.subjects s
           on s.id = t.subject_id and s.slug = 'umumi-tarix'
-         where t.slug like 'utarix-10-%') = 6),
+         where t.parent_id is null and t.slug like 'utarix-10-%') = 6),
     ('69_bank_tarix_umumi10.sql',
        (select count(*) from public.questions where ext_key like 'utarix10-%') = 186),
     ('70_movzular_umumi_tarix7.sql',
@@ -243,7 +251,36 @@ select v.fayl,
           join public.subjects s
             on s.id = t.subject_id and s.slug = 'umumi-tarix'
           join public.levels l on l.id = t.level_id and l.code in ('8','9','11')
-         where t.parent_id is null) = 8)
+         where t.parent_id is null) = 8),
+    ('95_alt_movzular_utarix7.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'umumi-tarix'
+          join public.levels l on l.id = p.level_id and l.code = '7') = 23),
+    ('96_alt_movzular_utarix8_9_11.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'umumi-tarix'
+          join public.levels l on l.id = p.level_id and l.code in ('8','9','11')) = 60),
+    ('97_alt_movzular_utarix10.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'umumi-tarix'
+          join public.levels l on l.id = p.level_id and l.code = '10') = 25),
+    ('98_cografiya11_enerji_erzaq_duzelis.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id and p.slug = 'cog-11-enerji-erzaq'
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'cografiya') = 2),
+    ('99_bank_ingilis8_788.sql',
+       (select count(*) from public.questions q
+          join public.topics t on t.id = q.topic_id
+          join public.subjects s on s.id = t.subject_id and s.slug = 'ingilis-dili'
+          join public.levels l on l.id = t.level_id and l.code = '8'
+         where q.ext_key like 'ing8v2-%') = 360)
   ) as v(fayl, var)
  order by 1;
 
