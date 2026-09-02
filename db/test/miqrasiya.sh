@@ -52,6 +52,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          90_alt_movzular_cografiya6_11.sql \
          91_alt_movzular_edebiyyat5_11.sql \
          92_alt_movzular_tarix5_8_9_11.sql \
+         93_alt_movzular_utarix6.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
