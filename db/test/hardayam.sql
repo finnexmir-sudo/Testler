@@ -196,7 +196,22 @@ select v.fayl,
        (select count(*) from public.topics c
           join public.topics p on p.id = c.parent_id
           join public.subjects s
-            on s.id = p.subject_id and s.slug = 'informatika') = 348)
+            on s.id = p.subject_id and s.slug = 'informatika') = 348),
+    ('86_alt_movzular_fizika6_11.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'fizika') = 344),
+    ('87_alt_movzular_kimya7_11.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'kimya') = 280),
+    ('88_alt_movzular_biologiya6_11.sql',
+       (select count(*) from public.topics c
+          join public.topics p on p.id = c.parent_id
+          join public.subjects s
+            on s.id = p.subject_id and s.slug = 'biologiya') = 278)
   ) as v(fayl, var)
  order by 1;
 

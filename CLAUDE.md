@@ -174,9 +174,10 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    4:69, 5:89, 6:85, 7:63, 8:74, 9:92, 10:77, 11:77). **Həyat bilgisi
    1-4** də hazırdır (`84`, 125 alt mövzu — dərslik və baza dörd
    sinifdə də bire-bir uyğundur), **İnformatika 1-11** də (`85`,
-   348 alt mövzu). Adlar e-dərslikdən eynilə, dərslikdəki sıra ilə.
-   `82`/`83`/`84`/`85` əllə yazılmır — `tools/alt_movzular.py`
-   çıxarır (paket-paket konfiqurasiya).
+   348 alt mövzu), **Fizika 6-11** də (`86`, 344 alt mövzu),
+   **Kimya 7-11** də (`87`, 280 alt mövzu). Adlar e-dərslikdən eynilə,
+   dərslikdəki sıra ilə. `82`/`83`/`84`/`85`/`86`/`87` əllə yazılmır —
+   `tools/alt_movzular.py` çıxarır (paket-paket konfiqurasiya).
    **Ağac hər fənndə eyni formada deyil** — generator dörd hal tanıyır:
    bölmə → bir mövzu; bölmə **buraxılır** (informatika 5 «Giriş»,
    11 «Layihələr üçün yardımçı materiallar»); bölmə **səhifəyə görə**
@@ -184,7 +185,33 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    bölmə **alt başlığa görə** bölünür (informatika 1, 3, 4 — alt başlıq
    nömrəsizdir və özündən sonrakı dərslə eyni səhifədədir, ona görə
    dərs sayılmır). İki bölmə bir mövzuya da düşə bilər (informatika
-   10, 11) — sətirlər birləşir, sort davam edir.
+   10, 11; fizika 10-un V fəsli III-ə) — sətirlər birləşir, sort
+   davam edir; bölmə **bir neçə səhifə sərhədi ilə növbələşərək**
+   iki mövzuya paylanır (fizika 9 «İşıq hadisələri» — yayılma/qayıtma
+   → güzgü → sınma → linza/göz sırası ilə iki dəfə keçid edir,
+   sərhədlər 123/133/145; bölmə adları eyni qalır, movzu dəyişir).
+   Dərslikdə mündəricat mötəbər olmaya bilər: fizika 7-də «Bölmə 4.
+   Atomun quruluşu və ölçüsü» başlığı portalın öz mündəricat
+   panelində ayrıca bölmə kimi deyil, əvvəlki bölmənin sətri kimi
+   görünür (portal qüsuru) — generator bu sətri silib sərhəd kimi
+   işlədir.
+   **Kimya 9 və 11-ci sinifdə daha da dərindir**: dərslikdə cəmi
+   3-4 böyük bölük var («I. METALLAR», «I. Hissə»), hər biri özünün
+   içində «Fəsil N.» başlıqları ilə bir neçə mövzuya bölünür (kimya 9:
+   sərhədlər 23/89/121; kimya 11: 50/97/118). «Fəsil N.» başlıqları
+   (bəzən böyük, bəzən kiçik hərflə) mövzu deyil — hər biri ayrıca
+   `xaric_ad`da adı ilə sadalanıb, səhifə üst-üstə düşmə riski
+   olduğu üçün ümumi «bölmə başlığı» qaydasına (informatika kimi)
+   güvənilmədi.
+   **Slug generatorunda tələ tapıldı və düzəldildi**: bir bölmədə
+   iki fərqli mövzunun başlıqları demək olar eyni sözlərlə qurulubsa
+   (kimya 10 — «Alkadienlərin homoloji sırası…» / «Tsikloalkanların
+   homoloji sırası…»), hər sözün öz kiçik qrupda «təkrarsız» sayılması
+   səhv uzun slug seçirdi (`"-".join(tek)` heç bir hədd qoymadan bütün
+   sözləri birləşdirirdi, halbuki qısa `ilk+son söz` namizədi
+   arxada qalırdı). İndi bu namizəd 3 sözlə həddlənib — köhnə
+   fayllar (82-86) təsirlənmədi, çünki fərq yalnız NƏ vaxt hədd
+   aşılanda işə düşür.
    **Böyük hərflə yazılış toxunulmur**: informatika 3 və 4-ün
    başlıqları kitabın özündə də tam böyük hərflədir
    (`<h3>1. İNSAN VƏ İNFORMASİYA`), portal qüsuru deyil.
@@ -310,6 +337,15 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    sayğacları bunu bağlayır. Yoxlama üçün mock `X-Test-Delay`
    başlığını tanıyır — yarışı deterministik yaratmağın başqa yolu
    yoxdur (mock çoxaxınlıdır).
+   **Sual yazma formasında (`#qtop`) da eyni sinif tələ var idi** —
+   bank e2e-si (`test/e2e_bank.py`, F0 bölməsi) mövzu ağacı böyüdükcə
+   (fizika 6-11 əlavəsi ilə `topics` cədvəli xeyli genişlədi) sabit
+   `wait_for_timeout(900)` bəzən kifayət etmirdi: `#qlev`/`#qsub`
+   dəyişəndə köhnə siyahı ekranda qalır, yoxlama səhv sinif/fənnin
+   mövzularını görürdü. Sabit gözləmə yerinə `loadTopics()`-in
+   `#qtop`-u yenidən aktivləşdirməsini (`disabled=false`) gözləyən
+   `wait_for_function` qoyuldu — bank ekranındakı kimi ayrıca sayğac
+   yazmadan, mövcud disabled/enabled keçidindən istifadə edir.
 12. Riyaziyyat 2 mövzularının yenilənməsi
    (portala yeni nəşr gələndə).
 13. ~~Sinif (level) modeli~~ — hazırdır (`db/100_seviyye_modeli.sql`).
@@ -496,7 +532,7 @@ bütün funksiyaların gövdəsi də tutuşdurulur.
 
 Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
 `claude/bil10-question-bank-expansion-eu6vkn` budağı `main`-ə
-birləşdirildikdən sonra 30…85 aralığındadır. Əvvəl nömrələr
+birləşdirildikdən sonra 30…87 aralığındadır. Əvvəl nömrələr
 toqquşurdu (bankın 7 faylı 23–29-da idi, indi 75–81-ə köçürülüb).
 Bölgü belədir:
 
@@ -877,3 +913,34 @@ pg_trgm və cavab balansı ilə bir sırada.
 
 Xronoloji sualda cavab sətri (`2 - 3 - 1`) da cavab sayılır — eyni
 sıralama bir bankda ikidən çox təkrarlanmamalıdır.
+
+---
+
+## Çoxmülahizəli birləşmə sualı — təsdiqlənmiş format (növbəti mərhələ)
+
+Real DİM səviyyəsinə yaxınlaşdırmaq üçün sınanıb təsdiqlənmiş əlavə
+qəlib: **4 nömrələnmiş mülahizə + kombinasiya variantları**
+(`A) 1,3  B) yalnız 1  C) 2,4  D) 1,2,3  E) 3,4`). Sxemə toxunmur —
+mövcud `single` növünün içindədir, sual mətni sadəcə çoxsətirli yazılır.
+
+Pilot: `utarix-9-birlesme` mövzusunda real şagird üzərində sınandı.
+Nəticə: format işlədi («vaxt aparan, düşündürücü, çətin orta»),
+amma **əl ilə yazılan yeni fakt riskli oldu** — bir sınaq sualında
+Qaribaldi/Kavur haqqında əlavə diplomatik detal yazılmışdı, şagird
+«dərslikdə yoxdur» dedi. Səbəb detalın yalançı olması deyildi —
+mündəricatın göstərdiyi dərinlikdən kənara çıxmışdı.
+
+**Qayda: retrofit yalnız mövzunun ÖZ bankında artıq mövcud olan
+faktlardan qurulur.** Yəni 4 mülahizə yeni tarixi bilik yazmaqla yox,
+həmin mövzunun mövcud (asan/orta/çətin) suallarının cütlük, ardıcıllıq
+və müqayisə faktlarını bir sualda birləşdirməklə alınır. Bu, iki şeyi
+eyni anda verir: mündəricat sərhədini aşmır (bütün faktlar onsuz da
+təsdiqlənib) və analitik çətinliyi artırır (şagird 4 ayrı faktı
+yadda saxlayıb müqayisə etməlidir, təkini yox).
+
+**Sıra:** əvvəlcə mövzu ağacları (alt-mövzular) bitsin — bu, ayrı
+məsələdir. Sonra bu format bütün fənlərə (təkcə tarixə yox) mövcud
+"çətin" sualların üzərində tətbiq olunacaq. Venn diaqramı formatı
+(şəkilli/analitik) ayrı, sonrakı qərardır — `media_url` heç bir
+ekranda render olunmur, ona görə real frontend işi tələb edir; hələ
+başlanmayıb.

@@ -268,6 +268,164 @@ BASLIQ_INF = """\
 --  (s.6 basligi <h3>1. INSAN VE INFORMASIYA</h3>).  Bu, portal
 --  qusuru deyil - dersliyin dizaynidir, ona gore toxunulmur."""
 
+BASLIQ_FIZ = """\
+--  86_alt_movzular_fizika6_11.sql : FIZIKA 6-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Dorduncu fenn.  Riyaziyyat, heyat bilgisi ve informatika hazirdir.
+--  Fizika 6-cı sinifden baslayir (1-5-de yoxdur).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 546 (6),
+--  867/868 (7), 931/932 (8), 472 (9), 734 (10), 282 (11).  Adlar
+--  EYNILE goturulub.
+--
+--  DERSLIYIN QURULUSU BIZIMKINDEN FERQLIDIR - HER SINIFDE AYRI SEBEB:
+--
+--  6-cı sinif: derslikde 4 bolme, bazada 6 movzu - iki bolme
+--  SEHIFEYE GORE ikiye bolunur ("1 FIZIKA NEYI OYRENIR?" ->
+--  fiz-6-giris + fiz-6-olcmeler, sehife 22-den; "4 QARSILIQLI
+--  TESIRLER VE HEREKET" -> fiz-6-hereket + fiz-6-enerji, sehife 83-den).
+--
+--  7-ci sinif: kitab 867-nin "Giris" bolmesi (3 hemin dersin adi ile -
+--  "Fizikler tebiet haqqinda ne bilirler?" ve s.) NOMRESIZ ve derslikde
+--  ayri "==" bolme kimi gorunur, amma bazada ayri movzusu yoxdur -
+--  ilk movzuya (fiz-7-olcme) elave edilib.  Daha ciddi tele: kitabin
+--  öz mundericat sehifesinde "Bolme 4. Atomun qurulusu ve olcusu"
+--  basligi mundericat SCRAPER-inde "==" kimi DEYIL, adi bir sətir
+--  kimi "Bolme 3. Eyrixetli hereket"in daxilinde gorunur (portal
+--  qusuru).  Bu setir ozu XARIC edilib (movzu deyil, basliqdir),
+--  sehife 76-dan sonrasi fiz-7-atom-a gedir.
+--
+--  9-cu sinif: 4 fesil, bazada 6 movzu.  Fesil 3 (ISIQ HADISELERI)
+--  ISIQ ve GUZGU-LINZA arasinda İKİ DEFE novbelesir (dersler movzu
+--  uzre deyil, dersliyin oz ardicilligi ilə düzülüb): yayilma+qayitma
+--  (isiq) -> guzgu (guzgu-linza) -> sinma+tam-daxili-qayitma (isiq) ->
+--  linza+goz (guzgu-linza).  Sehife serhedleri: 123, 133, 145.
+--  Fesil 4 (ATOM VE ATOM NUVESI) bir sehifede (193) radioaktivlik/
+--  nuve arasinda bolunur.
+--
+--  10-cu sinif: derslikde 7 fesil, bazada 6 movzu - V fesil
+--  (RELYATIVISTIK MEXANIKA, cemi 2 ders: nisbilik nezeriyyesi ve
+--  enerji-kutle elaqesi) III fesle (SAXLANMA QANUNLARI) birlesir -
+--  hər ikisi enerjinin saxlanmasi movzusudur.
+--
+--  11-ci sinif: 4 fesil, bazada 6 movzu.  I fesil (ELEKTROMAQNIT
+--  SAHESI) sehife 31-den ELEKTROSTATIKA/MAQNIT-INDUKSIYA arasinda,
+--  III fesil (ELEKTROMAQNIT REQSLERI VE DALGALARI) sehife 128-den
+--  REQS/OPTIKA arasinda bolunur.
+--
+--  "•" ILE BASLAYAN BENDLER (6-cı sinif: "• Ümumiləşdirici
+--  tapşırıqlar"): dusterin ozu, movzu adinin hissesi deyil - silinir.
+--
+--  BURAXILAN BOLMELER: yoxdur - hamisi hardasa bir movzuya baglanir.
+--  Arxa hisse (Sozluk/Terminler lugeti/fesil cavab acari/Elaveler)
+--  xaric edilir."""
+
+BASLIQ_KIM = """\
+--  87_alt_movzular_kimya7_11.sql : KIMYA 7-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Altinci fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika
+--  hazirdir.  Kimya 7-ci sinifden baslayir (1-6-da yoxdur).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 871/872 (7),
+--  935/936 (8), 505 (9), 739 (10), 349 (11).  Adlar EYNILE goturulub.
+--
+--  DERSLIYIN QURULUSU 9 VE 11-CI SINIFDE COX PILLELIDIR:
+--
+--  9-cu sinif: derslikde YALNIZ 3 boyuk boluk var ("I. METALLAR",
+--  "II. QEYRİ-METALLAR", "III. ÜZVİ KİMYAYA GİRİŞ...") - hər biri
+--  ozunun icinde "Fəsil N." basliqlari ile bolunub, bazada ise 6
+--  movzu var.  "I" boluk sehife 23-den iki movzuya (metal-umumi/
+--  metallar), "II" boluk sehife 89 ve 121-den UC movzuya (halogen-
+--  kukurd/azot-fosfor/karbon-silisium) bolunur.  "Fəsil N." basliqlari
+--  ozleri movzu deyil - novbeti derslə eyni sehifede olsalar da,
+--  bezen basqa sehifede oldugu ucun umumi qaydayla (bolmebasliq)
+--  tutulmur, ona gore herfi mетnleri xaric siyahisindadir.
+--
+--  11-ci sinif: daha da derindir - "I. Hissə" YEGANE boluk daxilinde
+--  DORD movzu gizlenib (spirtler/aldehid-tursu/efir-yag/karbohidrat),
+--  sehife 50/97/118-den bolunur.  "fəsil N." basliqlari (kicik herflə)
+--  eyni sebeble xaric siyahisindadir.  Bir yazi qusuru var:
+--  "Ümumiləşdİrİcl sual və tapşırıqlar" (s.47) - boyuk/kicik herf
+--  qarisigi. "3.5.Sabun..." bosluqsuz nomrelidir (s.109).
+--
+--  7-ci sinifin "Giriş" bolmesi (1 ders - laboratoriya tehlukesizliyi)
+--  nomresiz ayri "==" bolme kimi gelir, bazada ayri movzusu yoxdur -
+--  ilk movzuya (kim-7-elementler) elave edildi.
+--
+--  10-cu sinifin "Kimya" / "Giriş" bolmesi (1 ders, dersliyin ozunun
+--  "bu kitabla nece isləmeli" tipli girisidir - real kimya mezmunu
+--  deyil) ATILIB, informatika 5-in "Giriş"i kimi.
+--
+--  10-cu sinifde III BÖLMƏ (Alkadienlər) ve V BÖLMƏ (Tsikloalkanlar)
+--  EYNI movzuya (kim-10-dien-tsiklo) gedir, aralarinda IV BÖLMƏ
+--  (Alkinler, oz movzusu) olsa da - setirler birlesir, sort davam edir.
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
+BASLIQ_BIO = """\
+--  88_alt_movzular_biologiya6_11.sql : BIOLOGIYA 6-11 - ALT MOVZULAR
+--
+--  NIYE
+--  Yeddinci fenn.  Riyaziyyat, heyat bilgisi, informatika, fizika,
+--  kimya hazirdir.  Biologiya 6-ci sinifden baslayir (1-5-de yoxdur).
+--
+--  MENBE: e-derslik.edu.az "Movzular" agaci - kitab id 538 (6),
+--  863/864 (7), 927/928 (8), 727 (10), 276 (11).  Adlar EYNILE
+--  goturulub.
+--
+--  9-CU SINIF BU FAYLDA YOXDUR: kitab id 467-nin server terefi
+--  BOS qayidir (Cemi sehife: 0) - portal bu derslik ucun meznunu
+--  hele yuklemeyib, umumi mundericat.py scraperi de bunu tesdiq edir.
+--  Ust movzular (bio-9-*) ondan evvel, basqa menbeden qurulub -
+--  toxunulmur, sadece bu merhelede alt movzu almir.  Portal
+--  meznunu yukleyende elave olunacaq.
+--
+--  DERSLIYIN QURULUSU:
+--
+--  6-ci sinif: 8 Fesil, hamisi bire-bir movzuya (birbasa).
+--
+--  7-ci sinif: kitab 863-un "Giris" bolmesi (2 ders, basliq yoxdur)
+--  ayri "==" bolme kimi gelir, bazada ayri movzusu yoxdur - ilk
+--  movzuya (bio-7-huceyre-orqanizm) elave edildi.
+--
+--  8-ci sinif: 8 Bolme, hamisi bire-bir movzuya (birbasa).
+--
+--  10-cu sinif: derslikde 5 boyuk boluk (I-V), bazada 8 movzu -
+--  ILK boluk ("I. Biosferde istehsal ve istehlak") sehife 31-den
+--  IKI movzuya bolunur (heyat-prosesleri/istehsal).  "II" ve "III"
+--  boluklerin ICINDE nomresiz "Bolme N." alt-basliqlari var (novbeti
+--  dersle EYNI sehifede, alt-basliq qaydasi ile tutulur) - "II"
+--  UC movzuya (deyiskenlik/saglam-heyat/epidemiologiya), "III" ISE
+--  IKI alt-basliqla da EYNI movzuya (tekamul) gedir - dersllik iki
+--  hisseye bolse de bazada tek movzudur.  "IV" ve "V" birbasa.
+--
+--  11-ci sinif: derslikde 7 boyuk boluk (I-VII), bazada 8 movzu -
+--  "II. Mikrobiologiya"nin 9 dersi TAM bakteriyalar movzusuna
+--  (bio-11-bakteriyalar) yonledi.  Sebeb: dersliyin mundericat
+--  panelinde bu bolmenin icinde virus-a aid AYRI basliq YOXDUR (butun
+--  9 ders "Mikroorqanizmler/menfur muhit/infeksion proses" basliqli,
+--  sehife araliqlari da bolunme gostermir) - uydurma sehife serhedi
+--  qoymaqdansa, movcud movzunun (bio-11-viruslar) bu merhelede 0 alt
+--  movzu qalmasi seçildi.  Qalan 6 boluk birbasa bire-bir movzuya.
+--
+--  BURAXILAN BENDLER: "Layihə", "Təqdimat mövzuları" / "Təqdimat və
+--  referat mövzuları" / "Təqdimat üçün mövzular" - ders deyil, elavedir
+--  (10 ve 11-ci sinifde tekrar-tekrar cixir).  "İstifadə edilmiş
+--  ədəbiyyat" da eyni sebeble xaric edilib.
+--
+--  "•" ILE BASLAYAN BENDLER (6-ci sinif): dusterin ozu, silinir.
+--
+--  YAZI QUSURLARI: 6-ci sinifde "Xəstəliktörədən" (bosluq dusub),
+--  7-ci sinifde iki bend sonunda artiq nöqte ("Tozlanma.",
+--  "Çiçək və onun quruluşu."), 8-ci sinifde bir bend sonunda ("İnsan
+--  ürəyinin quruluşu və işi."), 7-ci sinif II hissede iki bendde
+--  noqteden sonra bosluq yoxdur ("hissələri.Buğumayaqlılar",
+--  "hissələri.Molyusklar").
+--
+--  ELLE YAZILMIR: tools/alt_movzular.py cixarir."""
+
 PAKETLER = [
     {
         "ad": "riy5_11",
@@ -466,6 +624,177 @@ PAKETLER = [
                          None, None])]),
         ],
     },
+    {
+        "ad": "fiz6_11",
+        "etiket": "Fizika 6-11",
+        "fayl": "86_alt_movzular_fizika6_11.sql",
+        "fenn": "fizika",
+        "fayl_on": "fizika",
+        "basliq": BASLIQ_FIZ,
+        "xaric_seh": {(867, 75), (282, 204)},
+        "xaric_ad": {"Terminlər lüğəti", "Əlavələr",
+                     "Fəsillərə aid məsələlərin cavabları"},
+        "duzelis": {
+            "1.7 Elastiklik qüvvəsi.": ("Elastiklik qüvvəsi", "yazi"),
+        },
+        "ust": ("Fizika ust movzu sayi 37 deyil", "true", 37),
+        "sinifler": [
+            (6, [(546, [("fiz-6-giris", 22, "fiz-6-olcmeler"),
+                        "fiz-6-materiya", "fiz-6-madde",
+                        ("fiz-6-hereket", 83, "fiz-6-enerji")])]),
+            (7, [(867, ["fiz-7-olcme", "fiz-7-olcme", "fiz-7-duzxetli",
+                        ("fiz-7-eyrixetli", 76, "fiz-7-atom")]),
+                 (868, ["fiz-7-elektrik-sahe", "fiz-7-dovre",
+                        "fiz-7-maqnit"])]),
+            (8, [(931, ["fiz-8-quvve", "fiz-8-is-enerji",
+                        "fiz-8-tezyiq"]),
+                 (932, ["fiz-8-dalgalar", "fiz-8-istilik",
+                        "fiz-8-istilik-qanun"])]),
+            (9, [(472, ["fiz-9-cereyan-muhit", "fiz-9-maqnit-sahe",
+                        [(123, "fiz-9-isiq"), (133, "fiz-9-guzgu-linza"),
+                         (145, "fiz-9-isiq"),
+                         (float("inf"), "fiz-9-guzgu-linza")],
+                        [(193, "fiz-9-radioaktivlik"),
+                         (float("inf"), "fiz-9-nuve")]])]),
+            (10, [(734, ["fiz-10-kinematika", "fiz-10-dinamika",
+                         "fiz-10-saxlanma", "fiz-10-reqs-dalga",
+                         "fiz-10-saxlanma", "fiz-10-molekulyar",
+                         "fiz-10-termodinamika"])]),
+            (11, [(282, [("fiz-11-elektrostatika", 31,
+                          "fiz-11-maqnit-induksiya"),
+                         "fiz-11-cereyan-qanunlari",
+                         ("fiz-11-em-reqs", 128, "fiz-11-optika"),
+                         "fiz-11-atom"])]),
+        ],
+    },
+    {
+        "ad": "kim7_11",
+        "etiket": "Kimya 7-11",
+        "fayl": "87_alt_movzular_kimya7_11.sql",
+        "fenn": "kimya",
+        "fayl_on": "kimya",
+        "basliq": BASLIQ_KIM,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "Terminlər və kimyəvi anlayışlar", "Bəzi tapşırıqların cavabları",
+            "Əlavələr",
+            #  9-cu sinif: "Fəsil N." basliqlari + tekrarlanan ust basliq
+            "Fəsil 1. Metalların ümumi xarakteristikası",
+            "Fəsil 2. Əsas yarımqrup metalları",
+            "Fəsil 3. Əlavə yarımqrup metalları",
+            "Fəsil 4. Flüor yarımqrupu elementləri",
+            "Fəsil 5. Oksigen yarımqrupu elementləri",
+            "Fəsil 6. Azot yarımqrupu elementləri",
+            "Fəsil 7. Karbon yarımqrupu elementləri",
+            "Fəsil 8. Karbohidrogenlər",
+            "Fəsil 9. Karbohidrogenlərin oksigenli və azotlu törəmələri",
+            "SADƏ ÜZVİ BİRLƏŞMƏLƏRLƏ TANIŞLIQ",
+            #  11-ci sinif: "fəsil N." basliqlari (kicik herflə)
+            "fəsil 1. SPİRTLƏR VƏ FENOLLAR",
+            "fəsil 2. ALDEHİDLƏR",
+            "fəsil 3. KARBON TURŞULARI VƏ ONLARIN TÖRƏMƏLƏRİ",
+            "fəsil 4. KARBOHİDRATLAR (SAXARİDLƏR)",
+            "fəsil 5. NİTROBİRLƏŞMƏLƏR, AMİNLƏR, AMİNTURŞULAR VƏ ZÜLALLAR",
+            "fəsil 6. POLİMERLƏR",
+        },
+        "duzelis": {
+            "Məişətdə istifadə edilən mühüm kimyəvi birləşmələr.":
+                ("Məişətdə istifadə edilən mühüm kimyəvi birləşmələr", "yazi"),
+            "Ümumiləşdİrİcl sual və tapşırıqlar":
+                ("Ümumiləşdirici sual və tapşırıqlar", "yazi"),
+            "3.5.Sabun və sintetik yuyucu maddələr":
+                ("Sabun və sintetik yuyucu maddələr", "yazi"),
+        },
+        "ust": ("Kimya ust movzu sayi 31 deyil", "true", 31),
+        "sinifler": [
+            (7, [(871, ["kim-7-elementler", "kim-7-elementler",
+                        "kim-7-atom", "kim-7-birlesmeler",
+                        "kim-7-qarisiqlar"]),
+                 (872, ["kim-7-ayrilma", "kim-7-reaksiyalar",
+                        "kim-7-tursu-esas"])]),
+            (8, [(935, ["kim-8-dovri-cedvel", "kim-8-rabite",
+                        "kim-8-reaksiya-tesnifat"]),
+                 (936, ["kim-8-reaksiya-sureti", "kim-8-oksidlesme",
+                        "kim-8-tursu-esas"])]),
+            (9, [(505, [[(23, "kim-9-metal-umumi"),
+                         (float("inf"), "kim-9-metallar")],
+                        [(89, "kim-9-halogen-kukurd"),
+                         (121, "kim-9-azot-fosfor"),
+                         (float("inf"), "kim-9-karbon-silisium")],
+                        "kim-9-uzvi"])]),
+            (10, [(739, [None, "kim-10-alkan", "kim-10-alken",
+                         "kim-10-dien-tsiklo", "kim-10-alkin",
+                         "kim-10-dien-tsiklo", "kim-10-aromatik",
+                         "kim-10-neft"])]),
+            (11, [(349, [[(50, "kim-11-spirtler"),
+                          (97, "kim-11-aldehid-tursu"),
+                          (118, "kim-11-efir-yag"),
+                          (float("inf"), "kim-11-karbohidrat")],
+                         "kim-11-azotlu",
+                         "kim-11-polimer"])]),
+        ],
+    },
+    {
+        "ad": "bio6_11",
+        "etiket": "Biologiya 6-11 (9-cu sinif menbesi bos)",
+        "fayl": "88_alt_movzular_biologiya6_11.sql",
+        "fenn": "biologiya",
+        "fayl_on": "biologiya",
+        "basliq": BASLIQ_BIO,
+        "bolmebasliq": True,
+        "xaric_seh": set(),
+        "xaric_ad": {
+            "Layihə", "Təqdimat mövzuları",
+            "Təqdimat və referat mövzuları", "Təqdimat üçün mövzular",
+            "İstifadə edilmiş ədəbiyyat",
+        },
+        "duzelis": {
+            "9. Bakteriyaların yayılması və təbiətdə rolu."
+            " Xəstəliktörədən bakteriyalar. Viruslar":
+                ("Bakteriyaların yayılması və təbiətdə rolu."
+                 " Xəstəlik törədən bakteriyalar. Viruslar", "yazi"),
+            "3.1 Çiçək və onun quruluşu.":
+                ("Çiçək və onun quruluşu", "yazi"),
+            "3.2 Tozlanma.": ("Tozlanma", "yazi"),
+            "4.4 Onurğasız heyvanlarda bədənin əsas hissələri."
+            "Buğumayaqlılar":
+                ("Onurğasız heyvanlarda bədənin əsas hissələri."
+                 " Buğumayaqlılar", "yazi"),
+            "4.5 Onurğasız heyvanlarda bədənin əsas hissələri."
+            "Molyusklar":
+                ("Onurğasız heyvanlarda bədənin əsas hissələri."
+                 " Molyusklar", "yazi"),
+            "3.2 İnsan ürəyinin quruluşu və işi.":
+                ("İnsan ürəyinin quruluşu və işi", "yazi"),
+        },
+        "ust": ("Biologiya ust movzu sayi 47 deyil", "true", 47),
+        "sinifler": [
+            (6, [(538, ["bio-6-tedqiqat", "bio-6-huceyre",
+                        "bio-6-vegetativ", "bio-6-generativ",
+                        "bio-6-hereket-qida", "bio-6-dasinma-coxalma",
+                        "bio-6-muhit", "bio-6-rol"])]),
+            (7, [(863, ["bio-7-huceyre-orqanizm", "bio-7-huceyre-orqanizm",
+                        "bio-7-bitki", "bio-7-coxalma"]),
+                 (864, ["bio-7-heyvanlar", "bio-7-muxteliflik",
+                        "bio-7-ekosistem", "bio-7-saglam-heyat"])]),
+            (8, [(927, ["bio-8-heyat-kimyasi", "bio-8-bitki",
+                        "bio-8-qan-dovrani", "bio-8-teneffus"]),
+                 (928, ["bio-8-hezm", "bio-8-coxalma",
+                        "bio-8-tesnifat", "bio-8-saglamliq"])]),
+            (10, [(727, [("bio-10-heyat-prosesleri", 31,
+                          "bio-10-istehsal"),
+                         {"Bölmə 1. Dəyişkənlik": "bio-10-deyiskenlik",
+                          "Bölmə 2. Sağlam həyat": "bio-10-saglam-heyat",
+                          "Bölmə 3. Epidemiologiya": "bio-10-epidemiologiya"},
+                         {"Bölmə 1. Makrotəkamül": "bio-10-tekamul",
+                          "Bölmə 2. İnsanın tarixi inkişafı": "bio-10-tekamul"},
+                         "bio-10-genetika", "bio-10-ekologiya"])]),
+            (11, [(276, ["bio-11-heyatin-yaranmasi", "bio-11-bakteriyalar",
+                         "bio-11-seleksiya", "bio-11-biotexnologiya",
+                         "bio-11-biosfer", "bio-11-insan-muhit",
+                         "bio-11-bolunme-nezaret"])]),
+        ],
+    },
 ]
 
 
@@ -519,7 +848,10 @@ def namizedler(ad, valideyn, tezlik_f, tezlik_u):
                 yan = ws[-1] if ws[-1] != tek[0] else ws[0]
                 cut = sorted({tek[0], yan}, key=ws.index)
                 n.append("-".join(cut))
-            n.append(tek[0] if len(tek) == 1 else "-".join(tek))
+            #  "-".join(tek) hamisi TEK ola biler (dar qrupda ferdi
+            #  basliq) - o zaman butun sozler qeder uzanmasin deye 3-e
+            #  kesilir; qisa namizedler (C/D/E) onsuz da asagida gelir.
+            n.append(tek[0] if len(tek) == 1 else "-".join(tek[:3]))
         n.append("-".join([ws[0], ws[-1]] if len(ws) > 1 else ws))
         if len(ws) > 2:
             n.append("-".join(ws[:3]))
@@ -537,7 +869,10 @@ BEND = re.compile(r"^\s+(\d+)\s\s(.*)$")
 #  "1.1. Natural...", "26. Kesisen...", "9.Oxsarliq...".
 #  NOMRELEMEDE HOKMEN NOQTE VAR - ona gore "10-a qeder sayma" ve
 #  "9 ve 10 ededleri" toxunulmaz qalir (bir defe elden getdi).
-NOMRE = re.compile(r"^(\d+\.\d+\.?\s+|\d+\.(?=\D)\s*)")
+#  Kimya 11-de UC SEVIYYELI nomre var ("1.1.1. Adlandirilmasi") -
+#  ikinci qrup {1,2} defe teklana biler.  Iki seviyyeli ("1.1. ")
+#  ucun eyni neticeni verir - geriye uygundur.
+NOMRE = re.compile(r"^(\d+(\.\d+){1,2}\.?\s+|\d+\.(?=\D)\s*)")
 #  Informatika dersliklerinde nomre bezen noqtesizdir ("8 OBYEKTLER
 #  QRUPU").  Riyaziyyatda bu qaydani ISLETMEK OLMAZ - "9 ve 10
 #  ededleri" adinin ozudur.  Ona gore paketde acilir.
@@ -612,6 +947,7 @@ def yigim(paket):
                         qrup = xam.strip()
                         continue
                     ad = nomre.sub("", xam).strip()
+                    ad = re.sub(r"^[•]\s*", "", ad).strip()
                     if ad in xaric or (kid, seh) in paket["xaric_seh"]:
                         continue
                     acar = xam if xam in duzelis else ad
@@ -624,6 +960,23 @@ def yigim(paket):
                     a, kesik, b = spec
                     paylar = [(a, [x for x in adlar if x[0] < kesik]),
                               (b, [x for x in adlar if x[0] >= kesik])]
+                elif isinstance(spec, list):
+                    #  COX SERHEDLI bolunme: sinif fesli mundericati
+                    #  interleaved ola biler (fizika 9 - isiq/guzgu
+                    #  novbelesir).  spec = [(esh_qeder, valideyn), ...,
+                    #  (float("inf"), son valideyn)] - sehife < esh olan
+                    #  ilk cutu goturur.
+                    sira_v, gorulmus = [], set()
+                    for _, v in spec:
+                        if v not in gorulmus:
+                            sira_v.append(v); gorulmus.add(v)
+                    def hansi(seh):
+                        for esh, v in spec:
+                            if seh < esh:
+                                return v
+                        return spec[-1][1]
+                    paylar = [(v, [x for x in adlar if hansi(x[0]) == v])
+                              for v in sira_v]
                 elif isinstance(spec, dict):
                     sira_v = []
                     for _, q_ad, _ in adlar:
