@@ -1277,6 +1277,15 @@
       '<button class="btn ghost sm eCancel">Ləğv et</button></div>' +
       /* Kod yenilemek nadir ve geri qaytarilmazdir - siyahida yer
          tutmasin deye burdadir, ayrica ve seyrek gorunusde. */
+      /*  Valideyn girisi burdadir, setirde yox: acmaq birdefelik
+          qerardir, gundelik emeliyyat deyil.  Acilandan SONRA kod
+          setirde gorunur - onu her defe kopyalamaq lazim olur.  */
+      (s.parent_code ? "" :
+        '<div class="pbox"><button class="btn sm ghost" data-pon="' +
+          esc(s.id) + '">Valideyn girişini aç</button>' +
+        '<span class="muted">Valideyn uşağın dərslərini və ' +
+          "nəticələrini görəcək. İstədiyiniz vaxt bağlaya bilərsiniz." +
+        "</span></div>") +
       '<div class="danger"><button class="btn sm ghost" data-reset="' +
         esc(s.id) + '">' + ic("refresh") + "Giriş kodunu yenilə</button>" +
       '<span class="muted">Köhnə kod etibarsız olur.</span></div>' +
@@ -1287,6 +1296,10 @@
     n1.focus(); n1.select();
     box.querySelector(".eCancel").addEventListener("click", function () { box.remove(); });
     box.querySelector(".eSave").addEventListener("click", save);
+    var pon = box.querySelector("[data-pon]");
+    if (pon) pon.addEventListener("click", function () {
+      parentAccess(s.id, true, pon, classId);
+    });
     box.querySelector("[data-reset]").addEventListener("click", function () {
       var b = this;
       if (!confirm("Kod yenilənsin?\n\nKöhnə kod dərhal etibarsız olacaq və " +
@@ -1318,7 +1331,7 @@
 
   function loadStudents(classId) {
     sb.select("students", {
-      select: "id,full_name,display_name,login_code,is_active",
+      select: "id,full_name,display_name,login_code,is_active,parent_code",
       eq: { class_id: classId },
       order: "full_name"
     }).then(function (rows) {
@@ -1378,12 +1391,62 @@
               ic("send") + "Göndər</button>" +
             '<button class="btn sm ghost link arch" data-arch="' + esc(s.id) + '">' +
               "Dayandır</button>" +
-          "</div></div>";
+          "</div>" +
+          /*  VALIDEYN GIRISI - susmaya gore BAGLI.
+              Bezi muellimler isinin seffaflasmasindan narahat olur;
+              mecburi etsek muellimi itiririk.
+
+              BAGLI ikən setirde HEC NE gorunmur: acmaq nadir, birdefelik
+              emeliyyatdir ve qelemin altindadir (kod yenilemek kimi).
+              Telefonda setir onsuz da uc duyme dasiyir - dorduncusu onu
+              sisirdirdi (e2e heddi 120px, olculdu: 142px).
+              Kod VARSA ise ayrica setir lazimdir: muellim onu her defe
+              kopyalayib gonderecek, qelemin altinda gizli qalmamalidir.  */
+          (s.parent_code
+            ? '<div class="l3">' +
+                '<span class="pcap">Valideyn</span>' +
+                '<span class="code key">' + esc(s.parent_code) + "</span>" +
+                '<button class="btn sm ghost icon" data-copy="' + esc(s.parent_code) +
+                  '" title="Valideyn kodunu kopyala" ' +
+                  'aria-label="Valideyn kodunu kopyala">' + ic("copy") + "</button>" +
+                '<button class="btn sm ghost link" data-pnew="' + esc(s.id) + '">' +
+                  "Yenilə</button>" +
+                '<button class="btn sm ghost link arch" data-poff="' + esc(s.id) + '">' +
+                  "Bağla</button>" +
+              "</div>"
+            : "") +
+          "</div>";
       }
 
       Array.prototype.forEach.call(box.querySelectorAll("[data-copy]"), function (b) {
         b.addEventListener("click", function () {
           copyText(b.getAttribute("data-copy"), b);
+        });
+      });
+      //  Valideyn girisi: ac / yenile / bagla
+      Array.prototype.forEach.call(box.querySelectorAll("[data-pon]"), function (b) {
+        b.addEventListener("click", function () {
+          parentAccess(b.getAttribute("data-pon"), true, b, classId);
+        });
+      });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-poff]"), function (b) {
+        b.addEventListener("click", function () {
+          if (!confirm("Valideyn girişi bağlansın?\n\nAçıq baxış dərhal " +
+                       "kəsiləcək və kod işləməyəcək.")) return;
+          parentAccess(b.getAttribute("data-poff"), false, b, classId);
+        });
+      });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-pnew]"), function (b) {
+        b.addEventListener("click", function () {
+          if (!confirm("Valideyn kodu yenilənsin?\n\nKöhnə kod dərhal " +
+                       "etibarsız olacaq.")) return;
+          var id = b.getAttribute("data-pnew");
+          b.disabled = true; b.textContent = "Gözləyin…";
+          sb.rpc("rpc_parent_code_reset", { p_student_id: id })
+            .then(function () { loadStudents(classId); })
+            .catch(function (e) {
+              b.disabled = false; b.textContent = "Yenilə"; alert(fail(e));
+            });
         });
       });
       Array.prototype.forEach.call(box.querySelectorAll("[data-wa]"), function (b) {
@@ -1433,6 +1496,19 @@
       verir, yer limiti ise BAZA TRIGGER-indedir (trg_students_seat_limit).
       Trigger geri qaytarmada limiti YENIDEN yoxlayir - yerler dolubsa
       xeta atir ve mesaji oldugu kimi gosteririk.  */
+  /*  Valideyn girisini acir/baglayir.  Ekran YENIDEN cizilir ki, kod
+      (ve ya onun yoxlugu) derhal gorunsun.  */
+  function parentAccess(id, on2, btn, classId) {
+    var kohne = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = on2 ? "Açılır…" : "Bağlanır…";
+    sb.rpc("rpc_parent_access", { p_student_id: id, p_on: !!on2 })
+      .then(function () { loadStudents(classId); })
+      .catch(function (e) {
+        btn.disabled = false; btn.textContent = kohne; alert(fail(e));
+      });
+  }
+
   function setActive(st, aktiv, btn, classId) {
     if (busy) return;
     busy = true; btn.disabled = true;

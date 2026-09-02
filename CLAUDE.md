@@ -19,6 +19,38 @@ test/           uçdan-uca yoxlama (mock Supabase + Chromium)
 
 ---
 
+## Valideyn girişi
+
+Müəllim şagirdi əlavə edəndə valideyn girişi **YOXDUR**. Müəllim onu
+qələmin altından (redaktə vərəqi) **özü açır** — və istədiyi vaxt
+bağlayır. Susmaya görə bağlıdır, çünki bəzi müəllimlər işinin
+şəffaflaşmasından narahat olur; məcburi etsək müəllimi itiririk.
+
+```
+students.parent_code   NULL = bağlı.  Kod «V» ilə başlayır - şagird
+                       kodundan gözlə seçilsin deyə
+parent_sessions        AYRI cədvəl, 30 gün
+valideyn/              üçüncü tətbiq (muellim/, sagird/ ilə yanaşı)
+```
+
+**Niyə ayrı sessiya cədvəli.** Valideyn tokeni heç vaxt şagird
+RPC-lərində işləməməlidir — əks halda valideyn kodu şagird koduna
+çevrilir və uşağın adından test yazıla bilər. `student_sessions`-a
+«rol» sütunu əlavə etmək bu səhvi bir gün mütləq yaradardı.
+
+**Valideyn NƏ GÖRMÜR** (`rpc_parent_home` onları qaytarmır):
+uşağın öz giriş kodu · tam adı (yalnız `display_name`) · düz cavablar ·
+başqa uşaqların adları və balları · reytinq · qrupla müqayisə ·
+müəllimin əlaqə məlumatı.
+
+**Ekran bir səhifədir, naviqasiya yoxdur** — valideyn telefonda 40
+saniyə baxır. Vəziyyət çılpaq faizlə deyil, **meyllə** verilir («keçən
+aya görə 8 % yaxşılaşıb»): 64 % rəqəmi valideynə heç nə demir.
+
+Bağlayanda açıq sessiyalar **dərhal ölür** — «bağladım, amma hələ də
+baxır» olmamalıdır. `db/107_valideyn.sql`, `db/test/smoke_valideyn.sql`
+(12 yoxlama, əsasən təhlükəsizlik iddiasıdır).
+
 ## ƏN VACİB ÜÇ QAYDA
 
 **1 · Bal həmişə serverdə hesablanır.**
@@ -515,6 +547,11 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     əvvəl funksiya yığmamaq qaydasını pozmaq deməkdir. Üç-dörd müəllim
     eyni şeyi desə, dəyişir.
 
+16. **Bir valideyn — bir neçə uşaq.** İndi hər şagirdin ayrı valideyn
+    kodu var: iki uşağı olan valideyn iki kod daşıyır. Müştəri sayı
+    artanda bunlar bir girişdə birləşməlidir (bir kod → uşaq seçimi).
+    İstifadəçi ilə razılaşdırılıb: **hələlik ayrı, gələcəkdə birgə.**
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi);
 valideyn girişində qiymət modeli (valideyn ayrıca ödəyir, yoxsa
@@ -666,6 +703,21 @@ yəni yeni sızma yolu yaranmır, mövcud hüquq rahat göstərilir.
 **Bunu dəyişməzdən əvvəl:** `smoke_bank_rpc.sql`-in 8-ci yoxlaması və
 `smoke_siyahi_variant.sql`-in 6-cısı bu qapını qoruyur. Onlar sınırsa,
 bank pulsuz yüklənə bilir deməkdir.
+
+## Azərbaycan hərfləri — test yazanda tələ
+
+İki dəfə eyni yerə düşdük, ona görə yazılır.
+
+**1 · `base.css` `h2`-ni BÖYÜK HƏRFƏ çevirir.** Playwright-in
+`inner_text()` ekranda **görünən** mətni qaytarır, ona görə
+`"Gözləyən tapşırıq" in metn` tapmır — orada `GÖZLƏYƏN TAPŞIRIQ` var.
+
+**2 · `.lower()` bunu DÜZƏLTMİR.** Python `"TAPŞIRIQ".lower()` →
+`"tapşiriq"` verir: nöqtəsiz **ı** nöqtəli **i**-yə çevrilir. Yəni
+kiçik hərfə salıb müqayisə etmək daha da yanıldır.
+
+Qayda: yoxlamada nöqtəsiz `ı` olmayan hissəyə baxın (`"GÖZLƏYƏN"`),
+və ya `data-*` nişanı ilə seçin — mətnlə yox.
 
 ## Sürət ölçəndə: əvvəlcə `ANALYZE`
 

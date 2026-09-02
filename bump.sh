@@ -6,10 +6,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 V=$(( $(git rev-list --count HEAD) + 1 ))
-for f in index.html muellim/index.html sagird/index.html; do
+for f in index.html muellim/index.html sagird/index.html valideyn/index.html; do
   [ -f "$f" ] || continue
   sed -i -E "s|(href=\"[^\"]*\.css)(\?v=[0-9]+)?\"|\1?v=$V\"|g" "$f"
   sed -i -E "s|(src=\"[^\"]*\.js)(\?v=[0-9]+)?\"|\1?v=$V\"|g"  "$f"
 done
 echo "versiya -> $V"
-grep -ho '[a-z]*\.\(css\|js\)?v=[0-9]*' index.html muellim/index.html sagird/index.html 2>/dev/null | sort -u
+grep -ho '[a-z]*\.\(css\|js\)?v=[0-9]*' index.html muellim/index.html sagird/index.html valideyn/index.html 2>/dev/null | sort -u

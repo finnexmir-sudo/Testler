@@ -55,5 +55,8 @@ echo
 echo "12/13 parol berpasi"
 python3 test/e2e_parol.py
 echo
-echo "13/13 tedris fennleri"
+echo "13/14 tedris fennleri"
 python3 test/e2e_fenn.py
+echo
+echo "14/14 valideyn girisi"
+python3 test/e2e_valideyn.py

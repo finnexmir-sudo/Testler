@@ -67,7 +67,7 @@ grant update          on public.accounts to authenticated;
 --  anon ucun HEC BIR cedvel - sagird terefi tamamile RPC ile isleyir
 
 -- ============================================================ funksiyalar
---  Sagird tetbiqi YEDDI funksiya cagirir - basqa hec ne.  Supabase yeni
+--  Sagird tetbiqi 8, valideyn tetbiqi 3 funksiya cagirir - basqa hec ne.  Supabase yeni
 --  funksiyalara anon ucun EXECUTE-u avtomatik verdiyi ucun burda hamisi
 --  geri alinir, sonra 03_rpc.sql-in verdiyi alti dene yerinde qalir.
 --  Beleliklə sonradan yazilan her yeni muellim funksiyasi OZ-OZUNE
@@ -84,7 +84,13 @@ begin
                              'rpc_start_attempt','rpc_submit_attempt',
                              'rpc_leaderboard','rpc_test_result',
                              'rpc_report_question_student',
-                             'rpc_student_my_results')
+                             'rpc_student_my_results',
+                             --  valideyn tetbiqi (db/107_valideyn.sql):
+                             --  eynen sagird kimi anon-la isleyir, giris
+                             --  kodladir.  rpc_parent_home DUZ CAVAB ve
+                             --  usagin giris kodunu QAYTARMIR.
+                             'rpc_parent_login','rpc_parent_home',
+                             'rpc_parent_logout')
   loop
     execute format('revoke all on function %s from anon', fn);
   end loop;
@@ -110,10 +116,12 @@ begin
                            'rpc_start_attempt','rpc_submit_attempt',
                            'rpc_leaderboard','rpc_test_result',
                              'rpc_report_question_student',
-                             'rpc_student_my_results');
+                             'rpc_student_my_results',
+                             'rpc_parent_login','rpc_parent_home',
+                             'rpc_parent_logout');
   if leak is not null then
     raise exception 'anon bu funksiyalari cagira bilir: %', leak;
   end if;
 
-  raise notice 'Huquqlar quruldu: anon yalniz kataloqu ve 8 sagird RPC-sini gorur.';
+  raise notice 'Huquqlar quruldu: anon kataloqu, 8 sagird ve 3 valideyn RPC-sini gorur.';
 end $$;
