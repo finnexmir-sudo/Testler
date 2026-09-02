@@ -16,7 +16,9 @@ CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
 DSN    = "host=/tmp port=55432 user=postgres dbname=panel_e2e"
 TEST_CFG = """window.CFG = {
   SUPABASE_URL: "http://127.0.0.1:54321",
-  SUPABASE_ANON_KEY: "test-anon-key"
+  SUPABASE_ANON_KEY: "test-anon-key",
+  STUDENT_URL: "http://127.0.0.1:8010/sagird/",
+  PARENT_URL:  "http://127.0.0.1:8010/valideyn/"
 };"""
 
 fails = []
@@ -111,6 +113,19 @@ with sync_playwright() as pw:
     ok(kod.startswith("V"), "valideyn kodu «V» ile baslayir - sagird kodundan secilir")
     ok(pg.locator('.stu:has-text("Ayan Qasimova") .l3 .code').inner_text() == kod,
        "kod ekranda gorunur")
+    #  Muellim kodu GONDERE bilmelidir - kopyalamaq kifayet deyil,
+    #  sagird kodunda "Gonder" var, valideynde de olmalidir.
+    wa = row.locator("[data-pwa]")
+    ok(wa.count() == 1, "valideyn kodunda «Göndər» duymesi var")
+    lnk = pg.evaluate(
+        """() => { const b = document.querySelector('.stu .l3 [data-pwa]');
+                   if (!b) return ''; let u = '';
+                   const o = window.open; window.open = x => { u = x; };
+                   b.click(); window.open = o; return u; }""")
+    ok("valideyn" in lnk, "link VALIDEYN tetbiqine gedir (sagirdə yox)",
+       lnk[:90])
+    ok(kod in lnk.replace("%20", " "), "mesajda valideyn kodu var")
+    ok("SAGIRD11" not in lnk, "mesajda usagin OZ kodu YOXDUR")
     #  Ikinci sagird TOXUNULMAMIS qalir
     ok(db("""select parent_code c from public.students
               where full_name = 'Rasad Memmedov'""", one=True)["c"] is None,

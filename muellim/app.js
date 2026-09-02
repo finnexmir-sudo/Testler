@@ -1409,6 +1409,8 @@
                 '<button class="btn sm ghost icon" data-copy="' + esc(s.parent_code) +
                   '" title="Valideyn kodunu kopyala" ' +
                   'aria-label="Valideyn kodunu kopyala">' + ic("copy") + "</button>" +
+                '<button class="btn sm" data-pwa="' + esc(s.id) + '">' +
+                  ic("send") + "Göndər</button>" +
                 '<button class="btn sm ghost link" data-pnew="' + esc(s.id) + '">' +
                   "Yenilə</button>" +
                 '<button class="btn sm ghost link arch" data-poff="' + esc(s.id) + '">' +
@@ -1434,6 +1436,14 @@
           if (!confirm("Valideyn girişi bağlansın?\n\nAçıq baxış dərhal " +
                        "kəsiləcək və kod işləməyəcək.")) return;
           parentAccess(b.getAttribute("data-poff"), false, b, classId);
+        });
+      });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-pwa]"), function (b) {
+        b.addEventListener("click", function () {
+          var s = rows.filter(function (x) {
+            return x.id === b.getAttribute("data-pwa");
+          })[0];
+          if (s) window.open(waLinkParent(s), "_blank", "noopener");
         });
       });
       Array.prototype.forEach.call(box.querySelectorAll("[data-pnew]"), function (b) {
@@ -1527,6 +1537,18 @@
         btn.textContent = aktiv ? "Davam etdir" : "Dayandır";
         alert(fail(e));
       });
+  }
+
+  /*  Valideynə göndərilən mesaj.  Şagirdinki ilə eyni qəlibdə, amma
+      AYRI ünvan və AYRI kod - qarışsa valideyn uşağın kodunu alar. */
+  function waLinkParent(s) {
+    var url = (window.CFG && window.CFG.PARENT_URL) || "";
+    var t = "Salam! " + s.full_name + " üçün valideyn girişi:\n\n" +
+            "Link: " + url + "\n" +
+            "Valideyn kodu: " + s.parent_code + "\n\n" +
+            "Linki açıb kodu yazın — dərsləri, tapşırıqları və " +
+            "nəticələri görəcəksiniz.";
+    return "https://wa.me/?text=" + encodeURIComponent(t);
   }
 
   function waLink(s) {

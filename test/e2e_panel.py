@@ -91,8 +91,13 @@ with sync_playwright() as pw:
     # birlesende gedir, dikine ise ozu-ozune azalmir - olculmelidir.
     pg.set_viewport_size({"width": 360, "height": 740})
     pg.goto("http://127.0.0.1:8010/index.html"); pg.wait_for_timeout(400)
+    #  Olcu SON hero elementinden gedir: qapilardan sonra valideyn
+    #  sətri de var.  Yoxlamanin meqsedi "olu bosluq olmasin"dir -
+    #  MEZMUN elave etmek onu pozmamalidir, bosluq buraxmaq pozmalidir.
     ara = pg.evaluate("""() => {
-        const d = document.querySelector('.doors').getBoundingClientRect();
+        const last = document.querySelector('.pdoor') ||
+                     document.querySelector('.doors');
+        const d = last.getBoundingClientRect();
         const s = document.querySelector('.stitle').getBoundingClientRect();
         return Math.round(s.top - d.bottom);
       }""")
