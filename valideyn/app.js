@@ -93,7 +93,9 @@
         '<button class="btn go wide" id="btnIn">Daxil ol</button>' +
       "</div>" +
       '<p class="note" style="text-align:center;margin-top:16px">' +
-        "Kod yoxdursa müəllimdən istəyin. Giriş 30 gün açıq qalır.</p>"
+        "Kod yoxdursa müəllimdən istəyin. Giriş 30 gün açıq qalır.</p>" +
+      '<p class="note" style="text-align:center;margin-top:10px">' +
+        '<a href="../" class="homelink">← Bil10 ana səhifəsi</a></p>' 
     );
     var inp = $("code");
     inp.focus();

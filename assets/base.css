@@ -55,7 +55,12 @@ a{color:var(--brand);text-decoration:none}
 .top .mark{
   width:26px;height:26px;flex:0 0 26px;
   display:flex;align-items:center;justify-content:center;
+  /*  Nisan ana sehifeye KECIDDIR - evvel <span> idi ve tetbiqden
+      qayitmagin yeganə yolu unvani əl ile silmek idi.  */
+  text-decoration:none;color:inherit;border-radius:8px;
 }
+.top a.mark:hover{opacity:.82}
+.top a.mark:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
 .top .mark svg{width:26px;height:26px}
 .top b{flex:1;font-size:14.5px;font-weight:600;letter-spacing:-.011em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

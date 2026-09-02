@@ -278,3 +278,8 @@ body{background:
 
 /* qaralamadan qaytarilan cavablar - bir defelik bildiris */
 .ok.restored{margin:0 0 14px}
+
+/*  Ana səhifəyə qayıdış - giriş ekranında üst zolaq gizli olduğu üçün
+    nişan görünmür; keçid burada ayrıca lazımdır. */
+.homelink{color:var(--fg-3);text-decoration:none;font-size:12.5px}
+.homelink:hover{color:var(--brand);text-decoration:underline}

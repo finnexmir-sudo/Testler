@@ -201,6 +201,16 @@ with sync_playwright() as pw:
     vp.route("**/config.js*", lambda r: r.fulfill(
         status=200, content_type="application/javascript", body=TEST_CFG))
     vp.goto(APP); vp.wait_for_selector("#code", timeout=15000)
+    #  ANA SEHIFEYE QAYIDIS.  Evvel hec bir yol yox idi - istifadeci
+    #  unvani ƏL ILE silib qayidirdi.  Giris ekraninda ust zolaq
+    #  gizlidir, ona gore kecid burada ayrica olmalidir.
+    ok(vp.locator(".homelink").count() == 1,
+       "giris ekranindan ana sehifeye kecid var")
+    vp.click(".homelink"); vp.wait_for_selector(".doors", timeout=15000)
+    ok(vp.locator(".doors").count() == 1, "kecid ANA SEHIFEYE aparir",
+       vp.url.split("/Testler")[-1] or vp.url)
+    vp.go_back(); vp.wait_for_selector("#code", timeout=15000)
+
     vp.fill("#code", "YANLIS99"); vp.click("#btnIn")
     vp.wait_for_selector("#lErr .err", timeout=15000)
     ok("yanlış" in vp.inner_text("#lErr").lower() or
@@ -260,6 +270,9 @@ with sync_playwright() as pw:
     #  Ust zolaqda ad TEKRARLANMIR
     ok(vp.inner_text("#topTitle").strip() == "Uşağım",
        "ust zolaqda ad tekrarlanmir", vp.inner_text("#topTitle"))
+    #  Daxil olandan sonra da qayidis yolu var - ust zolaqdaki nisan
+    ok(vp.locator("a.mark[href='../']").count() == 1,
+       "ust zolaqdaki nisan ana sehifeye kecidddir")
 
     print("D · Sessiya saxlanılır, çıxış işləyir")
     vp.reload(); vp.wait_for_selector(".who", timeout=15000)
