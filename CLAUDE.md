@@ -418,8 +418,73 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    imtahana hazırlaşdıran real bir repetitor «sınayaram» desə, sıra
    dəyişir: onda təxminlə yox, konkret ehtiyacla qururuq.
 
+15. **Valideyn girişi** — müzakirə olunub, pilotdan SONRA.
+
+    **Fikir:** müəllim şagirdi əlavə edəndə şagird kodu ilə birlikdə
+    **valideyn kodu** da versin. Valideyn uşağını izləsin: hansı dərs
+    keçildi, nə tapşırıq verildi, nə test verildi, necə oxuyur.
+
+    **Niyə güclüdür — bu, rahatlıq deyil, iş modeli dəyişikliyidir.**
+    Bu gün 29 AZN-i müəllim verir. Valideyn həm daha narahatdır, həm
+    adətən daha ödəyəndir: 25 şagirdli repetitorda 25 × 9 AZN = 225 AZN.
+    Daha vacibi — bu, **müəllimin satış alətidir**: valideynə canlı
+    hesabat göstərə bilən repetitor rəqibindən seçilir, yəni müəllimin
+    ödəmə səbəbi «vaxt qənaəti»ndən qat-qat güclü olur. Yan fayda:
+    valideyn baxırsa, şagird tapşırığı edir.
+
+    **Yarısı artıq bazadadır:** `students.parent_id → profiles`,
+    `app.can_read_student` **onsuz da** `s.parent_id = auth.uid()`
+    şərtinə icazə verir, `accounts.type = 'parent'`, valideyn paketləri
+    (`plans`: aylıq 9 / illik 99 AZN, 3 şagird), `consents` cədvəli
+    (valideyn razılığı — hüquqi tələb). Çatışmayan: **kodla giriş yolu**
+    və **valideyn ekranı**.
+
+    **Kod, parol yox.** Şagird girişinin bütün mexanizmi hazırdır
+    (`login_code` + 12 saatlıq `student_sessions`) — təkrarlanır.
+    Valideyn hesab yaratmayacaq, şifrəni unudacaq, dəstək yükü olacaq.
+    Şərtlər: **yalnız oxumaq**, **ləğv edilə bilən**, hər şagird üçün
+    ayrı. Kod yayılsa, müəllim onu bir kliklə dəyişə bilməlidir.
+    (`parent_id` sahəsi ayrı hal üçün qalır: valideyn ÖZ abunəsini alıb
+    öz uşağını idarə edəndə.)
+
+    **Ən böyük risk — gözə görünməyən.** Bu, müəllimin işini
+    şəffaflaşdırır: valideyn görəcək ki, dərs keçilmədi, tapşırıq
+    verilmədi, qrup 40 % yazdı. **Bəzi müəllimlər məhz buna görə imtina
+    edəcək.** Ona görə valideyn girişi **müəllimin özü tərəfindən,
+    şagird-şagird açılır və susmaya görə BAĞLIDIR**. Məcburi etsək
+    müəllimi itiririk; könüllü etsək müəllim onu öz üstünlüyü kimi
+    işlədir.
+
+    **Valideyn NƏ GÖRMƏMƏLİDİR** — dizaynın yarısı budur:
+
+    | Görsün | Görməsin |
+    |---|---|
+    | hansı dərs keçildi, nə vaxt | **başqa uşaqların adları və balları** |
+    | tapşırıq verildi, edildi/edilmədi | reytinq (`rpc_leaderboard`) |
+    | test nəticələri və tarixi | bitməmiş testin düz cavabları |
+    | zəif mövzular | müəllimin şəxsi qeydləri |
+
+    Reytinq ayrıca vurğulanır: şagird bu gün başqalarının adlarını
+    görür. Eyni ekranı valideynə versək, **başqasının uşağının balını
+    yad adama göstərmiş oluruq** — bu, zövq məsələsi deyil, hüquqi
+    problemdir.
+
+    **Sıra: pilotdan sonra.** Bu, indiyə qədər müzakirə olunan ən böyük
+    iş parçasıdır — üçüncü tətbiq (`valideyn/`), yeni RPC-lər, yeni
+    yoxlamalar. Pilot elə bu sualın özünə də cavab verəcək; beş
+    repetitordan soruşulmalıdır:
+
+    > «Valideyn uşağının nəticələrini görsə, bu sizin üçün üstünlükdür,
+    > yoxsa narahatlıq?»
+
+    «Üstünlükdür» → qururuq və qiymət modelini ona görə düzürük.
+    «Narahatlıq» → könüllü qururuq. Bunu **əvvəlcədən** bilmək iki
+    həftəlik işi xilas edir.
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
-mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi).
+mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi);
+valideyn girişində qiymət modeli (valideyn ayrıca ödəyir, yoxsa
+müəllimin paketinə daxildir) — pilotdan sonra.
 
 ## Test yığanda bir neçə sinif
 
