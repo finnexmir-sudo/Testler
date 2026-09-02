@@ -15,10 +15,19 @@
 --  movzusuna gedir, qalan 9 bend (diaqnostik/layihe/umumilesdirici +
 --  4 ekoloji ders) cog-11-ekoloji-qlobal-da qalir.
 --
---  Movzu yeniden cixarilanda KOHNE iki setir (cog-11-ekoloji-qlobal-*
+--  Movzu yeniden cixarilanda KOHNE setirler (cog-11-ekoloji-qlobal-*
 --  slug-i ile) avtomatik silinmir - generator hec vaxt silmir (ozunun
 --  qaydasidir).  Bu fayl onlari YENI setirler artiq movcud oldugunu
 --  YOXLAYIB silir - itki sessiz olmur, yoxlama uğursuz olsa xeta atir.
+--
+--  UCUNCU YAN TESIR (ilk versiyada gozden qacib, canli bazada
+--  "66 gozlenilirdi, 69 tapildi" xetasi ile tapildi): "Alternativ
+--  enerji menbeleri" ve "Dunyanin erzaq problemi" cog-11-ekoloji-
+--  qlobal-dan cixanda, qalan bendlerin sozluk-tezliyi hesabi da
+--  deyisdi - "Dunyanin icmeli su problemi" bendinin oz slug-u da
+--  YAN TESIR kimi deyisdi (cog-11-ekoloji-qlobal-icmeli-problemi ->
+--  cog-11-ekoloji-qlobal-dunyanin-icmeli, EYNI valideyn daxilinde,
+--  sadece slug METNI deyisib).  Bu da 3-cu kohne setir kimi qalir.
 --
 --  ON SERT: 90_alt_movzular_cografiya6_11.sql (yenilenmis versiya)
 --  islenmis olmalidir. Tekrar isledile biler.  SONRA: 05_grants.sql.
@@ -29,8 +38,11 @@ declare
   v_subj uuid;
   v_yeni1 uuid;
   v_yeni2 uuid;
+  v_yeni3 uuid;
   v_kohne1 uuid;
   v_kohne2 uuid;
+  v_kohne3 uuid;
+  v_silinen int := 0;
 begin
   select id into v_subj from public.subjects where slug = 'cografiya';
 
@@ -38,7 +50,9 @@ begin
    where subject_id = v_subj and slug = 'cog-11-enerji-erzaq-alternativ-menbeleri';
   select id into v_yeni2 from public.topics
    where subject_id = v_subj and slug = 'cog-11-enerji-erzaq-dunyanin-problemi';
-  if v_yeni1 is null or v_yeni2 is null then
+  select id into v_yeni3 from public.topics
+   where subject_id = v_subj and slug = 'cog-11-ekoloji-qlobal-dunyanin-icmeli';
+  if v_yeni1 is null or v_yeni2 is null or v_yeni3 is null then
     raise exception 'ONCE 90_alt_movzular_cografiya6_11.sql (yenilenmis) '
                     'isledilmelidir - yeni alt movzular tapilmadi';
   end if;
@@ -47,19 +61,23 @@ begin
    where subject_id = v_subj and slug = 'cog-11-ekoloji-qlobal-alternativ-enerji';
   select id into v_kohne2 from public.topics
    where subject_id = v_subj and slug = 'cog-11-ekoloji-qlobal-erzaq-problemi';
+  select id into v_kohne3 from public.topics
+   where subject_id = v_subj and slug = 'cog-11-ekoloji-qlobal-icmeli-problemi';
 
   if v_kohne1 is not null then
-    delete from public.topics where id = v_kohne1;
+    delete from public.topics where id = v_kohne1; v_silinen := v_silinen + 1;
   end if;
   if v_kohne2 is not null then
-    delete from public.topics where id = v_kohne2;
+    delete from public.topics where id = v_kohne2; v_silinen := v_silinen + 1;
+  end if;
+  if v_kohne3 is not null then
+    delete from public.topics where id = v_kohne3; v_silinen := v_silinen + 1;
   end if;
 
-  if v_kohne1 is null and v_kohne2 is null then
+  if v_silinen = 0 then
     raise notice 'Kohne setirler artiq yoxdur - fayl evvel isledilib.';
   else
-    raise notice 'Kohne 2 setir silindi, "enerji-erzaq" alt movzusu '
-                 'indi 2 bendlidir.';
+    raise notice 'Kohne % setir silindi.', v_silinen;
   end if;
 end $$;
 
@@ -77,10 +95,19 @@ begin
   select count(*) into k from public.topics t
     join public.subjects s on s.id = t.subject_id and s.slug = 'cografiya'
    where t.slug in ('cog-11-ekoloji-qlobal-alternativ-enerji',
-                     'cog-11-ekoloji-qlobal-erzaq-problemi');
+                     'cog-11-ekoloji-qlobal-erzaq-problemi',
+                     'cog-11-ekoloji-qlobal-icmeli-problemi');
   if k > 0 then
     raise exception 'kohne setirler heleki qalib: %', k;
   end if;
 
-  raise notice 'Cografiya 11 enerji-erzaq duzeldi: 2 alt movzu hazir.';
+  select count(*) into k from public.topics c
+    join public.topics p on p.id = c.parent_id
+    join public.subjects s on s.id = p.subject_id and s.slug = 'cografiya'
+    join public.levels   l on l.id = p.level_id and l.code = '11';
+  if k <> 66 then
+    raise exception 'cografiya 11-ci alt movzulari: 66 gozlenilirdi, % tapildi', k;
+  end if;
+
+  raise notice 'Cografiya 11 enerji-erzaq duzeldi: 66 alt movzu, hamisi yerinde.';
 end $$;
