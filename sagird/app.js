@@ -18,6 +18,7 @@
   var ME = null;        // {id, display_name}
   var CLS = null;       // {id, name}
   var S = null;         // aktiv cehd
+  var ON_HOME = true;   // brauzerin "geri" duymesi tetbiqden CIXMASIN
   var busy = false;
 
   var LS = "sagird_ses";
@@ -183,6 +184,7 @@
 
   /* ------------------------------------------------------ giris ekrani */
   function screenLogin(note) {
+    markScreen(true);
     topBar.classList.add("hide");
     show(
       '<div class="hero"><div class="mark"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lgQ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4acb"/><stop offset="1" stop-color="#0e9384"/></linearGradient></defs><path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="url(#lgQ)"/><g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/></g><path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#ffc94d"/><path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#1a2233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
@@ -291,6 +293,7 @@
   }
 
   function screenTests() {
+    markScreen(true);
     topBar.classList.remove("hide");
     topTitle.textContent = ME ? ME.display_name : "Testlər";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
@@ -404,6 +407,7 @@
 
   /* ---------------------------------------------------------- test */
   function startTest(testId) {
+    markScreen(false);
     show('<div class="card"><div class="skel">Test hazırlanır…</div></div>');
     sb.rpc("rpc_start_attempt", { p_token: TOKEN, p_test_id: testId })
       .then(function (d) {
@@ -433,6 +437,7 @@
 
   /* Bitmis testin neticesi - yeni cehd acilmir */
   function viewResult(testId) {
+    markScreen(false);
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_test_result", { p_token: TOKEN, p_test_id: testId })
       .then(function (r) {
@@ -589,6 +594,7 @@
 
   /* --------------------------------------------------------- netice */
   function screenResult(r, review) {
+    markScreen(false);
     var pct = Math.round(Number(r.percent) || 0);
     var C = 2 * Math.PI * 58;
     var dash = (C * pct / 100).toFixed(1) + " " + C.toFixed(1);
@@ -714,6 +720,7 @@
   /* Sagird oz gedisatini gorur: mini qrafik + son testler.  Yalniz OZ
      neticeleri - duzgun cavab ve basqa sagird melumati yoxdur. */
   function screenMyResults() {
+    markScreen(false);
     topTitle.textContent = "Nəticələrim";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_student_my_results", { p_token: TOKEN }).then(function (rows) {
@@ -750,6 +757,7 @@
 
   /* ---------------------------------------------------------- lovhe */
   function screenBoard(review) {
+    markScreen(false);
     topTitle.textContent = "Lövhə";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_leaderboard", { p_token: TOKEN, p_test_id: S.test.id })
@@ -803,6 +811,32 @@
     e.preventDefault();
     e.returnValue = "";
     return "";
+  });
+
+  /* Brauzerin "geri" duymesi: tetbiq hec bir sehife dəyişmir (SPA),
+     ona gore brauzer tarixinde əlavə pilləmiz yoxdur - "geri" birbasa
+     tetbiqden EVVELKI sehifeye (mes. bil10.az) aparirdi.  Netice
+     ekranindan geri basanda butun tetbiqden cixmaq gozlənilməz idi.
+     Həll: ev ekranindan (Testlər) uzaqlaşanda BİR defelik tarix
+     pilləsi qururuq, "geri" o pilləni sındırıb yenidən Testlərə
+     qayıdır - real sehifeden hec vaxt cixmir. */
+  function markScreen(isHome) {
+    if (isHome) { ON_HOME = true; return; }
+    if (ON_HOME) {
+      ON_HOME = false;
+      history.pushState({ sagird: 1 }, "", location.href);
+    }
+  }
+
+  window.addEventListener("popstate", function () {
+    if (testInProgress() &&
+        !confirm("Test yarımçıqdır.\n\nÇıxsan cavabların göndərilməyəcək. " +
+                 "Yenə də çıxmaq istəyirsən?")) {
+      history.pushState({ sagird: 1 }, "", location.href);   // "geri"ni ləğv et
+      return;
+    }
+    ON_HOME = true;
+    if (TOKEN) screenTests(); else screenLogin();
   });
 
   function boot() {

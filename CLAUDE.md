@@ -169,6 +169,30 @@ səhv etdim (`.right` sayı == 0 gözlədim, təsadüfən 1 düz çıxdı, test
 uğursuz oldu) — düzəliş: `.wrong.count() + .right.count() == cəmi sual`
 kimi şuffle-dan asılı olmayan yoxlama yaz.
 
+## Şagird tətbiqi — brauzerin «geri» düyməsi
+
+`sagird/` tək səhifəli tətbiqdir, ekranlar `show()` ilə DOM-da dəyişir,
+URL dəyişmir. Ona görə brauzer tarixində heç bir pillə yox idi — nəticə
+ekranında «geri» basanda birbaşa tətbiqdən ƏVVƏLKİ səhifəyə (landing)
+çıxırdı. İstifadəçi: «səhifələrdə geri mütləq olmalıdır».
+
+Həll (`sagird/app.js`, `markScreen` + `popstate`): ev ekranından
+(Testlər) uzaqlaşanda **bir dəfəlik** `history.pushState` qurulur
+(`ON_HOME` bayrağı ilə idempotent — neçə ekran keçsən də bir pillə).
+«Geri» o pilləni sındırır, `popstate` Testlərə qaytarır. Ev ekranından
+ikinci «geri» əvvəlki kimi tətbiqdən çıxır (kökdür, normaldır).
+Test ortasında «geri» `btnOut` ilə eyni «yarımçıq test» `confirm`-ini
+verir; ləğv edəndə `pushState` yenidən çağırılır — «geri» geri alınır.
+
+- Yeni ekran əlavə edəndə funksiyanın başına `markScreen(false)` yaz
+  (ev/giriş ekranı isə `markScreen(true)`). Unudulsa o ekrandan «geri»
+  yenə tətbiqdən çıxarar.
+- Dərin naviqasiya yığını (ekran-ekran geri) qəsdən qurulmayıb: kiçik
+  tətbiqdə «geri həmişə Testlərə» proqnozlaşdırılandır, testi də sadədir.
+- `muellim/` hash marşrutu (`#/g/<id>`) işlədir — orda «geri» onsuz da
+  işləyir. `valideyn/` tək ekrandır — «geri» landing-ə çıxması düzgündür.
+- e2e: `test/e2e_student.py` «G3» bölməsi fiziki `go_back()` yoxlayır.
+
 ## ƏN VACİB ÜÇ QAYDA
 
 **1 · Bal həmişə serverdə hesablanır.**

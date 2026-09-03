@@ -245,6 +245,17 @@ with sync_playwright() as pw:
     })()""")
     ok(st in (400, 403), "birbasa sorgu ile de yeni cehd acilmir (server bloklayir)", st)
 
+    print("G3 · Brauzerin «geri» düyməsi tətbiqdən çıxarmır")
+    # Evvel SPA-da tarix pillesi yox idi: netice ekranindan "geri" basanda
+    # birbasa tetbiqden EVVELKI sehifeye (landing) cixirdi.  Indi ev
+    # ekranindan uzaqlasanda bir pille qurulur - "geri" Testlere qaytarir.
+    pg.go_back(); pg.wait_for_timeout(700)
+    ok("/sagird/" in pg.url, "geri basanda hele tetbiqdedir (landing-e cixmir)", pg.url)
+    ok(pg.locator(".test").count() > 0, "geri basanda Testler ekranina qayidir")
+    #  Sonraki bolme netice ekranini gozleyir - eyni bitmis testi yeniden ac
+    pg.locator(".test", has_text="Vurma cədvəli").first.click()
+    pg.wait_for_selector(".ring", timeout=8000)
+
     print("H · Səhv cavab yolu")
     pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
     pg.locator(".test:not(.lock)", has_text="Azərbaycan dili").first.click()
