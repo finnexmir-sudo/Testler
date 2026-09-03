@@ -105,6 +105,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 86_alt_movzular_fizika6_11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 87_alt_movzular_kimya7_11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 88_alt_movzular_biologiya6_11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 89_alt_movzular_ingilis6_11.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 98_cografiya11_enerji_erzaq_duzelis.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 90_alt_movzular_cografiya6_11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 91_alt_movzular_edebiyyat5_11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 92_alt_movzular_tarix5_8_9_11.sql
@@ -113,8 +114,8 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 94_umumi_tarix_8_9_11_restruktur.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 95_alt_movzular_utarix7.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 96_alt_movzular_utarix8_9_11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 97_alt_movzular_utarix10.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 98_cografiya11_enerji_erzaq_duzelis.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 99_bank_ingilis8_788.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 112_bank_cetin_birlesme.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql

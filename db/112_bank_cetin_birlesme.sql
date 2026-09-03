@@ -1,0 +1,3068 @@
+-- =====================================================================
+--  112_bank_cetin_birlesme.sql :
+--  "Coxmulahizeli birlesme sualı" retrofit-i (CLAUDE.md, "novbeti
+--  merhele" bolmesinde sened edilmis format).
+--
+--  Her bend: movcud CETIN (difficulty=3) sualin ozu ORTA (2)
+--  seviyyeye enir - ARXIVLENMIR, movzuda qalir, kohne netice ve
+--  hesabatlar toxunulmaz qalir. Onun YERINE eyni movzuda 4
+--  nomrelenmis mulahize + kombinasiya variantlari olan yeni sual 3
+--  (cetin) kimi yazilir.
+--
+--  Qayda: 4 mulahize YALNIZ hemin movzunun oz bankinda ARTIQ movcud
+--  olan (evvelden dogru cavabi ile tesdiqlenmis) faktlardan qurulur -
+--  yeni fakt UYDURULMUR (erken pilotdaki ders - uydurulmus elave
+--  detala real sagird "derslikde yoxdur" deyib).
+--
+--  Elave sual novu YOX, movcud `single` novun icindedir (sxeme
+--  toxunmur) - body coxsetirlidir, variantlar kombinasiya seklindedir
+--  (A) 1,3  B) yalniz 1  C) 2,4  D) 1,2,3).
+--
+--  Yeni sual kohne sualin QUARTER-ini alt sorgu ile goturur - elle
+--  yazilmir, kohne setirle uygunsuzluk yaranmasin deye.
+--
+--  Ehate: pilot - 1 sual/fenn (riyaziyyat, az dili, ingilis, 11-ci
+--  sinif). tools/cetin_birlesme.py-in RETROFIT siyahisina yeni bend
+--  elave edib yeniden isledaraq boyudulur.
+--
+--  Tekrar isledile biler (on conflict (ext_key) do update).
+-- =====================================================================
+
+set search_path = public, extensions;
+
+-- ------------------------------------------------------------- riy11-toreme#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-toreme#11';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-toreme#comb1', 'riy-11-toreme',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) (sin x)′ = cos x
+2) (cos x)′ = sin x
+3) (eˣ)′ = eˣ
+4) (ln x)′ = x',
+  '(sin x)′ = cos x və (eˣ)′ = eˣ doğrudur. 2-ci mülahizədə işarə səhvdir (doğrusu −sin x), 4-cü mülahizədə isə (ln x)′ əslində 1/x-dir, x deyil.',
+  '1', '1, 3', '2, 4', '1, 2, 3', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-toreme#11'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az11-murekkeb-t#comb1
+update public.questions set difficulty = 2 where ext_key = 'az11-murekkeb-t#12';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az11-murekkeb-t#comb1', 'az-11-murekkeb-t',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Külək əsdi, yarpaqlar töküldü» cümləsi tabesiz mürəkkəb cümlədir.
+2) «Yağış yağanda hava sərinləşir» cümləsindəki budaq cümlə səbəb bildirir.
+3) «Hava pis olduğu üçün gəzintini təxirə saldıq» cümləsindəki budaq cümlə səbəb bildirir.
+4) «Bilirəm ki, sən haqlısan» cümləsindəki budaq cümlə zaman bildirir.',
+  '1 və 3 doğrudur. 2-ci mülahizədə əslində zaman bildirilir (səbəb yox), 4-cü mülahizədə isə budaq cümlə tamamlıq (xəbər) vəzifəsindədir, zaman yox.',
+  '1', '2, 4', '1, 2, 3', '1, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az11-murekkeb-t#12'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing11-regrets#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing11-regrets#20';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing11-regrets#comb1', 'ing-11-regrets',
+  'Which statements are TRUE?
+1) "If they had left earlier, they would have caught the train" is a Third Conditional sentence.
+2) "He regrets leaving school early" uses the -ing form after "regret".
+3) "We could have taken a taxi instead of walking, but we did not" describes a missed past possibility.
+4) "She wishes she lived in a bigger city now" uses the Past Perfect after "wish".',
+  '1, 2 and 3 are true. Statement 4 is wrong - "wishes...lived" uses the Past Simple to express a present wish, not the Past Perfect.',
+  '1, 2, 3', 'yalnız 1', '2, 4', '3, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing11-regrets#20'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy11-arasdirma#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-arasdirma#4';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-arasdirma#comb1', 'riy-11-arasdirma',
+  'f(x) = x³ − 3x funksiyası verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Funksiyanın böhran nöqtələri x = −1 və x = 1-dir.
+2) x = −1 nöqtəsində funksiyanın maksimumu var.
+3) x = 1 nöqtəsində funksiyanın minimumu var.
+4) f(x)-in [0; 2] parçasında ən böyük qiyməti f(1) nöqtəsindədir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: x = 1 elə bu parçanın öz MİNİMUMUDUR (f(1) = −2), parçanın ən böyük qiyməti isə ucda, x = 2-də (f(2) = 2) əldə olunur - böhran nöqtəsi həmişə parçanın ekstremumu demək deyil, uclar da yoxlanmalıdır.',
+  '1, 2, 3, 4', '2, 3, 4', '1, 2, 3', '1, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-arasdirma#4'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az11-sintaksis-d#comb1
+update public.questions set difficulty = 2 where ext_key = 'az11-sintaksis-d#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az11-sintaksis-d#comb1', 'az-11-sintaksis-d',
+  '«Aygün, Vüsal və Kamran sevincindən ağladılar, sonra müəllimlərinə təşəkkür etmək üçün sinfə qayıtdılar» cümləsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Aygün, Vüsal və Kamran» həmcins mübtədadır.
+2) «Sevincindən ağladılar» hissəsində zərflik səbəb bildirir.
+3) «Müəllimlərinə təşəkkür etmək üçün» hissəsi səbəb zərfliyidir.
+4) Cümlədə iki fərqli zərflik növü (səbəb və məqsəd) iştirak edir.',
+  '1, 2 və 4 doğrudur. 3-cü mülahizə yanlışdır: «təşəkkür etmək üçün» səbəb yox, MƏQSƏD zərfliyidir (nəyə görə deyil, nə üçün sualına cavab verir) - səbəb və məqsəd zərfliyi tez-tez qarışdırılır.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 3, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az11-sintaksis-d#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing11-experiences#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing11-experiences#8';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing11-experiences#comb1', 'ing-11-experiences',
+  'Tom has been to Italy three times. He has gone to Spain now, so he is not here. He arrived in London an hour ago.
+Which statements are TRUE?
+1) "Tom has been to Italy three times" means Tom is currently in Italy.
+2) "He has gone to Spain now" means he is currently away in Spain.
+3) "He arrived in London an hour ago" uses Past Simple because "an hour ago" is a specific past time expression.
+4) "He arrived in London an hour ago" could correctly be rewritten as "He has arrived in London an hour ago" without changing the meaning.',
+  '2 and 3 are true. Statement 1 is wrong - "has been to" means he went and RETURNED, not that he is still there (that is "has gone to"). Statement 4 is wrong - Present Perfect cannot combine with a specific past-time expression like "ago".',
+  '1, 2', '1, 3, 4', '2, 3, 4', '2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing11-experiences#8'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy11-inteqral#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-inteqral#7';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-inteqral#comb1', 'riy-11-inteqral',
+  'f(x) = x² − 4 funksiyası verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) f(x)-in ibtidai funksiyası F(x) = x³/3 − 4x + C-dir.
+2) ∫₀² f(x) dx = −16/3-dür.
+3) f(x) [0; 2] parçasında mənfi qiymətli olduğu üçün əyri ilə x-oxu arasındakı sahə 16/3-dür.
+4) f(x) [0; 2] parçasında müsbət qiymətli olduğu üçün inteqralın nəticəsi birbaşa sahəyə bərabərdir.',
+  '1, 2 və 3 doğrudur (F(2) − F(0) = −16/3 − 0 = −16/3, sahə isə əks işarəlisi 16/3-dür). 4-cü mülahizə yanlışdır: f(x) bu parçada mənfi (və ya sıfır) qiymətlidir, müsbət deyil - buna görə inteqral birbaşa sahə vermir, əks işarəli götürülməlidir.',
+  '1, 2, 3, 4', '2, 3, 4', '1, 3', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-inteqral#7'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az11-morfologiya-d#comb1
+update public.questions set difficulty = 2 where ext_key = 'az11-morfologiya-d#15';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az11-morfologiya-d#comb1', 'az-11-morfologiya-d',
+  '«Qapı bağlandı. Uşaqlar öpüşdülər. Ana uşağa corabı geydirtdi. Aygün səhər tez yuyundu.» Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Qapı bağlandı» - məchul növdür.
+2) «Uşaqlar öpüşdülər» - qarşılıq növdür.
+3) «Ana uşağa corabı geydirtdi» - qayıdış növdür.
+4) «Aygün səhər tez yuyundu» - qayıdış növdür.',
+  '1, 2 və 4 doğrudur. 3-cü mülahizə yanlışdır: «geydirtdi» İCBAR növdür (biri başqasına bir işi gördürür) - qayıdış (məs. «yuyundu») ilə icbar tez-tez qarışdırılır, çünki hər ikisi feilə əlavə şəkilçi qoşulmasıdır.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 3, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az11-morfologiya-d#15'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing11-whys#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing11-whys#28';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing11-whys#comb1', 'ing-11-whys',
+  'He passed the exam because of hard studying. Despite the heavy rain, the match continued. As a result of eating too much junk food, she felt sick.
+Which statements are TRUE?
+1) "He passed the exam because of hard studying" shows a cause-result relationship.
+2) "Despite the heavy rain, the match continued" shows a contrast, not a cause.
+3) "Despite" and "because of" can both be replaced by "although" without changing the grammar, since all three introduce a reason.
+4) "As a result of eating too much junk food, she felt sick" shows a cause-result relationship, like "because of".',
+  '1, 2 and 4 are true. Statement 3 is wrong - "despite" shows CONTRAST, not reason like "because of", and "although" needs a clause (subject + verb), not a noun phrase.',
+  '1, 3, 4', '1, 2, 4', '1, 2, 3', '2, 3, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing11-whys#28'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy11-coxhedli#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-coxhedli#26';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-coxhedli#comb1', 'riy-11-coxhedli',
+  'P(x) = x³ − 2x² − 5x + 6 çoxhədlisi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) P(1) = 0-dır.
+2) Qalıq teoreminə görə, P(x)-in (x − 1)-ə bölünməsindən qalıq P(1)-ə bərabərdir.
+3) 1-ci və 2-ci mülahizələrə əsasən, (x − 1) P(x)-in vuruğudur.
+4) P(x)-in (x − 3)-ə bölünməsindən qalıq sıfırdan fərqlidir.',
+  '1, 2 və 3 doğrudur (P(1)=1−2−5+6=0, deməli qalıq sıfırdır və (x−1) vuruqdur). 4-cü mülahizə yanlışdır: P(3)=27−18−15+6=0 - yəni (x−3) də vuruqdur, qalıq sıfırdan fərqli deyil, elə sıfırdır.',
+  '1, 2, 3, 4', '2, 3', '1, 2, 3', '1, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-coxhedli#26'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy11-feza-vektor#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-feza-vektor#23';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-feza-vektor#comb1', 'riy-11-feza-vektor',
+  'a(1; 2; 2) və b(2; 1; −2) vektorları verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) a·b skalyar hasili sıfırdır.
+2) Bu vektorlar bir-birinə perpendikulyardır.
+3) Eyni zamanda bu vektorlar kollineardır (paraleldir).
+4) a vektorunun uzunluğu 3-dür.',
+  '1, 2 və 4 doğrudur (a·b=1·2+2·1+2·(−2)=0; |a|=√(1+4+4)=3). 3-cü mülahizə yanlışdır: sıfır olmayan vektorlar eyni zamanda həm perpendikulyar, həm kollinear ola bilməz - bu, bir-birini istisna edən iki vəziyyətdir.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 3, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-feza-vektor#23'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy11-limit#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-limit#37';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-limit#comb1', 'riy-11-limit',
+  'g(x) = (x² − 9)/(x − 3) funksiyası verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) x = 3 nöqtəsində g(x) 0/0 şəklində qeyri-müəyyənlikdir.
+2) Bu qeyri-müəyyənlik ifadəni çevirib ixtisar etməklə aradan qaldırılır.
+3) lim(x→3) g(x) = 6-dır.
+4) g(x) x = 3 nöqtəsində kəsilməzdir, çünki limit mövcuddur və 6-ya bərabərdir.',
+  '1, 2 və 3 doğrudur (g(x)=(x−3)(x+3)/(x−3)=x+3, x→3-də → 6). 4-cü mülahizə yanlışdır: g(3) ümumiyyətlə TƏYİN OLUNMAYIB (məxrəc sıfır olur) - limitin mövcudluğu funksiyanın həmin nöqtədə kəsilməz olması demək deyil, bu, aradan qaldırıla bilən kəsilmə nöqtəsidir.',
+  '1, 2, 4', '2, 3, 4', '1, 3', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-limit#37'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy11-firlanma#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-firlanma#37';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-firlanma#comb1', 'riy-11-firlanma',
+  'Radiusu 3 olan silindr (hündürlüyü 5) və radiusu 3 olan konus (doğuranı 5) verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Silindrin yan səthinin sahəsi 30π-dir.
+2) Konusun yan səthinin sahəsi 15π-dir.
+3) Silindrin yan səthi konusunkindən 2 dəfə böyükdür.
+4) Silindrin radiusu 2 dəfə artırılsa (h sabit qalsa), yeni yan səthi 4 dəfə artıb 120π olar.',
+  '1, 2 və 3 doğrudur (2π·3·5=30π, π·3·5=15π, 30π/15π=2). 4-cü mülahizə yanlışdır: yan səthi düsturu 2πrh radiusda XƏTTİDİR - yalnız r 2 dəfə artanda (h sabit qalanda) sahə də cəmi 2 dəfə (60π) artır, 4 dəfə yox.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 3', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-firlanma#37'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy11-firlanma-hecm#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-firlanma-hecm#36';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-firlanma-hecm#comb1', 'riy-11-firlanma-hecm',
+  'Radiusu 2, hündürlüyü 3 olan silindr verilmişdir (həcmi 12π). Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Radiusu 2 dəfə artırılıb (h sabit qalsa), yeni həcm 48π olar (4 dəfə artıb).
+2) Hündürlüyü 2 dəfə artırılıb (r sabit qalsa), yeni həcm 24π olar (2 dəfə artıb).
+3) Eyni radiuslu kürənin radiusu 2 dəfə artırılsa, kürənin həcmi 8 dəfə artar.
+4) Silindrin radiusu VƏ hündürlüyü hər ikisi 2 dəfə artırılsa, yeni həcm cəmi 2 dəfə artar.',
+  '1, 2 və 3 doğrudur (π·4²·3=48π, π·2²·6=24π; kürədə həcm r³-lə mütənasibdir). 4-cü mülahizə yanlışdır: hər iki ölçü birlikdə 2 dəfə artanda təsirlər HASİL olunur (r-in kvadratik təsiri × h-in xətti təsiri = 4×2 = 8 dəfə, 96π), cəmlənmir.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-firlanma-hecm#36'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy11-statistika#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-statistika#32';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-statistika#comb1', 'riy-11-statistika',
+  'A və B asılı olmayan hadisələrdir, P(A) = 0,6 və P(B) = 0,5. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Ā (A-nın əksi) hadisəsinin ehtimalı 0,4-dür.
+2) A və B-nin birgə baş vermə ehtimalı 0,3-dür.
+3) Ā və B̄-nin birgə baş verməmə ehtimalı 0,2-dir.
+4) A və B-nin birgə baş vermə ehtimalı onların cəmi ilə (0,6+0,5=1,1) tapılır.',
+  '1, 2 və 3 doğrudur (P(Ā)=0,4; P(A∩B)=0,6·0,5=0,3; P(Ā∩B̄)=0,4·0,5=0,2). 4-cü mülahizə yanlışdır: birgə (VƏ) ehtimalı HASİLLƏ tapılır, cəmlə yox - üstəlik 1,1 ehtimal üçün mümkün olmayan qiymətdir (ehtimal 0 ilə 1 arasında olmalıdır).',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-statistika#32'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy11-tenlikler#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy11-tenlikler#22';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy11-tenlikler#comb1', 'riy-11-tenlikler',
+  '√(x − 2) = x − 4 tənliyi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Tənliyi kvadrata yüksəltdikdən sonra x² − 9x + 18 = 0 alınır.
+2) Bu kvadrat tənliyin kökləri x = 6 və x = 3-dür.
+3) x = 6 əsl tənliyin kökü deyil, kənar kökdür.
+4) x = 3 əsl tənliyin kökü deyil, kənar kökdür.',
+  '1, 2 və 4 doğrudur (x=3-də √1=1, sağ tərəf isə 3−4=−1, uyğun gəlmir - kənar kök). 3-cü mülahizə yanlışdır: x=6 əslində DÜZGÜN kökdür (√4=2, sağ tərəf 6−4=2, uyğun gəlir) - hər kvadrat kök AYRICA yoxlanmalıdır, biri kənar çıxsa digəri də kənar olmalı deyil.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 3, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy11-tenlikler#22'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az11-fonetika-leksika#comb1
+update public.questions set difficulty = 2 where ext_key = 'az11-fonetika-leksika#13';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az11-fonetika-leksika#comb1', 'az-11-fonetika-leksika',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Əsr - əsir» cütü paronimdir.
+2) «Baş» sözünün «dağın başı», «işin başı» mənaları omonimlikdir.
+3) «Gül» sözünün (çiçək / gülmək əmri) iki mənası omonimlikdir.
+4) Paronim, çoxmənalılıq və omonimlik eyni hadisədir - hamısı sözlərin səs baxımından üst-üstə düşməsini bildirir.',
+  '1 və 3 doğrudur. 2-ci mülahizə yanlışdır: «baş»ın mənaları ÇOXMƏNALILIQDIR (eyni sözün əlaqəli mənaları), omonim isə əlaqəsiz mənalı sözlərdir (məs. «gül»). 4-cü mülahizə yanlışdır: bu, üç fərqli hadisədir, eyni deyil.',
+  '1, 2', '2, 3, 4', '1, 2, 3', '1, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az11-fonetika-leksika#13'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az11-soz-yaradiciligi#comb1
+update public.questions set difficulty = 2 where ext_key = 'az11-soz-yaradiciligi#29';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az11-soz-yaradiciligi#comb1', 'az-11-soz-yaradiciligi',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Yazıçı» sözü quruluşca düzəltmə sözdür.
+2) «Yazıçılar» sözü (yazıçı + -lar) də quruluşca düzəltmə sözdür, çünki -lar şəkilçisi yeni leksik məna yaratmır.
+3) «Günəbaxanlar» sözü (günəbaxan + -lar) quruluşca artıq mürəkkəb söz deyil, sadə söz olur, çünki -lar əlavə olunub.
+4) Bir sözün quruluşca növünü (sadə/düzəltmə/mürəkkəb) yalnız leksik (yeni məna yaradan) şəkilçilər müəyyən edir, qrammatik şəkilçilər (cəm, hal və s.) yox.',
+  '1, 2 və 4 doğrudur. 3-cü mülahizə yanlışdır: «günəbaxanlar» da hələ MÜRƏKKƏB sözdür - -lar qrammatik şəkilçisi (4-cü mülahizənin qaydasına görə) sözün quruluşca növünü dəyişmir, eynilə «yazıçılar»ın da düzəltmə qalması kimi.',
+  '1, 2, 3', '2, 3, 4', '1, 2, 4', '1, 3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az11-soz-yaradiciligi#29'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az11-uslubiyyat#comb1
+update public.questions set difficulty = 2 where ext_key = 'az11-uslubiyyat#23';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az11-uslubiyyat#comb1', 'az-11-uslubiyyat',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Aslan kimi döyüşdü» ifadəsində bənzətmə (təşbeh) var, çünki «kimi» sözü ilə açıq müqayisə edilir.
+2) Əgər «kimi» sözü çıxarılıb (əsgəri nəzərdə tutaraq) «Aslan döyüşdü» deyilsəydi, bu artıq metafora olardı, çünki metafora da oxşarlığa əsaslanır, amma gizli müqayisədir.
+3) «Zalın gurultulu alqışları» ifadəsindəki «zal» sözü də metaforadır, çünki bu da oxşarlığa əsaslanır.
+4) Bənzətmə və metafora eyni əsasa (oxşarlığa) söykənir, amma bənzətmə açıq müqayisə («kimi»), metafora isə gizli müqayisədir.',
+  '1, 2 və 4 doğrudur. 3-cü mülahizə yanlışdır: «zal» sözü METONİMİYADIR (zal - orada oturan tamaşaçılar arasındakı ƏLAQƏ, yəni yerlə insan arasında əlaqə əsasında), oxşarlığa yox.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 3, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az11-uslubiyyat#23'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az11-metn-tehlili#comb1
+update public.questions set difficulty = 2 where ext_key = 'az11-metn-tehlili#9';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az11-metn-tehlili#comb1', 'az-11-metn-tehlili',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Bakı Azərbaycanın paytaxtıdır» faktdır, çünki yoxlanıla bilər.
+2) «Bakı dünyanın ən gözəl şəhəridir» şərhdir (rəydir), çünki subyektivdir.
+3) «Bakının əhalisi 2 milyondan çoxdur» cümləsi də faktdır, çünki bu, yoxlanıla bilən məlumatdır.
+4) «Bakı ən yaxşı şəhərdir, çünki mən orada doğulmuşam» cümləsi fakt sayılır, çünki səbəb göstərilib.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: bir subyektiv iddiaya (rəyə) SƏBƏB əlavə etmək onu FAKTA çevirmir - fakt olmaq üçün müstəqil yoxlanıla bilməlidir, müəllifin şəxsi əsaslandırması kifayət deyil.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az11-metn-tehlili#9'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az11-isguzar#comb1
+update public.questions set difficulty = 2 where ext_key = 'az11-isguzar#28';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az11-isguzar#comb1', 'az-11-isguzar',
+  '«Direktor cənab X-ə. Xahiş edirəm mənə 3 gün məzuniyyət verəsiniz. Ad-soyad, tarix, imza.» nümunə ərizəsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Bu ərizə düzgün başlayır, çünki ünvanlanan şəxsin adı və vəzifəsi ilə başlayıb.
+2) «Xahiş edirəm mənə 3 gün məzuniyyət verəsiniz» cümləsi ərizə üçün səciyyəvi rəsmi qəlibdir.
+3) Ərizənin sonunda tarix və imza olması mütləqdir.
+4) Ərizə mətnində «Öpürəm, hörmətlə gözləyirəm» kimi isti münasibət ifadə edən sözlərin işlədilməsi işgüzar üslub baxımından məqbuldur.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: işgüzar sənəddə rəsmi qəliblər qəbul olunub («Xahiş edirəm...»), əzizləmə formaları («Öpürəm») yox - bu, üslub səhvidir.',
+  '1, 2, 4', '2, 3, 4', '1, 4', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az11-isguzar#28'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing11-conversation#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing11-conversation#22';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing11-conversation#comb1', 'ing-11-conversation',
+  'Ali said, "I am tired now." Later he said, "I saw this film yesterday here." His teacher told him, "Do not be late."
+Which statements are TRUE?
+1) The reported form of "I am tired now" is "Ali said that he was tired then."
+2) The reported form of "I saw this film yesterday here" is "Ali said he had seen this film the day before there."
+3) The reported form of "Do not be late" is "The teacher told him not to be late."
+4) The reported form of "I saw this film yesterday here" could also correctly keep "yesterday" and "here" unchanged, since the meaning stays clear either way.',
+  '1, 2 and 3 are true. Statement 4 is wrong - time and place words like "yesterday"/"here" are deictic and MUST shift in reported speech (to "the day before"/"there") when the reporting happens at a different time or place.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing11-conversation#22'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing11-creativity#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing11-creativity#19';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing11-creativity#comb1', 'ing-11-creativity',
+  'Which statements are TRUE?
+1) "This picture was painted by a young artist" is PASSIVE VOICE - the picture itself received the action.
+2) "She had her portrait painted last month" is a CAUSATIVE construction - it means she arranged for someone else to paint it, she did not paint it herself.
+3) Since both sentences use a past participle after "be/have", passive and causative are grammatically the same structure.
+4) "The concert hall was built two years ago" uses passive voice, just like "This picture was painted by a young artist."',
+  '1, 2 and 4 are true. Statement 3 is wrong - despite the surface similarity (a participle after "be/have"), passive ("be + V3", subject RECEIVES the action) and causative ("have + object + V3", subject ARRANGES the action) are different structures with different meanings.',
+  '1, 2, 3', '2, 3, 4', '1, 2, 4', '1, 3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing11-creativity#19'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing11-news#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing11-news#13';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing11-news#comb1', 'ing-11-news',
+  'Which statements are TRUE?
+1) "It is reported that the president will visit tomorrow" and "The earthquake is reported to have destroyed hundreds of homes" are both passive reporting structures, but grammatically different: the first uses "It is reported THAT + clause", the second uses "SUBJECT is reported TO HAVE + V3".
+2) "The company is said to be building a new factory" uses "to be + V-ing" because the action is ONGOING.
+3) "The bridge is believed to have been damaged in the storm" uses "to have been + V3" because the action happened BEFORE the reporting, i.e. it is already completed.
+4) Since "is reported to have destroyed" and "is said to be building" both use a "to + verb" pattern, they describe the SAME time relationship.',
+  '1, 2 and 3 are true. Statement 4 is wrong - "to have destroyed" (perfect infinitive = COMPLETED action) and "to be building" (continuous infinitive = ONGOING action) express different time relationships, despite the surface "to + verb" similarity.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing11-news#13'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-funksiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-funksiya#34';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-funksiya#comb1', 'riy-10-funksiya',
+  'f(x) = x³ və g(x) = 1/x funksiyaları verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) f(x) = x³ təkdir.
+2) g(x) = 1/x təkdir.
+3) h(x) = f(x) + g(x) = x³ + 1/x funksiyası da təkdir, çünki iki tək funksiyanın cəmi yenə təkdir.
+4) k(x) = x³ + 1 funksiyası da təkdir, çünki tək funksiyaya (x³) sadəcə ədəd əlavə olunub.',
+  '1, 2 və 3 doğrudur (h(−x)=−h(x) hər zaman ödənir). 4-cü mülahizə yanlışdır: k(−x)=−x³+1, bu nə k(x)=x³+1-ə, nə də −k(x)=−x³−1-ə bərabərdir - sabit əlavə etmək tək funksiyanın simmetriyasını pozur, k(x) nə cüt, nə təkdir.',
+  '1, 2, 3, 4', '1, 2, 3', '2, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-funksiya#34'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-feza#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-feza#30';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-feza#comb1', 'riy-10-feza',
+  'Nöqtə A-dan müstəviyə perpendikulyar AH = 5 sm-dir (H - əsas). Müstəvi üzərində B və C nöqtələri var, HB = HC = 12 sm. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) AB mailinin uzunluğu 13 sm-dir.
+2) HB = HC olduğu üçün AC mailinin uzunluğu da 13 sm-dir.
+3) Bərabər maillərin (AB=AC=13) proyeksiyaları da bərabərdir (HB=HC=12).
+4) AB mail AH perpendikulyarından qısadır.',
+  '1, 2 və 3 doğrudur (Pifaqor: √(5²+12²)=13). 4-cü mülahizə yanlışdır: mail (13 sm) həmişə perpendikulyardan (5 sm) UZUNDUR, əksinə deyil - bu, üç perpendikulyar teoreminin əsas nəticəsidir.',
+  '1, 2, 4', '2, 3, 4', '1, 4', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-feza#30'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-triq-ifade#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-triq-ifade#27';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-triq-ifade#comb1', 'riy-10-triq-ifade',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) sin(90° − 30°) = cos 30° (çevirmə düsturuna görə).
+2) sin(180° − 30°) = sin 30° (çevirmə düsturuna görə).
+3) sin(−30°) = −sin(180° − 30°), çünki hər ikisi −sin 30°-a bərabərdir.
+4) sin(90° − 30°) və sin(180° − 30°) eyni qiymətdədir, çünki hər ikisi "sin"-dən başlayır.',
+  '1, 2 və 3 doğrudur (sin(−30°)=−0,5=−sin(180°−30°)=−0,5). 4-cü mülahizə yanlışdır: sin(90°−30°)=cos30°≈0,866, sin(180°−30°)=sin30°=0,5 - fərqli qiymətlərdir, çünki fərqli çevirmə düsturları tətbiq olunur.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-triq-ifade#27'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-sinus-kosinus#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-sinus-kosinus#35';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-sinus-kosinus#comb1', 'riy-10-sinus-kosinus',
+  'Üçbucaqda a = 5, b = 8, C = 60° verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) c tərəfi 7-yə bərabərdir.
+2) a² + b² (=89) c²-dən (=49) böyükdür.
+3) 2-ci mülahizəyə əsasən, C bucağı itidir.
+4) Əgər C bucağı dəyişib 90° olsaydı (a, b sabit qalsa), c yenə də 7 olardı, çünki c yalnız a və b-dən asılıdır.',
+  '1, 2 və 3 doğrudur (kosinuslar teoremi: c²=25+64−2·5·8·0,5=49). 4-cü mülahizə yanlışdır: c bucaq C-dən DƏ asılıdır (−2ab·cosC həddi) - C=90° olsaydı c²=a²+b²=89, c=√89≈9,43 olardı, 7 yox.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-sinus-kosinus#35'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-triq-qrafik#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-triq-qrafik#33';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-triq-qrafik#comb1', 'riy-10-triq-qrafik',
+  'y = 2 sin(2x) + 1 funksiyası verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Funksiyanın amplitudu 2-dir.
+2) Funksiyanın ən kiçik müsbət dövrü π-dir (arqumentdəki 2 əmsalına görə).
+3) Funksiyanın qrafiki y = sin x qrafikinə nisbətən 1 vahid yuxarı sürüşdürülüb.
+4) Funksiyanın ən böyük qiyməti 2-dir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: ən böyük qiymət amplitud VƏ şaquli sürüşmənin cəmidir (2·1+1=3), amplitudun özü (2) deyil.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-triq-qrafik#33'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-coxuzlu#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-coxuzlu#31';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-coxuzlu#comb1', 'riy-10-coxuzlu',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Tili 5 sm olan kubun tam səthinin sahəsi 150 sm²-dir (6·5²).
+2) Ölçüləri 4, 4 və 7 sm olan paralelepipedin diaqonalı 9 sm-dir (√(4²+4²+7²)).
+3) Kub da xüsusi paralelepipeddir (bütün ölçülər bərabərdir), buna görə tili 5 olan kubun diaqonalı √(5²+5²+5²)=5√3 sm-dir.
+4) Tili 5 olan kubun diaqonalı da 9 sm-dir, çünki bütün paralelepipedlərin diaqonalı ölçülərdən asılı olmayaraq eynidir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: diaqonal ölçülərdən birbaşa asılıdır (düstur bunu göstərir) - tili 5 olan kubun diaqonalı 5√3≈8,66 sm-dir, 9 sm deyil (9 yalnız 4,4,7 ölçülü fərqli paralelepiped üçündür).',
+  '1, 2, 4', '2, 3, 4', '1, 4', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-coxuzlu#31'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-triq-tenlik#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-triq-tenlik#33';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-triq-tenlik#comb1', 'riy-10-triq-tenlik',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) arcsin(1/2) = π/6-dır.
+2) arcsin(−1/2) = −π/6-dır (çünki arcsin(−a) = −arcsin a).
+3) arccos(1/2) = π/3-dür.
+4) arccos(−1/2) = −π/3-dür, çünki arccos da arcsin kimi eyni "əksini götür" qaydasını izləyir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: arccos FƏRQLİ qaydaya tabedir - arccos(−a) = π − arccos(a), yəni arccos(−1/2) = π − π/3 = 2π/3, −π/3 deyil.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-triq-tenlik#33'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-hecm#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-hecm#31';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-hecm#comb1', 'riy-10-hecm',
+  'Ölçüləri 40, 30 və 50 sm olan akvariumun tutumu 60 litrdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Bütün ölçüləri 2 dəfə böyüdülmüş oxşar akvariumun (80,60,100 sm) tutumu 480 litr olar.
+2) Bu, birbaşa hesabla da yoxlanıla bilər: 80·60·100=480000 sm³=480 L.
+3) Nəticə xətti ölçülərin 2 dəfə artması qaydasına uyğundur (həcm 8 dəfə artır).
+4) Bütün ölçüləri 2 dəfə böyüdülmüş akvariumun tutumu 120 litr olar, çünki hər ölçü 2 dəfə artıb, tutum da cəmi 2 dəfə artır.',
+  '1, 2 və 3 doğrudur (40·30·50=60000, 80·60·100=480000, nisbət=8). 4-cü mülahizə yanlışdır: hər 3 ölçü birlikdə 2 dəfə artanda həcm 2³=8 dəfə (xətti yox, KUBİK) artır, cəmi 2 dəfə yox.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-hecm#31'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-ustlu-loqarifm#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-ustlu-loqarifm#33';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-ustlu-loqarifm#comb1', 'riy-10-ustlu-loqarifm',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) log₂ 8 = 3 (çünki 2³=8).
+2) log₂ 32 = 5 (çünki 2⁵=32).
+3) log₂ x = 5 tənliyinin kökü x=32-dir (2-ci mülahizənin tərs əməliyyatıdır).
+4) 4ˣ = 2 tənliyinin kökü x=2-dir, çünki 4=2·2 münasibətinə görə 2 dəfə vurmaq lazımdır.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 4ˣ=2 → (2²)ˣ=2¹ → 2x=1 → x=1/2-dir, 2 deyil - «4=2·2» münasibəti tənliyin həllinə birbaşa tətbiq edilə bilməz.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-ustlu-loqarifm#33'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy10-statistika#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy10-statistika#33';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy10-statistika#comb1', 'riy-10-statistika',
+  'Simmetrik sikkə 3 dəfə atılır (uğur=gerb, p=1/2). Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Bernulli düsturuna görə, düz 2 dəfə gerb düşmə ehtimalı P=C(3,2)·(1/2)²·(1/2)¹ şəklində hesablanır.
+2) C(3,2)=3 olduğu üçün, bu ehtimal P=3/8-dir.
+3) Hər 3-də də gerb düşmə ehtimalı C(3,3)·(1/2)³·(1/2)⁰=1/8-dir.
+4) 3/8 ehtimalı 1/8-dən kiçikdir, çünki daha çox uğur əldə etmək həmişə daha az ehtimallıdır.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 3/8 (0,375) əslində 1/8-dən (0,125) BÖYÜKDÜR - «daha çox uğur həmişə daha az ehtimallıdır» ümumiləşdirməsi yanlışdır, burada 2 uğur (k=2) elə ən ehtimallı nəticədir.',
+  '1, 2, 4', '2, 3, 4', '1, 4', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy10-statistika#33'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az10-dil-unsiyyet#comb1
+update public.questions set difficulty = 2 where ext_key = 'az10-dil-unsiyyet#10';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az10-dil-unsiyyet#comb1', 'az-10-dil-unsiyyet',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Azərbaycan dili mənşəyinə görə türk dilləri qrupuna daxildir.
+2) Dil sistemdir, nitq onun tətbiqidir - bu, dil ilə nitq arasındakı fərqdir.
+3) Ədəbi dil normalara tabe olan ümumxalq dili formasıdır, dialekt isə müəyyən bölgəyə xas yerli qoldur.
+4) Dialekt ədəbi dilin başqa adıdır, ikisi eyni şeyi bildirir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: ədəbi dil (normativ, ümumxalq) və dialekt (yerli, qeyri-normativ) iki FƏRQLİ formadır, eyni şey deyil.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az10-dil-unsiyyet#10'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az10-fonetika-tekrar#comb1
+update public.questions set difficulty = 2 where ext_key = 'az10-fonetika-tekrar#29';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az10-fonetika-tekrar#comb1', 'az-10-fonetika-tekrar',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Alma» (meyvə) ilə «alma» (əmr) sözlərini tələffüzdə vurğunun yeri fərqləndirir.
+2) «Ton» ilə «don» sözlərini isə vurğu yox, ilk samitin kar-cingiltili olması fərqləndirir.
+3) Bu iki cüt söz eyni fonetik mexanizmlə (vurğu ilə) fərqlənir.
+4) «Kitab» sözü [kitap] kimi tələffüz olunur, çünki söz sonunda cingiltili samit karlaşır.',
+  '1, 2 və 4 doğrudur. 3-cü mülahizə yanlışdır: bu iki cüt söz FƏRQLİ mexanizmlərlə fərqlənir - «alma/alma» vurğu ilə, «ton/don» isə samitin kar-cingiltili olması ilə.',
+  '1, 2, 3', '2, 3, 4', '1, 2, 4', '1, 3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az10-fonetika-tekrar#29'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az10-leksika#comb1
+update public.questions set difficulty = 2 where ext_key = 'az10-leksika#16';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az10-leksika#comb1', 'az-10-leksika',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Qızıl üzük» birləşməsində «qızıl» sözü həqiqi mənada işlənib.
+2) «Qızıl ürək» birləşməsində isə «qızıl» sözü məcazi mənadadır.
+3) Bu iki məna (üzük/ürək) əlaqəlidir (hər ikisi «dəyərli» ideyasından qaynaqlanır), buna görə bu, ÇOXMƏNALILIQ nümunəsidir, omonimlik deyil.
+4) «Bal» (şirin qida) və «bal» (rəqs gecəsi) sözləri də eyni səbəbdən çoxmənalılığa misaldır.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «bal/bal»-ın iki mənası ƏLAQƏSİZDİR - bu, OMONİMLİKDİR, çoxmənalılıq deyil.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az10-leksika#16'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az10-uslub#comb1
+update public.questions set difficulty = 2 where ext_key = 'az10-uslub#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az10-uslub#comb1', 'az-10-uslub',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Ərizə, protokol, arayış rəsmi-işgüzar üslubda yazılır.
+2) Nağıl və dastanlar isə bədii üslubun nümunəsidir.
+3) Rəsmi sənəddə «görüşənədək, öpürəm» kimi ifadələr yazmaq üslub uyğunsuzluğu yaradır, çünki bu, məişət üslubuna aiddir.
+4) Nağıl mətnində rəsmi-işgüzar üslubun leksik vasitələrindən istifadə etmək də normal sayılır, çünki bütün üslublar bir-birini əvəz edə bilər.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: üslublar bir-birini əvəz etmir - bədii mətndə rəsmi-işgüzar leksika işlətmək də, rəsmi sənəddə məişət ifadəsi işlətmək qədər uyğunsuzdur.',
+  '1, 2, 4', '2, 3, 4', '1, 4', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az10-uslub#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az10-morfologiya-t#comb1
+update public.questions set difficulty = 2 where ext_key = 'az10-morfologiya-t#28';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az10-morfologiya-t#comb1', 'az-10-morfologiya-t',
+  '«Oxuyan şagird kitabı gələndə gətirdi» cümləsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Oxuyan» feili sifətdir (şagirdin əlamətini bildirir).
+2) «Gələndə» feili bağlamadır (əsas hərəkətin zamanını bildirir).
+3) Hər ikisi feildən əmələ gəlib, amma «oxuyan» isim üçün TƏYİN, «gələndə» isə ZƏRFLİK vəzifəsindədir.
+4) «Oxuyan» sözü də «gələndə» kimi feili bağlamadır, çünki hər ikisi feildən düzəlib.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: eyni köklə (feillə) bağlı olmaq eyni FORMA olmaq demək deyil - «oxuyan» feili SİFƏTDİR, feili bağlama yox.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az10-morfologiya-t#28'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az10-sintaksis-t#comb1
+update public.questions set difficulty = 2 where ext_key = 'az10-sintaksis-t#28';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az10-sintaksis-t#comb1', 'az-10-sintaksis-t',
+  '«Qırmızı almanı qardaşıma bağçada verdim» cümləsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Qırmızı» təyindir.
+2) «Qardaşıma» tamamlıqdır.
+3) «Bağçada» yer zərfliyidir.
+4) «Almanı» sözü mübtədadır, çünki cümlədə əşya kimi ilk qeyd olunan isimdir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «almanı» sözü tamamlıqdır (təsirlik hal şəkilçisi -nı ilə) - cümlədə İLK qeyd olunması onu mübtəda etmir, hal şəkilçisi onun üzvünü müəyyən edir.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az10-sintaksis-t#28'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az10-metn#comb1
+update public.questions set difficulty = 2 where ext_key = 'az10-metn#29';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az10-metn#comb1', 'az-10-metn',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Mətnin klassik quruluşu giriş, əsas hissə və nəticədən ibarətdir.
+2) Əsas hissədə mövzunun geniş açıqlanması yerləşir.
+3) Nəticə hissəsində isə fikrin ümumiləşdirilməsi olur, yeni mövzu başlanmır.
+4) «Əvvəlcə, sonra, nəhayət» sözləri nəticə hissəsində yeni mövzunun başlandığını göstərən əlamətdir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «əvvəlcə, sonra, nəhayət» ARDICILLIĞI göstərir, yeni mövzunun başlanmasını yox - üstəlik nəticə hissəsində yeni mövzu ümumiyyətlə başlanmamalıdır.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az10-metn#29'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az10-nitq-medeni#comb1
+update public.questions set difficulty = 2 where ext_key = 'az10-nitq-medeni#27';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az10-nitq-medeni#comb1', 'az-10-nitq-medeni',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Deməli, yəni, zad» kimi sözlərin tez-tez təkrarı zəif nitqin (tüfeyli sözlərin) əlamətidir.
+2) Nitq zamanı pauzalar isə fikri ayırıb diqqəti cəmləməyə xidmət edir - faydalı vasitədir.
+3) Deməli, natiq fikrini toplamaq üçün pauza verməklə tüfeyli söz işlətməkdən daha yaxşı edər.
+4) Tüfeyli sözlər və pauzalar eyni funksiyanı daşıyır - ikisi arasında fərq yoxdur.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: hər ikisi natiqin fikrini toplaması üçün vaxt qazandırsa da, tüfeyli sözlər ZƏİF nitqin, pauzalar isə FAYDALI bir vasitənin əlamətidir.',
+  '1, 2, 4', '2, 3, 4', '1, 4', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az10-nitq-medeni#27'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing10-kindness#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing10-kindness#19';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing10-kindness#comb1', 'ing-10-kindness',
+  'Which statements are TRUE?
+1) "who" is used because "man" is a person, as in "The man who helped me carry the bags."
+2) "where" is used because "town" is a place, as in "This is the town where I was born."
+3) "why" is used because "reason" needs a reason-relative-pronoun, as in "The reason why she helps others."
+4) All three relative pronouns (who, where, why) could be replaced by "which" without changing correctness, since "which" is the general-purpose relative pronoun for everything.',
+  '1, 2 and 3 are true. Statement 4 is wrong - "which" is specifically used for THINGS, not people, places, or reasons - replacing "who"/"where"/"why" with "which" would be ungrammatical.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing10-kindness#19'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing10-victory#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing10-victory#18';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing10-victory#comb1', 'ing-10-victory',
+  'Which statements are TRUE?
+1) "We stayed at home because it was raining heavily" uses "because" + a clause (subject+verb).
+2) "The roads were closed because of the heavy snow" uses "because of" + a noun phrase, not a clause.
+3) "Although he was tired, he continued the mission" uses "although" to show CONTRAST, not cause.
+4) "Because" and "because of" can be used interchangeably in both sentences above, since they mean the same thing.',
+  '1, 2 and 3 are true. Statement 4 is wrong - "because" needs a clause and "because of" needs a noun phrase; swapping them makes the sentence ungrammatical, even though they express a similar idea.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing10-victory#18'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing10-cultures#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing10-cultures#14';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing10-cultures#comb1', 'ing-10-cultures',
+  'Which statements are TRUE?
+1) "Despite the rain, the open-air concert continued" uses "despite" + a noun phrase.
+2) "Despite being far away, she joined the family holiday online" uses "despite" + a gerund phrase.
+3) "Even though he lives abroad, he keeps his traditions" uses "even though" + a full clause (subject+verb).
+4) "Despite" and "Even though" are grammatically interchangeable everywhere, since "despite he lives abroad" would also be correct.',
+  '1, 2 and 3 are true. Statement 4 is wrong - "despite" cannot be directly followed by a clause with subject+verb ("despite he lives abroad" is ungrammatical); only "even though" can.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing10-cultures#14'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing10-environment#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing10-environment#28';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing10-environment#comb1', 'ing-10-environment',
+  'Which statements are TRUE?
+1) "I have finished my homework already" uses Present Perfect Simple, emphasising a COMPLETED action with a present result.
+2) "It has been raining since Monday" uses Present Perfect Continuous, emphasising the ONGOING duration of the action.
+3) Both sentences connect a past action to the present moment, unlike Past Simple, which only describes a finished past action.
+4) Since both are Present Perfect forms, "have finished" and "has been raining" mean exactly the same thing: a completed action with no ongoing process.',
+  '1, 2 and 3 are true. Statement 4 is wrong - Present Perfect Simple (completion) and Present Perfect Continuous (ongoing duration) express different meanings, despite both being "Present Perfect".',
+  '1, 2, 4', '2, 3, 4', '1, 4', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing10-environment#28'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing10-success#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing10-success#17';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing10-success#comb1', 'ing-10-success',
+  'Which statements are TRUE?
+1) "She said she had read the book before the exam" uses Past Perfect because the reading happened before another past point.
+2) "After she had completed the course, she found a good job" also uses Past Perfect, because completing came before finding the job.
+3) "The bridge had been built by 1950" uses Past Perfect Passive, showing completion before a past deadline.
+4) In all three sentences, "had + V3" could be replaced by Simple Past forms without any change in meaning.',
+  '1, 2 and 3 are true. Statement 4 is wrong - Past Perfect specifically marks which of two past events happened FIRST; replacing it with Simple Past loses that clear sequencing.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing10-success#17'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing10-media#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing10-media#28';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing10-media#comb1', 'ing-10-media',
+  'Which statements are TRUE?
+1) "She said that she was tired" reports a STATEMENT, using backshift (is → was).
+2) "The teacher asked us to be quiet" reports a COMMAND, using the infinitive form ("to be").
+3) "Mum asked me if I had done my homework" reports a YES/NO QUESTION, using "if" instead of a question word.
+4) Since all three sentence types (statement, command, question) are being "reported", they all use the same grammatical pattern ("asked/told/said + that + clause").',
+  '1, 2 and 3 are true. Statement 4 is wrong - reported statements use "said/told that + clause", reported commands use "told/asked + object + infinitive" (no "that"), and reported yes/no questions use "asked + if/whether + clause" - three different patterns, not one.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing10-media#28'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-kok#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-kok#18';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-kok#comb1', 'riy-9-kok',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) √12 sadələşəndə 2√3 alınır (√12=√(4·3)=2√3).
+2) √27 sadələşəndə 3√3 alınır (eyni üsulla, fərqli ədədlə: √27=√(9·3)=3√3).
+3) Bu iki nəticəni toplasaq, √12+√27=2√3+3√3=5√3 alınır.
+4) Eyni cəmi kökləri əvvəlcə toplayıb (12+27=39), sonra kökünü alaraq (√39) da tapmaq olar - bu da 5√3-ə bərabər nəticə verər.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: √a+√b ≠ √(a+b) - √39≈6,24, 5√3≈8,66, fərqli ədədlərdir. Kökləri əvvəlcə toplayıb sonra kök almaq səhv üsuldur.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-kok#18'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-cevre#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-cevre#38';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-cevre#comb1', 'riy-9-cevre',
+  'Çevrənin uzunluğu 20π sm-dir, bu çevrədə 72°-lik qövs verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Çevrənin radiusu 10 sm-dir (uzunluq=2πr, 20π=2πr → r=10).
+2) 1-ci addımdakı radiusu l=πrα/180 düsturuna yazsaq, 72°-lik qövsün uzunluğu l=4π sm olar.
+3) Bu 72°-lik qövsə söykənən daxilə çəkilmiş bucaq 36°-dir (daxilə çəkilmiş bucaq=qövsün yarısı).
+4) Əgər qövs 72°-dən 144°-yə (2 dəfə) böyüsə, ona söykənən daxilə çəkilmiş bucaq da 2 dəfə artar, qövsün uzunluğu isə 4 dəfə artar.',
+  '1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə yanlışdır: qövs uzunluğu düsturu (l=πrα/180) α-da XƏTTİDİR - qövs 2 dəfə artanda uzunluq da CƏMİ 2 dəfə (4 dəfə yox) artır, eynilə daxilə çəkilmiş bucaq kimi.',
+  '1, 2, 3, 4', '2, 3, 4', '1, 3', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-cevre#38'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-funksiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-funksiya#37';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-funksiya#comb1', 'riy-9-funksiya',
+  'y = x² − 6x + 5 funksiyası verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Funksiyanın simmetriya oxu x=3-dür (x=−b/2a=6/2=3).
+2) Funksiyanın sıfırları x=1 və x=5-dir.
+3) 1-ci və 2-ci mülahizələrə əsasən, simmetriya oxu iki sıfırın dəqiq orta nöqtəsindən keçir ((1+5)/2=3).
+4) Funksiyanın təpə nöqtəsinin ordinatı (y qiyməti) sıfırdır, çünki təpə simmetriya oxu üzərindədir.',
+  '1, 2 və 3 doğrudur (Python-la yoxlanıldı: f(1)=f(5)=0, midpoint=3). 4-cü mülahizə yanlışdır: təpə nöqtəsi simmetriya oxu ÜZƏRİNDƏDİR (x=3), amma bu, absis oxunu (y=0) kəsdiyi demək deyil - f(3)=−4-dür, sıfır yox.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-funksiya#37'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-cevre-tenliyi#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-cevre-tenliyi#35';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-cevre-tenliyi#comb1', 'riy-9-cevre-tenliyi',
+  'M(9; 12) nöqtəsi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) M-in başlanğıcdan uzaqlığı 15 vahiddir (9²+12²=225=15²).
+2) 1-ci addıma əsasən, M nöqtəsi mərkəzi başlanğıcda, radiusu 15 olan çevrənin (x²+y²=225) üzərindədir.
+3) Bu çevrədə M-ə uyğun bucaq üçün cos α=9/15=0,6, sin α=12/15=0,8-dir.
+4) cos α=0,6 olduğu üçün, cos²α=0,64-dür (#24-dəki eyni ədədi nəticəni tətbiq edərək).',
+  '1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə yanlışdır: cos²α=0,6²=0,36-dır - 0,64 fərqli bir bank sualında (sin α=0,6 verildikdə) alınan cavabdır, birbaşa köçürülə bilməz.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-cevre-tenliyi#35'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-tenlikler#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-tenlikler#39';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-tenlikler#comb1', 'riy-9-tenlikler',
+  'x⁴ − 5x² + 4 = 0 tənliyi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Bu, bikvadrat tənlikdir (yalnız cüt qüvvətlər iştirak edir).
+2) t=x² əvəzləməsi aparsaq, t²−5t+4=0 tənliyi alınır ki, bu da (t−1)(t−4)=0 kimi vuruqlara ayrılır - deməli t=1 və ya t=4.
+3) 2-ci addımdakı t qiymətlərini geri x²-ə qaytarsaq (x²=1 və x²=4), tənliyin kökləri x=±1 və x=±2 olur.
+4) Tənliyin bütün köklərinin (±1, ±2) cəmi 6-dır.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: ±1 və ±2-nin cəmi 1−1+2−2=0-dır, 6 yox - simmetrik köklər (+ və −) bir-birini ləğv edir.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-tenlikler#39'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-coxbucaqli#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-coxbucaqli#39';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-coxbucaqli#comb1', 'riy-9-coxbucaqli',
+  'Tərəfi 6 sm olan kvadrat verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Kvadratın daxilinə çəkilmiş çevrənin radiusu 3 sm-dir (radius=tərəf/2).
+2) Kvadratın diaqonalı 6√2 sm-dir (Pifaqor: √(6²+6²)=6√2).
+3) 2-ci addımdakı diaqonaldan istifadə etsək, xaricinə çəkilmiş çevrənin radiusu 3√2 sm olur (radius=diaqonal/2).
+4) Xarici çevrənin radiusu daxili çevrənin radiusundan 2 dəfə böyükdür.',
+  '1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə yanlışdır: 3√2/3=√2≈1,41-dir, 2 dəfə yox - bu nisbət hər kvadratda √2-dir (2 deyil).',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-coxbucaqli#39'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-berabersizlik#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-berabersizlik#39';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-berabersizlik#comb1', 'riy-9-berabersizlik',
+  '(x−2)(x−6)<0 bərabərsizliyi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Uyğun tənliyin kökləri x=2 və x=6-dır.
+2) Bu köklərə əsasən, (x−2)(x−6) ifadəsi 2<x<6 aralığında mənfi, xaricində isə müsbətdir.
+3) Deməli (x−2)(x−6)<0 bərabərsizliyinin həlli 2<x<6 aralığıdır (uc nöqtələr daxil deyil).
+4) Bu aralığa (x=2 daxil olmaqla) düşən tam ədədlərin sayı 4-dür (2, 3, 4, 5).',
+  '1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə yanlışdır: x=2-də ifadə sıfırdır (mənfi deyil), buna görə strict bərabərsizliyin həllinə daxil olmur - düz say 3-dür (3, 4, 5).',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-berabersizlik#39'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-vektorlar#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-vektorlar#40';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-vektorlar#comb1', 'riy-9-vektorlar',
+  'a(1; 3) və b(2; −1) vektorları verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) a+b cəminin koordinatları (3; 2)-dir.
+2) 1-ci addımdakı nəticəyə əsasən, |a+b|=√(3²+2²)=√13-dür.
+3) Əgər a və b vektorları perpendikulyar olsaydı, |a+b|²=|a|²+|b|² olardı.
+4) 1-ci addımdakı (3; 2) vektorunun modulu 5-dir, çünki (3; 4) vektorunun modulu 5 olduğu kimi bu da eynidir.',
+  '1, 2 və 3 doğrudur (Python-la yoxlanıldı: |a+b|=√13≈3,6). 4-cü mülahizə yanlışdır: (3; 2) vektoru (3; 4) vektorundan FƏRQLİDİR - modulu √13-dür, 5 yox, sadəcə ikisinin ilk koordinatı eyni olduğu üçün qarışdırılmamalıdır.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-vektorlar#40'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-silsile#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-silsile#37';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-silsile#comb1', 'riy-9-silsile',
+  'Ədədi silsilədə a₅=20 və a₆=26-dır. Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Silsilənin fərqi d=6-dır (a₆−a₅=26−20=6).
+2) 1-ci addımdakı fərqdən istifadə edib geriyə hesablasaq, a₁=a₅−4d=20−24=−4 olur.
+3) 2-ci addımdakı a₁ və d dəyərləri ilə Sₙ=n/2·(2a₁+(n−1)d) düsturuna əsasən, ilk 10 həddin cəmi S₁₀=230-dur.
+4) Silsilənin ilk həddi (a₁=−4) mənfi olduğu üçün, bütün hədləri mənfidir.',
+  '1, 2 və 3 doğrudur (Python-la yoxlanıldı: d=6, a₁=−4, S₁₀=230). 4-cü mülahizə yanlışdır: d=6>0 olduğu üçün hədlər artır - a₅=20 artıq müsbətdir, ilk həddin mənfi olması bütün hədlərin mənfi olması demək deyil.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-silsile#37'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- riy9-ehtimal#comb1
+update public.questions set difficulty = 2 where ext_key = 'riy9-ehtimal#37';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('riy9-ehtimal#comb1', 'riy-9-ehtimal',
+  '6 nəfərdən 2 nəfərlik komanda seçilir (bütün seçimlər bərabər ehtimallıdır). Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Mümkün seçimlərin ümumi sayı C(6,2)=15-dir.
+2) Bu 6 nəfər arasındakı Aygün adlı şagirdin seçilmiş komandaya daxil olması üçün əlverişli seçimlərin sayı 5-dir (Aygün + qalan 5 nəfərdən biri).
+3) Klassik ehtimal düsturuna görə (əlverişli/mümkün), Aygünün komandaya düşmə ehtimalı 5/15=1/3-dür.
+4) Əgər komanda 2 yox, 3 nəfərlik olsaydı, Aygünün seçilmə ehtimalı da eyni (1/3) qalardı.',
+  '1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə yanlışdır: 3 nəfərlik komandada ehtimal C(5,2)/C(6,3)=10/20=1/2 olur, 1/3 yox - komanda ölçüsü böyüdükcə bir nəfərin seçilmə ehtimalı da artır.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'riy9-ehtimal#37'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'riyaziyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az9-tabesiz-baglayici#comb1
+update public.questions set difficulty = 2 where ext_key = 'az9-tabesiz-baglayici#23';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az9-tabesiz-baglayici#comb1', 'az-9-tabesiz-baglayici',
+  '«Külək əsdi, yarpaqlar töküldü» və «Külək əsdi, lakin yarpaqlar tökülmədi» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Birinci cümlədə bağlayıcısız tabesiz mürəkkəb cümlədə tərəflər sadalama intonasiyası ilə (vergüllə) bağlanır.
+2) İkinci cümlədə isə «lakin» bağlayıcısından əvvəl vergül qoyulur.
+3) Deməli hər iki cümlədə də vergül var, amma səbəbi fərqlidir: birincidə bağlayıcı yoxluğu, ikincidə «lakin»in özünün tələbi.
+4) Əgər «lakin» sözü çıxarılıb «Külək əsdi, yarpaqlar tökülmədi» yazılsa, vergül artıq yanlış olar, çünki indi cümlə bağlayıcısızdır.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 1-ci mülahizənin özünə görə bağlayıcısız cümlədə DƏ vergül lazımdır (sadalama intonasiyası ilə) - «lakin»in çıxarılması vergülü yanlış etmir, sadəcə səbəbini dəyişir.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az9-tabesiz-baglayici#23'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az9-tabesiz-mena#comb1
+update public.questions set difficulty = 2 where ext_key = 'az9-tabesiz-mena#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az9-tabesiz-mena#comb1', 'az-9-tabesiz-mena',
+  '«Şimşək çaxdı, göy guruldadı, amma biz qorxmadıq» cümləsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Şimşək çaxdı, göy guruldadı» hissəsi zaman (ardıcıllıq) əlaqəsini bildirir.
+2) «..., amma biz qorxmadıq» hissəsi isə qarşılaşdırma əlaqəsini bildirir.
+3) Bu üç hissəli cümlədə iki fərqli məna əlaqəsi (zaman və qarşılaşdırma) birləşir.
+4) Cümlədəki bütün üç tərəf eyni məna əlaqəsini (zaman əlaqəsini) daşıyır, çünki hamısı bir-birinin ardınca gəlir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 3-cü hissə («amma biz qorxmadıq») ilk ikisinə QARŞILAŞDIRMA əlaqəsi ilə bağlanır, zaman əlaqəsi ilə yox - bütün cümlə eyni əlaqə növündən ibarət deyil.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az9-tabesiz-mena#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az9-tabeli-qurulus#comb1
+update public.questions set difficulty = 2 where ext_key = 'az9-tabeli-qurulus#27';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az9-tabeli-qurulus#comb1', 'az-9-tabeli-qurulus',
+  '«Bilirəm ki, sən gələcəksən» və «Kim çalışsa, o qazanar» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Birinci cümlədə «Bilirəm» baş cümlə, «sən gələcəksən» isə budaq cümlədir - budaq cümlə burada baş cümlədən SONRA gəlir.
+2) İkinci cümlədə isə əksinə, budaq cümlə («kim çalışsa») baş cümlədən («o qazanar») ƏVVƏL gəlir.
+3) Hər iki cümlədə budaq cümləni buraxsaq, qalan hissə fikri natamam saxlayar.
+4) Bu iki nümunədən çıxan nəticə: budaq cümlə HƏMİŞƏ baş cümlədən sonra gəlməlidir, «kim çalışsa, o qazanar» isə bu qaydanın istisnasıdır.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 2-ci mülahizənin özü göstərir ki, budaq cümlə baş cümlədən ƏVVƏL də gəlir - bu, «istisna» yox, normal bir imkandır (budaq cümlənin yeri sabit deyil).',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az9-tabeli-qurulus#27'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az9-mubteda-xeber-bc#comb1
+update public.questions set difficulty = 2 where ext_key = 'az9-mubteda-xeber-bc#26';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az9-mubteda-xeber-bc#comb1', 'az-9-mubteda-xeber-bc',
+  '«Kim çox oxuyursa, o çox bilər» cümləsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Kim çox oxuyursa» mübtəda budaq cümləsidir.
+2) Bu cümlədə baş cümlənin öz mübtədası («o») mövcuddur, budaq cümlə ona əlavə izah verir.
+3) Cümlədə 2 qrammatik əsas var - biri budaq cümlədə («kim...oxuyursa»), biri baş cümlədə («o...bilər»).
+4) Budaq cümlə mübtəda vəzifəsində olduğu üçün ayrıca qrammatik əsas sayılmır - cümlədə yalnız 1 qrammatik əsas var.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: budaq cümlə hansı üzvün vəzifəsində olursa olsun, öz mübtəda-xəbərini (qrammatik əsasını) daşıyır - cümlədə 2 qrammatik əsas var, #28-in nümunəsindəki kimi.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az9-mubteda-xeber-bc#26'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az9-tamamliq-teyin-bc#comb1
+update public.questions set difficulty = 2 where ext_key = 'az9-tamamliq-teyin-bc#16';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az9-tamamliq-teyin-bc#comb1', 'az-9-tamamliq-teyin-bc',
+  '«Onu deyim ki, işlər yaxşı gedir» və «Elə adam ol ki, hamı sənə hörmət etsin» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Birinci cümlədə budaq cümlə TAMAMLIQ budaq cümləsidir («onu» qarşılıq sözü ilə).
+2) İkinci cümlədə isə budaq cümlə TƏYİN budaq cümləsidir («elə» qarşılıq sözü ilə).
+3) Bu iki cümlə arasındakı fərq budaq cümlənin verdiyi cavab və aid olduğu üzvdəndir.
+4) Hər iki qarşılıq söz («onu» və «elə») eyni üzvü (tamamlığı) əvəz etdiyi üçün, hər iki cümlədəki budaq cümlə də eyni növdəndir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «elə» tamamlığın yox, TƏYİNİN qarşılıq sözüdür - 1-ci və 2-ci mülahizələr artıq bunları FƏRQLİ növ kimi təsnif edib, 4-cü mülahizə bununla ziddiyyət təşkil edir.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az9-tamamliq-teyin-bc#16'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az9-zerflik-bc#comb1
+update public.questions set difficulty = 2 where ext_key = 'az9-zerflik-bc#29';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az9-zerflik-bc#comb1', 'az-9-zerflik-bc',
+  '«Gecikdim, çünki yol bağlı idi» və «Ona görə çalışıram ki, arzuma çatım» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Birinci cümlədə budaq cümlə səbəb bildirir («yol bağlı idi» - artıq olmuş iş).
+2) İkinci cümlədə isə budaq cümlə məqsəd bildirir («arzuma çatım» - hələ olmamış, gələcək iş).
+3) Səbəb artıq olmuş işi, məqsəd isə hələ olacaq işi bildirir - bu iki cümlə dəqiq bu fərqi göstərir.
+4) Bu qaydaya əsasən, «çünki» bağlayıcısı ilə başlayan HƏR budaq cümlə məqsəd bildirir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «çünki» SƏBƏB bağlayıcısıdır (1-ci mülahizənin özündə göründüyü kimi), məqsəd yox - iddia öz-özü ilə ziddiyyət təşkil edir.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az9-zerflik-bc#29'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az9-durgu-mc#comb1
+update public.questions set difficulty = 2 where ext_key = 'az9-durgu-mc#23';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az9-durgu-mc#comb1', 'az-9-durgu-mc',
+  '«Bilirəm ki, sən gələcəksən» və «Əgər çox çalışsan, nəticə görərsən» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Birinci cümlədə vergül «ki» bağlayıcısından sonra qoyulur.
+2) İkinci cümlədə isə budaq cümlə (şərt) əvvəldə olduğu üçün, vergül budaq cümlədən sonra qoyulur.
+3) Hər iki qaydanın ortaq məntiqi: vergül budaq cümlənin bitdiyi yerdə qoyulur.
+4) Deməli, tabeli mürəkkəb cümlədə vergülün yeri həmişə sabitdir - istənilən konstruksiyada elə «ki» sözündən sonra qoyulur.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 2-ci cümlədə heç «ki» sözü belə yoxdur - vergül budaq cümlənin sonunda qoyulur, «ki»-yə bağlı deyil. 1-ci mülahizədəki xüsusi qayda BÜTÜN formalara ümumiləşdirilə bilməz.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az9-durgu-mc#23'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- az9-metn-nitq#comb1
+update public.questions set difficulty = 2 where ext_key = 'az9-metn-nitq#22';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('az9-metn-nitq#comb1', 'az-9-metn-nitq',
+  'Aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Nitqin təmizliyi kobud və artıq (tüfeyli) sözləri istisna edir.
+2) Ədəbi dilə isə dialekt və loru sözlər daxil deyil.
+3) Bu iki qayda fərqli meyarlara əsaslanır: nitq təmizliyi təkrar/mənasızlıq məsələsidir, ədəbi dilə aidlik isə sözün mənşəyi/yayılma dairəsi məsələsidir.
+4) Deməli, sinonimlər də nitq təmizliyi baxımından tüfeyli söz sayılır, çünki onlar da «artıq» sözlərdir.',
+  '1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: sinonimlər üslubi məqsədlə işlədilən fərqli sözlərdir, tüfeyli (mənasız təkrar) söz deyil - bank bu ikisini açıq şəkildə ayırır.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'az9-metn-nitq#22'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'az-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing9-identity#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing9-identity#28';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing9-identity#comb1', 'ing-9-identity',
+  'Ayshe is bilingual: she has been learning English for five years, but she speaks neither French nor German. Which statements are TRUE?
+1) "Bilingual" means Ayshe speaks two languages.
+2) "has been learning English for five years" uses "for" because it states a DURATION, not a starting point.
+3) "speaks neither French nor German" uses "nor" to pair with "neither" and negate both.
+4) Since she speaks "neither French nor German," she is not bilingual - she only knows one language.',
+  '1, 2 and 3 are true. Statement 4 is wrong - not speaking French or German does not contradict being bilingual: she is bilingual because of Azerbaijani (her mother tongue) and English, two completely different languages from the "neither...nor" pair.',
+  '1, 2, 4', '2, 3, 4', '1, 4', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing9-identity#28'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing9-books#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing9-books#6';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing9-books#comb1', 'ing-9-books',
+  'This novel, which is based on real events, was written a century ago. Which statements are TRUE?
+1) "was written a century ago" uses Past Simple Passive because the action happened at a specific point in the past.
+2) "is based on real events" describes the novel''s source.
+3) "Fiction" means invented/imaginative literature.
+4) Since the novel "is based on real events," it must be non-fiction, not fiction, because fiction can never be based on real events.',
+  '1, 2 and 3 are true. Statement 4 is wrong - fiction (invented literature) very often draws on real events (e.g. historical novels) while still being fictionalised - "based on real events" does not make a work non-fiction.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing9-books#6'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing9-traditions#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing9-traditions#23';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing9-traditions#comb1', 'ing-9-traditions',
+  'In the past, people used to travel by horse to celebrate Novruz, which is celebrated in spring. Nowadays, guests are welcomed with tea instead. Which statements are TRUE?
+1) "used to travel by horse" describes a PAST HABIT that is no longer true now.
+2) "celebrated in spring" uses "in" because spring is a season (a general time period), not a specific day.
+3) "welcomed with tea" uses "with" to show the means of welcoming.
+4) Since "used to" describes a past habit, it means people still travel by horse today to celebrate Novruz.',
+  '1, 2 and 3 are true. Statement 4 is wrong - "used to" specifically contrasts a past habit with the present, implying the habit has STOPPED, not that it continues.',
+  '1, 2, 4', '2, 3, 4', '1, 2, 3', '1, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing9-traditions#23'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing9-ambitions#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing9-ambitions#19';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing9-ambitions#comb1', 'ing-9-ambitions',
+  '"If you work hard, you will succeed" and "If she studied harder, she would pass the exam." Which statements are TRUE?
+1) The first sentence is First Conditional (If + present, will + verb) - a realistic/likely future outcome.
+2) The second sentence is Second Conditional (If + past, would + verb) - a hypothetical situation, implying she is NOT currently studying hard.
+3) The two sentences use different conditional forms because they express different degrees of likelihood.
+4) Since both sentences are about hard work leading to success, they can be mixed: "If you worked hard, you will succeed" would be equally correct.',
+  '1, 2 and 3 are true. Statement 4 is wrong - mixing Past tense in the if-clause with "will" in the main clause is ungrammatical; First and Second Conditional forms must stay internally consistent.',
+  '1, 2, 3', '1, 2, 4', '2, 3, 4', '1, 4', 1)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing9-ambitions#19'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing9-art#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing9-art#30';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing9-art#comb1', 'ing-9-art',
+  'Yesterday, the walls of the gallery were decorated with beautiful patterns, and the exhibition was opened. The artist first drew the design with a pencil, then painted it with bright colours. Which statements are TRUE?
+1) "was opened" uses Past Simple Passive because the action happened at a specific past time.
+2) "were decorated with patterns" uses "with" to show the means/material of decoration.
+3) The artist first drew (pencil), then painted (paint) - two different techniques.
+4) Since both "drew" and "painted" describe making art, they mean exactly the same thing and are interchangeable here.',
+  '1, 2 and 3 are true. Statement 4 is wrong - "draw" (with a pencil) and "paint" (with paint) are different techniques, not interchangeable synonyms, as the sentence itself shows by using them for two separate steps.',
+  '1, 2, 4', '2, 3, 4', '1, 4', '1, 2, 3', 4)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing9-art#30'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- ing9-skills#comb1
+update public.questions set difficulty = 2 where ext_key = 'ing9-skills#29';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('ing9-skills#comb1', 'ing-9-skills',
+  'Rashad is a punctual employee - he always arrives on time. He is also reliable, so his manager trusts him with important tasks. However, he is not very flexible, and he struggles when his schedule changes suddenly. Which statements are TRUE?
+1) "Punctual" describes Rashad arriving on time - this is about TIME.
+2) "Reliable" describes that his manager trusts him - this is about DEPENDABILITY, a different quality from punctuality.
+3) "Not very flexible" means Rashad has difficulty adapting to sudden changes - a third, separate quality.
+4) Since punctual, reliable, and flexible are all positive workplace words, they all mean the same thing, so calling Rashad "punctual" is the same as calling him "flexible".',
+  '1, 2 and 3 are true. Statement 4 is wrong - these are distinct qualities, and the passage itself contradicts it: Rashad is punctual and reliable BUT explicitly NOT flexible.',
+  '1, 2, 4', '1, 2, 3', '2, 3, 4', '1, 4', 2)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'ing9-skills#29'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'ingilis-dili'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+do $$
+declare v_n int;
+begin
+  select count(*) into v_n from public.questions where ext_key like '%#comb%';
+  if v_n <> 72 then
+    raise exception '112: 72 birlesme sual gozlenilirdi, % tapildi', v_n;
+  end if;
+  raise notice '112 OK - % birlesme sual', v_n;
+end $$;

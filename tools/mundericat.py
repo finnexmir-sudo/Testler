@@ -58,6 +58,9 @@ KITABLAR = [
     (520, "informatika", 2, ""),
     (676, "informatika", 3, ""),
     (360, "informatika", 4, ""),
+    (517, "ingilis-dili", 2, ""),
+    (673, "ingilis-dili", 3, ""),
+    (768, "ingilis-dili", 4, ""),
     # ------- 5-ci sinif (orta mekteb) -------
     (840, "riyaziyyat", 5, "I hisse"),
     (841, "riyaziyyat", 5, "II hisse"),
@@ -113,6 +116,7 @@ KITABLAR = [
     (507, "riyaziyyat", 9, ""),
     (875, "azerbaycan-dili", 9, "tedris dili"),
     (886, "ingilis-dili", 9, "esas xarici dil"),
+    (887, "ingilis-dili", 9, "ikinci xarici dil"),
     (884, "informatika", 9, ""),
     (877, "tarix", 9, "Azerbaycan tarixi"),
     (879, "tarix", 9, "Umumi tarix"),
