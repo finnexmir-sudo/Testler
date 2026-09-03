@@ -2394,11 +2394,12 @@
         note = isNew
           ? msg("ok", "Test yığıldı və aşağıda seçildi — son tarixi " +
                       "təyin edib «Tapşırıq ver» düyməsini basın.")
-          //  Testin sinfi qrupun sinfinden ferqlidirse suzgec onu kesir.
-          //  Test ITMIR - generatorda sinfi duzeldib yeniden vermek olar.
-          : msg("warn", "Test yığıldı, amma bu siyahıya düşmür — sinfi " +
-                        "qrupun sinfindən fərqlidir. Generatorda «Sinif» " +
-                        "seçimini qrupla eyni edin.");
+          //  Asagi sinifler artiq KECIR (db/112).  Siyahiya dusmeyen
+          //  test yalniz YUXARI sinif ucun yigilmis ola biler.
+          : msg("warn", "Test yığıldı, amma bu siyahıya düşmür — " +
+                        "qrupun sinfindən YUXARI sinif üçün yığılıb. " +
+                        "Aşağı siniflər olar, yuxarı yox: generatorda " +
+                        "sinfi düzəldin və ya qrupun sinfini dəyişin.");
       }
       /* Iki ayri hal - eyni mesaji vermek olmaz:
          siyahi tamam bosdursa bu sinif ucun hele test YAZILMAYIB. */
@@ -2423,15 +2424,22 @@
           var sub = String(t.subject || "");
           var ttl = String(t.title || "");
           var lbl = (sub && ttl.indexOf(sub) !== 0) ? sub + " — " + ttl : ttl;
+          /*  Siyahida artiq ASAGI sinif testleri de var - hansi sinif
+              ucun yigildigi GORUNMELIDIR, yoxsa muellim 5-ci sinif
+              testini 8-ci sinif testi bilib verer.  Qrupun oz sinfi
+              tekrarlanmir: o, onsuz da basliqdadir.  */
+          var lv = String(t.level || "");
+          if (lv && lv !== (levelName(g.level_id) || "")) lbl += " · " + lv;
           return '<option value="' + esc(t.id) + '">' + esc(lbl) +
             " (" + (Number(t.questions) || 0) + " sual)" +
             (t.is_free ? "" : " · abunə") +
             (elsew[t.id] ? " · başqa qrupda verilib" : "") + "</option>";
         }).join("") + "</select>" +
         (g.level_id
-          ? '<p class="muted" style="margin:-8px 0 14px">Yalnız ' +
-            esc(levelName(g.level_id) || "") + " və sinifsiz testlər " +
-            "göstərilir — qrupun sinfini dəyişsəniz siyahı da dəyişər.</p>"
+          ? '<p class="muted" style="margin:-8px 0 14px">' +
+            esc(levelName(g.level_id) || "") + " və ondan aşağı siniflər " +
+            "üçün yığılmış testlər göstərilir — təkrar üçün aşağı sinif " +
+            "materialı da verə bilərsiniz.</p>"
           : "") +
         //  Kime: butun qrup (kohne davranis) ve ya tek sagird
         (students.length

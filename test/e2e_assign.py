@@ -214,18 +214,32 @@ with sync_playwright() as pw:
     ok("Sərbəst məşq" not in heads, "serbest mesq bolmesi gizlenir", heads)
 
     print("H · Testi olmayan sinif aydın izah olunur")
-    # Test bazasinda yalniz 3-cu sinif var. 4-cu sinif qrupunda siyahi
-    # bosdur - amma "hamisi verilib" YOX, "hele test yoxdur" yazilmalidir.
+    # Test bazasinda yalniz 3-cu sinif var.
+    # DIQQET: db/112-den sonra ASAGI sinif testleri de gorunur, ona gore
+    # 4-cu sinif qrupu ARTIQ BOS DEYIL - 3-cu sinif testlerini gorur.
+    # Bos hal indi yalniz movcud testlerden ASAGI sinifde olur: 2-ci
+    # sinif qrupuna 3-cu sinif testi teklif olunmur (yuxaridir).
     pg.click("#btnBack"); pg.wait_for_selector("#btnRen", timeout=8000)
     pg.click("#btnRen"); pg.wait_for_selector("#gLev", timeout=8000)
     pg.select_option("#gLev", "4"); pg.click("#gSave")
+    pg.wait_for_timeout(900)
+    pg.click("#btnAsgs"); pg.wait_for_selector("#aTest", timeout=8000)
+    ok(pg.locator("#aTest option").count() >= 1,
+       "4-cu sinif qrupu ASAGI sinif testlerini gorur",
+       pg.locator("#aTest option").count())
+    ok("aşağı siniflər" in pg.inner_text("#pick"),
+       "izah asagi siniflerin oldugunu yazir")
+
+    pg.click("#btnBack"); pg.wait_for_selector("#btnRen", timeout=8000)
+    pg.click("#btnRen"); pg.wait_for_selector("#gLev", timeout=8000)
+    pg.select_option("#gLev", "2"); pg.click("#gSave")
     pg.wait_for_timeout(900)
     pg.click("#btnAsgs"); pg.wait_for_selector("#pick .empty", timeout=8000)
     t = pg.inner_text("#pick")
     ok("hələ test yoxdur" in t, "bos test bazasi duzgun izah olunur",
        t.replace("\n", " ")[:70])
     ok("Bütün testlər verilib" not in t, "yaniltici 'hamisi verilib' yazilmir")
-    ok("4-cü sinif" in t, "hansi sinif oldugu yazilir")
+    ok("2-ci sinif" in t, "hansi sinif oldugu yazilir")
     # geri qaytaririq
     pg.click("#btnBack"); pg.wait_for_selector("#btnRen", timeout=8000)
     pg.click("#btnRen"); pg.wait_for_selector("#gLev", timeout=8000)

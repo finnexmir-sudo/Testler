@@ -682,6 +682,50 @@ with sync_playwright() as pw:
               (NEWT["i"],), one=True),
        "yigmaq tek basina tapsiriq vermir")
 
+    print("O2 · Aşağı sinif üçün yığılan test də verilə bilir")
+    #  Birlikde danisilan sey: repetitor 8-ci sinfi hazirlayarken 5-in
+    #  materialini da vere bilsin.  Generator bunu buraxirdi, TEYINAT
+    #  ekrani ise DEQIQ beraberlik teleb edib kesirdi - isin yarisi
+    #  islemirdi (db/112).  Burada hemin yarini olcuruk.
+    pg.click("#btnGenHere")
+    pg.wait_for_selector("#btnMake", timeout=8000)
+    #  qrup 4-cu sinifdir - 2-ci sinif seciriik (asagi)
+    pg.locator('#gLevs .chip.on').first.click()
+    pg.wait_for_function(
+        "() => document.querySelectorAll('#gLevs .chip.on').length === 0",
+        timeout=8000)
+    pg.locator('#gLevs [data-l="2"]').click()
+    pg.wait_for_function(
+        "() => document.querySelectorAll('#gLevs .chip.on').length === 1",
+        timeout=8000)
+    pg.select_option("#gsub", "riyaziyyat")
+    pg.wait_for_selector("#gsub", timeout=8000); pg.wait_for_timeout(500)
+    pg.fill("#gCnt", "5"); pg.fill("#gTitle", "Ikinci sinif tekrari")
+    pg.wait_for_function(
+        "document.querySelector('#gPrev') && "
+        "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
+        "document.querySelector('#gPrev').innerText.length > 5", timeout=10000)
+    pg.click("#btnMake")
+    pg.wait_for_selector("#aTest", timeout=10000)
+
+    LOW = db("""select id::text i from public.tests
+                 where title = 'Ikinci sinif tekrari'""", one=True)
+    ok(bool(LOW), "asagi sinif testi bazada yarandi")
+    #  ESAS: siyahida OLMALIDIR - evvel "siyahiya dusmur" deyilirdi
+    opts = pg.locator("#aTest option").evaluate_all(
+        "els => els.map(e => e.value)")
+    ok(LOW["i"] in opts, "asagi sinif testi teyinat siyahisindadir",
+       len(opts))
+    ok(pg.locator("#pick .warn").count() == 0,
+       "xeberdarliq CIXMIR - test qebul olunur")
+    #  Sinif adi setirde gorunmelidir ki, muellim qarisdirmasin
+    lbl = pg.locator("#aTest option[value='" + LOW["i"] + "']").inner_text()
+    ok("sinif" in lbl, "setirde testin sinfi yazilir", lbl)
+    #  Izah metni de artiq dogru olmalidir
+    ok("aşağı siniflər" in pg.inner_text("#pick"),
+       "izah asagi siniflerin oldugunu yazir")
+
+    pg.select_option("#aTest", NEWT["i"])
     pg.select_option("#aWho", "")
     pg.click("#btnAsg")
     #  DIQQET: ".asg" gozlemek AZDIR - bu qrupda onsuz da teyinat var,
@@ -699,18 +743,19 @@ with sync_playwright() as pw:
     pg.reload(); pg.wait_for_selector("#aTest", timeout=8000)
     ok(pg.locator("#pick .ok").count() == 0, "bildiris bir defelikdir")
 
-    print("P · Sinif uyğun gəlməyəndə səbəb yazılır")
-    #  Muellim generatorda sinfi deyisirse, teze test qrupun suzgecine
-    #  DUSMUR (rpc_available_tests sinife gore suzur).  Test itmir -
-    #  ekran sebebi yazmalidir, yoxsa "yigdim, hara getdi?" olur.
+    print("P · YUXARI sinif seçiləndə səbəb yazılır")
+    #  db/112-den sonra ASAGI sinifler qebul olunur - xeberdarliq yalniz
+    #  YUXARI sinif ucun dogrudur.  4-cu sinif qrupuna 5-ci sinif testi
+    #  yigiriq: siyahiya dusmemelidir, amma test ITMEMELI ve ekran
+    #  sebebi YAZMALIDIR ("yigdim, hara getdi?" olmasin).
     pg.click("#btnGenHere"); pg.wait_for_selector("#btnMake", timeout=8000)
     pg.select_option("#gsub", "riyaziyyat")
     pg.wait_for_selector("#gsub", timeout=8000); pg.wait_for_timeout(400)
-    #  4-cu sinfi soneduryub 3-cu sinfi yandiririq
+    #  4-cu sinfi soneduryub 5-ci sinfi yandiririq (YUXARI)
     if pg.locator("#gLevs .chip.on").count():
         pg.locator("#gLevs .chip.on").first.click()
         pg.wait_for_selector("#gLevs", timeout=8000); pg.wait_for_timeout(300)
-    pg.locator('#gLevs [data-l="3"]').click()
+    pg.locator('#gLevs [data-l="5"]').click()
     pg.wait_for_selector("#gLevs", timeout=8000); pg.wait_for_timeout(400)
     pg.fill("#gCnt", "5"); pg.fill("#gTitle", "Yanlis sinifle yigilan")
     pg.wait_for_function(
@@ -719,8 +764,10 @@ with sync_playwright() as pw:
         "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
     pg.click("#btnMake")
     pg.wait_for_selector("#pick .warn", timeout=10000)
-    ok("sinfi" in pg.inner_text("#pick .warn"), "sebeb izah olunur",
-       pg.inner_text("#pick .warn")[:60].replace("\n", " "))
+    ok("YUXARI" in pg.inner_text("#pick .warn"), "sebeb izah olunur",
+       pg.inner_text("#pick .warn")[:70].replace("\n", " "))
+    ok("Aşağı siniflər olar" in pg.inner_text("#pick .warn"),
+       "asagi siniflerin oldugu da yazilir")
     MIS = db("""select id::text i from public.tests
                  where title = 'Yanlis sinifle yigilan'""", one=True)
     ok(bool(MIS), "test ITMIR - bazada durur")

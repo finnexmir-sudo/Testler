@@ -577,6 +577,14 @@ süzgəci tam açıb 1-11-i qarışdırmalı idi.
 - **Testin öz sinfi seçilənlərin ən yuxarısıdır**: 8+7 testi 8-ci
   sinif testidir (7 təkrardır), `rpc_available_tests` onu 8-ci sinif
   qrupuna göstərməlidir.
+- **Təyinat siyahısı da aşağı sinifləri qəbul edir** (`db/112`).
+  `103` işin yalnız YARISI idi: generator aşağı sinif seçməyə icazə
+  verirdi, təyinat ekranı isə testləri DƏQİQ bərabərliklə süzürdü —
+  müəllim 5-ci sinif testi yığıb 8-ci sinif qrupuna verə bilmirdi,
+  ekran «sinfi qrupun sinfindən fərqlidir» deyib kəsirdi.
+  İndi şərt `levels.sort <= qrupun sort`-udur. **Yuxarı sinif bağlı
+  qalır** — səhv ehtimalı yüksəkdir və qrupun sinfini dəyişmək bir
+  klikdir. Sətirdə testin sinfi yazılır ki, müəllim qarışdırmasın.
 - **Mövzu nişanları yalnız TƏK sinif seçiləndə çıxır** — iki sinifdə
   siyahı ikiqat olur, mövzu seçimi onsuz da tək sinif işidir.
 

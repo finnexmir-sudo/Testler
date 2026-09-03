@@ -67,7 +67,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          105_alt_movzu_duzelisleri.sql 106_bank_siyahi_variantlar.sql \
          107_valideyn.sql 108_valideyn_duzelis.sql \
          109_duzelis_nisani.sql 110_valideyn_duzelis_nisani.sql \
-         111_admin_test_sayi.sql \
+         111_admin_test_sayi.sql 112_asagi_sinif_testleri.sql \
          05_grants.sql; do
   printf "  %-22s" "$f"
   if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then
