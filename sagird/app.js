@@ -13,6 +13,7 @@
   var topBar = document.getElementById("topBar");
   var topTitle = document.getElementById("topTitle");
   var btnOut = document.getElementById("btnOut");
+  var btnBack = document.getElementById("btnBack");   // ust zolaqda «Geri» - ev ekranindan basqa
 
   var TOKEN = null;     // sagird sessiya tokeni
   var ME = null;        // {id, display_name}
@@ -821,6 +822,9 @@
      pilləsi qururuq, "geri" o pilləni sındırıb yenidən Testlərə
      qayıdır - real sehifeden hec vaxt cixmir. */
   function markScreen(isHome) {
+    //  Gorunen «Geri» duymesi: yalniz ev ekranindan uzaqda.  Istifadeci
+    //  brauzer oxunu yox, sehifede duyme gozleyirdi - "hani geri duymesi?"
+    if (btnBack) btnBack.classList.toggle("hide", isHome);
     if (isHome) { ON_HOME = true; return; }
     if (ON_HOME) {
       ON_HOME = false;
@@ -837,6 +841,14 @@
     }
     ON_HOME = true;
     if (TOKEN) screenTests(); else screenLogin();
+  });
+
+  /* «Geri» duymesi brauzerin oxu ile EYNI yolu gedir (history.back ->
+     popstate): tek kod yolu, tarix pillesi de duzgun sindirilir.  Test
+     ortasinda eyni "yarimciq test" xeberdarligini verir. */
+  if (btnBack) btnBack.addEventListener("click", function () {
+    if (ON_HOME) return;
+    history.back();
   });
 
   function boot() {

@@ -252,6 +252,14 @@ with sync_playwright() as pw:
     pg.go_back(); pg.wait_for_timeout(700)
     ok("/sagird/" in pg.url, "geri basanda hele tetbiqdedir (landing-e cixmir)", pg.url)
     ok(pg.locator(".test").count() > 0, "geri basanda Testler ekranina qayidir")
+    #  Ev ekraninda gorunen «Geri» duymesi YOXDUR (kokdur)
+    ok(not pg.locator("#btnBack").is_visible(), "Testler ekraninda «Geri» duymesi gizlidir")
+    pg.locator(".test", has_text="Vurma cədvəli").first.click()
+    pg.wait_for_selector(".ring", timeout=8000)
+    #  Netice ekraninda ust zolaqda «Geri» gorunur ve Testlere aparir
+    ok(pg.locator("#btnBack").is_visible(), "netice ekraninda ust zolaqda «Geri» duymesi var")
+    pg.click("#btnBack"); pg.wait_for_selector(".test", timeout=8000)
+    ok("/sagird/" in pg.url, "«Geri» duymesi de tetbiqde saxlayir", pg.url)
     #  Sonraki bolme netice ekranini gozleyir - eyni bitmis testi yeniden ac
     pg.locator(".test", has_text="Vurma cədvəli").first.click()
     pg.wait_for_selector(".ring", timeout=8000)

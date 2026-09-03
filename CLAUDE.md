@@ -184,9 +184,14 @@ ikinci «geri» əvvəlki kimi tətbiqdən çıxır (kökdür, normaldır).
 Test ortasında «geri» `btnOut` ilə eyni «yarımçıq test» `confirm`-ini
 verir; ləğv edəndə `pushState` yenidən çağırılır — «geri» geri alınır.
 
+- Üst zolaqda **görünən «‹ Geri» düyməsi** (`#btnBack`) də var — brauzer
+  oxu düzələndən sonra istifadəçi «hanı geri düyməsi?» dedi: ox deyil,
+  səhifədə düymə gözləyirdi. `markScreen` onu göstərir/gizlədir (ev
+  ekranında gizli), kliki `history.back()` çağırır — brauzer oxu ilə
+  eyni `popstate` yolu, iki ayrı kod yolu yoxdur.
 - Yeni ekran əlavə edəndə funksiyanın başına `markScreen(false)` yaz
   (ev/giriş ekranı isə `markScreen(true)`). Unudulsa o ekrandan «geri»
-  yenə tətbiqdən çıxarar.
+  yenə tətbiqdən çıxarar və «Geri» düyməsi görünməz.
 - Dərin naviqasiya yığını (ekran-ekran geri) qəsdən qurulmayıb: kiçik
   tətbiqdə «geri həmişə Testlərə» proqnozlaşdırılandır, testi də sadədir.
 - `muellim/` hash marşrutu (`#/g/<id>`) işlədir — orda «geri» onsuz da
