@@ -893,7 +893,23 @@ funksiyalara `anon` üçün EXECUTE-u **birbaşa** verir — PUBLIC-dən geri
 almaq ona toxunmur. Müəllim funksiyası yazanda mütləq
 `revoke all on function ... from public, anon` yaz.
 İkinci qat: `05_grants.sql` sonda `anon`-dan bütün funksiyaları geri
-alır və yalnız 6 şagird RPC-sini saxlayır — unudulsa da sızmır.
+alır və yalnız ağ siyahını (8 şagird + 3 valideyn RPC-si) saxlayır —
+unudulsa da sızmır.
+
+**`05_grants.sql`-i köhnə sırada işlətmək huquq siləcək — özü bunu düzəldir.**
+Bir dəfə canlıda belə oldu: `db/107_valideyn.sql` valideyn RPC-lərini
+yaradıb `anon`-a EXECUTE verdi, sonra kimsə **köhnə** (valideyni
+tanımayan) `05_grants.sql`-i yenidən işlətdi — o, ağ siyahıda olmayan
+hər şeyi geri alır, nəticə: `permission denied for function
+rpc_parent_login` canlıda. Faylı təkrar işlətmək də kömək etmirdi,
+çünki köhnə versiya yalnız **geri alırdı**, heç nə **vermirdi**.
+İndi `05_grants.sql` iki istiqamətdə işləyir: ağ siyahıda olmayanı
+bağlayır, ağ siyahıda olub huququ itmişi **bərpa edir** — nə vaxt
+işlənsə, nəticə eynidir, sıradan asılı deyil. Sınmış canlı bazanı tək
+faylla düzəltmək üçün `db/113_valideyn_huquq_berpa.sql` da var (yalnız
+o 3 valideyn RPC-sinə grant verir, başqa heç nəyə toxunmur).
+Yoxlanır: `db/test/smoke_huquq.sql` — köhnə sıra ssenarisini qurub
+`05_grants.sql`-in özünü sağaltdığını sınayır.
 
 **Miqrasiya təzə sxemlə EYNİ nəticə verməlidir.** Bir dəfə `11` qismən
 unikal indeks yaratdı (`where ext_key is not null`), `01` isə tam

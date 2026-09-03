@@ -67,38 +67,80 @@ grant update          on public.accounts to authenticated;
 --  anon ucun HEC BIR cedvel - sagird terefi tamamile RPC ile isleyir
 
 -- ============================================================ funksiyalar
---  Sagird tetbiqi 8, valideyn tetbiqi 3 funksiya cagirir - basqa hec ne.  Supabase yeni
---  funksiyalara anon ucun EXECUTE-u avtomatik verdiyi ucun burda hamisi
---  geri alinir, sonra 03_rpc.sql-in verdiyi alti dene yerinde qalir.
---  Beleliklə sonradan yazilan her yeni muellim funksiyasi OZ-OZUNE
---  bagli olur - unudulsa da sizmir.
+--  Sagird tetbiqi 8, valideyn tetbiqi 3 funksiya cagirir - basqa hec ne.
+--
+--  IKI ISTIQAMETDE ISLEYIR:
+--    a) siyahida OLMAYAN her funksiyadan anon-un huququ geri alinir.
+--       Supabase yeni funksiyaya avtomatik EXECUTE verir; bele olanda
+--       sonradan yazilan her muellim funksiyasi OZ-OZUNE bagli olur.
+--    b) siyahida OLAN her funksiyaya EXECUTE verilir.
+--
+--  (b) evvel YOX IDI - ve bu, canli bazada real xetaya cevrildi.
+--  107_valideyn.sql valideyn funksiyalarini yaradib huquq verir, amma
+--  ondan sonra KOHNE (valideyni tanimayan) 05_grants.sql isledilende
+--  huquq geri alinirdi:  "permission denied for function
+--  rpc_parent_login".  Fayli tekrar isletmek de komek etmirdi, cunki
+--  o yalniz geri alirdi, hec ne vermirdi.
+--
+--  Indi netice fayllarin sirasindan ASILI DEYIL: bu fayl ne vaxt
+--  islense, anon-un huququ tam olaraq asagidaki siyahiya beraberlenir.
+--  Ag siyahi BIR yerde saxlanilir (v_ok) - evvel uc yere kopyalanmisdi
+--  ve biri unudulsa sessizce ferqli davranirdi.
 do $$
-declare fn text;
+declare
+  v_ok text[] := array[
+        --  sagird tetbiqi (db/03_rpc.sql)
+        'rpc_student_login','rpc_student_tests',
+        'rpc_start_attempt','rpc_submit_attempt',
+        'rpc_leaderboard','rpc_test_result',
+        'rpc_report_question_student','rpc_student_my_results',
+        --  valideyn tetbiqi (db/107_valideyn.sql): eynen sagird kimi
+        --  anon-la, giris kodu ile isleyir.  rpc_parent_home DUZ CAVABI
+        --  ve usagin giris kodunu QAYTARMIR.
+        'rpc_parent_login','rpc_parent_home','rpc_parent_logout'];
+  fn text;
 begin
+  --  a) artiq acilmis olani bagla.  "from public" VACIBDIR: Postgres
+  --  yeni funksiyaya susmaya gore PUBLIC-e EXECUTE verir, anon ise
+  --  PUBLIC-in icindedir.  Yalniz "from anon" yazilanda huquq
+  --  PUBLIC vasitesile yerinde qalirdi - yeni funksiyani "oz-ozune
+  --  baglanir" saymaq sehv idi.  authenticated her funksiyada acig
+  --  qrantla saxlanir, ona gore ona toxunmur.
   for fn in
     select p.oid::regprocedure::text
       from pg_proc p join pg_namespace n on n.oid = p.pronamespace
      where n.nspname = 'public'
        and has_function_privilege('anon', p.oid, 'EXECUTE')
-       and p.proname not in ('rpc_student_login','rpc_student_tests',
-                             'rpc_start_attempt','rpc_submit_attempt',
-                             'rpc_leaderboard','rpc_test_result',
-                             'rpc_report_question_student',
-                             'rpc_student_my_results',
-                             --  valideyn tetbiqi (db/107_valideyn.sql):
-                             --  eynen sagird kimi anon-la isleyir, giris
-                             --  kodladir.  rpc_parent_home DUZ CAVAB ve
-                             --  usagin giris kodunu QAYTARMIR.
-                             'rpc_parent_login','rpc_parent_home',
-                             'rpc_parent_logout')
+       and not (p.proname = any(v_ok))
   loop
-    execute format('revoke all on function %s from anon', fn);
+    execute format('revoke all on function %s from public, anon', fn);
+  end loop;
+
+  --  b) catismayani ver
+  for fn in
+    select p.oid::regprocedure::text
+      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public'
+       and p.prokind = 'f'
+       and p.proname = any(v_ok)
+       and not has_function_privilege('anon', p.oid, 'EXECUTE')
+  loop
+    execute format('grant execute on function %s to anon, authenticated', fn);
+    raise notice 'huquq berpa olundu: %', fn;
   end loop;
 end $$;
 
 -- ------------------------------------------------------------ 6. hesabat
 do $$
-declare leak text;
+declare
+  v_ok text[] := array[
+        'rpc_student_login','rpc_student_tests',
+        'rpc_start_attempt','rpc_submit_attempt',
+        'rpc_leaderboard','rpc_test_result',
+        'rpc_report_question_student','rpc_student_my_results',
+        'rpc_parent_login','rpc_parent_home','rpc_parent_logout'];
+  leak text;
+  v_say int;
 begin
   select string_agg(distinct table_name, ', ') into leak
     from information_schema.role_table_grants
@@ -108,20 +150,35 @@ begin
   if leak is not null then
     raise exception 'anon-a hele de aciq cedveller var: %', leak;
   end if;
+
+  --  cox olan
   select string_agg(p.oid::regprocedure::text, ', ') into leak
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
    where n.nspname = 'public'
      and has_function_privilege('anon', p.oid, 'EXECUTE')
-     and p.proname not in ('rpc_student_login','rpc_student_tests',
-                           'rpc_start_attempt','rpc_submit_attempt',
-                           'rpc_leaderboard','rpc_test_result',
-                             'rpc_report_question_student',
-                             'rpc_student_my_results',
-                             'rpc_parent_login','rpc_parent_home',
-                             'rpc_parent_logout');
+     and not (p.proname = any(v_ok));
   if leak is not null then
     raise exception 'anon bu funksiyalari cagira bilir: %', leak;
   end if;
 
-  raise notice 'Huquqlar quruldu: anon kataloqu, 8 sagird ve 3 valideyn RPC-sini gorur.';
+  --  az olan.  Bu yoxlama evvel yox idi: huquq itende fayl "OK" deyib
+  --  kecirdi, sagird/valideyn tetbiqi ise canlida 401 alirdi.
+  select string_agg(x, ', ') into leak
+    from unnest(v_ok) x
+   where exists (select 1 from pg_proc p
+                   join pg_namespace n on n.oid = p.pronamespace
+                  where n.nspname = 'public' and p.proname = x)
+     and not exists (select 1 from pg_proc p
+                       join pg_namespace n on n.oid = p.pronamespace
+                      where n.nspname = 'public' and p.proname = x
+                        and has_function_privilege('anon', p.oid, 'EXECUTE'));
+  if leak is not null then
+    raise exception 'anon bu funksiyalari cagira BILMIR: %', leak;
+  end if;
+
+  select count(*) into v_say
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public'
+     and has_function_privilege('anon', p.oid, 'EXECUTE');
+  raise notice 'Huquqlar quruldu: anon kataloqu ve % RPC-ni gorur.', v_say;
 end $$;
