@@ -248,6 +248,284 @@ RETROFIT = [
      "CONTRAST, not reason like \"because of\", and \"although\" needs a "
      "clause (subject + verb), not a noun phrase.",
      ["1, 3, 4", "1, 2, 4", "1, 2, 3", "2, 3, 4"], 2),
+
+    # ---- dorduncu dalga (2026-09-03): riyaziyyat/az dili/ingilis-in
+    # HAMISI 11-ci sinifde - qalan movzular teker-teker deyil, fenn/
+    # sinif uzre TAM bitirilir (istifadecinin sorgusu). Riyaziyyatda
+    # her fakt Python-la (yuxarida ayrica komanda ile) tekrar
+    # yoxlanildi.
+
+    # riy11-coxhedli#4 (P(a)=0 -> (x-a) voruqdur) + #2 (qaliq teoremi:
+    # qaliq=P(a)) + #30 (P(1)=0 -> (x-1) qaliqsiz bolunur) - hamisi
+    # P(x)=x^3-2x^2-5x+6 uzerinde: P(1)=P(3)=P(-2)=0 (Python-la
+    # yoxlanildi). Tuzaq: 4-cu mulahize P(3)-u hesablamadan "qaliq
+    # sifirdan ferqlidir" deyir - amma P(3)=0, yeni (x-3) de vuruqdur.
+    ("riyaziyyat", "orta", "11", "riy-11-coxhedli",
+     "riy11-coxhedli#26", "riy11-coxhedli#comb1",
+     "P(x) = x³ − 2x² − 5x + 6 çoxhədlisi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) P(1) = 0-dır.\n"
+     "2) Qalıq teoreminə görə, P(x)-in (x − 1)-ə bölünməsindən qalıq P(1)-ə bərabərdir.\n"
+     "3) 1-ci və 2-ci mülahizələrə əsasən, (x − 1) P(x)-in vuruğudur.\n"
+     "4) P(x)-in (x − 3)-ə bölünməsindən qalıq sıfırdan fərqlidir.",
+     "1, 2 və 3 doğrudur (P(1)=1−2−5+6=0, deməli qalıq sıfırdır və "
+     "(x−1) vuruqdur). 4-cü mülahizə yanlışdır: P(3)=27−18−15+6=0 - "
+     "yəni (x−3) də vuruqdur, qalıq sıfırdan fərqli deyil, elə "
+     "sıfırdır.",
+     ["1, 2, 3, 4", "2, 3", "1, 2, 3", "1, 3"], 3),
+
+    # riy11-feza-vektor#5 (a(1,2,2).b(2,1,-2)=0) + #6 (skalyar hasil=0
+    # -> perpendikulyar) + #7 (kollinear=paralel istiqametli) + #2-nin
+    # qelibi (uzunluq duesturu). Tuzaq: 3-cu mulahize eyni iki vektoru
+    # HEM perpendikulyar, HEM kollinear elan edir - qeyri-sifir
+    # vektorlar ucun bu ikisi eyni anda ola bilmez.
+    ("riyaziyyat", "orta", "11", "riy-11-feza-vektor",
+     "riy11-feza-vektor#23", "riy11-feza-vektor#comb1",
+     "a(1; 2; 2) və b(2; 1; −2) vektorları verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) a·b skalyar hasili sıfırdır.\n"
+     "2) Bu vektorlar bir-birinə perpendikulyardır.\n"
+     "3) Eyni zamanda bu vektorlar kollineardır (paraleldir).\n"
+     "4) a vektorunun uzunluğu 3-dür.",
+     "1, 2 və 4 doğrudur (a·b=1·2+2·1+2·(−2)=0; |a|=√(1+4+4)=3). "
+     "3-cü mülahizə yanlışdır: sıfır olmayan vektorlar eyni zamanda "
+     "həm perpendikulyar, həm kollinear ola bilməz - bu, bir-birini "
+     "istisna edən iki vəziyyətdir.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 3, 4"], 1),
+
+    # riy11-limit#12 ((x^2-9)/(x-3) 0/0 -> 6) + #22 (0/0 ixtisar ile
+    # aradan qaldirilir) + #7 (kesilmez funksiyada limit=qiymet) +
+    # #15 (kesilme noqtesi anlayisi). Tuzaq: 4-cu mulahize "limit var
+    # -> kesilmezdir" deyir, amma funksiya x=3-de TEYIN OLUNMAYIB -
+    # limitin movcudlugu kesilmezlik ucun kifayet etmir.
+    ("riyaziyyat", "orta", "11", "riy-11-limit",
+     "riy11-limit#37", "riy11-limit#comb1",
+     "g(x) = (x² − 9)/(x − 3) funksiyası verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) x = 3 nöqtəsində g(x) 0/0 şəklində qeyri-müəyyənlikdir.\n"
+     "2) Bu qeyri-müəyyənlik ifadəni çevirib ixtisar etməklə aradan qaldırılır.\n"
+     "3) lim(x→3) g(x) = 6-dır.\n"
+     "4) g(x) x = 3 nöqtəsində kəsilməzdir, çünki limit mövcuddur və 6-ya bərabərdir.",
+     "1, 2 və 3 doğrudur (g(x)=(x−3)(x+3)/(x−3)=x+3, x→3-də → 6). "
+     "4-cü mülahizə yanlışdır: g(3) ümumiyyətlə TƏYİN OLUNMAYIB "
+     "(məxrəc sıfır olur) - limitin mövcudluğu funksiyanın həmin "
+     "nöqtədə kəsilməz olması demək deyil, bu, aradan qaldırıla bilən "
+     "kəsilmə nöqtəsidir.",
+     ["1, 2, 4", "2, 3, 4", "1, 3", "1, 2, 3"], 4),
+
+    # riy11-firlanma#5 (silindr r=3,h=5 yan sahe=30pi) + #9 (konus
+    # r=3,l=5 yan sahe=15pi) + #25 (silindr radiusu 2x -> yan sahe 2x,
+    # h sabit) - Python-la yoxlanildi. Tuzaq: 4-cu mulahize duesturun
+    # radiusda XETTI (2pi*r*h) oldugunu unudub sahenin here zaman
+    # kvadratik boyudugunu (4 defe) iddia edir.
+    ("riyaziyyat", "orta", "11", "riy-11-firlanma",
+     "riy11-firlanma#37", "riy11-firlanma#comb1",
+     "Radiusu 3 olan silindr (hündürlüyü 5) və radiusu 3 olan konus (doğuranı 5) verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Silindrin yan səthinin sahəsi 30π-dir.\n"
+     "2) Konusun yan səthinin sahəsi 15π-dir.\n"
+     "3) Silindrin yan səthi konusunkindən 2 dəfə böyükdür.\n"
+     "4) Silindrin radiusu 2 dəfə artırılsa (h sabit qalsa), yeni yan səthi 4 dəfə artıb 120π olar.",
+     "1, 2 və 3 doğrudur (2π·3·5=30π, π·3·5=15π, 30π/15π=2). 4-cü "
+     "mülahizə yanlışdır: yan səthi düsturu 2πrh radiusda XƏTTİDİR - "
+     "yalnız r 2 dəfə artanda (h sabit qalanda) sahə də cəmi 2 dəfə "
+     "(60π) artır, 4 dəfə yox.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 3"], 2),
+
+    # riy11-firlanma-hecm#2 (silindr r=2,h=3 hecm=12pi) + #21 (r 2x,h
+    # sabit -> hecm 4x) + #9 (h 2x,r sabit -> hecm 2x) + #8 (kure r 2x
+    # -> hecm 8x) - Python-la yoxlanildi. Tuzaq: 4-cu mulahize HER IKI
+    # olcu birlikde 2x olanda hecmin de sade "2 defe" artdigini iddia
+    # edir - amma bu vezifelerin HASILIDIR (4x*2x=8x), cemi deyil.
+    ("riyaziyyat", "orta", "11", "riy-11-firlanma-hecm",
+     "riy11-firlanma-hecm#36", "riy11-firlanma-hecm#comb1",
+     "Radiusu 2, hündürlüyü 3 olan silindr verilmişdir (həcmi 12π). Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Radiusu 2 dəfə artırılıb (h sabit qalsa), yeni həcm 48π olar (4 dəfə artıb).\n"
+     "2) Hündürlüyü 2 dəfə artırılıb (r sabit qalsa), yeni həcm 24π olar (2 dəfə artıb).\n"
+     "3) Eyni radiuslu kürənin radiusu 2 dəfə artırılsa, kürənin həcmi 8 dəfə artar.\n"
+     "4) Silindrin radiusu VƏ hündürlüyü hər ikisi 2 dəfə artırılsa, yeni həcm cəmi 2 dəfə artar.",
+     "1, 2 və 3 doğrudur (π·4²·3=48π, π·2²·6=24π; kürədə həcm r³-lə "
+     "mütənasibdir). 4-cü mülahizə yanlışdır: hər iki ölçü birlikdə "
+     "2 dəfə artanda təsirlər HASİL olunur (r-in kvadratik təsiri × "
+     "h-in xətti təsiri = 4×2 = 8 dəfə, 96π), cəmlənmir.",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # riy11-statistika#15 (P(A)=0.7 -> P(Abar)=0.3) + #16/#18 (asili
+    # olmayan hadiselerin birge ehtimali = hasil) + #37
+    # (P(A)+P(Abar)=1) - hamisi P(A)=0.6, P(B)=0.5 uzerinde, Python-la
+    # yoxlanildi. Tuzaq: 4-cu mulahize BIRGE ehtimali (VƏ) CEMLE
+    # (yalniz uyusmayan hadiselerin YA BIRI ucun duz olan qayda) qarisdirir.
+    ("riyaziyyat", "orta", "11", "riy-11-statistika",
+     "riy11-statistika#32", "riy11-statistika#comb1",
+     "A və B asılı olmayan hadisələrdir, P(A) = 0,6 və P(B) = 0,5. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Ā (A-nın əksi) hadisəsinin ehtimalı 0,4-dür.\n"
+     "2) A və B-nin birgə baş vermə ehtimalı 0,3-dür.\n"
+     "3) Ā və B̄-nin birgə baş verməmə ehtimalı 0,2-dir.\n"
+     "4) A və B-nin birgə baş vermə ehtimalı onların cəmi ilə (0,6+0,5=1,1) tapılır.",
+     "1, 2 və 3 doğrudur (P(Ā)=0,4; P(A∩B)=0,6·0,5=0,3; P(Ā∩B̄)=0,4·0,5=0,2). "
+     "4-cü mülahizə yanlışdır: birgə (VƏ) ehtimalı HASİLLƏ tapılır, "
+     "cəmlə yox - üstəlik 1,1 ehtimal üçün mümkün olmayan qiymətdir "
+     "(ehtimal 0 ilə 1 arasında olmalıdır).",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # riy11-tenlikler#4/#6/#21 (kvadrata yukselmede kenar kok yaranir,
+    # yoxlanmalidir) - konkret misalda: sqrt(x-2)=x-4, kvadrata
+    # yukseldib x^2-9x+18=0 (kokler 6 ve 3), Python-la yoxlanildi:
+    # x=6 duz (2=2), x=3 kenar (1 != -1). Tuzaq: 3-cu ve 4-cu
+    # mulahizeler hansi kokun kenar oldugunu YERINI DEYISIB gosterir.
+    ("riyaziyyat", "orta", "11", "riy-11-tenlikler",
+     "riy11-tenlikler#22", "riy11-tenlikler#comb1",
+     "√(x − 2) = x − 4 tənliyi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Tənliyi kvadrata yüksəltdikdən sonra x² − 9x + 18 = 0 alınır.\n"
+     "2) Bu kvadrat tənliyin kökləri x = 6 və x = 3-dür.\n"
+     "3) x = 6 əsl tənliyin kökü deyil, kənar kökdür.\n"
+     "4) x = 3 əsl tənliyin kökü deyil, kənar kökdür.",
+     "1, 2 və 4 doğrudur (x=3-də √1=1, sağ tərəf isə 3−4=−1, uyğun "
+     "gəlmir - kənar kök). 3-cü mülahizə yanlışdır: x=6 əslində "
+     "DÜZGÜN kökdür (√4=2, sağ tərəf 6−4=2, uyğun gəlir) - hər kvadrat "
+     "kök AYRICA yoxlanmalıdır, biri kənar çıxsa digəri də kənar "
+     "olmalı deyil.",
+     ["1, 2, 3", "1, 2, 4", "2, 3, 4", "1, 3, 4"], 2),
+
+    # az11-fonetika-leksika#9 (esr-esir=paronim) + #21 (bas=coxmenalilik)
+    # + #26 (gul=omonim) - uc ayri leksik-semantik kateqoriyanin
+    # ferqlendirilmesi. Tuzaq: 2-ci mulahize "bas"-i omonim kimi
+    # gosterir (esasen coxmenalilik-dir - eyni sozun ELAQELI menalari),
+    # 4-cu mulahize ucunu eyni hadise kimi birlesdirir.
+    ("az-dili", "orta", "11", "az-11-fonetika-leksika",
+     "az11-fonetika-leksika#13", "az11-fonetika-leksika#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Əsr - əsir» cütü paronimdir.\n"
+     "2) «Baş» sözünün «dağın başı», «işin başı» mənaları omonimlikdir.\n"
+     "3) «Gül» sözünün (çiçək / gülmək əmri) iki mənası omonimlikdir.\n"
+     "4) Paronim, çoxmənalılıq və omonimlik eyni hadisədir - hamısı sözlərin səs baxımından üst-üstə düşməsini bildirir.",
+     "1 və 3 doğrudur. 2-ci mülahizə yanlışdır: «baş»ın mənaları "
+     "ÇOXMƏNALILIQDIR (eyni sözün əlaqəli mənaları), omonim isə "
+     "əlaqəsiz mənalı sözlərdir (məs. «gül»). 4-cü mülahizə yanlışdır: "
+     "bu, üç fərqli hadisədir, eyni deyil.",
+     ["1, 2", "2, 3, 4", "1, 2, 3", "1, 3"], 4),
+
+    # az11-soz-yaradiciligi#11 (yazici=duzeltme) + #12
+    # (gunebaxan=murekkeb) + #5 (-lar qrammatik sekilcidir, soz
+    # yaradiciligina aid deyil - yeni leksik mena yaratmir). Tuzaq:
+    # 3-cu mulahize EYNI qaydani (qrammatik sekilci novu deyismir)
+    # tetbiq edende YANLIS neticeye gelir.
+    ("az-dili", "orta", "11", "az-11-soz-yaradiciligi",
+     "az11-soz-yaradiciligi#29", "az11-soz-yaradiciligi#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Yazıçı» sözü quruluşca düzəltmə sözdür.\n"
+     "2) «Yazıçılar» sözü (yazıçı + -lar) də quruluşca düzəltmə sözdür, çünki -lar şəkilçisi yeni leksik məna yaratmır.\n"
+     "3) «Günəbaxanlar» sözü (günəbaxan + -lar) quruluşca artıq mürəkkəb söz deyil, sadə söz olur, çünki -lar əlavə olunub.\n"
+     "4) Bir sözün quruluşca növünü (sadə/düzəltmə/mürəkkəb) yalnız leksik (yeni məna yaradan) şəkilçilər müəyyən edir, qrammatik şəkilçilər (cəm, hal və s.) yox.",
+     "1, 2 və 4 doğrudur. 3-cü mülahizə yanlışdır: «günəbaxanlar» "
+     "da hələ MÜRƏKKƏB sözdür - -lar qrammatik şəkilçisi (4-cü "
+     "mülahizənin qaydasına görə) sözün quruluşca növünü dəyişmir, "
+     "eynilə «yazıçılar»ın da düzəltmə qalması kimi.",
+     ["1, 2, 3", "2, 3, 4", "1, 2, 4", "1, 3, 4"], 3),
+
+    # az11-uslubiyyat#9 (aslan kimi = benzetme) + #3 (metafora=oxsarliga
+    # esaslanir) + #4 (zal=metonimiya). Tuzaq: 3-cu mulahize "zal"-i
+    # metafora kimi gosterir - esasen elaqeye (metonimiya) esaslanir,
+    # oxsarliga yox.
+    ("az-dili", "orta", "11", "az-11-uslubiyyat",
+     "az11-uslubiyyat#23", "az11-uslubiyyat#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Aslan kimi döyüşdü» ifadəsində bənzətmə (təşbeh) var, çünki «kimi» sözü ilə açıq müqayisə edilir.\n"
+     "2) Əgər «kimi» sözü çıxarılıb (əsgəri nəzərdə tutaraq) «Aslan döyüşdü» deyilsəydi, bu artıq metafora olardı, çünki metafora da oxşarlığa əsaslanır, amma gizli müqayisədir.\n"
+     "3) «Zalın gurultulu alqışları» ifadəsindəki «zal» sözü də metaforadır, çünki bu da oxşarlığa əsaslanır.\n"
+     "4) Bənzətmə və metafora eyni əsasa (oxşarlığa) söykənir, amma bənzətmə açıq müqayisə («kimi»), metafora isə gizli müqayisədir.",
+     "1, 2 və 4 doğrudur. 3-cü mülahizə yanlışdır: «zal» sözü "
+     "METONİMİYADIR (zal - orada oturan tamaşaçılar arasındakı ƏLAQƏ, "
+     "yəni yerlə insan arasında əlaqə əsasında), oxşarlığa yox.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 3, 4"], 1),
+
+    # az11-metn-tehlili#14 (Baki paytaxtdir=fakt, Baki en gozeldir=serh)
+    # + #13 (fakt yoxlanilir, serh subyektivdir) - eyni qaydanin YENI
+    # nümunelere tetbiqi. Tuzaq: 4-cu mulahize "sebeb gostermek"-i
+    # "yoxlanila bilmek"le qarisdirir - serhe sebeb elave etmek onu
+    # fakta cevirmir.
+    ("az-dili", "orta", "11", "az-11-metn-tehlili",
+     "az11-metn-tehlili#9", "az11-metn-tehlili#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Bakı Azərbaycanın paytaxtıdır» faktdır, çünki yoxlanıla bilər.\n"
+     "2) «Bakı dünyanın ən gözəl şəhəridir» şərhdir (rəydir), çünki subyektivdir.\n"
+     "3) «Bakının əhalisi 2 milyondan çoxdur» cümləsi də faktdır, çünki bu, yoxlanıla bilən məlumatdır.\n"
+     "4) «Bakı ən yaxşı şəhərdir, çünki mən orada doğulmuşam» cümləsi fakt sayılır, çünki səbəb göstərilib.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: bir subyektiv "
+     "iddiaya (rəyə) SƏBƏB əlavə etmək onu FAKTA çevirmir - fakt "
+     "olmaq üçün müstəqil yoxlanıla bilməlidir, müəllifin şəxsi "
+     "əsaslandırması kifayət deyil.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # az11-isguzar#2 (erize unvanla baslayir) + #26/#19 (rasmi qelib,
+    # "Xahis edirem...") + #3 (son: tarix+imza) - erize numunesinin
+    # butov qurulusu. Tuzaq: 4-cu mulahize emosional/qeyri-rasmi
+    # ifadelerin isguzar uslubda meqbul oldugunu iddia edir.
+    ("az-dili", "orta", "11", "az-11-isguzar",
+     "az11-isguzar#28", "az11-isguzar#comb1",
+     "«Direktor cənab X-ə. Xahiş edirəm mənə 3 gün məzuniyyət verəsiniz. Ad-soyad, tarix, imza.» nümunə ərizəsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Bu ərizə düzgün başlayır, çünki ünvanlanan şəxsin adı və vəzifəsi ilə başlayıb.\n"
+     "2) «Xahiş edirəm mənə 3 gün məzuniyyət verəsiniz» cümləsi ərizə üçün səciyyəvi rəsmi qəlibdir.\n"
+     "3) Ərizənin sonunda tarix və imza olması mütləqdir.\n"
+     "4) Ərizə mətnində «Öpürəm, hörmətlə gözləyirəm» kimi isti münasibət ifadə edən sözlərin işlədilməsi işgüzar üslub baxımından məqbuldur.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: işgüzar sənəddə "
+     "rəsmi qəliblər qəbul olunub («Xahiş edirəm...»), əzizləmə "
+     "formaları («Öpürəm») yox - bu, üslub səhvidir.",
+     ["1, 2, 4", "2, 3, 4", "1, 4", "1, 2, 3"], 4),
+
+    # ing11-conversation#1 (I am tired -> was tired) + #17 (saw...
+    # yesterday -> had seen...the day before) + #18 (are here now ->
+    # were there then) + #6/#7 (imperativ -> to+feil) - reported
+    # speech-in BUTUN elementlerinin (zaman+yer+feil formasi) EYNI
+    # cümlede birlesdirilmesi. Tuzaq: 4-cu mulahize deiktik
+    # (zaman/yer) sozlerin deyismeye ehtiyaci olmadigini iddia edir.
+    ("ingilis-dili", "orta", "11", "ing-11-conversation",
+     "ing11-conversation#22", "ing11-conversation#comb1",
+     "Ali said, \"I am tired now.\" Later he said, \"I saw this film yesterday here.\" His teacher told him, \"Do not be late.\"\n"
+     "Which statements are TRUE?\n"
+     "1) The reported form of \"I am tired now\" is \"Ali said that he was tired then.\"\n"
+     "2) The reported form of \"I saw this film yesterday here\" is \"Ali said he had seen this film the day before there.\"\n"
+     "3) The reported form of \"Do not be late\" is \"The teacher told him not to be late.\"\n"
+     "4) The reported form of \"I saw this film yesterday here\" could also correctly keep \"yesterday\" and \"here\" unchanged, since the meaning stays clear either way.",
+     "1, 2 and 3 are true. Statement 4 is wrong - time and place words "
+     "like \"yesterday\"/\"here\" are deictic and MUST shift in reported "
+     "speech (to \"the day before\"/\"there\") when the reporting "
+     "happens at a different time or place.",
+     ["1, 2, 3", "1, 2, 4", "2, 3, 4", "1, 4"], 1),
+
+    # ing11-creativity#1 (was painted = passive) + #4 (had her
+    # portrait painted = causative) + #16 (was built = passive) -
+    # passive vs causative eyni sethi qelibde (be/have + V3) amma
+    # FERQLI menada. Tuzaq: 3-cu mulahize hemin sethi oxsarliga
+    # esasen ikisini EYNI struktur elan edir.
+    ("ingilis-dili", "orta", "11", "ing-11-creativity",
+     "ing11-creativity#19", "ing11-creativity#comb1",
+     "Which statements are TRUE?\n"
+     "1) \"This picture was painted by a young artist\" is PASSIVE VOICE - the picture itself received the action.\n"
+     "2) \"She had her portrait painted last month\" is a CAUSATIVE construction - it means she arranged for someone else to paint it, she did not paint it herself.\n"
+     "3) Since both sentences use a past participle after \"be/have\", passive and causative are grammatically the same structure.\n"
+     "4) \"The concert hall was built two years ago\" uses passive voice, just like \"This picture was painted by a young artist.\"",
+     "1, 2 and 4 are true. Statement 3 is wrong - despite the surface "
+     "similarity (a participle after \"be/have\"), passive (\"be + V3\", "
+     "subject RECEIVES the action) and causative (\"have + object + "
+     "V3\", subject ARRANGES the action) are different structures "
+     "with different meanings.",
+     ["1, 2, 3", "2, 3, 4", "1, 2, 4", "1, 3, 4"], 3),
+
+    # ing11-news#1 (It is reported that...) + #22 (is reported to have
+    # destroyed - perfect infinitiv, tamamlanmis heretket) + #2 (is
+    # said to be building - davamedici infinitiv, hele bitmemis
+    # heretket) + #9 (is believed to have been damaged). Tuzaq: 4-cu
+    # mulahize "to have V3" ve "to be V-ing"-i EYNI zaman elaqesi kimi
+    # gosterir.
+    ("ingilis-dili", "orta", "11", "ing-11-news",
+     "ing11-news#13", "ing11-news#comb1",
+     "Which statements are TRUE?\n"
+     "1) \"It is reported that the president will visit tomorrow\" and \"The earthquake is reported to have destroyed hundreds of homes\" are both passive reporting structures, but grammatically different: the first uses \"It is reported THAT + clause\", the second uses \"SUBJECT is reported TO HAVE + V3\".\n"
+     "2) \"The company is said to be building a new factory\" uses \"to be + V-ing\" because the action is ONGOING.\n"
+     "3) \"The bridge is believed to have been damaged in the storm\" uses \"to have been + V3\" because the action happened BEFORE the reporting, i.e. it is already completed.\n"
+     "4) Since \"is reported to have destroyed\" and \"is said to be building\" both use a \"to + verb\" pattern, they describe the SAME time relationship.",
+     "1, 2 and 3 are true. Statement 4 is wrong - \"to have destroyed\" "
+     "(perfect infinitive = COMPLETED action) and \"to be building\" "
+     "(continuous infinitive = ONGOING action) express different time "
+     "relationships, despite the surface \"to + verb\" similarity.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
 ]
 
 
