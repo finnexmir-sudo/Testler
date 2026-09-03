@@ -272,7 +272,7 @@ with sync_playwright() as pw:
     ok("dərs planını" in vp.inner_text("#main"),
        "bos ders bolmesinde SEBEB yazilir")
     #  Ust zolaqda ad TEKRARLANMIR
-    ok(vp.inner_text("#topTitle").strip() == "Uşağım",
+    ok(vp.inner_text("#topTitle").strip() == "Valideyn paneli",
        "ust zolaqda ad tekrarlanmir", vp.inner_text("#topTitle"))
     #  Daxil olandan sonra da qayidis yolu var - ust zolaqdaki nisan
     ok(vp.locator("a.mark[href='../']").count() == 1,

@@ -142,7 +142,7 @@
     topBar.classList.remove("hide");
     //  Ad sehifenin ozunde iri yazilir - zolaqda tekrarlamaq telefonda
     //  ekranin basindan yer yeyirdi.
-    topTitle.textContent = "Uşağım";
+    topTitle.textContent = "Valideyn paneli";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_parent_home", { p_token: TOKEN })
       .then(function (d) { drawHome(d || {}); })
