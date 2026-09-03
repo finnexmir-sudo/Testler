@@ -624,6 +624,32 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     bağlıdır — ondan əvvəl mənasızdır. Bələdçi (`komek/`) ilə birlikdə
     «necə qazanılır» da orada yazılacaq.
 
+18. **Diaqnostik test → şagird üzrə mövzu xəritəsi → fərdi dərs planı.**
+    İstifadəçi «möhtəşəm» dedi, ilk pilot müəllimindən sonra. Üç pillə:
+    (a) «Diaqnostik test ver» — sinfin BÜTÜN mövzularından hər birinə
+    3 sual (`app.min_topic_answers()` = 3 olmasa analiz susur; fəsil
+    səviyyəsində, ~30–45 sual, bir cəhd); (b) nəticə — mövzu xəritəsi
+    (yaşıl/narıncı/qırmızı) + «bundan başla» + hər zəif mövzuya «səhvlər
+    üzərində iş»; (c) **fərdi plan**: zəif mövzular kurikulum sırası ilə
+    şagirdin öz planına düşür («Keçildi» şagird üzrə). İndi plan yalnız
+    qrup üzrədir (`class_plans.class_id`) — fərdi plan üçün `student_id`
+    (nullable) və UI-də yüngül görünüş lazımdır: 12 şagirdə 12 plan
+    olacaq, hər biri 3–6 sətir olmalıdır, 74 yox. Təkrar diaqnostika
+    irəliləyişi rəqəmlə göstərir («3 qırmızı → 1») — valideyn hesabatına
+    (yol xəritəsi «aylıq hesabat» təklifi) da düşür.
+    `07_seed_tests.sql`-dəki «Genişləndirilmiş analiz testi» bunun
+    nümunə-yer tutucusudur, məhsul deyil (canlıda yoxdur).
+
+19. **«Bizə yaz» — istifadəçi təklifləri.** İstifadəçinin sözü: real
+    təcrübədən gələn təkliflər olacaq, biz dəyərləndirəcəyik. Qayda:
+    tətbiqdən kənara şəbəkə müraciəti yoxdur → təklif Supabase-də
+    cədvələ yazılır (`feedback`: kim, hansı tətbiq, mətn, tarix), RLS
+    bağlı, yazmaq RPC ilə (müəllim `auth.uid()`, şagird/valideyn öz
+    tokeni ilə), oxumaq yalnız İdarəetmədə. Müəllim Profildə,
+    şagird/valideyn giriş/ev ekranında kiçik «Bizə yaz» forması.
+    WhatsApp linki bunu əvəz etmir: təkliflər bir yerə yığılmalıdır ki,
+    dəyərləndirilsin. Kiçik iş — pilotla eyni vaxtda faydalıdır.
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); valideyn
 girişində qiymət modeli — pilotdan sonra (təfərrüat: yerli strategiya
