@@ -75,6 +75,12 @@ OUT = os.path.join(KOK, "db", "112_bank_cetin_birlesme.sql")
 
 # her bend: (fenn_slug, proqram_slug, sinif_kodu, movzu_slug,
 #            kohne_ext_key, yeni_ext_key, body, izah, [4 variant], duz_ord)
+# DIQQET: hemise ayni ord-da (mes. hemise 1-ci variant) duz cavab
+# qoymaq oz-ozune bir "qelib" yaradir - sagird mezmuna baxmadan "hemise
+# A" secib xal apara biler. Asagida duz cavabin ord-u qesden 1..4
+# arasinda deyisdirilib (movzu/dogruluqla elaqesi yoxdur, sadece
+# yerlesdirme).
+
 RETROFIT = [
     ("riyaziyyat", "orta", "11", "riy-11-toreme",
      "riy11-toreme#11", "riy11-toreme#comb1",
@@ -86,7 +92,7 @@ RETROFIT = [
      "(sin x)′ = cos x və (eˣ)′ = eˣ doğrudur. 2-ci mülahizədə işarə "
      "səhvdir (doğrusu −sin x), 4-cü mülahizədə isə (ln x)′ əslində "
      "1/x-dir, x deyil.",
-     ["1, 3", "1", "2, 4", "1, 2, 3"], 1),
+     ["1", "1, 3", "2, 4", "1, 2, 3"], 2),
 
     ("az-dili", "orta", "11", "az-11-murekkeb-t",
      "az11-murekkeb-t#12", "az11-murekkeb-t#comb1",
@@ -98,7 +104,7 @@ RETROFIT = [
      "1 və 3 doğrudur. 2-ci mülahizədə əslində zaman bildirilir (səbəb "
      "yox), 4-cü mülahizədə isə budaq cümlə tamamlıq (xəbər) "
      "vəzifəsindədir, zaman yox.",
-     ["1, 3", "1", "2, 4", "1, 2, 3"], 1),
+     ["1", "2, 4", "1, 2, 3", "1, 3"], 4),
 
     ("ingilis-dili", "orta", "11", "ing-11-regrets",
      "ing11-regrets#20", "ing11-regrets#comb1",
@@ -133,7 +139,7 @@ RETROFIT = [
      "öz MİNİMUMUDUR (f(1) = −2), parçanın ən böyük qiyməti isə ucda, "
      "x = 2-də (f(2) = 2) əldə olunur - böhran nöqtəsi həmişə parçanın "
      "ekstremumu demək deyil, uclar da yoxlanmalıdır.",
-     ["1, 2, 3", "1, 2, 3, 4", "2, 3, 4", "1, 3"], 1),
+     ["1, 2, 3, 4", "2, 3, 4", "1, 2, 3", "1, 3"], 3),
 
     # az11-sintaksis-d#20 (hemcins mubteda -> "eyni suala cavab verib
     # eyni uzve baglanmaq" qaydasinin, #19-dan, paralel siyahiya
@@ -154,7 +160,7 @@ RETROFIT = [
      "üçün» səbəb yox, MƏQSƏD zərfliyidir (nəyə görə deyil, nə üçün "
      "sualına cavab verir) - səbəb və məqsəd zərfliyi tez-tez "
      "qarışdırılır.",
-     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 3, 4"], 1),
+     ["1, 2, 3", "1, 2, 4", "2, 3, 4", "1, 3, 4"], 2),
 
     # ing11-experiences#18 (been to = qayidib, gone to = hele ordadir)
     # + #14/#25 (konkret kecmis vaxt qeydi -> Past Simple, Present
@@ -175,7 +181,73 @@ RETROFIT = [
      "went and RETURNED, not that he is still there (that is \"has gone "
      "to\"). Statement 4 is wrong - Present Perfect cannot combine with "
      "a specific past-time expression like \"ago\".",
-     ["2, 3", "1, 2", "1, 3, 4", "2, 3, 4"], 1),
+     ["1, 2", "1, 3, 4", "2, 3, 4", "2, 3"], 4),
+
+    # ---- ucuncu dalga (2026-09-03): eyni 3 fennden daha bir movzu.
+
+    # riy11-inteqral#22 (guc qaydasi: integral(x^3)=x^4/4+C) + #9
+    # (sabitin inteqrali: integral(a)=ax+C) + #11 (cemin/ferqin
+    # inteqrali = inteqrallarin cemi/ferqi) - bu ucu ile
+    # F(x)=x^3/3-4x qurulur (f(x)=x^2-4-un ibtidaisi) + #40
+    # (Nyuton-Leybniz: integral[a,b] = F(b)-F(a)) + #29 (menfi
+    # qiymetli funksiyanin inteqrali sahenin EKS ISARELISIDIR).
+    # f(x)=x^2-4 [0;2]-de HEMISE <=0 (Python-la yoxlanildi: f(0)=-4,
+    # f(2)=0) - integral=-16/3, sahe=+16/3. Tuzaq: 4-cu mulahize
+    # funksiyani "musbet" hesab edib inteqrali birbasa sahe kimi
+    # oxuyur - #29-un tam eksi.
+    ("riyaziyyat", "orta", "11", "riy-11-inteqral",
+     "riy11-inteqral#7", "riy11-inteqral#comb1",
+     "f(x) = x² − 4 funksiyası verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) f(x)-in ibtidai funksiyası F(x) = x³/3 − 4x + C-dir.\n"
+     "2) ∫₀² f(x) dx = −16/3-dür.\n"
+     "3) f(x) [0; 2] parçasında mənfi qiymətli olduğu üçün əyri ilə x-oxu arasındakı sahə 16/3-dür.\n"
+     "4) f(x) [0; 2] parçasında müsbət qiymətli olduğu üçün inteqralın nəticəsi birbaşa sahəyə bərabərdir.",
+     "1, 2 və 3 doğrudur (F(2) − F(0) = −16/3 − 0 = −16/3, sahə isə əks "
+     "işarəlisi 16/3-dür). 4-cü mülahizə yanlışdır: f(x) bu parçada "
+     "mənfi (və ya sıfır) qiymətlidir, müsbət deyil - buna görə "
+     "inteqral birbaşa sahə vermir, əks işarəli götürülməlidir.",
+     ["1, 2, 3, 4", "2, 3, 4", "1, 3", "1, 2, 3"], 4),
+
+    # az11-morfologiya-d#10/#11/#12/#9 - feilin 4 mena novunun
+    # (mechul/qarsiliq/icbar/qayidis) EYNI qrammatik qelible qurulmus
+    # 4 cumlede fergendirilmesi. Tuzaq: 3-cu mulahize icbari (#12-nin
+    # qelibi - birine bir isi GORDURMEK) qayidis kimi gosterir - bu,
+    # icbar/qayidis novlerinin klassik qarisdirilmasidir.
+    ("az-dili", "orta", "11", "az-11-morfologiya-d",
+     "az11-morfologiya-d#15", "az11-morfologiya-d#comb1",
+     "«Qapı bağlandı. Uşaqlar öpüşdülər. Ana uşağa corabı geydirtdi. "
+     "Aygün səhər tez yuyundu.» Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Qapı bağlandı» - məchul növdür.\n"
+     "2) «Uşaqlar öpüşdülər» - qarşılıq növdür.\n"
+     "3) «Ana uşağa corabı geydirtdi» - qayıdış növdür.\n"
+     "4) «Aygün səhər tez yuyundu» - qayıdış növdür.",
+     "1, 2 və 4 doğrudur. 3-cü mülahizə yanlışdır: «geydirtdi» İCBAR "
+     "növdür (biri başqasına bir işi gördürür) - qayıdış (məs. "
+     "«yuyundu») ilə icbar tez-tez qarışdırılır, çünki hər ikisi "
+     "feilə əlavə şəkilçi qoşulmasıdır.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 3, 4"], 1),
+
+    # ing11-whys#1 (because of = sebeb, + isim) + #14 (Despite = ziddiyet,
+    # + isim) + #27 (As a result of = sebeb-netice, + gerund) - ucu de
+    # eyni qrammatik qelibde (preposition + isim ifadesi), amma MENALARI
+    # ZIDDIR. Tuzaq: 3-cu mulahize "despite" ve "because of"-u eyni
+    # mena kimi ("although" ile evezlene bilen) gosterir - bu, hem
+    # sebeb/ziddiyet qarisdirmasidir, hem de qrammatik sehvdir
+    # ("although" clause isteyir, isim ifadesi yox).
+    ("ingilis-dili", "orta", "11", "ing-11-whys",
+     "ing11-whys#28", "ing11-whys#comb1",
+     "He passed the exam because of hard studying. Despite the heavy "
+     "rain, the match continued. As a result of eating too much junk "
+     "food, she felt sick.\n"
+     "Which statements are TRUE?\n"
+     "1) \"He passed the exam because of hard studying\" shows a cause-result relationship.\n"
+     "2) \"Despite the heavy rain, the match continued\" shows a contrast, not a cause.\n"
+     "3) \"Despite\" and \"because of\" can both be replaced by \"although\" without changing the grammar, since all three introduce a reason.\n"
+     "4) \"As a result of eating too much junk food, she felt sick\" shows a cause-result relationship, like \"because of\".",
+     "1, 2 and 4 are true. Statement 3 is wrong - \"despite\" shows "
+     "CONTRAST, not reason like \"because of\", and \"although\" needs a "
+     "clause (subject + verb), not a noun phrase.",
+     ["1, 3, 4", "1, 2, 4", "1, 2, 3", "2, 3, 4"], 2),
 ]
 
 
