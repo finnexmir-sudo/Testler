@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Bil10 — necə işləyir</title>
+<meta name="description" content="Bil10 bələdçisi: müəllim qrup yaradır, şagird kodla girir, valideyn nəticəni izləyir. Addım-addım, real ekran şəkilləri ilə.">
+<link rel="stylesheet" href="../assets/base.css?v=292">
+<style>
+  /* Beledci: uzun oxunan sehife.  Ekran sekilleri telefon cercivesinde,
+     metn onlarin YANINDA (masaustu) ve ya USTUNDE (telefon). */
+  body{background:var(--surface)}
+  .site{max-width:960px;margin:0 auto;padding:14px 18px;display:flex;align-items:center;gap:14px}
+  .site .logo{font-weight:700;font-size:17px;color:var(--fg);text-decoration:none;letter-spacing:-.01em}
+  .site .logo em{font-style:normal;color:var(--brand)}
+  .site nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+  .site nav a{font-size:13px;color:var(--fg-2);text-decoration:none;padding:6px 10px;border-radius:8px}
+  .site nav a:hover{background:var(--n-100);color:var(--fg)}
+  .wrap{max-width:960px}
+  .hero{padding:26px 0 6px}
+  .hero h1{font-size:30px;letter-spacing:-.025em;margin:0 0 8px}
+  .hero p{font-size:16px;color:var(--fg-2);max-width:620px;margin:0}
+  .who{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0 8px}
+  .who a{display:block;padding:14px;border:1px solid var(--n-100);border-radius:14px;background:#fff;text-decoration:none;color:var(--fg)}
+  .who a b{display:block;font-size:15px;margin-bottom:3px}
+  .who a i{font-style:normal;font-size:12.5px;color:var(--fg-3)}
+  .who a:hover{border-color:var(--brand)}
+  section{margin-top:34px}
+  section > h2{font-size:22px;letter-spacing:-.02em;text-transform:none;color:var(--fg);margin:0 0 4px}
+  section > .lead{color:var(--fg-2);margin:0 0 18px;font-size:15px}
+  .step{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start;
+        padding:22px 0;border-top:1px solid var(--n-100)}
+  .step .n{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;
+           align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:8px}
+  .step h3{font-size:17px;margin:0 0 8px;letter-spacing:-.01em}
+  .step p{margin:0 0 10px;color:var(--fg-2);line-height:1.55;font-size:15px}
+  .step ul{margin:0 0 10px 18px;padding:0;color:var(--fg-2);line-height:1.55;font-size:14.5px}
+  .step .tip{background:var(--ok-tint);border:1px solid var(--ok-line);color:#05603a;border-radius:10px;padding:10px 12px;font-size:13.5px}
+  .step .warn2{background:var(--warn-tint);border:1px solid var(--warn-line);color:#93370d;border-radius:10px;padding:10px 12px;font-size:13.5px}
+  figure.ph{margin:0;justify-self:end}
+  figure.ph img{display:block;width:100%;max-width:300px;border-radius:18px;border:1px solid var(--n-100);
+                box-shadow:0 10px 30px rgba(21,26,36,.10)}
+  figure.ph figcaption{font-size:12px;color:var(--fg-3);text-align:center;margin-top:8px}
+  .faq details{border-top:1px solid var(--n-100);padding:12px 0}
+  .faq summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;gap:10px;align-items:center}
+  .faq summary::before{content:"+";color:var(--brand);font-weight:700;width:16px}
+  .faq details[open] summary::before{content:"–"}
+  .faq details p{margin:8px 0 0 26px;color:var(--fg-2);line-height:1.55;font-size:14.5px}
+  .foot{margin:40px 0 30px;padding-top:18px;border-top:1px solid var(--n-100);font-size:13px;color:var(--fg-3)}
+  .foot a{color:var(--brand)}
+  @media (max-width:720px){
+    .who{grid-template-columns:1fr}
+    .step{grid-template-columns:1fr;gap:14px}
+    figure.ph{justify-self:center}
+    .hero h1{font-size:25px}
+    .site nav a{padding:6px 8px}
+  }
+</style>
+</head>
+<body>
+<div class="site">
+  <a class="logo" href="../">Bil<em>10</em></a>
+  <nav>
+    <a href="#muellim">Müəllim</a>
+    <a href="#sagird">Şagird</a>
+    <a href="#valideyn">Valideyn</a>
+    <a href="#suallar">Suallar</a>
+    <a href="../">← Ana səhifə</a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>Necə işləyir</h1>
+    <p>Beş dəqiqəlik bələdçi. Bir dəfə qurursunuz, sonra hər həftə eyni axınla gedir:
+       müəllim tapşırıq verir → şagird kodla girib işləyir → nəticə özü yığılır.</p>
+    <div class="who">
+      <a href="#muellim"><b>Müəllim / repetitor</b><i>qrup, şagird kodu, tapşırıq, hesabat</i></a>
+      <a href="#sagird"><b>Şagird</b><i>kodla giriş, test, nəticə</i></a>
+      <a href="#valideyn"><b>Valideyn</b><i>uşağın gedişatı — bir ekranda</i></a>
+    </div>
+  </div>
+
+  <!-- ============================================================ MUELLIM -->
+  <section id="muellim">
+    <h2>Müəllim üçün</h2>
+    <p class="lead">Telefon da kifayətdir. Şəkillər real tətbiqdəndir.</p>
+
+    <div class="step">
+      <div>
+        <span class="n">1</span>
+        <h3>Qeydiyyat</h3>
+        <p><a href="../muellim/">Panelə keçin</a>, «Qeydiyyat»ı seçin, ad, e-poçt və parol yazın.
+           Sonra hesab növünü («Repetitor» və ya «Məktəb») və hesabın adını yazın —
+           bu ad üst zolaqda görünəcək.</p>
+        <div class="tip">Parolu unutsanız giriş ekranındakı «Parolu unutmusunuz?» keçidi ilə bərpa edilir.</div>
+      </div>
+      <figure class="ph"><img src="img/m2_hesab.png" alt="Hesab quraşdırma ekranı" loading="lazy"><figcaption>Hesab növü və adı — bir dəfəlik</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">2</span>
+        <h3>Qrup yaradın</h3>
+        <p>İcmal ekranında qrupun adını yazın və sinfi seçin. Sinif vacibdir: sual bankı,
+           test yığma və dərs planı ona görə daralır.</p>
+        <ul>
+          <li>Bir hesabda istənilən sayda qrup ola bilər.</li>
+          <li>Qrupa aşağı sinfin testini də vermək olar (məsələn 8-ci sinfə 7-nin təkrarı), yuxarı sinfinkini yox.</li>
+        </ul>
+      </div>
+      <figure class="ph"><img src="img/m3_icmal.png" alt="İcmal: sürətli əməliyyatlar və qrup yaratma" loading="lazy"><figcaption>İcmal — qruplar və sürətli əməliyyatlar</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">3</span>
+        <h3>Şagird əlavə edin — kod özü yaranır</h3>
+        <p>Qrupu açıb ad-soyad yazın. Hər şagirdə daimi <b>giriş kodu</b> yaranır (8 simvol).
+           Kodu «Göndər» ilə WhatsApp-a atın və ya kopyalayın — şagird bu kodla girir,
+           parol yoxdur.</p>
+        <ul>
+          <li>Şagird parolu itirə bilməz; kod sızsa qələmdən «Kodu yenilə» — köhnəsi dərhal ölür.</li>
+          <li>«Dayandır» — şagirdi silmədən girişini bağlayır, nəticələri qalır.</li>
+          <li>Qələmin altında <b>Valideyn girişi</b> var: açanda «V» ilə başlayan ayrıca kod yaranır (bax <a href="#valideyn">Valideyn</a>).</li>
+        </ul>
+        <div class="tip">Pulsuz hesabda 5 şagird yeri var; artımı paketlə olur.</div>
+      </div>
+      <figure class="ph"><img src="img/m4_qrup_sagirdler.png" alt="Qrup ekranı: şagirdlər, kodlar, Göndər düyməsi" loading="lazy"><figcaption>Kod · Göndər · Valideyn kodu</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">4</span>
+        <h3>Tapşırıq verin</h3>
+        <p>Qrup ekranında «Tapşırıqlar» → testi seçin, son tarix və cəhd sayı qoyun.
+           Şagird girən kimi tapşırığı görür, son tarixə nə qaldığı da yazılır.</p>
+        <ul>
+          <li>Tapşırığı tək bir şagirdə də vermək olar («yalnız ona» — şagird ekranında «sənə» nişanı).</li>
+          <li>«Sərbəst məşq» açıqdırsa şagird platforma testlərini özü də işləyə bilər.</li>
+          <li>Vaxtı bitmiş tapşırıq «Bağlı» sekmesinə keçir — nəticələr itmir.</li>
+        </ul>
+      </div>
+      <figure class="ph"><img src="img/m5_tapsiriq_ver.png" alt="Tapşırıq vermə forması" loading="lazy"><figcaption>Test · son tarix · cəhd sayı</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">5</span>
+        <h3>Öz testinizi yığın</h3>
+        <p>«Test yığ» — fənn, sinif, mövzu və çətinliyi seçin, sistem sual bankından test yığır.
+           «Sual bankı»nda öz suallarınızı da yaza bilərsiniz; onlar yalnız sizindir.</p>
+        <ul>
+          <li>Platforma suallarının düz cavabı şagird tərəfinə heç vaxt getmir — bal serverdə hesablanır.</li>
+          <li>Testi kağıza çap etmək üçün «Test vərəqi» var.</li>
+        </ul>
+      </div>
+      <figure class="ph"><img src="img/m8_test_yig.png" alt="Test yığma ekranı" loading="lazy"><figcaption>Mövzu və çətinliyə görə</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">6</span>
+        <h3>Hesabata baxın</h3>
+        <p>Qrup ekranında «Hesabat»: kim işlədi, kim işləmədi, orta bal, hansı mövzu axsayır.
+           Şagirdin adına toxunsanız onun öz hesabatı açılır — səhv etdiyi suallar da orada.</p>
+        <ul>
+          <li>Qrup ekranı özü xəbər verir: geriləyən şagird, zəif mövzu, ulduz.</li>
+          <li>Zəif mövzudan bir klikə «səhvlər üzərində iş» testi yığılır.</li>
+        </ul>
+        <div class="warn2">Mövzu analizi və dərs planı abunə paketi ilədir; nəticə və bal həmişə pulsuzdur.</div>
+      </div>
+      <figure class="ph"><img src="img/m9_hesabat.png" alt="Qrup hesabatı" loading="lazy"><figcaption>Hesabat — qrup üzrə</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- ============================================================= SAGIRD -->
+  <section id="sagird">
+    <h2>Şagird üçün</h2>
+    <p class="lead">Tamamilə pulsuz. Qeydiyyat yoxdur — yalnız müəllimin verdiyi kod.</p>
+
+    <div class="step">
+      <div>
+        <span class="n">1</span>
+        <h3>Kodla girin</h3>
+        <p><a href="../sagird/">Şagird girişi</a>nə müəllimin göndərdiyi 8 simvollu kodu yazın.
+           Böyük-kiçik hərf fərqi yoxdur. Bir dəfə girəndən sonra telefon sizi yadda saxlayır.</p>
+        <div class="tip">Telefonda «Ana ekrana əlavə et» edin — tətbiq kimi açılır.</div>
+      </div>
+      <figure class="ph"><img src="img/s1_giris.png" alt="Şagird giriş ekranı" loading="lazy"><figcaption>Yalnız kod, parol yoxdur</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">2</span>
+        <h3>Tapşırıqlar və məşq</h3>
+        <p>Yuxarıda müəllimin verdiyi tapşırıqlar (son tarix və neçə cəhd qaldığı ilə),
+           aşağıda sərbəst məşq testləri. «sənə» nişanı — bu tapşırıq yalnız sizindir.</p>
+      </div>
+      <figure class="ph"><img src="img/s2_tapsiriqlar.png" alt="Şagirdin tapşırıq siyahısı" loading="lazy"><figcaption>Tapşırıqlar · son tarix · cəhd</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">3</span>
+        <h3>Testi işləyin</h3>
+        <p>Variantı seçib «Növbəti». Bilmədiyiniz sualı keçə bilərsiniz — xəritədən geri qayıdıb
+           cavablayarsınız. Sonda «Testi bitir».</p>
+        <ul>
+          <li>İnternet kəsilsə cavablar telefonda saxlanır, qayıdanda davam edirsiniz.</li>
+          <li>Cavabsız sual «səhv» sayılmır, amma bal da gətirmir.</li>
+        </ul>
+      </div>
+      <figure class="ph"><img src="img/s3_sual.png" alt="Sual ekranı" loading="lazy"><figcaption>Sual · xəritə · Növbəti</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">4</span>
+        <h3>Nəticə və səhvlər</h3>
+        <p>Bal dərhal görünür, müəllim də eyni anda panelində görür. Aşağıda bütün suallar:
+           nə yazdığınız, düz/səhv və izah. Düz cavabın özü göstərilmir — mövzunu izahdan
+           təkrarlayıb məşqdə yenidən sınayırsınız.</p>
+        <ul>
+          <li>Sualda səhv görsəniz «Sualda səhv var?» — müəllimə gedir.</li>
+          <li>«Lövhə» — qrupda kim neçə faiz; yalnız ad və bal.</li>
+        </ul>
+      </div>
+      <figure class="ph"><img src="img/s4_netice.png" alt="Nəticə ekranı" loading="lazy"><figcaption>Bal · bütün suallar · izah</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">5</span>
+        <h3>Ev ekranı: gedişat</h3>
+        <p>İşlənmiş test sayı, ortalama, ən yüksək nəticə, neçə gündür ardıcıl test yazdığınız,
+           növbəti dərs, zəif mövzular və keçilən dərslər — hamısı bir yerdə.
+           Üst zolaqdakı «‹ Geri» həmişə bura qaytarır.</p>
+      </div>
+      <figure class="ph"><img src="img/s5_ev_ekrani.png" alt="Şagirdin ev ekranı" loading="lazy"><figcaption>Gedişat bir baxışda</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- =========================================================== VALIDEYN -->
+  <section id="valideyn">
+    <h2>Valideyn üçün</h2>
+    <p class="lead">Müəllim açırsa. Bir ekran, 40 saniyə — uşağın necə getdiyi.</p>
+
+    <div class="step">
+      <div>
+        <span class="n">1</span>
+        <h3>Müəllimdən kod alın, girin</h3>
+        <p>Müəllim şagirdin qələmindən «Valideyn girişi»ni açır; «V» ilə başlayan kod yaranır
+           və WhatsApp-la sizə göndərilir. <a href="../valideyn/">Valideyn girişi</a>nə o kodu yazın.
+           Giriş 30 gün qalır.</p>
+        <div class="warn2">Valideyn kodu ilə test yazmaq olmaz — o yalnız baxmaq üçündür. Uşağın öz kodu ayrıdır.</div>
+      </div>
+      <figure class="ph"><img src="img/v1_giris.png" alt="Valideyn giriş ekranı" loading="lazy"><figcaption>«V…» kodu</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">2</span>
+        <h3>Nə görürsünüz</h3>
+        <p>Son 30 günün ortalaması və keçən aya görə meyl, gözləyən tapşırıq və ona nə qədər
+           qaldığı, son nəticələr, zəif mövzular, keçilən dərslər. Uşağın giriş kodu, tam adı
+           və başqa uşaqların nəticələri burada <b>görünmür</b>.</p>
+        <p>Sualınız olsa müəllimə yazın — ekran əməliyyat üçün deyil, baxmaq üçündür.</p>
+      </div>
+      <figure class="ph"><img src="img/v2_usagim.png" alt="Valideyn ekranı" loading="lazy"><figcaption>Uşağın gedişatı</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- ============================================================ SUALLAR -->
+  <section id="suallar" class="faq">
+    <h2>Tez-tez verilən suallar</h2>
+    <p class="lead">İlk dəfə ən çox ilişilən yerlər.</p>
+
+    <details><summary>Kod «tapılmadı» deyir</summary>
+      <p>Kod 8 simvoldur, boşluqsuz. Şagird kodu hərf-rəqəm, valideyn kodu «V» ilə başlayır —
+         ikisini qarışdırmayın. Müəllim şagirdi dayandırıbsa və ya kodu yeniləyibsə köhnə kod işləmir;
+         müəllimdən yenisini istəyin.</p></details>
+    <details><summary>Test kilidlidir / «abunə lazımdır»</summary>
+      <p>Pulsuz hesabda platformanın pulsuz testləri açıqdır, ödənişli testlər və mövzu analizi
+         paketlədir. Müəllimin öz yığdığı testlər həmişə açıqdır.</p></details>
+    <details><summary>«Bu testi artıq işləmisən — yenidən işləmək olmaz»</summary>
+      <p>Müəllim tapşırıqda cəhd sayı qoyub (susmaya görə 1). Nəticəyə və səhvlərə baxa bilərsiniz;
+         yenidən yazmaq üçün müəllim cəhd sayını artırmalı və ya yeni tapşırıq verməlidir.</p></details>
+    <details><summary>Düz cavab niyə göstərilmir?</summary>
+      <p>Nəticədə hər sualda nə yazdığınız, düz/səhv olduğu və izah görünür. Düz cavabın özü
+         açılsa, sual bankı bir gündə paylaşılıb mənasız olar — ona görə izah var, açar yoxdur.</p></details>
+    <details><summary>İnternet kəsildi, cavablar itdi?</summary>
+      <p>Yox. Seçdiyiniz cavablar telefonda saxlanır; eyni testi yenidən açanda geri qayıdır.
+         «Testi bitir» yalnız internet olanda göndərilir.</p></details>
+    <details><summary>Telefona necə quraşdırım?</summary>
+      <p>Brauzerdə səhifəni açıb menyudan «Ana ekrana əlavə et» (Android: Chrome menyusu, iPhone: Paylaş → Ana ekrana əlavə et).
+         Ayrıca mağaza yoxdur — bu, veb tətbiqdir.</p></details>
+    <details><summary>Şagirdi silsəm nə olar?</summary>
+      <p>Cəhdləri, cavabları və sessiyaları da silinir. Nəticələr lazımdırsa silməyin — «Dayandır» edin:
+         giriş bağlanır, hesabat qalır.</p></details>
+    <details><summary>Valideyn uşağın kodunu görə bilərmi?</summary>
+      <p>Xeyr. Valideyn ekranında uşağın giriş kodu, tam adı, düz cavablar və başqa uşaqların
+         nəticələri yoxdur. Müəllim valideyn girişini istənilən vaxt bağlaya bilər — açıq sessiya dərhal kəsilir.</p></details>
+  </section>
+
+  <p class="foot">Bələdçi tətbiqlə birlikdə yenilənir. Sual qaldı? Müəlliminizə yazın —
+     müəllimsinizsə <a href="../muellim/">paneldə</a> «Profil» bölməsindən bizə çatın.</p>
+</div>
+</body>
+</html>

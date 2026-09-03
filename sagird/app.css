@@ -301,5 +301,5 @@ body{background:
 
 /*  Ana səhifəyə qayıdış - giriş ekranında üst zolaq gizli olduğu üçün
     nişan görünmür; keçid burada ayrıca lazımdır. */
-.homelink{color:var(--fg-3);text-decoration:none;font-size:12.5px}
-.homelink:hover{color:var(--brand);text-decoration:underline}
+.homelink,.helplink{color:var(--fg-3);text-decoration:none;font-size:12.5px}
+.homelink:hover,.helplink:hover{color:var(--brand);text-decoration:underline}

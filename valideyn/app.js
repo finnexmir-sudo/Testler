@@ -98,7 +98,8 @@
       '<p class="note" style="text-align:center;margin-top:16px">' +
         "Kod yoxdursa müəllimdən istəyin. Giriş 30 gün açıq qalır.</p>" +
       '<p class="note" style="text-align:center;margin-top:10px">' +
-        '<a href="../" class="homelink">← Bil10 ana səhifəsi</a></p>' 
+        '<a href="../" class="homelink">← Bil10 ana səhifəsi</a> · ' +
+        '<a href="../komek/#valideyn" class="helplink">Necə işləyir?</a></p>'
     );
     var inp = $("code");
     inp.focus();

@@ -616,6 +616,14 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     artanda bunlar bir girişdə birləşməlidir (bir kod → uşaq seçimi).
     İstifadəçi ilə razılaşdırılıb: **hələlik ayrı, gələcəkdə birgə.**
 
+17. **Aktiv müəllimə aylıq endirim.** İstifadəçinin təklifi (ilk canlı
+    müəllim söhbətindən sonra): proqramı fəal işlədən müəllimə növbəti
+    ayın haqqından endirim — stimul. Ölçü sadə olmalıdır və müəllimin
+    özü görməlidir («bu ay 12 tapşırıq, 40 cəhd → gələn ay −20 %»);
+    gizli düstur inam qırar. Ödəniş mərhələ 2-yə (Payriff/Epoint)
+    bağlıdır — ondan əvvəl mənasızdır. Bələdçi (`komek/`) ilə birlikdə
+    «necə qazanılır» da orada yazılacaq.
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); valideyn
 girişində qiymət modeli — pilotdan sonra (təfərrüat: yerli strategiya
@@ -1095,6 +1103,26 @@ Lokal `psql`-də işləyir, Supabase-də işləmir — ona görə testlərdə tu
 `db/07_seed_tests.sql` bunun nümunəsidir.
 
 ---
+
+## Bələdçi — `komek/`
+
+«Necə işləyir» səhifəsi: müəllim / şagird / valideyn üçün addım-addım,
+**real ekran şəkilləri ilə** (`komek/img/*.png`, 16 şəkil). İstifadəçinin
+tələbi: ilk dəfə çətinlik çəkənlər girib oxusun. Keçidlər: landing
+menyusu («Bələdçi») və «Üç addım» altı, müəllim panelində Profil,
+şagird və valideyn giriş ekranlarında «Necə işləyir?».
+
+Şəkillər əl ilə çəkilmir — `test/beledci_sekil.py` mock üzərində real
+axını gedib çəkir (qeydiyyat → qrup → şagird → tapşırıq → şagird test
+yazır → hesabat → valideyn). **Ekran dəyişəndə skripti yenidən işlət**,
+yoxsa bələdçi köhnə ekranı göstərər; işlətmə qaydası faylın başındadır.
+FAQ-dakı iddialar (kod 8 simvol, pulsuz hədd 5 şagird, 30 gün valideyn
+sessiyası, cəhd sayı) kodun faktlarıdır — kod dəyişəndə ora da bax.
+
+`bump.sh` `komek/index.html`-i də bilir (base.css `?v=`).
+Video hələ yoxdur: səssiz avtomatik video az fayda verir; istifadəçi
+telefon/OBS ilə səsli çəksə, `<video>` ilə `komek/`-ə qoyulur (öz
+serverimizdən — xarici embed CSP/qayda ilə bağlıdır).
 
 ## Keş — vacib
 

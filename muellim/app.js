@@ -378,6 +378,13 @@
         '<div class="chips subpick" id="meSubs"><span class="skel">Yüklənir…</span></div>' +
         '<div id="meErr"></div>' +
         '<button class="btn go" id="btnMeSave">Yadda saxla</button>' +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      '<div class="card tight">' +
+        "<b>Necə işləyir?</b>" +
+        '<p class="note" style="margin:4px 0 0">Qrup, şagird kodu, tapşırıq, hesabat — ' +
+          "addım-addım, ekran şəkilləri ilə. " +
+          '<a href="../komek/#muellim" target="_blank" rel="noopener">Bələdçini aç →</a></p>' +
       "</div>");
     on("btnBack", "click", function () { nav("#/"); });
     subChips("meSubs", mySubs());

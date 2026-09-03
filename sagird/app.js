@@ -203,7 +203,8 @@
       '<p class="note" style="text-align:center;margin-top:16px">' +
         "Kodu itirmisənsə müəllimindən yenisini istə.</p>" +
       '<p class="note" style="text-align:center;margin-top:10px">' +
-        '<a href="../" class="homelink">← Bil10 ana səhifəsi</a></p>' 
+        '<a href="../" class="homelink">← Bil10 ana səhifəsi</a> · ' +
+        '<a href="../komek/#sagird" class="helplink">Necə işləyir?</a></p>'
     );
     var inp = $("code");
     inp.focus();
