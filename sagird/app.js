@@ -373,6 +373,17 @@
           }).join("") + "</div>";
       }
 
+      /* 4. Kecdiyi dersler - "novbeti ders" hara gedirik deyir, bu
+         hardan geldik.  Ən çoxu 5, ən yenisi əvvəl. */
+      if (d.lessons && d.lessons.length) {
+        h += '<div class="spacer"></div><h2>Keçdiyi dərslər</h2>' +
+          '<div class="card pad0">' + d.lessons.map(function (l) {
+            return '<div class="myr"><div class="g"><b>' + esc(l.topic) + "</b>" +
+              "<i>" + esc(l.subject) + "</i></div>" +
+              '<span class="at">' + dateAz(l.at) + "</span></div>";
+          }).join("") + "</div>";
+      }
+
       show(h);
       on("btnMyRes", "click", screenMyResults);
       Array.prototype.forEach.call(main.querySelectorAll("[data-t]"), function (b) {
@@ -607,24 +618,36 @@
       (review
         ? '<div class="warn" style="margin-bottom:12px">' + ic("info") +
           "<span>Bu testi artıq işləmisən — yuxarıda nəticən, aşağıda isə " +
-          "səhv suallar və izahları var. Testi yenidən işləmək olmaz.</span></div>"
+          "bütün suallar və cavabların var. Testi yenidən işləmək olmaz.</span></div>"
         : '<div class="ok" style="margin-bottom:12px">' + ic("check") +
           "<span>Nəticə yadda saxlanıldı. Müəllimin onu panelində görür.</span></div>") +
       '<div class="row"><button class="btn go" id="btnHome" style="flex:1">Testlər</button>' +
         '<button class="btn" id="btnLb" style="flex:1">' + ic("cup") + "Lövhə</button></div>" +
 
-      ((r.wrong && r.wrong.length)
-        ? "<h2>Səhv cavablar</h2><div class=\"card pad0\" id=\"wrongBox\">" +
-          r.wrong.map(function (w) {
-            return '<div class="wrong"><b>' + esc(w.body) + "</b>" +
+      ((r.questions && r.questions.length)
+        ? "<h2>Suallar</h2>" +
+          (r.questions.every(function (q) { return q.correct; })
+            ? '<div class="ok" style="margin-bottom:12px">' + ic("check") +
+              "<span>Bütün suallara düzgün cavab verdin.</span></div>"
+            : "") +
+          "<div class=\"card pad0\" id=\"wrongBox\">" +
+          r.questions.map(function (w) {
+            var right = !!w.correct;
+            return '<div class="' + (right ? "right" : "wrong") + '">' +
+              '<div class="qh"><b>' + esc(w.body) + "</b>" +
+                '<span class="qmark ' + (right ? "y" : "n") + '">' +
+                  ic(right ? "check" : "x") + "</span></div>" +
+              (w.picked && w.picked.length
+                ? '<p class="picked">Sən yazdın: ' + w.picked.map(esc).join(", ") + "</p>"
+                : "") +
               (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
-              '<button class="rlink" data-rq="' + esc(w.question_id || "") +
-                '">Sualda səhv var?</button>' +
-              '<div class="rslot" id="rs-' + esc(w.question_id || "") + '"></div>' +
+              (right ? "" :
+                '<button class="rlink" data-rq="' + esc(w.question_id || "") +
+                  '">Sualda səhv var?</button>' +
+                '<div class="rslot" id="rs-' + esc(w.question_id || "") + '"></div>') +
             "</div>";
           }).join("") + "</div>"
-        : '<div class="ok" style="margin-top:16px">' + ic("check") +
-          "<span>Bütün suallara düzgün cavab verdin.</span></div>")
+        : "")
     );
 
     on("btnHome", "click", screenTests);

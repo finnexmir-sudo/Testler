@@ -188,6 +188,12 @@ with sync_playwright() as pw:
     ok(str(NQ) + " / " + str(NQ) in pg.inner_text(".score"), "bal duzgun",
        pg.inner_text(".score").replace("\n", " "))
     ok("səhv suallar" not in pg.inner_text("#main").lower(), "sehv siyahisi gorunmur")
+    # Hamisi duzgun - amma indi BUTUN suallar (duz cavablar da) siyahida gorunur
+    ok(pg.locator(".right").count() == NQ, "hamisi duz cavab - hamisi .right kimi gorunur",
+       pg.locator(".right").count())
+    ok(pg.locator(".wrong").count() == 0, "duz cavabda .wrong sifirdir")
+    ok("Sən yazdın" in pg.locator(".right").first.inner_text(),
+       "duz cavabda da sagirdin oz secimi gosterilir")
 
     print("E · Nəticə ekranı")
     ok("yadda saxlanıldı" in pg.inner_text("#main"),
@@ -255,12 +261,19 @@ with sync_playwright() as pw:
         else: pg.click("#btnFinish")
         pg.wait_for_timeout(400)
     pg.wait_for_selector(".ring", timeout=8000)
-    ok("səhv cavablar" in pg.inner_text("#main").lower(),
-       "sehv cavablar siyahisi cixir")
+    ok("suallar" in pg.inner_text("#main").lower(),
+       "suallar siyahisi cixir")
     ok(pg.locator(".wrong").count() >= 1, "sehv sual sayilir",
        pg.locator(".wrong").count())
     ok(len(pg.locator(".wrong i").first.inner_text()) > 5,
        "sehv sualda izah gosterilir", pg.locator(".wrong i").first.inner_text()[:45])
+    ok("Sən yazdın" in pg.locator(".wrong").first.inner_text(),
+       "sehv cavabda sagirdin oz secimi gosterilir (duz cavab yox)")
+    # Variantlar QARISDIRILIR (shuffle_options) - "birinci hemise sehvdir"
+    # deye bilmerik, amma her sual (duz da, sehv de) siyahida olmalidir
+    ok(pg.locator(".wrong").count() + pg.locator(".right").count() == naz,
+       "butun suallar gorunur - hec biri itmir", "%d + %d != %d" % (
+         pg.locator(".wrong").count(), pg.locator(".right").count(), naz))
     # sualda sehv bildirisi: link -> sebeb -> gonder -> tesekkur
     pg.locator(".wrong .rlink").first.click()
     pg.wait_for_selector(".wrong [data-rsend]", timeout=4000)

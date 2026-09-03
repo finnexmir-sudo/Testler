@@ -58,8 +58,9 @@ begin
   assert (v->>'streak')::int = 0, 'fealiyyetsiz halda streak 0 olmalidir';
   assert v->'next_lesson' = 'null'::jsonb, 'plan qurulmayibsa next_lesson bos olmalidir';
   assert v->'weak' = '[]'::jsonb, 'fealiyyetsiz halda zeif movzu ola bilmez';
+  assert v->'lessons' = '[]'::jsonb, 'plan qurulmayibsa kecdiyi ders ola bilmez';
 end $$;
-\echo 'OK  1 · fealiyyet yoxdursa best/streak/next_lesson/weak hamisi bosdur'
+\echo 'OK  1 · fealiyyet yoxdursa best/streak/next_lesson/weak/lessons hamisi bosdur'
 
 -- =====================================================================
 --  2. Ders plani: novbeti ders ILK BITIRILMEMIS movzudur
@@ -109,8 +110,15 @@ begin
   tok := public.rpc_student_login('AYGSAG01')->>'token';
   sv := public.rpc_student_tests(tok);
   assert sv->'next_lesson' = 'null'::jsonb, 'plan bitibse next_lesson bos olmalidir';
+
+  --  85 movzu kecilib, "lessons" en coxu 5-i qaytarir
+  assert jsonb_array_length(sv->'lessons') = 5,
+    format('kecdiyi ders sayi 5 olmalidir (limit): %s', jsonb_array_length(sv->'lessons'));
+  assert sv->'lessons'->0->>'subject' = 'Riyaziyyat', 'kecdiyi dersin fenni sehvdir';
+  assert sv->'lessons'->0->>'topic' is not null, 'kecdiyi dersin movzu adi yoxdur';
+  assert sv->'lessons'->0->>'at' is not null, 'kecdiyi dersin tarixi yoxdur';
 end $$;
-\echo 'OK  3 · butun movzular kecilende novbeti ders yoxdur'
+\echo 'OK  3 · butun movzular kecilende novbeti ders yoxdur, kecdiyi dersler 5-e kimi gorunur'
 
 reset role; reset request.jwt.claim.sub;
 

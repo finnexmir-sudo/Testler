@@ -135,11 +135,19 @@ input{min-height:52px;font-size:17px}
 .score .lbl{font-size:15px;color:var(--fg-2);margin-bottom:2px}
 .score .sub{font-size:13px;color:var(--fg-3)}
 
-/* Sehv suallarin siyahisi */
-.wrong{padding:14px 16px;border-bottom:1px solid var(--n-100);font-size:14.5px;line-height:1.5}
-.wrong:last-child{border-bottom:0}
-.wrong b{display:block;font-weight:550;margin-bottom:4px}
-.wrong i{font-style:normal;color:var(--fg-2);font-size:13.5px}
+/* Netice: butun suallar - duz (.right) ve sehv (.wrong) eyni qatarda */
+.wrong,.right{padding:14px 16px;border-bottom:1px solid var(--n-100);font-size:14.5px;line-height:1.5}
+.wrong:last-child,.right:last-child{border-bottom:0}
+.wrong b,.right b{display:block;font-weight:550;margin-bottom:4px}
+.wrong i,.right i{font-style:normal;color:var(--fg-2);font-size:13.5px}
+.qh{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.qh b{flex:1}
+.qmark{flex:0 0 auto;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;margin-top:1px}
+.qmark svg{width:12px;height:12px}
+.qmark.y{background:var(--ok-tint);color:var(--ok)}
+.qmark.n{background:var(--err-tint);color:var(--err)}
+.picked{margin:2px 0 0;font-size:13px;color:var(--fg-3)}
 
 /* ------------------------------------------------------------ lovhe */
 .lb{display:flex;align-items:center;gap:13px;padding:13px 16px;
@@ -281,6 +289,7 @@ body{background:
 .myr b{display:block;font-size:14px;font-weight:560}
 .myr i{display:block;font-style:normal;font-size:12px;color:var(--fg-3);margin-top:2px}
 .myr .best{font-size:15px;font-weight:640}
+.myr .at{flex:0 0 auto;font-size:12px;color:var(--fg-3);white-space:nowrap}
 
 /* "sene" - yalniz bu sagirde verilmis tapsiriq */
 .test .g b .solo{display:inline-block;margin-left:7px;padding:1px 7px;

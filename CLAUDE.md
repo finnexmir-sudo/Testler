@@ -133,6 +133,42 @@ Bunu bir dəfə səhv etdim — 03-dən köçürüb ferdi təyinat düzəlişini
 `grep -ln "create or replace function public.FUNKSIYA_ADI" *.sql` ilə
 ƏVVƏLKİ BÜTÜN override-ları tap, ən sonuncunu əsas götür.
 
+`db/115_sagird_kecdiyi_dersler.sql` beşinci sahəni əlavə etdi:
+**`lessons`** — son 5 keçilmiş mövzu, tarixlə (valideyn ekranındakı
+eyni sorğu). «Növbəti dərs» hara gedirik deyir, bu hardan gəldik.
+
+## Nəticə ekranı — bütün suallar, düz cavab yox
+
+Əvvəl şagird test bitirəndə yalnız SƏHV suallar görünürdü (sual mətni
++ izah), öz seçdiyi cavab heç göstərilmirdi. İstifadəçi soruşdu: «testi
+tam görməyin faydası olarmı?» — bəli, amma sərt sərhədlə:
+**`question_options.is_correct` heç vaxt qayıtmır** — Bil10 sual bankı
+satır, düz cavab şagirdə çıxsa screenshot alınıb paylaşıla bilər.
+
+`db/116_sagird_tam_netice.sql` (`rpc_test_result` — baxış rejimi) və
+`db/117_sagird_tam_netice_submit.sql` (`rpc_submit_attempt` — təzə
+bitirmə) `'wrong'` sahəsini `'questions'`-la əvəz etdi: BÜTÜN suallar
+(düz + səhv), hər birində şagirdin **öz seçdiyi cavabın mətni**
+(`picked` — mətn tipli sualda `text_answer`-dən, seçim tipində
+`selected_option_ids`-dən) və `correct` boolean (hansı variantın düz
+olduğu yox, sadəcə bəli/xeyr). Frontend: `.right`/`.wrong` sinifləri,
+yaşıl/qırmızı `qmark`.
+
+**Tələ (iki yerdə eyni RPC):** nəticə ekranı İKİ mənbədən qurulur —
+təzəcə bitirəndə `rpc_submit_attempt`-in cavabından, təkrar baxanda
+`rpc_test_result`-dan. Yalnız birini yeniləyib o birini unutmaq olar —
+məhz bunu etdim, vizual yoxlamada "Suallar" bölməsi boş göründü (təzə
+bitirmə hələ köhnə `'wrong'` qaytarırdı). `grep -ln "rpc_submit_attempt\|rpc_test_result" *.sql`
+ilə hər ikisini tap, ikisini də yenilə.
+
+**Tələ (variantlar qarışdırılır):** `tests.shuffle_options` susmaya
+görə **doğrudur** — e2e testdə "həmişə birinci variantı klik et" ilə
+"hamısı səhv olacaq" fərz etmək YANLIŞDIR, hansı variantın birinci
+göründüyü hər cəhddə dəyişir. `test/e2e_student.py`-də bunu bir dəfə
+səhv etdim (`.right` sayı == 0 gözlədim, təsadüfən 1 düz çıxdı, test
+uğursuz oldu) — düzəliş: `.wrong.count() + .right.count() == cəmi sual`
+kimi şuffle-dan asılı olmayan yoxlama yaz.
+
 ## ƏN VACİB ÜÇ QAYDA
 
 **1 · Bal həmişə serverdə hesablanır.**

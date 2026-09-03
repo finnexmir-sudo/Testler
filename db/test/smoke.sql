@@ -243,9 +243,24 @@ begin
   assert (v_res->>'max_score')::numeric = 3, 'Maksimum bal sehv';
   assert (v_res->>'percent')::numeric between 66 and 67, format('Faiz sehv: %s', v_res->>'percent');
   assert (v_res->>'passed')::boolean = true, 'passed sehv';
-  assert jsonb_array_length(v_res->'wrong') = 1, 'Sehv sual sayi yanlis';
+
+  --  116/117: 'wrong' evezine BUTUN suallar 'questions'-de gelir -
+  --  duz da, sehv de.  Duz cavab (is_correct) heç bir sualda sizmir.
+  assert jsonb_array_length(v_res->'questions') = 3, 'Sual sayi yanlis (3 gozlenilir)';
+  assert (select count(*)::int from jsonb_array_elements(v_res->'questions') x
+           where (x->>'correct')::boolean = false) = 1, 'Sehv sual sayi yanlis';
+  assert (select x->'picked'->>0 from jsonb_array_elements(v_res->'questions') x
+           where x->>'question_id' = '99999999-0000-0000-0000-000000000001') = '42',
+    'Duz cavabda sagirdin secimi yanlis (42 gozlenilir)';
+  assert (select x->'picked'->>0 from jsonb_array_elements(v_res->'questions') x
+           where x->>'question_id' = '99999999-0000-0000-0000-000000000002') = '64',
+    'Sehv cavabda sagirdin secimi yanlis (64 gozlenilir)';
+  --  metn tipli sual: selected_option_ids bosdur, picked text_answer-den gelir
+  assert (select x->'picked'->>0 from jsonb_array_elements(v_res->'questions') x
+           where x->>'question_id' = '99999999-0000-0000-0000-000000000003') = '25',
+    'Metn cavabinda picked yazilmiyib';
 end $$;
-\echo 'OK  5 · bal serverde duzgun hesablanir (2/3 = 66.67%)'
+\echo 'OK  5 · bal serverde duzgun hesablanir (2/3 = 66.67%), butun suallar gorunur'
 
 -- =====================================================================
 --  6. Sagird ozune 100 bal yaza bilmir (cavab uydursa da)
