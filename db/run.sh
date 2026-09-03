@@ -45,6 +45,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 114_sagird_paneli_zenginlesdirme.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 115_sagird_kecdiyi_dersler.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 116_sagird_tam_netice.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 117_sagird_tam_netice_submit.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 118_diaqnostika.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql

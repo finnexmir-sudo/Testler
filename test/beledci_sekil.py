@@ -3,7 +3,9 @@
 """Beledci (komek/) ucun REAL ekran sekilleri - tetbiqin ozunden, mock uzerinde.
 
 Ne vaxt isletmeli: ekran deyisende (yeni bolme, basliq, duyme) - beledcidəki
-sekil kohnelmesin.  Cixis: komek/img/*.png (16 sekil, ~1 MB).
+sekil kohnelmesin.  Cixis: komek/img/*.png (18 sekil, ~1 MB).
+Yalniz bir-iki sekli yenilemek:  ONLY=m10_diaqnostika,s6_diaqnostika python3 test/beledci_sekil.py
+(axin tam gedir, amma disk-e yalniz adi cekilenler yazilir - qalan PNG-ler git-de deyismir).
 
 Nece isletmeli (postgres isleyir, bil10-bank yan qovluqdadir):
     createdb panel_e2e && (cd db && ./run.sh panel_e2e --local)
@@ -52,7 +54,11 @@ def page(ctx, w, h):
     pg.route("**://*.supabase.co/**", lambda r: r.abort())
     return pg
 
+ONLY = {x for x in os.environ.get("ONLY", "").split(",") if x}
+
 def shot(pg, name, full=False):
+    if ONLY and name not in ONLY:
+        return
     pg.evaluate("window.scrollTo(0,0)")
     pg.wait_for_timeout(350)
     pg.screenshot(path=f"{OUT}/{name}.png", full_page=full)
@@ -136,6 +142,54 @@ with sync_playwright() as p:
 
     # ---------------- MUELLIM: hesabat
     t.goto(PANEL + "#/r/" + gid); t.wait_for_timeout(1500); shot(t, "m9_hesabat")
+
+    # ---------------- DIAQNOSTIKA: muellim abune ile yaradir, sagird yazir
+    # (xerite ucun 3 reng lazimdir: 1-ci fesil 0/3 zeif, 3-cu 1/3 zeif, 5-ci 2/3 orta, qalani yaxsi)
+    db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)
+          select a.id, p.id, 'active', now() + interval '30 days'
+            from public.accounts a, public.plans p where p.slug = 'repetitor-25'""")
+    sid = db("select id::text i from public.students where full_name='Aysu Məmmədova'", one=True)["i"]
+    t.goto(PANEL + "#/s/" + sid + "/" + gid); t.wait_for_selector("#dgGo", timeout=15000)
+    t.select_option("#dgSub", "riyaziyyat"); t.click("#dgGo")
+    t.wait_for_selector("#diagBox:has-text('Gözlənilir')", timeout=20000)
+    dt = db("select id::text i from public.tests where is_diagnostic order by created_at desc limit 1", one=True)["i"]
+    rows = db("""select o.id::text oid, q.id::text qid, o.is_correct c,
+                        dense_rank() over (order by tp.sort, tp.name) rk
+                   from public.test_questions tq
+                   join public.questions q on q.id = tq.question_id
+                   join public.topics tp on tp.id = q.topic_id
+                   join public.question_options o on o.question_id = q.id
+                  where tq.test_id = %s""", (dt,))
+    O2Q = {r["oid"]: r["qid"] for r in rows}; QRK = {r["qid"]: r["rk"] for r in rows}
+    CORR = {r["oid"] for r in rows if r["c"]}
+    wrong_left = {1: 3, 3: 2, 5: 1}          # fesil sirasi -> nece sual sehv
+    s.goto(STUDENT); s.wait_for_selector(".test", timeout=15000)
+    s.locator(".test.asg:has-text('Diaqnostika')").first.click(); s.wait_for_selector(".opt", timeout=15000)
+    while True:
+        ids = s.locator(".opt").evaluate_all("els => els.map(e => e.getAttribute('data-o'))")
+        rk = QRK.get(O2Q.get(ids[0]))
+        if wrong_left.get(rk, 0) > 0:
+            wrong_left[rk] -= 1; want = next(o for o in ids if o not in CORR)
+        else:
+            want = next(o for o in ids if o in CORR)
+        s.locator("[data-o='%s']" % want).click(); s.wait_for_timeout(80)
+        if s.locator("#btnNext").count() and s.locator("#btnNext").is_visible():
+            s.click("#btnNext"); s.wait_for_timeout(100)
+        else:
+            s.once("dialog", lambda d: d.accept()); s.click("#btnFinish"); break
+    s.wait_for_selector(".ring", timeout=15000)
+    if not ONLY or "s6_diaqnostika" in ONLY:
+        # yalniz xerite hissesi: "Movzu xeriten" basligindan kartin sonuna qeder (tam sehife 5000px-dir)
+        box = s.evaluate("""() => { const h = [...document.querySelectorAll('h2')].find(e => /x\u0259rit/i.test(e.textContent));
+            const c = h.nextElementSibling.nextElementSibling; const a = h.getBoundingClientRect(), b = c.getBoundingClientRect();
+            return {x: 0, y: a.top + window.scrollY - 12, width: 390, height: b.bottom - a.top + 24}; }""")
+        s.wait_for_timeout(350); s.screenshot(path=f"{OUT}/s6_diaqnostika.png", full_page=True, clip=box); print("   s6_diaqnostika")
+    t.reload(); t.wait_for_selector("#dgMap", timeout=15000)
+    # element sekli uzun kart uzre suruslur - sabit ust zolaq ve alt menyu araya dusmesin deye gizledilir
+    t.add_style_tag(content=".top,.bnav{display:none!important}")
+    t.evaluate("document.getElementById('diagBox').scrollIntoView()"); t.wait_for_timeout(350)
+    if not ONLY or "m10_diaqnostika" in ONLY:
+        t.locator("#diagBox").screenshot(path=f"{OUT}/m10_diaqnostika.png"); print("   m10_diaqnostika")
 
     # ---------------- VALIDEYN (390x844)
     v = page(ctx, 390, 844)

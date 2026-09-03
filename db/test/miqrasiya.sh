@@ -74,6 +74,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          115_sagird_kecdiyi_dersler.sql \
          116_sagird_tam_netice.sql \
          117_sagird_tam_netice_submit.sql \
+         118_diaqnostika.sql \
          05_grants.sql; do
   printf "  %-22s" "$f"
   #  Bank fayllari (16,17,19,20,30-99) bu repoda YOXDUR - private

@@ -1947,6 +1947,163 @@
       "</b><span>" + esc(lbl) + "</span></div>";
   }
 
+
+  /* ================================================================
+     DIAQNOSTIKA - "bu usaq neyi bilmir?"  (db/118_diaqnostika.sql)
+     Sagird hesabatinin ustunde ayrica kart: yarat -> gozle -> xerite.
+     Xerite pullu (hesabatdaki movzu analizi kimi), test yaratmaq da
+     (platforma banki).  Sagirdin OZ xeritesi onun ekranindadir - pulsuz.
+     ================================================================ */
+  function loadDiag(id, classId) {
+    var box = $("diagBox");
+    if (!box) return;
+    box.innerHTML = "<h2>Diaqnostika</h2>" +
+      '<div class="card"><div class="skel">Yüklənir…</div></div>';
+    Promise.all([
+      sb.rpc("rpc_diagnostic_result",  { p_student_id: id, p_subject: null }),
+      sb.rpc("rpc_diagnostic_options", { p_student_id: id })
+    ]).then(function (rr) {
+      if (!$("diagBox")) return;          //  ekran artiq deyisib
+      drawDiag(id, classId, rr[0] || {}, rr[1] || {});
+    }).catch(function (e) {
+      var b = $("diagBox");
+      if (b) b.innerHTML = "<h2>Diaqnostika</h2>" + msg("err", fail(e));
+    });
+  }
+
+  var DST = { ok: ["ok", "yaxşı"], mid: ["mid", "orta"], weak: ["weak", "zəif"] };
+  function dstChip(st) {
+    var l = DST[st] || DST.weak;
+    return '<span class="dst ' + l[0] + '">' + l[1] + "</span>";
+  }
+  //  Evvelki diaqnostika ile muqayise oxu
+  function dprev(t) {
+    if (!t.prev_status) return "";
+    var rank = { weak: 0, mid: 1, ok: 2 };
+    var a = rank[t.prev_status], b = rank[t.status];
+    if (a === undefined || b === undefined || a === b) {
+      return '<span class="dprev same" title="Əvvəlki kimi">=</span>';
+    }
+    return b > a ? '<span class="dprev up" title="Əvvəlkindən yaxşı">↑</span>'
+                 : '<span class="dprev down" title="Əvvəlkindən pis">↓</span>';
+  }
+
+  function drawDiag(id, classId, d, o) {
+    var box = $("diagBox");
+    if (!box) return;
+    var subs = o.subjects || [];
+    var paid = !!(o.paid || d.paid);
+    var h = "<h2>Diaqnostika</h2>";
+
+    if (!o.level) {
+      box.innerHTML = h + '<div class="card"><p class="muted" style="margin:0">' +
+        esc(o.reason || "Qrupun sinfi seçilməyib.") + "</p></div>";
+      return;
+    }
+    if (!paid) {
+      box.innerHTML = h + '<div class="upsell">' + ic("star") + "<div><b>Diaqnostik test</b>" +
+        "<span>Sinfin bütün mövzularından hər birinə 3 sual — «bu uşaq nəyi bilmir?» " +
+        "sualına 40 dəqiqədə cavab. Platformanın sual bankından yığıldığı üçün abunə " +
+        "paketində açılır.</span></div></div>";
+      return;
+    }
+
+    /* ---- netice (varsa) ---- */
+    if (d.has) {
+      var tp = d.topics || [], st = d.start || [];
+      var nWeak = tp.filter(function (t) { return t.status !== "ok"; }).length;
+      h += '<div class="card tight">' +
+        '<div class="dghead"><div><b>' + esc(d.test.title) + "</b>" +
+          "<i>" + dateAz(d.taken_at) + " · " + d.score + " / " + d.max_score + " düzgün</i></div>" +
+          pctChip(d.percent) + "</div>" +
+        '<div class="dgsum">' +
+          '<span class="dst weak">' + (d.weak_now || 0) + " zəif</span>" +
+          '<span class="dst mid">'  + (d.mid_now  || 0) + " orta</span>" +
+          '<span class="dst ok">'   + (d.ok_now   || 0) + " yaxşı</span>" +
+          (d.weak_prev !== null && d.weak_prev !== undefined
+            ? '<span class="dgdelta">əvvəlki (' + dateAz(d.prev_at) + "): " +
+              d.weak_prev + " zəif → " + (d.weak_now || 0) + "</span>" : "") +
+        "</div>" +
+        (st.length
+          ? '<div class="warn" style="margin:12px 0 0">' + ic("warn") +
+            "<span>Bundan başla: <b>" + st.map(esc).join(", ") + "</b></span></div>"
+          : '<div class="ok" style="margin:12px 0 0">' + ic("check") +
+            "<span>Bütün mövzular yaxşıdır.</span></div>") +
+        "</div>" +
+        '<div class="card pad0" style="margin-top:10px" id="dgMap">' + tp.map(function (t) {
+          return '<div class="trow dgrow ' + esc(t.status) + '"><div class="g"><b>' + esc(t.name) + "</b>" +
+            "<i>" + t.correct + " / " + t.total + " düzgün</i>" + meter(t.ratio) + "</div>" +
+            dprev(t) + dstChip(t.status) + "</div>";
+        }).join("") + "</div>";
+      if (nWeak) {
+        h += '<button class="btn go wide" id="dgRem" style="margin-top:10px">' + ic("gen") +
+          "Zəif mövzulardan test yığ (" + nWeak + ")</button>";
+      }
+    }
+
+    /* ---- gozleyen / yaratmaq ---- */
+    if (d.pending) {
+      h += '<div class="card tight" style="margin-top:10px"><b>Gözlənilir: ' +
+        esc(d.pending.title) + "</b>" +
+        '<p class="muted" style="margin:4px 0 0">' + (d.pending.questions || 0) +
+        " sual · son tarix " + dateAz(d.pending.closes_at) +
+        ". Şagird yazan kimi mövzu xəritəsi burada görünəcək. " +
+        '<a href="#/t/' + esc(d.pending.test_id) + '">Vərəqə bax</a></p></div>';
+    } else {
+      var opts = subs.map(function (s) {
+        return '<option value="' + esc(s.slug) + '">' + esc(s.name) + " — " + s.topics +
+          " mövzu · " + s.questions + " sual</option>";
+      }).join("");
+      h += '<div class="card tight" style="margin-top:10px">' +
+        "<b>" + (d.has ? "Yenidən diaqnostika" : "Diaqnostik test ver") + "</b>" +
+        '<p class="muted" style="margin:4px 0 10px">' + esc(o.level.name) +
+          " — bütün mövzulardan hər birinə 3 sual, bir cəhd, yalnız bu şagirdə. " +
+          (d.has ? "Əvvəlki ilə fərq xəritədə görünəcək."
+                 : "Nəticə — mövzu xəritəsi: nədən başlamalı.") + "</p>" +
+        (subs.length
+          ? '<label for="dgSub">Fənn</label><select id="dgSub">' + opts + "</select>" +
+            '<label for="dgDays" style="margin-top:8px">Müddət</label><select id="dgDays">' +
+              '<option value="7">7 gün</option><option value="14">14 gün</option>' +
+              '<option value="30">30 gün</option></select>' +
+            '<button class="btn go wide" id="dgGo" style="margin-top:12px">' + ic("gen") +
+              "Diaqnostik test ver</button>" +
+            '<div id="dgMsg"></div>'
+          : '<p class="muted" style="margin:0">Bu sinif üçün sual bankında kifayət qədər mövzu yoxdur.</p>') +
+        "</div>";
+    }
+    box.innerHTML = h;
+
+    on("dgGo", "click", function () {
+      if (busy) return;
+      var sub  = ($("dgSub")  || {}).value || "";
+      var days = Number(($("dgDays") || {}).value) || 7;
+      setBusy("dgGo", true, "Diaqnostik test ver");
+      sb.rpc("rpc_diagnostic_create", { p_student_id: id, p_subject: sub, p_days: days })
+        .then(function (res) {
+          busy = false;
+          $("dgMsg").innerHTML = '<div class="ok" style="margin-top:10px">' + ic("check") +
+            "<span>" + (res.existing
+              ? "Açıq diaqnostika artıq var — şagird hələ yazmayıb. "
+              : (Number(res.questions) || 0) + " sual, " + (Number(res.topics) || 0) +
+                " mövzu — tapşırıq yalnız bu şagirdə verildi. ") +
+            '<a href="#/t/' + esc(res.test_id) + '">Vərəqə bax</a></span></div>';
+          setTimeout(function () { loadDiag(id, classId); }, 900);
+        })
+        .catch(function (e) {
+          setBusy("dgGo", false, "Diaqnostik test ver");
+          $("dgMsg").innerHTML = msg("err", fail(e));
+        });
+    });
+    on("dgRem", "click", function () {
+      var weak = (d.topics || []).filter(function (t) { return t.status !== "ok" && t.id; })
+        .map(function (t) {
+          return { id: t.id, name: t.name,
+                   subject_slug: d.test.subject_slug, level: d.test.level_code };
+        });
+      remedialGen(classId, weak);
+    });
+  }
+
   function screenStudent(id, classId) {
     var live = guard();
     topTitle.textContent = "Şagird hesabatı";
@@ -1969,6 +2126,8 @@
           statTile(pct(sm.avg) + "%", "orta", "g2") +
           statTile(pct(sm.best) + "%", "ən yaxşı", "g3") +
         "</div>";
+      //  Diaqnostika karti - ayri sorgu ile dolur (loadDiag)
+      h += '<div id="diagBox"></div>';
 
       if (r.topics !== null) {
         h += "<h2>Valideyn üçün xülasə</h2>" +
@@ -2085,6 +2244,7 @@
       }
 
       show(h);
+      loadDiag(id, classId);
       if ($("vTxt")) {
         $("vTxt").value = velText(VSTY, r);
         on("vSty", "click", function (e) {

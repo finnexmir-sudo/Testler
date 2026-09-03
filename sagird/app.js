@@ -257,7 +257,8 @@
       '<div class="ic">' + ic(lock ? "lock" : (over ? "check" : "doc")) + "</div>" +
       '<div class="g"><b>' + esc(t.title) +
         //  Yalniz bu sagirde verilib - qrupun qalani gormur
-        (t.personal ? '<span class="solo">sənə</span>' : "") + "</b><i>" +
+        (t.personal ? '<span class="solo">sənə</span>' : "") +
+        (t.diagnostic ? '<span class="solo diag">diaqnostika</span>' : "") + "</b><i>" +
         "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
         "<span>" + (t.questions || 0) + " sual</span>" +
         (isAsg && t.closes_at ? dueSpan(t.closes_at) : "") +
@@ -268,6 +269,27 @@
       (done ? '<span class="best ' + pctCls(t.best) + '">' +
         Math.round(t.best) + "%</span>" : "") +
       (lock ? "" : '<span class="arrow">' + ic("right") + "</span>") + "</button>";
+  }
+
+  /* Diaqnostik testin MOVZU XERITESI - sagirdin ozune (pulsuz, 114-deki
+     "oz zeif movzulari" qerari ile eyni).  Duz cavab yoxdur, yalniz say. */
+  function diagMap(r) {
+    if (!r || !r.diagnostic || !r.topics || !r.topics.topics) return "";
+    var tp = r.topics.topics, st = r.topics.start || [];
+    if (!tp.length) return "";
+    var lbl = { ok: ["bh", "yaxşı"], mid: ["bm", "orta"], weak: ["bl", "zəif"] };
+    return "<h2>Mövzu xəritən</h2>" +
+      (st.length
+        ? '<div class="warn" style="margin-bottom:12px">' + ic("info") +
+          "<span>Bundan başla: <b>" + st.map(esc).join(", ") + "</b></span></div>"
+        : '<div class="ok" style="margin-bottom:12px">' + ic("check") +
+          "<span>Bütün mövzular yaxşıdır — afərin!</span></div>") +
+      '<div class="card pad0">' + tp.map(function (t) {
+        var l = lbl[t.status] || lbl.weak;
+        return '<div class="myr"><div class="g"><b>' + esc(t.name) + "</b>" +
+          "<i>" + t.correct + " / " + t.total + " düzgün</i></div>" +
+          '<span class="best ' + l[0] + '">' + l[1] + "</span></div>";
+      }).join("") + "</div>";
   }
 
   /* Faiz uzre reng sinfi: >=80 yasil, >=60 narinci, alti qirmizi */
@@ -631,6 +653,8 @@
           "<span>Nəticə yadda saxlanıldı. Müəllimin onu panelində görür.</span></div>") +
       '<div class="row"><button class="btn go" id="btnHome" style="flex:1">Testlər</button>' +
         '<button class="btn" id="btnLb" style="flex:1">' + ic("cup") + "Lövhə</button></div>" +
+
+      diagMap(r) +
 
       ((r.questions && r.questions.length)
         ? "<h2>Suallar</h2>" +

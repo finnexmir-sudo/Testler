@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light">
 <title>Bil10 — necə işləyir</title>
 <meta name="description" content="Bil10 bələdçisi: müəllim qrup yaradır, şagird kodla girir, valideyn nəticəni izləyir. Addım-addım, real ekran şəkilləri ilə.">
-<link rel="stylesheet" href="../assets/base.css?v=292">
+<link rel="stylesheet" href="../assets/base.css?v=296">
 <style>
   /* Beledci: uzun oxunan sehife.  Ekran sekilleri telefon cercivesinde,
      metn onlarin YANINDA (masaustu) ve ya USTUNDE (telefon). */
@@ -173,6 +173,25 @@
       </div>
       <figure class="ph"><img src="img/m9_hesabat.png" alt="Qrup hesabatı" loading="lazy"><figcaption>Hesabat — qrup üzrə</figcaption></figure>
     </div>
+
+    <div class="step">
+      <div>
+        <span class="n">7</span>
+        <h3>Diaqnostika: bu uşaq nəyi bilmir?</h3>
+        <p>Yeni şagird gəldi — hardan başlamalı? Şagirdin ekranında «Diaqnostik test ver»:
+           fənni seçirsiniz, sistem sinfin <b>hər mövzusundan 3 sual</b> (asan · orta · çətin) yığıb
+           yalnız ona tapşırır. Şagird yazandan sonra mövzu xəritəsi çıxır: hansı mövzu
+           <span style="color:var(--err)">zəif</span>, hansı <span style="color:var(--warn)">orta</span>,
+           hansı <span style="color:var(--ok)">yaxşı</span> — və «Bundan başla» tövsiyəsi.</p>
+        <ul>
+          <li>Zəif mövzulardan bir klikə düzəliş testi yığılır.</li>
+          <li>Bir-iki aydan sonra «Yenidən diaqnostika» — ikinci xəritədə əvvəlki ilə fərq oxlarla görünür (↑ ↓ =).</li>
+          <li>Şagird öz nəticəsində eyni xəritəni görür; düz cavablar yenə gizli qalır.</li>
+        </ul>
+        <div class="warn2">Diaqnostik test yaratmaq və müəllim xəritəsi abunə paketi ilədir; şagirdin öz xəritəsi pulsuzdur.</div>
+      </div>
+      <figure class="ph"><img src="img/m10_diaqnostika.png" alt="Diaqnostika kartı — mövzu xəritəsi" loading="lazy"><figcaption>Zəif · orta · yaxşı · «Bundan başla»</figcaption></figure>
+    </div>
   </section>
 
   <!-- ============================================================= SAGIRD -->
@@ -240,6 +259,21 @@
       </div>
       <figure class="ph"><img src="img/s5_ev_ekrani.png" alt="Şagirdin ev ekranı" loading="lazy"><figcaption>Gedişat bir baxışda</figcaption></figure>
     </div>
+
+    <div class="step">
+      <div>
+        <span class="n">6</span>
+        <h3>Diaqnostika testi</h3>
+        <p>Siyahıda «diaqnostika» nişanlı test — müəllim sizin hardan başlamalı olduğunuzu
+           öyrənmək üçün verib. Hər mövzudan 3 sual var, bir cəhd. Bal deyil, xəritə vacibdir:
+           nəticədə hansı mövzunun zəif, hansının yaxşı olduğu görünür.</p>
+        <ul>
+          <li>Bilmədiyiniz sualı təxmin etməyin — boş qoyun, xəritə daha düz çıxar.</li>
+          <li>«Bundan başla» — müəllimlə ilk keçəcəyiniz mövzular.</li>
+        </ul>
+      </div>
+      <figure class="ph"><img src="img/s6_diaqnostika.png" alt="Şagirdin mövzu xəritəsi" loading="lazy"><figcaption>Mövzu xəritən</figcaption></figure>
+    </div>
   </section>
 
   <!-- =========================================================== VALIDEYN -->
@@ -296,6 +330,9 @@
     <details><summary>Telefona necə quraşdırım?</summary>
       <p>Brauzerdə səhifəni açıb menyudan «Ana ekrana əlavə et» (Android: Chrome menyusu, iPhone: Paylaş → Ana ekrana əlavə et).
          Ayrıca mağaza yoxdur — bu, veb tətbiqdir.</p></details>
+    <details><summary>«Diaqnostik test ver» düyməsi yoxdur</summary>
+      <p>Diaqnostika abunə paketi ilədir — düymənin yerində «abunə lazımdır» yazısı görünür.
+         Bir də: şagirdə artıq açıq diaqnostika verilibsə, o yazılana qədər ikincisi yaradılmır.</p></details>
     <details><summary>Şagirdi silsəm nə olar?</summary>
       <p>Cəhdləri, cavabları və sessiyaları da silinir. Nəticələr lazımdırsa silməyin — «Dayandır» edin:
          giriş bağlanır, hesabat qalır.</p></details>

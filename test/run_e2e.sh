@@ -58,5 +58,8 @@ echo
 echo "13/14 tedris fennleri"
 python3 test/e2e_fenn.py
 echo
-echo "14/14 valideyn girisi"
+echo "14/15 valideyn girisi"
 python3 test/e2e_valideyn.py
+echo
+echo "15/15 diaqnostika"
+python3 test/e2e_diaq.py

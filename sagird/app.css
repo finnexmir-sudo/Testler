@@ -292,6 +292,7 @@ body{background:
 .myr .at{flex:0 0 auto;font-size:12px;color:var(--fg-3);white-space:nowrap}
 
 /* "sene" - yalniz bu sagirde verilmis tapsiriq */
+.test .g b .solo.diag{background:var(--ok-tint);color:var(--ok);border-color:var(--ok-line)}
 .test .g b .solo{display:inline-block;margin-left:7px;padding:1px 7px;
   border-radius:999px;font-size:10.5px;font-weight:620;vertical-align:1px;
   background:var(--brand-tint);color:var(--brand);border:1px solid var(--brand-line)}

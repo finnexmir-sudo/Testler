@@ -625,6 +625,8 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     «necə qazanılır» da orada yazılacaq.
 
 18. **Diaqnostik test → şagird üzrə mövzu xəritəsi → fərdi dərs planı.**
+    (a) və (b) **hazırdır** — `db/118_diaqnostika.sql`, bax «Diaqnostik
+    test» bölməsi; (c) fərdi plan açıqdır.
     İstifadəçi «möhtəşəm» dedi, ilk pilot müəllimindən sonra. Üç pillə:
     (a) «Diaqnostik test ver» — sinfin BÜTÜN mövzularından hər birinə
     3 sual (`app.min_topic_answers()` = 3 olmasa analiz susur; fəsil
@@ -1130,10 +1132,50 @@ Lokal `psql`-də işləyir, Supabase-də işləmir — ona görə testlərdə tu
 
 ---
 
+## Diaqnostik test — «bu uşaq nəyi bilmir?»
+
+`db/118_diaqnostika.sql`. Yeni şagird gələndə müəllim şagird hesabatında
+«Diaqnostik test ver» basır: sinfin **bütün** fəsillərindən (üst
+səviyyə mövzu; suallar fəslə bağlıdır, alt mövzunun hovuzu yoxdur) hər
+birinə **3 sual** — asan/orta/çətin varsa, yoxsa nə varsa — bir cəhd,
+yalnız o şagirdə, 75 san/sual. Nəticə **mövzu xəritəsi**: 3/3 yaxşı,
+2/3 orta, 0–1 zəif (`app.diag_status`, hesabatdakı meter hədləri 75/50),
+«bundan başla» (qırmızılar, sonra narıncılar, kurikulum sırası, ən çoxu
+3), eyni fənndə əvvəlki diaqnostika ilə fərq («1 zəif → 0», hər sətirdə
+↑/↓/=). Zəif fəsillərdən bir klikə düzəliş testi (`remedialGen`).
+
+**Niyə 3 sual.** `app.min_topic_answers()` = 3 — ondan az cavabla mövzu
+analizi susur. 15 mövzuya 30 sual versən mövzu başına 2 düşür, xəritə
+boş qalır: say mövzudan çıxır, əksi yox. Ümumi tarix 9/11-də bəzi
+fəsillərdə <3 sual var — onlar testə düşmür (`app.diag_topics`).
+
+**Abunə.** Test platforma bankından yığılır → `rpc_generate_test` və
+`rpc_remedial_test` kimi abunə paketində (bir diaqnostika 30+ platforma
+sualını pulsuz açardı — bank sızması). Müəllimin xəritəsi hesabatdakı
+`topics` kimi abunə ilə; abunə bitəndə xəritə bağlanır, bal qalır.
+**Şagirdin öz xəritəsi pulsuzdur** (114-dəki «öz zəif mövzuları»
+qərarı ilə eyni) — `rpc_submit_attempt`/`rpc_test_result` diaqnostik
+testdə `topics` qaytarır, düz cavab yox, yalnız say.
+
+**Dublikat yoxdur:** açıq, yazılmamış diaqnostika varsa `rpc_diagnostic_create`
+onu qaytarır (`existing: true`). Yazılandan sonra yenisi yaranır — fərq
+üçün. Pilot müəlliminə abunə sətri əl ilə verilir (`subscriptions`).
+
+RPC-lər (authenticated): `rpc_diagnostic_options(student)` — sinif,
+fənnlər (fəsil/sual sayı, son diaqnostika), `rpc_diagnostic_create(student,
+subject, days)`, `rpc_diagnostic_result(student, subject)`. Nişanlar:
+şagird siyahısında `diagnostic`, valideyndə `diag`, başlıq «Diaqnostika ·
+Fənn · Sinif». UI: `muellim/app.js` `loadDiag/drawDiag` (`#diagBox`),
+`sagird/app.js` `diagMap`. Testlər: `db/test/smoke_diaqnostika.sql` (9),
+`test/e2e_diaq.py`.
+
+`07_seed_tests.sql`-dəki «Genişləndirilmiş analiz testi» bunun köhnə
+yer tutucusudur — məhsul deyil, bələdçi şəkillərində gizlədilir.
+
 ## Bələdçi — `komek/`
 
 «Necə işləyir» səhifəsi: müəllim / şagird / valideyn üçün addım-addım,
-**real ekran şəkilləri ilə** (`komek/img/*.png`, 16 şəkil). İstifadəçinin
+**real ekran şəkilləri ilə** (`komek/img/*.png`, 18 şəkil). İstifadəçinin
 tələbi: ilk dəfə çətinlik çəkənlər girib oxusun. Keçidlər: landing
 menyusu («Bələdçi») və «Üç addım» altı, müəllim panelində Profil,
 şagird və valideyn giriş ekranlarında «Necə işləyir?».

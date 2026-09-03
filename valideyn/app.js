@@ -205,6 +205,7 @@
         return '<div class="row">' +
           "<div><b>" + esc(p.title) + "</b>" +
             (p.fix ? '<em class="tag">düzəliş</em>' : "") +
+            (p.diag ? '<em class="tag">diaqnostika</em>' : "") +
             "<i>" + [ p.subject, (p.questions || 0) + " sual" ]
               .filter(Boolean).map(esc).join(" · ") + "</i></div>" +
           (p.closes_at
@@ -230,6 +231,7 @@
           return '<div class="row">' +
             "<div><b>" + esc(r.test) + "</b>" +
               (r.fix ? '<em class="tag">düzəliş</em>' : "") +
+              (r.diag ? '<em class="tag">diaqnostika</em>' : "") +
             "<i>" +
               [ r.subject, dateAz(r.at) ].filter(Boolean).map(esc).join(" · ") +
             "</i></div>" +
