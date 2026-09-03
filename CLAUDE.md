@@ -477,9 +477,9 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    bilməz. MİQ/sertifikasiya səviyyələrinə toxunulmur — kodları
    rəqəm deyil. Mövcud qruplarda `program_id` sinifə uyğunlaşdırılır.
 14. **Sınaq imtahanı rejimi** (buraxılış / qəbul) — araşdırılıb, təcili
-   deyil. Qərar: **məzmun məhsulu qurmuruq** (Hədəf/Araz tipli
-   nəşriyyatlarla məzmun yarışında şansımız yoxdur), **alət** qururuq:
-   qəlib → hər həftə yeni variant → sınaqdan-sınağa trend.
+   deyil. Qərar: məzmun deyil, **alət** qururuq — qəlib → hər həftə
+   yeni variant → sınaqdan-sınağa trend (sıra əsaslandırması və rəqabət
+   mövqeyi ayrıca saxlanılıb).
    Rəsmi mənbə: DİM → Fəaliyyət → Qəbul və imtahanlar → Yekun
    qiymətləndirmə (menyuda «Sənədlər»də deyil).
 
@@ -526,108 +526,25 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    **Başlamazdan əvvəl:** «Azərbaycan dili (dövlət dili kimi)» balının
    300-ə qatılıb-qatılmadığı DİM-dən (1653) dəqiqləşdirilməlidir.
 
-   **Sıra:** bu, `levels` modeli və pilotdan SONRA. İmtahan auditoriyası
-   ən bağışlamayandır — bir səhv cavab açarı etibarı birdəfəlik alır,
-   biz isə məhsulu hələ bir ay real şagirdlə işlətməmişik. Amma
-   imtahana hazırlaşdıran real bir repetitor «sınayaram» desə, sıra
-   dəyişir: onda təxminlə yox, konkret ehtiyacla qururuq.
+   **Sıra:** bu, `levels` modeli və pilotdan SONRA — imtahan auditoriyası
+   səhvi bağışlamır, məhsul hələ real şagirdlə sınanmayıb.
 
-15. **Valideyn girişi** — müzakirə olunub, pilotdan SONRA.
+15. **Valideyn girişi (tam portal / avtomatik kod)** — müzakirə olunub,
+    pilotdan SONRA. Bu, yuxarıdakı «Valideyn girişi» bölməsindən
+    (`db/107_valideyn.sql`, müəllimin şagird-şagird açdığı, susmaya
+    görə bağlı model) **fərqlidir** — orada olan artıq hazırdır və
+    işləyir. Burada müzakirə edilən daha böyük addımdır: hər şagird
+    əlavə olunanda avtomatik valideyn kodu, tam valideyn ekranı, ya da
+    (araşdırılan alternativ) müəllimə hazır həftəlik WhatsApp xülasəsi.
 
-    **Fikir:** müəllim şagirdi əlavə edəndə şagird kodu ilə birlikdə
-    **valideyn kodu** da versin. Valideyn uşağını izləsin: hansı dərs
-    keçildi, nə tapşırıq verildi, nə test verildi, necə oxuyur.
+    Texniki əsas artıq bazadadır: `students.parent_id → profiles`,
+    `app.can_read_student` `s.parent_id = auth.uid()` şərtinə icazə
+    verir, `accounts.type = 'parent'`, `consents` cədvəli (valideyn
+    razılığı). Kod mexanizmi şagird girişinin təkrarıdır (`login_code`
+    üsulu) — parol yox, çünki valideyn hesab yaratmayacaq.
 
-    **Niyə güclüdür — bu, rahatlıq deyil, iş modeli dəyişikliyidir.**
-    Bu gün 29 AZN-i müəllim verir. Valideyn həm daha narahatdır, həm
-    adətən daha ödəyəndir: 25 şagirdli repetitorda 25 × 9 AZN = 225 AZN.
-    Daha vacibi — bu, **müəllimin satış alətidir**: valideynə canlı
-    hesabat göstərə bilən repetitor rəqibindən seçilir, yəni müəllimin
-    ödəmə səbəbi «vaxt qənaəti»ndən qat-qat güclü olur. Yan fayda:
-    valideyn baxırsa, şagird tapşırığı edir.
-
-    **Yarısı artıq bazadadır:** `students.parent_id → profiles`,
-    `app.can_read_student` **onsuz da** `s.parent_id = auth.uid()`
-    şərtinə icazə verir, `accounts.type = 'parent'`, valideyn paketləri
-    (`plans`: aylıq 9 / illik 99 AZN, 3 şagird), `consents` cədvəli
-    (valideyn razılığı — hüquqi tələb). Çatışmayan: **kodla giriş yolu**
-    və **valideyn ekranı**.
-
-    **Kod, parol yox.** Şagird girişinin bütün mexanizmi hazırdır
-    (`login_code` + 12 saatlıq `student_sessions`) — təkrarlanır.
-    Valideyn hesab yaratmayacaq, şifrəni unudacaq, dəstək yükü olacaq.
-    Şərtlər: **yalnız oxumaq**, **ləğv edilə bilən**, hər şagird üçün
-    ayrı. Kod yayılsa, müəllim onu bir kliklə dəyişə bilməlidir.
-    (`parent_id` sahəsi ayrı hal üçün qalır: valideyn ÖZ abunəsini alıb
-    öz uşağını idarə edəndə.)
-
-    **Ən böyük risk — gözə görünməyən.** Bu, müəllimin işini
-    şəffaflaşdırır: valideyn görəcək ki, dərs keçilmədi, tapşırıq
-    verilmədi, qrup 40 % yazdı. **Bəzi müəllimlər məhz buna görə imtina
-    edəcək.** Ona görə valideyn girişi **müəllimin özü tərəfindən,
-    şagird-şagird açılır və susmaya görə BAĞLIDIR**. Məcburi etsək
-    müəllimi itiririk; könüllü etsək müəllim onu öz üstünlüyü kimi
-    işlədir.
-
-    **Valideyn NƏ GÖRMƏMƏLİDİR** — dizaynın yarısı budur:
-
-    | Görsün | Görməsin |
-    |---|---|
-    | hansı dərs keçildi, nə vaxt | **başqa uşaqların adları və balları** |
-    | tapşırıq verildi, edildi/edilmədi | reytinq (`rpc_leaderboard`) |
-    | test nəticələri və tarixi | bitməmiş testin düz cavabları |
-    | zəif mövzular | müəllimin şəxsi qeydləri |
-
-    Reytinq ayrıca vurğulanır: şagird bu gün başqalarının adlarını
-    görür. Eyni ekranı valideynə versək, **başqasının uşağının balını
-    yad adama göstərmiş oluruq** — bu, zövq məsələsi deyil, hüquqi
-    problemdir.
-
-    **Sıra: pilotdan sonra.** Bu, indiyə qədər müzakirə olunan ən böyük
-    iş parçasıdır — üçüncü tətbiq (`valideyn/`), yeni RPC-lər, yeni
-    yoxlamalar. Pilot elə bu sualın özünə də cavab verəcək; beş
-    repetitordan soruşulmalıdır:
-
-    > «Valideyn uşağının nəticələrini görsə, bu sizin üçün üstünlükdür,
-    > yoxsa narahatlıq?»
-
-    «Üstünlükdür» → qururuq və qiymət modelini ona görə düzürük.
-    «Narahatlıq» → könüllü qururuq. Bunu **əvvəlcədən** bilmək iki
-    həftəlik işi xilas edir.
-
-    **BİR REPETİTORDAN CAVAB GƏLDİ** (n=1, sentyabr 2026): «əksinə, bu
-    çox yaxşı fikirdir — mən gecə-gündüz valideynlərlə danışıram: bu
-    belə oldu, bunu keçdim, burda zəifdir».
-
-    Bu, çərçivəni dəyişir: biz müəllimə **nəzarət qurmuruq**, onun
-    artıq gördüyü işi avtomatlaşdırırıq. Mövcud vərdişin üstündəki yükü
-    götürən funksiyalar, yeni vərdiş yaratmağa çalışanlardan həmişə
-    yaxşı tutur.
-
-    Amma **şəffaflıq riski təkzib olunmadı** — seçim təsiri var:
-    valideynlə gecə-gündüz danışan müəllim məhz bu fikri bəyənəcək
-    adamdır; danışmayan isə narahat olacaq və bunu ilk söhbətdə
-    deməyəcək, sadəcə istifadə etməyəcək. Yaxşı ki həll onsuz da
-    yazılıb: **müəllim özü açır, susmaya görə bağlı**. Mübahisəni
-    qazanmağa ehtiyac yoxdur.
-
-    **Onun sözlərindən çıxan ƏSAS nəticə — bu, MESAJDIR, portal
-    deyil.** Valideynə kod versək, o ayda bir dəfə açacaq, müəllim isə
-    WhatsApp mesajını yenə yazacaq: yük azalmayacaq. Müəllimə **hazır
-    həftəlik xülasə** versək (bir düymə → mətn/link → WhatsApp-a
-    yapışdırır), əsl yük elə həmin anda düşür.
-
-    İkinci variant birincidən **qat-qat kiçikdir**: üçüncü tətbiq yox,
-    müəllim panelində bir ekran. Ona görə **birinci sürüm xülasə
-    olmalıdır**, valideyn portalı isə sonra — əgər tələb qalsa.
-
-    Növbəti sual həmin repetitora: «Bunu indi WhatsApp-da yazırsınız?
-    Nə qədər vaxt aparır? Hansı daha rahatdır — hazır mesajı
-    göndərmək, yoxsa valideynə kod verib istədiyi vaxt baxsın?»
-
-    **Sıra hələ dəyişmir** — n=1-ə görə sıra dəyişdirmək, pilotdan
-    əvvəl funksiya yığmamaq qaydasını pozmaq deməkdir. Üç-dörd müəllim
-    eyni şeyi desə, dəyişir.
+    Bazar sınağı və qiymət modeli müzakirəsi ayrıca saxlanılıb (bax:
+    yerli strategiya qeydləri). Sıra hələ dəyişmir.
 
 16. **Bir valideyn — bir neçə uşaq.** İndi hər şagirdin ayrı valideyn
     kodu var: iki uşağı olan valideyn iki kod daşıyır. Müştəri sayı
@@ -635,9 +552,9 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     İstifadəçi ilə razılaşdırılıb: **hələlik ayrı, gələcəkdə birgə.**
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
-mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi);
-valideyn girişində qiymət modeli (valideyn ayrıca ödəyir, yoxsa
-müəllimin paketinə daxildir) — pilotdan sonra.
+mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); valideyn
+girişində qiymət modeli — pilotdan sonra (təfərrüat: yerli strategiya
+qeydləri).
 
 ## Test yığanda bir neçə sinif
 
@@ -756,20 +673,27 @@ bütün funksiyaların gövdəsi də tutuşdurulur.
 
 ## `db/` fayl nömrələri — iki sessiya arasında bölgü
 
-Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
-`claude/bil10-question-bank-expansion-eu6vkn` budağı `main`-ə
-birləşdirildikdən sonra 30…87 aralığındadır. Əvvəl nömrələr
-toqquşurdu (bankın 7 faylı 23–29-da idi, indi 75–81-ə köçürülüb).
-Bölgü belədir:
+Bankı ayrı sessiya doldurur. Nömrə bölgüsü belədir:
 
 | Aralıq | Kim | Nə |
 |---|---|---|
-| 01–29 | kod | sxem, RLS, RPC — doludur |
+| 01–29 | kod | sxem, RLS, RPC — doludur, bu repodadır |
 | 30–99 | bank | sual/mövzu məlumatı (o biri sessiya) |
-| 100+ | kod | yeni RPC və miqrasiyalar |
+| 100+ | kod | yeni RPC və miqrasiyalar, bu repodadır |
 
 Yeni **kod** faylı 100-dən başlayır. Bank faylına toxunma; bank
 sessiyası da 100+ aralığına girmir.
+
+**2026-09-03-dən bank fayllarının (16,17,19,20 və 30-99 aralığı) +
+`tools/` + `mundericat/` yeri dəyişib: ayrıca PRIVATE repo-dadır —
+`finnexmir-sudo/bil10-bank`.** Səbəb: bu repo (`Testler`) PUBLIC-dir,
+bank faylları isə sual mətni + düz cavab + izahı açıq mətn kimi
+daşıyırdı — `rpc_bank_samples`/`rpc_bank_list`-dəki abunə qapısı
+faktiki mənasız olurdu, çünki kimsə sadəcə bu faylları GitHub-dan
+oxuyub bütün bankı pulsuz götürə bilərdi. Bank sessiyası işini
+`bil10-bank`-da davam etdirir, eyni nömrələmə qaydası ilə. Bu repoda
+bank fayllarına ehtiyac olsa (məs. `db/test/miqrasiya.sh`), `bil10-bank`-ı
+`Testler`-in yanına (bacı qovluq kimi, `../bil10-bank`) klonla.
 
 ## Bank siyahısında variantlar — abunə ilə
 
@@ -1015,6 +939,8 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
 - Ağacın **mənbəyi e-derslik.edu.az-dır** — Təhsil Nazirliyinin rəsmi
   portalı. `tools/mundericat.py` kitabların **mündəricatını** yığır
   (`mundericat/*.txt`), `15_...sql` isə ondan mövzu ağacını qurur.
+  (`tools/` və `mundericat/` `bil10-bank` private repo-dadır, bax
+  yuxarı «db/ fayl nömrələri».)
   Dərsliyin mətni, çalışmaları, şəkilləri **götürülmür** — onlar müəllif
   hüququ ilə qorunur; mündəricat isə faktdır.
   Azərbaycan dili istisnadır: dərslik mövzuya yox, **mövzuya (temaya)**
@@ -1059,6 +985,9 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   ≥0.95 təkrar yoxla, fənn üzrə eyni düzgün cavab ≤2 olsun,
   `rpc_generate_test` balans yoxlaması işlət (nümunə:
   `test/smoke_generator.sql`).
+  (Bu bənddə adı çəkilən bütün `db/NN_bank_*.sql` faylları və
+  `tools/*.py` skriptləri `bil10-bank` private repo-dadır, bu repoda
+  deyil — bax yuxarı «db/ fayl nömrələri».)
 - **Kiril oxşarı hərf tələsi.** `а е о р с х у М Т В` latın hərfləri
   ilə eyni görünür, amma fərqli koddur — belə hərf düşən sual
   axtarışda tapılmır və pg_trgm yoxlaması onu təkrar saymır.
