@@ -308,9 +308,15 @@
       worked.forEach(function (t) { avg += Number(t.best) || 0; });
       avg = worked.length ? Math.round(avg / worked.length) : 0;
 
+      /* Dovamlilik: bugun/dunen bir sey yazilmayibsa server 0 qaytarir -
+         "3 gundur ardıcılsan" kimi yalan motivasiya olmasin. 2-den az
+         gostermirik, 1 gunluk "ardıcıllıq" hec neyi bildirmir. */
+      var streakTxt = Number(d.streak) >= 2
+        ? " · 🔥 " + Number(d.streak) + " gün ardıcıl" : "";
+
       var h = '<div class="shero">' + av(ME ? ME.display_name : "?") +
         "<div><b>Salam, " + esc(ME ? ME.display_name : "") + "! 👋</b>" +
-        (CLS ? "<i>" + esc(CLS.name) + "</i>" : "") + "</div></div>";
+        (CLS ? "<i>" + esc(CLS.name) + streakTxt + "</i>" : "") + "</div></div>";
       if (worked.length) {
         h += '<div class="stiles">' +
           '<div class="st a"><b>' + worked.length +
@@ -319,6 +325,19 @@
           '<button class="st c" id="btnMyRes"><b>' + ic("cup") + "</b>" +
             "<span>nəticələrim</span></button>" +
         "</div>";
+        if (d.best != null) {
+          h += '<p class="beststat">🏆 Ən yüksək nəticən: <b>' +
+            Math.round(d.best) + "%</b></p>";
+        }
+      }
+
+      /* Novbeti ders: muellim ekranindaki "NOVBETI DERS" kartinin eynisi -
+         yalniz baxmaq ucundur, klik olunmur. */
+      if (d.next_lesson) {
+        h += '<div class="card tight nlesson"><span class="nl-tag">Növbəti dərs</span>' +
+          "<b>" + esc(d.next_lesson.topic) + "</b>" +
+          (d.next_lesson.subject ? "<i>" + esc(d.next_lesson.subject) + "</i>" : "") +
+          "</div>";
       }
 
       /* 1. Muellimin verdiyi tapsiriqlar - hemise yuxarida */
@@ -340,6 +359,18 @@
              '<div class="card pad0">' + prac.map(function (t) {
                return testRow(t, false);
              }).join("") + "</div>";
+      }
+
+      /* 3. Zeif movzular - haradan basla, konkret cavab.  .myr/.best
+         siniflerini "netcelerim" siyahisindan goturur, yeni CSS lazim
+         deyil.  Faiz hemise <60 oldugu ucun rengi hemise qirmizidir. */
+      if (d.weak && d.weak.length) {
+        h += '<div class="spacer"></div><h2>Zəif mövzular</h2>' +
+          '<div class="card pad0">' + d.weak.map(function (w) {
+            return '<div class="myr"><div class="g"><b>' + esc(w.topic) + "</b>" +
+              "<i>" + esc(w.subject) + "</i></div>" +
+              '<span class="best bl">' + Math.round(w.percent) + "%</span></div>";
+          }).join("") + "</div>";
       }
 
       show(h);

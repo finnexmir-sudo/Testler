@@ -41,6 +41,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 110_valideyn_duzelis_nisani.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 111_admin_test_sayi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 112_asagi_sinif_testleri.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 113_valideyn_huquq_berpa.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 114_sagird_paneli_zenginlesdirme.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql

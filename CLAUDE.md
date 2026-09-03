@@ -104,6 +104,35 @@ Bağlayanda açıq sessiyalar **dərhal ölür** — «bağladım, amma hələ d
 baxır» olmamalıdır. `db/107_valideyn.sql`, `db/test/smoke_valideyn.sql`
 (12 yoxlama, əsasən təhlükəsizlik iddiasıdır).
 
+## Şagirdin öz ekranı — 4 yeni sahə
+
+Əvvəl şagird öz ekranında YALNIZ tapşırıqları/sərbəst məşqi görürdü —
+«necə gedirəm», «nə vaxt nə keçdik», «harada zəifəm» yalnız müəllim və
+valideyn tərəfində idi. `db/114_sagird_paneli_zenginlesdirme.sql`
+`rpc_student_tests`-ə 4 sahə əlavə etdi:
+
+- **`best`** — ən yüksək faiz, bütün cəhdlər üzrə.
+- **`streak`** — neçə gündür ARDICIL test yazır. Bu gün/dünən heç nə
+  yazılmayıbsa zəncir qırılıb sayılır, `0` qayıdır — «3 gündür
+  ardıcılsan» yalan motivasiya olmasın.
+- **`next_lesson`** — dərs planından ilk bitirilməmiş mövzu (müəllim
+  ekranındakı «NÖVBƏTİ DƏRS» kartı ilə eyni məntiq).
+- **`weak`** — zəif mövzular (<60 %, ən azı 3 cavab).
+
+**`weak` ABUNƏ TƏLƏB ETMİR** — bu, valideyn ekranındakı eyni sorğudan
+(`107_valideyn.sql`) fərqlidir, orda abunə (müəllimin satdığı analitika)
+şərtdir. Burda isə şagirdin öz zəifliyini bilməsi təhsil məzmunudur,
+satılan analitika deyil. Qərar istifadəçi ilə açıq razılaşdırılıb —
+başqa yerdə təkrarlanacaqsa bu fərqi qorumaq lazımdır.
+
+**Tələ:** `rpc_student_tests`-i override edəndə 03-dəki İLK versiyadan
+DEYİL, ən son override-dan (`28_ferdi_tapsiriq.sql`) başlamaq lazımdır.
+Bunu bir dəfə səhv etdim — 03-dən köçürüb ferdi təyinat düzəlişini
+(`personal` sahəsi, `a.student_id` filtri) öz-özünə geri qaytardım,
+`smoke_ferdi.sql` bunu dərhal tutdu. Bir funksiyanı override edəndə
+`grep -ln "create or replace function public.FUNKSIYA_ADI" *.sql` ilə
+ƏVVƏLKİ BÜTÜN override-ları tap, ən sonuncunu əsas götür.
+
 ## ƏN VACİB ÜÇ QAYDA
 
 **1 · Bal həmişə serverdə hesablanır.**

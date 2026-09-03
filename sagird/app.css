@@ -247,6 +247,17 @@ body{background:
 .st.c{background:linear-gradient(135deg,#232a38,#3a4358);cursor:pointer;font:inherit}
 .st.c:active{transform:scale(.97)}
 
+/* en yuksek netice - stiles altinda kicik setir */
+.beststat{font-size:12.5px;color:var(--fg-3);margin:-8px 0 16px}
+.beststat b{color:var(--fg);font-weight:640}
+
+/* novbeti ders - yalniz baxmaq ucun, klik olunmur */
+.nlesson{margin:0 0 16px}
+.nl-tag{display:block;font-size:11px;font-weight:600;letter-spacing:.03em;
+  text-transform:uppercase;color:var(--fg-3);margin-bottom:4px}
+.nlesson b{display:block;font-size:14.5px;font-weight:600}
+.nlesson i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-3);margin-top:2px}
+
 /* son tarix yaxinlasanda qirmizi */
 .test .due{color:var(--err);font-weight:600}
 

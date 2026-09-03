@@ -70,6 +70,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          109_duzelis_nisani.sql 110_valideyn_duzelis_nisani.sql \
          111_admin_test_sayi.sql 112_asagi_sinif_testleri.sql \
          113_valideyn_huquq_berpa.sql \
+         114_sagird_paneli_zenginlesdirme.sql \
          05_grants.sql; do
   printf "  %-22s" "$f"
   if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then
