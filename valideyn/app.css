@@ -14,7 +14,12 @@ body{font-size:15.5px}
 input{min-height:52px;font-size:17px}
 
 /* ------------------------------------------------------------- giris */
-.hero{text-align:center;padding:30px 0 10px}
+.hero{text-align:center;padding:26px 0 10px}
+/*  Loqo - sagirdin giris ekrani ile eyni olcu ve kolge */
+.hero .mark{width:56px;height:56px;margin:0 auto 14px;
+  display:flex;align-items:center;justify-content:center}
+.hero .mark svg{width:56px;height:56px;
+  filter:drop-shadow(0 4px 10px rgba(43,74,203,.25))}
 .hero h1{font-size:23px;letter-spacing:-.022em;margin-bottom:7px}
 .hero p{color:var(--fg-2);font-size:14.5px;margin:0}
 

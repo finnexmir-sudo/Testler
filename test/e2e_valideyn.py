@@ -206,6 +206,10 @@ with sync_playwright() as pw:
     #  gizlidir, ona gore kecid burada ayrica olmalidir.
     ok(vp.locator(".homelink").count() == 1,
        "giris ekranindan ana sehifeye kecid var")
+    #  Giris ekraninda mehsulun kimliyi gorunmelidir - evvel ne loqo,
+    #  ne ad vardi, sehife "hansi sayt?" sualini dogururdu.
+    ok(vp.locator(".hero .mark svg").count() == 1,
+       "giris ekraninda loqo var")
     vp.click(".homelink"); vp.wait_for_selector(".doors", timeout=15000)
     ok(vp.locator(".doors").count() == 1, "kecid ANA SEHIFEYE aparir",
        vp.url.split("/Testler")[-1] or vp.url)
