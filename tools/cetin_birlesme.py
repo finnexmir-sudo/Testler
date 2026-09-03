@@ -1464,6 +1464,654 @@ RETROFIT = [
      "qualities, and the passage itself contradicts it: Rashad is "
      "punctual and reliable BUT explicitly NOT flexible.",
      ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+    # ============================================================
+    # YEDDINCI DALGA (2026-09-03): 8-ci sinif - V2 STANDARTLA.
+    # riyaziyyat (11 movzu), az-dili (8 movzu), ingilis-dili
+    # (12 movzu) = 31 bend. Riyaziyyat faktlari Python-la yoxlanildi.
+    # Qrammatika/uslub movzularinda (V2-B) YALNIZ bankin oz artiq
+    # tesdiqlenmis cavablari restate olunur, yeni linqvistik hokm
+    # elave edilmir.
+    # ============================================================
+
+    # Cetinlik: 6/10
+    # Sebeb: iki ayri kok hasilini eyni qayda ile hesablamaq, sonra
+    #   sadelesdirilmis formani yaddan cixarib xeta etmek.
+    # Addimlar: 1,2 (eyni qaydanin iki misali) -> 3 (paralel fakt) ->
+    #   4 (3-un sadelesdirilmis formasindan yanlis nice cixarma)
+    # Derslikden kenar bilik? Xeyr (hamisi #6/#7/#9/#30-dan)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-kvadrat-kok",
+     "riy8-kvadrat-kok#40", "riy8-kvadrat-kok#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) √a · √b = √(ab) qaydasına görə, √36 · √25 = √900 = 30 alınır.\n"
+     "2) Eyni qaydaya görə, √13 · √52 = √676 = 26 alınır (13 · 52 = 676, 26² = 676).\n"
+     "3) √18 ifadəsi tək başına sadələşəndə 3√2 alınır (18 = 9 · 2).\n"
+     "4) Bu qaydaya əsasən, √18 · √2 hasilini 3√2 sadələşdirilmiş formasını 2-yə vuraraq 6√2 kimi tapmaq olar.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: √18 · √2 = √36 = 6 "
+     "(eyni √a·√b=√(ab) qaydası ilə birbaşa), 6√2 yox - sadələşdirilmiş "
+     "3√2 formasını √2-yə vuranda 3·(√2·√2)=3·2=6 alınır, artıq √2 qalmır.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # Cetinlik: 6/10
+    # Sebeb: konkret nerdivan meselesini hell etmek, sonra 2 defe
+    #   miqyaslamani tetbiq etmek, sonra QISMEN miqyaslama telesine
+    #   dusmek.
+    # Addimlar: 1 (Pifaqor) -> 2 (1-in HEM eseasi, HEM hipotenuzu
+    #   miqyaslanir) -> 3 (2-nin izahi) -> 4 (qismen miqyaslama)
+    # Derslikden kenar bilik? Xeyr (#19/#27-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-pifaqor",
+     "riy8-pifaqor#35", "riy8-pifaqor#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Divara söykənən 5 m-lik nərdivanın aşağı ucu divardan 3 m aralıdırsa, nərdivan divarda 4 m hündürlüyə çatır.\n"
+     "2) 3-4-5 üçlüyünü 2-yə vursaq, 6-8-10 üçlüyü alınır - yəni əsas 6 m, nərdivan 10 m olanda hündürlük 8 m-dir.\n"
+     "3) Bu, Pifaqor üçlüyünün miqyaslana bilmə xassəsidir: bütün tərəflər eyni əmsalla vurulanda üçbucağın forması dəyişmir.\n"
+     "4) Bu qaydaya əsasən, divardan məsafə 3 m saxlanılıb yalnız nərdivan 10 m-ə uzadılsa, hündürlük yenə 8 m olar.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: miqyaslama YALNIZ HƏR "
+     "İKİ tərəf birgə dəyişəndə işləyir - əsas 3 m-də qalıb yalnız "
+     "hipotenuz 10 m-ə uzansa, hündürlük √(10²−3²)=√91≈9,54 m olar, 8 m yox.",
+     ["1, 3", "2, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: iki FERQLI tenliyin koklerini ayri-ayri tapmaq, Viet
+    #   qaydasi ile yoxlamaq, sonra oxsar emsallara gore onlari
+    #   qarisdirmaq telesine dusmek.
+    # Addimlar: 1 (tenlik A) -> 2 (1-i Viet ile tesdiqleyir) -> 3
+    #   (tenlik B, paralel fakt) -> 4 (A ve B-ni qarisdirir)
+    # Derslikden kenar bilik? Xeyr (#14/#21/#8/#13-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-kvadrat-tenlik",
+     "riy8-kvadrat-tenlik#34", "riy8-kvadrat-tenlik#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) x² − 7x + 10 = 0 tənliyinin kökləri 2 və 5-dir.\n"
+     "2) Vietə görə bu köklərin cəmi (2+5=7) əmsalın əksinə (−(−7)=7), hasili (2·5=10) sərbəst həddə (10) uyğun gəlir.\n"
+     "3) x² − 3x − 10 = 0 tənliyinin kökləri isə fərqlidir: −2 və 5-dir.\n"
+     "4) Bu iki tənliyin oxşar əmsallarına əsasən, x² − 7x + 10 = 0 tənliyinin kökləri x² − 3x − 10 = 0 tənliyinin köklərinə də uyğun gəlir.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: bu, iki FƏRQLİ "
+     "tənliyin köklərini qarışdırmaqdır - {2,5} və {−2,5} ortaq yalnız "
+     "5-i paylaşır, 2 ilə −2 tamam fərqlidir.",
+     ["2, 3, 4", "1, 4", "1, 2, 3", "yalnız 1"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: qonsu bucaqdan qarsi bucaga, sonra hamisini birlesdirib
+    #   360-a cemlemek, sonra "hamisi eyni bucaq" ferziyyesini
+    #   yoxlamaq.
+    # Addimlar: 1 -> 2 (1-in netices ile parallel) -> 3 (1,2-ni
+    #   birlesdirir) -> 4 (3-un yanlis umumilesmesi)
+    # Derslikden kenar bilik? Xeyr (#21/#10/#11/#3-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-dordbucaqlilar",
+     "riy8-dordbucaqlilar#37", "riy8-dordbucaqlilar#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Paraleloqramın bir bucağı 70°-dirsə, qonşu bucağı 110°-dir (qonşu bucaqların cəmi 180°).\n"
+     "2) Paraleloqramın qarşı bucaqları bərabərdir - deməli 70°-lik bucağın qarşısındakı bucaq da 70°-dir.\n"
+     "3) Beləliklə dörd bucaq ardıcıl 70°, 110°, 70°, 110°-dir, cəmləri 360°-yə bərabərdir.\n"
+     "4) Bu nümunəyə əsasən, paraleloqramın bütün dörd bucağı 70°-dir.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: yalnız qarşı-qarşıya "
+     "olan bucaqlar bərabərdir, qonşu bucaqlar fərqlidir (70° və 110°) "
+     "- hamısı 70° olsaydı cəm 280° olardı, 360° yox.",
+     ["1, 3", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # Cetinlik: 6/10
+    # Sebeb: vurma qaydasini, sonra qüvvetin qüvveti qaydasini, sonra
+    #   bolme qaydasini ardicil tetbiq etmek, sonra bir addimi
+    #   atlamaqla eyni neticeni "almaq" telesi.
+    # Addimlar: 1 -> 2 (1-in neticesini kvadrata yukseldir) -> 3
+    #   (2-nin neticesini bolur) -> 4 (2-ci addimi atlayir)
+    # Derslikden kenar bilik? Xeyr (#11/#3/#12-nin eyni qaydalari)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-rasional-ifade",
+     "riy8-rasional-ifade#29", "riy8-rasional-ifade#comb1",
+     "(a⁴ · a³)² : a⁸ ifadəsi üçün aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) a⁴ · a³ = a⁷ (vurmada qüvvətlər toplanır).\n"
+     "2) (a⁷)² = a¹⁴ (qüvvətin qüvvəti qaydasına görə üstlər vurulur).\n"
+     "3) a¹⁴ : a⁸ = a⁶ (bölmədə qüvvətlər çıxılır).\n"
+     "4) Kvadratlaşdırma addımını (2-ci addımı) atlayıb birbaşa a⁷ : a⁸ hesablasaq, yenə eyni a⁶ nəticəsi alınar.",
+     "1, 2 və 3 doğrudur - nəticə a⁶-dır. 4-cü mülahizə yanlışdır: a⁷ : "
+     "a⁸ = a⁻¹ (7<8 olduğu üçün mənfi qüvvət), a⁶ ilə heç bir əlaqəsi "
+     "yoxdur - addımı atlamaq fərqli, səhv nəticə verir.",
+     ["1, 4", "2, 3, 4", "1, 2, 3", "yalnız 2"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: sahe ve cevre uzunlugunu eyni radiusdan tapmaq, sonra
+    #   radiusu 2 defe artiranda sahenin NECE artdigini (4 defe,
+    #   cevre kimi 2 defe yox) hesablamaq.
+    # Addimlar: 1,2 (eyni r-in paralel neticeleri) -> 3 (1-in
+    #   dusturunu yeni r-e tetbiq edir) -> 4 (3-u cevre kimi xetti
+    #   sanmaq)
+    # Derslikden kenar bilik? Xeyr (#9/#23/#8-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-sahe",
+     "riy8-sahe#37", "riy8-sahe#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Radiusu 10 olan dairənin sahəsi 100π-dir (S=πr²=π·100).\n"
+     "2) Eyni radiuslu çevrənin uzunluğu isə 20π-dir (uzunluq=2πr=2π·10).\n"
+     "3) Radius 20-yə (2 dəfə) artırılsa, S=πr² düsturuna görə yeni sahə π·400=400π olar, yəni sahə 4 dəfə artır.\n"
+     "4) Bu qaydaya əsasən, radius 2 dəfə artanda sahə də cəmi 2 dəfə artıb 200π olar.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: sahə (S=πr²) "
+     "radiusdan KVADRATİK asılıdır, çevrənin uzunluğu (2πr) kimi xətti "
+     "yox - radius 2 dəfə artanda sahə 4 dəfə (200π yox, 400π) artır.",
+     ["1, 2, 4", "1, 4", "2, 3, 4", "1, 2, 3"], 4),
+
+    # Cetinlik: 6/10
+    # Sebeb: musbet ve menfi keki tapmaq, ikisini de yoxlamaq (kenar
+    #   kok deyil), sonra "carpaz vurma HEMISE kenar kok yaradir"
+    #   yanlis umumilesmesini tutmaq.
+    # Addimlar: 1 -> 2 (1-in paralel menfi keki) -> 3 (1,2-ni
+    #   birlikde yoxlayir) -> 4 (3-un yanlis umumilesmesi)
+    # Derslikden kenar bilik? Xeyr (#22/#3/#33/#17-nin qaydalari)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-rasional-tenlik",
+     "riy8-rasional-tenlik#16", "riy8-rasional-tenlik#comb1",
+     "x/6 = 24/x tənliyi üçün aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Çarpaz vurma ilə x² = 144 alınır, müsbət kök x=12-dir.\n"
+     "2) x² = 144 tənliyinin mənfi kökü də var: x=−12.\n"
+     "3) Hər iki kökü (12 və −12) yoxlasaq, ikisi də tənliyi ödəyir - heç biri məxrəci (x=0-ı) sıfır etmir, ona görə kənar kök deyil.\n"
+     "4) Çarpaz vurma HƏR ZAMAN kənar kök yaradır, ona görə x=12 və x=−12-dən biri mütləq kənar kökdür.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: çarpaz vurma YALNIZ "
+     "məxrəci sıfır edən kök yaransa kənar kök yaradır - bu misalda heç "
+     "bir kök məxrəci sıfır etmir, «hər zaman» ümumiləşdirməsi səhvdir.",
+     ["yalnız 1", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # Cetinlik: 6/10
+    # Sebeb: emsali tapmaq, onu perimetre (xetti) tetbiq etmek, sonra
+    #   sahe ucun FERQLI (kvadratik) qaydani tetbiq etmek, sonra
+    #   ikisini qarisdirmaq.
+    # Addimlar: 1 -> 2 (1-i perimetre tetbiq edir) -> 3 (1-i sahe ucun
+    #   FERQLI tetbiq edir) -> 4 (2 ve 3-u qarisdirir)
+    # Derslikden kenar bilik? Xeyr (#23/#13/#4-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-oxsarliq",
+     "riy8-oxsarliq#33", "riy8-oxsarliq#comb1",
+     "△ABC ~ △DEF, AB=4, DE=12 verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Oxşarlıq əmsalı k=3-dür (12:4=3).\n"
+     "2) Bu əmsala görə, ABC-nin perimetri 12-dirsə, DEF-in perimetri 12·3=36 olar.\n"
+     "3) Sahələrin nisbəti isə k²=9-dur, yəni DEF-in sahəsi ABC-nin sahəsindən 9 dəfə böyükdür.\n"
+     "4) Bu qaydaya əsasən, sahələr də perimetrlər kimi əmsalla eyni (3 dəfə) artır.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: sahə k² ilə (9 dəfə) "
+     "artır, perimetr kimi xətti (3 dəfə) yox - sahə kvadratik, perimetr "
+     "xəttidir.",
+     ["1, 4", "2, 3, 4", "1, 2, 3", "yalnız 1"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: tenliyi hell edib neticeni tapmaq, isare deyisme qaydasini
+    #   iki defe tetbiq etmek, sonra bir defe qaydani UNUTMAQ (isareni
+    #   deyismemek) telesine dusmek.
+    # Addimlar: 1 (5x-3>2x+9 -> x>4) -> 2 (1-in neticesini -1-e vurur)
+    #   -> 3 (1-in neticesini -3-e vurur) -> 4 (1-in neticesini -2-ye
+    #   vurur, amma isareni deyismir)
+    # Derslikden kenar bilik? Xeyr (#25/#2/#23/#17-nin qaydalari)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-berabersizlik",
+     "riy8-berabersizlik#16", "riy8-berabersizlik#comb1",
+     "5x − 3 > 2x + 9 bərabərsizliyi üçün aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Bərabərsizliyin həlli x > 4-dür (5x−2x>9+3 → 3x>12 → x>4).\n"
+     "2) Bu nəticəyə əsasən, −x < −4 doğrudur (hər iki tərəfi −1-ə vuranda işarə dəyişir).\n"
+     "3) Yenə bu nəticəyə əsasən, −3x < −12 doğrudur (hər iki tərəfi −3-ə vuranda işarə dəyişir).\n"
+     "4) Eyni qaydaya əsasən, −2x > −8 doğrudur (hər iki tərəfi −2-yə vuraraq).",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: bərabərsizliyin hər "
+     "iki tərəfini mənfi ədədə (−2) vuranda işarə mütləq dəyişməlidir - "
+     "düzgün nəticə −2x < −8-dir, −2x > −8 yox (işarə dəyişdirilməyib).",
+     ["1, 2, 4", "2, 3, 4", "1, 4", "1, 2, 3"], 4),
+
+    # Cetinlik: 6/10
+    # Sebeb: sin/cos qiymetlerini tapmaq, eyniliklə yoxlamaq, sonra
+    #   tangensi tapmaq, sonra kotangensi tangenslə qarisdirmaq
+    #   (bir-birinin tersidir).
+    # Addimlar: 1 -> 2 (1-i eyniliklə istifade edir) -> 3 (1,2-ni
+    #   nisbetlendirir) -> 4 (3-u kotangenslə qarisdirir)
+    # Derslikden kenar bilik? Xeyr (#4/#11/#25/#23/#34-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-triqonometrik",
+     "riy8-triqonometrik#39", "riy8-triqonometrik#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) sin 30° = 1/2-dir.\n"
+     "2) Bu qiymətə əsasən və sin²α+cos²α=1 eyniliyini tətbiq etsək, cos 30° = √3/2 alınır (cos²30°=1−1/4=3/4).\n"
+     "3) sin 30° və cos 30°-nin bu qiymətlərinə əsasən, tan 30° = sin30°/cos30° = √3/3 alınır.\n"
+     "4) Bu qiymətlərə əsasən, cot 30° = tan 30° ilə eynidir, yəni √3/3-dür.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: kotangens tangensin "
+     "TƏRSİDİR (cot α = cos α/sin α) - cot 30° = √3, tan 30° = √3/3, "
+     "bunlar bir-birindən fərqlidir, eyni deyil.",
+     ["2, 4", "1, 2, 3", "1, 3", "yalnız 2"], 2),
+
+    # Cetinlik: 6/10
+    # Sebeb: bir ehtimali tapmaq, eks hadise qaydasini tetbiq etmek,
+    #   nisbeti hesablamaq, sonra iki musteqil hadise ucun TOPLAMA
+    #   (vurma evezine) telesine dusmek.
+    # Addimlar: 1 -> 2 (1-in eks hadisesi) -> 3 (1,2-ni nisbetlendirir)
+    #   -> 4 (mustqil hadiseleri sehv toplayir)
+    # Derslikden kenar bilik? Xeyr (#15/#26/#19-un qaydalari)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "8", "riy-8-ehtimal",
+     "riy8-ehtimal#7", "riy8-ehtimal#comb1",
+     "Qutuda 4 qırmızı və 6 mavi kürə var. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Mavi kürə çıxarma ehtimalı 6/10=3/5-dir.\n"
+     "2) Bu ehtimala əsasən, qırmızı kürə çıxarma ehtimalı (əks hadisə) 1−3/5=2/5-dir.\n"
+     "3) Bu iki ehtimala əsasən, mavi kürə çıxma ehtimalı qırmızıdan 1,5 dəfə çoxdur ((3/5):(2/5)=1,5).\n"
+     "4) Kürə geri qoyulmaqla iki dəfə ardıcıl çıxarılsa, hər ikisinin mavi olması ehtimalı 3/5+3/5=6/5-dir.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: iki MÜSTƏQİL "
+     "hadisənin İKİSİNİN BİRDƏN baş verməsi ehtimalı TOPLANMIR, "
+     "VURULUR - düzgün nəticə (3/5)·(3/5)=9/25-dir; üstəlik ehtimal heç "
+     "vaxt 1-dən böyük ola bilməz, 6/5 artıq özü-özlüyündə mümkünsüzdür.",
+     ["1, 2, 4", "1, 4", "1, 2, 3", "2, 3, 4"], 3),
+
+    # ---------------------------------------------------------- az-dili 8
+    # V2-B qaydasi: qrammatik movzularda YALNIZ bankin oz artiq
+    # tesdiqlenmis cavablari restate olunur, yeni linqvistik hokm
+    # elave edilmir.
+
+    # Cetinlik: 6/10
+    # Sebeb: uc novun her birinin ozunemexsus baglanma qaydasini
+    #   ayirmaq, sonra "her ikisi de sekilcili" qaydasini butun
+    #   novlere yayib 1-ci novu unutmaq.
+    # Addimlar: 1 -> 2 (1-den ferqli nov) -> 3 (1,2-den de ferqli,
+    #   ucuncu nov) -> 4 (1,2,3-u yanlis umumilesdirir)
+    # Derslikden kenar bilik? Xeyr (#12/#13/#14/#8/#7/#11-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "8", "az-8-soz-birlesmesi",
+     "az8-soz-birlesmesi#4", "az8-soz-birlesmesi#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Dəmir qapı» birləşməsi 1-ci növ təyini söz birləşməsidir (tərəflər şəkilçisiz yanaşır).\n"
+     "2) «Sinif otağı» birləşməsi isə fərqli, 2-ci növdür, çünki ikinci tərəf mənsubiyyət şəkilçisi qəbul edib.\n"
+     "3) «Şəhərin küçələri» birləşməsi isə 3-cü növdür, çünki birinci tərəf yiyəlik halda, ikinci tərəf mənsubiyyət şəkilçilidir - yəni HƏR İKİ tərəf şəkilçilidir.\n"
+     "4) Bu üç nümunəyə əsasən, təyini söz birləşmələrinin bütün növlərində hər iki tərəf mütləq şəkilçi qəbul etməlidir.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 1-ci növdə (məs. "
+     "«dəmir qapı») HEÇ BİR tərəf şəkilçi qəbul etmir, tərəflər sadəcə "
+     "yanaşır - «hər iki tərəf şəkilçili olmalıdır» qaydası yalnız 3-cü "
+     "növə aiddir, hamısına yox.",
+     ["1, 2, 4", "1, 4", "2, 3, 4", "1, 2, 3"], 4),
+
+    # Cetinlik: 5/10
+    # Sebeb: iki ferqli xeber novunu ayirmaq, umumi uzlasma qaydasini
+    #   tetbiq etmek, sonra "ismi xeber yalniz isimle olur" yanlis
+    #   umumilesmesine dusmek.
+    # Addimlar: 1 -> 2 (1-den ferqli xeber novu) -> 3 (1,2-ye ortaq
+    #   qayda) -> 4 (1-in adindan yanlis nice cixarma)
+    # Derslikden kenar bilik? Xeyr (#13/#14/#5/#26/#15-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "8", "az-8-mubteda-xeber",
+     "az8-mubteda-xeber#17", "az8-mubteda-xeber#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Bakı Azərbaycanın paytaxtıdır» cümləsində xəbər ismi xəbərdir.\n"
+     "2) «Quşlar uçur» cümləsindəki xəbər isə feili xəbərdir, çünki feillə ifadə olunub.\n"
+     "3) Hər iki cümlədə xəbər mübtəda ilə uzlaşır - şəxsə və kəmiyyətə görə uyğunlaşır.\n"
+     "4) Bu iki nümunəyə əsasən, ismi xəbər yalnız isimlə ifadə oluna bilər, feillə ifadə oluna bilməz.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: ismi xəbər təkcə "
+     "isimlə deyil, bir neçə nitq hissəsi ilə ifadə oluna bilər - "
+     "«yalnız isimlə» məhdudiyyəti yanlışdır.",
+     ["1, 2, 3", "1, 4", "2, 3, 4", "yalnız 1"], 1),
+
+    # Cetinlik: 6/10
+    # Sebeb: eyni cumlede iki ferqli tamamliq novunu ayirmaq, ayri bir
+    #   uzvu (zerflik) elave etmek, sonra hal (yonluk) esasinda
+    #   zerflik ile tamamligi qarisdirmaq.
+    # Addimlar: 1 -> 2 (1-den ferqli tamamliq novu, eyni cumlede) -> 3
+    #   (paralel fakt, basqa cumle) -> 4 (1,2-nin qaydasini yanlis
+    #   yerde tetbiq edir)
+    # Derslikden kenar bilik? Xeyr (#1/#2/#23/#16/#7-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "8", "az-8-ikinci-uzvler",
+     "az8-ikinci-uzvler#4", "az8-ikinci-uzvler#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Kitabı rəfə qoydum» cümləsində «kitabı» sözü vasitəsiz tamamlıqdır (təsirlik haldadır).\n"
+     "2) Eyni cümlədə «rəfə» sözü isə vasitəli tamamlıqdır (yönlük haldadır).\n"
+     "3) «Oxumaq üçün kitabxanaya getdi» cümləsində «oxumaq üçün» məqsəd zərfliyidir.\n"
+     "4) Bu nümunələrə əsasən, «kitabxanaya» sözü də cümlədə tamamlıqdır, çünki yönlük haldadır.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «kitabxanaya» sözü "
+     "«hara?» sualına cavab verir və yer zərfliyidir - üzvü təkcə HAL "
+     "əsasında (yönlük) müəyyənləşdirmək olmaz, sual/məna da nəzərə "
+     "alınmalıdır.",
+     ["1, 4", "2, 3, 4", "1, 2, 3", "yalnız 3"], 3),
+
+    # Cetinlik: 5/10
+    # Sebeb: umumi vergul qaydasindan iki istisnani (iki noqte, tire)
+    #   ayirmaq, sonra ayri bir istisnani (baglayici "ve") bu iki
+    #   istisna ile qarisdirmaq.
+    # Addimlar: 1 -> 2 (1-in istisnasi) -> 3 (2-den de ferqli ikinci
+    #   istisna) -> 4 (basqa bir istisnani 1-e uygunlasdirir)
+    # Derslikden kenar bilik? Xeyr (#3/#6/#9/#5-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "8", "az-8-hemcins",
+     "az8-hemcins#18", "az8-hemcins#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Həmcins üzvlər arasında adətən vergül qoyulur.\n"
+     "2) Amma ümumiləşdirici söz bu üzvlərdən ƏVVƏL gələndə, ondan sonra vergül yox, iki nöqtə (:) qoyulur.\n"
+     "3) Ümumiləşdirici söz üzvlərdən SONRA gələndə isə ondan əvvəl tire (—) qoyulur.\n"
+     "4) Bu qaydalara əsasən, təkrarlanmayan «və» bağlayıcısından əvvəl də vergül qoyulmalıdır.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: təkrarlanmayan «və» "
+     "bağlayıcısından əvvəl vergül QOYULMUR - bu, «həmcins üzvlər "
+     "arasında vergül» əsas qaydasının bir istisnasıdır.",
+     ["1, 2, 3", "2, 3, 4", "1, 4", "yalnız 2"], 1),
+
+    # Cetinlik: 5/10
+    # Sebeb: umumi vergul qaydasindan konkret hala kecmek, xitabin
+    #   cumle uzvu olmadigini tetbiq etmek, sonra "ey" nida edatini
+    #   xitabin ozu ile qarisdirmaq.
+    # Addimlar: 1 -> 2 (1-in konkretlesmesi) -> 3 (paralel fakt) -> 4
+    #   (basqa nümunede xitabi yanlis muyyenlesdirir)
+    # Derslikden kenar bilik? Xeyr (#4/#25/#3/#15-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "8", "az-8-xitab-ara",
+     "az8-xitab-ara#27", "az8-xitab-ara#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Xitab yazıda vergüllə ayrılır.\n"
+     "2) Xitab cümlənin ortasında gələndə hər iki tərəfdən vergüllə ayrılır.\n"
+     "3) Xitab cümlə üzvü deyil - ona görə «Uşaqlar, sabahınız xeyir!» cümləsində «Uşaqlar» sözü mübtəda ola bilməz.\n"
+     "4) «Ey Vətən!» müraciətində «Ey» sözü xitabdır.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «Vətən» sözü "
+     "xitabdır, «Ey» isə xitabdan ƏVVƏL işlənən ayrıca nida ədatıdır, "
+     "xitabın özü deyil.",
+     ["1, 3", "2, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 5/10
+    # Sebeb: uc ferqli cumle novunu bir-bir ayirmaq (cuttorkibli,
+    #   muellim sexsli, qeyri-muellim sexsli), sonra qeyri-muellim
+    #   sexsli ile sexssiz cumleni qarisdirmaq.
+    # Addimlar: 1 -> 2 (1-den ferqli, tektorkibli alt novu) -> 3
+    #   (2-den de ferqli ikinci tektorkibli alt novu) -> 4 (yeni
+    #   numuneni 3-un novune yanlis aid edir)
+    # Derslikden kenar bilik? Xeyr (#11/#6/#5/#13/#23-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "8", "az-8-cumle-novleri",
+     "az8-cumle-novleri#17", "az8-cumle-novleri#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Payız gəldi» cümləsi cüttərkiblidir - həm mübtədası, həm xəbəri var.\n"
+     "2) «Gəlirəm» cümləsi isə təktərkiblidir - müəyyən şəxsli, çünki mübtəda feilin şəxs şəkilçisindən aydın olduğu üçün buraxılıb.\n"
+     "3) «Otağı səliqəyə saldılar» cümləsi də təktərkiblidir, lakin fərqli növdür - qeyri-müəyyən şəxsli, çünki işi görən şəxs məlum deyil.\n"
+     "4) Bu üç nümunəyə əsasən, «Bayırda qaranlıq idi» cümləsi də qeyri-müəyyən şəxsli cümlədir, çünki mübtəda yoxdur.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «Bayırda qaranlıq "
+     "idi» cümləsi ŞƏXSSİZ cümlədir - qeyri-müəyyən şəxsli cümlədə "
+     "naməlum bir ŞƏXS nəzərdə tutulur, şəxssiz cümlədə isə mübtəda "
+     "ümumiyyətlə təsəvvür belə edilmir (təbiət hadisəsi).",
+     ["1, 2, 4", "1, 4", "2, 3, 4", "1, 2, 3"], 4),
+
+    # Cetinlik: 5/10
+    # Sebeb: iki ferqli durgu qaydasini (soz sirasina gore) ayirmaq,
+    #   sonra biri o birinin qaydasini yanlis yerde tetbiq etmek.
+    # Addimlar: 1 -> 2 (1-in konkret qaydasi) -> 3 (2-den ferqli,
+    #   paralel fakt) -> 4 (2-nin qaydasini 3-un sirasina tetbiq edir)
+    # Derslikden kenar bilik? Xeyr (#1/#2/#12/#23/#19-dan)
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "8", "az-8-durgu",
+     "az8-durgu#14", "az8-durgu#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Vasitəsiz nitq dırnaq içərisində yazılır.\n"
+     "2) Müəllifin sözləri vasitəsiz nitqdən ƏVVƏL gələndə, aralarında iki nöqtə qoyulur, sonra dırnaqda vasitəsiz nitq yazılır.\n"
+     "3) Vasitəsiz nitq vasitəli nitqə çevriləndə isə dırnaq işarələri tamamilə götürülür.\n"
+     "4) Bu qaydaya əsasən, müəllifin sözləri vasitəsiz nitqdən SONRA gələndə də aralarında iki nöqtə qoyulmalıdır.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: müəllifin sözləri "
+     "vasitəsiz nitqdən SONRA gələndə fərqli işarələr (vergül/tire) "
+     "qoyulur - söz sırası dəyişəndə durğu qaydası da dəyişir, «əvvəl "
+     "gələndə»ki iki nöqtə qaydası bura tətbiq olunmur.",
+     ["2, 3, 4", "1, 2, 3", "1, 4", "yalnız 2"], 2),
+
+    # Cetinlik: 5/10
+    # Sebeb: uc ferqli uslubun ferqli meyarini ayirmaq (terminoloji,
+    #   ifade vasitesi, sened formasi), sonra ferqli meyarla qurulmus
+    #   ikinci uslubu birinciye ("send formasi") yanlis aid etmek.
+    # Addimlar: 1 -> 2 (1-den ferqli meyar) -> 3 (1,2-den de ferqli
+    #   ucuncu meyar) -> 4 (basqa uslubu 3-un meyarina yanlis aid edir)
+    # Derslikden kenar bilik? Xeyr (#24/#25/#23/#21-den)
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "8", "az-8-metn-uslub",
+     "az8-metn-uslub#16", "az8-metn-uslub#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Elmi üslubda termin və elmi sözlər üstünlük təşkil edir.\n"
+     "2) Bədii üslubun əsas ifadə vasitəsi isə fərqlidir - məcazi, obrazlı dildir.\n"
+     "3) Rəsmi-işgüzar üslub isə bunların heç birinə deyil, sənəd formasına (ərizə, arayış və s.) əsaslanır.\n"
+     "4) Bu fərqlərə əsasən, publisistik üslub da rəsmi-işgüzar üslub kimi yalnız sənəd formasında olur.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: publisistik üslub "
+     "əsasən mətbuatda (KİV-də) işlənir - sənəd forması ilə əlaqəsi "
+     "yoxdur, tamam fərqli sahədir.",
+     ["1, 4", "1, 2, 3", "2, 3, 4", "yalnız 1"], 2),
+
+    # ---------------------------------------------------------- ingilis-dili 8
+
+    # Difficulty: 6/10
+    # Reason: apply the too/adj vs adj/enough word-order rule to two
+    #   examples, then reverse the order in the trap.
+    # Steps: 1,2 (parallel word-order facts) -> 3 (applies rule 2) ->
+    #   4 (reverses the exact order from rule 2)
+    # Outside textbook knowledge? No - grounded in #18/#19/#20/#24
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-holidays",
+     "ing8v2-ing-8-holidays#21", "ing8v2-ing-8-holidays#comb1",
+     "Which statements are TRUE?\n"
+     "1) \"too\" usually comes BEFORE an adjective and means \"more than needed\".\n"
+     "2) \"enough\" comes AFTER an adjective, not before it.\n"
+     "3) \"She is not old enough to travel alone.\" means she does not have enough age to travel alone (following rule 2's word order).\n"
+     "4) \"This bag is enough big.\" is grammatically correct.",
+     "1, 2 and 3 are true. Statement 4 is wrong - \"enough\" must come "
+     "AFTER the adjective (\"big enough\"), not before it; \"enough "
+     "big\" reverses the word order fixed by statement 2.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # Difficulty: 6/10
+    # Reason: apply the passive-voice structure rule to two examples,
+    #   then misidentify what the passive actually foregrounds.
+    # Steps: 1 -> 2 (applies rule 1) -> 3 (applies rule 1 again,
+    #   parallel) -> 4 (wrong claim about focus, contradicts #14)
+    # Outside textbook knowledge? No - grounded in #15/#3/#23/#14
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-inventions",
+     "ing8-inventions#7", "ing8-inventions#comb1",
+     "Which statements are TRUE?\n"
+     "1) The Passive voice is built with \"was/were + the 3rd form of the verb\".\n"
+     "2) By this structure, \"The telephone was invented by Bell.\" is in the Passive voice.\n"
+     "3) By the same rule, \"Radio waves were discovered by scientists.\" is also in the Passive voice.\n"
+     "4) Based on these two examples, the Passive voice puts the focus on the person after \"by\" (Bell, scientists).",
+     "1, 2 and 3 are true. Statement 4 is wrong - the Passive voice "
+     "actually shifts focus AWAY from the doer, onto the action or the "
+     "object; the \"by\" phrase is often even left out.",
+     ["1, 2, 4", "2, 3, 4", "1, 4", "1, 2, 3"], 4),
+
+    # Difficulty: 6/10
+    # Reason: apply the "used to" meaning, then its negative form,
+    #   then wrongly keep the -d in the question form.
+    # Steps: 1 -> 2 (applies rule 1) -> 3 (a different, negative form
+    #   of the same structure) -> 4 (mixes rule 3's -d loss with the
+    #   question form, contradicts #21)
+    # Outside textbook knowledge? No - grounded in #17/#18/#22/#20/#21
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-hobbies",
+     "ing8-hobbies#2", "ing8-hobbies#comb1",
+     "Which statements are TRUE?\n"
+     "1) \"used to\" describes a habit that continued in the past but does NOT continue now.\n"
+     "2) \"I used to play chess every day.\" means this was a past habit that does not continue now.\n"
+     "3) In the negative form, \"used to\" loses its \"-d\": \"did not use to\", not \"did not used to\".\n"
+     "4) By the same rule, the question form is \"Did you used to collect stamps?\".",
+     "1, 2 and 3 are true. Statement 4 is wrong - the question form "
+     "also drops the \"-d\": \"Did you USE to collect stamps?\", the "
+     "same as the negative form in statement 3.",
+     ["2, 3, 4", "1, 4", "1, 2, 3", "yalnız 1"], 3),
+
+    # Difficulty: 6/10
+    # Reason: apply the Past Progressive structure, then the
+    #   "ongoing action interrupted" timeline twice, then reverse
+    #   that timeline in the trap.
+    # Steps: 1 -> 2 (applies rule 1 to a timeline) -> 3 (applies the
+    #   same timeline pattern again) -> 4 (reverses the timeline from
+    #   2/3)
+    # Outside textbook knowledge? No - grounded in #9/#11/#16/#19
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-real-heroes",
+     "ing8v2-ing-8-real-heroes#29", "ing8v2-ing-8-real-heroes#comb1",
+     "Which statements are TRUE?\n"
+     "1) Past Progressive is built with \"was/were + verb-ing\".\n"
+     "2) \"They were helping people when the fire started.\" - \"were helping\" began BEFORE \"started\" and was still going on.\n"
+     "3) \"While she was helping the child, her phone rang.\" - \"was helping\" is the LONGER action, \"rang\" is the short, sudden one.\n"
+     "4) By this pattern, in \"The children were playing when the storm began.\", the storm began BEFORE \"were playing\".",
+     "1, 2 and 3 are true. Statement 4 is wrong - it reverses the "
+     "timeline: \"were playing\" was the ongoing action that started "
+     "first, and \"the storm began\" is the short action that "
+     "interrupted it, not the other way round.",
+     ["1, 2, 4", "1, 4", "2, 3, 4", "1, 2, 3"], 4),
+
+    # Difficulty: 5/10
+    # Reason: apply the negative Past Progressive form, then its
+    #   contraction, then flip the meaning of a negated sentence.
+    # Steps: 1 -> 2 (applies rule 1) -> 3 (applies rule 1 to a real
+    #   sentence) -> 4 (flips the negation entirely, contradicts #12)
+    # Outside textbook knowledge? No - grounded in #9/#13/#14/#12
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-choose-kind",
+     "ing8v2-ing-8-choose-kind#30", "ing8v2-ing-8-choose-kind#comb1",
+     "Which statements are TRUE?\n"
+     "1) In the negative Past Progressive, \"not\" comes right after \"was/were\".\n"
+     "2) \"was not\" is shortened to \"wasn't\".\n"
+     "3) \"He was not crying, he was just tired.\" denies that he was crying, and offers tiredness instead.\n"
+     "4) By this rule, \"They were not helping the new student.\" means \"They WERE helping the new student.\"",
+     "1, 2 and 3 are true. Statement 4 is wrong - it reverses the "
+     "meaning of the negative sentence completely: \"were not "
+     "helping\" means they did NOT help, not that they did.",
+     ["1, 4", "1, 2, 3", "2, 3, 4", "yalnız 1"], 2),
+
+    # Difficulty: 6/10
+    # Reason: apply the Past Progressive question order, then its
+    #   short-answer form, then subject-agreement, then swap the
+    #   agreeing pronoun for a wrong one.
+    # Steps: 1 -> 2 (applies rule 1) -> 3 (a different fact, subject
+    #   pronoun) -> 4 (misapplies rule 3's agreement, contradicts #26)
+    # Outside textbook knowledge? No - grounded in #9/#12/#16/#26
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-travel-stories",
+     "ing8v2-ing-8-travel-stories#17", "ing8v2-ing-8-travel-stories#comb1",
+     "Which statements are TRUE?\n"
+     "1) A Past Progressive question is built as \"Was/Were + subject + verb-ing\".\n"
+     "2) By this rule, the short answer to \"Was she travelling alone?\" is \"Yes, she was.\" or \"No, she wasn't.\"\n"
+     "3) In \"Who was waiting at the station?\", \"Who\" refers to the subject, which is why \"was\" (not \"were\") is used.\n"
+     "4) By this rule, \"you and your friends\" in \"Were you and your friends exploring the old town?\" can be replaced with \"she\".",
+     "1, 2 and 3 are true. Statement 4 is wrong - \"you and your "
+     "friends\" is plural and matches \"were\", so it is replaced with "
+     "\"you\" (plural), not \"she\" (singular, which would need \"was\").",
+     ["1, 2, 3", "2, 3, 4", "1, 4", "yalnız 1"], 1),
+
+    # Difficulty: 5/10
+    # Reason: apply the "when" vs "while" tense rule, then combine
+    #   both in one sentence, then reverse which action is the
+    #   longer/background one.
+    # Steps: 1,2 (parallel rules) -> 3 (combines 1 and 2 in one
+    #   sentence) -> 4 (reverses the long/short roles from 3)
+    # Outside textbook knowledge? No - grounded in #15/#16/#13/#10
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-celebrations",
+     "ing8v2-ing-8-celebrations#21", "ing8v2-ing-8-celebrations#comb1",
+     "Which statements are TRUE?\n"
+     "1) \"when\" is usually used with Past Simple - a short, sudden action.\n"
+     "2) \"while\" is usually used with Past Progressive - a longer, ongoing action.\n"
+     "3) \"While we were decorating the hall, the guests arrived.\" - \"were decorating\" (rule 2) is the longer action, \"arrived\" (rule 1) is the short one.\n"
+     "4) By this pattern, in the same sentence, \"the guests arrived\" is the longer, ongoing action.",
+     "1, 2 and 3 are true. Statement 4 is wrong - it reverses the "
+     "roles from statement 3: \"were decorating\" is the longer, "
+     "background action, and \"arrived\" is the short Past Simple one.",
+     ["1, 4", "2, 3, 4", "1, 2, 3", "yalnız 2"], 3),
+
+    # Difficulty: 6/10
+    # Reason: apply can (present ability) then could (past ability)
+    #   then their negative forms, then swap which modal's negative
+    #   belongs to which.
+    # Steps: 1 -> 2 (parallel to 1, past form) -> 3 (applies the
+    #   negative of 2) -> 4 (misapplies 3's negative form to rule 1)
+    # Outside textbook knowledge? No - grounded in #9/#10/#28/#18
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-art",
+     "ing8v2-ing-8-art#11", "ing8v2-ing-8-art#comb1",
+     "Which statements are TRUE?\n"
+     "1) \"can\" is used for general present ability.\n"
+     "2) \"could\" expresses the same kind of ability, but in the PAST.\n"
+     "3) The negative form of \"could\" is \"could not\" (\"couldn't\").\n"
+     "4) By the same rule, the negative form of \"can\" is also \"could not\".",
+     "1, 2 and 3 are true. Statement 4 is wrong - \"can\"'s negative "
+     "form is \"cannot\" (\"can not\"), not \"could not\"; each modal "
+     "keeps its own negative form matching its own tense.",
+     ["2, 4", "1, 2, 3", "1, 3", "yalnız 2"], 2),
+
+    # Difficulty: 6/10
+    # Reason: apply the "must" bare-infinitive rule, the
+    #   must-vs-have-to source distinction, the "do not have to"
+    #   meaning, then equate it with "must not" which means the
+    #   opposite.
+    # Steps: 1 -> 2 (a different, parallel fact) -> 3 (the meaning of
+    #   "do not have to", contrasted with "must not") -> 4 (equates
+    #   3's two opposite meanings)
+    # Outside textbook knowledge? No - grounded in #9/#10/#12/#13/#15
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-environment",
+     "ing8v2-ing-8-environment#18", "ing8v2-ing-8-environment#comb1",
+     "Which statements are TRUE?\n"
+     "1) After \"must\", the main verb comes in the bare infinitive form (no \"to\").\n"
+     "2) \"must\" usually expresses the speaker's own opinion, while \"have to\" expresses an outside rule - \"You have to recycle plastic in this city.\" is a city rule.\n"
+     "3) \"do not have to\" means there is NO obligation, a free choice - unlike \"must not\", which means a strict prohibition.\n"
+     "4) By this, \"You do not have to buy a new bag\" means exactly the same as \"You must not buy a new bag\".",
+     "1, 2 and 3 are true. Statement 4 is wrong - these are OPPOSITE "
+     "meanings: \"do not have to\" = free choice, no obligation; "
+     "\"must not\" = strictly forbidden.",
+     ["1, 2, 4", "1, 4", "2, 3, 4", "1, 2, 3"], 4),
+
+    # Difficulty: 5/10
+    # Reason: apply the Zero Conditional structure, its general-truth
+    #   meaning, the if/when swap rule, then claim a specific example
+    #   describes a one-time event instead.
+    # Steps: 1 -> 2 (applies rule 1's meaning) -> 3 (applies rule 2
+    #   further) -> 4 (contradicts rule 2 by calling a general-truth
+    #   example a one-time event)
+    # Outside textbook knowledge? No - grounded in #9/#10/#13/#11
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-people-life",
+     "ing8v2-ing-8-people-life#14", "ing8v2-ing-8-people-life#comb1",
+     "Which statements are TRUE?\n"
+     "1) Zero Conditional is built as \"If + Present Simple, Present Simple\".\n"
+     "2) By this structure, it expresses a general truth that is always true.\n"
+     "3) In Zero Conditional, \"if\" can be replaced with \"when\" without changing the meaning, because both describe a general rule.\n"
+     "4) By this, \"If you are kind to people, they trust you.\" describes one specific, one-time event, not a general rule.",
+     "1, 2 and 3 are true. Statement 4 is wrong - it contradicts "
+     "statement 2: this sentence is exactly the kind of ALWAYS-true "
+     "general rule Zero Conditional describes, not a one-time event.",
+     ["1, 4", "1, 2, 3", "2, 3, 4", "yalnız 1"], 2),
+
+    # Difficulty: 6/10
+    # Reason: apply the First Conditional structure, split it into
+    #   its two clauses, then wrongly put "will" into the if-clause
+    #   too.
+    # Steps: 1 -> 2 (splits rule 1 into its two clauses) -> 3
+    #   (applies rule 1's meaning to a real example) -> 4 (breaks
+    #   rule 2 by putting "will" in the if-clause)
+    # Outside textbook knowledge? No - grounded in #9/#13/#14/#10/#11
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-modern-technology",
+     "ing8v2-ing-8-modern-technology#19", "ing8v2-ing-8-modern-technology#comb1",
+     "Which statements are TRUE?\n"
+     "1) First Conditional is built as \"If + Present Simple, will + bare infinitive\".\n"
+     "2) In the if-clause, Present Simple is used; in the result clause, \"will\" is used.\n"
+     "3) This structure expresses a real, possible future condition - \"If you charge your phone tonight, it will work tomorrow.\" is an example.\n"
+     "4) By this rule, \"will\" can also be used in the if-clause, since both clauses refer to the future.",
+     "1, 2 and 3 are true. Statement 4 is wrong - it breaks the rule "
+     "from statement 2: the if-clause always uses Present Simple, "
+     "never \"will\", even though the whole sentence refers to the "
+     "future.",
+     ["1, 2, 4", "2, 3, 4", "1, 4", "1, 2, 3"], 4),
+
+    # Difficulty: 5/10
+    # Reason: apply the subject-when-object-is-same rule, match two
+    #   specific pronouns to their reflexive forms, then wrongly
+    #   match a third pronoun using only "plural" instead of person.
+    # Steps: 1 -> 2 (applies rule 1 to two specific pronouns) -> 3 (a
+    #   different, idiomatic use) -> 4 (misapplies rule 2's pairing
+    #   logic to a new pronoun)
+    # Outside textbook knowledge? No - grounded in #9/#11/#12/#14/#16
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "8", "ing-8-important-skills",
+     "ing8v2-ing-8-important-skills#19", "ing8v2-ing-8-important-skills#comb1",
+     "Which statements are TRUE?\n"
+     "1) Reflexive pronouns are used when the subject and the object of the verb are the same person.\n"
+     "2) By this rule, \"he\" matches \"himself\", and \"she\" matches \"herself\" - each pronoun has its own reflexive form.\n"
+     "3) \"They solved the problem by themselves.\" - here \"by themselves\" means \"without help, alone\".\n"
+     "4) By this rule, \"we\" also matches \"themselves\", because both are plural.",
+     "1, 2 and 3 are true. Statement 4 is wrong - being plural is not "
+     "enough: person also has to match. \"we\" (1st person plural) "
+     "matches \"ourselves\", and \"they\" (3rd person plural) matches "
+     "\"themselves\" - they are not interchangeable.",
+     ["2, 4", "1, 2, 3", "1, 3", "yalnız 2"], 2),
 ]
 
 
