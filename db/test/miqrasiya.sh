@@ -72,7 +72,21 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          113_valideyn_huquq_berpa.sql \
          05_grants.sql; do
   printf "  %-22s" "$f"
-  if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$f" >/dev/null 2>/tmp/miq.err; then
+  #  Bank fayllari (16,17,19,20,30-99) bu repoda YOXDUR - private
+  #  bil10-bank repo-suna kocurulub (2026-09-03, public repo-dan
+  #  mezmun sizmasinin qarsisini almaq ucun).  Yerli fayl tapilmasa,
+  #  sibling qovluqda ../../bil10-bank/db/ axtar; o da yoxdursa,
+  #  DAYANMADAN kec - bu, sxem/RLS/RPC muqayisesini poz muyor, cunki
+  #  bank fayllari yalniz movzu/sual SETIRI elave edir, sxem deyismir.
+  SRC="$f"
+  if [ ! -f "$SRC" ] && [ -f "../../bil10-bank/db/$f" ]; then
+    SRC="../../bil10-bank/db/$f"
+  fi
+  if [ ! -f "$SRC" ]; then
+    echo "KEC (bank fayli yerli deyil - bil10-bank private repo)"
+    continue
+  fi
+  if psql -v ON_ERROR_STOP=1 -q -d miq_test -f "$SRC" >/dev/null 2>/tmp/miq.err; then
     echo "OK"
   else
     echo "XETA"; tail -3 /tmp/miq.err; exit 1

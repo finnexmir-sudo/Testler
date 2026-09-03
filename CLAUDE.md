@@ -644,20 +644,27 @@ bütün funksiyaların gövdəsi də tutuşdurulur.
 
 ## `db/` fayl nömrələri — iki sessiya arasında bölgü
 
-Bankı ayrı sessiya doldurur. Faylları **artıq repodadır** —
-`claude/bil10-question-bank-expansion-eu6vkn` budağı `main`-ə
-birləşdirildikdən sonra 30…87 aralığındadır. Əvvəl nömrələr
-toqquşurdu (bankın 7 faylı 23–29-da idi, indi 75–81-ə köçürülüb).
-Bölgü belədir:
+Bankı ayrı sessiya doldurur. Nömrə bölgüsü belədir:
 
 | Aralıq | Kim | Nə |
 |---|---|---|
-| 01–29 | kod | sxem, RLS, RPC — doludur |
+| 01–29 | kod | sxem, RLS, RPC — doludur, bu repodadır |
 | 30–99 | bank | sual/mövzu məlumatı (o biri sessiya) |
-| 100+ | kod | yeni RPC və miqrasiyalar |
+| 100+ | kod | yeni RPC və miqrasiyalar, bu repodadır |
 
 Yeni **kod** faylı 100-dən başlayır. Bank faylına toxunma; bank
 sessiyası da 100+ aralığına girmir.
+
+**2026-09-03-dən bank fayllarının (16,17,19,20 və 30-99 aralığı) +
+`tools/` + `mundericat/` yeri dəyişib: ayrıca PRIVATE repo-dadır —
+`finnexmir-sudo/bil10-bank`.** Səbəb: bu repo (`Testler`) PUBLIC-dir,
+bank faylları isə sual mətni + düz cavab + izahı açıq mətn kimi
+daşıyırdı — `rpc_bank_samples`/`rpc_bank_list`-dəki abunə qapısı
+faktiki mənasız olurdu, çünki kimsə sadəcə bu faylları GitHub-dan
+oxuyub bütün bankı pulsuz götürə bilərdi. Bank sessiyası işini
+`bil10-bank`-da davam etdirir, eyni nömrələmə qaydası ilə. Bu repoda
+bank fayllarına ehtiyac olsa (məs. `db/test/miqrasiya.sh`), `bil10-bank`-ı
+`Testler`-in yanına (bacı qovluq kimi, `../bil10-bank`) klonla.
 
 ## Bank siyahısında variantlar — abunə ilə
 
@@ -903,6 +910,8 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
 - Ağacın **mənbəyi e-derslik.edu.az-dır** — Təhsil Nazirliyinin rəsmi
   portalı. `tools/mundericat.py` kitabların **mündəricatını** yığır
   (`mundericat/*.txt`), `15_...sql` isə ondan mövzu ağacını qurur.
+  (`tools/` və `mundericat/` `bil10-bank` private repo-dadır, bax
+  yuxarı «db/ fayl nömrələri».)
   Dərsliyin mətni, çalışmaları, şəkilləri **götürülmür** — onlar müəllif
   hüququ ilə qorunur; mündəricat isə faktdır.
   Azərbaycan dili istisnadır: dərslik mövzuya yox, **mövzuya (temaya)**
@@ -947,6 +956,9 @@ hansı sualı hansı sıra ilə götürdüyünü saxlayır.
   ≥0.95 təkrar yoxla, fənn üzrə eyni düzgün cavab ≤2 olsun,
   `rpc_generate_test` balans yoxlaması işlət (nümunə:
   `test/smoke_generator.sql`).
+  (Bu bənddə adı çəkilən bütün `db/NN_bank_*.sql` faylları və
+  `tools/*.py` skriptləri `bil10-bank` private repo-dadır, bu repoda
+  deyil — bax yuxarı «db/ fayl nömrələri».)
 - **Kiril oxşarı hərf tələsi.** `а е о р с х у М Т В` latın hərfləri
   ilə eyni görünür, amma fərqli koddur — belə hərf düşən sual
   axtarışda tapılmır və pg_trgm yoxlaması onu təkrar saymır.
