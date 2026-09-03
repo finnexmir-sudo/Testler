@@ -64,6 +64,8 @@ with sync_playwright() as p:
 
     # ---------------- MUELLIM (430x900 - telefon, panel testleri ile eyni)
     t = page(ctx, 430, 1150)
+    # giris ve hesab ekrani qisadir - hundur pencerede alt bos qalir
+    t.set_viewport_size({"width": 430, "height": 760})
     t.goto(PANEL); t.wait_for_selector("#btnAuth", timeout=15000)
     shot(t, "m1_giris")
     t.click("#btnSwap"); t.fill("#fname", "Leyla Məmmədova"); t.fill("#email", "leyla%d@numune.az" % int(time.time()))
@@ -71,6 +73,7 @@ with sync_playwright() as p:
     t.wait_for_selector("#btnSetup", timeout=15000)
     t.select_option("#atype", "tutor"); t.fill("#aname", "Leyla müəllim — riyaziyyat")
     shot(t, "m2_hesab")
+    t.set_viewport_size({"width": 430, "height": 1150})
     t.click("#btnSetup"); t.wait_for_selector("#btnGroup", timeout=15000)
     t.fill("#gname", "3-cü sinif — şənbə qrupu"); t.select_option("#glevel", "3")
     t.click("#btnGroup"); t.wait_for_selector("#groups .item", timeout=15000)
@@ -104,6 +107,9 @@ with sync_playwright() as p:
     t.goto(PANEL + "#/gen"); t.wait_for_timeout(1200); shot(t, "m8_test_yig")
 
     # ---------------- SAGIRD (390x844)
+    # 07_seed_tests-deki 'Genislendirilmis analiz testi' YERLI numunedir (is_free=false,
+    # kilidli) - canlida yoxdur.  Beledcide gorunse casdirir: sekil muddetince gizledilir.
+    db("update public.tests set status='draft' where slug='riy-3-analiz'")
     s = page(ctx, 390, 844)
     s.goto(STUDENT); s.wait_for_selector("#btnIn", timeout=15000)
     s.fill("#code", code); shot(s, "s1_giris")
@@ -136,5 +142,6 @@ with sync_playwright() as p:
     v.goto(PARENT); v.wait_for_selector("#code", timeout=15000)
     v.fill("#code", pcode); shot(v, "v1_giris")
     v.click("#btnIn"); v.wait_for_selector(".who", timeout=15000); shot(v, "v2_usagim", full=True)
+    db("update public.tests set status='published' where slug='riy-3-analiz'")
     br.close()
 print("HAZIR:", sorted(os.listdir(OUT)))
