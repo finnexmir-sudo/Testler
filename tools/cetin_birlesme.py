@@ -959,6 +959,511 @@ RETROFIT = [
      "yes/no questions use \"asked + if/whether + clause\" - three "
      "different patterns, not one.",
      ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # ============================================================
+    # ALTINCI DALGA (2026-09-03): 9-cu sinif - V2 STANDARTLA (bax
+    # basliqdaki "V2 STANDART"). Her bend ucun oz-ozune audit serhi
+    # (Cetinlik/Sebeb/Addimlar/Derslikden kenar?/Ezberle?) elave
+    # olunub. Riyaziyyat faktlarinin hamisi Python-la eded ile
+    # yoxlanildi (ayrica komandalarla, bu sessiyada).
+    # ============================================================
+
+    # Cetinlik: 6/10
+    # Sebeb: iki koku ayri sadelesdirmek, neticeleri toplamaq, sonra
+    #   bunu sehv "kok cemi" qaydasi ile mueqayise etmek.
+    # Addimlar: 1 -> 2 -> 3 (1,2-nin neticesini toplayir) -> 4 (3-un
+    #   neticesi ile ziddiyyet)
+    # Derslikden kenar bilik? Xeyr (riy9-kok#14/#16-nin eyni qaydasi)
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-kok",
+     "riy9-kok#18", "riy9-kok#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) √12 sadələşəndə 2√3 alınır (√12=√(4·3)=2√3).\n"
+     "2) √27 sadələşəndə 3√3 alınır (eyni üsulla, fərqli ədədlə: √27=√(9·3)=3√3).\n"
+     "3) Bu iki nəticəni toplasaq, √12+√27=2√3+3√3=5√3 alınır.\n"
+     "4) Eyni cəmi kökləri əvvəlcə toplayıb (12+27=39), sonra kökünü alaraq (√39) da tapmaq olar - bu da 5√3-ə bərabər nəticə verər.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: √a+√b ≠ √(a+b) - "
+     "√39≈6,24, 5√3≈8,66, fərqli ədədlərdir. Kökləri əvvəlcə toplayıb "
+     "sonra kök almaq səhv üsuldur.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # Cetinlik: 6/10
+    # Sebeb: cevrenin uzunlugundan radiusu tapmaq, sonra radiusla qovs
+    #   uzunlugunu, sonra hemin qovsden daxile cekilmis bucagi tapmaq.
+    # Addimlar: 1 -> 2 (1-in radiusunu istifade edir) -> 3 (qovsun
+    #   dereceesini istifade edir) -> 4 (xetti/xetti-olmayan qarisdirma)
+    # Derslikden kenar bilik? Xeyr
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-cevre",
+     "riy9-cevre#38", "riy9-cevre#comb1",
+     "Çevrənin uzunluğu 20π sm-dir, bu çevrədə 72°-lik qövs verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Çevrənin radiusu 10 sm-dir (uzunluq=2πr, 20π=2πr → r=10).\n"
+     "2) 1-ci addımdakı radiusu l=πrα/180 düsturuna yazsaq, 72°-lik qövsün uzunluğu l=4π sm olar.\n"
+     "3) Bu 72°-lik qövsə söykənən daxilə çəkilmiş bucaq 36°-dir (daxilə çəkilmiş bucaq=qövsün yarısı).\n"
+     "4) Əgər qövs 72°-dən 144°-yə (2 dəfə) böyüsə, ona söykənən daxilə çəkilmiş bucaq da 2 dəfə artar, qövsün uzunluğu isə 4 dəfə artar.",
+     "1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə "
+     "yanlışdır: qövs uzunluğu düsturu (l=πrα/180) α-da XƏTTİDİR - "
+     "qövs 2 dəfə artanda uzunluq da CƏMİ 2 dəfə (4 dəfə yox) artır, "
+     "eynilə daxilə çəkilmiş bucaq kimi.",
+     ["1, 2, 3, 4", "2, 3, 4", "1, 3", "1, 2, 3"], 4),
+
+    # Cetinlik: 6/10
+    # Sebeb: simmetriya oxu ve sifirlar ayri hesablanir, sonra
+    #   aralarindaki ORTA NOQTE elaqesi qurulur, tepe noqtesinin
+    #   ordinati ile qarisdirilma yoxlanilir.
+    # Addimlar: 1,2 (paralel) -> 3 (1 ve 2-nin BIRGE neticesi) -> 4
+    #   (yanlis umumilesme)
+    # Derslikden kenar bilik? Xeyr
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-funksiya",
+     "riy9-funksiya#37", "riy9-funksiya#comb1",
+     "y = x² − 6x + 5 funksiyası verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Funksiyanın simmetriya oxu x=3-dür (x=−b/2a=6/2=3).\n"
+     "2) Funksiyanın sıfırları x=1 və x=5-dir.\n"
+     "3) 1-ci və 2-ci mülahizələrə əsasən, simmetriya oxu iki sıfırın dəqiq orta nöqtəsindən keçir ((1+5)/2=3).\n"
+     "4) Funksiyanın təpə nöqtəsinin ordinatı (y qiyməti) sıfırdır, çünki təpə simmetriya oxu üzərindədir.",
+     "1, 2 və 3 doğrudur (Python-la yoxlanıldı: f(1)=f(5)=0, "
+     "midpoint=3). 4-cü mülahizə yanlışdır: təpə nöqtəsi simmetriya "
+     "oxu ÜZƏRİNDƏDİR (x=3), amma bu, absis oxunu (y=0) kəsdiyi demək "
+     "deyil - f(3)=−4-dür, sıfır yox.",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: nöqtenin baslangicdan mesafesini tapmaq, bunu radius kimi
+    #   tetbiq etmek, sonra hemin radiusla cos/sin-i hesablamaq.
+    # Addimlar: 1 -> 2 (1-in neticesini radius kimi istifade edir) ->
+    #   3 (2-nin cevresi ustunde cos/sin) -> 4 (yanlis eded kopyalama)
+    # Derslikden kenar bilik? Xeyr
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-cevre-tenliyi",
+     "riy9-cevre-tenliyi#35", "riy9-cevre-tenliyi#comb1",
+     "M(9; 12) nöqtəsi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) M-in başlanğıcdan uzaqlığı 15 vahiddir (9²+12²=225=15²).\n"
+     "2) 1-ci addıma əsasən, M nöqtəsi mərkəzi başlanğıcda, radiusu 15 olan çevrənin (x²+y²=225) üzərindədir.\n"
+     "3) Bu çevrədə M-ə uyğun bucaq üçün cos α=9/15=0,6, sin α=12/15=0,8-dir.\n"
+     "4) cos α=0,6 olduğu üçün, cos²α=0,64-dür (#24-dəki eyni ədədi nəticəni tətbiq edərək).",
+     "1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə "
+     "yanlışdır: cos²α=0,6²=0,36-dır - 0,64 fərqli bir bank sualında "
+     "(sin α=0,6 verildikdə) alınan cavabdır, birbaşa köçürülə bilməz.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # Cetinlik: 6/10
+    # Sebeb: bikvadrat tenlikde evezleme aparmaq, kvadrat tenliyi
+    #   həll etmek, t qiymetlerini geri x^2-e qaytarmaq.
+    # Addimlar: 1 -> 2 (evezleme) -> 3 (2-nin t qiymetlerini istifade
+    #   edir) -> 4 (koklerin cemi - is+/- cutlerin legvi unudulur)
+    # Derslikden kenar bilik? Xeyr
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-tenlikler",
+     "riy9-tenlikler#39", "riy9-tenlikler#comb1",
+     "x⁴ − 5x² + 4 = 0 tənliyi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Bu, bikvadrat tənlikdir (yalnız cüt qüvvətlər iştirak edir).\n"
+     "2) t=x² əvəzləməsi aparsaq, t²−5t+4=0 tənliyi alınır ki, bu da (t−1)(t−4)=0 kimi vuruqlara ayrılır - deməli t=1 və ya t=4.\n"
+     "3) 2-ci addımdakı t qiymətlərini geri x²-ə qaytarsaq (x²=1 və x²=4), tənliyin kökləri x=±1 və x=±2 olur.\n"
+     "4) Tənliyin bütün köklərinin (±1, ±2) cəmi 6-dır.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: ±1 və ±2-nin cəmi "
+     "1−1+2−2=0-dır, 6 yox - simmetrik köklər (+ və −) bir-birini "
+     "ləğv edir.",
+     ["1, 2, 3", "1, 2, 4", "2, 3, 4", "1, 4"], 1),
+
+    # Cetinlik: 6/10
+    # Sebeb: tereфi 6 olan kvadratin daxili radiusunu, sonra diaqonalini,
+    #   sonra diaqonaldan xarici radiusunu tapmaq - hersey ARDICIL.
+    # Addimlar: 1 (mueqim) -> 2 (mueqim) -> 3 (2-nin diaqonalini
+    #   istifade edir) -> 4 (nisbet sehvi - koke gore deyisir)
+    # Derslikden kenar bilik? Xeyr
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-coxbucaqli",
+     "riy9-coxbucaqli#39", "riy9-coxbucaqli#comb1",
+     "Tərəfi 6 sm olan kvadrat verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Kvadratın daxilinə çəkilmiş çevrənin radiusu 3 sm-dir (radius=tərəf/2).\n"
+     "2) Kvadratın diaqonalı 6√2 sm-dir (Pifaqor: √(6²+6²)=6√2).\n"
+     "3) 2-ci addımdakı diaqonaldan istifadə etsək, xaricinə çəkilmiş çevrənin radiusu 3√2 sm olur (radius=diaqonal/2).\n"
+     "4) Xarici çevrənin radiusu daxili çevrənin radiusundan 2 dəfə böyükdür.",
+     "1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə "
+     "yanlışdır: 3√2/3=√2≈1,41-dir, 2 dəfə yox - bu nisbət hər "
+     "kvadratda √2-dir (2 deyil).",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: kokleri tapmaq, aralig-usulunu tetbiq etmek, sonra STRICT
+    #   berabersizlikde uc noqtelerin daxil olub-olmadigini yoxlamaq.
+    # Addimlar: 1 -> 2 (1-in koklerini istifade edir) -> 3 (2-nin
+    #   aralьgini istifade edir) -> 4 (uc noqte sehven daxil edilir)
+    # Derslikden kenar bilik? Xeyr
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-berabersizlik",
+     "riy9-berabersizlik#39", "riy9-berabersizlik#comb1",
+     "(x−2)(x−6)<0 bərabərsizliyi verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Uyğun tənliyin kökləri x=2 və x=6-dır.\n"
+     "2) Bu köklərə əsasən, (x−2)(x−6) ifadəsi 2<x<6 aralığında mənfi, xaricində isə müsbətdir.\n"
+     "3) Deməli (x−2)(x−6)<0 bərabərsizliyinin həlli 2<x<6 aralığıdır (uc nöqtələr daxil deyil).\n"
+     "4) Bu aralığa (x=2 daxil olmaqla) düşən tam ədədlərin sayı 4-dür (2, 3, 4, 5).",
+     "1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə "
+     "yanlışdır: x=2-də ifadə sıfırdır (mənfi deyil), buna görə strict "
+     "bərabərsizliyin həllinə daxil olmur - düz say 3-dür (3, 4, 5).",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: vektorlarin cemini tapmaq, hemin cemin modulunu hesablamaq,
+    #   perpendikulyarlik faktini elave etmek, sonra oxsar gorunuslu
+    #   AMMA FERQLI vektorla qarisdirmani yoxlamaq.
+    # Addimlar: 1 -> 2 (1-in koordinatlarini istifade edir) -> 3
+    #   (paralel fakt) -> 4 (1-in neticesi ile fərqli bank faktinin
+    #   qarisdirilmasi)
+    # Derslikden kenar bilik? Xeyr
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-vektorlar",
+     "riy9-vektorlar#40", "riy9-vektorlar#comb1",
+     "a(1; 3) və b(2; −1) vektorları verilmişdir. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) a+b cəminin koordinatları (3; 2)-dir.\n"
+     "2) 1-ci addımdakı nəticəyə əsasən, |a+b|=√(3²+2²)=√13-dür.\n"
+     "3) Əgər a və b vektorları perpendikulyar olsaydı, |a+b|²=|a|²+|b|² olardı.\n"
+     "4) 1-ci addımdakı (3; 2) vektorunun modulu 5-dir, çünki (3; 4) vektorunun modulu 5 olduğu kimi bu da eynidir.",
+     "1, 2 və 3 doğrudur (Python-la yoxlanıldı: |a+b|=√13≈3,6). 4-cü "
+     "mülahizə yanlışdır: (3; 2) vektoru (3; 4) vektorundan FƏRQLİDİR "
+     "- modulu √13-dür, 5 yox, sadəcə ikisinin ilk koordinatı eyni "
+     "olduğu üçün qarışdırılmamalıdır.",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: ferqi tapmaq, geriye hesablayaraq ilk heddi tapmaq, sonra
+    #   cemi hesablamaq - hersey ARDICIL bir-birinin ustunde qurulur.
+    # Addimlar: 1 -> 2 (1-in ferqini istifade edir) -> 3 (2-nin a1-ini
+    #   istifade edir) -> 4 (yanlis umumilesme - isaret)
+    # Derslikden kenar bilik? Xeyr
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-silsile",
+     "riy9-silsile#37", "riy9-silsile#comb1",
+     "Ədədi silsilədə a₅=20 və a₆=26-dır. Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Silsilənin fərqi d=6-dır (a₆−a₅=26−20=6).\n"
+     "2) 1-ci addımdakı fərqdən istifadə edib geriyə hesablasaq, a₁=a₅−4d=20−24=−4 olur.\n"
+     "3) 2-ci addımdakı a₁ və d dəyərləri ilə Sₙ=n/2·(2a₁+(n−1)d) düsturuna əsasən, ilk 10 həddin cəmi S₁₀=230-dur.\n"
+     "4) Silsilənin ilk həddi (a₁=−4) mənfi olduğu üçün, bütün hədləri mənfidir.",
+     "1, 2 və 3 doğrudur (Python-la yoxlanıldı: d=6, a₁=−4, S₁₀=230). "
+     "4-cü mülahizə yanlışdır: d=6>0 olduğu üçün hədlər artır - a₅=20 "
+     "artıq müsbətdir, ilk həddin mənfi olması bütün hədlərin mənfi "
+     "olması demək deyil.",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: umumi seciim sayini (C) tapmaq, elverisli seciimleri
+    #   tapmaq, klassik ehtimal duesturunu tetbiq etmek, sonra
+    #   komanda olcusu deyisende nisbetin DEYISDIYINI yoxlamaq.
+    # Addimlar: 1 -> 2 -> 3 (1 ve 2-nin neticesini nisbetlendirir) ->
+    #   4 (yanlis umumilesme - nisbet sabit qalir iddiasi)
+    # Derslikden kenar bilik? Xeyr
+    # Ezberle cavablandirila biler? Xeyr
+    ("riyaziyyat", "orta", "9", "riy-9-ehtimal",
+     "riy9-ehtimal#37", "riy9-ehtimal#comb1",
+     "6 nəfərdən 2 nəfərlik komanda seçilir (bütün seçimlər bərabər ehtimallıdır). Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Mümkün seçimlərin ümumi sayı C(6,2)=15-dir.\n"
+     "2) Bu 6 nəfər arasındakı Aygün adlı şagirdin seçilmiş komandaya daxil olması üçün əlverişli seçimlərin sayı 5-dir (Aygün + qalan 5 nəfərdən biri).\n"
+     "3) Klassik ehtimal düsturuna görə (əlverişli/mümkün), Aygünün komandaya düşmə ehtimalı 5/15=1/3-dür.\n"
+     "4) Əgər komanda 2 yox, 3 nəfərlik olsaydı, Aygünün seçilmə ehtimalı da eyni (1/3) qalardı.",
+     "1, 2 və 3 doğrudur (Python-la yoxlanıldı). 4-cü mülahizə "
+     "yanlışdır: 3 nəfərlik komandada ehtimal C(5,2)/C(6,3)=10/20=1/2 "
+     "olur, 1/3 yox - komanda ölçüsü böyüdükcə bir nəfərin seçilmə "
+     "ehtimalı da artır.",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 5/10
+    # Sebeb: bagliliqsiz ve baglayicili formanin HANSI qaydaya gore
+    #   vergul aldigi ferqlendirilir, sonra bu iki qaydanin AYNI
+    #   NETICEYE (vergul) getirdiyi gorulur.
+    # Addimlar: 1, 2 (paralel qaydalar) -> 3 (1 ve 2-ni birlesdirir) ->
+    #   4 (yanlis umumilesme - vergul yalniz baglayici ile bagli sanilir)
+    # Derslikden kenar bilik? Xeyr - yalniz bankin oz cavablarina
+    #   (#7, #13, #26) istinad edilir, elave linqvistik hokm yoxdur
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "9", "az-9-tabesiz-baglayici",
+     "az9-tabesiz-baglayici#23", "az9-tabesiz-baglayici#comb1",
+     "«Külək əsdi, yarpaqlar töküldü» və «Külək əsdi, lakin yarpaqlar tökülmədi» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Birinci cümlədə bağlayıcısız tabesiz mürəkkəb cümlədə tərəflər sadalama intonasiyası ilə (vergüllə) bağlanır.\n"
+     "2) İkinci cümlədə isə «lakin» bağlayıcısından əvvəl vergül qoyulur.\n"
+     "3) Deməli hər iki cümlədə də vergül var, amma səbəbi fərqlidir: birincidə bağlayıcı yoxluğu, ikincidə «lakin»in özünün tələbi.\n"
+     "4) Əgər «lakin» sözü çıxarılıb «Külək əsdi, yarpaqlar tökülmədi» yazılsa, vergül artıq yanlış olar, çünki indi cümlə bağlayıcısızdır.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 1-ci mülahizənin "
+     "özünə görə bağlayıcısız cümlədə DƏ vergül lazımdır (sadalama "
+     "intonasiyası ilə) - «lakin»in çıxarılması vergülü yanlış "
+     "etmir, sadəcə səbəbini dəyişir.",
+     ["1, 2, 3", "1, 2, 4", "2, 3, 4", "1, 4"], 1),
+
+    # Cetinlik: 5/10
+    # Sebeb: iki ayri melumat elaqesini (zaman, qarsilasdirma)
+    #   ferqlendirmek, sonra ucuncu terkib hisseni yeni elave olunan
+    #   baglayici ile duz tesnif etmek.
+    # Addimlar: 1, 2 (paralel tesnifat) -> 3 (1 ve 2-ni birlesdirir) ->
+    #   4 (yanlis umumilesme - hamisi eyni elaqe sayilir)
+    # Derslikden kenar bilik? Xeyr - yalniz bankin #2/#4/#14 faktlarina
+    #   istinad edilir
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "9", "az-9-tabesiz-mena",
+     "az9-tabesiz-mena#24", "az9-tabesiz-mena#comb1",
+     "«Şimşək çaxdı, göy guruldadı, amma biz qorxmadıq» cümləsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Şimşək çaxdı, göy guruldadı» hissəsi zaman (ardıcıllıq) əlaqəsini bildirir.\n"
+     "2) «..., amma biz qorxmadıq» hissəsi isə qarşılaşdırma əlaqəsini bildirir.\n"
+     "3) Bu üç hissəli cümlədə iki fərqli məna əlaqəsi (zaman və qarşılaşdırma) birləşir.\n"
+     "4) Cümlədəki bütün üç tərəf eyni məna əlaqəsini (zaman əlaqəsini) daşıyır, çünki hamısı bir-birinin ardınca gəlir.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 3-cü hissə "
+     "(«amma biz qorxmadıq») ilk ikisinə QARŞILAŞDIRMA əlaqəsi ilə "
+     "bağlanır, zaman əlaqəsi ilə yox - bütün cümlə eyni əlaqə "
+     "növündən ibarət deyil.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # Cetinlik: 5/10
+    # Sebeb: iki ferqli movqeli (sonra/evvel) budaq cumle numunesini
+    #   mueqayise etmek, sonra bu mueqayiseden YANLIS umumilesdirme
+    #   qurulub-qurulmadigini yoxlamaq.
+    # Addimlar: 1, 2 (paralel numuneler) -> 3 (her ikisinde ortaq
+    #   netice) -> 4 (2-ci addimla birbasa ziddiyyet)
+    # Derslikden kenar bilik? Xeyr - #6/#7/#8/#21-in oz cavablarina
+    #   istinad edilir, yeni numune ("kim..o") de bankin oz #13-undendir
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "9", "az-9-tabeli-qurulus",
+     "az9-tabeli-qurulus#27", "az9-tabeli-qurulus#comb1",
+     "«Bilirəm ki, sən gələcəksən» və «Kim çalışsa, o qazanar» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Birinci cümlədə «Bilirəm» baş cümlə, «sən gələcəksən» isə budaq cümlədir - budaq cümlə burada baş cümlədən SONRA gəlir.\n"
+     "2) İkinci cümlədə isə əksinə, budaq cümlə («kim çalışsa») baş cümlədən («o qazanar») ƏVVƏL gəlir.\n"
+     "3) Hər iki cümlədə budaq cümləni buraxsaq, qalan hissə fikri natamam saxlayar.\n"
+     "4) Bu iki nümunədən çıxan nəticə: budaq cümlə HƏMİŞƏ baş cümlədən sonra gəlməlidir, «kim çalışsa, o qazanar» isə bu qaydanın istisnasıdır.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 2-ci mülahizənin "
+     "özü göstərir ki, budaq cümlə baş cümlədən ƏVVƏL də gəlir - bu, "
+     "«istisna» yox, normal bir imkandır (budaq cümlənin yeri sabit "
+     "deyil).",
+     ["1, 2, 3", "1, 2, 4", "2, 3, 4", "1, 4"], 1),
+
+    # Cetinlik: 6/10
+    # Sebeb: mubteda budaq cumlesini teyin etmek, onun icindeki
+    #   qrammatik esasi tapmaq, sonra umumi qrammatik esas sayini
+    #   dogru hesablamaq.
+    # Addimlar: 1 -> 2 (1-i deqiqlesdirir) -> 3 (1 ve 2-ni #13/#28-in
+    #   qaydasi ile birlesdirir) -> 4 (yanlis netice - esas sayi)
+    # Derslikden kenar bilik? Xeyr - #3/#13/#28-in oz cavablarina
+    #   istinad edilir
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "9", "az-9-mubteda-xeber-bc",
+     "az9-mubteda-xeber-bc#26", "az9-mubteda-xeber-bc#comb1",
+     "«Kim çox oxuyursa, o çox bilər» cümləsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) «Kim çox oxuyursa» mübtəda budaq cümləsidir.\n"
+     "2) Bu cümlədə baş cümlənin öz mübtədası («o») mövcuddur, budaq cümlə ona əlavə izah verir.\n"
+     "3) Cümlədə 2 qrammatik əsas var - biri budaq cümlədə («kim...oxuyursa»), biri baş cümlədə («o...bilər»).\n"
+     "4) Budaq cümlə mübtəda vəzifəsində olduğu üçün ayrıca qrammatik əsas sayılmır - cümlədə yalnız 1 qrammatik əsas var.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: budaq cümlə hansı "
+     "üzvün vəzifəsində olursa olsun, öz mübtəda-xəbərini (qrammatik "
+     "əsasını) daşıyır - cümlədə 2 qrammatik əsas var, #28-in "
+     "nümunəsindəki kimi.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # Cetinlik: 6/10
+    # Sebeb: iki ferqli budaq cumle novunu (tamamliq/teyin) eyni
+    #   qarsiliq soz mexanizmi ile ferqlendirmek, sonra bu ferqi
+    #   yanlis umumilesdirib-umumilesdirmediyini yoxlamaq.
+    # Addimlar: 1, 2 (paralel tesnifat) -> 3 (1 ve 2-ni #26-nin
+    #   qaydasi ile birlesdirir) -> 4 (yanlis - eyni uzv sayilir)
+    # Derslikden kenar bilik? Xeyr - #3/#6/#26-nin oz cavablarina
+    #   istinad edilir
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "9", "az-9-tamamliq-teyin-bc",
+     "az9-tamamliq-teyin-bc#16", "az9-tamamliq-teyin-bc#comb1",
+     "«Onu deyim ki, işlər yaxşı gedir» və «Elə adam ol ki, hamı sənə hörmət etsin» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Birinci cümlədə budaq cümlə TAMAMLIQ budaq cümləsidir («onu» qarşılıq sözü ilə).\n"
+     "2) İkinci cümlədə isə budaq cümlə TƏYİN budaq cümləsidir («elə» qarşılıq sözü ilə).\n"
+     "3) Bu iki cümlə arasındakı fərq budaq cümlənin verdiyi cavab və aid olduğu üzvdəndir.\n"
+     "4) Hər iki qarşılıq söz («onu» və «elə») eyni üzvü (tamamlığı) əvəz etdiyi üçün, hər iki cümlədəki budaq cümlə də eyni növdəndir.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «elə» tamamlığın "
+     "yox, TƏYİNİN qarşılıq sözüdür - 1-ci və 2-ci mülahizələr artıq "
+     "bunları FƏRQLİ növ kimi təsnif edib, 4-cü mülahizə bununla "
+     "ziddiyyət təşkil edir.",
+     ["1, 2, 3", "1, 2, 4", "2, 3, 4", "1, 4"], 1),
+
+    # Cetinlik: 6/10
+    # Sebeb: iki ferqli zerflik novunu (sebeb/meqsed) zaman-istiqameti
+    #   qaydasi ile tesnif etmek, sonra bu qaydanin butun "cunki"
+    #   cumlelerine tetbiq oluna bilib-bilmediyini yoxlamaq.
+    # Addimlar: 1, 2 (paralel tesnifat) -> 3 (1 ve 2-ni #21-in
+    #   qaydasi ile birlesdirir) -> 4 (yanlis umumilesme)
+    # Derslikden kenar bilik? Xeyr - #5/#7/#21-in oz cavablarina
+    #   istinad edilir
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "9", "az-9-zerflik-bc",
+     "az9-zerflik-bc#29", "az9-zerflik-bc#comb1",
+     "«Gecikdim, çünki yol bağlı idi» və «Ona görə çalışıram ki, arzuma çatım» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Birinci cümlədə budaq cümlə səbəb bildirir («yol bağlı idi» - artıq olmuş iş).\n"
+     "2) İkinci cümlədə isə budaq cümlə məqsəd bildirir («arzuma çatım» - hələ olmamış, gələcək iş).\n"
+     "3) Səbəb artıq olmuş işi, məqsəd isə hələ olacaq işi bildirir - bu iki cümlə dəqiq bu fərqi göstərir.\n"
+     "4) Bu qaydaya əsasən, «çünki» bağlayıcısı ilə başlayan HƏR budaq cümlə məqsəd bildirir.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: «çünki» SƏBƏB "
+     "bağlayıcısıdır (1-ci mülahizənin özündə göründüyü kimi), "
+     "məqsəd yox - iddia öz-özü ilə ziddiyyət təşkil edir.",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 6/10
+    # Sebeb: iki ferqli vergul qaydasini (ki-den sonra / budaq
+    #   cumlenin sonunda) ferqlendirmek, sonra bu qaydalardan birinin
+    #   umumilesdirilib-umumilesdirilmediyini yoxlamaq.
+    # Addimlar: 1, 2 (paralel qaydalar) -> 3 (1 ve 2-ni ortaq
+    #   mentiqle birlesdirir) -> 4 (yanlis umumilesme)
+    # Derslikden kenar bilik? Xeyr - #4/#5/#7-nin oz cavablarina
+    #   istinad edilir
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "9", "az-9-durgu-mc",
+     "az9-durgu-mc#23", "az9-durgu-mc#comb1",
+     "«Bilirəm ki, sən gələcəksən» və «Əgər çox çalışsan, nəticə görərsən» cümlələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Birinci cümlədə vergül «ki» bağlayıcısından sonra qoyulur.\n"
+     "2) İkinci cümlədə isə budaq cümlə (şərt) əvvəldə olduğu üçün, vergül budaq cümlədən sonra qoyulur.\n"
+     "3) Hər iki qaydanın ortaq məntiqi: vergül budaq cümlənin bitdiyi yerdə qoyulur.\n"
+     "4) Deməli, tabeli mürəkkəb cümlədə vergülün yeri həmişə sabitdir - istənilən konstruksiyada elə «ki» sözündən sonra qoyulur.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: 2-ci cümlədə heç "
+     "«ki» sözü belə yoxdur - vergül budaq cümlənin sonunda qoyulur, "
+     "«ki»-yə bağlı deyil. 1-ci mülahizədəki xüsusi qayda BÜTÜN "
+     "formalara ümumiləşdirilə bilməz.",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Cetinlik: 5/10
+    # Sebeb: nitq temizliyi ve edebi dile aidlik anlayislarinin
+    #   FERQLI meyarlara esaslandigini gostermek, sonra bu ferqin
+    #   yanlis silinib-silinmediyini yoxlamaq.
+    # Addimlar: 1, 2 (paralel qaydalar) -> 3 (1 ve 2-ni mueqayise
+    #   edir) -> 4 (yanlis - sinonimi tufeyli soz sayir)
+    # Derslikden kenar bilik? Xeyr - #24/#13-un oz cavablarina istinad
+    #   edilir
+    # Ezberle cavablandirila biler? Xeyr
+    ("az-dili", "orta", "9", "az-9-metn-nitq",
+     "az9-metn-nitq#22", "az9-metn-nitq#comb1",
+     "Aşağıdakı mülahizələrdən hansılar doğrudur?\n"
+     "1) Nitqin təmizliyi kobud və artıq (tüfeyli) sözləri istisna edir.\n"
+     "2) Ədəbi dilə isə dialekt və loru sözlər daxil deyil.\n"
+     "3) Bu iki qayda fərqli meyarlara əsaslanır: nitq təmizliyi təkrar/mənasızlıq məsələsidir, ədəbi dilə aidlik isə sözün mənşəyi/yayılma dairəsi məsələsidir.\n"
+     "4) Deməli, sinonimlər də nitq təmizliyi baxımından tüfeyli söz sayılır, çünki onlar da «artıq» sözlərdir.",
+     "1, 2 və 3 doğrudur. 4-cü mülahizə yanlışdır: sinonimlər üslubi "
+     "məqsədlə işlədilən fərqli sözlərdir, tüfeyli (mənasız təkrar) "
+     "söz deyil - bank bu ikisini açıq şəkildə ayırır.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
+
+    # Difficulty: 5/10
+    # Reason: identify "bilingual" meaning, apply for-vs-since rule,
+    #   apply neither-nor pairing, then check whether a DIFFERENT
+    #   pair of languages (not spoken) affects the bilingual claim.
+    # Steps: 1, 2, 3 (parallel facts) -> 4 (wrong inference from 2&3
+    #   confused with 1)
+    # Outside textbook knowledge? No - grounded in #2/#5/#19
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "9", "ing-9-identity",
+     "ing9-identity#28", "ing9-identity#comb1",
+     "Ayshe is bilingual: she has been learning English for five years, but she speaks neither French nor German. Which statements are TRUE?\n"
+     "1) \"Bilingual\" means Ayshe speaks two languages.\n"
+     "2) \"has been learning English for five years\" uses \"for\" because it states a DURATION, not a starting point.\n"
+     "3) \"speaks neither French nor German\" uses \"nor\" to pair with \"neither\" and negate both.\n"
+     "4) Since she speaks \"neither French nor German,\" she is not bilingual - she only knows one language.",
+     "1, 2 and 3 are true. Statement 4 is wrong - not speaking French "
+     "or German does not contradict being bilingual: she is bilingual "
+     "because of Azerbaijani (her mother tongue) and English, two "
+     "completely different languages from the \"neither...nor\" pair.",
+     ["1, 2, 4", "2, 3, 4", "1, 4", "1, 2, 3"], 4),
+
+    # Difficulty: 5/10
+    # Reason: identify passive tense form, connect it to a factual
+    #   claim about the novel's source, then check whether "based on
+    #   real events" logically forces a fiction/non-fiction label.
+    # Steps: 1, 2, 3 (parallel facts) -> 4 (wrong inference combining
+    #   2 and the fiction definition)
+    # Outside textbook knowledge? No - grounded in #4/#9/#28
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "9", "ing-9-books",
+     "ing9-books#6", "ing9-books#comb1",
+     "This novel, which is based on real events, was written a century ago. Which statements are TRUE?\n"
+     "1) \"was written a century ago\" uses Past Simple Passive because the action happened at a specific point in the past.\n"
+     "2) \"is based on real events\" describes the novel's source.\n"
+     "3) \"Fiction\" means invented/imaginative literature.\n"
+     "4) Since the novel \"is based on real events,\" it must be non-fiction, not fiction, because fiction can never be based on real events.",
+     "1, 2 and 3 are true. Statement 4 is wrong - fiction (invented "
+     "literature) very often draws on real events (e.g. historical "
+     "novels) while still being fictionalised - \"based on real "
+     "events\" does not make a work non-fiction.",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Difficulty: 5/10
+    # Reason: recognise "used to" as a past-habit marker, apply two
+    #   preposition rules (in/with), then check whether "used to"
+    #   implies the habit continues today.
+    # Steps: 1, 2, 3 (parallel facts) -> 4 (wrong inference from 1)
+    # Outside textbook knowledge? No - grounded in #18/#4/#7
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "9", "ing-9-traditions",
+     "ing9-traditions#23", "ing9-traditions#comb1",
+     "In the past, people used to travel by horse to celebrate Novruz, which is celebrated in spring. Nowadays, guests are welcomed with tea instead. Which statements are TRUE?\n"
+     "1) \"used to travel by horse\" describes a PAST HABIT that is no longer true now.\n"
+     "2) \"celebrated in spring\" uses \"in\" because spring is a season (a general time period), not a specific day.\n"
+     "3) \"welcomed with tea\" uses \"with\" to show the means of welcoming.\n"
+     "4) Since \"used to\" describes a past habit, it means people still travel by horse today to celebrate Novruz.",
+     "1, 2 and 3 are true. Statement 4 is wrong - \"used to\" "
+     "specifically contrasts a past habit with the present, implying "
+     "the habit has STOPPED, not that it continues.",
+     ["1, 2, 4", "2, 3, 4", "1, 2, 3", "1, 4"], 3),
+
+    # Difficulty: 6/10
+    # Reason: distinguish First vs Second Conditional forms, connect
+    #   each to its real/hypothetical meaning, then check whether the
+    #   two forms can be mixed together.
+    # Steps: 1, 2 (parallel forms) -> 3 (compares 1 and 2's meaning)
+    #   -> 4 (wrong claim that forms are interchangeable)
+    # Outside textbook knowledge? No - grounded in #4/#27
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "9", "ing-9-ambitions",
+     "ing9-ambitions#19", "ing9-ambitions#comb1",
+     "\"If you work hard, you will succeed\" and \"If she studied harder, she would pass the exam.\" Which statements are TRUE?\n"
+     "1) The first sentence is First Conditional (If + present, will + verb) - a realistic/likely future outcome.\n"
+     "2) The second sentence is Second Conditional (If + past, would + verb) - a hypothetical situation, implying she is NOT currently studying hard.\n"
+     "3) The two sentences use different conditional forms because they express different degrees of likelihood.\n"
+     "4) Since both sentences are about hard work leading to success, they can be mixed: \"If you worked hard, you will succeed\" would be equally correct.",
+     "1, 2 and 3 are true. Statement 4 is wrong - mixing Past tense "
+     "in the if-clause with \"will\" in the main clause is "
+     "ungrammatical; First and Second Conditional forms must stay "
+     "internally consistent.",
+     ["1, 2, 3", "1, 2, 4", "2, 3, 4", "1, 4"], 1),
+
+    # Difficulty: 5/10
+    # Reason: apply the draw-vs-paint distinction, apply two
+    #   preposition/passive rules, then check whether "draw" and
+    #   "paint" are interchangeable once both describe "making art."
+    # Steps: 1, 2 (parallel facts) -> 3 (applies the draw/paint
+    #   distinction in sequence) -> 4 (wrong claim they're the same)
+    # Outside textbook knowledge? No - grounded in #14/#19/#28
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "9", "ing-9-art",
+     "ing9-art#30", "ing9-art#comb1",
+     "Yesterday, the walls of the gallery were decorated with beautiful patterns, and the exhibition was opened. The artist first drew the design with a pencil, then painted it with bright colours. Which statements are TRUE?\n"
+     "1) \"was opened\" uses Past Simple Passive because the action happened at a specific past time.\n"
+     "2) \"were decorated with patterns\" uses \"with\" to show the means/material of decoration.\n"
+     "3) The artist first drew (pencil), then painted (paint) - two different techniques.\n"
+     "4) Since both \"drew\" and \"painted\" describe making art, they mean exactly the same thing and are interchangeable here.",
+     "1, 2 and 3 are true. Statement 4 is wrong - \"draw\" (with a "
+     "pencil) and \"paint\" (with paint) are different techniques, "
+     "not interchangeable synonyms, as the sentence itself shows by "
+     "using them for two separate steps.",
+     ["1, 2, 4", "2, 3, 4", "1, 4", "1, 2, 3"], 4),
+
+    # Difficulty: 5/10
+    # Reason: apply three distinct workplace-quality adjectives to one
+    #   description, then check whether "positive workplace word"
+    #   makes them all synonyms.
+    # Steps: 1, 2, 3 (parallel facts about the same person) -> 4
+    #   (wrong claim they're all interchangeable, contradicted by the
+    #   passage's own "not flexible" contrast)
+    # Outside textbook knowledge? No - grounded in #20/#17/#26
+    # Answerable by rote memory alone? No
+    ("ingilis-dili", "orta", "9", "ing-9-skills",
+     "ing9-skills#29", "ing9-skills#comb1",
+     "Rashad is a punctual employee - he always arrives on time. He is also reliable, so his manager trusts him with important tasks. However, he is not very flexible, and he struggles when his schedule changes suddenly. Which statements are TRUE?\n"
+     "1) \"Punctual\" describes Rashad arriving on time - this is about TIME.\n"
+     "2) \"Reliable\" describes that his manager trusts him - this is about DEPENDABILITY, a different quality from punctuality.\n"
+     "3) \"Not very flexible\" means Rashad has difficulty adapting to sudden changes - a third, separate quality.\n"
+     "4) Since punctual, reliable, and flexible are all positive workplace words, they all mean the same thing, so calling Rashad \"punctual\" is the same as calling him \"flexible\".",
+     "1, 2 and 3 are true. Statement 4 is wrong - these are distinct "
+     "qualities, and the passage itself contradicts it: Rashad is "
+     "punctual and reliable BUT explicitly NOT flexible.",
+     ["1, 2, 4", "1, 2, 3", "2, 3, 4", "1, 4"], 2),
 ]
 
 
