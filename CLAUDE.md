@@ -19,6 +19,59 @@ test/           uçdan-uca yoxlama (mock Supabase + Chromium)
 
 ---
 
+## «HAZIRDIR» NƏ DEMƏKDİR — pozulmaz qayda
+
+**Baş verən (sentyabr 2026).** İstifadəçi dedi: «test yığanda dərs
+keçdiyi sinif və **aşağı sinifləri də seçib verə bilsin**». `db/103`
+generatorda çoxlu sinif seçməyi açdı, 7 SQL + e2e yoxlaması yaşıl
+oldu, mən **«hazırdır»** dedim.
+
+Yarısı işləmirdi. Təyinat ekranı testləri hələ də dəqiq bərabərliklə
+süzürdü — müəllim 5-ci sinif testi yığırdı, sonra onu qrupa **verə
+bilmirdi**. İstifadəçi bunu canlıda özü tapdı.
+
+**Səhvin kökü:** dəyişdiyim funksiyanı yoxladım, istifadəçinin
+cümləsini yox. Bütün yoxlamalar generatorda idi; zəncirin o biri ucuna
+— «verə bilsin» hissəsinə — heç kim baxmamışdı.
+
+### Qayda
+
+**1 · İstifadəçinin cümləsinin FEİLİ deliverabldır.**
+«…seçib **verə bilsin**» — deliverabl vermək, yığmaq yox.
+«…valideyn **görsün**» — deliverabl görmək, RPC yazmaq yox.
+Cümləni yazıb feilini altından xətlə: iş o feillə bitir.
+
+**2 · Zənciri sonuna qədər yeri.** Dəyişiklikdən sonra istifadəçinin
+yolunu addım-addım keç, HƏR addımda dayan:
+yığıldı → siyahıda **görünür?** → təyin oluna **bilir?** → şagird
+**görür?** → nəticə hesabata **düşür?**
+Bir addım yoxlanmayıbsa, iş bitməyib.
+
+**3 · Yaşıl testlər «hazırdır» demək DEYİL.** Testlər dəyişdiyim
+kodu ölçür. Zəncirin toxunmadığım hissəsi sınmır — çünki heç kim ona
+baxmır. «201 yoxlama keçir» ilə «istifadəçi istədiyini edə bilir»
+fərqli iddialardır.
+
+**4 · Dili dəqiq işlət.** «Hazırdır» yalnız zəncir sonuna qədər
+yoxlanandan sonra. Yoxsa:
+«Generator hissəsi hazırdır, təyinat tərəfini ölçməmişəm.»
+Ölçmədiyimi **deməmək — aldatmaqdır**, «hələ bilmirəm» demək yox.
+
+**5 · Şübhə varsa, açıq de.** «Bunu yoxladım, bunu yoxlamadım» həmişə
+«hazırdır»dan yaxşıdır. İstifadəçi yarımçıq işi canlıda tapmamalıdır.
+
+### Eyni kökdən olan digər hallar (hamısı bu gün)
+
+- Sürət «qüsuru» — ölçü statistikasız bazada aparılmışdı, 620 ms
+  yalandı (`ANALYZE` bölməsi).
+- «19 təkrar variant» — hərf böyüklüyünə baxmayan yoxlama.
+- «Şəxsi» nişanı — düzəliş testi üçün əvəzedici siqnal götürüldü,
+  altı nəticənin üçündə çıxdı.
+
+Ortaq kök birdir: **qurduğumu yoxlamaq, istənəni yoxlamaq deyil.**
+
+---
+
 ## Valideyn girişi
 
 Müəllim şagirdi əlavə edəndə valideyn girişi **YOXDUR**. Müəllim onu
