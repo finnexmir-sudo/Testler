@@ -783,7 +783,7 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .plgrp .plgc{flex:0 0 auto;font-size:11.5px;font-weight:600;
   color:var(--fg-3);padding:1px 8px;border-radius:999px;
   background:var(--n-50);border:1px solid var(--n-100)}
-.plgrp .plgc.ok{background:var(--ok-tint);border-color:var(--ok-line);
+.plgrp .plgc.full{background:var(--ok-tint);border-color:var(--ok-line);
   color:var(--ok)}
 /* fesil daxilindeki dersler bir az iceri */
 .plgrp .plrow{padding-left:30px}
@@ -867,5 +867,14 @@ details.arxiv>summary span{padding:1px 8px;border-radius:999px;
 .plrow .plck{min-height:0;padding:0;margin-bottom:0;border:0;box-shadow:none;background:none}
 .plrow .plck ~ .plundo{margin-left:8px}
 /* "geri" olan setirde secim qutusu da sag kenarda qalsin (sutun duz dursun) */
-.plrow .plck ~ .plundo{order:-1;margin-left:auto}
+.plrow .plundo{order:1}
+.plrow .plck{order:2}
+.plrow .plck ~ .plundo{margin-left:auto}
 .plrow:has(.plundo) .plck{margin-left:10px}
+/* gelecek fesiller "Novbetilere bax" altinda */
+.plnext{margin-top:6px}
+.plnext > summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--brand);padding:8px 4px;list-style:none;display:flex;align-items:center;gap:8px}
+.plnext > summary::-webkit-details-marker{display:none}
+.plnext > summary::before{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.plnext[open] > summary::before{transform:rotate(45deg)}
+.plnext > summary .fn{font-size:11px;font-weight:600;background:var(--brand-tint);color:var(--brand);padding:2px 7px;border-radius:999px}

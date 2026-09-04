@@ -142,7 +142,7 @@ with sync_playwright() as pw:
     ok(("1 / %d" % ntop) in head, "irelileyis 1/N oldu", head)
 
     print("D · Siyahı, vərəq linki, geri qaytarma")
-    pg.locator(".plan details:not(.plgrp) > summary").click(); pg.wait_for_timeout(300)
+    pg.locator(".plan details:not(.plgrp):not(.plnext) > summary").click(); pg.wait_for_timeout(300)
     ok(pg.locator(".plrow").count() == ntop, "butun movzular siyahida",
        pg.locator(".plrow").count())
     ok(pg.locator(".plrow.done").count() == 1, "kecilmis isarelenib")
@@ -164,7 +164,7 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".ploffer", timeout=8000)
     pg.locator("[data-plskip]").click()          # helelik test yigilmir
     pg.wait_for_timeout(300)
-    pg.locator(".plan details:not(.plgrp) > summary").click(); pg.wait_for_timeout(300)
+    pg.locator(".plan details:not(.plgrp):not(.plnext) > summary").click(); pg.wait_for_timeout(300)
     ok(pg.locator("[data-plmk]").count() == 1, "kecilmis movzuda «test yığ» var",
        pg.locator("[data-plmk]").count())
     pg.locator("[data-plmk]").click()
@@ -177,7 +177,7 @@ with sync_playwright() as pw:
     n2 = db("select count(*) n from public.tests where owner_type='educator'",
             one=True)["n"]
     ok(n2 == 2, "ikinci test bazada var", n2)
-    pg.locator(".plan details:not(.plgrp) > summary").click(); pg.wait_for_timeout(300)
+    pg.locator(".plan details:not(.plgrp):not(.plnext) > summary").click(); pg.wait_for_timeout(300)
     ok(pg.locator("[data-plmk]").count() == 0, "test yigilandan sonra duyme itir")
     ok(pg.locator(".plrow .pltest").count() == 2, "iki movzuda veraq linki var",
        pg.locator(".plrow .pltest").count())
@@ -223,10 +223,10 @@ with sync_playwright() as pw:
           select s.id, %s, s.class_id, 'submitted', now(), 2, 5, 40
             from public.students s where s.login_code = 'PLANSGE1'""", (t1,))
     pg.reload()
-    pg.wait_for_selector(".plan details:not(.plgrp) > summary", timeout=8000)
+    pg.wait_for_selector(".plan details:not(.plgrp):not(.plnext) > summary", timeout=8000)
     head = pg.inner_text(".plan .plhead").replace("\n", " ")
     ok("%" in head, "basliqda faiz gorunur", head)
-    pg.locator(".plan details:not(.plgrp) > summary").click(); pg.wait_for_timeout(300)
+    pg.locator(".plan details:not(.plgrp):not(.plnext) > summary").click(); pg.wait_for_timeout(300)
     ok(pg.locator(".plavg").count() == 1, "movzu ortalamasi cipi var",
        pg.locator(".plavg").count())
     ok("40%" in pg.inner_text(".plavg"), "ortalama 40%-dir")
@@ -269,8 +269,8 @@ with sync_playwright() as pw:
 
     #  plani silib yeniden qururuq - movcud planlar toxunulmur, bu
     #  qesdendir; muellim "Planı sil" ile teze quruluşa kecir
-    pg.reload(); pg.wait_for_selector(".plan details:not(.plgrp) > summary", timeout=8000)
-    pg.locator(".plan details:not(.plgrp) > summary").first.click(); pg.wait_for_timeout(300)
+    pg.reload(); pg.wait_for_selector(".plan details:not(.plgrp):not(.plnext) > summary", timeout=8000)
+    pg.locator(".plan details:not(.plgrp):not(.plnext) > summary").first.click(); pg.wait_for_timeout(300)
     #  dialoq dinleyicisi suite-in evvelinde onsuz da qeydiyyatdadir
     #  (setir 55) - ikincisini elave etmek "already handled" verir
     pg.locator("[data-pldel]").click()

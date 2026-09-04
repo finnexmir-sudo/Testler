@@ -874,20 +874,48 @@
             '<p class="muted" style="margin:6px 0 0">Plan tamamlanıb — ' +
             "hesabatda zəif mövzulara baxıb təkrar testlər verə bilərsiniz.</p></div>") +
         "<details><summary>Bütün mövzular</summary>" +
-          '<div class="pllist">' + blocks.map(function (bl) {
-            var rows = bl.items.map(plRow).join("");
-            if (!bl.gid) return rows;          //  fesilsiz - duz setir
-            /*  Fesil YIGILMIS gelir.  8-ci sinifde 11 fesil ~50 ders
-                demekdir - hamisi acıq olsa telefonda ekran udulur.
-                Yalniz cari dersin fesli acıq acilir.  */
-            var nd = bl.items.filter(function (x) { return x.done; }).length;
-            var acik = cur && bl.items.some(function (x) { return x.id === cur.id; });
-            return '<details class="plgrp"' + (acik ? " open" : "") + ">" +
-              "<summary><b>" + esc(bl.name) + "</b>" +
-              '<span class="plgc' + (nd === bl.items.length ? " ok" : "") + '">' +
-                nd + "/" + bl.items.length + "</span></summary>" +
-              rows + "</details>";
-          }).join("") + "</div>" +
+          '<div class="pllist">' + (function () {
+            /*  Gelecek fesiller gizli: 8-ci sinifde 11 fesil siyahini
+                uzadirdi, muellime ise kecilen + cari lazimdir.  Qalani
+                "Novbetilere bax" altinda acilir (istifadeci teklifi).  */
+            var ci = -1;
+            blocks.forEach(function (bl, i) {
+              if (cur && bl.items.some(function (x) { return x.id === cur.id; })) ci = i;
+            });
+            if (ci < 0) ci = blocks.length - 1;
+            function grp(bl, i) {
+              var rows = bl.items.map(plRow).join("");
+              if (!bl.gid) return rows;          //  fesilsiz - duz setir
+              /*  Fesil YIGILMIS gelir.  Yalniz cari dersin fesli acıq acilir.  */
+              var nd = bl.items.filter(function (x) { return x.done; }).length;
+              return '<details class="plgrp"' + (i === ci ? " open" : "") + ">" +
+                "<summary><b>" + esc(bl.name) + "</b>" +
+                '<span class="plgc' + (nd === bl.items.length ? " full" : "") + '">' +
+                  nd + "/" + bl.items.length + "</span></summary>" +
+                rows + "</details>";
+            }
+            var now = blocks.slice(0, ci + 1), next = blocks.slice(ci + 1);
+            var h = now.map(grp).join("");
+            //  fesilsiz duz planda cari dersden sonrakilar da gizlenir
+            if (blocks.length === 1 && !blocks[0].gid && cur) {
+              var it = blocks[0].items, k = -1;
+              it.forEach(function (x, i) { if (x.id === cur.id) k = i; });
+              if (k >= 0 && k < it.length - 1) {
+                h = it.slice(0, k + 1).map(plRow).join("");
+                next = [{ items: it.slice(k + 1), flat: true }];
+              }
+            }
+            if (next.length) {
+              var nn = next.reduce(function (a, b) { return a + b.items.length; }, 0);
+              h += '<details class="plnext"><summary>Növbətilərə bax ' +
+                '<span class="fn">' + (next[0].flat ? nn + " mövzu" : next.length + " fəsil · " + nn + " dərs") +
+                "</span></summary>" +
+                next.map(function (bl, j) {
+                  return bl.flat ? bl.items.map(plRow).join("") : grp(bl, ci + 1 + j);
+                }).join("") + "</details>";
+            }
+            return h;
+          })() + "</div>" +
           '<div class="plmbar" id="plmb-' + esc(p.id) + '"></div>' +
           '<button class="btn sm ghost" data-pldel="' + esc(p.id) +
             '" style="margin-top:10px">Planı sil</button>' +
@@ -2058,9 +2086,9 @@
           "<i>" + dateAz(d.taken_at) + " · " + d.score + " / " + d.max_score + " düzgün</i></div>" +
           pctChip(d.percent) + "</div>" +
         '<div class="dgsum">' +
-          '<span class="dst weak">' + (d.weak_now || 0) + " zəif</span>" +
-          '<span class="dst mid">'  + (d.mid_now  || 0) + " orta</span>" +
-          '<span class="dst ok">'   + (d.ok_now   || 0) + " yaxşı</span>" +
+          '<span class="dst st-weak">' + (d.weak_now || 0) + " zəif</span>" +
+          '<span class="dst st-mid">'  + (d.mid_now  || 0) + " orta</span>" +
+          '<span class="dst st-ok">'   + (d.ok_now   || 0) + " yaxşı</span>" +
           (d.weak_prev !== null && d.weak_prev !== undefined
             ? '<span class="dgdelta">əvvəlki (' + dateAz(d.prev_at) + "): " +
               d.weak_prev + " zəif → " + (d.weak_now || 0) + "</span>" : "") +
