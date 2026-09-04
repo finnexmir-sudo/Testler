@@ -6585,12 +6585,348 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- cog9-bioehtiyat#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog9-bioehtiyat#4';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog9-bioehtiyat#comb1', 'cog-9-bioehtiyat',
+  'Azərbaycanın təbii ehtiyatları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Hirkan milli parkı Lənkəran zonasındakı qədim meşələri qoruyur, buradakı dəmirağac üçüncü dövrdən qalmış relikt növdür.
+2) 1-ci mülahizəyə əsasən, Hirkan MİLLİ PARK statusunda olduğu üçün, qoruqdan fərqli olaraq, mühafizə ilə yanaşı turizmə də icazə verilir.
+3) Azərbaycanda meşələr ölkə ərazisinin təqribən 60 faizini əhatə edir.
+4) Qırmızı kitaba nəsli kəsilməkdə olan bitki və heyvan növləri daxil edilir.',
+  '1, 2 və 4 doğrudur: Hirkan milli parkı dəmirağacı qoruyur, milli park statusu turizmə icazə verir; Qırmızı kitaba nəsli kəsilməkdə olan növlər daxil edilir. 3-cü mülahizə yanlışdır: Azərbaycanda meşələr 60% yox, TƏQRİBƏN 11-12 FAİZ təşkil edir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog9-bioehtiyat#4'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog9-ehali#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog9-ehali#17';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog9-ehali#comb1', 'cog-9-ehali',
+  'Əhali coğrafiyası ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Emiqrasiya əhalinin öz ölkəsindən başqa ölkəyə getməsi, immiqrasiya isə başqa ölkədən gəlib məskunlaşmasıdır.
+2) 1-ci mülahizəyə əsasən, doğum azaldığı Avropa ölkələrində immiqrasiya əhali artımını dəstəkləyən mənbələrdən biri olsa da, bu ölkələrdə əhalinin qocalması hələ də ciddi problemdir.
+3) Bir-birinə qovuşmuş şəhər aqlomerasiyalarının əmələ gətirdiyi nəhəng zolağa kənd deyilir.
+4) Hazırda dünya əhalisinin yarıdan çoxu şəhərlərdə yaşayır.',
+  '1, 2 və 4 doğrudur: emiqrasiya/immiqrasiya tərifləri doğrudur, Avropa ölkələrində əhali qocalır; dünya əhalisinin yarıdan çoxu şəhərlərdə yaşayır. 3-cü mülahizə yanlışdır: bu zolaq kənd yox, MEQAPOLİS adlanır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog9-ehali#17'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog9-iqlim#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog9-iqlim#18';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog9-iqlim#comb1', 'cog-9-iqlim',
+  'İqlim qurşaqları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Aralıq dənizi iqlimində yay quru və isti, qış isə yumşaq və yağıntılı keçir.
+2) 1-ci mülahizəyə əsasən, bu cür sahil iqliminin əksinə olaraq, kontinentin dərinliyindəki KONTİNENTAL iqlimdə yay-qış temperatur fərqi (amplitud) daha böyük olur.
+3) Passat küləkləri qütblərdən qütblərə əsən daimi küləklərdir.
+4) İsti Qolfstrim cərəyanı Qərbi Avropanın iqlimini xeyli yumşaldır.',
+  '1, 2 və 4 doğrudur: Aralıq dənizi iqlimi yumşaq-yağışlı qışla seçilir, kontinental iqlimdə amplitud böyükdür; Qolfstrim Qərbi Avropanı yumşaldır. 3-cü mülahizə yanlışdır: passatlar qütblərdən yox, TROPİKLƏRDƏN EKVATORA doğru əsir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog9-iqlim#18'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog9-iqtisadiyyat#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog9-iqtisadiyyat#12';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog9-iqtisadiyyat#comb1', 'cog-9-iqtisadiyyat',
+  'İqtisadi coğrafiya ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Ölkənin öz tələbatı üçün xaricdən mal alıb gətirməsi idxal adlanır.
+2) 1-ci mülahizəyə əsasən, bu mal mübadiləsinin sürətli və ucuz aparılmasında infrastruktur (yol, rabitə, enerji qurğuları) həlledici rol oynayır - kütləvi yüklərin uzaq məsafəyə daşınmasında ən ucuz nəqliyyat növü isə dəniz nəqliyyatıdır.
+3) Gəncə-Qazax bölgəsi Azərbaycanda əsasən çayçılıq rayonlarındandır.
+4) Sənaye müəssisəsi yerləşdirilərkən xammala, əmək ehtiyatlarına və istehlakçıya yaxınlıq nəzərə alınır.',
+  '1, 2 və 4 doğrudur: idxal doğru tərif olunub, infrastruktur və dəniz nəqliyyatı mal mübadiləsində vacibdir; müəssisə yeri xammal/əmək/istehlakçıya görə seçilir. 3-cü mülahizə yanlışdır: Gəncə-Qazax çayçılıq yox, ÜZÜMÇÜLÜK bölgəsidir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog9-iqtisadiyyat#12'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog9-relyef#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog9-relyef#22';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog9-relyef#comb1', 'cog-9-relyef',
+  'Azərbaycanın relyefi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Azərbaycan ərazisinin təqribən 60 faizi dağlıq sahələrdir, qalanı düzənlikdir.
+2) 1-ci mülahizəyə əsasən, bu dağlıq ərazinin bir hissəsini təşkil edən Naxçıvan Muxtar Respublikasının ən uca zirvəsi Qapıcıqdır (3906 m).
+3) Küləyin səhralarda yaratdığı aypara şəkilli qum təpələrinə platformalar deyilir.
+4) Düzənliklər hündürlüyünə görə ovalıqlara, təpəliklərə və yaylalara bölünür.',
+  '1, 2 və 4 doğrudur: Azərbaycan ərazisinin 60%-i dağlıqdır, Qapıcıq Naxçıvanın ən uca zirvəsidir (3906 m); düzənliklər ovalıq/təpəlik/yaylaya bölünür. 3-cü mülahizə yanlışdır: bu qum təpələri platforma yox, BARXAN adlanır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog9-relyef#22'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog9-sivilizasiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog9-sivilizasiya#20';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog9-sivilizasiya#comb1', 'cog-9-sivilizasiya',
+  'Sivilizasiyalar coğrafiyası ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Qədim Misir sivilizasiyası Nil çayının vadisində, Mesopotamiya sivilizasiyası isə Dəclə və Fərat çayları arasında yaranmışdır.
+2) 1-ci mülahizəyə əsasən, bu iki nümunə kimi, qədim sivilizasiyalar ümumilikdə əsasən böyük, münbit çay vadilərində formalaşmışdır.
+3) Azərbaycanın UNESCO Dünya İrsi siyahısına daxil edilmiş qədim şəhər hissəsi Yeni Yasamaldır.
+4) Türk Dövlətləri Təşkilatı türkdilli ölkələri birləşdirən siyasi-iqtisadi əməkdaşlıq qurumudur.',
+  '1, 2 və 4 doğrudur: Misir Nil, Mesopotamiya Dəclə-Fərat vadisindədir, sivilizasiyalar çay vadilərində yaranıb; Türk Dövlətləri Təşkilatı türkdilli ölkələri birləşdirir. 3-cü mülahizə yanlışdır: UNESCO siyahısındakı qədim şəhər hissəsi Yeni Yasamal yox, İÇƏRİŞƏHƏRDİR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog9-sivilizasiya#20'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog9-sular#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog9-sular#17';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog9-sular#comb1', 'cog-9-sular',
+  'Sular coğrafiyası ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Göygöl 1139-cu il zəlzələsində baş vermiş dağ uçqununun çayın qabağını kəsməsi nəticəsində yaranmışdır.
+2) 1-ci mülahizəyə əsasən, bu kimi təbii fəlakət mənşəli göllər ümumilikdə tektonik, buzlaq və vulkanik mənşəli göllər sırasına aid edilir.
+3) Okean sahillərində suyun gündə iki dəfə qalxıb-enməsinin (qabarma-çəkilmə) əsas səbəbi küləyin əsməsidir.
+4) Yerin şirin su ehtiyatının ən böyük hissəsi buzlaqlarda saxlanılır.',
+  '1, 2 və 4 doğrudur: Göygöl zəlzələ nəticəsində yaranıb, göllər mənşəyinə görə təsnif olunur; şirin suyun böyük hissəsi buzlaqlardadır. 3-cü mülahizə yanlışdır: qabarma-çəkilmənin səbəbi külək yox, AYIN CAZİBƏ QÜVVƏSİDİR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog9-sular#17'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog9-xerite#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog9-xerite#25';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog9-xerite#comb1', 'cog-9-xerite',
+  'Xəritəçilik ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Horizontalın üzərindəki kiçik cizgi - berqştrix yamacın hansı tərəfə alçaldığını göstərir.
+2) 1-ci mülahizəyə əsasən, relyefin xəritədə eyni qiymətli nöqtələri birləşdirən xətlərlə (izoxətlər üsulu ilə) təsvir edilməsində berqştrixlər yamacın istiqamətini dəqiqləşdirən əlavə işarədir.
+3) 1:1 000 000 miqyası 1:25 000 miqyasından daha iridir.
+4) Coğrafi informasiya sistemləri (CİS) məkan məlumatlarını kompüterdə toplayıb təhlil edən sistemdir.',
+  '1, 2 və 4 doğrudur: berqştrix yamac istiqamətini göstərir, izoxətlər üsulu ilə əlaqəlidir; CİS məkan məlumatlarını emal edir. 3-cü mülahizə yanlışdır: 1:25 000 miqyası 1:1 000 000-dan DAHA İRİDİR - məxrəc kiçik olduqca miqyas iri olur.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog9-xerite#25'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 156 then
-    raise exception '112: 156 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 164 then
+    raise exception '112: 164 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
