@@ -7425,12 +7425,348 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- bio9-ali-esb#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio9-ali-esb#17';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio9-ali-esb#comb1', 'bio-9-ali-esb',
+  'Ali sinir fəaliyyəti ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) İkinci siqnal sistemi sözlə - nitqlə bağlıdır və yalnız insana xasdır.
+2) 1-ci mülahizəyə əsasən, heyvanlarda isə yalnız birinci siqnal sistemi olur - hiss orqanlarının bilavasitə qıcıqlarına əsaslanır.
+3) Coşqun, tez qızışan, fəal temperament tipi fleqmatikdir.
+4) Temperamentin dörd tipə bölünməsi qədim həkim Hippokratın adı ilə bağlıdır.',
+  '1, 2 və 4 doğrudur: ikinci siqnal sistemi insana xasdır (nitq), heyvanlarda yalnız birinci var; temperament təlimi Hippokratdan gəlir. 3-cü mülahizə yanlışdır: coşqun, tez qızışan tip fleqmatik yox, XOLERİKDİR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio9-ali-esb#17'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio9-bolunme#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio9-bolunme#14';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio9-bolunme#comb1', 'bio-9-bolunme',
+  'Hüceyrə bölünməsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Meyozda iki ardıcıl bölünmə gedir, DNT isə yalnız bir dəfə ikiləşir - nəticədə haploid (tək dəstli) cinsiyyət hüceyrələri əmələ gəlir.
+2) 1-ci mülahizəyə əsasən, mayalanma zamanı iki haploid hüceyrə birləşərək diploid ziqot yaradır - beləliklə növün xromosom sayı bərpa olunur.
+3) Mitozda xromosomların hüceyrənin ekvator müstəvisində düzülməsi anafazada baş verir.
+4) Homoloji xromosomlar forma və ölçücə bir-birinə uyğun gələn cüt xromosomlardır.',
+  '1, 2 və 4 doğrudur: meyoz iki bölünmədir, mayalanma diploidliyi bərpa edir; homoloji xromosomlar oxşar cüt xromosomlardır. 3-cü mülahizə yanlışdır: xromosomların ekvatorda düzülməsi METAFAZADA baş verir, anafazada yox (anafazada qütblərə çəkilirlər).',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio9-bolunme#14'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio9-coxalma-inkisaf#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio9-coxalma-inkisaf#17';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio9-coxalma-inkisaf#comb1', 'bio-9-coxalma-inkisaf',
+  'Çoxalma və inkişaf ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Qeyri-cinsi çoxalmada bir valideyn iştirak edir və nəsil ona bənzəyir; cinsi çoxalmada isə iki valideynin əlamətləri birləşərək nəsildə irsi müxtəliflik yaranır.
+2) 1-ci mülahizəyə əsasən, kəpənək kimi tam çevrilmə ilə inkişaf edən həşəratlarda sürfə (tırtıl) ilə yetkin fərd arasında əlavə bir mərhələ - pup mərhələsi olur.
+3) Çəyirtkə də kəpənək kimi tam çevrilmə ilə inkişaf edir, sürfə pup mərhələsindən keçir.
+4) Cinsiyyət hüceyrələri meyoz nəticəsində əmələ gəlir.',
+  '1, 2 və 4 doğrudur: qeyri-cinsi/cinsi çoxalmanın fərqi doğrudur, kəpənəkdə pup mərhələsi var; cinsiyyət hüceyrələri meyozla yaranır. 3-cü mülahizə yanlışdır: çəyirtkə NATAMAM çevrilmə ilə inkişaf edir, pup mərhələsi YOXDUR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio9-coxalma-inkisaf#17'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio9-huceyre#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio9-huceyre#22';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio9-huceyre#comb1', 'bio-9-huceyre',
+  'Hüceyrənin quruluşu ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Endoplazmatik şəbəkə kanalları ilə maddələr hüceyrə daxilində daşınır.
+2) 1-ci mülahizəyə əsasən, bu şəbəkə ilə daşınan maddələr sonra Qolci aparatına çatır - burada toplanır, qablaşdırılır və hüceyrədən xaric edilir.
+3) Suyun hüceyrə membranından çox qatılıqlı mühitdən az qatılıqlı mühitə keçməsi osmos adlanır.
+4) Heyvan hüceyrəsinin bölünməsində iştirak edən, nüvə yaxınlığında yerləşən orqanoid hüceyrə mərkəzidir.',
+  '1, 2 və 4 doğrudur: EPŞ maddə daşıyır, Qolci aparatı toplayıb ifraz edir; hüceyrə mərkəzi bölünmə iyini yaradır. 3-cü mülahizə yanlışdır: osmos AZ qatılıqlı mühitdən ÇOX qatılıqlı mühitə doğru gedir, əksinə yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio9-huceyre#22'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio9-irsiyyet-muhit#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio9-irsiyyet-muhit#10';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio9-irsiyyet-muhit#comb1', 'bio-9-irsiyyet-muhit',
+  'İrsiyyət və dəyişkənlik ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Genotip orqanizmin bütün genlərinin məcmusudur, fenotip isə orqanizmin bütün xarici və daxili əlamətlərinin məcmusudur.
+2) 1-ci mülahizəyə əsasən, fenotip təkcə genotipdən deyil, həm də mühitin təsirindən formalaşır - bu iki amilin qarşılıqlı təsiridir.
+3) Mühitin yaratdığı modifikasiya dəyişkənliyi genotipə təsir edir və nəsildən-nəslə irsən ötürülür.
+4) Resessiv əlamət yalnız hər iki valideyndən keçdikdə üzə çıxır.',
+  '1, 2 və 4 doğrudur: genotip/fenotip tərifləri doğrudur, fenotip genotip və mühitdən formalaşır; resessiv əlamət hər iki valideyndən keçəndə görünür. 3-cü mülahizə yanlışdır: modifikasiya dəyişkənliyi genotipə TOXUNMUR və İRSƏN ÖTÜRÜLMÜR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio9-irsiyyet-muhit#10'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio9-kimyevi-terkib#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio9-kimyevi-terkib#30';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio9-kimyevi-terkib#comb1', 'bio-9-kimyevi-terkib',
+  'Hüceyrənin kimyəvi tərkibi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) DNT-nin tərkibində timin azotlu əsası var, RNT-də isə timinin yerini urasil tutur.
+2) 1-ci mülahizəyə əsasən, bu iki nuklein turşusunun zənciri aminturşulardan yox, nukleotidlərdən qurulur.
+3) Zülal zəncirində aminturşular bir-biri ilə hidrogen qazı ilə birləşir.
+4) DNT molekulunun fəza quruluşu ikiqat spiraldır.',
+  '1, 2 və 4 doğrudur: DNT-də timin, RNT-də urasil var; DNT ikiqat spiraldır, hər ikisi nukleotidlərdən qurulur. 3-cü mülahizə yanlışdır: aminturşular PEPTİD RABİTƏSİ ilə birləşir, hidrogen qazı ilə yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio9-kimyevi-terkib#30'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio9-mubadile#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio9-mubadile#10';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio9-mubadile#comb1', 'bio-9-mubadile',
+  'Maddələr mübadiləsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Transkripsiya prosesində DNT üzərində məlumat RNT-si sintez olunur, translyasiya prosesində isə bu məlumat əsasında ribosomlarda zülal yığılır.
+2) 1-ci mülahizəyə əsasən, bu prosesdə hər aminturşuya DNT-də üç nukleotiddən ibarət triplet uyğun gəlir - genetik kod məhz bu üçlüklərlə oxunur.
+3) Qlükozanın oksigensiz şəraitdə parçalanması fotosintez adlanır.
+4) Gərgin işləyən əzələdə oksigen çatışmadıqda süd turşusu toplanır.',
+  '1, 2 və 4 doğrudur: transkripsiya/translyasiya prosesləri və triplet kodu doğru təsvir olunub; oksigen çatışmazlığında əzələdə süd turşusu toplanır. 3-cü mülahizə yanlışdır: qlükozanın oksigensiz parçalanması QLİKOLİZ adlanır, fotosintez yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio9-mubadile#10'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio9-nov-tekamul#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio9-nov-tekamul#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio9-nov-tekamul#comb1', 'bio-9-nov-tekamul',
+  'Növ və təkamül ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Çarlz Darvinə görə təkamülün əsas hərəkətverici qüvvəsi təbii seçmədir - mühitə uyğunlaşan fərdlər sağ qalıb daha çox nəsil verir.
+2) 1-ci mülahizəyə əsasən, insanın lazımlı əlamətli fərdləri özü seçib artırması isə fərqli bir proses - süni seçmədir; bu yolla it, göyərçin və toyuğun çoxsaylı cinsləri yaradılıb.
+3) Appendiks kimi orqanlar mimikriyaya misaldır - müdafiəsiz canlının qorunan canlıya bənzəməsidir.
+4) Populyasiyada tamamilə yeni əlamətlərin ilkin mənbəyi mutasiyalardır.',
+  '1, 2 və 4 doğrudur: təbii seçmə/süni seçmə fərqi doğrudur; yeni əlamətlərin mənbəyi mutasiyadır. 3-cü mülahizə yanlışdır: appendiks RUDİMENT orqana misaldır (təkamüldə əhəmiyyətini itirmiş orqan), mimikriya yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio9-nov-tekamul#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 176 then
-    raise exception '112: 176 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 184 then
+    raise exception '112: 184 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
