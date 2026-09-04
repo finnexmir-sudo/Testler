@@ -5872,20 +5872,20 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
 -- ------------------------------------------------------------- inf11-komputer-veb#comb1
-update public.questions set difficulty = 2 where ext_key = 'inf11-komputer-veb#19';
+update public.questions set difficulty = 2 where ext_key = 'inf11-komputer-veb#10';
 
 with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
  ('inf11-komputer-veb#comb1', 'inf-11-komputer-veb',
-  'Kompüter və veb texnologiyaları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
-1) Kompüter yüklənəndə (boot) İLK NÖVBƏDƏ mikroproqram (BIOS/UEFI) aparatı yoxlayıb sistemi başladır.
-2) 1-ci mülahizəyə əsasən, sistem işə düşdükdən sonra tez-tez istifadə olunan verilənlər sürəti artırmaq üçün prosessora yaxın KEŞ YADDAŞDA saxlanılır.
-3) Veb səhifələrdə şəkillərə alternativ mətn (alt) yazılmasının məqsədi səhifənin YÜKLƏNMƏ SÜRƏTİNİ artırmaqdır.
-4) Veb formalarda daxil edilən məlumatın validasiya olunması səhv və zərərli verilənlərin qarşısını almaq üçün vacibdir.',
-  '1, 2 və 4 doğrudur: yüklənmə BIOS/UEFI ilə başlayır, sistem işə düşdükdən sonra tez-tez lazım olan verilən sürət üçün keş yaddaşda saxlanılır, forma validasiyası isə səhv/zərərli verilənin qarşısını alır. 3-cü mülahizə yanlışdır: alt mətnin məqsədi sürət yox, ƏLÇATANLIQ (görmə məhdudiyyətli istifadəçilər) və axtarış sistemləridir - keş yaddaşın sürət funksiyası ilə səhv qarışdırılıb.',
-  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 3, 4', 3)
+  'İstifadəçi hesabları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Administrator hesabı sistem parametrlərini sərbəst dəyişə bilər, standart istifadəçi hesabı isə bu baxımdan MƏHDUDDUR.
+2) 1-ci mülahizəyə əsasən, valideyn öz hesabını administrator, uşağının hesabını isə standart səviyyədə saxlayaraq, Ailə təhlükəsizliyi funksiyası ilə uşağın ekran vaxtını və giriş etdiyi məzmunu məhdudlaşdıra bilər.
+3) Ailə təhlükəsizliyi funksiyası YALNIZ administrator hesabının fəaliyyətini məhdudlaşdırmaq üçün nəzərdə tutulub.
+4) Bir kompüterdə bir neçə istifadəçi hesabının olması hər istifadəçinin öz fərdi parametr və fayllarını ayrı saxlamasına imkan verir.',
+  '1, 2 və 4 doğrudur: administrator hesabı sərbəst, standart isə məhduddur, bu fərqə əsaslanaraq valideyn uşağın hesabını standart saxlayıb Ailə təhlükəsizliyi ilə ekran vaxtını/məzmunu məhdudlaşdıra bilər, bir neçə hesab isə hər kəsin fərdi parametrlərini ayrı saxlayır. 3-cü mülahizə yanlışdır: Ailə təhlükəsizliyi standart (uşaq) hesabları üçündür, administrator hesabını məhdudlaşdırmaq üçün deyil.',
+  '1, 2, 3, 4', '1, 2, 4', '1, 2, 3', '2, 3, 4', 2)
 ),
 kohne_q as (
-  select quarter from public.questions where ext_key = 'inf11-komputer-veb#19'
+  select quarter from public.questions where ext_key = 'inf11-komputer-veb#10'
 ),
 ins as (
   insert into public.questions

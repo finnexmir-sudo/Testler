@@ -75,6 +75,23 @@ yoxlanandan sonra. Yoxsa:
   səhv slug-a yazılmışdı. Sual sayı düz idi (30/30), çətinlik bölgüsü
   də «məqbul» görünürdü — heç kim mövzu ADI ilə sualların MƏZMUNUNU
   tutuşdurmamışdı, çünki bunu ölçən avtomatik yoxlama yox idi.
+- **inf-11-komputer-veb (2026-09, eyni audit).** Mövzu «Kompüterin
+  idarə edilməsi. Veb-layihə» idi (İdarəetmə paneli, Ailə
+  təhlükəsizliyi, Word/Excel/PowerPoint-də veb-səhifə və s. — 8
+  konkret alt-başlıq), 20 sualın hamısı isə ÜMUMİ kompüter aparatı
+  (CPU/RAM/SSD) və ümumi veb-dizayn (HTML/CSS/JS) idi — mövzunun heç
+  bir konkret bacarığına toxunmurdu. Bu, `bio-11-insan-muhit`-dən
+  fərqli tələ idi: məzmun tamam YAD deyildi (hələ də informatika,
+  hətta «yaxın» görünürdü), sadəcə kurikulumun TƏLƏB ETDİYİ konkret
+  bacarıqlar əvəzinə ümumi/tanış mövzu yazılmışdı — «fənnə aiddir»
+  «mövzuya aiddir» demək deyil.
+- **tarix-11-mustemleke (2026-09, eyni audit).** Bu ikisindən fərqli,
+  daha yüngül hal: mövzunun 10 real alt-başlığından 8-i yaxşı
+  örtülmüşdü, YALNIZ «Cənubi Azərbaycan XIX əsrdə» və «Məşrutə
+  inqilabı» (IV fəsil) heç toxunulmamışdı — 31 sualın hamısı Şimali
+  Azərbaycan idi. Nəticə: **hər mövzunun HƏR fəsli/alt-başlığı**
+  yoxlanmalıdır, «əksəriyyəti düzdür» kifayət etmir — bir fəslin tam
+  unudulması asanlıqla gözdən qaça bilər.
 
 Ortaq kök birdir: **qurduğumu yoxlamaq, istənəni yoxlamaq deyil.**
 
