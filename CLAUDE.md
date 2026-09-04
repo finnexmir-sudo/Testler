@@ -1182,6 +1182,38 @@ Yeni RPC diaqnostik testə toxunursa `is_diagnostic`-i yoxla.
 `07_seed_tests.sql`-dəki «Genişləndirilmiş analiz testi» bunun köhnə
 yer tutucusudur — məhsul deyil, bələdçi şəkillərində gizlədilir.
 
+## UX yoxlaması — qaydalar (2026-09-04)
+
+Tam gəziş (27 ekran, telefon + masaüstü) bunları çıxardı; hamısı
+düzəldilib. Yeni ekran yazanda eyni tələlərə düşmə:
+
+- **Boş hal xəta deyil.** Yeni müəllimin öz sualı yoxdur: generator
+  «0 sual tapıldı» qırmızısı əvəzinə sarı yol göstərir, bank «Öz
+  suallarım» boşdursa Platforma ilə açılır (`f.auto`), İcmalda qrup
+  yoxdursa «Qrup yarat» formu başlığın altına qalxır, rəqəm kartları
+  gizlənir (`#hTop`, `#gForm.first`).
+- **Bildiyimizi soruşma.** Profildə fənn təkdirsə generatorda seçili
+  gəlir; bütün qruplar eyni sinifdirsə sinif də (`genInit`). Tapşırıq
+  siyahısında müəllimin fənni birinci (`subjectNames()`).
+- **Eyni siyahı iki dəfə göstərilmir.** Diaqnostika xəritəsi və
+  «Mövzu üzrə mənimsəmə» yalnız zəif/orta sətirləri açıq göstərir,
+  yaxşılar `<details>` altında; «Zəif mövzulardan test yığ» bir dənədir
+  (`#btnRem`, `#dgRem` yoxdur). «Son nəticələr» yalnız İcmalda.
+  Telefonda «Sürətli əməliyyatlar» gizlidir — alt menyu eyni üç düyməni
+  daşıyır (`.quick`). Şagird tətbiqində «Geri» yalnız üst zolaqdadır.
+- **İzah bir cümlə.** Formada boz izahlar birləşdirilib; «Dərs planı»
+  plan yoxdursa bir sətir + «Planı qur» (`#btnPlOpen` → `#plForm`).
+- **Nadir əməliyyat qələmin altında.** «Dayandır» şagird sətrində
+  deyil, redaktə panelindədir (kod yeniləmək kimi).
+- **Ad doğru olsun.** «Səhv edilən suallar» (say yalnız 2×-dan
+  yuxarı görünür); «öz testiniz» diaqnostikanı saymır (`db/120`);
+  «Dinamika» 3 testdən başlayır; işlənmiş testdə «son tarix» yazılmır.
+
+Yoxlama skripti: `test/beledci_sekil.py` bələdçi şəkilləri üçündür;
+tam UX gəzişi üçün onun genişi bu sessiyanın scratchpad-ında idi
+(`audit.py`) — lazım olsa eyni axınla yenidən yazılır: hər ekran 390 və
+1280 px, `innerText` uzunluğu, `.muted` uzunluğu, səhifə hündürlüyü.
+
 ## Bələdçi — `komek/`
 
 «Necə işləyir» səhifəsi: müəllim / şagird / valideyn üçün addım-addım,

@@ -117,7 +117,8 @@ with sync_playwright() as pw:
     sp = page(ctx, 390, 844)
     sp.goto(STUDENT); sp.wait_for_selector("#btnIn", timeout=15000)
     sp.fill("#code", code); sp.click("#btnIn"); sp.wait_for_selector(".test", timeout=15000)
-    ok(sp.locator(".test .solo.diag").count() == 1, "sagird siyahisinda «diaqnostika» nisani")
+    #  basliq onsuz da "Diaqnostika ·" ile baslayir - ayrica cip tekrardir (UX yoxlamasi)
+    ok(sp.locator(".test .solo.diag").count() == 0, "basliqda 'Diaqnostika' olanda ikinci nisan yoxdur")
     ok("Diaqnostika" in sp.locator(".test.asg").first.inner_text(), "basliq 'Diaqnostika ·' ile baslayir")
     sp.locator(".test.asg").first.click(); sp.wait_for_selector(".opt", timeout=15000)
     ok("is_correct" not in sp.content(), "sual ekraninda is_correct yoxdur")
@@ -140,6 +141,8 @@ with sync_playwright() as pw:
     ok("XƏRİTƏN" in t or "xəritən" in t, "sagirdde 'Movzu xeriten' bolmesi var (I telesi: lower() yox)")
     ok(T1NAME in t and "Bundan başla" in t, "sagirdde 'Bundan basla' = 1-ci fesil", T1NAME)
     ok(sp.locator(".myr").count() == 12, "xeritede 12 fesil", sp.locator(".myr").count())
+    ok(sp.locator("details.more").count() == 1 and sp.locator("details.more .myr").count() == 11,
+       "11 yaxsi fesil yigilmis bolmededir, 1 zeif acıqdadir")
     ok(sp.locator(".myr .best.bl").count() == 1 and sp.locator(".myr .best.bh").count() == 11,
        "1 zeif, 11 yaxsi")
     if os.environ.get("SHOT"): sp.screenshot(path=os.environ["SHOT"] + "/diaq_sagird.png", full_page=True)
@@ -152,13 +155,16 @@ with sync_playwright() as pw:
     box = pg.inner_text("#diagBox")
     ok("1 zəif" in box and "11 yaxşı" in box, "xulase cipleri", box[:80].replace("\n", " "))
     ok("Bundan başla" in box and T1NAME in box, "'Bundan basla' 1-ci fesil")
-    ok(pg.locator("#dgRem").count() == 1 and "(1)" in pg.inner_text("#dgRem"), "'Zeif movzulardan test yig (1)'")
+    ok(pg.locator("#dgRem").count() == 0, "diaqnostika kartinda ayrica duyme yoxdur (bir duyme: #btnRem)")
+    ok(pg.locator("#btnRem").count() == 1 and "(1)" in pg.inner_text("#btnRem"), "'Zeif movzulardan test yig (1)'")
+    ok(pg.locator("#dgMap details").count() == 1 and not pg.locator("#dgMap details").first.get_attribute("open"),
+       "yaxsi movzular yigilmis bolmededir")
     ok(pg.locator("#dgGo").count() == 1 and "Yenidən diaqnostika" in box, "yenidən diaqnostika formasi var")
     ok(pg.locator("#dgMap .dprev").count() == 0, "ilk diaqnostikada muqayise oxu yoxdur")
     if os.environ.get("SHOT"):
         pg.evaluate("document.getElementById('diagBox').scrollIntoView()"); pg.wait_for_timeout(200)
         pg.locator("#diagBox").screenshot(path=os.environ["SHOT"] + "/diaq_muellim.png")
-    pg.click("#dgRem"); pg.wait_for_timeout(1200)
+    pg.click("#btnRem"); pg.wait_for_timeout(1200)
     ok("#/gen" in pg.url, "duzelis duymesi generatora aparir", pg.url.split("#")[-1])
     ok(T1NAME in pg.inner_text("#main"), "generatorda zeif fesil secilib")
 
@@ -188,7 +194,12 @@ with sync_playwright() as pw:
     ok("1 zəif → 0" in box, "ferq yazilir: 1 zeif -> 0", box[:120].replace("\n", " "))
     ok(pg.locator("#dgMap .dprev.up").count() == 1 and pg.locator("#dgMap .dprev.same").count() == 11,
        "muqayise oxlari: 1 yuxari, 11 eyni")
-    ok(pg.locator("#dgRem").count() == 0, "zeif movzu qalmayanda duzelis duymesi yoxdur")
+    #  #btnRem "Movzu uzre menimseme"ye baglidir (butun testler): 1-ci fesil
+    #  tarixce uzre 3/6 = 50% - hele zeifdir, duyme qalir; diaqnostika karti ise
+    #  SON xeriteni gosterir ("hamisi yaxsidir")
+    ok(pg.locator("#btnRem").count() == 1 and "(1)" in pg.inner_text("#btnRem"),
+       "duzelis duymesi tarixceye gore qalir (1-ci fesil 3/6)")
+    ok(pg.locator("#dgMap .dgrow.weak").count() == 0, "son xeritede zeif fesil yoxdur")
     ok("Bütün mövzular yaxşıdır" in box, "muellimde 'hamisi yaxsidir'")
     if os.environ.get("SHOT"): pg.locator("#diagBox").screenshot(path=os.environ["SHOT"] + "/diaq_muellim2.png")
 

@@ -86,7 +86,7 @@ with sync_playwright() as pw:
     pg.fill("#fname", "Bank Muellim"); pg.fill("#email", "bank@t.az"); pg.fill("#pass", "parol1234")
     pg.click("#btnAuth"); pg.wait_for_selector("#btnSetup", timeout=8000)
     pg.select_option("#atype", "tutor"); pg.fill("#aname", "Riyaziyyat")
-    pg.click("#btnSetup"); pg.wait_for_selector("#btnBank", timeout=8000)
+    pg.click("#btnSetup"); pg.wait_for_selector("#gForm", timeout=8000)
 
     print("A · Bank ekranı")
     ok(True, "esas sehifede 'Sual banki' var")
@@ -95,10 +95,17 @@ with sync_playwright() as pw:
     ok(pg.locator("#btnBank").evaluate(
         "e => getComputedStyle(e.closest('.card')).backgroundColor") != "rgba(0, 0, 0, 0)",
        "bank kecidi kart icindedir")
-    pg.click("#btnBank"); pg.wait_for_selector("#btnNewQ", timeout=8000)
+    #  telefonda suretli emeliyyatlar gizlidir - alt menyudan gedirik
+    pg.click("#bnav a[href='#/b']"); pg.wait_for_selector("#btnNewQ", timeout=8000)
     ok("/b" in pg.url, "bankin oz unvani var", pg.url.split("#")[-1])
     ok("0" in pg.inner_text(".seat .num"), "istifade gostericisi 0-dan baslayir",
        pg.inner_text(".seat .num").replace("\n", " "))
+    #  Oz suali olmayan muellime bank PLATFORMA ile acilir (UX yoxlamasi) -
+    #  bos "Sual tapilmadi" ilk ekran olmasin
+    pg.wait_for_selector(".bpick .pkb", timeout=8000)   # platforma: fenn secimi
+    ok("Platforma" in pg.locator("#bPool .seg.on").inner_text(), "oz suali yoxdursa Platforma acilir",
+       pg.locator("#bPool .seg.on").inner_text())
+    pg.locator("#bPool .seg", has_text="Öz suallarım").click()
     pg.wait_for_selector("#bList .empty", timeout=8000)
     ok("Sual tapılmadı" in pg.inner_text("#bList"), "bos veziyyet aydindir")
     ok(empty_icons(pg) == 0, "bank ekraninda bos ikon yoxdur", empty_icons(pg))

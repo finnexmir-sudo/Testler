@@ -62,7 +62,7 @@ with sync_playwright() as pw:
     pg.locator("#setSubs [data-sub='riyaziyyat']").click()
     pg.select_option("#atype", "tutor")
     pg.fill("#aname", "Fenn hesabi"); pg.click("#btnSetup")
-    pg.wait_for_selector("#btnBank", timeout=8000)
+    pg.wait_for_selector("#gForm", timeout=8000)
     r = db("select subjects from public.accounts", one=True)
     ok(r and r["subjects"] == ["riyaziyyat"], "fenn bazaya yazildi",
        r and r["subjects"])

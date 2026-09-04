@@ -348,16 +348,7 @@
       } else {
         h += '<div class="card pad0" id="nAl">' + al.map(alertRow).join("") + "</div>";
       }
-      var rc = v.recent || [];
-      if (rc.length) {
-        h += '<div class="spacer"></div>' + "<h2>Son nəticələr</h2>" +
-          '<div class="card pad0">' + rc.map(function (x) {
-            return '<div class="trow"><div class="g"><b>' + esc(x.student || "") +
-              "</b><i>" + esc(x.test || "") +
-              (x["class"] ? " · " + esc(x["class"]) : "") +
-              " · " + dateAz(x.at) + "</i></div>" + pctChip(x.percent) + "</div>";
-          }).join("") + "</div>";
-      }
+      //  "Son neticeler" burada tekrar idi (Icmalda var) - cixarildi
       show(h);
       bindAlerts($("nAl"));
       on("btnBack", "click", function () { nav("#/"); });
@@ -416,6 +407,10 @@
 
     var html =
       '<h1 class="hi">Xoş gəlmisiniz' + (ad ? ", " + esc(ad) : "") + "! 👋</h1>" +
+      /*  Bos hesabda (qrup yoxdur) bu blok gizlenir ve "Qrup yarat"
+          formasi basliğin altina qalxir - yeni muellim ilk isi
+          sehifenin dibinde axtarmasin (loadGroups).  */
+      '<div id="hTop">' +
       /* Reqemler bir baxisda - "Fealiyyet merkezi"nin ust lovheleri */
       '<div class="tiles" id="hTiles">' +
         '<div class="tile a"><b>—</b><span>qrup</span></div>' +
@@ -441,8 +436,9 @@
           : "") +
       "</div>" +
       '<div class="spacer"></div>' +
-      /* Suretli emeliyyatlar - boyuk barmaq-dostu kartlar (mobil ustunlyu) */
-      '<div class="card">' +
+      /* Suretli emeliyyatlar - masaustu ucun; telefonda alt menyu eyni
+         uc duymeni dasidigi ucun gizlenir (CSS .quick) */
+      '<div class="card quick">' +
         '<div class="qhead">Sürətli əməliyyatlar</div>' +
         '<div class="qgrid">' +
           '<button class="qact qa" id="btnGen">' + ic("gen") +
@@ -468,11 +464,12 @@
           '<span class="arrow">' + ic("right") + "</span></button></div>"
         : "") +
       '<div class="spacer"></div>' +
+      "</div>" +
       "<h2>Qruplar</h2>" +
       '<div id="groups" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
       '<div id="hRecent"></div>' +
       '<div class="spacer"></div>' +
-      '<div class="card">' +
+      '<div class="card" id="gForm">' +
         '<label for="gname">Qrup adı</label>' +
         '<div class="fieldrow">' +
           '<div><input id="gname" placeholder="məsələn: Cümə qrupu"></div>' +
@@ -570,9 +567,11 @@
              qalani "Daha N netice" duymesi ile acilir. */
           var vis = REXP ? list : list.slice(0, RCAP);
           return vis.map(function (x) {
+            //  qrup adi yalniz lazim olanda: tek qrupda ve ya cip ile
+            //  suzulende o, onsuz da bellidir (basliqla tekrar olurdu)
             return '<div class="trow"><div class="g"><b>' + esc(x.student || "") +
               "</b><i>" + esc(x.test || "") +
-              (x["class"] ? " · " + esc(x["class"]) : "") +
+              (x["class"] && rgs.length > 1 && !RF ? " · " + esc(x["class"]) : "") +
               " · " + dateAz(x.at) + "</i></div>" +
               pctChip(x.percent) + "</div>";
           }).join("") +
@@ -644,9 +643,19 @@
       if (!box) return;
       if (!rows || !rows.length) {
         box.innerHTML = '<div class="empty"><div class="ic">' + ic("group") + "</div>" +
-          "<b>Hələ qrup yoxdur</b>Aşağıdan birincisini yaradın.</div>";
+          "<b>Hələ qrup yoxdur</b>Şagirdlər və tapşırıqlar qrupun içindədir.</div>";
+        //  ilk addim ustde: forma basliğin altina, reqemler gizli
+        var top = $("hTop"), gf = $("gForm"), h1 = document.querySelector("h1.hi");
+        if (top) top.hidden = true;
+        if (gf && h1 && !gf.classList.contains("first")) {
+          gf.classList.add("first");
+          gf.insertAdjacentHTML("afterbegin", '<div class="fttl">İlk qrupunuzu yaradın</div>');
+          h1.insertAdjacentElement("afterend", gf);
+        }
         return;
       }
+      //  ilk qrup indi yarandi - ekran adi qurulusuna qayidir
+      if ($("hTop") && $("hTop").hidden) { screenHome(); return; }
       box.innerHTML = rows.map(function (g) {
         var n = cnt[g.id] || 0;
         var lv = levelName(g.level_id);
@@ -746,19 +755,31 @@
           "</div>";
         return;
       }
+      /*  Plan yoxdursa bir setir + duyme; forma duymeye basanda acilir.
+          Evvel iki cumle izah ve iki secim her qrupda daim acıq idi
+          (UX yoxlamasi).  */
       box.innerHTML =
         '<div class="card">' +
-          '<p class="muted" style="margin:0 0 12px">Fənn və sinif seçin — ' +
-            "mövzular dərslik ardıcıllığı ilə plana düzüləcək. Hər mövzunu " +
-            "keçəndə bir kliklə yoxlama testi yığılıb qrupa veriləcək.</p>" +
-          '<div class="fieldrow">' +
-            '<div><label for="plSub">Fənn</label><select id="plSub"></select></div>' +
-            '<div style="flex:0 0 150px"><label for="plLev">Sinif</label>' +
-              '<select id="plLev"></select></div>' +
+          '<div class="plopen">' +
+            '<span class="muted">Mövzu təqvimi, «keçildi» jurnalı, hər mövzudan ' +
+              "sonra bir klikə yoxlama testi.</span>" +
+            '<button class="btn sm" id="btnPlOpen">' + ic("plus") + "Planı qur</button>" +
           "</div>" +
-          '<div id="plMsg"></div>' +
-          '<button class="btn go" id="btnPlMk">' + ic("plus") + "Planı qur</button>" +
+          '<div id="plForm" hidden>' +
+            '<div class="fieldrow" style="margin-top:14px">' +
+              '<div><label for="plSub">Fənn</label><select id="plSub"></select></div>' +
+              '<div style="flex:0 0 150px"><label for="plLev">Sinif</label>' +
+                '<select id="plLev"></select></div>' +
+            "</div>" +
+            '<div id="plMsg"></div>' +
+            '<button class="btn go" id="btnPlMk">' + ic("plus") + "Planı qur</button>" +
+          "</div>" +
         "</div>";
+      on("btnPlOpen", "click", function () {
+        var fm = $("plForm"), op = $("btnPlOpen");
+        if (fm) fm.hidden = false;
+        if (op) op.parentNode.hidden = true;
+      });
       //  Siyahida YALNIZ movzu agaci olan fenn+sinif kombinasiyalari -
       //  agacsiz fenni ("Kurikulum" ve s.) secib xeta almaq olmasin.
       //  Sinif siyahisi fenne gore daralir.
@@ -1296,6 +1317,11 @@
       '<div class="danger"><button class="btn sm ghost" data-reset="' +
         esc(s.id) + '">' + ic("refresh") + "Giriş kodunu yenilə</button>" +
       '<span class="muted">Köhnə kod etibarsız olur.</span></div>' +
+      /*  Dayandirmaq nadir isdir - setirden bura kecdi ki, her sagirdde
+          bes duyme durmasin (UX yoxlamasi).  */
+      '<div class="danger"><button class="btn sm ghost arch" data-arch="' +
+        esc(s.id) + '">Dayandır</button>' +
+      '<span class="muted">Giriş bağlanır, yer boşalır, nəticələr qalır.</span></div>' +
       "</div>");
     var box = row.querySelector(".edit");
     var n1 = box.querySelector(".eName");
@@ -1306,6 +1332,13 @@
     var pon = box.querySelector("[data-pon]");
     if (pon) pon.addEventListener("click", function () {
       parentAccess(s.id, true, pon, classId);
+    });
+    box.querySelector("[data-arch]").addEventListener("click", function () {
+      if (!confirm("«" + s.full_name + "» dayandırılsın?\n\n" +
+                   "Giriş kodu dərhal işləməyi dayandırır və şagird " +
+                   "paketdə yer tutmur. Keçmiş nəticələri qalır — " +
+                   "istənilən vaxt davam etdirə bilərsiniz.")) return;
+      setActive(s, false, this, classId);
     });
     box.querySelector("[data-reset]").addEventListener("click", function () {
       var b = this;
@@ -1396,8 +1429,6 @@
               'title="Kodu kopyala" aria-label="Kodu kopyala">' + ic("copy") + "</button>" +
             '<button class="btn sm" data-wa="' + esc(s.id) + '">' +
               ic("send") + "Göndər</button>" +
-            '<button class="btn sm ghost link arch" data-arch="' + esc(s.id) + '">' +
-              "Dayandır</button>" +
           "</div>" +
           /*  VALIDEYN GIRISI - susmaya gore BAGLI.
               Bezi muellimler isinin seffaflasmasindan narahat olur;
@@ -1741,6 +1772,16 @@
      generator, ders plani.  Bos siyahi ve ya "secilenlerde hec ne
      yoxdur" hali = tam siyahi.  Bu filtrdir, mehdudiyyet deyil. */
   function mySubs() { return (ACC && ACC.subjects) || []; }
+  //  Fenn slug -> ad siyahisi (bir defe yuklenir) - tapsiriq siyahisini
+  //  muellimin fennine gore siralamaq ucun
+  var SUBNAMES = null;
+  function subjectNames() {
+    if (!SUBNAMES) {
+      SUBNAMES = sb.select("subjects", { select: "slug,name", order: "sort" })
+        .catch(function () { SUBNAMES = null; return []; });
+    }
+    return SUBNAMES;
+  }
   function subFilter(list, keep) {
     var s = mySubs();
     if (!s.length) return list || [];
@@ -2011,7 +2052,6 @@
     /* ---- netice (varsa) ---- */
     if (d.has) {
       var tp = d.topics || [], st = d.start || [];
-      var nWeak = tp.filter(function (t) { return t.status !== "ok"; }).length;
       h += '<div class="card tight">' +
         '<div class="dghead"><div><b>' + esc(d.test.title) + "</b>" +
           "<i>" + dateAz(d.taken_at) + " · " + d.score + " / " + d.max_score + " düzgün</i></div>" +
@@ -2030,15 +2070,29 @@
           : '<div class="ok" style="margin:12px 0 0">' + ic("check") +
             "<span>Bütün mövzular yaxşıdır.</span></div>") +
         "</div>" +
-        '<div class="card pad0" style="margin-top:10px" id="dgMap">' + tp.map(function (t) {
-          return '<div class="trow dgrow ' + esc(t.status) + '"><div class="g"><b>' + esc(t.name) + "</b>" +
-            "<i>" + t.correct + " / " + t.total + " düzgün</i>" + meter(t.ratio) + "</div>" +
-            dprev(t) + dstChip(t.status) + "</div>";
-        }).join("") + "</div>";
-      if (nWeak) {
-        h += '<button class="btn go wide" id="dgRem" style="margin-top:10px">' + ic("gen") +
-          "Zəif mövzulardan test yığ (" + nWeak + ")</button>";
-      }
+        /*  Yaxsi movzular yigilmis: 12 setirlik xerite ekrani udurdu,
+            asagida "Movzu uzre menimseme" de eyni movzulari sayirdi.
+            "Zeif movzulardan test yig" duymesi de bir dene qaldi -
+            asagidaki #btnRem butun testleri nezere alir.  */
+        '<div style="margin-top:10px" id="dgMap">' +
+          (function () {
+            function row(t) {
+              return '<div class="trow dgrow ' + esc(t.status) + '"><div class="g"><b>' +
+                esc(t.name) + "</b>" +
+                "<i>" + t.correct + " / " + t.total + " düzgün</i>" + meter(t.ratio) + "</div>" +
+                dprev(t) + dstChip(t.status) + "</div>";
+            }
+            var need = tp.filter(function (t) { return t.status !== "ok"; });
+            var good = tp.filter(function (t) { return t.status === "ok"; });
+            return (need.length ? '<div class="card pad0">' + need.map(row).join("") + "</div>" : "") +
+              (good.length
+                ? '<details class="more filt"' + (need.length ? "" : " open") +
+                  (need.length ? ' style="margin-top:10px"' : "") + ">" +
+                  "<summary>Yaxşı mövzular " + '<span class="fn">' + good.length + "</span></summary>" +
+                  '<div class="card pad0" style="margin-top:10px">' + good.map(row).join("") + "</div></details>"
+                : "");
+          })() +
+        "</div>";
     }
 
     /* ---- gozleyen / yaratmaq ---- */
@@ -2093,14 +2147,6 @@
           setBusy("dgGo", false, "Diaqnostik test ver");
           $("dgMsg").innerHTML = msg("err", fail(e));
         });
-    });
-    on("dgRem", "click", function () {
-      var weak = (d.topics || []).filter(function (t) { return t.status !== "ok" && t.id; })
-        .map(function (t) {
-          return { id: t.id, name: t.name,
-                   subject_slug: d.test.subject_slug, level: d.test.level_code };
-        });
-      remedialGen(classId, weak);
     });
   }
 
@@ -2157,16 +2203,31 @@
         //  YIGILMIS bolmede, neytral (rengsiz) faizle gedir.
         var tsure = r.topics.filter(function (t) { return Number(t.total) >= minA; });
         var tlow  = r.topics.filter(function (t) { return Number(t.total) < minA; });
+        function topicRow(t) {
+          var bad = Number(t.ratio) < 60;
+          return '<div class="trow"><div class="g"><b>' +
+            (bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
+            esc(t.name) + "</b>" +
+            "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
+            meter(t.ratio) + "</div>" +
+            pctChip(t.ratio) + "</div>";
+        }
         if (tsure.length) {
-          h += '<div class="card pad0">' + tsure.map(function (t) {
-            var bad = Number(t.ratio) < 60;
-            return '<div class="trow"><div class="g"><b>' +
-              (bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
-              esc(t.name) + "</b>" +
-              "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
-              meter(t.ratio) + "</div>" +
-              pctChip(t.ratio) + "</div>";
-          }).join("") + "</div>";
+          /*  Yaxsi (>=80%) movzular yigilmis gedir: 12 movzuluq sinifde
+              siyahi ekrani udurdu, muellime ise zeif olanlar lazimdir.  */
+          var tneed = tsure.filter(function (t) { return Number(t.ratio) < 80; });
+          var tgood = tsure.filter(function (t) { return Number(t.ratio) >= 80; });
+          h += (tneed.length
+                  ? '<div class="card pad0">' + tneed.map(topicRow).join("") + "</div>"
+                  : '<div class="ok">' + ic("check") +
+                    "<span>Bütün mövzular yaxşıdır (≥80%).</span></div>") +
+               (tgood.length
+                  ? '<details class="more filt" style="margin-top:10px">' +
+                    "<summary>Yaxşı mövzular " +
+                      '<span class="fn">' + tgood.length + "</span></summary>" +
+                    '<div class="card pad0" style="margin-top:10px">' +
+                      tgood.map(topicRow).join("") + "</div></details>"
+                  : "");
         } else {
           h += '<div class="card"><p class="muted" style="margin:0">Hər mövzu üzrə ' +
             "ən azı " + minA + " cavab yığılanda etibarlı mənzərə burada görünəcək. " +
@@ -2197,14 +2258,16 @@
         /* Sehv edilen suallar: movzu teqli, ALTINDA "sehvler uzerinde is"
            duymesi - siyahi baxis yox, HEREKET nokresidir. */
         h += '<details class="more filt wrongbox" open>' +
-          "<summary>Təkrar səhv edilən suallar " +
+          "<summary>Səhv edilən suallar " +
             '<span class="fn">' + r.weak.length + "</span></summary>" +
           '<div class="card pad0" style="margin-top:10px">' +
           r.weak.map(function (w) {
             return '<div class="wq"><div class="g"><b>' + esc(w.body) + "</b>" +
               (w.topic ? '<span class="wtag">' + esc(w.topic) + "</span>" : "") +
               (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
-              '</div><span class="wn">' + w.wrong + "×</span></div>";
+              //  "1x" her setirde menasiz idi - say yalniz tekrarda
+              "</div>" + (Number(w.wrong) > 1
+                ? '<span class="wn">' + w.wrong + "×</span>" : "") + "</div>";
           }).join("") + "</div>" +
           '<button class="btn go wide" id="btnFix" style="margin-top:10px">' +
             ic("gen") + "Bu səhvlərdən təkrar testi yığ (" +
@@ -2214,8 +2277,9 @@
       }
 
       var at = r.attempts || [];
-      /* Dinamika: kohneden yeniye, her sutun bir test */
-      if (at.length >= 2) {
+      /* Dinamika: kohneden yeniye, her sutun bir test.  Iki sutunluq
+         qrafik hec ne demir - uc testden basliyir. */
+      if (at.length >= 3) {
         var bars = at.slice(0, 12).slice().reverse();
         h += "<h2>Dinamika</h2>" +
           '<div class="card"><div class="dyn">' + bars.map(function (a) {
@@ -2369,9 +2433,8 @@
       '<div class="spacer"></div>' +
       '<div class="card tight">' +
         "<h1>Tapşırıqlar</h1>" +
-        '<p class="muted" style="margin:8px 0 0">Seçdiyiniz test şagirdin ' +
-          "səhifəsində «Tapşırıqlar» bölməsində görünür. Son tarix keçəndə " +
-          "avtomatik bağlanır.</p>" +
+        '<p class="muted" style="margin:8px 0 0">Şagird tapşırığı öz ' +
+          "siyahısında görür; son tarix keçəndə bağlanır.</p>" +
         '<div class="spacer"></div>' +
         '<div class="swrap"><label class="switch" for="fp">' +
           '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
@@ -2393,9 +2456,8 @@
          Muellimler bunu qarisdirirdi: siyahida yalniz kohneler
          gorunurdu, yenisini haradan yigmagi ekran demirdi. */
       '<div class="card tight">' +
-        '<p class="muted" style="margin:0 0 12px">Siyahıda uyğun test ' +
-          "yoxdursa, sual bankından yenisini yığın — hazır olan kimi " +
-          "bura qayıdacaq və seçilmiş gələcək.</p>" +
+        '<p class="muted" style="margin:0 0 12px">Uyğun test yoxdursa ' +
+          "yenisini yığın — hazır olan kimi bura qayıdıb seçilmiş gələcək.</p>" +
         '<button class="btn wide" id="btnGenHere">' + ic("gen") +
           "Yeni test yığ</button>" +
       "</div>"
@@ -2532,12 +2594,26 @@
       sb.rpc("rpc_available_tests", { p_class_id: g.id }),
       //  basqa qrupdaki teyinatlar - "verilib" nisani ucun
       sb.select("assignments", { select: "test_id,class_id" })
-        .catch(function () { return []; })
+        .catch(function () { return []; }),
+      subjectNames()
     ]).then(function (res) {
       if (!live()) return;
       var box = $("pick");
       if (!box) return;
       var list = res[0] || [];
+      /*  Muellimin OZ fenni birinci: riyaziyyat muellimine siyahi
+          "Azerbaycan dili - 1" ile acilirdi (UX yoxlamasi).  Sira
+          sabitdir - eyni fennin icinde kohne sira qalir.  */
+      var myNames = (res[2] || []).filter(function (x) {
+        return mySubs().indexOf(x.slug) >= 0;
+      }).map(function (x) { return x.name; });
+      if (myNames.length) {
+        list = list.map(function (t, i) { return { t: t, i: i }; }).sort(function (a, b) {
+          var am = myNames.indexOf(String(a.t.subject || "")) >= 0 ? 0 : 1;
+          var bm = myNames.indexOf(String(b.t.subject || "")) >= 0 ? 0 : 1;
+          return am - bm || a.i - b.i;
+        }).map(function (x) { return x.t; });
+      }
       var elsew = {};
       (res[1] || []).forEach(function (a) {
         if (a.class_id !== g.id) elsew[a.test_id] = true;
@@ -2602,12 +2678,6 @@
             (t.is_free ? "" : " · abunə") +
             (elsew[t.id] ? " · başqa qrupda verilib" : "") + "</option>";
         }).join("") + "</select>" +
-        (g.level_id
-          ? '<p class="muted" style="margin:-8px 0 14px">' +
-            esc(levelName(g.level_id) || "") + " və ondan aşağı siniflər " +
-            "üçün yığılmış testlər göstərilir — təkrar üçün aşağı sinif " +
-            "materialı da verə bilərsiniz.</p>"
-          : "") +
         //  Kime: butun qrup (kohne davranis) ve ya tek sagird
         (students.length
           ? '<label for="aWho">Kimə</label>' +
@@ -2616,9 +2686,7 @@
               students.map(function (st) {
                 return '<option value="' + esc(st.id) + '">yalnız ' +
                   esc(st.display_name || "") + "</option>";
-              }).join("") + "</select>" +
-            '<p class="muted" style="margin:-8px 0 14px">Tək şagird ' +
-              "seçsəniz, tapşırığı yalnız o görəcək — qrupun qalanı yox.</p>"
+              }).join("") + "</select>"
           : "") +
         '<div class="fieldrow">' +
           '<div><label for="aDate">Son tarix</label>' +
@@ -2628,8 +2696,11 @@
               '<option value="2">2 cəhd</option><option value="3">3 cəhd</option>' +
               '<option value="0">Limitsiz</option></select></div>' +
         "</div>" +
+        //  Bes ayri izah bir cumleye yigildi (UX yoxlamasi): asagi sinif
+        //  testleri siyahida " · 2-ci sinif" nisani ile onsuz da gorunur
         '<p class="muted" style="margin:-8px 0 14px">Son tarix boş qalsa, ' +
-          "tapşırıq siz götürənə qədər açıq qalır.</p>" +
+          "tapşırıq siz götürənə qədər açıq qalır" +
+          (students.length ? "; tək şagird seçsəniz onu yalnız o görəcək." : ".") + "</p>" +
         '<div id="aErr"></div>' +
         '<button class="btn go" id="btnAsg">' + ic("plus") + "Tapşırıq ver</button>";
       if (isNew && $("aTest")) $("aTest").value = neu;
@@ -3242,6 +3313,8 @@
   //  Sinif kodundan adi - generatorun oz FAC siyahisindan
   function levelNameByCode2(code) {
     var l = (FAC.levels || []).filter(function (x) { return x.code === code; })[0];
+    //  hovuzda o sinifden sual yoxdursa FAC-da da yoxdur - umumi kesden al
+    if (!l) l = (LEVELS || []).filter(function (x) { return x.code === code; })[0];
     return l ? l.name : code;
   }
 
@@ -3321,6 +3394,32 @@
     nav("#/gen");
   }
 
+  /*  Ilk acilis: muellimin fenni TEK olanda ve butun qruplari eyni
+      sinifde olanda suzgec bos qalmasin.  "Butun fenler / Sinif
+      secilmeyib" ile baslayan ekran yeni muellimi casdirirdi (UX
+      yoxlamasi).  Yalniz BOS saheleri doldurur - tapsiriq ekranindan
+      gelende (genForClass) sinif artiq secilidir.  */
+  function genInit() {
+    var f = genFilter();
+    if (f.init) return Promise.resolve();
+    f.init = true;
+    return Promise.all([
+      sb.select("classes", { select: "level_id", eq: { account_id: ACC.id } })
+        .catch(function () { return []; }),
+      loadLevels()
+    ]).then(function (res) {
+      var subs = mySubs();
+      if (subs.length === 1 && !f.subject) f.subject = subs[0];
+      var seen = {};
+      (res[0] || []).forEach(function (c) { if (c.level_id) seen[c.level_id] = 1; });
+      var ids = Object.keys(seen);
+      if (ids.length === 1 && !f.levels.length) {
+        var code = levelCode(ids[0]);
+        if (code) f.levels = [code];
+      }
+    }).catch(function () {});
+  }
+
   function screenGen() {
     var live = guard();
     var f = genFilter();
@@ -3328,9 +3427,12 @@
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     //  Facets tek sinif qebul edir - movzu nisanlari onsuz da
     //  yalniz TEK sinif secilende cixir (asagida).
-    sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
+    genInit().then(function () {
+      if (!live()) return;
+      return sb.rpc("rpc_bank_facets", { p_subject: f.subject || null,
                                 p_level: f.levels.length === 1 ? f.levels[0] : null,
-                                p_pool: f.pool })
+                                p_pool: f.pool });
+    })
       .then(function (fac) {
         if (!live()) return;
         FAC = fac || {}; GFKEY = genFacKey(f); GFSEQ++;
@@ -3635,8 +3737,15 @@
         box.innerHTML = v.enough
           ? msg("ok", "Hovuzda kifayət qədər sual var — " + want +
                 " sual yığılacaq.")
-          : msg("err", "Bu süzgəclə yalnız " + found + " fərqli sual tapıldı (" +
-                want + " istənilir). Süzgəci genişləndirin və ya sayı azaldın.");
+          //  Yeni muellimin oz suali yoxdur - bu xeta deyil, yol
+          //  gostermekdir (evvel ilk aciliska qirmizi xeta cixirdi)
+          : (f.pool === "mine" && !(Number((FAC.usage || {}).used) || 0)
+              ? msg("warn", "Hələ öz sualınız yoxdur. «Sual bankı»nda yazın" +
+                    ((ACC && ACC.plan)
+                      ? " və ya yuxarıda «Platforma» seçin."
+                      : " — platforma hovuzu abunə paketi ilə açılır."))
+              : msg("err", "Bu süzgəclə yalnız " + found + " fərqli sual tapıldı (" +
+                    want + " istənilir). Süzgəci genişləndirin və ya sayı azaldın."));
       })
       .catch(function (e) {
         if (!live()) return;
@@ -4127,6 +4236,16 @@
       .then(function (fac) {
         if (!live() || myf !== BFSEQ) return;
         FAC = fac || {};
+        //  Ilk acilis: oz suali olmayan muellime bos "Sual tapilmadi"
+        //  gostermek evezine platforma bankini aciriq (UX yoxlamasi)
+        if (!f.auto) {
+          f.auto = true;
+          if (f.pool === "mine" && !(Number((FAC.usage || {}).used) || 0)) {
+            f.pool = "platform";
+            screenBank();
+            return;
+          }
+        }
         drawBank();
       })
       .catch(function (e) { if (live()) show(msg("err", fail(e))); });

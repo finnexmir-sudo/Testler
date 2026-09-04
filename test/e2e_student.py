@@ -214,20 +214,21 @@ with sync_playwright() as pw:
     ok("Məmmədova" not in pg.inner_text("#main"), "lovhede tam ad yoxdur")
 
     print("G · Bitmiş test təkrar işlənmir")
-    pg.click("#btnB"); pg.wait_for_selector(".ring", timeout=8000)
+    ok(pg.locator("#btnB").count() == 0, "Lovhede ikinci Geri duymesi yoxdur (ust zolaqda var)")
+    pg.click("#btnBack"); pg.wait_for_selector(".ring", timeout=8000)   # bir pille geri: neticeye
     pg.click("#btnHome"); pg.wait_for_selector(".test", timeout=8000)
     row = pg.locator(".test", has_text="Vurma cədvəli").first
     ok("100%" in row.inner_text(), "siyahida onceki netice gorunur",
        row.inner_text().replace("\n", " "))
-    ok("nəticəni gör" in row.inner_text().lower(),
+    ok("nəticəyə bax" in row.inner_text().lower(),
        "islenmis test aydin isarelenir", row.inner_text().replace("\n", " ")[-40:])
 
     row.click(); pg.wait_for_timeout(900)
     ok(pg.locator(".opt").count() == 0, "yeni cehd ACILMIR - sual gorunmur")
     ok(pg.locator(".ring").count() == 1, "evezine netice ekrani acilir")
     t = pg.inner_text("#main")
-    ok("yenidən işləmək olmaz" in t, "sagirde sebeb izah olunur")
-    ok("yuxarıda nəticən" in t, "netice ekranin harasinda oldugu gosterilir")
+    ok("işləmək olmaz" in t, "sagirde sebeb izah olunur")
+    ok("aşağıda cavabların" in t, "netice ekranin harasinda oldugu gosterilir")
     ok("Bir də cəhd edə bilərsən" not in t,
        "cehd qalmayanda 'bir de cehd ede bilersen' YAZILMIR")
     ok("100" in pg.inner_text(".ring .val"), "kohne netice gosterilir")
@@ -313,7 +314,8 @@ with sync_playwright() as pw:
     ok(pg.locator(".dyn i").count() >= 2, "mini qrafik cizilir",
        pg.locator(".dyn i").count())
     ok(pg.locator(".myr .best").count() >= 2, "faiz cipleri rənglidir")
-    pg.click("#btnB2"); pg.wait_for_selector(".test", timeout=8000)
+    ok(pg.locator("#btnB2").count() == 0, "Neticelerimde ikinci Geri duymesi yoxdur (ust zolaqda var)")
+    pg.click("#btnBack"); pg.wait_for_selector(".test", timeout=8000)
 
     print("I · Yarımçıq testdə çıxış xəbərdarlığı")
     pg.wait_for_selector(".test", timeout=8000)

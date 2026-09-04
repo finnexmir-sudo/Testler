@@ -227,8 +227,10 @@ with sync_playwright() as pw:
     ok(pg.locator("#aTest option").count() >= 1,
        "4-cu sinif qrupu ASAGI sinif testlerini gorur",
        pg.locator("#aTest option").count())
-    ok("aşağı siniflər" in pg.inner_text("#pick"),
-       "izah asagi siniflerin oldugunu yazir")
+    #  ayrica izah yoxdur (UX yoxlamasi) - asagi sinif testinin sinfi
+    #  secim setrinin ozunde " · N-ci sinif" kimi yazilir
+    ok(any("sinif" in o for o in pg.locator("#aTest option").all_inner_texts()),
+       "asagi sinif testinin sinfi secim setrinde yazilir")
 
     pg.click("#btnBack"); pg.wait_for_selector("#btnRen", timeout=8000)
     pg.click("#btnRen"); pg.wait_for_selector("#gLev", timeout=8000)

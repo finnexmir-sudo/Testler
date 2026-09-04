@@ -258,13 +258,16 @@
       '<div class="g"><b>' + esc(t.title) +
         //  Yalniz bu sagirde verilib - qrupun qalani gormur
         (t.personal ? '<span class="solo">sənə</span>' : "") +
-        (t.diagnostic ? '<span class="solo diag">diaqnostika</span>' : "") + "</b><i>" +
+        //  basliq onsuz da "Diaqnostika ·" ile baslayirsa cip tekrardir
+        (t.diagnostic && String(t.title || "").indexOf("Diaqnostika") < 0
+          ? '<span class="solo diag">diaqnostika</span>' : "") + "</b><i>" +
         "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
         "<span>" + (t.questions || 0) + " sual</span>" +
-        (isAsg && t.closes_at ? dueSpan(t.closes_at) : "") +
+        //  cehdi bitmis testde "son tarix · N gun qaldi" menasizdir
+        (isAsg && t.closes_at && !over ? dueSpan(t.closes_at) : "") +
         (left > 0 ? "<span>·</span><span>" + left + " cəhd qalıb</span>" : "") +
         (lock ? "<span>·</span><span>abunə lazımdır</span>" : "") +
-        (over ? "<span>·</span><span>işlənib — toxun, nəticəni gör</span>" : "") +
+        (over ? "<span>·</span><span>işlənib · nəticəyə bax</span>" : "") +
       "</i></div>" +
       (done ? '<span class="best ' + pctCls(t.best) + '">' +
         Math.round(t.best) + "%</span>" : "") +
@@ -284,12 +287,23 @@
           "<span>Bundan başla: <b>" + st.map(esc).join(", ") + "</b></span></div>"
         : '<div class="ok" style="margin-bottom:12px">' + ic("check") +
           "<span>Bütün mövzular yaxşıdır — afərin!</span></div>") +
-      '<div class="card pad0">' + tp.map(function (t) {
-        var l = lbl[t.status] || lbl.weak;
-        return '<div class="myr"><div class="g"><b>' + esc(t.name) + "</b>" +
-          "<i>" + t.correct + " / " + t.total + " düzgün</i></div>" +
-          '<span class="best ' + l[0] + '">' + l[1] + "</span></div>";
-      }).join("") + "</div>";
+      (function () {
+        function row(t) {
+          var l = lbl[t.status] || lbl.weak;
+          return '<div class="myr"><div class="g"><b>' + esc(t.name) + "</b>" +
+            "<i>" + t.correct + " / " + t.total + " düzgün</i></div>" +
+            '<span class="best ' + l[0] + '">' + l[1] + "</span></div>";
+        }
+        //  yaxsi movzular yigilmis - 12 setir sualların ustunde ekrani udurdu
+        var need = tp.filter(function (t) { return t.status !== "ok"; });
+        var good = tp.filter(function (t) { return t.status === "ok"; });
+        return (need.length ? '<div class="card pad0">' + need.map(row).join("") + "</div>" : "") +
+          (good.length
+            ? '<details class="more"' + (need.length ? ' style="margin-top:10px"' : " open") + ">" +
+              "<summary>Yaxşı mövzular <span class=\"fn\">" + good.length + "</span></summary>" +
+              '<div class="card pad0" style="margin-top:10px">' + good.map(row).join("") + "</div></details>"
+            : "");
+      })();
   }
 
   /* Faiz uzre reng sinfi: >=80 yasil, >=60 narinci, alti qirmizi */
@@ -647,8 +661,7 @@
 
       (review
         ? '<div class="warn" style="margin-bottom:12px">' + ic("info") +
-          "<span>Bu testi artıq işləmisən — yuxarıda nəticən, aşağıda isə " +
-          "bütün suallar və cavabların var. Testi yenidən işləmək olmaz.</span></div>"
+          "<span>Bu test artıq işlənib — aşağıda cavabların. Yenidən işləmək olmaz.</span></div>"
         : '<div class="ok" style="margin-bottom:12px">' + ic("check") +
           "<span>Nəticə yadda saxlanıldı. Müəllimin onu panelində görür.</span></div>") +
       '<div class="row"><button class="btn go" id="btnHome" style="flex:1">Testlər</button>' +
@@ -751,8 +764,8 @@
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_student_my_results", { p_token: TOKEN }).then(function (rows) {
       rows = rows || [];
-      var h = '<button class="btn sm ghost" id="btnB2">' + ic("back") +
-        "Testlər</button>" + '<div class="spacer"></div>';
+      //  ust zolaqda «Geri» var - ikinci "Testler" duymesi tekrar idi
+      var h = "";
       if (!rows.length) {
         h += '<div class="card pad0"><div class="empty"><div class="ic">' +
           ic("doc") + "</div><b>Hələ nəticə yoxdur</b>" +
@@ -777,19 +790,19 @@
         }).join("") + "</div>";
       }
       show(h);
-      on("btnB2", "click", screenTests);
     }).catch(function (e) { errScreen(e, screenMyResults); });
   }
 
   /* ---------------------------------------------------------- lovhe */
   function screenBoard(review) {
     markScreen(false);
+    BACKFN = function () { screenResult(S.result, review); };
     topTitle.textContent = "Lövhə";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_leaderboard", { p_token: TOKEN, p_test_id: S.test.id })
       .then(function (rows) {
-        var h = '<button class="btn sm ghost" id="btnB">' + ic("back") + "Geri</button>" +
-          '<div class="card tight" style="margin-top:12px">' +
+        //  ust zolaqda «Geri» var - ikinci duyme tekrar idi
+        var h = '<div class="card tight">' +
             "<h1>" + esc(S.test ? S.test.title : "Lövhə") + "</h1>" +
             '<p class="muted" style="margin:6px 0 0">' +
               (CLS ? esc(CLS.name) + " qrupundan " : "") +
@@ -807,7 +820,7 @@
           }).join("") + "</div>";
         }
         show(h);
-        on("btnB", "click", function () { screenResult(S.result, review); });
+
       })
       .catch(function (e) { errScreen(e, function () { screenBoard(review); }); });
   }
@@ -846,7 +859,12 @@
      Həll: ev ekranindan (Testlər) uzaqlaşanda BİR defelik tarix
      pilləsi qururuq, "geri" o pilləni sındırıb yenidən Testlərə
      qayıdır - real sehifeden hec vaxt cixmir. */
+  /*  Ust zolaqdaki «Geri» susmaya gore Testlere qaytarir.  Lovhe kimi
+      ara ekranlar BACKFN ile "bir pille geri" (neticeye) teyin edir -
+      ekran icinde ikinci «Geri» duymesi lazim olmur (UX yoxlamasi).  */
+  var BACKFN = null;
   function markScreen(isHome) {
+    BACKFN = null;
     //  Gorunen «Geri» duymesi: yalniz ev ekranindan uzaqda.  Istifadeci
     //  brauzer oxunu yox, sehifede duyme gozleyirdi - "hani geri duymesi?"
     if (btnBack) btnBack.classList.toggle("hide", isHome);
@@ -865,6 +883,7 @@
       return;
     }
     ON_HOME = true;
+    if (BACKFN) { var f = BACKFN; BACKFN = null; f(); return; }   // bir pille geri
     if (TOKEN) screenTests(); else screenLogin();
   });
 

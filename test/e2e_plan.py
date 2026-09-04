@@ -69,7 +69,7 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#btnSetup", timeout=8000)
     pg.select_option("#atype", "tutor")
     pg.fill("#aname", "Plan hesabi"); pg.click("#btnSetup")
-    pg.wait_for_selector("#btnBank", timeout=8000)
+    pg.wait_for_selector("#gForm", timeout=8000)
     AID = db("select id::text i from public.accounts", one=True)["i"]
     UID = db("select id::text i from auth.users where email='pln@t.az'", one=True)["i"]
     db("""insert into public.classes (id, account_id, teacher_id, kind, name, join_code)
@@ -86,7 +86,9 @@ with sync_playwright() as pw:
           select %s, p.id, 'active', now() + interval '30 days'
             from public.plans p where p.slug = 'repetitor-25'""", (AID,))
     pg.reload()
-    pg.wait_for_selector("#btnPlMk", timeout=8000)
+    pg.wait_for_selector("#btnPlOpen", timeout=8000)
+    ok(not pg.locator("#btnPlMk").is_visible(), "plan formasi yigilmis gelir - bir setir + «Planı qur»")
+    pg.click("#btnPlOpen"); pg.wait_for_selector("#btnPlMk", timeout=8000)
     pg.wait_for_function("document.querySelectorAll('#plSub option').length > 1", timeout=8000)
     subs = pg.locator("#plSub option").all_inner_texts()
     ndb = db("select count(distinct subject_id) n from public.topics "
@@ -272,6 +274,7 @@ with sync_playwright() as pw:
     #  dialoq dinleyicisi suite-in evvelinde onsuz da qeydiyyatdadir
     #  (setir 55) - ikincisini elave etmek "already handled" verir
     pg.locator("[data-pldel]").click()
+    pg.wait_for_selector("#btnPlOpen", timeout=8000); pg.click("#btnPlOpen")
     pg.wait_for_selector("#btnPlMk", timeout=8000)
     pg.wait_for_function(
         "document.querySelectorAll('#plSub option').length > 1", timeout=8000)

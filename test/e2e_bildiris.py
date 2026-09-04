@@ -69,7 +69,7 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#btnSetup", timeout=8000)
     pg.select_option("#atype", "tutor")
     pg.fill("#aname", "Bildiris hesabi"); pg.click("#btnSetup")
-    pg.wait_for_selector("#btnBank", timeout=8000)
+    pg.wait_for_selector("#gForm", timeout=8000)
     UID = db("select id::text i from auth.users where email='bld@t.az'", one=True)["i"]
     AID = db("select id::text i from public.accounts", one=True)["i"]
 

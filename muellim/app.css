@@ -838,3 +838,15 @@ details.arxiv>summary span{padding:1px 8px;border-radius:999px;
 .dprev.up{color:var(--ok)}
 .dprev.down{color:var(--err)}
 .dprev.same{color:var(--fg-3)}
+
+/* ---- UX yoxlamasi (icmal / qrup / plan) ---- */
+/* telefonda alt menyu eyni uc duymeni dasiyir - kart tekrardir */
+@media (max-width:720px){ body.bnav-on .quick{display:none} }
+/* bos hesab: "Qrup yarat" formasi basliğin altinda */
+#gForm.first{margin:14px 0 18px}
+#gForm .fttl{font-size:15.5px;font-weight:650;letter-spacing:-.01em;margin:0 0 12px}
+/* ders plani: bir setir + duyme */
+.plopen{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.plopen .muted{flex:1;min-width:0;font-size:13.5px;line-height:1.45}
+.plopen .btn{flex:0 0 auto}
+.plopen[hidden]{display:none}

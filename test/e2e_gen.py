@@ -277,8 +277,8 @@ with sync_playwright() as pw:
           select %s, p.id, 'active', now(), now() + interval '30 days'
             from public.plans p where p.slug='repetitor-25'""", (AID,))
     pg.goto(PANEL); pg.wait_for_timeout(300)
-    pg.reload(); pg.wait_for_selector("#btnGen", timeout=8000)
-    pg.click("#btnGen"); pg.wait_for_selector("#gPool", timeout=8000)
+    pg.reload(); pg.wait_for_selector("#gForm", timeout=8000)
+    pg.click("#bnav a[href='#/gen']"); pg.wait_for_selector("#gPool", timeout=8000)
     pg.locator("#gPool .seg", has_text="Platforma").click()
     pg.wait_for_timeout(500)
     ok("abunə paketinə daxildir" not in pg.inner_text("#main"),
@@ -722,8 +722,10 @@ with sync_playwright() as pw:
     lbl = pg.locator("#aTest option[value='" + LOW["i"] + "']").inner_text()
     ok("sinif" in lbl, "setirde testin sinfi yazilir", lbl)
     #  Izah metni de artiq dogru olmalidir
-    ok("aşağı siniflər" in pg.inner_text("#pick"),
-       "izah asagi siniflerin oldugunu yazir")
+    #  ayrica izah yoxdur (UX yoxlamasi) - asagi sinif testinin sinfi
+    #  secim setrinin ozunde " · N-ci sinif" kimi yazilir
+    ok(any("sinif" in o for o in pg.locator("#aTest option").all_inner_texts()),
+       "asagi sinif testinin sinfi secim setrinde yazilir")
 
     pg.select_option("#aTest", NEWT["i"])
     pg.select_option("#aWho", "")

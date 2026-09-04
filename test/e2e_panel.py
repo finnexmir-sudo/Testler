@@ -142,6 +142,8 @@ with sync_playwright() as pw:
     #  Paket gizlidir (SHOW_PLANS = false) - uc kart qalir
     ok(pg.locator(".qact").count() == 3, "suretli emeliyyatlar 3 kartdir",
        pg.locator(".qact").count())
+    #  telefonda (430px) kart gizlidir - alt menyu eyni uc duymeni dasiyir
+    ok(not pg.locator(".card.quick").is_visible(), "telefonda suretli emeliyyatlar gizlidir (alt menyu var)")
     ok(pg.locator("#btnMe").count() == 1, "profil qisayolu var")
     ok(pg.locator("#bnav a").count() == 4, "alt naviqasiya 4 bendlidir",
        pg.locator("#bnav a").count())
@@ -180,7 +182,7 @@ with sync_playwright() as pw:
     #  unvanla da acilmir - ana sehifeye qaytarir
     pg.goto(PANEL + "#/p"); pg.wait_for_timeout(700)
     ok("Paketlər" not in pg.inner_text("#main"), "unvanla da Paket acilmir")
-    pg.goto(PANEL + "#/"); pg.wait_for_selector(".qgrid", timeout=8000)
+    pg.goto(PANEL + "#/"); pg.wait_for_selector("#gForm", timeout=8000)
     # kontekst 430px-dedir - dar ekranda panel gorunur, masaustunde yox
     ok(pg.locator("#bnav").is_visible(), "dar ekranda alt panel gorunur")
     pg.set_viewport_size({"width": 1280, "height": 900})
@@ -425,11 +427,13 @@ with sync_playwright() as pw:
     pg.locator("#groups .item").first.click()
     pg.wait_for_selector(".stu", timeout=8000)
     n0 = pg.locator(".stu").count()
-    ok(pg.locator("[data-arch]").count() == n0,
-       "her aktiv sagirdde «Dayandır» var", (pg.locator("[data-arch]").count(), n0))
+    #  «Dayandır» setirde deyil, qelemin altindadir (nadir emeliyyat)
+    ok(pg.locator("[data-arch]").count() == 0, "setirde «Dayandır» yoxdur (redakte panelindedir)")
     ok(pg.locator("details.arxiv").count() == 0, "dayandirilmis bolmesi hele yoxdur")
 
     ad = pg.locator(".stu b").first.inner_text()
+    pg.locator(".stu [data-edit]").first.click(); pg.wait_for_selector(".stu .edit [data-arch]", timeout=8000)
+    ok(pg.locator("[data-arch]").count() == 1, "redakte panelinde «Dayandır» var")
     pg.locator("[data-arch]").first.click()
     pg.wait_for_selector("details.arxiv", timeout=8000)
     ok(pg.locator("details.arxiv").count() == 1, "dayandirilmis bolmesi cixir")

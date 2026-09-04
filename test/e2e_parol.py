@@ -61,7 +61,7 @@ with sync_playwright() as pw:
     pg.fill("#pass", "kohneparol1"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=8000)
     pg.select_option("#atype", "tutor"); pg.fill("#aname", "Parol hesabi")
-    pg.click("#btnSetup"); pg.wait_for_selector("#btnBank", timeout=8000)
+    pg.click("#btnSetup"); pg.wait_for_selector("#gForm", timeout=8000)
     pg.click("#btnOut")
     pg.wait_for_selector("#btnAuth", timeout=8000)
     ok(pg.locator("#btnForgot").count() == 1, "girisde 'Parolu unutmusunuz?' var")
@@ -91,7 +91,7 @@ with sync_playwright() as pw:
     ok("8 simvol" in pg.inner_text("#npErr"), "qisa parol reddedilir")
     pg.fill("#np1", "tezeparol22"); pg.fill("#np2", "tezeparol22")
     pg.click("#btnNp")
-    pg.wait_for_selector("#btnBank", timeout=8000)
+    pg.wait_for_selector("#gForm", timeout=8000)
     ok(True, "parol deyisdi, panel acildi")
 
     print("D · Köhnə parol işləmir, yenisi işləyir")
@@ -103,7 +103,7 @@ with sync_playwright() as pw:
        "kohne parol reddedilir", pg.inner_text("#authErr")[:40])
     pg.fill("#pass", "tezeparol22")
     pg.click("#btnAuth")
-    pg.wait_for_selector("#btnBank", timeout=8000)
+    pg.wait_for_selector("#gForm", timeout=8000)
     ok(True, "yeni parolla giris ugurludur")
 
     br.close()
