@@ -1233,6 +1233,15 @@ yanında `<span class="wm">Bil10</span>` və nöqtə, sonra səhifə adı.
 `theme-color` meta və manifestlərin `theme_color`-u da `#3559de`. Zolağa
 yeni element qoyanda rəngini ağ ver.
 
+## Bank həcmi yalnız adminə
+
+`showBankN()` (= `isAdmin()`) — bankın ölçüsü («Bankda 19 270 sual»,
+fənn/sinif/mövzu başına say, çətinlik bölgüsü, diaqnostika seçimində
+«· 36 sual») adi müəllimə göstərilmir (istifadəçi qərarı: rəqibə bank
+ölçüsü və zəif fənn görünməsin). Testin öz sual sayı («6 sual», «36 sual
+yığılacaq») hər yerdə qalır. Öz sualları hovuzunda say qalır — müəllimin
+özünündür. e2e_bank say yoxlamalarından əvvəl müəllimi admin edir.
+
 ## Yumşaq dərinlik — kölgə qaydası
 
 İstifadəçi seçimi (3 variantdan «yumşaq»): kart (`base.css .card`) nazik

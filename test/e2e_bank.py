@@ -259,6 +259,11 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".bpick .pkb", timeout=8000)
     ok(pg.locator(".qrow").count() == 0,
        "suzgecsiz platforma hovuzunda siyahi tokulmur")
+    #  Bank hecmi adi muellime gorunmur (istifadeci qerari): fenn kartinda
+    #  say yoxdur, "Bankda N sual var" yazisi yoxdur
+    ok("sual" not in pg.locator(".bpick .pkb").first.inner_text(), "adi muellim fenn kartinda sual sayi gormur",
+       pg.locator(".bpick .pkb").first.inner_text().replace("\n", " "))
+    ok("Bankda" not in pg.inner_text(".bpick"), "adi muellim 'Bankda N sual' yazisini gormur")
     npk = pg.locator(".bpick .pkb").count()
     ndb = db("select count(distinct subject_id) n from public.questions "
              "where owner_type = 'platform' and status = 'published'",
@@ -466,7 +471,11 @@ with sync_playwright() as pw:
        str(round(w)) + "/" + str(round(sv)) + "px")
     ok(pg.locator(".top .wm").count() == 1 and pg.inner_text(".top .wm") == "Bil10", "zolaqda Bil10 yazisi var")
 
-    print("I · Platforma hovuzu: siyahı yox, əhatə görüntüsü")
+    print("I · Platforma hovuzu: siyahı yox, əhatə görüntüsü (admin — saylar görünür)")
+    #  Bundan sonraki say yoxlamalari ADMIN gorunusunu sinayir: bank hecmi
+    #  yalniz adminə gosterilir.  Rol bazaya yazilir, sehife yenilenir.
+    db("insert into public.user_roles (user_id, role) select id, 'admin' from auth.users "
+       "where email = 'bank@t.az' on conflict do nothing")
     pg.goto(PANEL + "#/b"); pg.reload()
     pg.wait_for_selector("#bPool", timeout=15000)
     pool_click(pg, "Platforma")

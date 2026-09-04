@@ -88,8 +88,9 @@ with sync_playwright() as pw:
             from public.accounts a, public.plans p where a.name = %s and p.slug = 'repetitor-25'""", (ACC,))
     pg.reload(); pg.wait_for_selector("#dgGo", timeout=15000)
     opts = pg.locator("#dgSub option").all_inner_texts()
-    ok(any("Riyaziyyat" in o and "12 mövzu" in o and "36 sual" in o for o in opts),
-       "fenn secimi: Riyaziyyat - 12 movzu - 36 sual", opts[:2])
+    #  sual sayi (bank hecmi) adi muellime gosterilmir - yalniz adminə
+    ok(any("Riyaziyyat" in o and "12 mövzu" in o and "sual" not in o for o in opts),
+       "fenn secimi: Riyaziyyat - 12 movzu (sual sayi adi muellimde yoxdur)", opts[:2])
     pg.select_option("#dgSub", "riyaziyyat")
     pg.click("#dgGo"); pg.wait_for_selector("#dgMsg .ok", timeout=20000)
     ok("36 sual" in pg.inner_text("#dgMsg") and "12 mövzu" in pg.inner_text("#dgMsg"),

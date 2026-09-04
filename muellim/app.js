@@ -2223,7 +2223,7 @@
     } else {
       var opts = subs.map(function (s) {
         return '<option value="' + esc(s.slug) + '">' + esc(s.name) + " — " + s.topics +
-          " mövzu · " + s.questions + " sual</option>";
+          " mövzu" + (showBankN() ? " · " + s.questions + " sual" : "") + "</option>";
       }).join("");
       h += '<div class="card tight" style="margin-top:10px">' +
         "<b>" + (d.has ? "Yenidən diaqnostika" : "Diaqnostik test ver") + "</b>" +
@@ -3006,6 +3006,11 @@
   function isAdmin() {
     return !!(CTX && CTX.roles && CTX.roles.indexOf("admin") >= 0);
   }
+  /*  Bankin HECMI (nece min sual, fenn/sinif/movzu basina say) yalniz
+      adminə gorunur.  Adi muellime is ucun lazim deyil, reqibe ise
+      bankin olcusunu ve zeif fenni bir baxisda gosterirdi (istifadeci
+      qerari).  Testin oz sual sayi ("6 sual", "36 sual") her yerde qalir.  */
+  function showBankN() { return isAdmin(); }
 
   function azn(minor) {
     var m = Number(minor) || 0;
@@ -4697,7 +4702,7 @@
         d.levels sinif secilende de tam gelir (server onu suzmur).  */
     var head = '<div class="bcount">' + esc(subName(f.subject)) +
       (f.level ? " · " + esc(covLevelName(d, f.level)) : "") +
-      " · " + total + " sual</div>";
+      (showBankN() ? " · " + total + " sual" : "") + "</div>";
 
     if (!total) {
       box.innerHTML = head + '<div class="empty"><div class="ic">' + ic("doc") +
@@ -4711,15 +4716,15 @@
     if (!f.level) {
       var lv = d.levels || [];
       box.innerHTML = head +
-        '<div class="bpick"><p>Sinif seçin — həmin sinfin mövzuları ' +
-          "və hər mövzuda neçə sual olduğu görünəcək.</p>" +
+        '<div class="bpick"><p>Sinif seçin — həmin sinfin mövzuları' +
+          (showBankN() ? " və hər mövzuda neçə sual olduğu" : "") + " görünəcək.</p>" +
           '<div class="g">' + lv.map(function (l) {
             return '<button class="pkb" data-l="' + esc(l.code) + '">' +
-              esc(l.name) + "<i>" + (Number(l.n) || 0) + " sual</i></button>";
+              esc(l.name) + (showBankN() ? "<i>" + (Number(l.n) || 0) + " sual</i>" : "") + "</button>";
           }).join("") + "</div>" +
           (Number(d.no_level) > 0
             ? '<p class="muted" style="margin:12px 0 0">Bundan başqa ' +
-              Number(d.no_level) + " sual sinifsizdir — istənilən sinifdə " +
+              (showBankN() ? Number(d.no_level) + " sual" : "Bəzi suallar") + " sinifsizdir — istənilən sinifdə " +
               "işlənə bilər.</p>"
             : "") +
         "</div>";
@@ -4742,14 +4747,16 @@
         varsa (generator movzu basina beraber doldurub) her zolaq 100%
         olur - ekranda 12 dene tam dolu xett qalir, hec ne demir.
         Bele halda zolagi umumiyyetle cizmirik.  */
-    var bars = max > min;
+    var bars = max > min && showBankN();
     box.innerHTML = head +
       '<div class="cov">' + tp.map(function (t) {
         var n = Number(t.n) || 0;
         var parts = [];
-        if (Number(t.d1)) parts.push("asan " + t.d1);
-        if (Number(t.d2)) parts.push("orta " + t.d2);
-        if (Number(t.d3)) parts.push("çətin " + t.d3);
+        if (showBankN()) {
+          if (Number(t.d1)) parts.push("asan " + t.d1);
+          if (Number(t.d2)) parts.push("orta " + t.d2);
+          if (Number(t.d3)) parts.push("çətin " + t.d3);
+        }
         return '<div class="cvw">' +
           '<button class="cvr" data-t="' + esc(t.id) + '">' +
             '<div class="g"><b>' + esc(t.name) + "</b>" +
@@ -4757,8 +4764,8 @@
                 ? '<div class="cbar"><i style="width:' +
                   Math.round(n * 100 / max) + '%"></i></div>'
                 : "") +
-              "<i>" + esc(parts.join(" · ")) + "</i></div>" +
-            '<span class="n">' + n + "</span>" +
+              (parts.length ? "<i>" + esc(parts.join(" · ")) + "</i>" : "") + "</div>" +
+            (showBankN() ? '<span class="n">' + n + "</span>" : "") +
             '<span class="arrow">' + ic("right") + "</span>" +
           "</button>" +
           '<div class="smp" id="smp-' + esc(t.id) + '"></div>' +
@@ -4766,7 +4773,7 @@
       }).join("") + "</div>" +
       (Number(d.no_topic) > 0
         ? '<div class="bpick"><p style="margin:0">Bu sinifdə ' +
-          Number(d.no_topic) + " sual mövzusuzdur.</p></div>"
+          (showBankN() ? Number(d.no_topic) + " sual" : "bəzi suallar") + " mövzusuzdur.</p></div>"
         : "");
 
     Array.prototype.forEach.call(box.querySelectorAll("[data-t]"), function (b) {
@@ -4852,11 +4859,12 @@
           return a + (Number(x.n) || 0);
         }, 0);
         box0.innerHTML = subs.length
-          ? '<div class="bpick"><p>Bankda <b>' + total + "</b> sual var. " +
+          ? '<div class="bpick"><p>' +
+              (showBankN() ? "Bankda <b>" + total + "</b> sual var. " : "") +
               "Siyahı üçün fənn seçin və ya yuxarıdan axtarın:</p>" +
               '<div class="g">' + subs.map(function (x) {
                 return '<button class="pkb" data-s="' + esc(x.slug) + '">' +
-                  esc(x.name) + "<i>" + x.n + " sual</i></button>";
+                  esc(x.name) + (showBankN() ? "<i>" + x.n + " sual</i>" : "") + "</button>";
               }).join("") + "</div></div>"
           : '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
             "<b>Bu hovuzda hələ sual yoxdur</b></div>";
@@ -4939,8 +4947,10 @@
           box.insertAdjacentHTML("beforeend", rows + more);
         } else {
           box.innerHTML =
-            '<div class="bcount">' + total + " sual" +
-              (shown < total ? " · " + shown + "-i göstərilir" : "") + "</div>" +
+            '<div class="bcount">' +
+              (f.pool === "mine" || showBankN()
+                ? total + " sual" + (shown < total ? " · " + shown + "-i göstərilir" : "")
+                : (shown < total ? "İlk " + shown + " sual göstərilir" : "Tapılan suallar")) + "</div>" +
             rows + more;
         }
 
