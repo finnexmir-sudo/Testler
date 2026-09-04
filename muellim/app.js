@@ -3899,11 +3899,12 @@
                 : "yalnız bir şagird üçün") +
               ", bir cəhd.</span></div>" +
             '<p class="muted" style="margin:10px 0 0">Qrupa verilmir və yenidən yığılmır: ' +
-              "nəticə, mövzu xəritəsi və «Yenidən diaqnostika» şagirdin öz ekranındadır" +
+              "nəticə, mövzu xəritəsi və «Yenidən diaqnostika» şagirdin öz ekranındadır." +
+              //  qisa ad noqte ile bitir ("Huseynov M.") - cumle sonuna ikinci noqte qoyulmur
               (diagStu
-                ? ' — <a href="#/s/' + esc(diagStu.id) + "/" + esc(diagStu.class_id || "") +
-                  '">' + esc(diagStu.display_name || "şagird") + "</a>."
-                : ".") +
+                ? ' <a href="#/s/' + esc(diagStu.id) + "/" + esc(diagStu.class_id || "") +
+                  '">' + esc(diagStu.display_name || "Şagird") + " → şagird ekranı</a>"
+                : "") +
             "</p>" +
           "</div>"
         : "<h2>Qrupa təyin et</h2>" +
