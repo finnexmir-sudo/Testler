@@ -5577,12 +5577,306 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- bio11-bakteriyalar#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio11-bakteriyalar#7';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio11-bakteriyalar#comb1', 'bio-11-bakteriyalar',
+  'Bakteriyalarla bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Sporlar yüksək temperatura və quruluğa davamlıdır; konservlərin sterilizasiyası buna görə YÜKSƏK temperaturda aparılır, çünki adi qaynatma sporları öldürmür.
+2) 1-ci mülahizəyə əsasən, pasterizasiya (aşağı temperaturda mikrobların yalnız BÖYÜK hissəsini məhv edən proses) sporlu bakteriyaları TAM məhv ETMİR - bu, pasterizasiyanın sterilizasiyadan fərqli, daha yüngül proses olmasının səbəbidir.
+3) Pasterizasiya da sterilizasiya kimi bütün mikroorqanizmləri (sporlar daxil) tam məhv edir.
+4) Antibiotiklərin nəzarətsiz istifadəsi bakteriyalarda davamlılıq (rezistentlik) yaradır - bu, sporun davamlılığından fərqli, tamamilə ayrı bir mexanizmdir.',
+  '1, 2 və 4 doğrudur: sporlar yüksək temp/quruluğa davamlıdır, ona görə konserv sterilizasiyası yüksək temperatur tələb edir; pasterizasiya isə aşağı temperaturda yalnız mikrobların böyük hissəsini məhv edir, sporlu bakteriyaları tam yox etmir; antibiotik rezistentliyi tamam fərqli, qazanılmış bir müdafiə mexanizmidir. 3-cü mülahizə yanlışdır: pasterizasiya sterilizasiya DEYİL - tam mikrob yox etmə deyil, yalnız azaltmadır.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio11-bakteriyalar#7'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio11-biosfer#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio11-biosfer#20';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio11-biosfer#comb1', 'bio-11-biosfer',
+  'Ekologiya ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Ekoloji piramidada hər səviyyəyə keçdikdə enerjinin ~90%-i itir, yalnız 10%-i ötürülür; BUNA GÖRƏ qida zəncirinin uzunluğu adətən 4-5 həlqədən çox olmur - enerji itkisi zəncirin uzunluğunu MƏHDUDLAŞDIRAN səbəbdir.
+2) 1-ci mülahizəyə əsasən, 6-cı həlqəyə çatan enerji miqdarı ilk səviyyədəkindən təxminən 100 000 (10⁵) dəfə az olardı.
+3) Vulkan lavası üzərində həyatın yenidən başlaması İKİNCİLİ suksessiyaya misaldır, çünki torpaq artıq mövcuddur.
+4) Yanmış meşənin yerində bərpa isə İKİNCİLİ suksessiyadır, çünki torpaq qalıb.',
+  '1, 2 və 4 doğrudur: enerjinin yalnız 10%-i növbəti səviyyəyə keçir, bu, zəncirin 4-5 həlqədən uzun olmamasının səbəbidir; 5 keçiddən sonra enerji 10⁵ dəfə azalar - artıq həlqəni dəstəkləməz; yanmış meşədə torpaq qaldığı üçün bərpa ikincili suksessiyadır. 3-cü mülahizə yanlışdır: vulkan lavası üzərində torpaq YOXDUR, bu, İLKİN suksessiyaya misaldır, ikincili yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio11-biosfer#20'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio11-biotexnologiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio11-biotexnologiya#20';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio11-biotexnologiya#comb1', 'bio-11-biotexnologiya',
+  'Biotexnologiya üsulları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) PZR (polimeraza zəncir reaksiyası) az miqdarda DNT parçasını ÇOXALTMAQ üçün istifadə olunur; gen terapiyası isə zədəli genin işini DÜZƏLTMƏK və ya ƏVƏZ etmək üçündür - bu iki texnologiya FƏRQLİ məqsədlərə xidmət edir.
+2) 1-ci mülahizəyə əsasən, PZR gen terapiyasının ƏVƏZİ DEYİL - biri analiz/çoxaltma, digəri müalicə/düzəliş vasitəsidir.
+3) PZR həm DNT-ni çoxaldır, həm də zədəli geni düzəldir, ona görə PZR gen terapiyasının bir növüdür.
+4) Mikroklonal çoxaltma (bitki toxuma kulturası) sənaye mikrobiologiyasında ştamın seleksiya və gen mühəndisliyi ilə təkmilləşdirilməsindən FƏRQLİ bir texnologiyadır.',
+  '1, 2 və 4 doğrudur: PZR DNT-ni çoxaldır (analiz aləti), gen terapiyası isə zədəli geni düzəldir/əvəz edir (müalicə aləti) - fərqli məqsədlər; mikroklonal çoxaltma (bitki) və ştam təkmilləşdirmə (mikrob) də fərqli texnologiyalardır. 3-cü mülahizə yanlışdır: PZR yalnız mövcud DNT-nin SURƏTİNİ çoxaldır, geni dəyişdirmir/düzəltmir - bu, gen terapiyasının funksiyasıdır, PZR-in yox.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio11-biotexnologiya#20'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio11-bolunme-nezaret#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio11-bolunme-nezaret#12';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio11-bolunme-nezaret#comb1', 'bio-11-bolunme-nezaret',
+  'Hüceyrə bölünməsi və nəzarəti ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Meyoz olmasaydı, hər mayalanmadan sonra xromosom sayı nəsildən-nəslə İKİQAT artardı; krossinqover isə meyozun BİRİNCİ bölünməsinin profazasında baş verir və homoloji xromosomlar arasında gen mübadiləsi ilə yeni kombinasiyalar yaradır - meyoz HƏM xromosom sayını sabit saxlayır, HƏM DƏ genetik müxtəliflik yaradır.
+2) 1-ci mülahizəyə əsasən, meyozun bu iki funksiyası (say sabitliyi və müxtəliflik) BİR-BİRİNDƏN ASILI DEYİL - biri bölünmə SAYI, digəri krossinqoverin BAŞ VERMƏSİ ilə bağlıdır.
+3) Apoptoz (proqramlaşdırılmış hüceyrə ölümü) bədxassəli şişin əsas əlaməti kimi baş verir.
+4) Xoşxassəli şişin bədxassəlidən fərqi metastaz VERMƏMƏSİDİR.',
+  '1, 2 və 4 doğrudur: meyoz həm xromosom sayını sabit saxlayır, həm krossinqoverlə (profaza I-də) genetik müxtəliflik yaradır - bu iki funksiya bir-birindən asılı deyil; xoşxassəli şiş metastaz vermir. 3-cü mülahizə yanlışdır: apoptoz FAYDALI, nəzarətli prosesdir - zədəli hüceyrələri təmizləyir; əksinə, apoptozun POZULMASI (hüceyrələrin ölməməsi) bədxassəli şişin səbəblərindəndir, apoptozun özü yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio11-bolunme-nezaret#12'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio11-heyatin-yaranmasi#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio11-heyatin-yaranmasi#8';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio11-heyatin-yaranmasi#comb1', 'bio-11-heyatin-yaranmasi',
+  'Həyatın yaranması ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) İlk canlılar heterotrof idi (ilkin bulyondan hazır üzvi maddə alırdılar); avtotrof qidalanma isə bu üzvi maddə ehtiyatı TÜKƏNƏNDƏ həyatın davamını təmin etdi - avtotrofluq heterotrofluqdan SONRA, zərurətdən yaranıb.
+2) 1-ci mülahizəyə əsasən, Miller-Yurin təcrübəsi (aminturşuların abiogen alınması) heterotrof mərhələni DƏSTƏKLƏYİR, çünki bu aminturşular İLKİN BULYONUN tərkib hissəsi idi.
+3) İlk canlılar avtotrof idi, çünki fotosintez ən sadə qidalanma üsuludur.
+4) Mitoxondri və plastidlərin öz DNT-sinin olması onların simbioz bakteriyalardan yarandığı fikrini (simbiogenez) dəstəkləyir.',
+  '1, 2 və 4 doğrudur: ilk canlılar heterotrof idi, avtotrofluq üzvi ehtiyat tükənəndə zərurətdən yarandı; Miller-Yurin təcrübəsi ilkin bulyondakı aminturşuların mənbəyini göstərərək heterotrof mərhələni dəstəkləyir; mitoxondrinin öz DNT-si simbiogenezi dəstəkləyir. 3-cü mülahizə yanlışdır: ilk canlılar HETEROTROF idi, avtotrof deyil - avtotrofluq sonradan yaranıb.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio11-heyatin-yaranmasi#8'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio11-insan-muhit#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio11-insan-muhit#8';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio11-insan-muhit#comb1', 'bio-11-insan-muhit',
+  'İnsan və ətraf mühitlə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Bioakkumulyasiya nəticəsində pestisidlər qida zəncirində toplanır; bu toplanma səbəbindən qida zəncirinin YUXARI həlqələrində (yırtıcılarda) zəhərli maddələrin qatılığı ƏN YÜKSƏK olur.
+2) 1-ci mülahizəyə əsasən, insan qida zəncirinin YUXARI həlqəsindəki heyvanların (məsələn, iri yırtıcı balıqların) ətini istehlak edərkən DAHA ÇOX zəhərli maddə qəbul etmə riski daşıyır.
+3) Bioakkumulyasiya nəticəsində zəhərli maddələrin qatılığı qida zəncirinin AŞAĞI həlqələrində ən yüksək olur.
+4) Milli parkda (qoruqdan fərqli olaraq) tənzimlənən turizm və maarifləndirmə mümkündür.',
+  '1, 2 və 4 doğrudur: bioakkumulyasiya nəticəsində zəhərli maddə qida zəncirinin yuxarı həlqələrində toplanır, buna görə insan yuxarı həlqədəki heyvanları istehlak edərkən daha çox risk daşıyır; milli parkda tənzimlənən turizmə icazə verilir. 3-cü mülahizə yanlışdır: zəhərli maddə qatılığı YUXARI həlqələrdə ən yüksəkdir, aşağıda yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio11-insan-muhit#8'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio11-viruslar#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio11-viruslar#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio11-viruslar#comb1', 'bio-11-viruslar',
+  'İmmunitetlə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Virus infeksiyasından sonra qazanılan immunitet TƏBİİ AKTİV immunitet adlanır; zərdab (hazır antitellər) yeridilməsi isə SÜNİ PASSİV immunitet yaradır və MÜVƏQQƏTİDİR - bu iki immunitet növü həm mənbəyinə, həm davamlılığına görə fərqlənir.
+2) 1-ci mülahizəyə əsasən, təbii aktiv immunitet orqanizmin öz immun sisteminin reaksiyası olduğu üçün adətən süni passiv immunitetdən DAHA UZUNMÜDDƏTLİ olur.
+3) Zərdab yeridilməsi təbii aktiv immunitet yaradır, çünki orqanizm antitelləri özü istehsal edir.
+4) Kollektiv (sürü) immuniteti əhalinin böyük hissəsi immun olduqda xəstəliyin yayılmasının azalmasıdır - bu, FƏRDİ immunitetdən fərqli, populyasiya səviyyəsində bir hadisədir.',
+  '1, 2 və 4 doğrudur: virus keçirtmə təbii aktiv, zərdab isə süni passiv (müvəqqəti) immunitet yaradır - mənbə və davamlılıqla fərqlənir; təbii aktiv immunitet adətən daha uzunmüddətlidir; kollektiv immunitet isə fərdi immunitetdən fərqli, populyasiya səviyyəli hadisədir. 3-cü mülahizə yanlışdır: zərdab SÜNİ PASSİV immunitet yaradır - orqanizm antitelləri özü istehsal etmir, hazır alır.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio11-viruslar#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 132 then
-    raise exception '112: 132 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 139 then
+    raise exception '112: 139 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
