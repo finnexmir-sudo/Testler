@@ -6333,12 +6333,264 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- tarix9-cumhuriyyet#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix9-cumhuriyyet#16';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix9-cumhuriyyet#comb1', 'tarix-9-cumhuriyyet',
+  'Azərbaycan Xalq Cümhuriyyəti ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Bakı 1918-ci il sentyabrın 15-də azad olunduqdan sonra Cümhuriyyətin paytaxtı oldu.
+2) 1-ci mülahizəyə əsasən, Cümhuriyyət parlamenti də elə bu paytaxtda - Bakıda - 1918-ci il dekabrın 7-də ilk iclasını keçirdi.
+3) Cümhuriyyət Paris sülh konfransında tam DE-YURE tanınmışdı.
+4) Şeyx Məhəmməd Xiyabani rəhbərliyi ilə Cənubi Azərbaycanda 1920-ci il hərəkatı baş verdi və ölkəyə Azadıstan adı verildi.',
+  '1, 2 və 4 doğrudur: Bakı paytaxt oldu, parlament orada açıldı; Xiyabani hərəkatı Cənubda baş verdi, ölkəyə Azadıstan adı verildi. 3-cü mülahizə yanlışdır: Cümhuriyyət Paris konfransında yalnız DE-FAKTO tanınmışdı, de-yure yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix9-cumhuriyyet#16'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- tarix9-musteqillik#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix9-musteqillik#10';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix9-musteqillik#comb1', 'tarix-9-musteqillik',
+  'Müstəqillik dövrü ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Azərbaycan 1992-ci ilin martında BMT-yə üzv qəbul edildi, elə həmin il milli valyuta - manat da dövriyyəyə buraxıldı.
+2) 1-ci mülahizəyə əsasən, gənc dövlətin bu institusional addımlarından sonra, 1995-ci il Konstitusiyası ilə idarəetmə forması rəsmən prezidentli respublika kimi təsbit olundu.
+3) Cəbhədə atəşkəs sazişi 1993-cü ilin iyununda imzalandı.
+4) Bakı-Tbilisi-Ceyhan neft kəməri yeni neft strategiyasının nəticəsidir.',
+  '1, 2 və 4 doğrudur: BMT üzvlüyü və manat 1992-ci ildə, 1995-ci il Konstitusiyası prezidentli respublikanı təsbit etdi; BTC yeni neft strategiyasının məhsuludur. 3-cü mülahizə yanlışdır: atəşkəs sazişi 1993-cü ildə yox, 1994-CÜ İLİN MAYINDA imzalandı.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix9-musteqillik#10'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- tarix9-sovet#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix9-sovet#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix9-sovet#comb1', 'tarix-9-sovet',
+  'Sovet dövrü ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Azərbaycan SSR 1920-ci ilin aprel işğalından sonra yaradıldı, ilk hökumət başçısı Nəriman Nərimanov oldu.
+2) 1-ci mülahizəyə əsasən, sovet rejiminin sonrakı onilliklərində - 1937-ci il repressiyalarının qurbanları arasında Hüseyn Cavid və Mikayıl Müşfiq kimi məşhur ziyalılar da oldu.
+3) Qarabağ münaqişəsi 20 Yanvar faciəsindən SONRA, 1990-cı ildə başladı.
+4) Heydər Əliyev 1969-cu ildə Azərbaycana rəhbər seçildi.',
+  '1, 2 və 4 doğrudur: SSR 1920-ci ildə yaradıldı, Nərimanov başçı oldu, 1937-ci il repressiyasında Cavid/Müşfiq qurban oldu; Heydər Əliyev 1969-cu ildə rəhbər seçildi. 3-cü mülahizə yanlışdır: Qarabağ münaqişəsi 1990-cı ildən yox, 1988-Cİ İLDƏN başladı - 20 Yanvardan ƏVVƏL.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix9-sovet#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- tarix9-xix#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix9-xix#4';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix9-xix#comb1', 'tarix-9-xix',
+  'XIX əsr Azərbaycan tarixi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) 1848-ci ildə Bibiheybətdə dünyada ilk sənaye üsullu neft quyusu qazıldı.
+2) 1-ci mülahizəyə əsasən, bu neft sənayesinin sürətli inkişafı nəticəsində XIX əsrin sonunda Bakı dünya neft hasilatının təxminən yarısını verirdi.
+3) 1870-ci il kəndli islahatı Azərbaycan kəndlilərinə tam azadlıq və torpağı pulsuz verdi.
+4) Qori seminariyası Azərbaycanlı müəllim kadrları hazırlayırdı.',
+  '1, 2 və 4 doğrudur: Bibiheybət ilk neft quyusudur, əsr sonunda Bakı dünya hasilatının yarısını verirdi; Qori seminariyası müəllim hazırlayırdı. 3-cü mülahizə yanlışdır: 1870-ci il islahatı kəndlilərə YALNIZ TORPAQ PAYI ALMAQ HÜQUQU verdi, pulsuz/tam azadlıq yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix9-xix#4'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- tarix9-xx-evvel#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix9-xx-evvel#8';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix9-xx-evvel#comb1', 'tarix-9-xx-evvel',
+  'XX əsrin əvvəllərində milli hərəkat ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Difai» təşkilatı xalqı erməni hücumlarından qorumaq məqsədilə yaradılmışdı.
+2) 1-ci mülahizəyə əsasən, bu milli özünümüdafiə hərəkatının ideoloji davamı kimi «Müsavat» partiyası 1911-ci ildə təsis olundu.
+3) Səttarxana Salari-milli, Bağırxana isə Sərdari-milli adı verilmişdi.
+4) Zaqafqaziya seyminin dağılması müstəqil milli dövlətlərin elan olunmasına yol açdı.',
+  '1, 2 və 4 doğrudur: Difai özünümüdafiə üçün yarandı, Müsavat 1911-ci ildə quruldu; Seymin dağılması müstəqil dövlətlərin yolunu açdı. 3-cü mülahizə yanlışdır: adlar TƏRSİNƏ yazılıb - Səttarxan SƏRDARİ-MİLLİ, Bağırxan isə SALARİ-MİLLİ idi.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix9-xx-evvel#8'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- tarix9-yeni-dovr#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix9-yeni-dovr#15';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix9-yeni-dovr#comb1', 'tarix-9-yeni-dovr',
+  'Müasir dövr Azərbaycan tarixi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Bakı-Tbilisi-Ceyhan neft kəməri 2006-cı ildə, Bakı-Tbilisi-Qars dəmir yolu isə 2017-ci ildə tam istifadəyə verildi.
+2) 1-ci mülahizəyə əsasən, bu nəqliyyat-enerji infrastrukturunun davamı kimi Zəngəzur dəhlizi də Naxçıvanla birbaşa nəqliyyat əlaqəsini nəzərdə tutur.
+3) Ağdam, Kəlbəcər və Laçın rayonları uzun döyüşlərlə hərbi yolla azad edildi.
+4) 2023-cü ilin sentyabrında Azərbaycanın suverenliyi lokal antiterror tədbirləri ilə tam bərpa edildi.',
+  '1, 2 və 4 doğrudur: BTC 2006-cı, BTQ 2017-ci ildə açıldı, Zəngəzur dəhlizi Naxçıvanla əlaqəni nəzərdə tutur; 2023-cü il sentyabrında suverenlik antiterror tədbirləri ilə bərpa edildi. 3-cü mülahizə yanlışdır: Ağdam, Kəlbəcər və Laçın bəyanata əsasən DÖYÜŞSÜZ, sülh yolu ilə qaytarıldı.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix9-yeni-dovr#15'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 150 then
-    raise exception '112: 150 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 156 then
+    raise exception '112: 156 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
