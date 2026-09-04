@@ -4485,12 +4485,54 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- kim11-karbohidrat#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim11-karbohidrat#18';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim11-karbohidrat#comb1', 'kim-11-karbohidrat',
+  'Karbohidratlarla bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Saxaroza hidroliz olunanda qlükoza VƏ fruktoza (iki fərqli maddə) alınır, maltoza hidroliz olunanda isə iki EYNİ molekul (2 qlükoza) alınır - deməli saxarozanın və maltozanın monomer tərkibi fərqlidir.
+2) Qlükoza tərkibindəki aldehid qrupuna görə gümüş güzgü reaksiyası verir; 1-ci mülahizəyə əsasən, maltozanın hidrolizindən yalnız qlükoza alındığı üçün, bu hidroliz məhsulları da gümüş güzgü reaksiyası verməyə qadirdir.
+3) Qlükoza həm aldehid, həm spirt xassəsi göstərdiyi üçün aldehidospirt adlanır - bu ad onun YALNIZ TƏK funksional qrup daşıdığını göstərir.
+4) Nişasta və sellüloza eyni monomerdən (qlükoza) qurulsa da, zəncirin quruluş fərqi onların fərqli xassələr göstərməsinə səbəb olur.',
+  '1, 2 və 4 doğrudur: saxaroza fərqli iki şəkərə (qlükoza+fruktoza), maltoza isə iki eyni qlükozaya parçalanır - fərqli monomer tərkibi deməkdir; maltozanın hidroliz məhsulu olan qlükoza aldehid qrupu daşıdığı üçün gümüş güzgü reaksiyası verə bilər; nişasta və sellüloza eyni monomerdən olsa da zəncir quruluş fərqi xassələri fərqləndirir. 3-cü mülahizə yanlışdır: "aldehidospirt" adı əksinə, qlükozanın İKİ (aldehid VƏ spirt) funksional qrup daşıdığını göstərir, tək qrup yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim11-karbohidrat#18'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 106 then
-    raise exception '112: 106 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 107 then
+    raise exception '112: 107 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
