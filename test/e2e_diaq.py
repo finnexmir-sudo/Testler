@@ -150,7 +150,7 @@ with sync_playwright() as pw:
     print("E · Müəllim: xəritə, «bundan başla», düzəliş testi düyməsi")
     pg.reload(); pg.wait_for_selector("#dgMap", timeout=15000)
     ok(pg.locator("#dgMap .dgrow").count() == 12, "muellim xeritesinde 12 fesil")
-    ok(pg.locator("#dgMap .dgrow.weak").count() == 1 and pg.locator("#dgMap .dgrow.ok").count() == 11,
+    ok(pg.locator("#dgMap .dgrow.st-weak").count() == 1 and pg.locator("#dgMap .dgrow.st-ok").count() == 11,
        "1 zeif, 11 yaxsi (muellim)")
     box = pg.inner_text("#diagBox")
     ok("1 zəif" in box and "11 yaxşı" in box, "xulase cipleri", box[:80].replace("\n", " "))
@@ -199,7 +199,7 @@ with sync_playwright() as pw:
     #  SON xeriteni gosterir ("hamisi yaxsidir")
     ok(pg.locator("#btnRem").count() == 1 and "(1)" in pg.inner_text("#btnRem"),
        "duzelis duymesi tarixceye gore qalir (1-ci fesil 3/6)")
-    ok(pg.locator("#dgMap .dgrow.weak").count() == 0, "son xeritede zeif fesil yoxdur")
+    ok(pg.locator("#dgMap .dgrow.st-weak").count() == 0, "son xeritede zeif fesil yoxdur")
     ok("Bütün mövzular yaxşıdır" in box, "muellimde 'hamisi yaxsidir'")
     if os.environ.get("SHOT"): pg.locator("#diagBox").screenshot(path=os.environ["SHOT"] + "/diaq_muellim2.png")
 

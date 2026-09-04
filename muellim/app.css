@@ -511,9 +511,9 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .plrow i{flex:0 0 22px;height:22px;border-radius:50%;font-style:normal;
   font-size:11px;display:flex;align-items:center;justify-content:center;
   background:var(--n-25);color:var(--fg-3);border:1px solid var(--n-100)}
-.plrow.ok i{background:var(--ok-tint);color:var(--ok);
+.plrow.done i{background:var(--ok-tint);color:var(--ok);
   border-color:var(--ok-line)}
-.plrow.ok span{color:var(--fg-3)}
+.plrow.done span{color:var(--fg-3)}
 .plrow.cur span{font-weight:620}
 .plrow.cur i{background:var(--brand-tint);color:var(--brand);
   border-color:var(--brand-line)}
@@ -831,9 +831,9 @@ details.arxiv>summary span{padding:1px 8px;border-radius:999px;
 .dgsum{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
 .dgdelta{font-size:12.5px;color:var(--fg-2)}
 .dst{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
-.dst.ok{background:var(--ok-tint);color:var(--ok)}
-.dst.mid{background:var(--warn-tint);color:var(--warn)}
-.dst.weak{background:var(--err-tint);color:var(--err)}
+.dst.st-ok{background:var(--ok-tint);color:var(--ok)}
+.dst.st-mid{background:var(--warn-tint);color:var(--warn)}
+.dst.st-weak{background:var(--err-tint);color:var(--err)}
 .dprev{font-size:13px;font-weight:700;width:16px;text-align:center;flex:0 0 16px}
 .dprev.up{color:var(--ok)}
 .dprev.down{color:var(--err)}
@@ -850,3 +850,22 @@ details.arxiv>summary span{padding:1px 8px;border-radius:999px;
 .plopen .muted{flex:1;min-width:0;font-size:13.5px;line-height:1.45}
 .plopen .btn{flex:0 0 auto}
 .plopen[hidden]{display:none}
+
+/* ---- masaustu: sagird setri bir-iki setirde yigcam (UX yoxlamasi, sekil 2) ----
+   Telefonda uc setir (ad / kod / valideyn) alt-alta qalir; enli kartda
+   kod ve valideyn yan-yana durur, "Bagla" sagin dibine qacmir. */
+@media (min-width:721px){
+  .stu{display:flex;flex-wrap:wrap;align-items:center;column-gap:26px;row-gap:8px;padding:12px 16px}
+  .stu .l1{flex:1 0 100%}
+  .stu .l2,.stu .l3{margin-top:0;padding-top:0;border-top:0}
+  .stu .l3{padding-left:22px;border-left:1px dashed var(--n-150)}
+  .stu .l3 .btn.arch{margin-left:0}
+  .stu .edit,.stu .stuwarn{flex:1 0 100%}
+}
+/* plan setrindeki secim qutusu base.css-in umumi input qaydasindan (40px,
+   padding, margin-bottom) azad olur - masaustunde setri sisirirdi */
+.plrow .plck{min-height:0;padding:0;margin-bottom:0;border:0;box-shadow:none;background:none}
+.plrow .plck ~ .plundo{margin-left:8px}
+/* "geri" olan setirde secim qutusu da sag kenarda qalsin (sutun duz dursun) */
+.plrow .plck ~ .plundo{order:-1;margin-left:auto}
+.plrow:has(.plundo) .plck{margin-left:10px}

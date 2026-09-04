@@ -1018,6 +1018,13 @@ də yoxlayır: yana sürüşmə, boş ikon, üstlüyün yeri. Testlərdə də `.
 
 ---
 
+**`ok` / `warn` / `err` sinifləri `assets/base.css`-də mesaj qutusudur**
+(padding, çərçivə, rəng). Vəziyyət sinfi kimi `class="plrow ok"` və ya
+`class="dgrow ok"` yazanda sətir yaşıl karta çevrilir və şişir — canlıda
+masaüstündə görünüb. Vəziyyət üçün `done`, `st-ok`, `st-mid`, `st-weak`
+yaz. Eyni səbəbdən `<input type="checkbox">` `.plck` base `input`
+qaydasından (40px, padding) azad edilir.
+
 ## Sual bankı — qayda
 
 Sual **testin içində deyil, bankdadır**. `test_questions` hansı testin

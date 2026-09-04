@@ -907,7 +907,8 @@
                 ' şagird">' + Math.round(avgN) + "%</b>";
             }
             var weak = it.done && it.test_id && avgN != null && avgN < 60;
-            return '<div class="plrow' + (it.done ? " ok" : "") +
+            //  "ok" YOX: base.css-de .ok yasil netice qutusudur - setir sisirdi
+            return '<div class="plrow' + (it.done ? " done" : "") +
               (cur && it.id === cur.id ? " cur" : "") + '">' +
               "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
               "<span>" + esc(it.topic) +
@@ -2012,7 +2013,7 @@
     });
   }
 
-  var DST = { ok: ["ok", "yaxşı"], mid: ["mid", "orta"], weak: ["weak", "zəif"] };
+  var DST = { ok: ["st-ok", "yaxşı"], mid: ["st-mid", "orta"], weak: ["st-weak", "zəif"] };
   function dstChip(st) {
     var l = DST[st] || DST.weak;
     return '<span class="dst ' + l[0] + '">' + l[1] + "</span>";
@@ -2077,7 +2078,7 @@
         '<div style="margin-top:10px" id="dgMap">' +
           (function () {
             function row(t) {
-              return '<div class="trow dgrow ' + esc(t.status) + '"><div class="g"><b>' +
+              return '<div class="trow dgrow st-' + esc(t.status) + '"><div class="g"><b>' +
                 esc(t.name) + "</b>" +
                 "<i>" + t.correct + " / " + t.total + " düzgün</i>" + meter(t.ratio) + "</div>" +
                 dprev(t) + dstChip(t.status) + "</div>";

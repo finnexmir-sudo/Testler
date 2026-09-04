@@ -128,7 +128,7 @@ with sync_playwright() as pw:
     ok("Yoxlama testi yığılsınmı" in pg.inner_text(".ploffer"), "teklif cixir")
     pg.fill("#plCnt", "5")
     pg.locator("[data-pltest]").click()
-    # .ok sinfi .plrow.ok ile toqqusur - netice qutusu plm- konteynerindedir
+    # .ok sinfi .plrow.done ile toqqusur - netice qutusu plm- konteynerindedir
     pg.wait_for_selector(".plan [id^='plm-'] a", timeout=10000)
     ok("tapşırıq verildi" in pg.inner_text(".plan [id^='plm-']"), "netice mesaji")
     t = db("""select t.id::text i,
@@ -145,7 +145,7 @@ with sync_playwright() as pw:
     pg.locator(".plan details:not(.plgrp) > summary").click(); pg.wait_for_timeout(300)
     ok(pg.locator(".plrow").count() == ntop, "butun movzular siyahida",
        pg.locator(".plrow").count())
-    ok(pg.locator(".plrow.ok").count() == 1, "kecilmis isarelenib")
+    ok(pg.locator(".plrow.done").count() == 1, "kecilmis isarelenib")
     ok(pg.locator(".plrow .pltest").count() == 1, "veraq linki var")
     pg.locator("[data-plundo]").click()
     pg.wait_for_timeout(900)
