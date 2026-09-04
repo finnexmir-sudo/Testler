@@ -8895,12 +8895,264 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- kim10-alkan#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim10-alkan#29';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim10-alkan#comb1', 'kim-10-alkan',
+  'Alkanlar ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Alkanların ümumi formulu CnH2n+2-dir; n = 6 olduqda C6H14 (heksan) molekulu alınır.
+2) 1-ci mülahizəyə əsasən, eyni molekul formuluna (C4H10) malik olan n-butan və izobutan bir-birinin izomerləridir - fərqli quruluşa malikdirlər.
+3) Alkanlar doymamış olduqları üçün asanlıqla polimerləşir.
+4) Metanın xlorla işıqda reaksiyası əvəzetmə reaksiyasıdır.',
+  '1, 2 və 4 doğrudur: alkan formulu və izomerlik doğrudur, metan+xlor əvəzetmədir. 3-cü mülahizə yanlışdır: alkanlar DOYMUŞ olduqları üçün POLİMERLƏŞMİR, doymamış deyil.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim10-alkan#29'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim10-alken#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim10-alken#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim10-alken#comb1', 'kim-10-alken',
+  'Alkenlər ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Alkenin bromlu suyu rəngsizləşdirməsi molekulda ikiqat rabitənin - doymamışlığın olduğunu göstərir.
+2) 1-ci mülahizəyə əsasən, bu doymamışlıq səbəbindən etilenə hidrogen birləşdirildikdə doymamışlıq aradan qalxaraq doymuş alkan - etan alınır.
+3) Alkenlərə hidrogen-halogenidlərin birləşməsi Hess qanununa tabedir.
+4) Alkenlər sənayedə əsasən neft məhsullarının krekinqindən alınır.',
+  '1, 2 və 4 doğrudur: bromlu su doymamışlığı göstərir, etilen+H2→etan doğrudur; alkenlər krekinqdən alınır. 3-cü mülahizə yanlışdır: hidrogen-halogenidlərin birləşməsi Hess qanununa yox, MARKOVNİKOV QAYDASINA tabedir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim10-alken#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim10-alkin#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim10-alkin#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim10-alkin#comb1', 'kim-10-alkin',
+  'Alkinlər ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Üçqat rabitə bir siqma və iki pi rabitəsindən ibarətdir; asetilen sənayedə kalsium-karbidin su ilə reaksiyasından alınır.
+2) 1-ci mülahizəyə əsasən, bu çoxsaylı rabitələr üçqat rabitəni ikiqat rabitədən daha qısa edir.
+3) Alkin adındakı rəqəm (məsələn, butin-1) molekulun yaşını göstərir.
+4) Kalsium-karbidin formulu CaC2-dir.',
+  '1, 2 və 4 doğrudur: üçqat rabitə tərkibi və asetilen alınması doğrudur, üçqat rabitə qısadır; CaC2 doğru formuldur. 3-cü mülahizə yanlışdır: rəqəm molekulun yaşını yox, ÜÇQAT RABİTƏNİN YERİNİ göstərir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim10-alkin#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim10-aromatik#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim10-aromatik#10';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim10-aromatik#comb1', 'kim-10-aromatik',
+  'Aromatik karbohidrogenlər ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Benzolun molekul formulu C6H6-dır, altı karbon atomu müntəzəm altıbucaqlı halqa əmələ gətirir; bu halqavi quruluşu ilk dəfə Kekule təklif etmişdir.
+2) 1-ci mülahizəyə əsasən, benzolun homoloqları ümumi CnH2n−6 formuluna tabedir.
+3) Benzol doymamış olduğu üçün bromlu suyu dərhal rəngsizləşdirir.
+4) Toluolun kimyəvi adı metilbenzoldur.',
+  '1, 2 və 4 doğrudur: benzol formulu/quruluşu və Kekule doğrudur, homoloqlar CnH2n−6 formulundadır; toluol metilbenzoldur. 3-cü mülahizə yanlışdır: benzol adi şəraitdə bromlu suyu RƏNGSİZLƏŞDİRMİR - aromatik rabitənin sabitliyi buna imkan vermir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim10-aromatik#10'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim10-dien-tsiklo#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim10-dien-tsiklo#20';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim10-dien-tsiklo#comb1', 'kim-10-dien-tsiklo',
+  'Alkadienlər və tsikloalkanlar ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Alkadienlərin molekulunda iki ikiqat rabitə olur, ümumi formulu isə CnH2n−2-dir.
+2) 1-ci mülahizəyə əsasən, təbii kauçuk da belə bir dien - izoprenin polimeridir, kauçuku rezinə çevirən proses isə kükürdlə aparılan vulkanizasiyadır.
+3) Tsikloalkanla eyni formullu alken bir-birinin homoloqlarıdır.
+4) Ən kiçik tsikloalkan tsiklopropandır.',
+  '1, 2 və 4 doğrudur: alkadien tərifi/kauçuk-vulkanizasiya doğrudur; tsiklopropan ən kiçik tsikloalkandır. 3-cü mülahizə yanlışdır: eyni formullu (CnH2n) tsikloalkan və alken homoloq yox, SİNİFLƏRARASI İZOMERLƏRDİR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim10-dien-tsiklo#20'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim10-neft#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim10-neft#17';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim10-neft#comb1', 'kim-10-neft',
+  'Neft emalı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Krekinq prosesi iri molekulların qızdırılmaqla kiçik molekullara parçalanmasıdır, bu proses daha çox benzin almaq üçün aparılır.
+2) 1-ci mülahizəyə əsasən, əldə edilən benzinin keyfiyyəti oktan ədədi ilə qiymətləndirilir - yüksək oktan ədədi benzinin detonasiyaya daha davamlı olduğunu göstərir.
+3) Distillə kalonunda ən yuxarıda ən ağır fraksiya (mazut) toplanır.
+4) Neftin mənşəyi haqqında əsas fərziyyəyə görə o, qədim üzvi qalıqların çevrilməsindən yaranmışdır.',
+  '1, 2 və 4 doğrudur: krekinq/oktan ədədi doğrudur; neft üzvi qalıqlardan yaranıb. 3-cü mülahizə yanlışdır: distillə kalonunda yuxarıda ƏN YÜNGÜL (benzin) fraksiya toplanır, ağır fraksiya yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim10-neft#17'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 211 then
-    raise exception '112: 211 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 217 then
+    raise exception '112: 217 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
