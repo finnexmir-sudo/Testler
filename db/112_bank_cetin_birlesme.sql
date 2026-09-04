@@ -4401,12 +4401,54 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- cog11-demoqrafiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog11-demoqrafiya#9';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog11-demoqrafiya#comb1', 'cog-11-demoqrafiya',
+  'Demoqrafiya ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) İnkişaf etmiş ölkələrdə doğum və ölüm aşağıdır, əhali qocalır - bu ölkələrin yaş-cins piramidası, deməli, gənc, yüksək doğumlu ölkələrə xas geniş əsaslı (üçbucaq formalı) piramidanın ƏKSİNƏDİR.
+2) 1-ci mülahizəyə əsasən, bu ölkələrdə pensiya yükü artır və işçi qüvvəsi azalır.
+3) Əhalinin qocalmasının əsas səbəbi beyin axınıdır - yüksəkixtisaslı gənclərin xaricə köçməsi ölkəni yaşlı əhali ilə tək qoyur.
+4) Şəhər əhalisinin payının 40 %-dən 70 %-ə qalxması (urbanizasiya) ilə əhalinin qocalması eyni demoqrafik hadisə deyil - biri məskunlaşma NÖVÜNÜ, digəri yaş QURULUŞUNU dəyişir.',
+  '1, 2 və 4 doğrudur: inkişaf etmiş ölkələrdə aşağı doğum/ölüm əhalini qocaldır, bu, gənc əhaliyə xas üçbucaq piramidanın əksidir; qocalma pensiya yükünü artırır, işçi qüvvəsini azaldır; urbanizasiya (məskunlaşma növü) ilə qocalma (yaş quruluşu) fərqli demoqrafik proseslərdir. 3-cü mülahizə yanlışdır: qocalmanın səbəbi aşağı doğum/ölüm əmsallarıdır, beyin axını yox - beyin axını ölkəyə fərqli ziyan (insan kapitalının itirilməsi) vurur, əhalinin yaş quruluşunu deyil.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog11-demoqrafiya#9'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 104 then
-    raise exception '112: 104 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 105 then
+    raise exception '112: 105 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
