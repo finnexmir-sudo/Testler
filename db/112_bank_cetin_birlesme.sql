@@ -6921,12 +6921,264 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- fiz9-cereyan-muhit#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz9-cereyan-muhit#22';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz9-cereyan-muhit#comb1', 'fiz-9-cereyan-muhit',
+  'Elektrik cərəyanı və müxtəlif mühitlərlə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Metal qızdırıldıqda müqaviməti artır, çünki ionların rəqsi güclənir və elektronlara mane olur.
+2) 1-ci mülahizəyə əsasən, yarımkeçiricidə isə əksinə - temperatur artdıqca keçiricilik YAXŞILAŞIR, çünki bu, metaldan fərqli bir mexanizmdir.
+3) p-n keçidi cərəyanı hər iki istiqamətdə bərabər keçirir, ona görə yarımkeçirici diod səsi ucaltmaq üçün istifadə olunur.
+4) Fotorezistorun müqaviməti işıq düşdükdə azalır.',
+  '1, 2 və 4 doğrudur: metalda qızma müqaviməti artırır, yarımkeçiricidə əksinə keçiricilik yaxşılaşır; fotorezistor işıqda müqavimətini azaldır. 3-cü mülahizə yanlışdır: p-n keçidi cərəyanı YALNIZ BİR İSTİQAMƏTDƏ keçirir, diod isə cərəyanı DÜZLƏNDİRMƏK üçün istifadə olunur.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz9-cereyan-muhit#22'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz9-guzgu-linza#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz9-guzgu-linza#14';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz9-guzgu-linza#comb1', 'fiz-9-guzgu-linza',
+  'Güzgü və linzalarla bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Müstəvi güzgüdə xəyal mövhumi, düz və cisimlə eyni boydadır.
+2) 1-ci mülahizəyə əsasən, qabarıq güzgüdə isə xəyal həmişə kiçilmiş, düz və mövhumi olur - müstəvi güzgüdən fərqli olaraq ölçü dəyişir.
+3) Cisim toplayıcı linzanın fokusu ilə linza arasında olanda xəyal kiçilmiş, tərs və həqiqi olur.
+4) Toplayıcı linzanın ortası kənarlarından qalındır.',
+  '1, 2 və 4 doğrudur: müstəvi güzgüdə xəyal cisim boyda, qabarıqda kiçilmiş-mövhumidir; toplayıcı linzanın ortası qalındır. 3-cü mülahizə yanlışdır: cisim fokusla linza arasında olanda xəyal BÖYÜDÜLMÜŞ, DÜZ VƏ MÖVHUMİ olur, kiçilmiş/tərs/həqiqi yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz9-guzgu-linza#14'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz9-isiq#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz9-isiq#16';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz9-isiq#comb1', 'fiz-9-isiq',
+  'İşığın sınması və qayıtması ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) İşıq optik sıx mühitə keçəndə sınma bucağı düşmə bucağından kiçik olur, çünki optik sıx mühitdə işığın sürəti azalır.
+2) 1-ci mülahizəyə əsasən, tam daxili qayıtma da sıx mühitdən böyük bucaq altında düşəndə baş verir və bu, məhz almazın güclü parıltısının səbəbidir.
+3) Tam daxili qayıtma hadisəsi lifli optikada (optik kabellərdə) tətbiq olunmur.
+4) Optikada bucaqlar səthə qaldırılmış perpendikulyardan (normaldan) ölçülür.',
+  '1, 2 və 4 doğrudur: sıx mühitə keçəndə sınma bucağı kiçilir, tam daxili qayıtma almazın parıltısının səbəbidir; bucaqlar normaldan ölçülür. 3-cü mülahizə yanlışdır: tam daxili qayıtma məhz LİFLİ OPTİKADA (optik kabellərdə) tətbiq olunur.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz9-isiq#16'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz9-maqnit-sahe#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz9-maqnit-sahe#26';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz9-maqnit-sahe#comb1', 'fiz-9-maqnit-sahe',
+  'Maqnit sahəsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Sabit maqnitin sahəsini əslində atomdaxili elektronların hərəkəti - mikro cərəyanlar yaradır.
+2) 1-ci mülahizəyə əsasən, bu mikroskopik cərəyanların təbiətinə bənzər olaraq, eyni istiqamətli cərəyanlı iki paralel naqil öz sahələri vasitəsilə bir-birini CƏZB edir.
+3) Alüminium tozunun maqnitlə yığılmaması onun çox ağır olmasındandır.
+4) İnduksiya cərəyanının istiqaməti Lens qaydası ilə müəyyən olunur.',
+  '1, 2 və 4 doğrudur: sabit maqnitin sahəsi atomdaxili cərəyanlardan yaranır, paralel eyniistiqamətli naqillər cəzb olunur; induksiya cərəyanının istiqaməti Lens qaydası ilə tapılır. 3-cü mülahizə yanlışdır: alüminium tozu maqnitlə yığılmır, çünki FERROMAQNİT DEYİL, ağırlığa görə yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz9-maqnit-sahe#26'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz9-nuve#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz9-nuve#9';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz9-nuve#comb1', 'fiz-9-nuve',
+  'Nüvə enerjisi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Zəncirvari reaksiyada Uran-235 nüvəsinin bölünməsində ayrılan neytronlar yeni nüvələri bölür, bu proses davam edir.
+2) 1-ci mülahizəyə əsasən, bu reaksiyanın başlaya bilməsi üçün minimal - kritik kütlə tələb olunur.
+3) İstilik nüvə (sintez) reaksiyası ağır nüvələrin bölünərək yüngül nüvə yaratmasıdır.
+4) Bir uran nüvəsinin bölünməsində ayrılan enerji adi kimyəvi reaksiyadakından milyonlarla dəfə çoxdur.',
+  '1, 2 və 4 doğrudur: zəncirvari reaksiya Uran-235-də neytronlarla davam edir, kritik kütlə tələb olunur; nüvə bölünməsində enerji kimyəvi reaksiyadan milyonlarla dəfə çoxdur. 3-cü mülahizə yanlışdır: sintez reaksiyası YÜNGÜL nüvələrin BİRLƏŞMƏSİDİR, ağır nüvələrin bölünməsi (fissiya) yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz9-nuve#9'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz9-radioaktivlik#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz9-radioaktivlik#16';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz9-radioaktivlik#comb1', 'fiz-9-radioaktivlik',
+  'Radioaktivlik ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Alfa şüaları helium nüvələrindən ibarətdir və adi kağız vərəqi belə onları saxlaya bilir.
+2) 1-ci mülahizəyə əsasən, alfa çevrilməsində nüvənin yük ədədi 2 vahid azalır - çünki alfa hissəciyi (helium nüvəsi) 2 protonla birlikdə nüvədən ayrılır.
+3) Beta çevrilməsində nüvənin yük ədədi 2 vahid azalır.
+4) İzotoplar bir-birindən nüvədəki neytronların sayı ilə fərqlənir.',
+  '1, 2 və 4 doğrudur: alfa şüaları helium nüvəsidir, kağızla saxlanır, alfa çevrilməsində yük 2 vahid azalır; izotoplar neytron sayı ilə fərqlənir. 3-cü mülahizə yanlışdır: beta çevrilməsində yük 2 vahid azalmır, 1 VAHİD ARTIR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz9-radioaktivlik#16'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 164 then
-    raise exception '112: 164 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 170 then
+    raise exception '112: 170 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
