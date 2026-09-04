@@ -7971,12 +7971,348 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- edeb9-cenub#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb9-cenub#27';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb9-cenub#comb1', 'edeb-9-cenub',
+  'Cənub ədəbiyyatı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Səhəndiyyə» Məhəmmədhüseyn Şəhriyarın, «Səhənd dağı» isə Həbib Sahirin şeiridir.
+2) 1-ci mülahizəyə əsasən, Şəhriyar 1906-cı ildə doğulub, 1988-ci ildə vəfat edib - beləliklə onun ömrü 82 il olub.
+3) «Heydərbabaya salam» poeması əruz vəznindədir, klassik divan şeiri kimi.
+4) «Heydərbabaya salam»ın hər iki tayda geniş yayılmasının səbəbi onun ana dilində, hamıya doğma dildə yazılmasıdır.',
+  '1, 2 və 4 doğrudur: Səhəndiyyə-Şəhriyar, Səhənd dağı-Sahir; Şəhriyar 82 il yaşayıb; poema ana dilində yazıldığı üçün geniş yayılıb. 3-cü mülahizə yanlışdır: «Heydərbabaya salam» HECA vəznindədir, əruz divan şeiri yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb9-cenub#27'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb9-dunya#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb9-dunya#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb9-dunya#comb1', 'edeb-9-dunya',
+  'Dünya ədəbiyyatı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Qoca və dəniz» əsərinin müəllifi Ernest Heminqueydir, əsərdə Manolin qocanın şagirdi kimi təsvir olunur.
+2) 1-ci mülahizəyə əsasən, əsərdəki dəniz obrazı da simvolik məna daşıyır - həyatı və mübarizə meydanını simvolizə edir.
+3) Qoca sahilə böyük balığı bütöv halda çatdırır.
+4) Heminqueyin qısa cümlələrdən istifadə etməsi mətnə gərginlik və təmkinli ifadə gücü verir.',
+  '1, 2 və 4 doğrudur: Heminquey/Manolin, dəniz simvolu doğrudur; qısa cümlələr gərginlik yaradır. 3-cü mülahizə yanlışdır: qoca balığı bütöv yox, YALNIZ SKELETİ ilə qaytarır - köpək balıqları yolda onu yeyir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb9-dunya#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb9-milli-demokratik#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb9-milli-demokratik#31';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb9-milli-demokratik#comb1', 'edeb-9-milli-demokratik',
+  'Milli-demokratik dövr ədəbiyyatı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Azərbaycan bayrağına» şeirinin müəllifi Əhməd Cavaddır, dövlət himninin sözlərini də o yazmışdır, musiqisini isə Üzeyir Hacıbəyli bəstələmişdir.
+2) 1-ci mülahizəyə əsasən, bayraq mövzusunun ədəbiyyata gəlməsi məhz müstəqil Xalq Cümhuriyyətinin qurulması ilə bağlıdır.
+3) Bayraq rənglərindən yaşıl türkçülüyü, mavi isə islam mədəniyyətini bildirir.
+4) Əhməd Cavad Şəmkirdə, Cəfər Cabbarlı isə Xızıda doğulmuşdur.',
+  '1, 2 və 4 doğrudur: Azərbaycan bayrağına-Əhməd Cavad, himn sözləri onundur, bayraq mövzusu Cümhuriyyətlə bağlıdır; doğum yerləri doğrudur. 3-cü mülahizə yanlışdır: MAVİ türkçülüyü, YAŞIL islam mədəniyyətini bildirir - tərsinə yazılıb.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb9-milli-demokratik#31'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb9-muharibe#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb9-muharibe#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb9-muharibe#comb1', 'edeb-9-muharibe',
+  'Müharibə dövrü ədəbiyyatı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Gələcək gün» roman, «Vətən yaraları» isə hekayə janrındadır.
+2) 1-ci mülahizəyə əsasən, bu dövr nəsri ilə yanaşı, Süleyman Rüstəmin «Təbrizim» kimi şeirləri də Cənub həsrətini publisistik pafosla, mübarizəyə çağırış ruhu ilə əks etdirirdi.
+3) «Gələcək gün» hekayədir, roman deyil.
+4) Mirzə İbrahimov roman, Mir Cəlal isə hekayə yazmışdır.',
+  '1, 2 və 4 doğrudur: Gələcək gün-roman, Vətən yaraları-hekayə; Təbrizim publisistik pafosla Cənub həsrətini əks etdirir; Mirzə İbrahimov/Mir Cəlal janrları doğrudur. 3-cü mülahizə yanlışdır: «Gələcək gün» ROMANDIR, hekayə yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb9-muharibe#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb9-mustaqillik#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb9-mustaqillik#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb9-mustaqillik#comb1', 'edeb-9-mustaqillik',
+  'Müstəqillik dövrü ədəbiyyatı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Azərbaycan dövlət müstəqilliyini 1991-ci ildə bərpa etmişdir, «İstiqlal» şeirinin müəllifi Bəxtiyar Vahabzadədir.
+2) 1-ci mülahizəyə əsasən, bu tarixi hadisələr zaman ardıcıllığı ilə düzülür: əvvəlcə 20 Yanvar faciəsi (1990), sonra müstəqilliyin bərpası (1991), sonra Xocalı faciəsi (1992).
+3) 20 Yanvar faciəsi 1992-ci ildə baş vermişdir.
+4) Senzuranın aradan qalxması uzun illər qadağan olunmuş mövzuların açılmasına imkan verdi.',
+  '1, 2 və 4 doğrudur: İstiqlal-Vahabzadə, müstəqillik 1991; hadisələr 20 Yanvar (1990) → müstəqillik (1991) → Xocalı (1992) sırası ilə düzülür; senzuranın qalxması yeni mövzulara imkan verdi. 3-cü mülahizə yanlışdır: 20 Yanvar faciəsi 1992 yox, 1990-CI İLDƏ baş verdi.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb9-mustaqillik#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb9-ozunuderk-nesr#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb9-ozunuderk-nesr#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb9-ozunuderk-nesr#comb1', 'edeb-9-ozunuderk-nesr',
+  'Özünüdərk dövrü nəsri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Anar Rəsul Rza ilə Nigar Rəfibəylinin oğlu, Elçin isə İlyas Əfəndiyevin oğludur - hər ikisi tanınmış ədəbi ailədən çıxmışdır.
+2) 1-ci mülahizəyə əsasən, bu ədəbi mühitdə böyüyən Anar özü də ədəbiyyatdan başqa kino sahəsində - ssenari və rejissorluqla məşğul olmuşdur.
+3) «Məhşər» romanı Anarın əsəridir.
+4) «Talvar» Elçinin, «Zəhər» isə İsa Hüseynovun əsəridir.',
+  '1, 2 və 4 doğrudur: Anar/Elçin ədəbi ailə mənsublarıdır, Anar kino ilə də məşğul olub; Talvar-Elçin, Zəhər-İsa Hüseynov. 3-cü mülahizə yanlışdır: «Məhşər» Anarın yox, İSA HÜSEYNOVUN romanıdır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb9-ozunuderk-nesr#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb9-ozunuderk-seir#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb9-ozunuderk-seir#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb9-ozunuderk-seir#comb1', 'edeb-9-ozunuderk-seir',
+  'Özünüdərk dövrü poeziyası ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Sağ ol, ana dilim!» və «Çinar ömrü» Rəsul Rzanın, «Əsgər məktubu» isə Məmməd Arazın əsərləridir.
+2) 1-ci mülahizəyə əsasən, bu dövrdə ana dili mövzusunun poeziyada güclü olmasının səbəbi dilin milli kimliyin əsası sayılmasıdır.
+3) «Sağ ol, ana dilim!» Sabir Rüstəmxanlının əsəridir.
+4) Məmməd Araz Naxçıvanda doğulmuşdur.',
+  '1, 2 və 4 doğrudur: Sağ ol ana dilim/Çinar ömrü-Rəsul Rza, ana dili mövzusu milli kimliklə bağlıdır; Məmməd Araz Naxçıvanda doğulub. 3-cü mülahizə yanlışdır: «Sağ ol, ana dilim!» Sabir Rüstəmxanlının yox, RƏSUL RZANIN əsəridir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb9-ozunuderk-seir#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb9-repressiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb9-repressiya#23';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb9-repressiya#comb1', 'edeb-9-repressiya',
+  'Repressiya dövrü ədəbiyyatı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Həyat sevgisi» Mikayıl Müşfiqin, «Anabacı» isə Abdulla Şaiqin əsəridir və poema janrındadır.
+2) 1-ci mülahizəyə əsasən, bu dövrün digər tanınmış simalarından Çəmənzəminli Cümhuriyyətin Türkiyədəki səfiri olmuşdur.
+3) Almas İldırım xaricdə təhsil almaq istəyi ilə vətəni tərk etmişdir.
+4) Abdulla Şaiq uşaq ədəbiyyatı, Mikayıl Müşfiq isə lirik poeziya ilə tanınır.',
+  '1, 2 və 4 doğrudur: Həyat sevgisi-Müşfiq, Anabacı-Şaiq (poema); Çəmənzəminli səfir olub; Şaiq/Müşfiq janr fərqi doğrudur. 3-cü mülahizə yanlışdır: Almas İldırım SOVET REJİMİNİN TƏZYİQİ ilə mühacirətə getmişdir, təhsil istəyi ilə yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb9-repressiya#23'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 189 then
-    raise exception '112: 189 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 197 then
+    raise exception '112: 197 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
