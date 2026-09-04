@@ -404,8 +404,9 @@ with sync_playwright() as pw:
 
     # qrup hesabatinda da eyni duyme
     pg.goto(PANEL + "#/r/" + GID); pg.reload()
+    pg.wait_for_selector("#rTabs", timeout=8000); pg.click("#rTabs [data-v='m']")
     pg.wait_for_selector("#btnRem", timeout=8000)
-    ok(True, "qrup hesabatinda da duzelis duymesi var")
+    ok(True, "qrup hesabatinda da duzelis duymesi var (Movzular sekmesi)")
 
     print("L · Valideyn xülasəsi")
     pg.goto(PANEL + "#/s/" + SID + "/" + GID); pg.reload()

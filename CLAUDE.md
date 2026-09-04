@@ -1221,6 +1221,13 @@ tam UX gəzişi üçün onun genişi bu sessiyanın scratchpad-ında idi
 (`audit.py`) — lazım olsa eyni axınla yenidən yazılır: hər ekran 390 və
 1280 px, `innerText` uzunluğu, `.muted` uzunluğu, səhifə hündürlüyü.
 
+## Qrup hesabatı — üç sekme
+
+`screenReport`: **Şagirdlər / Mövzular / Fəaliyyət** (`#rTabs`, `RTAB`).
+Mövzularda fənn çipləri (`#rSub`), zəifdən yaxşıya, ilk 8 + «Daha N»,
+≥80% yığılmış, `#btnRem` bu sekmədədir; Fəaliyyət ilk 8 + «Daha N».
+Testdə `#btnRem`-dən əvvəl `#rTabs [data-v='m']` klik et.
+
 ## Şagird hesabatı — dörd sekme
 
 `screenStudent` (muellim/app.js) hesabatı **Xülasə / Mövzular / Səhvlər /

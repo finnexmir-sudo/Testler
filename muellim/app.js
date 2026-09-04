@@ -1686,6 +1686,7 @@
       "təkrar səhv edilən suallar və tam irəliləyiş tarixçəsi.</span></div></div>";
   }
 
+  var RTAB = "s";   // qrup hesabatinda secilmis sekme (sessiya boyu)
   function screenReport(gid, quiet) {
     var live = guard();
     if (!quiet) show('<div class="card"><div class="skel">Hesabat hazırlanır…</div></div>');
@@ -1711,13 +1712,16 @@
              " Son " + 7 + " günün məlumatı göstərilir.</p>";
       }
 
-      h += "<h2>Şagirdlər</h2>";
+      /*  Uc sekme: Sagirdler / Movzular / Fealiyyet.  Movzular butun
+          fennlerden 30+ setir, fealiyyet 11 setir - bir sehifede
+          uzanirdi (istifadeci teklifi, sagird hesabati ile eyni qayda).  */
       var st = r.students || [];
+      var hS = "";
       if (!st.length) {
-        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("person") +
+        hS += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("person") +
              "</div><b>Şagird yoxdur</b></div></div>";
       } else {
-        h += '<div class="card pad0">' + st.map(function (s) {
+        hS += '<div class="card pad0">' + st.map(function (s) {
           return '<button class="item" data-s="' + esc(s.id) + '">' +
             av(s.full_name) +
             '<div class="g"><b>' + esc(s.full_name) + "</b>" +
@@ -1729,48 +1733,132 @@
         }).join("") + "</div>";
       }
 
-      h += "<h2>Mövzular</h2>";
+      var hM = "";
+      var rt = r.topics || [];
+      var weakAll = rt.filter(function (t) { return Number(t.ratio) < 60; });
+      var rsubs = [];
+      rt.forEach(function (t) {
+        var k = t.subject_slug || t.subject;
+        if (k && !rsubs.some(function (x) { return x.key === k; })) rsubs.push({ key: k, name: t.subject });
+      });
+      var rmine = rsubs.filter(function (x) { return mySubs().indexOf(x.key) >= 0; });
+      var RSUB = (rsubs.length > 1 && rmine.length === 1) ? rmine[0].key : "";
+      var RCAP = 8, REXP2 = false;
       if (r.topics === null) {
-        h += upsell("Mövzu üzrə analiz");
-      } else if (!r.topics.length) {
-        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("chart") +
+        hM += upsell("Mövzu üzrə analiz");
+      } else if (!rt.length) {
+        hM += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("chart") +
              "</div><b>Hələ kifayət qədər cavab yoxdur</b>" +
              "Mövzu üzrə nəticə üçün ən azı 3 cavab lazımdır.</div></div>";
       } else {
-        h += '<div class="card pad0">' + r.topics.map(function (t) {
-          return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
-            "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
-            meter(t.ratio) + "</div>" +
-            pctChip(t.ratio) + "</div>";
-        }).join("") + "</div>";
-        /* Dovreni baglayan duyme: zeif movzular -> hazir test.
-           Generator qrupun SEHV ETDIYI suallara benzeyenleri de
-           avtomatik one cekir (rule.class). */
-        var weak = r.topics.filter(function (t) { return Number(t.ratio) < 60; });
-        if (weak.length) {
-          h += '<div class="spacer"></div>' +
-            '<button class="btn go wide" id="btnRem">' + ic("gen") +
-            "Zəif mövzulardan test yığ (" + weak.length + ")</button>";
-        }
+        hM += (rsubs.length > 1
+                ? '<div class="chips recf" id="rSub">' +
+                  '<button class="chip' + (RSUB ? "" : " on") + '" data-rs="">Hamısı</button>' +
+                  rsubs.map(function (x) {
+                    return '<button class="chip' + (RSUB === x.key ? " on" : "") +
+                      '" data-rs="' + esc(x.key) + '">' + esc(x.name) + "</button>";
+                  }).join("") + "</div>"
+                : "") +
+          '<div id="rTopicBox"></div>' +
+          /* Dovreni baglayan duyme: zeif movzular -> hazir test.
+             Generator qrupun SEHV ETDIYI suallara benzeyenleri de
+             avtomatik one cekir (rule.class). */
+          (weakAll.length
+            ? '<div class="spacer"></div>' +
+              '<button class="btn go wide" id="btnRem">' + ic("gen") +
+              "Zəif mövzulardan test yığ (" + weakAll.length + ")</button>"
+            : "");
+      }
+      function rTopicRow(t) {
+        return '<div class="trow"><div class="g"><b>' +
+          (Number(t.ratio) < 60 ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
+          esc(t.name) + "</b>" +
+          "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
+          meter(t.ratio) + "</div>" +
+          pctChip(t.ratio) + "</div>";
+      }
+      function drawRTopics() {
+        var box = $("rTopicBox");
+        if (!box) return;
+        var list = rt.filter(function (t) { return !RSUB || (t.subject_slug || t.subject) === RSUB; })
+          .slice().sort(function (a, b) { return Number(a.ratio) - Number(b.ratio); });
+        var need = list.filter(function (t) { return Number(t.ratio) < 80; });
+        var good = list.filter(function (t) { return Number(t.ratio) >= 80; });
+        var vis = REXP2 ? need : need.slice(0, RCAP);
+        box.innerHTML =
+          (need.length
+            ? '<div class="card pad0">' + vis.map(rTopicRow).join("") +
+              (need.length > vis.length
+                ? '<button class="morebtn" id="rMore">Daha ' + (need.length - vis.length) + " mövzu göstər</button>"
+                : "") + "</div>"
+            : '<div class="ok">' + ic("check") + "<span>Bütün mövzular yaxşıdır (≥80%).</span></div>") +
+          (good.length
+            ? '<details class="more filt" style="margin-top:10px"><summary>Yaxşı mövzular ' +
+              '<span class="fn">' + good.length + "</span></summary>" +
+              '<div class="card pad0" style="margin-top:10px">' + good.map(rTopicRow).join("") + "</div></details>"
+            : "");
+        on("rMore", "click", function () { REXP2 = true; drawRTopics(); });
       }
 
-      if (r.recent && r.recent.length) {
-        h += "<h2>Son fəaliyyət</h2><div class=\"card pad0\">" +
-          r.recent.map(function (x) {
-            return '<div class="trow"><div class="g"><b>' + esc(x.student) + "</b>" +
+      var hF = "";
+      var rec = r.recent || [];
+      var FCAP = 8;
+      if (!rec.length) {
+        hF += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("clock") +
+          "</div><b>Hələ fəaliyyət yoxdur</b></div></div>";
+      } else {
+        hF += '<div class="card pad0" id="rRec">' + rec.map(function (x, i) {
+            return '<div class="trow' + (i >= FCAP ? " hide" : "") + '"><div class="g"><b>' +
+              esc(x.student) + "</b>" +
               "<i>" + esc(x.test) + " · " + dateAz(x.at) + "</i></div>" +
               pctChip(x.percent) + "</div>";
-          }).join("") + "</div>";
+          }).join("") +
+          (rec.length > FCAP
+            ? '<button class="morebtn" id="rRecMore">Daha ' + (rec.length - FCAP) + " nəticə göstər</button>"
+            : "") + "</div>";
       }
+
+      h += '<div class="segs stabs" id="rTabs">' +
+          seg("s", "Şagirdlər" + (st.length ? ' <span class="tn">' + st.length + "</span>" : ""), RTAB) +
+          seg("m", "Mövzular" + (weakAll.length ? ' <span class="tn">' + weakAll.length + "</span>" : ""), RTAB) +
+          seg("f", "Fəaliyyət" + (rec.length ? ' <span class="tn">' + rec.length + "</span>" : ""), RTAB) +
+        "</div>" +
+        '<div class="stab" id="rtab-s"' + (RTAB === "s" ? "" : " hidden") + ">" + hS + "</div>" +
+        '<div class="stab" id="rtab-m"' + (RTAB === "m" ? "" : " hidden") + ">" + hM + "</div>" +
+        '<div class="stab" id="rtab-f"' + (RTAB === "f" ? "" : " hidden") + ">" + hF + "</div>";
 
       show(h);
       stamp();
+      drawRTopics();
+      on("rTabs", "click", function (e) {
+        var b = e.target.closest ? e.target.closest("[data-v]") : null;
+        if (!b) return;
+        RTAB = b.getAttribute("data-v");
+        Array.prototype.forEach.call(document.querySelectorAll("#rTabs .seg"), function (x) {
+          x.classList.toggle("on", x.getAttribute("data-v") === RTAB);
+        });
+        Array.prototype.forEach.call(document.querySelectorAll(".stab"), function (x) {
+          x.hidden = x.id !== "rtab-" + RTAB;
+        });
+      });
+      on("rSub", "click", function (e) {
+        var b = e.target.closest ? e.target.closest("[data-rs]") : null;
+        if (!b) return;
+        RSUB = b.getAttribute("data-rs"); REXP2 = false;
+        Array.prototype.forEach.call(document.querySelectorAll("#rSub .chip"), function (x) {
+          x.classList.toggle("on", x === b);
+        });
+        drawRTopics();
+      });
+      on("rRecMore", "click", function () {
+        Array.prototype.forEach.call(document.querySelectorAll("#rRec .trow.hide"), function (x) {
+          x.classList.remove("hide");
+        });
+        $("rRecMore").remove();
+      });
       on("btnB", "click", function () { nav("#/g/" + gid); });
       on("btnRef", "click", function () { screenReport(gid); });
-      on("btnRem", "click", function () {
-        var weak = (r.topics || []).filter(function (t) { return Number(t.ratio) < 60; });
-        remedialGen(gid, weak);
-      });
+      on("btnRem", "click", function () { remedialGen(gid, weakAll); });
       Array.prototype.forEach.call(main.querySelectorAll("[data-s]"), function (b) {
         b.addEventListener("click", function () {
           nav("#/s/" + b.getAttribute("data-s") + "/" + gid);
