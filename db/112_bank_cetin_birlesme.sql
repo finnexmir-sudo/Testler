@@ -7173,12 +7173,264 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- kim9-azot-fosfor#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim9-azot-fosfor#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim9-azot-fosfor#comb1', 'kim-9-azot-fosfor',
+  'Azot və fosfor birləşmələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Havanın həcmcə təqribən 78 faizi azotdur, azot molekulu (N2) ikiatomludur.
+2) 1-ci mülahizəyə əsasən, N2 molekulunda atomlar möhkəm üçqat rabitə ilə bağlı olduğu üçün azot adi şəraitdə az aktivdir - buna görə közərmə lampalarının içi telin oksidləşməsinin qarşısını almaq üçün azotla doldurulur.
+3) Nitrat turşusunda (HNO3) azotun oksidləşmə dərəcəsi -3-dür.
+4) Ağ fosfor havada öz-özünə alışdığı üçün su altında saxlanılır.',
+  '1, 2 və 4 doğrudur: azot 78%, N2 üçqat rabitəli olduğundan az aktivdir və lampalarda işlədilir; ağ fosfor su altında saxlanılır. 3-cü mülahizə yanlışdır: HNO3-də azot -3 yox, +5 OKSİDLƏŞMƏ DƏRƏCƏSİNDƏDİR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim9-azot-fosfor#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim9-halogen-kukurd#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim9-halogen-kukurd#25';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim9-halogen-kukurd#comb1', 'kim-9-halogen-kukurd',
+  'Halogenlər və kükürd birləşmələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Xlorid ionu məhlulda gümüş-nitratla ağ çöküntü (AgCl) əmələ gətirməklə təyin edilir.
+2) 1-ci mülahizəyə əsasən, sulfat ionu isə fərqli bir reaktivlə - barium duzları ilə - suda həll olmayan ağ çöküntü (BaSO4) əmələ gətirməklə təyin olunur.
+3) Mis qatı sulfat turşusu ilə qızdırıldıqda hidrogen qazı ayrılır.
+4) Duru xlorid turşusu misllə reaksiyaya girib hidrogen çıxara bilmir, çünki mis gərginlik sırasında hidrogendən sağda durur.',
+  '1, 2 və 4 doğrudur: xlorid və sulfat ionları müvafiq reaktivlərlə (AgCl/BaSO4) təyin edilir; mis duru turşu ilə hidrogen çıxarmır. 3-cü mülahizə yanlışdır: mis qatı H2SO4 ilə qızdırıldıqda hidrogen yox, KÜKÜRD QAZI (SO2) ayrılır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim9-halogen-kukurd#25'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim9-karbon-silisium#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim9-karbon-silisium#9';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim9-karbon-silisium#comb1', 'kim-9-karbon-silisium',
+  'Karbon və silisium birləşmələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Karbon təbiətdə almaz və qrafit kimi iki allotropik şəkildə rast gəlinir; hər ikisi eyni karbondur, lakin atomların kristal qəfəsdə düzülüşü fərqlidir.
+2) 1-ci mülahizəyə əsasən, bu struktur fərqi nəticəsində qrafit (almazdan fərqli olaraq) qeyri-metal olsa da, elektrik cərəyanını yaxşı keçirir - elektrodlar ondan hazırlanır.
+3) Dəm qazı (CO) kəskin qoxusu olduğu üçün asanlıqla hiss edilir və buna görə təhlükəlidir.
+4) Karbon qazı (CO2) özü yanmır və yanmanı saxlamır, ona görə odsöndürmədə işlədilir.',
+  '1, 2 və 4 doğrudur: almaz/qrafit eyni karbonun fərqli struktur formalarıdır, qrafit bu struktura görə cərəyan keçirir; CO2 yanmanı saxlamadığı üçün odsöndürmədə işlədilir. 3-cü mülahizə yanlışdır: dəm qazı (CO) RƏNGSİZ VƏ QOXUSUZ olduğu üçün təhlükəlidir - kəskin qoxusu yoxdur.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim9-karbon-silisium#9'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim9-metal-umumi#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim9-metal-umumi#30';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim9-metal-umumi#comb1', 'kim-9-metal-umumi',
+  'Metalların ümumi xassələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Elektrokimyəvi gərginlik sırasında soldan sağa getdikcə metalların aktivliyi azalır.
+2) 1-ci mülahizəyə əsasən, sink bu sırada misdən solda durduğu üçün mis duzunun məhlulundan misi sıxışdırıb çıxara bilir.
+3) Yer qabığında metallar arasında ən geniş yayılmış metal xromdur.
+4) Ən aktiv metallar dövri sistemin I qrupunun əsas yarımqrupunda - qələvi metallar sırasında yerləşir.',
+  '1, 2 və 4 doğrudur: gərginlik sırasında aktivlik soldan sağa azalır, sink misi sıxışdırır; ən aktiv metallar qələvi metallardır (I qrup). 3-cü mülahizə yanlışdır: yer qabığında ən geniş yayılmış metal xrom yox, ALÜMİNİUMDUR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim9-metal-umumi#30'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim9-metallar#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim9-metallar#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim9-metallar#comb1', 'kim-9-metallar',
+  'Metallar (Na, Ca, Al, Fe) ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Alüminium havada nazik, möhkəm oksid təbəqəsi ilə örtülür və bu təbəqə onu korroziyadan qoruyur.
+2) 1-ci mülahizəyə əsasən, bu qoruyucu xassəyə baxmayaraq, alüminium kimyəvi cəhətdən aktivdir - həm turşularla, həm də qələvilərlə reaksiyaya girə bilir, bu xassə amfoterlik adlanır.
+3) Çuqunda karbonun miqdarı poladdan azdır.
+4) Alüminium sənayedə əsasən boksit filizindən alınır.',
+  '1, 2 və 4 doğrudur: alüminiumun oksid təbəqəsi onu qoruyur, amfoter xassəsi var; boksit onun əsas filizidir. 3-cü mülahizə yanlışdır: çuqunda karbon poladdan az deyil, ÇOXDUR (2%-dən çox, poladda isə 2%-ə qədər).',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim9-metallar#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim9-uzvi#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim9-uzvi#15';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim9-uzvi#comb1', 'kim-9-uzvi',
+  'Üzvi birləşmələr ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Etilen (C2H4) molekulunda karbon atomları arasında ikiqat rabitə, asetilendə (C2H2) isə üçqat rabitə var.
+2) 1-ci mülahizəyə əsasən, bu çoxqat rabitəyə malik karbohidrogenlərdən fərqli olaraq, doymuş karbohidrogenlər (alkanlar) yalnız təkqat rabitəyə malikdir və ümumi CnH2n+2 formuluna tabedir.
+3) Yağlar qlükoza ilə yağ turşularının mürəkkəb efirləridir.
+4) Nişastanı yod məhlulu ilə təyin edirlər - yod nişastaya düşdükdə göy rəng alınır.',
+  '1, 2 və 4 doğrudur: etilen ikiqat, asetilen üçqat rabitəlidir; alkanlar təkqat rabitəli, CnH2n+2 formuludur; nişasta yodla göy rəng verir. 3-cü mülahizə yanlışdır: yağlar qlükoza yox, QLİSERİNLƏ yağ turşularının mürəkkəb efirləridir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim9-uzvi#15'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 170 then
-    raise exception '112: 170 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 176 then
+    raise exception '112: 176 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
