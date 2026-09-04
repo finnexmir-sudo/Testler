@@ -233,7 +233,7 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 
 /* dinamika - mini sutun qrafiki */
 .dyn{display:flex;align-items:flex-end;gap:6px;height:92px}
-.dyn i{flex:1;max-width:36px;border-radius:6px 6px 2px 2px;min-height:5px}
+.dyn i{flex:1;max-width:72px;border-radius:6px 6px 2px 2px;min-height:5px}
 .dyn .dh{background:var(--ok)}
 .dyn .dm{background:var(--warn)}
 .dyn .dl{background:var(--err)}

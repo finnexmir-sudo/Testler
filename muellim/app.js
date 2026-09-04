@@ -2379,14 +2379,20 @@
         hT += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("clock") +
              "</div><b>Hələ test işləməyib</b></div></div>";
       } else {
-        hT += '<div class="card pad0" id="atList">' + at.map(function (a) {
-          return '<button class="trow atr" data-att="' + esc(a.id) + '">' +
+        //  ilk 8 test acıq, qalani "Daha N" ile - il boyu 60 test sekmeni uzatmasin
+        var ACAP = 8;
+        hT += '<div class="card pad0" id="atList">' + at.map(function (a, i) {
+          var hid = i >= ACAP ? " hide" : "";
+          return '<button class="trow atr' + hid + '" data-att="' + esc(a.id) + '">' +
             '<div class="g"><b>' + esc(a.test) + "</b>" +
             "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max +
             ' · <span class="lnk2">cavab vərəqi</span></i></div>' +
             pctChip(a.percent) + "</button>" +
-            '<div class="sheet hide" id="sh-' + esc(a.id) + '"></div>';
-        }).join("") + "</div>";
+            '<div class="sheet hide' + (hid ? " late" : "") + '" id="sh-' + esc(a.id) + '"></div>';
+        }).join("") +
+        (at.length > ACAP
+          ? '<button class="morebtn" id="atMore">Daha ' + (at.length - ACAP) + " test göstər</button>"
+          : "") + "</div>";
       }
 
       /* ---------------- sekmeler ---------------- */
@@ -2427,6 +2433,12 @@
           x.classList.toggle("on", x === b);
         });
         drawTopics();
+      });
+      on("atMore", "click", function () {
+        Array.prototype.forEach.call(document.querySelectorAll("#atList .atr.hide"), function (x) {
+          x.classList.remove("hide");
+        });
+        $("atMore").remove();
       });
       on("wMore", "click", function () {
         Array.prototype.forEach.call(document.querySelectorAll("#wList .wq.hide"), function (x) {
