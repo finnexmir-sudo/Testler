@@ -1221,6 +1221,17 @@ tam UX gəzişi üçün onun genişi bu sessiyanın scratchpad-ında idi
 (`audit.py`) — lazım olsa eyni axınla yenidən yazılır: hər ekran 390 və
 1280 px, `innerText` uzunluğu, `.muted` uzunluğu, səhifə hündürlüyü.
 
+## Böyüyən siyahılar — hədd qaydası
+
+İl boyu böyüyən hər siyahının həddi var: ilk N açıq, qalanı «Daha N …»
+düyməsi (`.morebtn`, sətirlər `.hide` ilə). Yerlər: müəllim — hesabat
+sekmeləri (8), tarixçə (8), «Bağlı» tapşırıqlar (8, `AEXP`); şagird —
+sərbəst məşq fənn çipləri + 12 (`PSUB/PEXP`), işlənmiş tapşırıqlar
+«İşlənmiş (N)» altında (3-dən çoxdursa yığılmış, `#doneBox`), Nəticələrim
+10, nəticədə düz cavablar «Düz cavablar (N)» altında (səhv yoxdursa
+hamısı açıq). Yeni siyahı əlavə edəndə eyni qaydanı tətbiq et. Testlərdə
+gizli sətrə klik olmaz — əvvəl «Daha N» və ya details aç.
+
 ## Qrup hesabatı — üç sekme
 
 `screenReport`: **Şagirdlər / Mövzular / Fəaliyyət** (`#rTabs`, `RTAB`).

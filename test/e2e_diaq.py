@@ -141,7 +141,9 @@ with sync_playwright() as pw:
     ok("XƏRİTƏN" in t or "xəritən" in t, "sagirdde 'Movzu xeriten' bolmesi var (I telesi: lower() yox)")
     ok(T1NAME in t and "Bundan başla" in t, "sagirdde 'Bundan basla' = 1-ci fesil", T1NAME)
     ok(sp.locator(".myr").count() == 12, "xeritede 12 fesil", sp.locator(".myr").count())
-    ok(sp.locator("details.more").count() == 1 and sp.locator("details.more .myr").count() == 11,
+    #  netice ekraninda ikinci details de var ("Duz cavablar") - xerite olanini sec
+    mapd = sp.locator("details.more", has=sp.locator(".myr"))
+    ok(mapd.count() == 1 and mapd.locator(".myr").count() == 11,
        "11 yaxsi fesil yigilmis bolmededir, 1 zeif acıqdadir")
     ok(sp.locator(".myr .best.bl").count() == 1 and sp.locator(".myr .best.bh").count() == 11,
        "1 zeif, 11 yaxsi")
@@ -165,8 +167,10 @@ with sync_playwright() as pw:
     if os.environ.get("SHOT"):
         pg.evaluate("document.getElementById('diagBox').scrollIntoView()"); pg.wait_for_timeout(200)
         pg.locator("#diagBox").screenshot(path=os.environ["SHOT"] + "/diaq_muellim.png")
-    pg.click("#btnRem"); pg.wait_for_timeout(1200)
+    pg.click("#btnRem"); pg.wait_for_selector("#gPool", timeout=8000)
     ok("#/gen" in pg.url, "duzelis duymesi generatora aparir", pg.url.split("#")[-1])
+    #  generator facets + siniflər yüklənəndən sonra çizilir - sabit gözləmə yox
+    pg.wait_for_function("document.querySelector('#main').innerText.includes(%r)" % T1NAME, timeout=8000)
     ok(T1NAME in pg.inner_text("#main"), "generatorda zeif fesil secilib")
 
     print("F · İkinci diaqnostika: hamısı düz → fərq «1 zəif → 0»")

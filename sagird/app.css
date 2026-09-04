@@ -311,3 +311,12 @@ details.more summary::-webkit-details-marker{display:none}
 details.more summary::before{content:"";width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .15s;flex:0 0 auto}
 details.more[open] summary::before{transform:rotate(45deg)}
 details.more summary .fn{font-size:11.5px;font-weight:600;background:var(--n-100);color:var(--fg-3);padding:2px 7px;border-radius:999px}
+
+/* fenn cipleri (serbest mesq) ve "Daha N" duymesi - muellim paneli ile eyni gorunus */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.chip{min-height:30px;padding:0 11px;border:1px solid var(--n-200);background:var(--surface);
+  border-radius:999px;font:inherit;font-size:12.5px;color:var(--fg-2);cursor:pointer;transition:.12s}
+.chip.on{background:var(--brand-tint);border-color:var(--brand-line);color:var(--brand);font-weight:550}
+.morebtn{display:block;width:100%;padding:11px 14px;border:none;border-top:1px solid var(--line);
+  background:transparent;color:var(--brand);font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:center}
+.morebtn:hover{background:var(--brand-tint)}

@@ -2711,7 +2711,9 @@
         seg("on", "Aktiv (" + nOn + ")", AF) +
         seg("off", "Bağlı (" + (items.length - nOn) + ")", AF);
       if (box) box.innerHTML = asgRows(items, d.students || 0, AF);
+      on("asgMore", "click", function () { AEXP = true; drawAsgList(); });
     }
+    AEXP = false;
     drawAsgList();
     on("asgTabs", "click", function (ev) {
       var b = ev.target.closest ? ev.target.closest(".seg") : null;
@@ -2741,7 +2743,11 @@
           ? "Son tarixi keçən və götürülən tapşırıqlar bura düşür."
           : "Aşağıdan test seçib tapşırıq verin.") + "</div>";
     }
-    return list.map(function (a) {
+    //  "Bagli" il boyu boyuyur: ilk 8 + "Daha N" (AEXP acanda hamisi)
+    var ACAP2 = 8;
+    var full = list.length > ACAP2 && !AEXP && f === "off";
+    var shown = full ? list.slice(0, ACAP2) : list;
+    return shown.map(function (a) {
       var open = a.open !== false;
       var done = Number(a.done) || 0;
       var tries = Number(a.max_attempts) === 0 ? "limitsiz cəhd"
@@ -2766,8 +2772,12 @@
         '<div class="l2">' + done + "/" + tot + " şagird bitirib" +
           (a.avg != null ? " · orta " + pct(a.avg) + "%" : "") + "</div>" +
       "</div>";
-    }).join("");
+    }).join("") +
+    (full
+      ? '<button class="morebtn" id="asgMore">Daha ' + (list.length - ACAP2) + " tapşırıq göstər</button>"
+      : "");
   }
+  var AEXP = false;   // "Bagli" siyahisi tam acilib
 
   function bindAsgRows(g) {
     var box = $("asgList");

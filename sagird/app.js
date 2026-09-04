@@ -330,6 +330,7 @@
     return d.getDate() + " " + ay[d.getMonth()];
   }
 
+  var PSUB = "", PEXP = false;   // serbest mesq: fenn suzgeci, "daha" acildi
   function screenTests() {
     markScreen(true);
     topBar.classList.remove("hide");
@@ -381,25 +382,57 @@
           "</div>";
       }
 
-      /* 1. Muellimin verdiyi tapsiriqlar - hemise yuxarida */
+      /* 1. Muellimin verdiyi tapsiriqlar - hemise yuxarida.
+         Islenmis (cehdi bitmis) tapsiriqlar ayrica: son tarixi olmayan
+         tapsiriq il boyu siyahida qalirdi, 40-60 "islenib" karti
+         yigilirdi.  3-den coxdursa yigilmis gelir. */
       h += "<h2>Tapşırıqlar</h2>";
+      function isOver(t) {
+        var done = Number(t.done) || 0, lim = Number(t.max_attempts) || 0;
+        return !t.locked && done > 0 && lim > 0 && done >= lim;
+      }
+      var asgOpen = asg.filter(function (t) { return !isOver(t); });
+      var asgDone = asg.filter(isOver);
       if (!asg.length) {
         h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
              "</div><b>Tapşırıq yoxdur</b>" +
              (prac.length ? "Aşağıdakı testlərlə məşq edə bilərsən."
                           : "Müəllimin tapşırıq verməsini gözlə.") + "</div></div>";
       } else {
-        h += '<div class="card pad0">' + asg.map(function (t) {
-          return testRow(t, true);
-        }).join("") + "</div>";
+        h += (asgOpen.length
+          ? '<div class="card pad0">' + asgOpen.map(function (t) {
+              return testRow(t, true);
+            }).join("") + "</div>"
+          : '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
+            "</div><b>Hamısı işlənib</b>Yeni tapşırıq gələndə burada görünəcək.</div></div>") +
+          (asgDone.length
+            ? '<details class="more" id="doneBox"' + (asgDone.length <= 3 ? " open" : "") +
+              ' style="margin-top:10px"><summary>İşlənmiş <span class="fn">' + asgDone.length +
+              "</span></summary>" +
+              '<div class="card pad0" style="margin-top:8px">' + asgDone.map(function (t) {
+                return testRow(t, true);
+              }).join("") + "</div></details>"
+            : "");
       }
 
-      /* 2. Serbest mesq - muellim baglaya biler */
+      /* 2. Serbest mesq - muellim baglaya biler.  Sinfin butun platforma
+         testleri bir sutunda tokulurdu: fenn cipleri + ilk 12 + "Daha N". */
       if (prac.length) {
+        var psubs = [];
+        prac.forEach(function (t) {
+          if (t.subject && psubs.indexOf(t.subject) < 0) psubs.push(t.subject);
+        });
+        if (psubs.indexOf(PSUB) < 0) PSUB = "";
         h += '<div class="spacer"></div><h2>Sərbəst məşq</h2>' +
-             '<div class="card pad0">' + prac.map(function (t) {
-               return testRow(t, false);
-             }).join("") + "</div>";
+          (psubs.length > 1
+            ? '<div class="chips" id="pSub">' +
+              '<button class="chip' + (PSUB ? "" : " on") + '" data-ps="">Hamısı</button>' +
+              psubs.map(function (x) {
+                return '<button class="chip' + (PSUB === x ? " on" : "") + '" data-ps="' +
+                  esc(x) + '">' + esc(x) + "</button>";
+              }).join("") + "</div>"
+            : "") +
+          '<div id="pracBox"></div>';
       }
 
       /* 3. Zeif movzular - haradan basla, konkret cavab.  .myr/.best
@@ -426,14 +459,41 @@
       }
 
       show(h);
-      on("btnMyRes", "click", screenMyResults);
-      Array.prototype.forEach.call(main.querySelectorAll("[data-t]"), function (b) {
-        b.addEventListener("click", function () {
-          var id = b.getAttribute("data-t");
-          if (b.getAttribute("data-mode") === "view") viewResult(id);
-          else startTest(id);
+      function bindRows() {
+        Array.prototype.forEach.call(main.querySelectorAll("[data-t]:not([data-bound])"), function (b) {
+          b.setAttribute("data-bound", "1");
+          b.addEventListener("click", function () {
+            var id = b.getAttribute("data-t");
+            if (b.getAttribute("data-mode") === "view") viewResult(id);
+            else startTest(id);
+          });
         });
+      }
+      function drawPrac() {
+        var box = document.getElementById("pracBox");
+        if (!box) return;
+        var list = prac.filter(function (t) { return !PSUB || t.subject === PSUB; });
+        var vis = PEXP ? list : list.slice(0, 12);
+        box.innerHTML = '<div class="card pad0">' + vis.map(function (t) {
+            return testRow(t, false);
+          }).join("") +
+          (list.length > vis.length
+            ? '<button class="morebtn" id="pMore">Daha ' + (list.length - vis.length) + " test göstər</button>"
+            : "") + "</div>";
+        on("pMore", "click", function () { PEXP = true; drawPrac(); bindRows(); });
+      }
+      drawPrac();
+      on("pSub", "click", function (e) {
+        var b = e.target.closest ? e.target.closest("[data-ps]") : null;
+        if (!b) return;
+        PSUB = b.getAttribute("data-ps"); PEXP = false;
+        Array.prototype.forEach.call(document.querySelectorAll("#pSub .chip"), function (x) {
+          x.classList.toggle("on", x === b);
+        });
+        drawPrac(); bindRows();
       });
+      on("btnMyRes", "click", screenMyResults);
+      bindRows();
     }).catch(function (e) {
       if (e && (e.status === 403 || /Sessiya/i.test(e.message || ""))) {
         logout("Sessiya bitdi. Kodu bir də yaz.");
@@ -675,8 +735,23 @@
             ? '<div class="ok" style="margin-bottom:12px">' + ic("check") +
               "<span>Bütün suallara düzgün cavab verdin.</span></div>"
             : "") +
-          "<div class=\"card pad0\" id=\"wrongBox\">" +
-          r.questions.map(function (w) {
+          (function () {
+            var qs = r.questions;
+            var wrongs = qs.filter(function (q) { return !q.correct; });
+            var rights = qs.filter(function (q) { return !!q.correct; });
+            //  Sehvler acıq, duz cavablar yigilmis: 36 suallıq testde
+            //  sagirde lazim olan sehvleridir.  Hamisi duzdurse - hamisi acıq.
+            var main1 = wrongs.length ? wrongs : qs;
+            return "<div class=\"card pad0\" id=\"wrongBox\">" + main1.map(qRow).join("") + "</div>" +
+              (wrongs.length && rights.length
+                ? '<details class="more" style="margin-top:10px"><summary>Düz cavablar ' +
+                  '<span class="fn">' + rights.length + "</span></summary>" +
+                  '<div class="card pad0" style="margin-top:8px">' + rights.map(qRow).join("") + "</div></details>"
+                : "");
+          })()
+        : "")
+    );
+    function qRow(w) {
             var right = !!w.correct;
             return '<div class="' + (right ? "right" : "wrong") + '">' +
               '<div class="qh"><b>' + esc(w.body) + "</b>" +
@@ -691,9 +766,7 @@
                   '">Sualda səhv var?</button>' +
                 '<div class="rslot" id="rs-' + esc(w.question_id || "") + '"></div>') +
             "</div>";
-          }).join("") + "</div>"
-        : "")
-    );
+    }
 
     on("btnHome", "click", screenTests);
     on("btnLb", "click", function () { screenBoard(review); });
@@ -782,14 +855,25 @@
             "yeniyə. Yaşıl — əla, narıncı — orta, qırmızı — təkrar lazımdır.</p>" +
           "</div>" + '<div class="spacer"></div>';
         }
-        h += '<div class="card pad0">' + rows.map(function (a) {
+        //  il boyu 60 cehd - ilk 10 acıq, qalani "Daha N"
+        var MCAP = 10;
+        h += '<div class="card pad0" id="myrList">' + rows.map(function (a, i) {
           var p = Math.round(Number(a.percent) || 0);
-          return '<div class="myr"><div class="g"><b>' + esc(a.test) + "</b>" +
+          return '<div class="myr' + (i >= MCAP ? " hide" : "") + '"><div class="g"><b>' + esc(a.test) + "</b>" +
             "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max + "</i></div>" +
             '<span class="best ' + pctCls(p) + '">' + p + "%</span></div>";
-        }).join("") + "</div>";
+        }).join("") +
+        (rows.length > MCAP
+          ? '<button class="morebtn" id="myrMore">Daha ' + (rows.length - MCAP) + " nəticə göstər</button>"
+          : "") + "</div>";
       }
       show(h);
+      on("myrMore", "click", function () {
+        Array.prototype.forEach.call(document.querySelectorAll("#myrList .myr.hide"), function (x) {
+          x.classList.remove("hide");
+        });
+        document.getElementById("myrMore").remove();
+      });
     }).catch(function (e) { errScreen(e, screenMyResults); });
   }
 
