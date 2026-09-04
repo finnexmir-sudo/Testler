@@ -7761,12 +7761,222 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- inf9-cedvel#comb1
+update public.questions set difficulty = 2 where ext_key = 'inf9-cedvel#4';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('inf9-cedvel#comb1', 'inf-9-cedvel',
+  'Elektron cədvəl funksiyaları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) IF funksiyası şərtə görə müxtəlif qiymət qaytarmaq üçün istifadə olunur.
+2) 1-ci mülahizəyə əsasən, filtr də bənzər məntiqlə - müəyyən şərtə uyğun sətirləri seçib göstərmək üçün istifadə olunur.
+3) Mütləq istinad ($A$1) düstur köçürüləndə yeni mövqeyə uyğunlaşaraq dəyişir.
+4) AVERAGE funksiyası diapazondakı ədədlərin ortasını hesablayır.',
+  '1, 2 və 4 doğrudur: IF şərtə görə qiymət qaytarır, filtr şərtə uyğun sətirləri göstərir; AVERAGE ortanı hesablayır. 3-cü mülahizə yanlışdır: mütləq istinad ($A$1) köçürüləndə DƏYİŞMİR, sabit qalır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'inf9-cedvel#4'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'informatika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- inf9-kodlasdirma#comb1
+update public.questions set difficulty = 2 where ext_key = 'inf9-kodlasdirma#18';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('inf9-kodlasdirma#comb1', 'inf-9-kodlasdirma',
+  'Verilənlərin kodlaşdırılması ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Şəklin rəng dərinliyi bir pikselin kodlanmasına düşən bitlərin sayını göstərir; 8 bit rəng dərinliyi 2⁸ = 256 rəng verir.
+2) 1-ci mülahizəyə əsasən, rastr şəklin fayl həcmi piksel sayından və rəng dərinliyindən asılıdır - bit sayı artdıqca fayl da böyüyür.
+3) Vektor qrafikası fotoşəkillərdə rastr qrafikadan üstündür.
+4) Səsin diskretləşdirilməsi səs dalğasının hissələrə bölünüb ölçülməsidir.',
+  '1, 2 və 4 doğrudur: rəng dərinliyi bit sayıdır, 8 bit 256 rəng verir, fayl həcmi piksel və dərinlikdən asılıdır; diskretləşdirmə səsin ölçülməsidir. 3-cü mülahizə yanlışdır: vektor qrafikası LOQO VƏ ÇERTYOJLARDA üstündür, fotoşəkillərdə yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'inf9-kodlasdirma#18'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'informatika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- inf9-komputer#comb1
+update public.questions set difficulty = 2 where ext_key = 'inf9-komputer#16';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('inf9-komputer#comb1', 'inf-9-komputer',
+  'Kompüterin quruluşu ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Prosessorun nüvələrinin çoxluğu əməliyyatların paralel yerinə yetirilməsinə imkan verir.
+2) 1-ci mülahizəyə əsasən, bu paralel işləmənin sürətini daha da artırmaq üçün keş yaddaş tez-tez işlənən verilənləri prosessora yaxın saxlayır.
+3) Fayl sistemində fraqmentasiya kompüter söndürüləndə yaranır.
+4) Müvəqqəti fayllar sistemin xüsusi qovluqlarında yığılır.',
+  '1, 2 və 4 doğrudur: çoxnüvəlilik paralel əməliyyata imkan verir, keş yaddaş sürəti artırır; müvəqqəti fayllar sistem qovluqlarında yığılır. 3-cü mülahizə yanlışdır: fraqmentasiya kompüter söndürüləndə yox, FAYLLAR DƏFƏLƏRLƏ SİLİNİB YENİDƏN YAZILDIQCA yaranır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'inf9-komputer#16'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'informatika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- inf9-proqramlasdirma#comb1
+update public.questions set difficulty = 2 where ext_key = 'inf9-proqramlasdirma#13';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('inf9-proqramlasdirma#comb1', 'inf-9-proqramlasdirma',
+  'Python proqramlaşdırma ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Python-da tam ədədlər int, kəsr ədədlər isə float tipində saxlanılır.
+2) 1-ci mülahizəyə əsasən, funksiya def açar sözü ilə yaradılır və nəticəni return əmri ilə qaytarır.
+3) 7 // 2 əməliyyatının nəticəsi 3,5-dir.
+4) Sətri böyük hərflərə çevirən metod upper()-dır.',
+  '1, 2 və 4 doğrudur: int/float tipləri doğrudur, def/return funksiya yaradır; upper() böyük hərfə çevirir. 3-cü mülahizə yanlışdır: 7 // 2 TAM BÖLMƏDİR, nəticə 3-dür - 3,5 adi bölmənin (/) nəticəsi olardı.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'inf9-proqramlasdirma#13'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'informatika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- inf9-texnologiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'inf9-texnologiya#14';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('inf9-texnologiya#comb1', 'inf-9-texnologiya',
+  'Veb texnologiyaları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Veb-səhifələrin əsas quruluşu HTML dilində qurulur, CSS isə səhifənin görünüşünü və tərtibatını təmin edir.
+2) 1-ci mülahizəyə əsasən, bu struktur və tərtibata əlavə olaraq, JavaScript veb-səhifəyə interaktivlik və dinamiklik qatır.
+3) bil10.az kimi domen adı hostinq xidmətini əvəz edir.
+4) Şəbəkədəki hər qurğuya verilən rəqəmsal ünvan IP ünvan adlanır.',
+  '1, 2 və 4 doğrudur: HTML/CSS/JavaScript birlikdə saytı qurur; IP ünvan qurğunu identifikasiya edir. 3-cü mülahizə yanlışdır: domen adı HOSTİNQİ yox, RƏQƏMSAL IP ÜNVANI əvəz edir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'inf9-texnologiya#14'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'informatika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '9'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 184 then
-    raise exception '112: 184 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 189 then
+    raise exception '112: 189 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
