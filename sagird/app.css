@@ -320,3 +320,10 @@ details.more summary .fn{font-size:11.5px;font-weight:600;background:var(--n-100
 .morebtn{display:block;width:100%;padding:11px 14px;border:none;border-top:1px solid var(--line);
   background:transparent;color:var(--brand);font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:center}
 .morebtn:hover{background:var(--brand-tint)}
+
+/* yumsaq derinlik: rengli kartlar ve test setirleri */
+.st{box-shadow:0 2px 4px rgba(16,24,40,.08),0 10px 22px -10px rgba(43,74,203,.45)}
+@media (hover:hover){
+  .test{transition:background .12s,transform .12s}
+  .test:not([disabled]):hover{transform:translateY(-1px)}
+}

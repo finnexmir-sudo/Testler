@@ -82,9 +82,12 @@ a{color:var(--brand);text-decoration:none}
 .top .who{font-size:13px;color:rgba(255,255,255,.85);white-space:nowrap}
 
 /* ----------------------------------------------------------- kart */
+/*  Yumsaq derinlik (istifadeci secimi, 2-ci variant): kart fonun
+    ustunde qalxmis kimi - nazik cerçive + yaygin kolge.  Sert 3D yox.  */
 .card{
-  background:var(--surface);border:1px solid var(--line);
+  background:var(--surface);border:1px solid rgba(16,24,40,.06);
   border-radius:var(--r-lg);padding:18px;margin-bottom:12px;
+  box-shadow:0 1px 2px rgba(16,24,40,.05),0 8px 20px -10px rgba(16,24,40,.18);
 }
 .card.pad0{padding:0;overflow:hidden}
 .card.tight{padding:14px 16px}
@@ -184,7 +187,7 @@ select{appearance:none;
   transform .08s,filter .13s}
 .btn:active{transform:scale(.97)}
 .btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-.btn.go{box-shadow:0 2px 8px rgba(43,74,203,.25)}
+.btn.go{box-shadow:0 4px 12px -4px rgba(43,74,203,.55)}
 .btn.go:hover{filter:brightness(1.06)}
 
 input:focus,select:focus,textarea:focus{

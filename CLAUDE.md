@@ -1230,6 +1230,15 @@ yanında `<span class="wm">Bil10</span>` və nöqtə, sonra səhifə adı.
 `theme-color` meta və manifestlərin `theme_color`-u da `#3559de`. Zolağa
 yeni element qoyanda rəngini ağ ver.
 
+## Yumşaq dərinlik — kölgə qaydası
+
+İstifadəçi seçimi (3 variantdan «yumşaq»): kart (`base.css .card`) nazik
+çərçivə + yayğın kölgə; rəngli kartlar (`.stat`, `.tile`, şagird `.st`)
+mavi çalarlı kölgə; `.segs` içəri, `.seg.on` qalxmış; `.btn.go` altında
+mavi kölgə; masaüstündə (`@media (hover:hover)`) `.item`/`button.trow`/
+`.test` üstünə gələndə 1px qalxır. Sərt 3D (qabarıq düymə, qradiyent
+çərçivə, tünd kölgə) yoxdur və əlavə edilmir. Yeni kart/sətir eyni qaydada.
+
 ## Böyüyən siyahılar — hədd qaydası
 
 İl boyu böyüyən hər siyahının həddi var: ilk N açıq, qalanı «Daha N …»

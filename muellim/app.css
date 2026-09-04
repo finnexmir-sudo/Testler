@@ -892,3 +892,13 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   .segs.stabs .seg{padding:8px 2px;font-size:12.5px;letter-spacing:-.01em}
   .segs.stabs .seg .tn{min-width:16px;padding:0 4px;margin-left:3px;font-size:10.5px;line-height:16px}
 }
+
+/* ---- yumsaq derinlik (istifadeci secimi): rengli kartlar, sekmeler, setirler ---- */
+.stat,.tile{box-shadow:0 2px 4px rgba(16,24,40,.08),0 10px 22px -10px rgba(43,74,203,.45)}
+.segs{box-shadow:inset 0 1px 3px rgba(16,24,40,.08)}
+.seg.on{box-shadow:0 1px 3px rgba(16,24,40,.14),0 4px 10px -4px rgba(16,24,40,.18)}
+/* masaustunde siyahi setri ustune gelende yungulce qalxir - klik olundugu hiss olunsun */
+@media (hover:hover){
+  .item,button.trow{transition:background .12s,transform .12s}
+  .item:hover,button.trow:hover{transform:translateY(-1px);background:var(--n-50,#f8f9fc)}
+}
