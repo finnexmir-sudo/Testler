@@ -9693,12 +9693,348 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- edeb10-axundzade#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb10-axundzade#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb10-axundzade#comb1', 'edeb-10-axundzade',
+  'Mirzə Fətəli Axundzadə ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Aldanmış kəvakib» Axundzadənin povesti, «Hacı Qara» isə onun komediyasıdır.
+2) 1-ci mülahizəyə əsasən, Axundzadə cəmi altı komediya yazmışdır, bu əsərlərlə o, Azərbaycan dramaturgiyasının banisi sayılır - Molla Pənah Vaqifin realist şeirin banisi olması kimi.
+3) Axundzadə on beş komediya yazmışdır.
+4) Axundzadənin əlifba islahatı təklifinin əsas məqsədi savadlanmanı asanlaşdırmaq idi.',
+  '1, 2 və 4 doğrudur: Aldanmış kəvakib povest, Hacı Qara komediyadır, Axundzadə altı komediya yazıb dramaturgiyanın banisidir; əlifba islahatı savadlanmanı asanlaşdırırdı. 3-cü mülahizə yanlışdır: Axundzadə on beş yox, ALTI komediya yazmışdır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb10-axundzade#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb10-dede-qorqud#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb10-dede-qorqud#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb10-dede-qorqud#comb1', 'edeb-10-dede-qorqud',
+  '«Kitabi-Dədə Qorqud» eposu ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Kitabi-Dədə Qorqud» epos oğuz türkcəsində yaranmışdır, on iki boydan ibarətdir - Drezden nüsxəsində bu on iki boyun hamısı, Vatikan nüsxəsində isə yalnız altısı vardır.
+2) 1-ci mülahizəyə əsasən, bu boylardan birində Təpəgözü Basat məğlub edir.
+3) Epos fars dilində yaranmışdır.
+4) Dədə Qorqud ozan-ağsaqqaldır, Bayandır xan isə xanlar xanıdır.',
+  '1, 2 və 4 doğrudur: epos oğuz türkcəsində yaranıb, Drezden 12/Vatikan 6 boy, Basat Təpəgözü məğlub edir; Dədə Qorqud/Bayandır xan rolları doğrudur. 3-cü mülahizə yanlışdır: epos FARS dilində yox, OĞUZ TÜRKCƏSİNDƏ yaranmışdır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb10-dede-qorqud#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb10-fuzuli#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb10-fuzuli#19';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb10-fuzuli#comb1', 'edeb-10-fuzuli',
+  'Məhəmməd Füzuli ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Füzuli Azərbaycan, fars və ərəb dillərində divan yaratmışdır; onun «Leyli və Məcnun» poeması Nizamidən gələn xəmsəçilik və məsnəvi ənənəsinin davamıdır.
+2) 1-ci mülahizəyə əsasən, bu ənənəyə uyğun olaraq poemanın sonunda hər iki aşiq - Leyli və Məcnun - həlak olur, eşqləri isə əbədiləşir.
+3) Poemanın sonunda aşiqlər evlənib xoşbəxt olurlar.
+4) «Şikayətnamə» nəsrlə yazılmışdır.',
+  '1, 2 və 4 doğrudur: Füzuli üç dildə divan yaradıb, xəmsəçilik ənənəsinin davamı poema faciəli sonla bitir; Şikayətnamə nəsr əsəridir. 3-cü mülahizə yanlışdır: aşiqlər evlənmir, HƏR İKİSİ HƏLAK OLUR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb10-fuzuli#19'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb10-koroglu-vaqif#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb10-koroglu-vaqif#3';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb10-koroglu-vaqif#comb1', 'edeb-10-koroglu-vaqif',
+  '«Koroğlu» dastanı və Molla Pənah Vaqif ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Koroğlunun atası Alı kişidir, gözlərini Həsən xan kor etdirmişdir - bu, Koroğlunun Həsən xana qarşı üsyanının səbəbidir.
+2) 1-ci mülahizəyə əsasən, bu xalq qəhrəmanlığı mövzusundan fərqli olaraq, Molla Pənah Vaqif Qarabağ xanlığında vəzir olmuş, heca vəznində yazaraq Azərbaycan şeirində realizmin banisi sayılmışdır.
+3) Vaqif Füzuli kimi əruz vəzninə üstünlük vermişdir.
+4) Koroğlunun qərargahı Çənlibeldir.',
+  '1, 2 və 4 doğrudur: Alı kişi/Həsən xan üsyanın səbəbidir, Vaqif Qarabağda vəzir və realizmin banisidir; Çənlibel Koroğlunun qərargahıdır. 3-cü mülahizə yanlışdır: Vaqif HECA vəzninə üstünlük vermişdir, əruz yox (əruz Füzuliyə aiddir).',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb10-koroglu-vaqif#3'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb10-maarifci#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb10-maarifci#26';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb10-maarifci#comb1', 'edeb-10-maarifci',
+  'XIX əsr maarifçi ədəbiyyatı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) «Əkinçi» qəzeti 1875-ci ildə, «Müsibəti-Fəxrəddin» 1896-cı ildə, «Molla Nəsrəddin» jurnalı isə 1906-cı ildə nəşrə başlamışdır.
+2) 1-ci mülahizəyə əsasən, bu xronoloji sırada ilk yer tutan «Əkinçi»nin naşiri Həsən bəy Zərdabi olmuşdur.
+3) Aşıq Ələsgər əruz vəznində yazmışdır.
+4) «Müsibəti-Fəxrəddin» faciə janrındadır.',
+  '1, 2 və 4 doğrudur: Əkinçi/Müsibəti-Fəxrəddin/Molla Nəsrəddin xronologiyası və Zərdabi doğrudur; Müsibəti-Fəxrəddin faciədir. 3-cü mülahizə yanlışdır: Aşıq Ələsgər HECA vəznində yazmışdır, əruz yox - əruz yazılı ədəbiyyatın vəznidir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb10-maarifci#26'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb10-nesimi-xetayi#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb10-nesimi-xetayi#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb10-nesimi-xetayi#comb1', 'edeb-10-nesimi-xetayi',
+  'İmadəddin Nəsimi və Şah İsmayıl Xətayi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Nəsimi hürufilik təliminin ardıcılı idi, bu təlim dövrün rəsmi dairələrində küfr sayıldığı üçün şair Hələbdə edam olunmuşdur.
+2) 1-ci mülahizəyə əsasən, bu təqib mühitindən fərqli olaraq, Xətayi həm şair, həm də dövlət başçısı olmuşdur.
+3) Nəsimi Bağdadda edam olunmuşdur.
+4) Nəsimi Şamaxıda, Xətayi isə Ərdəbildə doğulmuşdur.',
+  '1, 2 və 4 doğrudur: Nəsimi hürufilik təlimi ucbatından Hələbdə edam olunub, Xətayi şair və hökmdar idi; doğum yerləri doğrudur. 3-cü mülahizə yanlışdır: Nəsimi Bağdadda yox, HƏLƏBDƏ edam olunmuşdur.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb10-nesimi-xetayi#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb10-nizami#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb10-nizami#22';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb10-nizami#comb1', 'edeb-10-nizami',
+  'Nizami Gəncəvi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Nizaminin «Xəmsə»si beş poemadan ibarətdir; bu poemalar «Sirlər xəzinəsi» → «Xosrov və Şirin» → ... → «İskəndərnamə» ardıcıllığı ilə yazılmışdır - «İskəndərnamə» sonuncu poemadır.
+2) 1-ci mülahizəyə əsasən, saray şairi olmaqdan uzaq durması Nizaminin fikir müstəqilliyini və hökmdarlara tənqidi baxışını qorumasına imkan vermişdir.
+3) «Xəmsə» dörd poemadan ibarətdir.
+4) Nizami fars dilində, Füzuli isə Azərbaycan dilində yazmışdır.',
+  '1, 2 və 4 doğrudur: Xəmsə beş poemadır, sıralanma və Nizaminin fikir müstəqilliyi doğrudur; dil fərqi doğrudur. 3-cü mülahizə yanlışdır: Xəmsə dörd yox, BEŞ poemadan ibarətdir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb10-nizami#22'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- edeb10-sifahi#comb1
+update public.questions set difficulty = 2 where ext_key = 'edeb10-sifahi#21';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('edeb10-sifahi#comb1', 'edeb-10-sifahi',
+  'Şifahi xalq ədəbiyyatı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Bayatı yeddi hecalı, qoşma isə on bir hecalı dördlükdür - aralarında dörd heca fərq var.
+2) 1-ci mülahizəyə əsasən, bu janrlar kimi digər şifahi janrlar da müəyyən məşğuliyyətlərlə bağlıdır: Holavar əkinçilik, sayaçı sözü isə heyvandarlıq nəğməsidir.
+3) Dastanlar bütövlükdə nəsrlə söylənir.
+4) Aşıq şeiri heca vəznindədir, əruz isə yazılı ədəbiyyatın vəznidir.',
+  '1, 2 və 4 doğrudur: bayatı/qoşma heca fərqi və Holavar/sayaçı sözü doğrudur; aşıq şeiri heca vəznindədir. 3-cü mülahizə yanlışdır: dastanlarda NƏSRLƏ YANAŞI NƏZM PARÇALARI da olur, bütövlükdə nəsr deyil.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'edeb10-sifahi#21'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'edebiyyat'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 230 then
-    raise exception '112: 230 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 238 then
+    raise exception '112: 238 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
