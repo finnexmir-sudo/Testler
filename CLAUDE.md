@@ -1223,11 +1223,12 @@ tam UX gəzişi üçün onun genişi bu sessiyanın scratchpad-ında idi
 
 ## Üst zolaq — marka rəngi
 
-`assets/base.css` `.top` üç tətbiqdə marka mavisidir (`--brand`), yazı,
-«Çıxış», «Geri» və zəng ağdır (istifadəçi seçimi, 3 variant arasından).
-`theme-color` meta və manifestlərin `theme_color`-u da `#2b4acb` — şagird
-və valideyndə köhnə yaşıl (#0e9384) qalmasın. Zolağa yeni element qoyanda
-rəngini ağ ver.
+`assets/base.css` `.top` üç tətbiqdə `--top-bg` (#3559de, markadan bir
+ton açıq — istifadəçi istədi), yazı, «Çıxış», «Geri» və zəng ağdır.
+Nişan 32px ağ kvadratdadır (`.top .mark`, SVG 24px — e2e_bank ölçür),
+yanında `<span class="wm">Bil10</span>` və nöqtə, sonra səhifə adı.
+`theme-color` meta və manifestlərin `theme_color`-u da `#3559de`. Zolağa
+yeni element qoyanda rəngini ağ ver.
 
 ## Böyüyən siyahılar — hədd qaydası
 

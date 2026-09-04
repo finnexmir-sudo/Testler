@@ -459,8 +459,12 @@ with sync_playwright() as pw:
     print("H · Başlıqdakı nişan pozulmayıb")
     mk = pg.locator(".top .mark").first
     ok(mk.count() > 0 if hasattr(mk, "count") else True, "basliqda nisan var")
+    #  Nisan ag 32px kvadratdadir, icindeki SVG 24px (mavi zolaq ucun)
     w = pg.locator(".top .mark").first.evaluate("e => e.getBoundingClientRect().width")
-    ok(24 <= w <= 28, "nisan olcusu duzgun (32 olsa CSS toqqusub)", str(round(w)) + "px")
+    sv = pg.locator(".top .mark svg").first.evaluate("e => e.getBoundingClientRect().width")
+    ok(30 <= w <= 34 and 22 <= sv <= 26, "nisan olcusu duzgun (kvadrat 32, svg 24)",
+       str(round(w)) + "/" + str(round(sv)) + "px")
+    ok(pg.locator(".top .wm").count() == 1 and pg.inner_text(".top .wm") == "Bil10", "zolaqda Bil10 yazisi var")
 
     print("I · Platforma hovuzu: siyahı yox, əhatə görüntüsü")
     pg.goto(PANEL + "#/b"); pg.reload()
