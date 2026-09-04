@@ -4863,12 +4863,306 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- cog11-ekoloji-qlobal#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog11-ekoloji-qlobal#8';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog11-ekoloji-qlobal#comb1', 'cog-11-ekoloji-qlobal',
+  'Qlobal ekoloji problemlərlə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Ozon təbəqəsinin nazilməsinə freonlar səbəb olub; Monreal protokolu bu maddələrin istehsalını məhdudlaşdırır - deməli protokol birbaşa bu problemin həllinə yönəlib.
+2) 1-ci mülahizəyə əsasən, Monreal protokolu karbon neytrallığı ilə EYNİ hədəfi güdür, çünki hər ikisi «atmosferə zərərli qazların tənzimlənməsi»dir.
+3) Davamlı İnkişaf Məqsədləri (DİM) 2015-ci ildə qəbul edilib.
+4) Beynəlxalq ekoloji sazişlərin icrasında əsas çətinlik ölkələrin iqtisadi maraqlarının uyğunlaşdırılmasıdır.',
+  '1, 3 və 4 doğrudur: freonlar ozonu dağıdır, Monreal protokolu bunları məhdudlaşdırır - problem və həll uyğundur; DİM 2015-ci ildə qəbul edilib; ekoloji sazişlərin icrasında əsas çətinlik ölkələrin iqtisadi maraqlarının uyğunlaşdırılmasıdır. 2-ci mülahizə yanlışdır: Monreal protokolu OZONDAĞIDICI maddələri (freonlar) hədəfləyir, karbon neytrallığı isə KARBON qazının tarazlığına aiddir - fərqli iki qlobal problemdir, eyni hədəf deyil.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 3, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog11-ekoloji-qlobal#8'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog11-enerji-erzaq#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog11-enerji-erzaq#6';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog11-enerji-erzaq#comb1', 'cog-11-enerji-erzaq',
+  'Enerji və ərzaq təhlükəsizliyi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Yaşıl inqilab yüksək məhsuldar sortlar, gübrə və suvarma ilə kənd təsərrüfatı məhsuldarlığını artırdı; eyni zamanda bu artım gübrə/pestisid yükünü, torpaq-su çirklənməsini də gətirdi - məhsuldarlıq artımı və çirklənmə EYNİ prosesin (gübrələmənin artmasının) iki nəticəsidir.
+2) 1-ci mülahizəyə əsasən, yaşıl inqilabın «xalis» (yalnız müsbət) nəticə olduğunu iddia etmək yanlışdır.
+3) Geotermal enerji İslandiya kimi vulkanik ölkələrdə geniş yayılıbsa, hidrogen enerjisi də eyni səbəbdən (vulkanik fəallıqdan) asılıdır.
+4) Hidrogen enerjisinin perspektivi onun yanma məhsulunun yalnız su olması ilə bağlıdır, coğrafi mövqedən asılı deyil.',
+  '1, 2 və 4 doğrudur: yaşıl inqilabın məhsuldarlıq artımı və çirklənməsi eyni prosesin iki üzüdür - xalis müsbət deyil; hidrogenin üstünlüyü yanma məhsulunun təmizliyi ilə bağlıdır, coğrafi mövqedən asılı deyil. 3-cü mülahizə yanlışdır: geotermal enerji vulkanik fəallıqdan (coğrafi amil) asılıdır, hidrogen enerjisi isə kimyəvi xüsusiyyətindən (yanma məhsulu) asılıdır - ikisini eyni səbəbə bağlamaq olmaz.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog11-enerji-erzaq#6'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog11-inteqrasiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog11-inteqrasiya#3';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog11-inteqrasiya#comb1', 'cog-11-inteqrasiya',
+  'İqtisadi inteqrasiya ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) İnteqrasiyanın ən sadə forması (azad ticarət zonası) ölkələr arası gömrük rüsumlarını azaldır; gömrük ittifaqı isə bundan fərqli olaraq ÜÇÜNCÜ ölkələrə qarşı VAHİD tarif tətbiq edir - gömrük ittifaqı azad ticarət zonasından DAHA DƏRİN inteqrasiya formasıdır.
+2) 1-ci mülahizəyə əsasən, gömrük ittifaqına keçid ölkənin öz gömrük siyasətini müstəqil müəyyən etmək sərbəstliyini azaldır.
+3) İnteqrasiyanın dərinləşməsi HƏMİŞƏ bütün üzv ölkələrə bərabər fayda verir, mənfi tərəfi yoxdur.
+4) TAP kəməri Cənub Qaz Dəhlizinin son həlqəsi olaraq qazı Avropa bazarına (İtaliyaya) çatdırır.',
+  '1, 2 və 4 doğrudur: gömrük ittifaqı üçüncü ölkələrə vahid tarif tətbiq etməklə azad ticarət zonasından dərinləşir, bu, üzv ölkənin öz gömrük siyasətini müstəqil müəyyənləşdirmə sərbəstliyini azaldır; TAP Cənub Qaz Dəhlizinin son həlqəsidir. 3-cü mülahizə yanlışdır: inteqrasiyanın mənfi tərəfi də var - zəif iqtisadiyyatlar güclü rəqiblərin təzyiqi altında qala bilər.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog11-inteqrasiya#3'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog11-iqtisadi-inkisaf#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog11-iqtisadi-inkisaf#9';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog11-iqtisadi-inkisaf#comb1', 'cog-11-iqtisadi-inkisaf',
+  'Sənayenin yerləşməsi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Metallurgiya müəssisələri xammal/yanacaq amilinə görə, yüngül sənaye isə işçi qüvvəsi/bazar amilinə görə yerləşdirilir - bu iki sənaye növü FƏRQLİ amillərə görə yer seçir.
+2) 1-ci mülahizəyə əsasən, elmtutumlu sahələr (kadr/elm mərkəzi amili) bu ikisindən DƏ fərqli, ÜÇÜNCÜ bir amilə əsaslanır - deməli sənaye yerləşməsi tək universal qaydaya tabe deyil.
+3) Bakı Beynəlxalq Dəniz Ticarət Limanının Ələtdə yerləşməsi məhz metallurgiyanın xammal amilinə görədir.
+4) Ələtdəki azad ticarət zonasının məqsədi güzəştli rejimlə xarici investisiya və tranzit ticarətini cəlb etməkdir.',
+  '1, 2 və 4 doğrudur: metallurgiya xammal/yanacağa, yüngül sənaye işçi qüvvəsi/bazara, elmtutumlu sahələr isə kadr/elm mərkəzlərinə görə yerləşir - üç fərqli amil, tək universal qayda yoxdur; Ələtdəki azad ticarət zonasının məqsədi investisiya/tranzit cəlbidir. 3-cü mülahizə yanlışdır: limanın Ələtdə yerləşməsi tranzit-coğrafi mövqe səbəbindəndir, metallurgiyanın xammal amili ilə heç bir əlaqəsi yoxdur - fərqli sənaye amillərinin səhv qarışdırılmasıdır.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog11-iqtisadi-inkisaf#9'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog11-qloballasma#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog11-qloballasma#12';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog11-qloballasma#comb1', 'cog-11-qloballasma',
+  'Qloballaşma ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Konteyner daşımaları yükü ucuzlaşdırıb standartlaşdırdı - bu, qlobal tədarük zəncirlərinin mümkün olmasına şərait yaratdı.
+2) 1-ci mülahizəyə əsasən, bu zəncirlərin ZƏİF nöqtəsi var - bir həlqədəki fasilə bütün zənciri dayandıra bilər, deməli ucuzluq eyni zamanda KIRILGANLIQ gətirib.
+3) Maliyyə bazarlarının qloballaşması riskləri azaldır, çünki böhran bir ölkədə qalıb yayılmır.
+4) Kiçik ölkələrin strategiyası konkret sahələrdə ixtisaslaşıb rəqabət üstünlüyü qazanmaqdır - qlobal tədarük zəncirində öz «həlqəsini» tapmaq deməkdir.',
+  '1, 2 və 4 doğrudur: konteyner daşımaları qlobal tədarük zəncirlərini mümkün etdi, amma bu zəncirlər kırılgandır (bir həlqə kəsilsə hamısı dayanır); kiçik ölkələr ixtisaslaşaraq zəncirdə öz yerini tapmalıdır. 3-cü mülahizə yanlışdır: maliyyə bazarlarının qloballaşması riski AZALTMIR, ƏKSİNƏ artırır - bir ölkədəki böhran sürətlə digərlərinə yayıla bilir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog11-qloballasma#12'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog11-tebii-ehtiyat#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog11-tebii-ehtiyat#5';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog11-tebii-ehtiyat#comb1', 'cog-11-tebii-ehtiyat',
+  'Təbii ehtiyatlarla bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Yanacaq-energetika xammalı əsasən çökmə süxurlarda, filiz faydalı qazıntılar isə qırışıqlıq zonalarında/qalxanlarda toplanır - bu, iki mineral qrupunun FƏRQLİ geoloji strukturlarda formalaşdığını göstərir.
+2) 1-ci mülahizəyə əsasən, eyni ərazidə HƏM yanacaq, HƏM filiz ehtiyatının bol olması gözlənilməz haldır, çünki onlar əks tip geoloji strukturlar tələb edir.
+3) Resurslarla təminat göstəricisi ehtiyatın ƏHALİYƏ nisbəti ilə hesablanır.
+4) Təbii ehtiyatların iqtisadi qiymətləndirilməsi təkcə kəmiyyəti yox, keyfiyyəti, yerləşmə şəraitini və çıxarma xərcini də nəzərə alır.',
+  '1, 2 və 4 doğrudur: yanacaq-energetika çökmə süxurlarda, filiz isə qırışıqlıq zonalarında toplanır - əks geoloji strukturlar, eyni ərazidə hər ikisinin bol olması gözlənilməzdir; iqtisadi qiymətləndirmə kəmiyyət, keyfiyyət, yerləşmə və xərci nəzərə alır. 3-cü mülahizə yanlışdır: resurslarla təminat göstəricisi ehtiyatın İLLİK HASİLATA nisbəti ilə hesablanır, əhaliyə nisbətlə yox.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog11-tebii-ehtiyat#5'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- cog11-xerite-cis#comb1
+update public.questions set difficulty = 2 where ext_key = 'cog11-xerite-cis#12';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('cog11-xerite-cis#comb1', 'cog-11-xerite-cis',
+  'Xəritə və CİS ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Xəritə proyeksiyası kürə səthini müstəviyə keçirmək üçün istifadə olunur; bu zaman təhriflərin olması QAÇILMAZDIR - kürəni tam təhrifsiz müstəviyə keçirmək mümkün deyil.
+2) 1-ci mülahizəyə əsasən, hər bir xəritə (proyeksiyaya əsaslandığı üçün) müəyyən dərəcədə TƏHRİF daşıyır - «təhrifsiz xəritə» anlayışı mövcud deyil.
+3) Yalnız KİÇİK miqyaslı xəritələrdə təhrif olur, böyük miqyaslılarda olmur.
+4) CİS-in əsas üstünlüyü müxtəlif məlumat qatlarını üst-üstə salıb birgə təhlil etmək imkanıdır.',
+  '1, 2 və 4 doğrudur: proyeksiya kürəni müstəviyə keçirir, bu, qaçılmaz təhrif yaradır - hər xəritə müəyyən təhrif daşıyır; CİS-in üstünlüyü fərqli qatları üst-üstə salıb birgə təhlil etməkdir. 3-cü mülahizə yanlışdır: təhrif YALNIZ kiçik xəritələrə aid deyil - bütün proyeksiyalarda, miqyasından asılı olmayaraq, qaçılmazdır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'cog11-xerite-cis#12'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'cografiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 115 then
-    raise exception '112: 115 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 122 then
+    raise exception '112: 122 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
