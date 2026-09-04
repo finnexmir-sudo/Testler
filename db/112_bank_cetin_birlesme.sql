@@ -5367,12 +5367,222 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- kim11-aldehid-tursu#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim11-aldehid-tursu#18';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim11-aldehid-tursu#comb1', 'kim-11-aldehid-tursu',
+  'Aldehid, keton və turşularla bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Aldehidlər gümüş güzgü reaksiyası ilə təyin olunur; aseton isə keton sinfinə aiddir - aldehid və keton FƏRQLİ sinif adları daşısa da, hər ikisində karbonil qrupu (C=O) var.
+2) 1-ci mülahizəyə əsasən, karbonil qrupunun ortaqlığı aldehid və ketonların bəzi kimyəvi oxşarlıqlara malik olmasına səbəb olur, amma bu, onları EYNİ sinif etmir.
+3) Aseton da gümüş güzgü reaksiyası verir, çünki tərkibində aldehidlər kimi karbonil qrupu var.
+4) Karbon turşularının turşuluğu karbon zənciri uzandıqca zəifləyir.',
+  '1, 2 və 4 doğrudur: aldehid gümüş güzgü ilə təyin olunur, aseton isə keton sinfinə aiddir - hər ikisində karbonil qrupu olsa da, bu, onları eyni sinif etmir; karbon turşularının turşuluğu zəncir uzandıqca zəifləyir. 3-cü mülahizə yanlışdır: gümüş güzgü reaksiyası məhz ALDEHİD qrupunu (tərkibində H olan karbonil) aşkarlayır - ketonlarda (aseton kimi) bu H yoxdur, ona görə ketonlar bu reaksiyanı vermir; karbonil qrupunun ortaqlığı reaktivlik ortaqlığı demək deyil.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim11-aldehid-tursu#18'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim11-azotlu#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim11-azotlu#30';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim11-azotlu#comb1', 'kim-11-azotlu',
+  'Zülallarla bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Zülalın birincili quruluşu aminturşuların zəncirdəki ARDICILLIĞINI bildirir; ikincili quruluş isə bu zəncirin fəzada spiral/büküş FORMASINI alması deməkdir - ikincili quruluş birincili quruluşun üzərində formalaşır.
+2) 1-ci mülahizəyə əsasən, ağır metal duzlarının yaratdığı dönməz denaturasiya zülalın FƏZA formasını pozur, amma aminturşu ARDICILLIĞINI (birincili quruluşu) DƏYİŞMİR.
+3) Denaturasiya zülalın aminturşu ardıcıllığını (birincili quruluşunu) dəyişdiyi üçün zəhərlidir.
+4) Biuret reaksiyası zülalın mövcudluğunu bənövşəyi rənglə göstərən keyfiyyət reaksiyasıdır.',
+  '1, 2 və 4 doğrudur: birincili quruluş aminturşu ardıcıllığı, ikincili isə bu zəncirin fəza formasıdır - ikincili birincilinin üzərində qurulur; ağır metal duzları fəza formasını (denaturasiya) pozur, amma ardıcıllığı dəyişmir; biuret reaksiyası zülalı bənövşəyi rənglə aşkarlayır. 3-cü mülahizə yanlışdır: denaturasiya FƏZA QURULUŞUNU pozur, aminturşu ARDICILLIĞINI dəyişmir.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim11-azotlu#30'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim11-efir-yag#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim11-efir-yag#12';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim11-efir-yag#comb1', 'kim-11-efir-yag',
+  'Yağlar və sabunla bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Sabun molekulunun bir ucu suya (polyar), digər ucu yağa (qeyri-polyar) meyllidir - bu ikili quruluş sayəsində kir hissəcikləri əhatələnir; yağ molekulları isə TAMAMİLƏ qeyri-polyar olduğu üçün suda həll OLMUR.
+2) 1-ci mülahizəyə əsasən, sabun yağdan fərqli olaraq HƏM polyar, HƏM qeyri-polyar hissəyə malikdir - bu quruluş fərqi onun yuyuculuq qabiliyyətinin mənbəyidir.
+3) Cod suda sabunun yuyuculuq qabiliyyəti sadəcə suyun temperaturundan asılıdır.
+4) Bitki yağlarının maye, heyvan piylərinin isə bərk olmasının səbəbi doymamış turşuların nisbətidir.',
+  '1, 2 və 4 doğrudur: sabun molekulunun ikili (polyar+qeyri-polyar) quruluşu onu yağdan (tamamilə qeyri-polyar) fərqləndirir və yuyuculuq qabiliyyəti verir; bitki yağlarının maye olması doymamış turşuların çoxluğundandır. 3-cü mülahizə yanlışdır: cod suda sabunun yuyuculuğunun azalması Ca/Mg ionları ilə həll olmayan duzların əmələ gəlməsindən irəli gəlir, temperaturdan yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim11-efir-yag#12'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim11-polimer#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim11-polimer#10';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim11-polimer#comb1', 'kim-11-polimer',
+  'Polimerlərlə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Termoplastik polimer qızdırıldıqda yumşalır, soyuduqda bərkiyir - TƏKRAR emal oluna bilir; termoreaktiv polimer isə bir dəfə bərkidikdən sonra təkrar ƏRİDİLƏ BİLMİR - bu iki tip davranış baxımından ƏKSDİR.
+2) 1-ci mülahizəyə əsasən, xətti quruluşlu polimerlər (elastik/plastik) termoplastik davranışa daha yaxındır, fəza (şəbəkəli) quruluşlular isə termoreaktiv davranışa.
+3) Vulkanizasiya prosesi (kauçuka kükürd qatılması) kauçuku TERMOPLASTİK edir, çünki rezin daha çevik olur.
+4) Polimerlər quruluşuna görə xətti, budaqlanmış və fəza (şəbəkəli) olmaqla üç növə bölünür.',
+  '1, 2 və 4 doğrudur: termoplastik təkrar emal olunur, termoreaktiv olunmur - əks davranış; xətti quruluş termoplastikə, fəza (şəbəkəli) quruluş isə termoreaktivə yaxındır; polimerlər xətti/budaqlanmış/fəza olaraq üç növə bölünür. 3-cü mülahizə yanlışdır: vulkanizasiya kauçuk zəncirləri arasında kükürd körpüləri yaradaraq FƏZA quruluş formalaşdırır - bu, kauçuku TERMOREAKTİV xassəyə yaxınlaşdırır, termoplastikə yox.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim11-polimer#10'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- kim11-spirtler#comb1
+update public.questions set difficulty = 2 where ext_key = 'kim11-spirtler#11';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('kim11-spirtler#comb1', 'kim-11-spirtler',
+  'Spirtlər və fenolla bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Spirtlərin qaynama temperaturunun eyni kütləli karbohidrogenlərdən yüksək olması hidrogen rabitəsi ilə bağlıdır; spirtlərin suda həllolması da eyni mexanizmə əsaslanır, amma karbon zənciri UZANDIQCA bu həllolma AZALIR.
+2) 1-ci mülahizəyə əsasən, kiçik spirt molekulları (məsələn, metanol) böyük (uzun zəncirli) spirt molekullarından suda DAHA YAXŞI həll olur.
+3) Çoxatomlu spirtləri təyin etmək üçün dəmir(III) xlorid reaktivindən istifadə olunur.
+4) Fenolun məhlulunu təyin etmək üçün dəmir(III) xlorid bənövşəyi rəng verir.',
+  '1, 2 və 4 doğrudur: spirtlərin yüksək qaynama temperaturu və suda həllolması eyni hidrogen rabitəsi mexanizminə əsaslanır, amma zəncir uzandıqca həllolma azalır - kiçik spirtlər daha yaxşı həll olur; fenol dəmir(III) xloridlə bənövşəyi rəng verir. 3-cü mülahizə yanlışdır: çoxatomlu spirtlər MİS (II) HİDROKSİDLƏ təyin olunur, dəmir(III) xlorid isə FENOLUN reaktividir - fərqli maddələr, fərqli reaktivlər.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'kim11-spirtler#11'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'kimya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 127 then
-    raise exception '112: 127 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 132 then
+    raise exception '112: 132 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
