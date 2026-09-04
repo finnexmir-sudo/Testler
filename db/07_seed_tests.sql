@@ -46,8 +46,10 @@ select 'platform', p.id, s.id, l.id, v.slug, v.title, v.descr,
           'Toplama, çıxma, vurma və mətn məsələsi', true, 900),
          ('az-3-dil-1',     'az-dili',    'Azərbaycan dili — 1',
           'Sait-samit, söz növləri, yazı qaydası', true, 600),
-         ('riy-3-analiz',   'riyaziyyat', 'Genişləndirilmiş analiz testi',
-          'Zəif mövzuları müəyyən edir — abunə paketinə daxildir', false, 1200)
+         --  YER TUTUCU: odenisli (kilidli) testin gorunusunu yoxlamaq ucun.
+         --  Canlida 121 ile gizledilir; diaqnostika (118) bunun heqiqi halidir.
+         ('riy-3-analiz',   'riyaziyyat', 'Nümunə — ödənişli test',
+          'Yerli nümunə: abunəsiz hesabda kilidli görünür', false, 1200)
        ) as v(slug, subj, title, descr, is_free, tlimit)
   join public.subjects s on s.slug = v.subj
   join public.programs p on p.slug = 'ibtidai'

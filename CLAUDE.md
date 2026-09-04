@@ -639,7 +639,7 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     olacaq, hər biri 3–6 sətir olmalıdır, 74 yox. Təkrar diaqnostika
     irəliləyişi rəqəmlə göstərir («3 qırmızı → 1») — valideyn hesabatına
     (yol xəritəsi «aylıq hesabat» təklifi) da düşür.
-    `07_seed_tests.sql`-dəki «Genişləndirilmiş analiz testi» bunun
+    `07_seed_tests.sql`-dəki «Nümunə — ödənişli test» (riy-3-analiz) bunun
     nümunə-yer tutucusudur, məhsul deyil (canlıda yoxdur).
 
 19. **«Bizə yaz» — istifadəçi təklifləri.** İstifadəçinin sözü: real
@@ -1186,8 +1186,11 @@ müddəti uzatmaq üçün), `drawPaper` isə diaqnostik testdə həmin
 düymələrin yerinə «Diaqnostika» qeydi və şagird ekranına keçid göstərir.
 Yeni RPC diaqnostik testə toxunursa `is_diagnostic`-i yoxla.
 
-`07_seed_tests.sql`-dəki «Genişləndirilmiş analiz testi» bunun köhnə
-yer tutucusudur — məhsul deyil, bələdçi şəkillərində gizlədilir.
+`07_seed_tests.sql`-dəki «Nümunə — ödənişli test» (slug riy-3-analiz,
+köhnə adı «Genişləndirilmiş analiz testi») bunun köhnə yer tutucusudur —
+məhsul deyil; canlıda `121_numune_test_gizli.sql` ilə draft-dır, yerli
+test bazasında qalır (`run.sh --local` 121-i keçir, kilid yoxlaması ona
+bağlıdır), bələdçi şəkillərində gizlədilir.
 
 ## UX yoxlaması — qaydalar (2026-09-04)
 
