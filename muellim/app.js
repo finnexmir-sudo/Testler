@@ -2478,7 +2478,12 @@
       '<div class="segs asgf" id="asgTabs"></div>' +
       '<div id="asgList" class="card pad0"></div>' +
       '<div class="spacer"></div>' +
-      "<h2>Yeni tapşırıq</h2>" +
+      /*  "Yeni tapsiriq" yeni test yaratmaq kimi oxunurdu (canli sual).
+          Burada hazir test secilib qrupa verilir - basliq ve bir cumle
+          bunu deyir.  */
+      "<h2>Hazır testi tapşır</h2>" +
+      '<p class="muted" style="margin:-6px 0 10px">Hazır testi seçin, kimə və nə vaxta ' +
+        "qədər — şagirdin siyahısına düşür. Eyni test bir neçə qrupa verilə bilər.</p>" +
       '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
       /* Bu ekran test YARATMIR - hazir testi qrupa yoneldir.
@@ -2688,25 +2693,41 @@
           "<b>Bütün testlər verilib</b>Bu sinif üçün başqa test qalmayıb.</div>";
         return;
       }
+      function optOf(t) {
+        /* Testin adi onsuz da fennle baslayirsa fenni tekrar yazmiriq:
+           "Azerbaycan dili - Azerbaycan dili - 1" cirkin cixirdi. */
+        var sub = String(t.subject || "");
+        var ttl = String(t.title || "");
+        var lbl = (sub && ttl.indexOf(sub) !== 0) ? sub + " — " + ttl : ttl;
+        /*  Siyahida ASAGI sinif testleri de var - hansi sinif ucun
+            yigildigi GORUNMELIDIR.  Qrupun oz sinfi tekrarlanmir.  */
+        var lv = String(t.level || "");
+        if (lv && lv !== (levelName(g.level_id) || "")) lbl += " · " + lv;
+        return '<option value="' + esc(t.id) + '">' + esc(lbl) +
+          " (" + (Number(t.questions) || 0) + " sual)" +
+          (t.is_free ? "" : " · abunə") +
+          (elsew[t.id] ? " · başqa qrupa da verilib" : "") + "</option>";
+      }
+      /*  Siyahi uc bolmede: bu sinfin platforma testleri, muellimin oz
+          testleri, asagi sinifler.  Evvel hamisi bir yerde idi - 8-ci
+          sinif riyaziyyat qrupu ucun ilk setir "Azerbaycan dili - 5-ci
+          sinif" cixirdi (canli sual).  Bolme bosdursa gorunmur.  */
+      var gl = levelName(g.level_id) || "";
+      var own = free.filter(function (t) { return t.mine; });
+      var here = free.filter(function (t) { return !t.mine && (!gl || String(t.level || "") === gl); });
+      var lower = free.filter(function (t) { return !t.mine && gl && String(t.level || "") !== gl; });
+      function grp(label, list) {
+        return list.length
+          ? '<optgroup label="' + esc(label) + '">' + list.map(optOf).join("") + "</optgroup>"
+          : "";
+      }
       box.innerHTML = note +
         '<label for="aTest">Test</label>' +
-        '<select id="aTest">' + free.map(function (t) {
-          /* Testin adi onsuz da fennle baslayirsa fenni tekrar yazmiriq:
-             "Azerbaycan dili - Azerbaycan dili - 1" cirkin cixirdi. */
-          var sub = String(t.subject || "");
-          var ttl = String(t.title || "");
-          var lbl = (sub && ttl.indexOf(sub) !== 0) ? sub + " — " + ttl : ttl;
-          /*  Siyahida artiq ASAGI sinif testleri de var - hansi sinif
-              ucun yigildigi GORUNMELIDIR, yoxsa muellim 5-ci sinif
-              testini 8-ci sinif testi bilib verer.  Qrupun oz sinfi
-              tekrarlanmir: o, onsuz da basliqdadir.  */
-          var lv = String(t.level || "");
-          if (lv && lv !== (levelName(g.level_id) || "")) lbl += " · " + lv;
-          return '<option value="' + esc(t.id) + '">' + esc(lbl) +
-            " (" + (Number(t.questions) || 0) + " sual)" +
-            (t.is_free ? "" : " · abunə") +
-            (elsew[t.id] ? " · başqa qrupda verilib" : "") + "</option>";
-        }).join("") + "</select>" +
+        '<select id="aTest">' +
+          grp(gl ? "Platforma · " + gl : "Platforma", here) +
+          grp("Öz testləriniz", own) +
+          grp("Aşağı siniflər", lower) +
+        "</select>" +
         //  Kime: butun qrup (kohne davranis) ve ya tek sagird
         (students.length
           ? '<label for="aWho">Kimə</label>' +
@@ -3641,7 +3662,7 @@
       '<div class="card">' +
         '<div class="fieldrow">' +
           '<div><label for="gTitle">Testin adı</label>' +
-            '<input id="gTitle" maxlength="120" placeholder="məsələn: Riyaziyyat — 1-ci rüb" value="' +
+            '<input id="gTitle" maxlength="120" placeholder="boş qalsa: fənn · sinif · tarix" value="' +
             esc(f.title) + '"></div>' +
           '<div style="flex:0 0 140px"><label for="gCnt">Sual sayı</label>' +
             '<input id="gCnt" type="number" min="1" max="100" inputmode="numeric" value="' +
@@ -3783,12 +3804,25 @@
       });
   }
 
+  /*  Ad bos qalanda "Avtomatik test" evezine menali ad: fenn, sinif,
+      tarix.  Canlida "1" adli test gorundu - muellim ad yazmaga vaxt
+      qoymur, siyahida ise hansi test oldugu bilinmirdi.  */
+  function genAutoTitle(f) {
+    var sub = (FAC.subjects || []).filter(function (x) { return x.slug === f.subject; })[0];
+    var parts = [sub ? sub.name : "Test"];
+    if (f.levels.length === 1) parts.push(levelNameByCode2(f.levels[0]));
+    else if (f.levels.length > 1) parts.push(f.levels.slice().sort(function (a, b) {
+      return Number(a) - Number(b); }).join(", ") + " siniflər");
+    parts.push(dateAz(new Date().toISOString()));
+    return parts.join(" · ");
+  }
+
   function makeTest() {
     if (busy) return;
     var f = genFilter();
     $("gErr").innerHTML = "";
     setBusy("btnMake", true, "Testi yığ");
-    sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: f.title || "" })
+    sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: (f.title || "").trim() || genAutoTitle(f) })
       .then(function (v) {
         //  qrup secilibse test derhal tapsiriq kimi gedir; tapsiriq
         //  alinmasa da test hazirdir - veraqde elle vermek olar

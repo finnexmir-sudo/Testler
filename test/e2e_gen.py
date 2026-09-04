@@ -494,7 +494,7 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/a/cccc2222-0000-0000-0000-0000000000e2"); pg.reload()
     pg.wait_for_selector("#aTest", timeout=8000)
     opts = " | ".join(pg.locator("#aTest option").all_inner_texts())
-    ok("başqa qrupda verilib" in opts, "verilib nisani gorunur", opts[:80])
+    ok("başqa qrupa da verilib" in opts, "verilib nisani gorunur", opts[:80])
     ok("səhvlər üzərində iş" not in opts,
        "sexsi sehv-testi basqa qrupa teklif olunmur")
 
