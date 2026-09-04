@@ -84,8 +84,9 @@ with sync_playwright() as p:
     t.fill("#gname", "3-cü sinif — şənbə qrupu"); t.select_option("#glevel", "3")
     t.click("#btnGroup"); t.wait_for_selector("#groups .item", timeout=15000)
     t.wait_for_timeout(500); shot(t, "m3_icmal")
-    t.click("#groups .item"); t.wait_for_selector("#btnStu", timeout=15000)
+    t.click("#groups .item"); t.wait_for_selector("#gTabs", timeout=15000)
     for nm in ("Aysu Məmmədova", "Kənan Əliyev", "Nigar Həsənova"):
+        if t.locator("#btnStuOpen").count() and t.locator("#btnStuOpen").is_visible(): t.click("#btnStuOpen")   # forma duyme ile acilir
         t.fill("#sname", nm); t.click("#btnStu"); t.wait_for_timeout(700)
     t.wait_for_selector(".stu", timeout=15000)
     # valideyn girisini ilk sagird ucun ac

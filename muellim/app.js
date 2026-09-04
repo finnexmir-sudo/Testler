@@ -1188,6 +1188,16 @@
       .catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
+  //  Qrup ekraninda secilmis sekme - sehife yenilenende de qalir (sessionStorage)
+  var GTAB = (function () { try { return sessionStorage.getItem("gtab") || "s"; } catch (e) { return "s"; } })();
+  //  "Yeni sagird" formasi: duyme ile acilir; acilandan sonra bagliya qeder qalir
+  function openStuForm(focus) {
+    var f = $("stuForm"), b = $("btnStuOpen");
+    if (!f) return;
+    f.hidden = false;
+    if (b) b.classList.add("hide");   // .btn display qaydasi hidden atributunu ezir
+    if (focus && $("sname")) $("sname").focus();
+  }
   function drawGroup(g) {
     topTitle.textContent = g.name;
     show(
@@ -1209,20 +1219,43 @@
         "</div>" +
       "</div>" +
       '<div id="alerts"></div>' +
-      "<h2>Dərs planı</h2>" +
-      '<div id="planBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>' +
-      "<h2>Şagirdlər</h2>" +
-      '<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
-      '<div class="spacer"></div>' +
-      '<div class="card">' +
-        '<label for="sname">Yeni şagird</label>' +
-        '<input id="sname" placeholder="Ad və soyad">' +
-        '<p class="muted" style="margin:-8px 0 14px">Lövhədə qısa ad: ' +
-          "Aysu Məmmədova → Aysu M.</p>" +
-        '<div id="sErr"></div>' +
-        '<button class="btn go" id="btnStu">' + ic("plus") + "Şagird əlavə et</button>" +
+      /*  Iki sekme (istifadeci teklifi): plan + 30 sagird + forma alt-alta
+          on ekran olurdu.  Sagirdler acıq gelir; "Yeni sagird" formasi
+          duyme ile acilir (sagird yoxdursa - avtomatik acıq).  */
+      '<div class="segs stabs" id="gTabs">' +
+        seg("s", 'Şagirdlər <span class="tn hide" id="gTabN"></span>', GTAB) +
+        seg("p", "Dərs planı", GTAB) +
+      "</div>" +
+      '<div class="stab" id="gtab-s"' + (GTAB === "s" ? "" : " hidden") + ">" +
+        '<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
+        '<button class="btn wide" id="btnStuOpen" style="margin-top:10px">' + ic("plus") +
+          "Şagird əlavə et</button>" +
+        '<div class="card" id="stuForm" hidden style="margin-top:10px">' +
+          '<label for="sname">Yeni şagird</label>' +
+          '<input id="sname" placeholder="Ad və soyad">' +
+          '<p class="muted" style="margin:-8px 0 14px">Lövhədə qısa ad: ' +
+            "Aysu Məmmədova → Aysu M.</p>" +
+          '<div id="sErr"></div>' +
+          '<button class="btn go" id="btnStu">' + ic("plus") + "Şagird əlavə et</button>" +
+        "</div>" +
+      "</div>" +
+      '<div class="stab" id="gtab-p"' + (GTAB === "p" ? "" : " hidden") + ">" +
+        '<div id="planBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>' +
       "</div>"
     );
+    on("gTabs", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-v]") : null;
+      if (!b) return;
+      GTAB = b.getAttribute("data-v");
+      try { sessionStorage.setItem("gtab", GTAB); } catch (e) {}
+      Array.prototype.forEach.call(document.querySelectorAll("#gTabs .seg"), function (x) {
+        x.classList.toggle("on", x.getAttribute("data-v") === GTAB);
+      });
+      Array.prototype.forEach.call(document.querySelectorAll(".stab"), function (x) {
+        x.hidden = x.id !== "gtab-" + GTAB;
+      });
+    });
+    on("btnStuOpen", "click", function () { openStuForm(true); });
 
     on("btnBack", "click", function () { nav("#/"); });
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
@@ -1404,6 +1437,13 @@
       eq: { class_id: classId },
       order: "full_name"
     }).then(function (rows) {
+      //  sekme basligina say; sagird yoxdursa forma avtomatik acıq
+      var tn = $("gTabN");
+      if (tn) {
+        var na = (rows || []).filter(function (x) { return x.is_active; }).length;
+        tn.textContent = na; tn.classList.toggle("hide", !na);   // inline-block hidden-i ezir
+      }
+      if (!rows || !rows.length) openStuForm(false);
       var box = $("stu");
       if (!box) return;
       if (!rows || !rows.length) {

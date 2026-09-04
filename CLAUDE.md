@@ -1262,6 +1262,15 @@ sərbəst məşq fənn çipləri + 12 (`PSUB/PEXP`), işlənmiş tapşırıqlar
 hamısı açıq). Yeni siyahı əlavə edəndə eyni qaydanı tətbiq et. Testlərdə
 gizli sətrə klik olmaz — əvvəl «Daha N» və ya details aç.
 
+## Qrup ekranı — iki sekme
+
+`drawGroup`: **Şagirdlər N / Dərs planı** (`#gTabs`, `GTAB` sessionStorage-da
+qalır — səhifə yenilənəndə də). «Yeni şagird» forması `#stuForm` gizlidir,
+`#btnStuOpen` ilə açılır; şagird yoxdursa `loadStudents` avtomatik açır.
+Testlərdə: qrup ekranı üçün `#gTabs` gözlə (köhnə `#btnStu` gizlidir),
+`#sname` doldurmazdan əvvəl `#btnStuOpen` görünürsə klik et; plan üçün
+`#gTabs [data-v='p']` klik et (bir dəfə bəsdir, reload-da qalır).
+
 ## Qrup hesabatı — üç sekme
 
 `screenReport`: **Şagirdlər / Mövzular / Fəaliyyət** (`#rTabs`, `RTAB`).

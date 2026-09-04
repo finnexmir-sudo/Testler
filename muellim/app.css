@@ -902,3 +902,7 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   .item,button.trow{transition:background .12s,transform .12s}
   .item:hover,button.trow:hover{transform:translateY(-1px);background:var(--n-50,#f8f9fc)}
 }
+/* valideyn setrinde "Yenile"/"Bagla" bir yerde, sagda (telefonda ayri-ayri dagilmirdi) */
+.stu .l3 [data-pnew]{margin-left:auto}
+.stu .l3 .btn.arch{margin-left:0}
+@media (min-width:721px){ .stu .l3 [data-pnew]{margin-left:6px} }

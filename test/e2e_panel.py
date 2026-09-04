@@ -253,11 +253,12 @@ with sync_playwright() as pw:
 
     print("C · Şagird əlavə etmək")
     pg.click("#groups .item")
-    pg.wait_for_selector("#btnStu", timeout=8000)
+    pg.wait_for_selector("#gTabs", timeout=8000)
     ok("Cume qrupu" in pg.inner_text("h1"), "qrup ekrani acilir")
     ok("3-cü sinif" in pg.inner_text("#gMeta"), "sinif qrup ekraninda da gorunur",
        pg.inner_text("#gMeta").replace("\n", " "))
 
+    if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
     pg.fill("#sname", "Aysu Məmmədova")
     pg.click("#btnStu")
     pg.wait_for_selector(".stu", timeout=8000)
@@ -270,6 +271,7 @@ with sync_playwright() as pw:
 
     ok(pg.locator("#snick").count() == 0,
        "leqeb sahesi yoxdur - qisa forma avtomatik yaranir")
+    if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
     pg.fill("#sname", "Kənan Əliyev")
     pg.click("#btnStu"); pg.wait_for_timeout(900)
     ok(pg.locator(".stu").count() == 2, "ikinci sagird elave olunur")
@@ -292,11 +294,13 @@ with sync_playwright() as pw:
 
     print("E · Paket limiti panel içində")
     for nm in ["Sagird 3", "Sagird 4", "Sagird 5"]:
+        if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
         pg.fill("#sname", nm)
         pg.click("#btnStu"); pg.wait_for_timeout(700)
     ok(pg.locator(".stu").count() == 5, "5 sagird elave olundu",
        pg.locator(".stu").count())
 
+    if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
     pg.fill("#sname", "Altinci Sagird")
     pg.click("#btnStu"); pg.wait_for_timeout(900)
     err = pg.inner_text("#sErr")
@@ -414,7 +418,7 @@ with sync_playwright() as pw:
     ok("#/s/" in pg.url, "sagird hesabati unvanda", pg.url.split("#")[-1])
     pg.go_back(); pg.wait_for_selector("#btnRef", timeout=8000)
     ok("#/r/" in pg.url, "brauzerin 'geri' duymesi isleyir", pg.url.split("#")[-1])
-    pg.click("#btnB"); pg.wait_for_selector("#btnStu", timeout=8000)
+    pg.click("#btnB"); pg.wait_for_selector("#gTabs", timeout=8000)
     pg.click("#btnBack"); pg.wait_for_selector("#btnGroup", timeout=8000)
 
     print("I2 · Şagirdi dayandırmaq — yer azad olur")

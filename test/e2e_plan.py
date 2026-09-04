@@ -78,6 +78,7 @@ with sync_playwright() as pw:
 
     print("A · Abunəsiz: kilid kartı")
     pg.goto(PANEL + "#/g/cccc1111-0000-0000-0000-0000000000e9"); pg.reload()
+    pg.wait_for_selector("#gTabs", timeout=8000); pg.click("#gTabs [data-v='p']")   # Ders plani sekmesi
     pg.wait_for_selector(".plock", timeout=8000)
     ok("abunə paketi" in pg.inner_text(".plock"), "kilid karti gorunur")
 
@@ -86,6 +87,7 @@ with sync_playwright() as pw:
           select %s, p.id, 'active', now() + interval '30 days'
             from public.plans p where p.slug = 'repetitor-25'""", (AID,))
     pg.reload()
+    pg.wait_for_selector("#gTabs", timeout=8000); pg.click("#gTabs [data-v='p']")   # Ders plani sekmesi
     pg.wait_for_selector("#btnPlOpen", timeout=8000)
     ok(not pg.locator("#btnPlMk").is_visible(), "plan formasi yigilmis gelir - bir setir + «Planı qur»")
     pg.click("#btnPlOpen"); pg.wait_for_selector("#btnPlMk", timeout=8000)
@@ -274,6 +276,7 @@ with sync_playwright() as pw:
     #  dialoq dinleyicisi suite-in evvelinde onsuz da qeydiyyatdadir
     #  (setir 55) - ikincisini elave etmek "already handled" verir
     pg.locator("[data-pldel]").click()
+    pg.wait_for_selector("#gTabs", timeout=8000); pg.click("#gTabs [data-v='p']")   # Ders plani sekmesi
     pg.wait_for_selector("#btnPlOpen", timeout=8000); pg.click("#btnPlOpen")
     pg.wait_for_selector("#btnPlMk", timeout=8000)
     pg.wait_for_function(
