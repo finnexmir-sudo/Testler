@@ -3852,6 +3852,12 @@
     var freeCls = classes.filter(function (c) { return !asgMap[c.id]; });
     var qs = t.questions || [];
     var done = Number(t.done) || 0;
+    //  Diaqnostik test (118): "her movzudan 3 sual", yalniz bir sagirde.
+    //  "Yeniden yig" ve "Qrupa teyin et" burada menasizdir - server de
+    //  redd edir (119); idareetme sagird ekranindaki kartdadir.
+    var diag = !!(t.gen_rule && t.gen_rule.kind === "diagnostic");
+    var diagStu = diag ? (students || []).filter(function (x) {
+      return x.id === t.gen_rule.student; })[0] : null;
     topTitle.textContent = t.title || "Test vərəqi";
 
     show(
@@ -3869,7 +3875,7 @@
             "Çap / PDF</button>" +
           '<button class="btn sm ghost" id="btnPrnK">' + ic("key") +
             "Cavab açarı ilə</button>" +
-          (t.gen_rule && !done
+          (t.gen_rule && !done && !diag
             ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
               "Yenidən yığ</button>"
             : "") +
@@ -3877,14 +3883,30 @@
         '<p class="muted" style="margin:10px 0 0">Çap pəncərəsində printer ' +
           "əvəzinə «PDF olaraq saxla» seçsəniz, vərəq fayl kimi yüklənəcək. " +
           "«Cavab açarı ilə» variantında açar ayrıca səhifədə çıxır.</p>" +
-        (t.gen_rule && done
+        (t.gen_rule && done && !diag
           ? '<p class="muted" style="margin:8px 0 0">Bu testi artıq şagird ' +
             "işlədiyi üçün yeniləmək olmaz — yeni test yığın.</p>"
           : "") +
         '<div id="pErr"></div>' +
       "</div>" +
       '<div class="spacer"></div>' +
-      "<h2>Qrupa təyin et</h2>" +
+      (diag
+        ? "<h2>Diaqnostika</h2>" +
+          '<div class="card" id="pDiag">' +
+            '<div class="pgrow">' + ic("person") + "<span>Hər mövzudan 3 sual — " +
+              (diagStu
+                ? "yalnız <b>" + esc(diagStu.display_name || "") + "</b> üçün"
+                : "yalnız bir şagird üçün") +
+              ", bir cəhd.</span></div>" +
+            '<p class="muted" style="margin:10px 0 0">Qrupa verilmir və yenidən yığılmır: ' +
+              "nəticə, mövzu xəritəsi və «Yenidən diaqnostika» şagirdin öz ekranındadır" +
+              (diagStu
+                ? ' — <a href="#/s/' + esc(diagStu.id) + "/" + esc(diagStu.class_id || "") +
+                  '">' + esc(diagStu.display_name || "şagird") + "</a>."
+                : ".") +
+            "</p>" +
+          "</div>"
+        : "<h2>Qrupa təyin et</h2>" +
       '<div class="card">' +
         (given.length || Object.keys(soloN).length
           ? '<div class="pgiven">' +
@@ -3935,7 +3957,7 @@
               ? ""
               : '<p class="muted">Əvvəlcə əsas səhifədə qrup yaradın — sonra bu ' +
                 "testi ona təyin edə biləcəksiniz.</p>")) +
-      "</div>" +
+      "</div>") +
       '<div class="spacer"></div>' +
       "<h2>Suallar</h2>" +
       '<div class="card pad0 paper">' +

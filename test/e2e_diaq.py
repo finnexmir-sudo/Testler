@@ -192,6 +192,16 @@ with sync_playwright() as pw:
     ok("Bütün mövzular yaxşıdır" in box, "muellimde 'hamisi yaxsidir'")
     if os.environ.get("SHOT"): pg.locator("#diagBox").screenshot(path=os.environ["SHOT"] + "/diaq_muellim2.png")
 
+    print("G · Test vərəqi: diaqnostik testdə «Yenidən yığ» və «Qrupa təyin et» yoxdur")
+    pg.goto(PANEL + "#/t/" + t1); pg.wait_for_selector("#btnPrn", timeout=15000)
+    ok(pg.locator("#btnRegen").count() == 0, "«Yeniden yig» yoxdur")
+    ok(pg.locator("#btnPAsg").count() == 0 and pg.locator("#pWho").count() == 0, "«Qrupa teyin et» formasi yoxdur")
+    ok(pg.locator("#pDiag").count() == 1 and "Hər mövzudan 3 sual" in pg.inner_text("#pDiag"), "diaqnostika qeydi var")
+    ok(pg.locator("#pDiag a[href^='#/s/']").count() == 1, "sagird ekranina kecid var")
+    if os.environ.get("SHOT"): pg.screenshot(path=os.environ["SHOT"] + "/diaq_vereq.png")
+    pg.locator("#pDiag a").click(); pg.wait_for_selector("#diagBox", timeout=15000)
+    ok(("#/s/" + sid) in pg.url, "kecid sagird ekranina aparir")
+
     br.close()
 
 if fails:

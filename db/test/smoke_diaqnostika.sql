@@ -348,4 +348,40 @@ begin
   assert (v::text) not like '%is_correct%', 'valideyne is_correct sizdi';
 end $$;
 \echo 'OK  9 · valideyn neticelerinde diaqnostika nisani var, duz cavab sizmir'
+
+-- =====================================================================
+--  10. Qoruyucular (119): "Yeniden yig" ve qrupa teyinat redd olunur
+-- =====================================================================
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000da';
+do $$
+declare t uuid; c uuid; ok1 boolean := false; ok2 boolean := false; ok3 boolean := false;
+begin
+  select val::uuid into t from public.diag_fx where diag_fx.k = 't2';
+  select class_id into c from public.students where id = '5555000a-0000-0000-0000-0000000000d1';
+  begin
+    perform public.rpc_regenerate_test(t);
+  exception when others then
+    ok1 := sqlerrm like '%Diaqnostik test yeniden yigilmir%';
+  end;
+  assert ok1, 'diaqnostik test yeniden yigildi';
+  assert (select count(*) from public.test_questions where test_id = t) = 36, 'suallar deyisdi';
+  begin
+    perform public.rpc_assign_test(c, t, null, 1, null);
+  exception when others then
+    ok2 := sqlerrm like '%yalniz oz sagirdine%';
+  end;
+  assert ok2, 'diaqnostik test qrupa teyin olundu';
+  begin
+    perform public.rpc_assign_test(c, t, null, 1, '5555000a-0000-0000-0000-0000000000d2');
+  exception when others then
+    ok3 := sqlerrm like '%yalniz oz sagirdine%';
+  end;
+  assert ok3, 'diaqnostik test basqa sagirde teyin olundu';
+  assert (select count(*) from public.assignments where test_id = t) = 1, 'teyinat sayi deyisdi';
+  -- oz sagirdine yeniden teyin (muddet uzatmaq) ise icazelidir
+  perform public.rpc_assign_test(c, t, now() + interval '3 days', 1, '5555000a-0000-0000-0000-0000000000d1');
+end $$;
+reset role; reset request.jwt.claim.sub;
+\echo 'OK 10 · diaqnostik test yeniden yigilmir, qrupa/basqasina verilmir; oz sagirdine uzatmaq olar'
 drop table public.diag_fx;

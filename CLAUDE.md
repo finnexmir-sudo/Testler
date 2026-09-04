@@ -1166,8 +1166,18 @@ fənnlər (fəsil/sual sayı, son diaqnostika), `rpc_diagnostic_create(student,
 subject, days)`, `rpc_diagnostic_result(student, subject)`. Nişanlar:
 şagird siyahısında `diagnostic`, valideyndə `diag`, başlıq «Diaqnostika ·
 Fənn · Sinif». UI: `muellim/app.js` `loadDiag/drawDiag` (`#diagBox`),
-`sagird/app.js` `diagMap`. Testlər: `db/test/smoke_diaqnostika.sql` (9),
+`sagird/app.js` `diagMap`. Testlər: `db/test/smoke_diaqnostika.sql` (10),
 `test/e2e_diaq.py`.
+
+**Tələ — diaqnostik test «Test yığ» siyahısında adi test kimi açılır.**
+Orada «Yenidən yığ» (`rpc_regenerate_test` → ümumi generator `kind:
+'diagnostic'` qaydasını tanımır, testi təsadüfi suallarla doldurar) və
+«Qrupa təyin et» (bütün qrup «hər mövzudan 3 sual» yazar, xəritə fərdi
+təyinata baxdığı üçün tapılmaz) var idi. `119_diaqnostika_qoruyucu.sql`
+ikisini də serverdə rədd edir (yalnız öz şagirdinə təyinat keçir —
+müddəti uzatmaq üçün), `drawPaper` isə diaqnostik testdə həmin
+düymələrin yerinə «Diaqnostika» qeydi və şagird ekranına keçid göstərir.
+Yeni RPC diaqnostik testə toxunursa `is_diagnostic`-i yoxla.
 
 `07_seed_tests.sql`-dəki «Genişləndirilmiş analiz testi» bunun köhnə
 yer tutucusudur — məhsul deyil, bələdçi şəkillərində gizlədilir.
