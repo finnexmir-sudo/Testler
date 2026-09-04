@@ -9147,12 +9147,348 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- bio10-deyiskenlik#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio10-deyiskenlik#18';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio10-deyiskenlik#comb1', 'bio-10-deyiskenlik',
+  'Dəyişkənlik ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Modifikasiya dəyişkənliyi yalnız fenotipi dəyişir, genotipə toxunmur; buna görə də modifikasiya irsi deyil, mutasiya isə irsidir.
+2) 1-ci mülahizəyə əsasən, mutasiyaların irsiliyi onların harada baş verməsindən asılıdır: cinsiyyət hüceyrələrindəki mutasiyalar nəslə ötürülə bilir.
+3) Bədən (somatik) hüceyrələrindəki mutasiyalar da cinsi yolla nəslə ötürülür.
+4) Reaksiya normasının hədlərini genotip müəyyən edir.',
+  '1, 2 və 4 doğrudur: modifikasiya fenotipi dəyişir və irsi deyil, cinsiyyət hüceyrəsi mutasiyaları ötürülür; reaksiya norması genotiplə müəyyən olunur. 3-cü mülahizə yanlışdır: SOMATİK mutasiyalar nəslə ÖTÜRÜLMÜR, yalnız cinsiyyət hüceyrələrindəkilər ötürülür.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio10-deyiskenlik#18'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio10-ekologiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio10-ekologiya#3';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio10-ekologiya#comb1', 'bio-10-ekologiya',
+  'Ekologiya ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Ekoloji piramida qida səviyyələri üzrə enerjinin azalmasını göstərir - bir səviyyədən digərinə təqribən 10% enerji keçir.
+2) 1-ci mülahizəyə əsasən, biosfer haqqındakı bu qanunauyğunluqları öyrənən təlimin banisi Vernadskidir, o həmçinin insan zəkasının idarə etdiyi biosfer mərhələsini - noosferi də araşdırmışdır.
+3) Şibyə iki bitkinin simbiozudur.
+4) Populyasiyanın sıxlığı vahid sahəyə düşən fərdlərin sayıdır.',
+  '1, 2 və 4 doğrudur: ekoloji piramida/10% enerji doğrudur, Vernadski biosfer/noosfer təliminin banisidir; sıxlıq tərifi doğrudur. 3-cü mülahizə yanlışdır: şibyə iki bitki yox, GÖBƏLƏK VƏ YOSUNUN simbiozudur.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio10-ekologiya#3'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio10-epidemiologiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio10-epidemiologiya#18';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio10-epidemiologiya#comb1', 'bio-10-epidemiologiya',
+  'Epidemiologiya ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Yoluxucu xəstəliyin bir ölkə daxilində kütləvi yayılması epidemiya, qitələri əhatə edən qlobal yayılması isə pandemiya adlanır.
+2) 1-ci mülahizəyə əsasən, bu cür geniş yayılan infeksiyalarla mübarizədə antibiotiklər yalnız bakterial infeksiyalara təsir edir, viruslara qarşı təsirsizdir.
+3) QİÇS-in törədicisi bakteriyadır.
+4) Heyvanlardan insana keçən xəstəliklər zoonozlar adlanır.',
+  '1, 2 və 4 doğrudur: epidemiya/pandemiya fərqi doğrudur, antibiotiklər viruslara təsir etmir; zoonozlar heyvandan insana keçir. 3-cü mülahizə yanlışdır: QİÇS-in törədicisi bakteriya yox, VİRUSDUR (İİV).',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio10-epidemiologiya#18'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio10-genetika#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio10-genetika#6';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio10-genetika#comb1', 'bio-10-genetika',
+  'Genetika ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Monohibrid çarpazlaşmada F2 nəslində parçalanma 3:1 nisbətindədir, dihibrid çarpazlaşmada isə 9:3:3:1 nisbətindədir.
+2) 1-ci mülahizəyə əsasən, bu qanunauyğunluqlardan fərqli olaraq, bir xromosomda yerləşən genlər ayrı-ayrı deyil, birlikdə - ilişikli irsən keçir; bunu Tomas Morqan drozofil milçəyi üzərində sübut etmişdir.
+3) Homozibot orqanizmin genotipi Aa kimi yazılır.
+4) Analiz çarpazlaşması dominant fenotipli fərdin genotipini müəyyən etmək üçün aparılır.',
+  '1, 2 və 4 doğrudur: monohibrid/dihibrid parçalanma nisbətləri və ilişikli irsiyyət (Morqan) doğrudur; analiz çarpazlaşması genotipi müəyyən edir. 3-cü mülahizə yanlışdır: Aa HETEROZİBOTUN genotipidir, homozibot AA və ya aa yazılır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio10-genetika#6'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio10-heyat-prosesleri#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio10-heyat-prosesleri#28';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio10-heyat-prosesleri#comb1', 'bio-10-heyat-prosesleri',
+  'Canlıların həyat prosesləri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Həşəratlar traxeya borucuqları ilə, torpaq (yağış) qurdu isə nəm dəri səthi ilə tənəffüs edir.
+2) 1-ci mülahizəyə əsasən, bu tənəffüs formalarından fərqli olaraq, anaerob orqanizmlər ümumiyyətlə oksigensiz mühitdə yaşayır.
+3) Oksigenli tənəffüs oksigensiz tənəffüsdən daha az enerji verir.
+4) Böyrəklərdə qandan mübadilə tullantıları süzülərək sidik əmələ gəlir.',
+  '1, 2 və 4 doğrudur: həşərat/torpaq qurdu tənəffüs üsulları və anaerob orqanizmlər doğrudur; böyrəklər tullantıları süzür. 3-cü mülahizə yanlışdır: oksigenli tənəffüs oksigensizdən DAHA ÇOX enerji verir, az yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio10-heyat-prosesleri#28'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio10-istehsal#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio10-istehsal#11';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio10-istehsal#comb1', 'bio-10-istehsal',
+  'Plastik mübadilə ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Fotosintezin işıq fazasında su parçalanır və ATF sintez olunur, qaranlıq fazasında isə karbon qazından üzvi maddə (qlükoza) sintez olunur.
+2) 1-ci mülahizəyə əsasən, bəzi bakteriyalarda isə işıq əvəzinə kimyəvi reaksiyaların enerjisi ilə üzvi maddə sintez olunur - bu, xemosintezdir.
+3) Bir molekul qlükozanın tam oksidləşməsindən cəmi 2 ATF sintez olunur.
+4) Energetik mübadilənin oksigensiz mərhələsində qlükoza süd turşusuna qədər parçalanır.',
+  '1, 2 və 4 doğrudur: fotosintez faza fərqi və xemosintez doğrudur; oksigensiz mərhələdə qlükoza süd turşusuna parçalanır. 3-cü mülahizə yanlışdır: qlükozanın tam oksidləşməsindən 2 yox, 38 ATF sintez olunur.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio10-istehsal#11'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio10-saglam-heyat#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio10-saglam-heyat#26';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio10-saglam-heyat#comb1', 'bio-10-saglam-heyat',
+  'Sağlam həyat tərzi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Bazal mübadilə tam sakitlik halında sərf olunan minimal enerjidir; bu mübadilənin sürətini qalxanabənzər vəzin hormonları tənzimləyir.
+2) 1-ci mülahizəyə əsasən, orqanizmin daxili mühitinin bu cür sabit saxlanılması homeostaz adlanır.
+3) Beyin fəaliyyəti üçün əsas enerji mənbəyi yağ turşularıdır.
+4) Bioritmlər orqanizmdəki proseslərin dövri dəyişməsidir.',
+  '1, 2 və 4 doğrudur: bazal mübadilə/homeostaz doğrudur; bioritmlər dövri dəyişmədir. 3-cü mülahizə yanlışdır: beyinin əsas enerji mənbəyi yağ turşuları yox, QLÜKOZADIR.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio10-saglam-heyat#26'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- bio10-tekamul#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio10-tekamul#13';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio10-tekamul#comb1', 'bio-10-tekamul',
+  'Təkamül ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Homoloji orqanlar mənşəyi eyni, funksiyası fərqli olan orqanlardır (insanın əli, balinanın üzgəci); analoji orqanlar isə funksiyası eyni, mənşəyi fərqli olan orqanlardır (kəpənək qanadı, quş qanadı).
+2) 1-ci mülahizəyə əsasən, quşlarda istiqanlılığın yaranması kimi quruluşu əsaslı mürəkkəbləşdirən iri təkamül dəyişiklikləri aromorfoz adlanır.
+3) Parazitlərdə orqanların sadələşməsi aromorfoz adlanır.
+4) İdioadaptasiya ümumi səviyyəni dəyişməyən xüsusi uyğunlaşmadır.',
+  '1, 2 və 4 doğrudur: homoloji/analoji orqanlar və aromorfoz doğru təsvir olunub; idioadaptasiya xüsusi uyğunlaşmadır. 3-cü mülahizə yanlışdır: parazitlərdə sadələşmə aromorfoz yox, DEGENERASİYA adlanır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio10-tekamul#13'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 217 then
-    raise exception '112: 217 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 225 then
+    raise exception '112: 225 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
