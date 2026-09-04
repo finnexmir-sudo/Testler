@@ -67,6 +67,14 @@ yoxlanandan sonra. Yoxsa:
 - «19 təkrar variant» — hərf böyüklüyünə baxmayan yoxlama.
 - «Şəxsi» nişanı — düzəliş testi üçün əvəzedici siqnal götürüldü,
   altı nəticənin üçündə çıxdı.
+- **bio-11-insan-muhit (2026-09).** İstifadəçi soruşdu: «testlərimiz
+  mövzunun bütün əsas bilik və bacarıqlarını bilmək üçün kifayət
+  edirmi?». Mövzu «İnsan, onun inkişafı və mühit» idi (embrional
+  inkişaf + psixika + ailə sağlamlığı), 30 sualın **hamısı** isə
+  ekologiya idi (çirklənmə, milli parklar) — başqa mövzunun məzmunu
+  səhv slug-a yazılmışdı. Sual sayı düz idi (30/30), çətinlik bölgüsü
+  də «məqbul» görünürdü — heç kim mövzu ADI ilə sualların MƏZMUNUNU
+  tutuşdurmamışdı, çünki bunu ölçən avtomatik yoxlama yox idi.
 
 Ortaq kök birdir: **qurduğumu yoxlamaq, istənəni yoxlamaq deyil.**
 
@@ -1023,6 +1031,26 @@ də yoxlayır: yana sürüşmə, boş ikon, üstlüyün yeri. Testlərdə də `.
 Sual **testin içində deyil, bankdadır**. `test_questions` hansı testin
 hansı sualı hansı sıra ilə götürdüyünü saxlayır.
 
+- **Yeni sual yazılanda/yoxlananda mövzunun ADI ilə sualların
+  MƏZMUNUNU tutuşdur — say kifayət deyil.** `bio-11-insan-muhit`
+  hadisəsi (yuxarı, «HAZIRDIR» bölməsi) bunu isbat etdi: 30/30 sual,
+  «yaxşı görünən» çətinlik bölgüsü, amma mövzunun tələb etdiyi mövzu
+  ilə heç bir əlaqəsi yox idi. Qayda:
+  - Mövzunun **bütün alt-başlıqlarını** (`topics.parent_id`, varsa)
+    və ya mündəricat sətirlərini sadala, hər birinə ən azı bir sual
+    uyğun gəldiyini əl ilə (SELECT ilə oxuyub) təsdiqlə — «alt-mövzu
+    sayı = sual sayı» kimi ədədi nisbətə güvənmə, mətni oxu.
+  - Yeni bank/mövzu üçün ext_key təyin edərkən **topic slug-u əl ilə
+    yenidən yoxla** (`join public.topics tp on tp.slug = d.topic`
+    sətrini kor-koranə köçürtmə) — səhv slug səssizcə başqa mövzuya
+    yazır, heç bir SQL xətası vermir.
+  - Ən azı 5-10 sualı təsadüfi seçib mövzu adı ilə **məntiqən uyğun
+    olduğunu** oxu — «sual bankda var, count() düzdür» «mövzuya
+    uyğundur» demək deyil.
+  - Şübhəli görünürsə (mövzu adı geniş/ikimənalıdır — «...və mühit»,
+    «...və cəmiyyət» kimi), əvvəlcə mündəricatın/alt-mövzu ağacının
+    HƏR sətrini oxu, sonra yaz — əks halda mövzunun yalnız bir
+    hissəsi (və ya tamam başqa mövzu) yazıla bilər.
 - `questions` sətrini **silmə** — `test_questions` `restrict` ilə imtina
   edir (təsadüfən tarixçə silinməsin deyə). Gizlətmək üçün
   `status = 'archived'` — generator onu görmür, köhnə nəticələr qalır.
