@@ -156,6 +156,7 @@ with sync_playwright() as pw:
     ok("1 zəif" in box and "11 yaxşı" in box, "xulase cipleri", box[:80].replace("\n", " "))
     ok("Bundan başla" in box and T1NAME in box, "'Bundan basla' 1-ci fesil")
     ok(pg.locator("#dgRem").count() == 0, "diaqnostika kartinda ayrica duyme yoxdur (bir duyme: #btnRem)")
+    pg.click("#sTabs [data-v='m']"); pg.wait_for_timeout(150)   # Movzular sekmesi
     ok(pg.locator("#btnRem").count() == 1 and "(1)" in pg.inner_text("#btnRem"), "'Zeif movzulardan test yig (1)'")
     ok(pg.locator("#dgMap details").count() == 1 and not pg.locator("#dgMap details").first.get_attribute("open"),
        "yaxsi movzular yigilmis bolmededir")
@@ -169,7 +170,8 @@ with sync_playwright() as pw:
     ok(T1NAME in pg.inner_text("#main"), "generatorda zeif fesil secilib")
 
     print("F · İkinci diaqnostika: hamısı düz → fərq «1 zəif → 0»")
-    pg.goto(PANEL + "#/s/" + sid + "/" + gid); pg.wait_for_selector("#dgGo", timeout=15000)
+    pg.goto(PANEL + "#/s/" + sid + "/" + gid); pg.wait_for_selector("#sTabs", timeout=15000)
+    pg.click("#sTabs [data-v='x']"); pg.wait_for_selector("#dgGo", timeout=15000)   # sekme yadda qalir - Xulaseye qayit
     pg.click("#dgGo"); pg.wait_for_selector("#diagBox:has-text('Gözlənilir')", timeout=20000)
     t2 = db("select id::text i from public.tests where is_diagnostic order by created_at desc limit 1", one=True)["i"]
     ok(t2 != t1, "yeni test yarandi")
@@ -197,8 +199,10 @@ with sync_playwright() as pw:
     #  #btnRem "Movzu uzre menimseme"ye baglidir (butun testler): 1-ci fesil
     #  tarixce uzre 3/6 = 50% - hele zeifdir, duyme qalir; diaqnostika karti ise
     #  SON xeriteni gosterir ("hamisi yaxsidir")
+    pg.click("#sTabs [data-v='m']"); pg.wait_for_timeout(150)
     ok(pg.locator("#btnRem").count() == 1 and "(1)" in pg.inner_text("#btnRem"),
        "duzelis duymesi tarixceye gore qalir (1-ci fesil 3/6)")
+    pg.click("#sTabs [data-v='x']"); pg.wait_for_timeout(150)
     ok(pg.locator("#dgMap .dgrow.st-weak").count() == 0, "son xeritede zeif fesil yoxdur")
     ok("Bütün mövzular yaxşıdır" in box, "muellimde 'hamisi yaxsidir'")
     if os.environ.get("SHOT"): pg.locator("#diagBox").screenshot(path=os.environ["SHOT"] + "/diaq_muellim2.png")

@@ -2179,6 +2179,7 @@
     });
   }
 
+  var STAB = "x";   // sagird hesabatinda secilmis sekme (sessiya boyu)
   function screenStudent(id, classId) {
     var live = guard();
     topTitle.textContent = "Şagird hesabatı";
@@ -2201,11 +2202,23 @@
           statTile(pct(sm.avg) + "%", "orta", "g2") +
           statTile(pct(sm.best) + "%", "ən yaxşı", "g3") +
         "</div>";
-      //  Diaqnostika karti - ayri sorgu ile dolur (loadDiag)
-      h += '<div id="diagBox"></div>';
+      /*  Hesabat DORD SEKMEDE: Xulase / Movzular / Sehvler / Tarixce.
+          Evvel hamisi bir uzun sehife idi - 8 testle 4000px; il erzinde
+          sehvler ve movzular coxaldiqca hara gedeceyi bilinmirdi
+          (istifadeci sualı).  Bir anda bir sekme gorunur, ilk ekran
+          heç vaxt boyumur.  Secilmis sekme sessiya boyu yadda qalir.  */
+      var minA = Number(r.min_answers) || 3;
+      var tAll = r.topics || [];
+      var tsure = tAll.filter(function (t) { return Number(t.total) >= minA; });
+      var tlow  = tAll.filter(function (t) { return Number(t.total) < minA; });
+      var sweakAll = tsure.filter(function (t) { return Number(t.ratio) < 60 && t.id; });
+      var weak = (r.weak !== null && r.weak) ? r.weak : [];
+      var at = r.attempts || [];
 
+      /* ---------------- XULASE ---------------- */
+      var hX = '<div id="diagBox"></div>';
       if (r.topics !== null) {
-        h += "<h2>Valideyn üçün xülasə</h2>" +
+        hX += "<h2>Valideyn üçün xülasə</h2>" +
           '<div class="card">' +
             '<div class="segs" id="vSty">' +
               seg("isti",  "Səmimi", VSTY) +
@@ -2218,115 +2231,155 @@
           "</div>";
       }
 
-      h += "<h2>Mövzu üzrə mənimsəmə</h2>";
-      var minA = Number(r.min_answers) || 3;
+      /* ---------------- MOVZULAR ---------------- */
+      var hM = "";
+      //  fenn cipleri: muellimin oz fenni secili gelir, yoxsa "Hamisi"
+      var subjs = [];
+      tAll.forEach(function (t) {
+        if (t.subject && !subjs.some(function (x) { return x.slug === t.subject_slug; })) {
+          subjs.push({ slug: t.subject_slug || t.subject, name: t.subject });
+        }
+      });
+      var mineSub = subjs.filter(function (x) { return mySubs().indexOf(x.slug) >= 0; });
+      var TSUB = (subjs.length > 1 && mineSub.length === 1) ? mineSub[0].slug : "";
+      var TCAP = 8, TEXP = false;
       if (r.topics === null) {
-        h += upsell("Mövzu üzrə mənimsəmə");
-      } else if (!r.topics.length) {
-        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("chart") +
+        hM += upsell("Mövzu üzrə mənimsəmə");
+      } else if (!tAll.length) {
+        hM += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("chart") +
              "</div><b>Hələ cavab yoxdur</b>Şagird test işlədikcə " +
              "mövzular burada yığılacaq.</div></div>";
       } else {
-        //  Etibarli movzular (>= minA cavab) esas siyahida - zeifden
-        //  gucluye; 1-2 cavabliq movzular sehifeni yemesin deye ayrica
-        //  YIGILMIS bolmede, neytral (rengsiz) faizle gedir.
-        var tsure = r.topics.filter(function (t) { return Number(t.total) >= minA; });
-        var tlow  = r.topics.filter(function (t) { return Number(t.total) < minA; });
-        function topicRow(t) {
-          var bad = Number(t.ratio) < 60;
-          return '<div class="trow"><div class="g"><b>' +
-            (bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
-            esc(t.name) + "</b>" +
-            "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
-            meter(t.ratio) + "</div>" +
-            pctChip(t.ratio) + "</div>";
-        }
-        if (tsure.length) {
-          /*  Yaxsi (>=80%) movzular yigilmis gedir: 12 movzuluq sinifde
-              siyahi ekrani udurdu, muellime ise zeif olanlar lazimdir.  */
-          var tneed = tsure.filter(function (t) { return Number(t.ratio) < 80; });
-          var tgood = tsure.filter(function (t) { return Number(t.ratio) >= 80; });
-          h += (tneed.length
-                  ? '<div class="card pad0">' + tneed.map(topicRow).join("") + "</div>"
+        hM += (subjs.length > 1
+                ? '<div class="chips recf" id="tSub">' +
+                  '<button class="chip' + (TSUB ? "" : " on") + '" data-ts="">Hamısı</button>' +
+                  subjs.map(function (x) {
+                    return '<button class="chip' + (TSUB === x.slug ? " on" : "") +
+                      '" data-ts="' + esc(x.slug) + '">' + esc(x.name) + "</button>";
+                  }).join("") + "</div>"
+                : "") +
+          '<div id="topicBox"></div>' +
+          (sweakAll.length
+            ? '<div class="spacer"></div>' +
+              '<button class="btn go wide" id="btnRem">' + ic("gen") +
+              "Zəif mövzulardan test yığ (" + sweakAll.length + ")</button>"
+            : "");
+      }
+      function topicRow(t) {
+        var bad = Number(t.ratio) < 60;
+        return '<div class="trow"><div class="g"><b>' +
+          (bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
+          esc(t.name) + "</b>" +
+          "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
+          meter(t.ratio) + "</div>" +
+          pctChip(t.ratio) + "</div>";
+      }
+      function drawTopics() {
+        var box = $("topicBox");
+        if (!box) return;
+        function inSub(t) { return !TSUB || (t.subject_slug || t.subject) === TSUB; }
+        var sure = tsure.filter(inSub).slice().sort(function (a, b) {
+          return Number(a.ratio) - Number(b.ratio); });
+        var low  = tlow.filter(inSub);
+        var need = sure.filter(function (t) { return Number(t.ratio) < 80; });
+        var good = sure.filter(function (t) { return Number(t.ratio) >= 80; });
+        var vis  = TEXP ? need : need.slice(0, TCAP);
+        var h2 = "";
+        if (sure.length) {
+          /*  Zeifden yaxsiya; yaxsi (>=80%) movzular yigilmis - muellime
+              zeif olanlar lazimdir.  Uzun siyahi "Daha N" ile acilir.  */
+          h2 += (need.length
+                  ? '<div class="card pad0">' + vis.map(topicRow).join("") +
+                    (need.length > vis.length
+                      ? '<button class="morebtn" id="tMore">Daha ' +
+                        (need.length - vis.length) + " mövzu göstər</button>"
+                      : "") + "</div>"
                   : '<div class="ok">' + ic("check") +
                     "<span>Bütün mövzular yaxşıdır (≥80%).</span></div>") +
-               (tgood.length
+               (good.length
                   ? '<details class="more filt" style="margin-top:10px">' +
                     "<summary>Yaxşı mövzular " +
-                      '<span class="fn">' + tgood.length + "</span></summary>" +
+                      '<span class="fn">' + good.length + "</span></summary>" +
                     '<div class="card pad0" style="margin-top:10px">' +
-                      tgood.map(topicRow).join("") + "</div></details>"
+                      good.map(topicRow).join("") + "</div></details>"
                   : "");
         } else {
-          h += '<div class="card"><p class="muted" style="margin:0">Hər mövzu üzrə ' +
+          h2 += '<div class="card"><p class="muted" style="margin:0">Hər mövzu üzrə ' +
             "ən azı " + minA + " cavab yığılanda etibarlı mənzərə burada görünəcək. " +
-            "İlkin cavablar aşağıdakı bölmədədir.</p></div>";
+            (low.length ? "İlkin cavablar aşağıdakı bölmədədir." : "") + "</p></div>";
         }
-        if (tlow.length) {
-          h += '<details class="more filt" style="margin-top:10px">' +
+        if (low.length) {
+          h2 += '<details class="more filt" style="margin-top:10px">' +
             "<summary>Az məlumatlı mövzular " +
-              '<span class="fn">' + tlow.length + "</span></summary>" +
-            '<div class="card pad0" style="margin-top:10px">' + tlow.map(function (t) {
+              '<span class="fn">' + low.length + "</span></summary>" +
+            '<div class="card pad0" style="margin-top:10px">' + low.map(function (t) {
               return '<div class="trow"><div class="g"><b>' + esc(t.name) + "</b>" +
                 "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total +
                 ' · <span class="lowtag">az məlumat</span></i></div>' +
                 '<span class="pctv">' + pct(t.ratio) + "%</span></div>";
             }).join("") + "</div></details>";
         }
-        var sweak = tsure.filter(function (t) {
-          return Number(t.ratio) < 60 && t.id;
-        });
-        if (sweak.length) {
-          h += '<div class="spacer"></div>' +
-            '<button class="btn go wide" id="btnRem">' + ic("gen") +
-            "Zəif mövzulardan test yığ (" + sweak.length + ")</button>";
-        }
+        box.innerHTML = h2;
+        on("tMore", "click", function () { TEXP = true; drawTopics(); });
       }
 
-      if (r.weak !== null && r.weak && r.weak.length) {
-        /* Sehv edilen suallar: movzu teqli, ALTINDA "sehvler uzerinde is"
-           duymesi - siyahi baxis yox, HEREKET nokresidir. */
-        h += '<details class="more filt wrongbox" open>' +
+      /* ---------------- SEHVLER ---------------- */
+      var hS = "";
+      if (r.weak === null) {
+        hS += upsell("Səhv edilən suallar");
+      } else if (!weak.length) {
+        hS += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
+          "</div><b>Səhv edilən sual yoxdur</b>Şagird səhv edəndə sual burada yığılır.</div></div>";
+      } else {
+        /* Sehv edilen suallar: HEREKET merkezi - duyme ustde, siyahi altda.
+           Server en cox sehv edilen 10 suali verir (tekrar edilen birinci);
+           ilk 5 acıq, qalani "Daha N" ile - sehife boyumesin. */
+        var WCAP = 5;
+        hS += '<button class="btn go wide" id="btnFix">' + ic("gen") +
+            "Bu səhvlərdən təkrar testi yığ (" + weak.length + " sual)</button>" +
+          '<div id="fixMsg"></div>' +
+          '<details class="more filt wrongbox" open style="margin-top:10px">' +
           "<summary>Səhv edilən suallar " +
-            '<span class="fn">' + r.weak.length + "</span></summary>" +
-          '<div class="card pad0" style="margin-top:10px">' +
-          r.weak.map(function (w) {
-            return '<div class="wq"><div class="g"><b>' + esc(w.body) + "</b>" +
+            '<span class="fn">' + weak.length + "</span>" +
+            '<span class="muted" style="font-weight:400;margin-left:auto">ən çox səhv edilən ' +
+              weak.length + "</span></summary>" +
+          '<div class="card pad0" style="margin-top:10px" id="wList">' +
+          weak.map(function (w, i) {
+            return '<div class="wq' + (i >= WCAP ? " hide" : "") + '"><div class="g"><b>' +
+              esc(w.body) + "</b>" +
               (w.topic ? '<span class="wtag">' + esc(w.topic) + "</span>" : "") +
               (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
               //  "1x" her setirde menasiz idi - say yalniz tekrarda
               "</div>" + (Number(w.wrong) > 1
                 ? '<span class="wn">' + w.wrong + "×</span>" : "") + "</div>";
-          }).join("") + "</div>" +
-          '<button class="btn go wide" id="btnFix" style="margin-top:10px">' +
-            ic("gen") + "Bu səhvlərdən təkrar testi yığ (" +
-            r.weak.length + " sual)</button>" +
-          '<div id="fixMsg"></div>' +
-        "</details>";
+          }).join("") +
+          (weak.length > WCAP
+            ? '<button class="morebtn" id="wMore">Daha ' + (weak.length - WCAP) + " sual göstər</button>"
+            : "") +
+          "</div></details>";
       }
 
-      var at = r.attempts || [];
+      /* ---------------- TARIXCE ---------------- */
+      var hT = "";
       /* Dinamika: kohneden yeniye, her sutun bir test.  Iki sutunluq
          qrafik hec ne demir - uc testden basliyir. */
       if (at.length >= 3) {
         var bars = at.slice(0, 12).slice().reverse();
-        h += "<h2>Dinamika</h2>" +
-          '<div class="card"><div class="dyn">' + bars.map(function (a) {
+        hT += '<div class="card"><div class="dyn">' + bars.map(function (a) {
             var p = Math.max(6, Math.round(Number(a.percent) || 0));
             var c = p >= 80 ? "dh" : (p >= 60 ? "dm" : "dl");
             return '<i class="' + c + '" style="height:' + p + '%" title="' +
               esc(a.test) + " · " + pct(a.percent) + '%"></i>';
           }).join("") + "</div>" +
           '<p class="muted" style="margin:10px 0 0">Soldan sağa: köhnədən ' +
-            "yeniyə. Yaşıl ≥80%, narıncı 60-79%, qırmızı &lt;60%.</p></div>";
+            "yeniyə. Yaşıl ≥80%, narıncı 60-79%, qırmızı &lt;60%.</p></div>" +
+          '<div class="spacer"></div>';
       }
-
-      h += "<h2>Test tarixçəsi</h2>";
       if (!at.length) {
-        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("clock") +
+        hT += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("clock") +
              "</div><b>Hələ test işləməyib</b></div></div>";
       } else {
-        h += '<div class="card pad0" id="atList">' + at.map(function (a) {
+        hT += '<div class="card pad0" id="atList">' + at.map(function (a) {
           return '<button class="trow atr" data-att="' + esc(a.id) + '">' +
             '<div class="g"><b>' + esc(a.test) + "</b>" +
             "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max +
@@ -2336,8 +2389,51 @@
         }).join("") + "</div>";
       }
 
+      /* ---------------- sekmeler ---------------- */
+      var nWeakT = tsure.filter(function (t) { return Number(t.ratio) < 60; }).length;
+      function tabLbl(t, n) {
+        return t + (n ? ' <span class="tn">' + n + "</span>" : "");
+      }
+      h += '<div class="segs stabs" id="sTabs">' +
+          seg("x", "Xülasə", STAB) +
+          seg("m", tabLbl("Mövzular", nWeakT), STAB) +
+          seg("s", tabLbl("Səhvlər", weak.length), STAB) +
+          seg("t", tabLbl("Tarixçə", at.length), STAB) +
+        "</div>" +
+        '<div class="stab" id="tab-x"' + (STAB === "x" ? "" : " hidden") + ">" + hX + "</div>" +
+        '<div class="stab" id="tab-m"' + (STAB === "m" ? "" : " hidden") + ">" + hM + "</div>" +
+        '<div class="stab" id="tab-s"' + (STAB === "s" ? "" : " hidden") + ">" + hS + "</div>" +
+        '<div class="stab" id="tab-t"' + (STAB === "t" ? "" : " hidden") + ">" + hT + "</div>";
+
       show(h);
       loadDiag(id, classId);
+      drawTopics();
+      on("sTabs", "click", function (e) {
+        var b = e.target.closest ? e.target.closest("[data-v]") : null;
+        if (!b) return;
+        STAB = b.getAttribute("data-v");
+        Array.prototype.forEach.call(document.querySelectorAll("#sTabs .seg"), function (x) {
+          x.classList.toggle("on", x.getAttribute("data-v") === STAB);
+        });
+        Array.prototype.forEach.call(document.querySelectorAll(".stab"), function (x) {
+          x.hidden = x.id !== "tab-" + STAB;
+        });
+      });
+      on("tSub", "click", function (e) {
+        var b = e.target.closest ? e.target.closest("[data-ts]") : null;
+        if (!b) return;
+        TSUB = b.getAttribute("data-ts"); TEXP = false;
+        Array.prototype.forEach.call(document.querySelectorAll("#tSub .chip"), function (x) {
+          x.classList.toggle("on", x === b);
+        });
+        drawTopics();
+      });
+      on("wMore", "click", function () {
+        Array.prototype.forEach.call(document.querySelectorAll("#wList .wq.hide"), function (x) {
+          x.classList.remove("hide");
+        });
+        $("wMore").remove();
+      });
       if ($("vTxt")) {
         $("vTxt").value = velText(VSTY, r);
         on("vSty", "click", function (e) {
@@ -2353,13 +2449,7 @@
         on("vCopy", "click", function () { copyText($("vTxt").value, $("vCopy")); });
       }
       on("btnB", "click", function () { nav("#/r/" + classId); });
-      on("btnRem", "click", function () {
-        var minA2 = Number(r.min_answers) || 3;
-        var sweak = (r.topics || []).filter(function (t) {
-          return Number(t.ratio) < 60 && Number(t.total) >= minA2 && t.id;
-        });
-        remedialGen(classId, sweak);
-      });
+      on("btnRem", "click", function () { remedialGen(classId, sweakAll); });
 
       //  Sehvler uzerinde is: mehz sehv edilen suallardan ferdi test
       on("btnFix", "click", function () {

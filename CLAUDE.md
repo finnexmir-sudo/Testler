@@ -1221,6 +1221,22 @@ tam UX gəzişi üçün onun genişi bu sessiyanın scratchpad-ında idi
 (`audit.py`) — lazım olsa eyni axınla yenidən yazılır: hər ekran 390 və
 1280 px, `innerText` uzunluğu, `.muted` uzunluğu, səhifə hündürlüyü.
 
+## Şagird hesabatı — dörd sekme
+
+`screenStudent` (muellim/app.js) hesabatı **Xülasə / Mövzular / Səhvlər /
+Tarixçə** sekmələrində göstərir (`#sTabs`, `.stab`). Səbəb: bir uzun
+səhifə 8 testlə 4000px idi, səhvlər və mövzular çoxaldıqca hara gedəcəyi
+bilinmirdi. Seçilmiş sekme `STAB` dəyişənində sessiya boyu qalır —
+müəllim A şagirddən B-yə keçəndə eyni sekmədə qalır. Testlərdə bunu
+nəzərə al: gizli sekmədəki element `wait_for_selector`-a görünmür,
+əvvəl `#sTabs [data-v='m']` klik et; `#dgGo`/`#vTxt` Xülasədə, `#btnRem`
+Mövzularda, `#btnFix`/`.wrongbox` Səhvlərdə, `.atr`/`.dyn` Tarixçədədir.
+
+Mövzular: fənn çipləri (`#tSub`, müəllimin tək fənni seçili gəlir),
+zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzular»
+altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
+ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
+
 ## Bələdçi — `komek/`
 
 «Necə işləyir» səhifəsi: müəllim / şagird / valideyn üçün addım-addım,

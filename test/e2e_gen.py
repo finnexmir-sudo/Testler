@@ -366,8 +366,13 @@ with sync_playwright() as pw:
     ok("zəif" in al, "zeif movzu siqnala baglidir")
     ok(pg.locator("#alerts .al.risk").count() == 1, "qirmizi siqnal siniflidir")
     pg.locator("#alerts .al").first.click()
-    pg.wait_for_selector("#btnRem", timeout=8000)
+    #  hesabat sekmelidir: "Zeif movzulardan test yig" Movzular sekmesindedir
+    pg.wait_for_selector("#sTabs", timeout=8000)
     ok("/s/" in pg.url, "siqnala klik sagird hesabatina aparir")
+    ok(pg.locator("#sTabs .seg").count() == 4, "sagird hesabati 4 sekmelidir")
+    ok(pg.locator("#vTxt").is_visible() and not pg.locator("#btnRem").is_visible(),
+       "ilk sekme Xulase - Movzular gizlidir")
+    pg.click("#sTabs [data-v='m']"); pg.wait_for_selector("#btnRem", timeout=8000)
 
     print("K · Hesabatdan bir klikle düzəliş testi")
     pg.click("#btnRem")
@@ -405,6 +410,7 @@ with sync_playwright() as pw:
     print("L · Valideyn xülasəsi")
     pg.goto(PANEL + "#/s/" + SID + "/" + GID); pg.reload()
     pg.wait_for_selector("#vTxt", timeout=8000)
+    pg.click("#sTabs [data-v='s']"); pg.wait_for_timeout(150)
     # Sehv siyahisi indi ACIQ gelir - hereket merkezidir
     ok(pg.locator("details.wrongbox").count() == 1, "sehv siyahisi var")
     ok(pg.locator("details.wrongbox[open]").count() == 1, "ilkin halda aciqdir")
@@ -415,6 +421,7 @@ with sync_playwright() as pw:
     ok(pg.locator(".wq .wtag").count() >= 1, "sehvlerde movzu teqi var",
        pg.locator(".wq .wtag").count())
     ok(pg.locator("#btnFix").count() == 1, "sehvlerden test duymesi var")
+    pg.click("#sTabs [data-v='x']"); pg.wait_for_timeout(150)
     t = pg.input_value("#vTxt")
     ok("Kənan" in t, "sagirdin adi metndedir", t.split("\n")[0][:40])
     ok("📊" in t and "▰" in t, "semimi uslubda emoji ve zolaqlar var")
@@ -432,6 +439,7 @@ with sync_playwright() as pw:
     ok(cb == t2, "mubadile buferine TAM metn dusur")
 
     print("M · Dinamika, cavab vərəqi, səhvlərdən test")
+    pg.click("#sTabs [data-v='t']"); pg.wait_for_timeout(150)
     ok(pg.locator(".dyn i").count() >= 2, "dinamika sutunlari var",
        pg.locator(".dyn i").count())
     pg.locator(".atr").first.click()
@@ -443,6 +451,7 @@ with sync_playwright() as pw:
     pg.locator(".atr").first.click(); pg.wait_for_timeout(200)
     ok(not pg.locator(".sheet .shq").first.is_visible(), "tekrar klik baglayir")
 
+    pg.click("#sTabs [data-v='s']"); pg.wait_for_timeout(150)
     pg.click("#btnFix")
     pg.wait_for_selector("#fixMsg .ok a", timeout=10000)
     ok("YALNIZ bu şagirdə verildi" in pg.inner_text("#fixMsg"),

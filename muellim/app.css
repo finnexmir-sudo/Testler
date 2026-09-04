@@ -878,3 +878,17 @@ details.arxiv>summary span{padding:1px 8px;border-radius:999px;
 .plnext > summary::before{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
 .plnext[open] > summary::before{transform:rotate(45deg)}
 .plnext > summary .fn{font-size:11px;font-weight:600;background:var(--brand-tint);color:var(--brand);padding:2px 7px;border-radius:999px}
+
+/* sagird hesabati - sekmeler */
+.segs.stabs{margin:14px 0 14px}
+.seg .tn{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:999px;
+  font-size:11px;font-weight:650;background:var(--n-150);color:var(--fg-2);line-height:18px}
+.seg.on .tn{background:var(--brand-tint);color:var(--brand)}
+.stab[hidden]{display:none}
+.wq.hide{display:none}
+details.wrongbox > summary{display:flex;align-items:center;gap:8px}
+/* telefonda dord sekme sigsin: dar boslug, kicik sirift, kesilmesin */
+@media (max-width:480px){
+  .segs.stabs .seg{padding:8px 2px;font-size:12.5px;letter-spacing:-.01em}
+  .segs.stabs .seg .tn{min-width:16px;padding:0 4px;margin-left:3px;font-size:10.5px;line-height:16px}
+}
