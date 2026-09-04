@@ -8643,12 +8643,264 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- fiz10-dinamika#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz10-dinamika#12';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz10-dinamika#comb1', 'fiz-10-dinamika',
+  'Dinamika ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Huk qanununa görə elastiklik qüvvəsi uzanma ilə düz mütənasibdir: F = kx.
+2) 1-ci mülahizəyə əsasən, cismin tarazlıqda qalması üçün ona təsir edən qüvvələrin əvəzləyicisi sıfır olmalıdır - məsələn, dəyişməz sürətlə üzən gəmiyə təsir edən qüvvələrin əvəzləyicisi də sıfırdır.
+3) Çəkisizlik halı cisim masada duranda yaranır.
+4) Qravitasiya sahəsi cazibə qarşılıqlı təsirinin ötürüldüyü sahədir.',
+  '1, 2 və 4 doğrudur: Huk qanunu doğrudur, tarazlıqda qüvvələr cəmi sıfırdır (gəmi nümunəsi); qravitasiya sahəsi cazibəni ötürür. 3-cü mülahizə yanlışdır: çəkisizlik SƏRBƏST DÜŞMƏ zamanı yaranır, masada duranda yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz10-dinamika#12'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz10-kinematika#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz10-kinematika#27';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz10-kinematika#comb1', 'fiz-10-kinematika',
+  'Kinematika ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Avtobusda oturan sərnişin yol kənarındakı ağaca nəzərən hərəkətdədir - çünki hərəkət nisbidir.
+2) 1-ci mülahizəyə əsasən, sükunət halı da mütləq deyil, nisbidir - hansı cismə nəzərən baxıldığından asılıdır.
+3) Cisim tam bir dövrə vurduqda həm yolu, həm də yerdəyişməsi sıfır olur.
+4) Çevrə üzrə hərəkətdə mərkəzəqaçma təcili çevrənin mərkəzinə doğru yönəlir.',
+  '1, 2 və 4 doğrudur: hərəkət/sükunət nisbidir; mərkəzəqaçma təcili mərkəzə yönəlir. 3-cü mülahizə yanlışdır: tam dövrdə YOL SIFIR DEYİL (çevrənin uzunluğuna bərabərdir), yalnız YERDƏYİŞMƏ sıfırdır.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz10-kinematika#27'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz10-molekulyar#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz10-molekulyar#27';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz10-molekulyar#comb1', 'fiz-10-molekulyar',
+  'Molekulyar-kinetik nəzəriyyə ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Sabit temperaturda gedən proses izotermik, sabit təzyiqdə gedən proses izobar, sabit həcmdə gedən proses isə izoxor adlanır.
+2) 1-ci mülahizəyə əsasən, Boyl-Mariott qanunu məhz izotermik prosesi təsvir edir: sabit temperaturda pV = sabit.
+3) Qaynamadan fərqli olaraq buxarlanma mayenin bütün həcmindən gedir.
+4) Su damcısının kürə forması alması səthi gərilmə ilə bağlıdır.',
+  '1, 2 və 4 doğrudur: izotermik/izobar/izoxor tərifləri doğrudur, Boyl-Mariott izotermik prosesi təsvir edir; damcının kürə forması səthi gərilmədəndir. 3-cü mülahizə yanlışdır: buxarlanma YALNIZ MAYENİN SƏTHİNDƏN gedir, bütün həcmdən yox - bu, qaynamanın xüsusiyyətidir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz10-molekulyar#27'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz10-reqs-dalga#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz10-reqs-dalga#9';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz10-reqs-dalga#comb1', 'fiz-10-reqs-dalga',
+  'Rəqslər və dalğalar ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Riyazi rəqqasın dövrü sapın uzunluğundan (və g-dən) asılıdır, yükün kütləsindən isə asılı deyil.
+2) 1-ci mülahizəyə əsasən, yaylı rəqqasda isə vəziyyət fərqlidir - onun dövrü həm yükün kütləsindən, həm də yayın sərtliyindən asılıdır.
+3) Rezonans hadisəsi temperatur artdıqda baş verir.
+4) Dalğa yayılarkən maddəni daşımadan enerji ötürür.',
+  '1, 2 və 4 doğrudur: riyazi rəqqas kütlədən asılı deyil, yaylı rəqqas kütlə+sərtlikdən asılıdır; dalğa enerji daşıyır, maddə yox. 3-cü mülahizə yanlışdır: rezonans temperaturdan yox, XARİCİ QÜVVƏNİN TEZLİYİ SİSTEMİN ÖZ TEZLİYİNƏ BƏRABƏR OLDUQDA baş verir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz10-reqs-dalga#9'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz10-saxlanma#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz10-saxlanma#23';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz10-saxlanma#comb1', 'fiz-10-saxlanma',
+  'Saxlanma qanunları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) İmpuls sürət istiqamətində yönəlmiş vektor kəmiyyətdir, impulsun saxlanması qanunu isə xarici qüvvələrin təsiri olmayan qapalı sistemlərdə ödənilir.
+2) 1-ci mülahizəyə əsasən, raketin hərəkəti və atəş zamanı silahın geri təpməsi məhz bu qanuna - impulsun saxlanmasına əsaslanır.
+3) Cismin sürəti 2 dəfə artdıqda kinetik enerjisi də 2 dəfə artır.
+4) Əbədi mühərrik yaratmaq mümkün deyil, çünki bu, enerjinin saxlanması qanununa ziddir.',
+  '1, 2 və 4 doğrudur: impuls vektordur, qapalı sistemdə saxlanır, raket/silah nümunələri buna əsaslanır; əbədi mühərrik enerjinin saxlanması qanununa ziddir. 3-cü mülahizə yanlışdır: sürət 2 dəfə artanda kinetik enerji 2 dəfə yox, 4 DƏFƏ artır (Ek sürətin kvadratı ilə mütənasibdir).',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz10-saxlanma#23'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz10-termodinamika#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz10-termodinamika#7';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz10-termodinamika#comb1', 'fiz-10-termodinamika',
+  'Termodinamika ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Termodinamikanın birinci qanununa görə verilən istilik daxili enerjinin dəyişməsinə və işə sərf olunur: Q = ΔU + A.
+2) 1-ci mülahizəyə əsasən, qaz sıxılarkən onun üzərində iş görüldükdə (sistemə iş ötürüldükdə) daxili enerjisi artır - qaz qızır.
+3) İstilik mühərrikinin FİƏ-si 100%-ə bərabər ola bilər, çünki bütün istilik faydalı işə çevrilir.
+4) İstilik mühərrikinin əsas hissələri qızdırıcı, işçi cisim və soyuducudan ibarətdir.',
+  '1, 2 və 4 doğrudur: I qanun Q = ΔU + A doğrudur, sıxılan qazın daxili enerjisi artır; mühərrik qızdırıcı/işçi cisim/soyuducudan ibarətdir. 3-cü mülahizə yanlışdır: FİƏ heç vaxt 100%-ə çatmır, çünki istiliyin bir hissəsi mütləq SOYUDUCUYA verilir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz10-termodinamika#7'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '10'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 205 then
-    raise exception '112: 205 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 211 then
+    raise exception '112: 211 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
