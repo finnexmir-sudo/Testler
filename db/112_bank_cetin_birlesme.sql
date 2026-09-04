@@ -4653,12 +4653,222 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- tarix11-cumhuriyyet#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix11-cumhuriyyet#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix11-cumhuriyyet#comb1', 'tarix-11-cumhuriyyet',
+  'AXC-nin tarixi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) İstiqlal Bəyannaməsi 28 may 1918-də Tiflisdə qəbul edildi; paytaxt Bakıya isə yalnız sentyabr 1918-də köçdü - deməli istiqlal elan ediləndə paytaxt hələ Bakı deyil, Tiflis idi.
+2) 1-ci mülahizəyə əsasən, parlamentin ilk iclası (7 dekabr 1918) artıq Bakıda keçirilə bilərdi, çünki bu tarix paytaxtın Bakıya köçməsindən (sentyabr 1918) SONRADIR.
+3) Parlamentdə yalnız müsəlman deputatlar təmsil olunurdu, milli azlıqların nümayəndəsi yox idi.
+4) F.Xoyski ilk baş nazir, M.Ə.Rəsulzadə isə Milli Şuranın sədri idi - bu iki vəzifə eyni şəxsə aid deyildi.',
+  '1, 2 və 4 doğrudur: istiqlal Tiflisdə elan edildi, paytaxt Bakıya sentyabr 1918-də köçdü - istiqlal zamanı paytaxt hələ Tiflis idi; parlamentin ilk iclası (7 dekabr) bu köçdən sonradır, Bakıda keçirilə bilərdi; Xoyski baş nazir, Rəsulzadə Milli Şuranın sədri idi - fərqli vəzifələr. 3-cü mülahizə yanlışdır: parlamentdə müsəlman deputatlarla yanaşı rus, erməni, yəhudi və alman millətlərinin nümayəndələri də təmsil olunurdu.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix11-cumhuriyyet#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- tarix11-isgal#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix11-isgal#12';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix11-isgal#comb1', 'tarix-11-isgal',
+  'Şimali Azərbaycanın işğalı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Kürəkçay (1805) ilə Gülüstan (1813) arasındakı fərq (8 il), Gülüstan (1813) ilə Türkmənçay (1828) arasındakı fərqdən (15 il) KİÇİKDİR.
+2) 1-ci mülahizəyə əsasən, İrəvan və Naxçıvan xanlıqları (Türkmənçayla, 1828) Kürəkçay/Gülüstanla tutulan digər xanlıqlardan daha GEC Rusiyaya keçmişdir.
+3) Gülüstan müqaviləsi İKİNCİ Rusiya-Qacar müharibəsini bitirdi, Türkmənçay isə BİRİNCİNİ.
+4) Naxçıvan xanlığı 1827-ci ildə, yəni Türkmənçay müqaviləsinin imzalanmasından (1828) BİR İL ƏVVƏL artıq faktiki tutulmuşdu - müqavilə bunu yalnız hüquqi cəhətdən təsdiqlədi.',
+  '1, 2 və 4 doğrudur: Kürəkçay-Gülüstan fərqi 8 il, Gülüstan-Türkmənçay fərqi isə 15 ildir (8 < 15); İrəvan/Naxçıvan Türkmənçayla (1828) - bu, Kürəkçay/Gülüstanla tutulan xanlıqlardan sonradır; Naxçıvan 1827-də artıq faktiki tutulmuşdu, Türkmənçay (1828) bunu hüquqi təsdiqlədi. 3-cü mülahizə yanlışdır: Gülüstan BİRİNCİ, Türkmənçay isə İKİNCİ Rusiya-Qacar müharibəsini bitirdi - əksinə deyil.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix11-isgal#12'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- tarix11-mustemleke#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix11-mustemleke#7';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix11-mustemleke#comb1', 'tarix-11-mustemleke',
+  'XIX əsr Bakı neft sənayesi ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Tağıyevin şirkəti YERLİ kapitalı təmsil edirdi, Branobel isveç, Rotşildlər isə fransız kapitalı idi - deməli yerli və əcnəbi kapital paralel fəaliyyət göstərirdi.
+2) 1-ci mülahizəyə əsasən, bu qarışıq kapital bazası ilə Bakı dünya neft hasilatının təqribən YARISINI verə bildi.
+3) Bakı-Tiflis dəmir yolunun (1880-ci illər) açılması ilə Şollar su kəmərinin işə düşməsi EYNİ VAXTDA baş verdi.
+4) Rusiya bazarına inteqrasiya nəticəsində ucuz fabrik malları yerli əl əməyini sıxışdırdı, ənənəvi sənətkarlıq tənəzzülə uğradı.',
+  '1, 2 və 4 doğrudur: yerli (Tağıyev) və əcnəbi (Branobel-isveç, Rotşild-fransız) kapital paralel işləyirdi, bu, Bakının dünya hasilatının yarısını verməsinə imkan verdi; Rusiya bazarına inteqrasiya ucuz fabrik mallarını gətirib yerli sənətkarlığı sıxışdırdı. 3-cü mülahizə yanlışdır: Bakı-Tiflis dəmir yolu 1880-ci illərdə açıldı, Şollar su kəməri isə YALNIZ 1917-ci ildə - eyni vaxtda deyil, otuz ildən çox fərqlə.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix11-mustemleke#7'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- tarix11-musteqillik#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix11-musteqillik#7';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix11-musteqillik#comb1', 'tarix-11-musteqillik',
+  'Azərbaycanın neft strategiyası ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Neft kəmərləri bu ardıcıllıqla açıldı: Bakı-Novorossiysk (1997), Bakı-Supsa (1999), Bakı-Tbilisi-Ceyhan (2006) - Dövlət Neft Fondu (1999) məhz Bakı-Supsa kəməri ilə EYNİ ildə yaradıldı.
+2) 1-ci mülahizəyə əsasən, Neft Fondu yaradılanda («Əsrin müqaviləsi»ndən, 1994-dən, 5 il sonra) hələ Bakı-Tbilisi-Ceyhan kəməri (2006) fəaliyyətdə deyildi, yalnız iki kəmər işləyirdi.
+3) Səngəçal terminalı emal zavodu ilə benzin doldurma məntəqələri arasındakı halqadır.
+4) Bu üç kəmərin hamısı Səngəçal terminalından (dəniz yataqları ilə ixrac kəmərləri arasındakı halqadan) başlayır.',
+  '1, 2 və 4 doğrudur: Neft Fondu (1999) Bakı-Supsa kəməri (1999) ilə eyni ildə yaradıldı, «Əsrin müqaviləsi»ndən (1994) 5 il sonra - o zaman BTC (2006) hələ yox idi; hər üç kəmər Səngəçal terminalından başlayır. 3-cü mülahizə yanlışdır: Səngəçal terminalı dəniz yataqları İLƏ ixrac kəmərləri arasındakı halqadır, emal zavodu-benzin doldurma məntəqəsi arasında deyil.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix11-musteqillik#7'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- tarix11-sovet#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix11-sovet#4';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix11-sovet#comb1', 'tarix-11-sovet',
+  'Sovet dövrü Azərbaycanı ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Neft Daşları (1949) ilə Mingəçevir SES (1953) arasındakı fərq (4 il), Mingəçevir SES (1953) ilə Bakı metrosu (1967) arasındakı fərqdən (14 il) KİÇİKDİR.
+2) 1-ci mülahizəyə əsasən, ilk televiziya yayımı (1956) Neft Daşlarının açılışından (1949) sonra, lakin Bakı metrosunun açılışından (1967) ƏVVƏL baş verib.
+3) Hərbi kommunizm siyasəti NEP-dən (1921-ci ildən) SONRA, 1930-cu illərdə tətbiq olundu.
+4) Neft Daşları (1949) kollektivləşdirmənin (1930-cu illər) artıq başa çatmasından sonrakı dövrün məhsuludur.',
+  '1, 2 və 4 doğrudur: Neft Daşları-Mingəçevir fərqi 4 il, Mingəçevir-metro fərqi isə 14 ildir (4 < 14); televiziya (1956) bu iki tarix arasındadır; Neft Daşları kollektivləşdirmədən (1930-cu illər) sonrakı dövrün məhsuludur. 3-cü mülahizə yanlışdır: hərbi kommunizm (1918-1921) NEP-dən (1921-) ƏVVƏL tətbiq olundu, sonra yox - ardıcıllıq əksinədir.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix11-sovet#4'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 110 then
-    raise exception '112: 110 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 115 then
+    raise exception '112: 115 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
