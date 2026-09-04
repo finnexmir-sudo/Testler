@@ -5788,20 +5788,20 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
 -- ------------------------------------------------------------- bio11-insan-muhit#comb1
-update public.questions set difficulty = 2 where ext_key = 'bio11-insan-muhit#8';
+update public.questions set difficulty = 2 where ext_key = 'bio11-insan-muhit#25';
 
 with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
  ('bio11-insan-muhit#comb1', 'bio-11-insan-muhit',
-  'İnsan və ətraf mühitlə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
-1) Bioakkumulyasiya nəticəsində pestisidlər qida zəncirində toplanır; bu toplanma səbəbindən qida zəncirinin YUXARI həlqələrində (yırtıcılarda) zəhərli maddələrin qatılığı ƏN YÜKSƏK olur.
-2) 1-ci mülahizəyə əsasən, insan qida zəncirinin YUXARI həlqəsindəki heyvanların (məsələn, iri yırtıcı balıqların) ətini istehlak edərkən DAHA ÇOX zəhərli maddə qəbul etmə riski daşıyır.
-3) Bioakkumulyasiya nəticəsində zəhərli maddələrin qatılığı qida zəncirinin AŞAĞI həlqələrində ən yüksək olur.
-4) Milli parkda (qoruqdan fərqli olaraq) tənzimlənən turizm və maarifləndirmə mümkündür.',
-  '1, 2 və 4 doğrudur: bioakkumulyasiya nəticəsində zəhərli maddə qida zəncirinin yuxarı həlqələrində toplanır, buna görə insan yuxarı həlqədəki heyvanları istehlak edərkən daha çox risk daşıyır; milli parkda tənzimlənən turizmə icazə verilir. 3-cü mülahizə yanlışdır: zəhərli maddə qatılığı YUXARI həlqələrdə ən yüksəkdir, aşağıda yox.',
-  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+  'Psixi sağlamlıqla bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Psixoz reallıqla əlaqənin pozulması, hallüsinasiya və sanrılarla müşayiət olunan ağır psixi pozuntudur.
+2) 1-ci mülahizəyə əsasən, psixoz zamanı xəstə çox vaxt öz vəziyyətini tənqidi qiymətləndirə BİLMİR.
+3) Bunun əksinə, təşviş pozuntusu kimi nevrotik hallarda xəstə öz vəziyyətini adətən tənqidi qiymətləndirə BİLİR.
+4) Şizofreniya psixotik pozuntular qrupuna deyil, YALNIZ təşviş pozuntularına aiddir.',
+  '1, 2 və 3 doğrudur: psixoz reallıqla əlaqənin pozulmasıdır və xəstə öz vəziyyətini tənqidi qiymətləndirə bilmir, təşviş pozuntusu kimi nevrotik hallarda isə bu qabiliyyət qalır. 4-cü mülahizə yanlışdır: şizofreniya PSİXOTİK pozuntular qrupuna aiddir, təşviş pozuntusuna yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '2, 3, 4', 2)
 ),
 kohne_q as (
-  select quarter from public.questions where ext_key = 'bio11-insan-muhit#8'
+  select quarter from public.questions where ext_key = 'bio11-insan-muhit#25'
 ),
 ins as (
   insert into public.questions
