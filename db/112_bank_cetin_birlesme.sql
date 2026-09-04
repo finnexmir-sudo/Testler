@@ -4527,12 +4527,54 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- bio11-seleksiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'bio11-seleksiya#9';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('bio11-seleksiya#comb1', 'bio-11-seleksiya',
+  'Seleksiya üsulları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Heteroziz F1 hibridlərinin valideynlərdən ÜSTÜN olması hadisəsidir, amma bu effekt sonrakı nəsillərdə tədricən ZƏİFLƏYİR - deməli heteroziz effektindən sabit deyil, yalnız İLK NƏSİLDƏ tam faydalanmaq olar.
+2) İnbridinq (qohumluq çarpazlaşdırması) isə əksinə, zərərli RESESSİV əlamətlərin üzə çıxmasına gətirir - bu, heterozizin ƏKS təsiridir.
+3) Heteroziz və inbridinq EYNİ genetik mexanizmin (heterozigotluğun) nəticəsidir, ona görə hər ikisi nəsildən-nəslə eyni istiqamətdə GÜCLƏNİR.
+4) Uzaq hibridləşdirmə (fərqli növlərin çarpazlaşdırılması) tez-tez QISIR nəsillər verir - bu, uzaq hibridləşdirmənin praktik məhdudiyyətidir.',
+  '1, 2 və 4 doğrudur: heteroziz F1-də üstünlük verir, amma sonrakı nəsillərdə zəifləyir - yalnız ilk nəsildə tam fayda var; inbridinq isə əksinə zərərli resessiv əlamətləri üzə çıxarır; uzaq hibridləşdirmə isə tez-tez qısır nəsillər problemi yaradır. 3-cü mülahizə yanlışdır: heteroziz və inbridinq EYNİ mexanizmin nəticəsi deyil, ƏKS proseslərdir - heteroziz heterozigotluqla bağlıdır və zəifləyir, inbridinq isə homozigotluğu artıraraq zərərli əlamətləri üzə çıxarır; ikisi eyni istiqamətdə güclənmir.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'bio11-seleksiya#9'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'biologiya'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 107 then
-    raise exception '112: 107 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 108 then
+    raise exception '112: 108 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
