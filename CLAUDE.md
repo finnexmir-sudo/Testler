@@ -1221,6 +1221,14 @@ tam UX gəzişi üçün onun genişi bu sessiyanın scratchpad-ında idi
 (`audit.py`) — lazım olsa eyni axınla yenidən yazılır: hər ekran 390 və
 1280 px, `innerText` uzunluğu, `.muted` uzunluğu, səhifə hündürlüyü.
 
+## Üst zolaq — marka rəngi
+
+`assets/base.css` `.top` üç tətbiqdə marka mavisidir (`--brand`), yazı,
+«Çıxış», «Geri» və zəng ağdır (istifadəçi seçimi, 3 variant arasından).
+`theme-color` meta və manifestlərin `theme_color`-u da `#2b4acb` — şagird
+və valideyndə köhnə yaşıl (#0e9384) qalmasın. Zolağa yeni element qoyanda
+rəngini ağ ver.
+
 ## Böyüyən siyahılar — hədd qaydası
 
 İl boyu böyüyən hər siyahının həddi var: ilk N açıq, qalanı «Daha N …»

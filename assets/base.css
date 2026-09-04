@@ -45,11 +45,20 @@ p.note{color:var(--fg-2);font-size:13.5px;line-height:1.55;margin:0 0 18px}
 a{color:var(--brand);text-decoration:none}
 
 /* ---------------------------------------------------------- ustluk */
+/*  Ust zolaq marka rengindedir (istifadeci secimi, 2-ci variant): ag
+    zolaq boz-ag fonla qaynayirdi, masaustunde bos gorunurdu.  Uc
+    tetbiqde eyni; yazi, duyme ve zeng ag.  */
 .top{
   display:flex;align-items:center;gap:12px;
-  height:56px;padding:0 20px;background:var(--surface);
-  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;
+  height:56px;padding:0 20px;background:var(--brand);color:#fff;
+  border-bottom:0;position:sticky;top:0;z-index:10;
 }
+.top .btn.ghost{color:#fff;border-color:rgba(255,255,255,.38);background:transparent}
+.top .btn.ghost:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.6);color:#fff}
+.top .bellbtn{color:#fff}
+.top .bellbtn:hover{color:#fff;background:rgba(255,255,255,.14)}
+.top .bellbtn i{border-color:var(--brand)}
+.top a.mark:focus-visible{outline-color:#fff}
 /*  Nisan Bil10 qabarcigidir - qradiyent SVG-nin icindedir,
     fon-kvadrat yoxdur.  Olcu 26px qalir (testler bunu olcur). */
 .top .mark{
@@ -62,9 +71,9 @@ a{color:var(--brand);text-decoration:none}
 .top a.mark:hover{opacity:.82}
 .top a.mark:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
 .top .mark svg{width:26px;height:26px}
-.top b{flex:1;font-size:14.5px;font-weight:600;letter-spacing:-.011em;
+.top b{flex:1;font-size:14.5px;font-weight:600;letter-spacing:-.011em;color:#fff;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top .who{font-size:13px;color:var(--fg-2);white-space:nowrap}
+.top .who{font-size:13px;color:rgba(255,255,255,.85);white-space:nowrap}
 
 /* ----------------------------------------------------------- kart */
 .card{
@@ -178,7 +187,7 @@ input:focus,select:focus,textarea:focus{
 }
 
 .card{box-shadow:0 1px 2px rgba(21,26,36,.04)}
-.top{box-shadow:0 1px 0 rgba(21,26,36,.03)}
+.top{box-shadow:0 1px 2px rgba(21,26,36,.18)}
 
 .item{transition:background .12s}
 .item .arrow{transition:transform .15s,color .15s}
