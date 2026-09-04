@@ -5157,12 +5157,222 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- fiz11-cereyan-qanunlari#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz11-cereyan-qanunlari#16';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz11-cereyan-qanunlari#comb1', 'fiz-11-cereyan-qanunlari',
+  'Elektrik cərəyanı qanunları ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Coul-Lens qanununa görə ayrılan istilik (Q = I²Rt) cərəyanın KVADRATI ilə düz mütənasibdir; elektrik enerjisi uzaq məsafəyə YÜKSƏK gərginlikdə ötürülür ki, cərəyan KİÇİK olsun - yüksək gərginlik seçimi məhz bu kvadratik asılılıqdan irəli gəlir.
+2) 1-ci mülahizəyə əsasən, cərəyanı 2 dəfə azaltmaq (gərginliyi 2 dəfə artırmaqla) xətdəki istilik itkisini 4 dəfə azaldır.
+3) Ampermetrin müqaviməti PARALEL qoşulduğu üçün kiçik olmalıdır.
+4) Voltmetrin müqavimətinin böyük olması PARALEL qoşulmuş dövrəni az pozmasına xidmət edir.',
+  '1, 2 və 4 doğrudur: Coul-Lens qanununa görə istilik cərəyanın kvadratı ilə mütənasibdir, ona görə yüksək gərginliklə cərəyanı azaltmaq itkini kvadratik azaldır (2 dəfə azaltsan, itki 4 dəfə azalır); voltmetrin böyük müqaviməti paralel qoşulmuş dövrəni az pozur. 3-cü mülahizə yanlışdır: ampermetr ARDICIL qoşulur (paralel yox), ona görə müqaviməti kiçik olmalıdır ki, dövrədəki cərəyanı dəyişməsin.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz11-cereyan-qanunlari#16'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz11-elektrostatika#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz11-elektrostatika#24';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz11-elektrostatika#comb1', 'fiz-11-elektrostatika',
+  'Elektrostatika ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Ekvipotensial səth bütün nöqtələrində potensialın eyni olduğu səthdir; sahə xətləri bu səthə PERPENDİKULYARDIR (90°).
+2) 1-ci mülahizəyə əsasən, yükü ekvipotensial səth boyunca hərəkət etdirəndə GÖRÜLƏN İŞ SIFIRDIR, çünki potensiallar fərqi sıfırdır.
+3) Ardıcıl birləşmiş kondensatorların ümumi tutumu tək kondensatorların CƏMİNƏ bərabərdir.
+4) Paralel birləşmiş kondensatorların ümumi tutumu tək-tək tutumların cəminə bərabərdir.',
+  '1, 2 və 4 doğrudur: ekvipotensial səth sahə xəttinə perpendikulyardır, bu səth boyunca hərəkətdə iş sıfırdır (potensiallar fərqi yoxdur); paralel kondensatorlarda tutumlar toplanır. 3-cü mülahizə yanlışdır: ARDICIL birləşmədə ümumi tutum ən kiçik kondensatordan da kiçik olur - cəminə bərabər olan PARALEL birləşmədir, ardıcıl deyil.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz11-elektrostatika#24'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz11-em-reqs#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz11-em-reqs#29';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz11-em-reqs#comb1', 'fiz-11-em-reqs',
+  'Dəyişən cərəyan və rəqslərlə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Dəyişən cərəyan dövrəsində sarğacın induktiv müqaviməti tezliklə DÜZ mütənasibdir, kondensatorun tutum müqaviməti isə tezliklə TƏRS mütənasibdir - bu iki elementin tezliyə reaksiyası ƏKSDİR.
+2) 1-ci mülahizəyə əsasən, tezlik ARTANDA sarğacın müqaviməti artır, kondensatorun müqaviməti isə azalır.
+3) Hər ikisi (sarğac və kondensator) tezliklə eyni istiqamətdə (düz mütənasib) dəyişir.
+4) Konturda tutum 4 dəfə artarsa, rəqs dövrü (kökaltı asılılığa görə) 2 dəfə artar.',
+  '1, 2 və 4 doğrudur: induktiv müqavimət tezliklə düz, tutum müqaviməti tezliklə tərs mütənasibdir - əks reaksiyalar, tezlik artanda biri artır, digəri azalır; tutum 4 dəfə artanda Tomson düsturuna görə dövr kökaltı asılılıqla 2 dəfə artır. 3-cü mülahizə yanlışdır: sarğac və kondensatorun müqaviməti tezliyə ƏKS istiqamətdə reaksiya verir, eyni istiqamətdə yox.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz11-em-reqs#29'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz11-maqnit-induksiya#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz11-maqnit-induksiya#14';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz11-maqnit-induksiya#comb1', 'fiz-11-maqnit-induksiya',
+  'Elektromaqnit induksiya ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Lens qaydasına görə, sarğaca maqnit yaxınlaşdıranda induksiya cərəyanının maqnit sahəsi bu yaxınlaşmaya MANE OLAN istiqamətdə yönəlir; özüninduksiya da EYNİ prinsipin xüsusi halıdır - dövrədə cərəyan dəyişəndə yaranan EHQ bu dəyişikliyə MANE OLUR.
+2) 1-ci mülahizəyə əsasən, dövrə açılan anda özüninduksiya EHQ-si bu kəsilməyə mane olmağa çalışır, nəticədə gərginlik sıçrayışı və qığılcım yaranır.
+3) Transformator nüvəsi nazik lövhələrdən yığılır ki, maqnit selini GÜCLƏNDİRSİN.
+4) Fuko (burulğan) cərəyanları HƏMİŞƏ zərərli deyil - induksiya sobalarında metalın əridilməsi kimi faydalı tətbiqi də var.',
+  '1, 2 və 4 doğrudur: Lens qaydası və özüninduksiya eyni prinsipin (dəyişikliyə müqavimət) təzahürüdür - dövrə açılanda özüninduksiya EHQ-si kəsilməyə mane olur, qığılcım yaranır; Fuko cərəyanlarının faydalı tətbiqi də var (induksiya sobaları). 3-cü mülahizə yanlışdır: transformator lövhələri burulğan cərəyanı İTKİSİNİ AZALTMAQ üçün nazikdir, seli gücləndirmək üçün yox.',
+  '1, 2, 3, 4', '1, 2, 3', '1, 2, 4', '3, 4', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz11-maqnit-induksiya#14'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
+-- ------------------------------------------------------------- fiz11-optika#comb1
+update public.questions set difficulty = 2 where ext_key = 'fiz11-optika#14';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('fiz11-optika#comb1', 'fiz-11-optika',
+  'Foton və fotoeffektlə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Foton enerjisi E = hν düsturu ilə hesablanır - tezlik nə qədər böyükdürsə, foton enerjisi də o qədər böyükdür.
+2) 1-ci mülahizəyə əsasən, fotoeffektin baş verməsi üçün minimum (qırmızı sərhəd) tezlik tələb olunması, əslində minimum FOTON ENERJİSİNİN tələb olunması deməkdir.
+3) Fotoeffektdə qopan elektronların maksimal kinetik enerjisi işığın İNTENSİVLİYİNDƏN asılıdır.
+4) Prizmadan keçən ağ işıqda bənövşəyi şüa ən çox sınır - bu, dispersiya hadisəsinin (sındırma əmsalının dalğa uzunluğundan asılılığının) nəticəsidir.',
+  '1, 2 və 4 doğrudur: E=hν-ə görə tezlik artdıqca foton enerjisi artır; fotoeffektin qırmızı sərhədi minimum foton enerjisi tələbidir; bənövşəyi işığın ən çox sınması dispersiyanın nəticəsidir. 3-cü mülahizə yanlışdır: fotoeffektdə maksimal kinetik enerji İŞIĞIN TEZLİYİNDƏN asılıdır, intensivlikdən DEYİL - intensivlik yalnız qopan elektronların SAYINI artırır, enerjisini yox.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'fiz11-optika#14'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'fizika'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 122 then
-    raise exception '112: 122 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 127 then
+    raise exception '112: 127 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
