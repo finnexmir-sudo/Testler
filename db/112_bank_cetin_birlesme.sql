@@ -4359,12 +4359,54 @@ select ins.id, o.ord, o.txt, o.ord = d.correct
   lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
 on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
 
+-- ------------------------------------------------------------- tarix11-zefer#comb1
+update public.questions set difficulty = 2 where ext_key = 'tarix11-zefer#12';
+
+with d(ext, topic, body, why, o1, o2, o3, o4, correct) as (values
+ ('tarix11-zefer#comb1', 'tarix-11-zefer',
+  '2020-ci il Vətən müharibəsi hadisələri ilə bağlı aşağıdakı mülahizələrdən hansılar doğrudur?
+1) Cəbrayıl (4 oktyabr) ilə Zəngilan (20 oktyabr) arasındakı fərq, Zəngilan ilə Qubadlı (25 oktyabr) arasındakı fərqdən böyükdür - deməli bu üç şəhər arasında Qubadlı SONUNCU azad edilmişdir.
+2) 1-ci mülahizədəki sonuncu tarixdən (25 oktyabr) sonra, lakin Üçtərəfli bəyanatın imzalanmasından (10 noyabr) əvvəl Şuşa (8 noyabr) azad edilmişdir.
+3) Üçtərəfli bəyanat Şuşanın azad edilməsindən DƏRHAL ƏVVƏL, hərbi əməliyyatların davamı kimi imzalanmışdır.
+4) Bəyanatdan sonra təhvil verilən sonuncu rayon olan Laçın (1 dekabr) Zəfər paradından (10 dekabr) əvvəl baş vermişdir.',
+  '1, 2 və 4 doğrudur: Cəbrayıl-Zəngilan fərqi 16 gün, Zəngilan-Qubadlı fərqi isə 5 gündür (16 > 5), deməli üç şəhər arasında Qubadlı (25 oktyabr) sonuncu azad edilib; Şuşa bundan sonra, 8 noyabrda azad olunub - bu, 10 noyabr bəyanatından ƏVVƏLDİR. Laçının təhvili (1 dekabr) isə Zəfər paradından (10 dekabr) əvvəldir. 3-cü mülahizə yanlışdır: Şuşanın hərbi yolla azad edilməsi (8 noyabr) Üçtərəfli bəyanatın imzalanmasından (10 noyabr) ƏVVƏL baş vermişdir - bəyanat qələbədən SONRA gəlib, əvvəl yox.',
+  '1, 2, 3, 4', '1, 3, 4', '1, 2, 4', '2, 3', 3)
+),
+kohne_q as (
+  select quarter from public.questions where ext_key = 'tarix11-zefer#12'
+),
+ins as (
+  insert into public.questions
+    (ext_key, owner_type, subject_id, level_id, topic_id, kind,
+     body, explanation, difficulty, quarter, status)
+  select d.ext, 'platform', s.id, l.id, tp.id, 'single',
+         d.body, d.why, 3, kq.quarter, 'published'
+    from d
+    cross join kohne_q kq
+    join public.subjects s on s.slug = 'tarix'
+    join public.programs p on p.slug = 'orta'
+    join public.levels   l on l.program_id = p.id and l.code = '11'
+    join public.topics   tp on tp.subject_id = s.id and tp.slug = d.topic
+  on conflict (ext_key) do update
+    set body = excluded.body, explanation = excluded.explanation,
+        difficulty = excluded.difficulty, quarter = excluded.quarter,
+        topic_id = excluded.topic_id, level_id = excluded.level_id,
+        subject_id = excluded.subject_id, status = 'published'
+  returning id, ext_key
+)
+insert into public.question_options (question_id, ord, body, is_correct)
+select ins.id, o.ord, o.txt, o.ord = d.correct
+  from ins
+  join d on d.ext = ins.ext_key,
+  lateral unnest(array[d.o1, d.o2, d.o3, d.o4]) with ordinality as o(txt, ord)
+on conflict (question_id, ord) do update set body = excluded.body, is_correct = excluded.is_correct;
+
 do $$
 declare v_n int;
 begin
   select count(*) into v_n from public.questions where ext_key like '%#comb%';
-  if v_n <> 103 then
-    raise exception '112: 103 birlesme sual gozlenilirdi, % tapildi', v_n;
+  if v_n <> 104 then
+    raise exception '112: 104 birlesme sual gozlenilirdi, % tapildi', v_n;
   end if;
   raise notice '112 OK - % birlesme sual', v_n;
 end $$;
