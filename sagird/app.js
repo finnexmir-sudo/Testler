@@ -64,7 +64,7 @@
     if (!S || !S.attempt || S.done) return;
     try {
       var o = draftPrune(draftAll());
-      o[S.attempt] = { i: S.i, ans: S.answers, at: Date.now() };
+      o[S.attempt] = { i: S.i, ans: S.answers, sec: S.sec || {}, sure: S.sure || {}, at: Date.now() };
       localStorage.setItem(LSD, JSON.stringify(o));
     } catch (e) { /* yer yoxdursa sakit kec - test yene isleyir */ }
   }
@@ -574,6 +574,9 @@
             S.answers = mine;
             S.i = Math.min(Math.max(Number(d0.i) || 0, 0), S.qs.length - 1);
             S.restored = n;
+            //  cavab terzi da qaralamadan qayidir (saniye, eminlik)
+            if (d0.sec && typeof d0.sec === "object") S.sec = d0.sec;
+            if (d0.sure && typeof d0.sure === "object") S.sure = d0.sure;
           }
         }
         drawQuestion();
@@ -593,9 +596,22 @@
       .catch(function (e) { errScreen(e, function () { viewResult(testId); }); });
   }
 
+  /*  Cavab terzi (db/128): her sualda kecirilen saniye ve "emin deyilem".
+      Vaxt sual ekranda oldugu muddetdir - geri qayidanda ustune gelir.  */
+  function tick() {
+    if (!S) return;
+    if (S.tq && S.curQ) {
+      S.sec = S.sec || {};
+      S.sec[S.curQ] = (S.sec[S.curQ] || 0) + (Date.now() - S.tq) / 1000;
+    }
+    S.tq = Date.now();
+  }
+
   function drawQuestion() {
     var q = S.qs[S.i];
     var n = S.qs.length;
+    tick(); S.curQ = q.id;
+    S.sure = S.sure || {};
     var pct = Math.round((S.i) * 100 / n);
     topTitle.textContent = S.test.title;
 
@@ -628,6 +644,12 @@
                 '<span class="t">' + esc(o.body) + "</span></button>";
             }).join("") +
           "</div>") +
+      //  "Emin deyilem" - bilmeden duz cavabi muellim gorsun (cavab terzi).
+      //  Susmaya gore emindir; yalniz variantli sualda.
+      (q.kind === "text" ? "" :
+        '<div class="surerow"><button type="button" class="sure' +
+          (S.sure[q.id] === false ? " on" : "") + '" id="btnSure">' +
+          ic("info") + "<span>Əmin deyiləm</span></button></div>") +
       /* Sual xeritesi: hansi cavablanib, hansi yox - klikle kecid.
          Sagird sonda cavabsiz qalani buradan tapir. */
       '<div class="qnav" id="qnav">' +
@@ -648,6 +670,12 @@
     );
 
     on("spk", "click", function () { say(q.body, $("spk")); });
+    on("btnSure", "click", function () {
+      var b = $("btnSure");
+      S.sure[q.id] = S.sure[q.id] === false ? true : false;
+      b.classList.toggle("on", S.sure[q.id] === false);
+      draftSave();
+    });
 
     /* Yazili sual: yazdiqca saxlanilir, duymenin adi da deyisir */
     on("ans", "input", function () {
@@ -720,11 +748,18 @@
 
   function finish() {
     setBusy("btnFinish", true, "Testi bitir");
+    tick();
     var payload = S.qs.map(function (q) {
       var a = S.answers[q.id];
+      var x;
       /* Yazili sualda cavab METNDIR, variant id-si deyil */
-      if (q.kind === "text") return { q: q.id, t: a || "" };
-      return { q: q.id, o: a ? [a] : [] };
+      if (q.kind === "text") x = { q: q.id, t: a || "" };
+      else x = { q: q.id, o: a ? [a] : [] };
+      //  cavab terzi: saniye (tam), eminlik - yalniz cavab varsa
+      var sec = S.sec && S.sec[q.id];
+      if (sec != null) x.s = Math.max(0, Math.round(sec));
+      if (a) x.c = !(S.sure && S.sure[q.id] === false);
+      return x;
     });
     sb.rpc("rpc_submit_attempt", {
       p_token: TOKEN, p_attempt_id: S.attempt, p_answers: payload

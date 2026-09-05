@@ -2025,6 +2025,21 @@
       var hM = "";
       var rt = r.topics || [];
       var weakAll = rt.filter(function (t) { return Number(t.ratio) < 60; });
+      /*  "Ne edim" setri (yol xeritesi 20d): en cox sagirdin zeif oldugu
+          movzu, adbaad, bir duyme.  Faizler cox, tovsiye az idi.  */
+      var todo = rt.filter(function (t) { return (t.weak_students || []).length > 0; })
+        .sort(function (a, b) { return b.weak_students.length - a.weak_students.length || Number(a.ratio) - Number(b.ratio); })[0];
+      if (todo) {
+        var ws = todo.weak_students;
+        h += '<div class="card todo" id="rTodo">' +
+          '<div class="pt"><b>Nə etməli</b><span class="muted">bu həftə</span></div>' +
+          '<p>«<b>' + esc(todo.name) + "</b>» mövzusunu " + ws.length + " şagirdə təkrar verin: " +
+            ws.slice(0, 6).map(function (x) {
+              return '<a href="#/s/' + esc(x.id) + "/" + esc(gid) + '">' + esc(firstName(x.name) || x.name) + "</a>";
+            }).join(", ") + (ws.length > 6 ? " və daha " + (ws.length - 6) : "") + ".</p>" +
+          '<button class="btn sm go" id="btnTodo">' + ic("gen") + "Bu mövzudan test yığ</button>" +
+        "</div>";
+      }
       var rsubs = [];
       rt.forEach(function (t) {
         var k = t.subject_slug || t.subject;
@@ -2146,6 +2161,7 @@
         $("rRecMore").remove();
       });
       on("btnB", "click", function () { nav("#/g/" + gid); });
+      on("btnTodo", "click", function () { remedialGen(gid, [todo]); });
       on("btnRef", "click", function () { screenReport(gid); });
       on("btnRem", "click", function () { remedialGen(gid, weakAll); });
       Array.prototype.forEach.call(main.querySelectorAll("[data-s]"), function (b) {
@@ -2598,6 +2614,21 @@
 
       /* ---------------- XULASE ---------------- */
       var hX = '<div id="diagBox"></div>';
+      /*  Cavab terzi (db/128): telesik sehv, bilmeden duz, emin idi-sehv.
+          Yalniz yeni tetbiqin gonderdiyi cavablar sayilir (n_meta).  */
+      var sty = r.style || {};
+      if (Number(sty.n_meta) > 0) {
+        var hasty = Number(sty.hasty) || 0, gok = Number(sty.guess_ok) || 0, sw = Number(sty.sure_wrong) || 0;
+        hX += "<h2>Cavab tərzi</h2>" +
+          '<div class="card tight styl">' +
+            '<div class="srow' + (hasty ? " bad" : "") + '"><b>' + hasty + "</b><div>Tələsik səhv" +
+              '<i>5 saniyədən tez verilmiş səhv cavab — diqqətsizlikdir, bilik boşluğu deyil</i></div></div>' +
+            '<div class="srow' + (gok ? " mid" : "") + '"><b>' + gok + "</b><div>Bilmədən düz" +
+              "<i>«Əmin deyiləm» deyib düz cavablayıb — mövzu oturmayıb</i></div></div>" +
+            '<div class="srow' + (sw ? " bad" : "") + '"><b>' + sw + "</b><div>Əmin idi, səhv" +
+              "<i>yanlış öyrənilib — ən vacib düzəliş yeri</i></div></div>" +
+          "</div>";
+      }
       if (r.topics !== null) {
         hX += "<h2>Valideyn üçün xülasə</h2>" +
           '<div class="card">' +
@@ -2729,6 +2760,8 @@
             return '<div class="wq' + (i >= WCAP ? " hide" : "") + '"><div class="g"><b>' +
               esc(w.body) + "</b>" +
               (w.topic ? '<span class="wtag">' + esc(w.topic) + "</span>" : "") +
+              (Number(w.hasty) > 0 ? '<span class="wtag wb-h" title="5 saniyədən tez">tələsik</span>' : "") +
+              (Number(w.sure_wrong) > 0 ? '<span class="wtag wb-s" title="Şagird əmin idi">əmin idi</span>' : "") +
               (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
               //  "1x" her setirde menasiz idi - say yalniz tekrarda
               "</div>" + (Number(w.wrong) > 1

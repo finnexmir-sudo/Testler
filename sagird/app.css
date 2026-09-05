@@ -335,3 +335,10 @@ details.fbd[open] summary{color:var(--fg-2)}
   padding:10px 12px;border:1px solid var(--n-200);border-radius:10px;background:var(--surface);color:var(--fg)}
 .fbrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
 .fbn{font-size:12px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+
+/* "Emin deyilem" - cavab terzi (db/128) */
+.surerow{display:flex;justify-content:flex-end;margin:6px 0 2px}
+.sure{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border:1px solid var(--n-200);
+  border-radius:999px;background:var(--surface);font:inherit;font-size:13px;color:var(--fg-3);cursor:pointer}
+.sure svg{width:14px;height:14px}
+.sure.on{border-color:var(--warn-line);background:var(--warn-tint);color:#93370d;font-weight:600}

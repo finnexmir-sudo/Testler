@@ -1369,6 +1369,24 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## Cavab tərzi və «Nə etməli» sətri (db/128, yol xəritəsi 22c və 20d)
+
+`attempt_answers.seconds` (sualda keçirilən saniyə) və `sure` («əminəm»
+true / «əmin deyiləm» false). Şagird tətbiqi hər cavabla `s` və `c`
+göndərir (`tick()` sual ekranda olduğu müddəti yığır, geri qayıdanda
+üstünə gəlir; qaralamada da saxlanır). Köhnə tətbiq göndərməsə null.
+Hədd `app.hasty_sec()` = 5.
+
+- Şagird hesabatı Xülasə: «Cavab tərzi» kartı (`r.style`: hasty,
+  guess_ok, sure_wrong; yalnız `n_meta > 0` olanda). Səhvlər sekməsində
+  «tələsik» / «əmin idi» nişanları (`weak[].hasty`, `sure_wrong`).
+- Qrup hesabatı: `topics[].weak_students` (hər şagird ≥ min cavab,
+  < 60%). Üstdə «Nə etməli» kartı: ən çox şagirdin zəif olduğu mövzu,
+  adbaad linklər, «Bu mövzudan test yığ» → `remedialGen`.
+- Şagird tətbiqi: variantlı sualda «Əmin deyiləm» düyməsi (susmaya
+  görə əmin). Bala təsir etmir.
+Testlər: `smoke_cavab_terzi.sql` (3), `test/e2e_inam.py`.
+
 ## Çaşdıran yerlər — bir dəfəyə (yol xəritəsi 20a, 20f)
 
 - **Ad sırası (db/127).** `app.name_parts`: ilk söz soyad şəkilçisi ilə
