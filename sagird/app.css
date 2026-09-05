@@ -342,3 +342,15 @@ details.fbd[open] summary{color:var(--fg-2)}
   border-radius:999px;background:var(--surface);font:inherit;font-size:13px;color:var(--fg-3);cursor:pointer}
 .sure svg{width:14px;height:14px}
 .sure.on{border-color:var(--warn-line);background:var(--warn-tint);color:#93370d;font-weight:600}
+
+/* Sehv defteri (db/129) */
+.mist .mrow{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.mist .mrow b{font-size:24px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums}
+.mist .mrow b.ok2{color:var(--ok);margin-left:14px}
+.mist .mrow span{font-size:13px;color:var(--fg-2)}
+.opt.right{border-color:var(--ok-line);background:var(--ok-tint)}
+.opt.right .k{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--err-line);background:var(--err-tint)}
+.opt.wrong .k{background:var(--err);color:#fff}
+.opt[disabled]{cursor:default;opacity:.9}
+#mFb .ok i,#mFb .warn i{font-style:normal;display:block;margin-top:4px;opacity:.85}

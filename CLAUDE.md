@@ -1369,6 +1369,31 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## İrəliləyiş kartı (yol xəritəsi 21.3) və Səhv dəftəri (db/129, 21.5)
+
+**İrəliləyiş kartı** — SQL yoxdur. Şagird hesabatı Xülasə, 2+ cəhddə:
+`progData(r)` (ad, dövr: son 30 gün/bütün dövr, test sayı, əvvəl→indi
+= ilk 3 / son 3 orta (4+ test) yoxsa ilk/son, ən yaxşı, güclü mövzular
+≥80% (≥2 cavab), müəllim adı) → `drawProgCard(canvas)` 1080×1350
+(brand→teal gradient, ad, «52% → 78%», kart: orta/ən yaxşı/dəyişmə,
+güclü mövzular, «Müəllim: …»). «Paylaş» = `navigator.share({files})`
+(Android Chrome), yoxsa «Şəkli yüklə» (`toDataURL` → `<a download>`).
+Şəbəkə sorğusu yoxdur.
+
+**Səhv dəftəri** — `public.mistakes(student_id, question_id, status
+open/review/closed, wrong_n, next_at, cleared_at)`, RLS bağlı.
+`app.mistake_note(student, question, ok, practice)`: səhv → open
+(məşqdə next_at +1 gün — variantları bir-bir yoxlamaqla tapmasın);
+düz → open isə review (+`app.review_days()`=7), review və vaxtı çatıbsa
+closed. Trigger `attempt_answers` üzərində (test cavabları da dəftəri
+yeniləyir); 129 mövcud səhvləri bir dəfəlik doldurur (son cavabı səhv
+olanlar). RPC: `rpc_student_mistakes(token)` (sayğaclar + 10 gözləyən
+sual, **düz variant getmir**), `rpc_student_mistake_answer(token, q, o)`
+→ düz/səhv + izah + status; gözləməyən sual rədd. Anon ağ siyahı 15 RPC.
+Şagird ev ekranında «Səhv dəftəri» kartı → məşq ekranı (bir-bir, dərhal
+rəy). Müəllim: Səhvlər sekməsində sayğaclar (`r.mistakes`).
+Testlər: `smoke_sehv_defteri.sql` (4), `smoke_huquq` 15, `test/e2e_defter.py`.
+
 ## Cavab tərzi və «Nə etməli» sətri (db/128, yol xəritəsi 22c və 20d)
 
 `attempt_answers.seconds` (sualda keçirilən saniyə) və `sure` («əminəm»

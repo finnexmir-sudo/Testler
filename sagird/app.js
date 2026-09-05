@@ -435,6 +435,10 @@
           '<div id="pracBox"></div>';
       }
 
+      /* 2b. Sehv defteri (db/129): sayğac serverden ayrica gelir - yer
+         tutucu; rpc_student_mistakes yuklenende dolur.  */
+      h += '<div id="mistBox"></div>';
+
       /* 3. Zeif movzular - haradan basla, konkret cavab.  .myr/.best
          siniflerini "netcelerim" siyahisindan goturur, yeni CSS lazim
          deyil.  Faiz hemise <60 oldugu ucun rengi hemise qirmizidir. */
@@ -541,6 +545,7 @@
         drawPrac(); bindRows();
       });
       on("btnMyRes", "click", screenMyResults);
+      loadMistakes();
       bindRows();
     }).catch(function (e) {
       if (e && (e.status === 403 || /Sessiya/i.test(e.message || ""))) {
@@ -914,6 +919,98 @@
   /* ---------------------------------------------------- neticelerim */
   /* Sagird oz gedisatini gorur: mini qrafik + son testler.  Yalniz OZ
      neticeleri - duzgun cavab ve basqa sagird melumati yoxdur. */
+  /* ================================================================
+     SEHV DEFTERI (db/129) - testde sehv edilen suallar; duz cavablanana
+     qeder qalir, bir hefte sonra yeniden gelir.  Duz variant gelmir:
+     cavab RPC-si yalniz duz/sehv ve izah qaytarir.
+     ================================================================ */
+  function loadMistakes() {
+    sb.rpc("rpc_student_mistakes", { p_token: TOKEN }).then(function (m) {
+      var box = $("mistBox");
+      if (!box || !m) return;
+      var open = Number(m.open) || 0, rev = Number(m.review) || 0, cl = Number(m.closed) || 0, due = Number(m.due) || 0;
+      if (!open && !rev && !cl) return;      // hec vaxt sehv olmayib - sakit
+      box.innerHTML = '<div class="spacer"></div><h2>Səhv dəftəri</h2>' +
+        '<div class="card mist">' +
+          '<div class="mrow"><b>' + due + "</b><span>" + (due ? "sual gözləyir" : "gözləyən yoxdur") + "</span>" +
+            '<b class="ok2">' + cl + "</b><span>bağlanıb</span></div>" +
+          '<p class="note" style="margin:6px 0 10px">' +
+            (due
+              ? "Səhv etdiyin suallar — düz cavablayana qədər burada qalır, bir həftə sonra yenidən gəlir."
+              : (rev ? "Bir həftə sonra " + rev + " sual təkrar gələcək." : "Hamısı bağlanıb, afərin! 🎉")) + "</p>" +
+          (due ? '<button class="btn go wide" id="btnMist">Məşq et (' + Math.min(due, 10) + ")</button>" : "") +
+        "</div>";
+      on("btnMist", "click", screenMistakes);
+    }).catch(function () {});
+  }
+
+  var MQ = null;   // mesq veziyyeti
+  function screenMistakes() {
+    markScreen(false);
+    topTitle.textContent = "Səhv dəftəri";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_student_mistakes", { p_token: TOKEN }).then(function (m) {
+      MQ = { items: (m && m.items) || [], i: 0, ok: 0, bad: 0 };
+      if (!MQ.items.length) { screenTests(); return; }
+      drawMist();
+    }).catch(function (e) { errScreen(e, screenMistakes); });
+  }
+  function drawMist() {
+    var q = MQ.items[MQ.i], n = MQ.items.length;
+    if (!q) { drawMistDone(); return; }
+    show(
+      '<div class="prog"><div class="bar"><i style="width:' + Math.round(MQ.i * 100 / n) + '%"></i></div>' +
+        '<span class="cnt">' + (MQ.i + 1) + " / " + n + "</span></div>" +
+      (q.topic ? '<p class="note" style="margin:0 0 6px">' + esc(q.topic) +
+        (q.status === "review" ? " · təkrar" : "") + "</p>" : "") +
+      '<div class="q"><div class="body">' + esc(q.body) + "</div></div>" +
+      '<div class="opts" id="opts">' +
+        (q.options || []).map(function (o, k) {
+          return '<button class="opt" data-o="' + esc(o.id) + '">' +
+            '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
+            '<span class="t">' + esc(o.body) + "</span></button>";
+        }).join("") + "</div>" +
+      '<div id="mFb"></div>'
+    );
+    Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (b) {
+      b.addEventListener("click", function () {
+        if (busy) return;
+        busy = true;
+        Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (x) { x.disabled = true; });
+        b.classList.add("sel");
+        sb.rpc("rpc_student_mistake_answer", {
+          p_token: TOKEN, p_question_id: q.qid, p_option_id: b.getAttribute("data-o")
+        }).then(function (r) {
+          busy = false;
+          if (r.correct) { MQ.ok++; b.classList.add("right"); } else { MQ.bad++; b.classList.add("wrong"); }
+          $("mFb").innerHTML =
+            '<div class="' + (r.correct ? "ok" : "warn") + '">' + ic(r.correct ? "check" : "info") +
+              "<span>" + (r.correct
+                ? (r.status === "closed" ? "Düzdür! Bu sual dəftərdən çıxdı. ✅" : "Düzdür! Bir həftə sonra bir də yoxlayacağıq.")
+                : "Səhvdir. Sabah yenə gələcək — bu dəfə düşünüb cavabla.") +
+              (r.explanation ? "<br><i>" + esc(r.explanation) + "</i>" : "") + "</span></div>" +
+            '<button class="btn go wide" id="btnMNext" style="margin-top:10px">' +
+              (MQ.i + 1 < n ? "Növbəti" : "Bitir") + "</button>";
+          on("btnMNext", "click", function () { MQ.i++; drawMist(); });
+        }).catch(function (e) {
+          busy = false;
+          Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (x) { x.disabled = false; });
+          b.classList.remove("sel");
+          $("mFb").innerHTML = msg("err", fail(e));
+        });
+      });
+    });
+  }
+  function drawMistDone() {
+    show('<div class="card" style="text-align:center">' +
+        "<h1>Məşq bitdi 🎯</h1>" +
+        '<p class="note">' + MQ.ok + " düz · " + MQ.bad + " səhv. " +
+          (MQ.bad ? "Səhvlər sabah yenə gələcək." : "Düz cavablar bir həftə sonra bir də yoxlanacaq.") + "</p>" +
+        '<button class="btn go wide" id="btnMHome" style="margin-top:12px">Testlərə qayıt</button>' +
+      "</div>");
+    on("btnMHome", "click", screenTests);
+  }
+
   function screenMyResults() {
     markScreen(false);
     topTitle.textContent = "Nəticələrim";

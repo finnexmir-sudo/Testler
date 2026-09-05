@@ -99,7 +99,8 @@ declare
         --  ve usagin giris kodunu QAYTARMIR.
         'rpc_parent_login','rpc_parent_home','rpc_parent_logout',
         --  «Bize yaz» (db/122): sagird ve valideyn tokenle yazir
-        'rpc_student_feedback','rpc_parent_feedback'];
+        'rpc_student_feedback','rpc_parent_feedback',
+        'rpc_student_mistakes','rpc_student_mistake_answer'];
   fn text;
 begin
   --  a) artiq acilmis olani bagla.  "from public" VACIBDIR: Postgres
@@ -142,7 +143,8 @@ declare
         'rpc_report_question_student','rpc_student_my_results',
         'rpc_parent_login','rpc_parent_home','rpc_parent_logout',
         --  «Bize yaz» (db/122): sagird ve valideyn tokenle yazir
-        'rpc_student_feedback','rpc_parent_feedback'];
+        'rpc_student_feedback','rpc_parent_feedback',
+        'rpc_student_mistakes','rpc_student_mistake_answer'];
   leak text;
   v_say int;
 begin

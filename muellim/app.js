@@ -2288,6 +2288,87 @@
     return new Array(k + 1).join("▰") + new Array(5 - k + 1).join("▱");
   }
 
+  /*  Irelileyis karti melumati: ad, dovr, testler, evvel -> indi, en yaxsi,
+      guclu movzular, muellim.  "evvel/indi": ilk 3 ve son 3 testin ortasi
+      (4+ test), yoxsa ilk ve son.  */
+  function progData(r) {
+    var st = r.student || {};
+    var atts = (r.attempts || []).slice().sort(function (a, b) {
+      return new Date(a.at) - new Date(b.at);
+    });
+    var cut = Date.now() - 30 * 864e5;
+    var use = atts.filter(function (a) { return new Date(a.at).getTime() >= cut; });
+    var dovr = "son 30 gün";
+    if (use.length < 2) { use = atts; dovr = "ümumi"; }
+    var pc = use.map(function (a) { return Number(a.percent) || 0; });
+    var k = pc.length >= 4 ? 3 : 1;
+    var avgOf = function (arr) { return arr.length ? Math.round(arr.reduce(function (x, y) { return x + y; }, 0) / arr.length) : 0; };
+    var from = avgOf(pc.slice(0, k)), to = avgOf(pc.slice(-k));
+    var strong = (r.topics || []).filter(function (t) { return Number(t.total) >= 2 && Number(t.ratio) >= 80; })
+      .sort(function (a, b) { return Number(b.ratio) - Number(a.ratio); }).slice(0, 2)
+      .map(function (t) { return t.name; });
+    var ay = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avqust","sentyabr","oktyabr","noyabr","dekabr"];
+    return {
+      name: firstName(st.full_name) || "Şagird",
+      period: dovr === "ümumi" ? "bütün dövr" : ay[new Date().getMonth()],
+      n: pc.length, from: from, to: to, best: Math.max.apply(null, pc.concat([0])),
+      avg: avgOf(pc), strong: strong,
+      teacher: (CTX && CTX.profile && CTX.profile.full_name) || ""
+    };
+  }
+
+  function drawProgCard(cv, d) {
+    var W = cv.width, H = cv.height, g = cv.getContext("2d");
+    var F = '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+    //  fon
+    g.fillStyle = "#f8f9fb"; g.fillRect(0, 0, W, H);
+    var gr = g.createLinearGradient(0, 0, W, 520);
+    gr.addColorStop(0, "#2b4acb"); gr.addColorStop(1, "#0e9384");
+    g.fillStyle = gr; g.fillRect(0, 0, W, 560);
+    //  marka
+    g.fillStyle = "#fff"; g.font = "700 44px " + F; g.textBaseline = "alphabetic";
+    g.fillText("Bil10", 72, 108);
+    g.fillStyle = "rgba(255,255,255,.75)"; g.font = "500 30px " + F;
+    g.fillText("irəliləyiş kartı · " + d.period, 72, 156);
+    //  ad
+    g.fillStyle = "#fff"; g.font = "700 88px " + F;
+    g.fillText(d.name, 72, 300);
+    g.fillStyle = "rgba(255,255,255,.85)"; g.font = "500 36px " + F;
+    g.fillText(d.n + " test işlənib", 72, 360);
+    //  evvel -> indi
+    var up = d.to - d.from;
+    g.fillStyle = "#fff"; g.font = "800 150px " + F;
+    g.fillText(d.from + "%", 72, 510);
+    g.font = "700 90px " + F; g.fillText("→", 470, 495);
+    g.fillStyle = up >= 0 ? "#ffc94d" : "#fff";
+    g.font = "800 150px " + F; g.fillText(d.to + "%", 590, 510);
+    //  kart
+    var r = 36, x = 72, y = 640, w = W - 144, h = 520;
+    g.fillStyle = "#fff";
+    g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); g.fill();
+    g.fillStyle = "#6b7488"; g.font = "600 30px " + F;
+    g.fillText("ORTA", x + 56, y + 90); g.fillText("ƏN YAXŞI", x + 380, y + 90); g.fillText("DƏYİŞMƏ", x + 700, y + 90);
+    g.fillStyle = "#151a24"; g.font = "800 84px " + F;
+    g.fillText(d.avg + "%", x + 56, y + 190); g.fillText(d.best + "%", x + 380, y + 190);
+    g.fillStyle = up > 0 ? "#0e9384" : (up < 0 ? "#b42318" : "#6b7488");
+    g.fillText((up > 0 ? "+" : "") + up, x + 700, y + 190);
+    g.strokeStyle = "#e8ebf1"; g.lineWidth = 3; g.beginPath(); g.moveTo(x + 56, y + 250); g.lineTo(x + w - 56, y + 250); g.stroke();
+    g.fillStyle = "#6b7488"; g.font = "600 30px " + F; g.fillText("GÜCLÜ MÖVZULAR", x + 56, y + 320);
+    g.fillStyle = "#151a24"; g.font = "600 44px " + F;
+    var lines = d.strong.length ? d.strong : ["hələ toplanır"];
+    lines.forEach(function (t, i) { g.fillText(fitText(g, "• " + t, w - 112), x + 56, y + 390 + i * 62); });
+    //  alt: muellim
+    g.fillStyle = "#6b7488"; g.font = "500 34px " + F;
+    g.fillText(d.teacher ? "Müəllim: " + d.teacher : "", 72, H - 100);
+    g.fillStyle = "#98a1b3"; g.font = "500 28px " + F;
+    g.fillText("bil10 · şagird və valideynə pulsuz", 72, H - 52);
+  }
+  function fitText(g, t, maxW) {
+    while (t.length > 4 && g.measureText(t).width > maxW) t = t.slice(0, -2) + "…";
+    return t;
+  }
+
   function velText(style, r) {
     var st = r.student || {};
     var name = firstName(st.full_name) || "Şagird";
@@ -2641,6 +2722,21 @@
               "WhatsApp-da valideynə göndərin.</p>" +
             '<button class="btn go" id="vCopy">' + ic("clip") + "Kopyala</button>" +
           "</div>";
+        /*  Irelileyis karti (yol xeritesi 21.3): brauzerde cekilen sekil -
+            "Ayan, sentyabr: 52% -> 78%, muellim Arzu".  Muellim valideyne
+            ve ya sosial sebekeye atir; sebeke sorgusu yoxdur (canvas).  */
+        if ((r.attempts || []).length >= 2) {
+          hX += "<h2>İrəliləyiş kartı</h2>" +
+            '<div class="card pcard">' +
+              '<canvas id="pcv" width="1080" height="1350"></canvas>' +
+              '<p class="muted" style="margin:10px 0 12px">Şəkil kimi paylaşın: valideynə WhatsApp-da, ' +
+                "ya da öz səhifənizdə. Şagirdin adı və sizin adınız üstündədir.</p>" +
+              '<div class="row" style="gap:8px">' +
+                '<button class="btn go" id="pcShare">' + ic("send") + "Paylaş</button>" +
+                '<a class="btn ghost" id="pcDl" download="bil10-irelileyis.png" href="#">' + ic("doc") + "Şəkli yüklə</a>" +
+              "</div><div id=\"pcMsg\"></div>" +
+            "</div>";
+        }
       }
 
       /* ---------------- MOVZULAR ---------------- */
@@ -2747,6 +2843,16 @@
            Server en cox sehv edilen 10 suali verir (tekrar edilen birinci);
            ilk 5 acıq, qalani "Daha N" ile - sehife boyumesin. */
         var WCAP = 5;
+        var mk = r.mistakes || {};
+        if ((Number(mk.open) || 0) + (Number(mk.review) || 0) + (Number(mk.closed) || 0) > 0) {
+          hS += '<div class="card tight mkbox"><b>Səhv dəftəri</b> ' +
+            '<span class="muted">şagirdin öz məşqi</span>' +
+            '<div class="mkrow"><span><b>' + (mk.open || 0) + "</b> gözləyir</span>" +
+              "<span><b>" + (mk.review || 0) + "</b> təkrarda</span>" +
+              '<span class="okc"><b>' + (mk.closed || 0) + "</b> bağlanıb</span></div>" +
+            '<p class="muted" style="margin:6px 0 0">Səhv etdiyi sual dəftərə düşür; şagird özü məşq edir, düz cavab bir həftə sonra yoxlanır, sonra bağlanır.</p>' +
+          "</div>";
+        }
         hS += '<button class="btn go wide" id="btnFix">' + ic("gen") +
             "Bu səhvlərdən təkrar testi yığ (" + weak.length + " sual)</button>" +
           '<div id="fixMsg"></div>' +
@@ -2873,6 +2979,24 @@
           $("vTxt").value = velText(VSTY, r);
         });
         on("vCopy", "click", function () { copyText($("vTxt").value, $("vCopy")); });
+        if ($("pcv")) {
+          var pdata = progData(r);
+          drawProgCard($("pcv"), pdata);
+          try { $("pcDl").href = $("pcv").toDataURL("image/png"); } catch (e) {}
+          on("pcShare", "click", function () {
+            var cv = $("pcv");
+            if (!cv.toBlob) { $("pcMsg").innerHTML = msg("warn", "Bu brauzer paylaşmağı dəstəkləmir — «Şəkli yüklə»."); return; }
+            cv.toBlob(function (blob) {
+              var file;
+              try { file = new File([blob], "bil10-irelileyis.png", { type: "image/png" }); } catch (e) {}
+              if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: "Bil10 — irəliləyiş" }).catch(function () {});
+              } else {
+                $("pcMsg").innerHTML = msg("info", "Bu cihazda birbaşa paylaşma yoxdur — «Şəkli yüklə» basıb WhatsApp-a əlavə edin.");
+              }
+            }, "image/png");
+          });
+        }
       }
       //  Qrup ekranindan gelibse ora, yoxsa qrup hesabatina (canli sual:
       //  "Geri" qrupa yox, hesabata atirdi)

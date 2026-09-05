@@ -57,6 +57,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 125_admin_giris.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 126_bu_gunun_dersi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 127_ad_sirasi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 128_cavab_terzi.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 129_sehv_defteri.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql

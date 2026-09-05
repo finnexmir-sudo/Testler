@@ -22,17 +22,17 @@ create temporary view t_anon as
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
    where n.nspname = 'public' and p.prokind = 'f';
 
---  1 · susmaya gore tam olaraq 13 funksiya aciqdir
+--  1 · susmaya gore tam olaraq 15 funksiya aciqdir
 do $$
 declare v_say int; v_ad text;
 begin
   select count(*), string_agg(distinct proname, ', ' order by proname)
     into v_say, v_ad from t_anon where ac;
-  if v_say <> 13 then
-    raise exception 'anon % funksiya gorur (13 gozlenilir): %', v_say, v_ad;
+  if v_say <> 15 then
+    raise exception 'anon % funksiya gorur (15 gozlenilir): %', v_say, v_ad;
   end if;
 end $$;
-\echo 'OK  1 · anon tam olaraq 13 RPC gorur'
+\echo 'OK  1 · anon tam olaraq 15 RPC gorur'
 
 --  2 · siyahinin OZU dogrudur - ad-ad
 do $$
@@ -43,7 +43,8 @@ begin
       'rpc_submit_attempt','rpc_leaderboard','rpc_test_result',
       'rpc_report_question_student','rpc_student_my_results',
       'rpc_parent_login','rpc_parent_home','rpc_parent_logout',
-      'rpc_student_feedback','rpc_parent_feedback']) x
+      'rpc_student_feedback','rpc_parent_feedback',
+      'rpc_student_mistakes','rpc_student_mistake_answer']) x
    where not exists (select 1 from t_anon where proname = x and ac);
   if v_yox is not null then
     raise exception 'bu RPC-ler anon-a baglidir: %', v_yox;
@@ -113,7 +114,7 @@ do $$
 declare v_say int;
 begin
   select count(*) into v_say from t_anon where ac;
-  if v_say <> 13 then raise exception 'tekrar isletmek sayi deyisdi: %', v_say; end if;
+  if v_say <> 15 then raise exception 'tekrar isletmek sayi deyisdi: %', v_say; end if;
 end $$;
 \echo 'OK  6 · berpa idempotentdir - ikinci defe hec ne deyismir'
 
