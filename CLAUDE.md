@@ -93,6 +93,26 @@ yoxlanandan sonra. Yoxsa:
   yoxlanmalıdır, «əksəriyyəti düzdür» kifayət etmir — bir fəslin tam
   unudulması asanlıqla gözdən qaça bilər.
 
+- **Additiv sual faylları — idempotentlik (2026-09).** `db/121-128`
+  (mövcud mövzuya bir neçə əlavə sual yazan kiçik fayllar) yazanda
+  `questions` sətrini `on conflict (ext_key) do update` ilə düzgün
+  qurdum, amma `question_options`-u əvvəlcədən silmədim — yalnız
+  db/122 və db/124-də (tam-əvəzləmə tipli fayllar) bu addım var idi,
+  qalan 6 faylda YOX idi. İkinci dəfə işlədiləndə `question_options`
+  unique constraint-ə (question_id, ord) çırpılırdı. İstifadəçi
+  bunu **canlı Supabase-də** tapdı, mən tapmadım — çünki commit
+  mesajında «idempotentlik yoxlanıldı» yazsam da, əslində yalnız
+  db/122 və db/124-ü iki dəfə işlədib yoxlamışdım, qalan 6 faylı
+  YOX. «Yoxladım» dedim, amma hamısını yoxlamamışdım — məhz «HAZIRDIR»
+  qaydasının 4-cü bəndinin pozulması («ölçmədiyimi deməmək —
+  aldatmaqdır»). Düzəlişdən sonra HƏR additiv faylı — 122/124 daxil,
+  hamısını — İKİ, bəzilərini ÜÇ dəfə ardıcıl işlədib sual/variant
+  sayının sabit qaldığını təsdiqlədim. **Qayda:** yeni additiv sual
+  faylı yazanda başına həmişə `delete from question_options ...
+  where ext_key like '<prefiks>%' and ext_key ~ '<son suallar
+  aralığı>'` sətri qoy — tam-əvəzləmə fayllarında olduğu kimi, sayı
+  az olsa da fərq etmir.
+
 Ortaq kök birdir: **qurduğumu yoxlamaq, istənəni yoxlamaq deyil.**
 
 ---
