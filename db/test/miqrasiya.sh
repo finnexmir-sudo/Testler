@@ -77,6 +77,8 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          134_inf11_sistemler_bosluqlar.sql \
          135_inf3_informasiya_bosluqlar.sql \
          136_inf3_kompyuter_is_masasi_qovluq.sql \
+         137_inf10_informasiya_miqdari.sql \
+         138_inf11_modellesdirme_bosluqlar.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \

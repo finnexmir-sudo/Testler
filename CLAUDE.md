@@ -137,7 +137,13 @@ yoxlanandan sonra. Yoxsa:
   «Kompüter şəbəkələri» bölməsi 6 sual), `db/134` (`inf-11-sistemler`,
   3 alt-başlıq — CİS/GİS, axtarış sistemləri, böyük verilənlər — 6
   sual), `db/135`/`db/136` (`inf-3-informasiya`/`inf-3-kompyuter`,
-  daha kiçik alt-başlıq boşluqları).
+  daha kiçik alt-başlıq boşluqları), `db/137` (`inf-10-informasiya`,
+  «İnformasiyanın miqdarı» — bit/bayt ölçü vahidləri — 5 sual),
+  `db/138` (`inf-11-modellesdirme`, «Proqramlaşdırma dillərinin
+  köməyi ilə riyazi modelləşdirmə» + «Üçölçülü qrafik modellər» 4
+  sual). Cəmi 56 informatika mövzusunun **hamısı** tək-tək
+  yoxlanıldı (alt-başlıq siyahısı ↔ sual mətnləri) — bu, təkcə bir
+  neçə nümunə mövzu yox, bütöv fənn üzrə ilk tam audit idi.
 
 Ortaq kök birdir: **qurduğumu yoxlamaq, istənəni yoxlamaq deyil.**
 

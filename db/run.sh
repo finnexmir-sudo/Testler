@@ -144,6 +144,8 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 133_inf8_internet_sebeke.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 134_inf11_sistemler_bosluqlar.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 135_inf3_informasiya_bosluqlar.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 136_inf3_kompyuter_is_masasi_qovluq.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 137_inf10_informasiya_miqdari.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 138_inf11_modellesdirme_bosluqlar.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
