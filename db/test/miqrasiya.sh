@@ -69,6 +69,9 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          126_fiz7_skalyar_vektorial.sql \
          127_hey4_dini_deyerler.sql \
          128_utarix8_qafqaz_medeniyyet.sql \
+         129_inf4_kompyuter_duzelis.sql \
+         130_inf3_alqoritm_obyekt.sql \
+         131_inf3_metn_duzelis.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \

@@ -136,6 +136,9 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 125_kim11_aldehid_izomer.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 126_fiz7_skalyar_vektorial.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 127_hey4_dini_deyerler.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 128_utarix8_qafqaz_medeniyyet.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 129_inf4_kompyuter_duzelis.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 130_inf3_alqoritm_obyekt.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 131_inf3_metn_duzelis.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
