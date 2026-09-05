@@ -1369,6 +1369,25 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## Çaşdıran yerlər — bir dəfəyə (yol xəritəsi 20a, 20f)
+
+- **Ad sırası (db/127).** `app.name_parts`: ilk söz soyad şəkilçisi ilə
+  bitirsə (-ov/-ova/-yev/-yeva/-li/-lı/-zadə/-oğlu/-qızı…) və ikinci
+  bitmirsə, ikinci söz addır → «Hüseynov Mirhüseyn» → «Mirhüseyn H.».
+  127 köhnə qaydayla yaranmış qısa adları bir dəfəlik düzəldir (əl ilə
+  verilənə toxunmur). Paneldə eyni qayda `firstName()` (valideyn mətni,
+  WhatsApp). Şagird formasının ipucu «Əvvəl ad, sonra soyad».
+- **«Platforma» → «Hazır bank»** müəllim tərəfində hər yerdə (hovuz
+  seqmenti, tapşırıq optgroup, vərəq/bank meta, abunə xəbərdarlığı).
+  Kodda `pool: "platform"` və admin bildirişindəki «platforma» qalır.
+  Testlər: e2e_bank, e2e_gen «Hazır bank» axtarır.
+- **«Bildirişlər» iki mənada idi:** zəng = «Siqnallar» (ekran başlığı,
+  düymə, FB_PAGE), admin bölməsi = «Sual bildirişləri».
+- **Tapşırıq ekranı:** «Hansı test nə vaxt?» yığılmış izah (hazır/öz test,
+  ev tapşırığı, diaqnostik, səhvlərdən təkrar); «Sərbəst məşq» açarında
+  «bağlasanız yalnız verdiyiniz tapşırıqları görər»; «götür» düyməsinin
+  ipucu və Bağlı boş-halı «nəticələr qalır».
+
 ## Ev tapşırığı avtomatı və WhatsApp mətni (yol xəritəsi 21.2)
 
 SQL yoxdur, yalnız panel. Üç yer:

@@ -92,3 +92,46 @@ begin
          'ilk sagird oz adini itirdi';
 end $$;
 \echo 'OK  3 · movcud tekrarlar bir defelik duzelir, ilk sagird qalir'
+
+-- =====================================================================
+--  4. Ad sirasi (db/127): "Hüseynov Mirhüseyn" -> "Mirhüseyn H."
+--  (3-cu yoxlama 124-u yeniden isletdi - 127 kohne govdeni geri qaytarir)
+-- =====================================================================
+\i 127_ad_sirasi.sql
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000a1';
+do $$
+declare d text; c uuid := 'cccc0000-0000-0000-0000-0000000000a2';
+begin
+  perform public.rpc_add_student(c, 'Hüseynov Mirhüseyn');
+  select display_name into d from public.students where full_name = 'Hüseynov Mirhüseyn';
+  assert d = 'Mirhüseyn H.', 'soyad evvel: ' || d;
+  perform public.rpc_add_student(c, 'Əliyeva Nigar');
+  select display_name into d from public.students where full_name = 'Əliyeva Nigar';
+  assert d = 'Nigar Ə.', 'soyad evvel (-yeva): ' || d;
+  --  iki soz de sekilci ile bitirse (Vəli Əliyev) ad sirasi qalir
+  perform public.rpc_add_student(c, 'Vəli Əliyev');
+  select display_name into d from public.students where full_name = 'Vəli Əliyev';
+  assert d = 'Vəli Ə.', 'iki sekilci: ' || d;
+  perform public.rpc_add_student(c, 'Aysu Məmmədova');
+  select display_name into d from public.students where full_name = 'Aysu Məmmədova';
+  assert d = 'Aysu M.', 'adi sira: ' || d;
+end $$;
+reset role; reset request.jwt.claim.sub;
+do $$
+declare d text;
+begin
+  --  kohne qaydayla yaranmis qisa ad 127-nin sonundaki blokla duzelir
+  update public.students set display_name = 'Hüseynov M.' where full_name = 'Hüseynov Mirhüseyn';
+end $$;
+\i 127_ad_sirasi.sql
+do $$
+declare d text;
+begin
+  select display_name into d from public.students where full_name = 'Hüseynov Mirhüseyn';
+  assert d = 'Mirhüseyn H.', 'kohne qisa ad duzelmedi: ' || d;
+  --  adi sirada yazilan ad toxunulmur
+  select display_name into d from public.students where full_name = 'Aysu Məmmədova';
+  assert d = 'Aysu M.', 'adi sira deyisdi: ' || d;
+end $$;
+\echo 'OK  4 · ad sirasi: soyad evvel yazilanda ad taninir, kohne qisa adlar duzelir'

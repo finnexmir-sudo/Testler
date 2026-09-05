@@ -514,6 +514,13 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .plcur b{display:block;font-size:14px;font-weight:600;margin-bottom:10px}
 .plbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .plbtns input{flex:0 0 72px;text-align:center}
+.tkind{margin:-2px 0 10px}
+.tkind summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--brand);list-style:none}
+.tkind summary::-webkit-details-marker{display:none}
+.tkind summary::before{content:"+ ";color:var(--brand)}
+.tkind[open] summary::before{content:"– "}
+.tkind ul{margin:6px 0 0;padding-left:18px;font-size:12.5px;line-height:1.55}
+.tkind li b{color:var(--fg)}
 .asgwa{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 14px}
 .asgwa .watxt{flex-basis:100%;width:100%;resize:vertical;font:inherit;font-size:12.5px;line-height:1.45;
   padding:8px 10px;border:1px solid var(--n-200);border-radius:10px;background:var(--n-25);color:var(--fg-2)}

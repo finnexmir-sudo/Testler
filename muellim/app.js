@@ -327,7 +327,7 @@
   /* ------------------------------------------------- bildirisler ekrani */
   function screenNotif() {
     var live = guard();
-    topTitle.textContent = "Bildirişlər";
+    topTitle.textContent = "Siqnallar";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_home", {}).then(function (v) {
       if (!live()) return;
@@ -366,7 +366,7 @@
                 done: "Edilib", closed: "Bağlı" };
   var FB_PAGE = { "": "İcmal", g: "Qrup", r: "Qrup hesabatı", a: "Tapşırıq",
                   b: "Sual bankı", gen: "Test yığ", t: "Test vərəqi", p: "Paket",
-                  adm: "İdarəetmə", n: "Bildirişlər", q: "Sual", s: "Şagird hesabatı" };
+                  adm: "İdarəetmə", n: "Siqnallar", q: "Sual", s: "Şagird hesabatı" };
   function fbKind(k) {
     for (var i = 0; i < FB_KIND.length; i++) if (FB_KIND[i][0] === k) return FB_KIND[i][1];
     return k;
@@ -1439,9 +1439,9 @@
           "Şagird əlavə et</button>" +
         '<div class="card" id="stuForm" hidden style="margin-top:10px">' +
           '<label for="sname">Yeni şagird</label>' +
-          '<input id="sname" placeholder="Ad və soyad">' +
-          '<p class="muted" style="margin:-8px 0 14px">Lövhədə qısa ad: ' +
-            "Aysu Məmmədova → Aysu M.</p>" +
+          '<input id="sname" placeholder="Ad Soyad — məs. Aysu Məmmədova">' +
+          '<p class="muted" style="margin:-8px 0 14px">Əvvəl ad, sonra soyad. ' +
+            "Lövhədə qısa ad belə yaranır: Aysu Məmmədova → Aysu M.</p>" +
           '<div id="sErr"></div>' +
           '<button class="btn go" id="btnStu">' + ic("plus") + "Şagird əlavə et</button>" +
         "</div>" +
@@ -1877,9 +1877,19 @@
 
   /*  Tapsiriqdan sonra hazir WhatsApp metni.  Sagirde bildiris gondere
       bilmirik (xarici sebeke yoxdur) - muellim bir toxunusla qrupa atir.  */
+  /*  Adin ilk sozu.  Muellim "Hüseynov Mirhüseyn" da yazir - soyad
+      sekilcisi ile taninir ve ikinci soz goturulur (valideyn metni
+      "Hüseynov — son 30 gün" demesin).  db/127 eyni qaydani qisa ad
+      ucun serverde tetbiq edir.  */
+  function firstName(full) {
+    var w = (full || "").trim().split(/\s+/);
+    if (w.length < 2) return w[0] || "";
+    var sfx = /(ov|ova|yev|yeva|ev|eva|li|lı|lu|lü|zadə|zade|ski|skaya|oğlu|qızı)$/i;
+    return (sfx.test(w[0]) && !sfx.test(w[1])) ? w[1] : w[0];
+  }
   function waAsgText(title, closes, who) {
     var url = (window.CFG && window.CFG.STUDENT_URL) || "";
-    return "Salam" + (who ? ", " + who.split(" ")[0] : "") + "! Bil10-da yeni tapşırıq var: «" +
+    return "Salam" + (who ? ", " + firstName(who) : "") + "! Bil10-da yeni tapşırıq var: «" +
       title + "».\n" +
       (closes ? "Son tarix: " + dateAz(closes) + ".\n" : "") +
       "Link: " + url + "\nKodunla gir — «Tapşırıqlar»da gözləyir.";
@@ -2264,7 +2274,7 @@
 
   function velText(style, r) {
     var st = r.student || {};
-    var name = (st.full_name || "").split(" ")[0] || "Şagird";
+    var name = firstName(st.full_name) || "Şagird";
     var atts = r.attempts || [];
     var cut = Date.now() - 30 * 864e5;
     var use = atts.filter(function (a) {
@@ -2958,8 +2968,9 @@
           '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
           '<span class="track"><i></i></span>' +
           "<span><b>Sərbəst məşq</b>" +
-            '<span class="muted">Şagird platformanın digər testlərini də ' +
-              "istədiyi vaxt işləyə bilər.</span></span></label>" +
+            '<span class="muted">Açıqdırsa şagird hazır bankın digər testlərini də ' +
+              "istədiyi vaxt işləyə bilər. Bağlasanız yalnız verdiyiniz " +
+              "tapşırıqları görər.</span></span></label>" +
         '<div id="fpErr"></div></div>' +
       "</div>" +
       '<div class="spacer"></div>' +
@@ -2974,6 +2985,13 @@
       "<h2>Hazır testi tapşır</h2>" +
       '<p class="muted" style="margin:-6px 0 10px">Hazır testi seçin, kimə və nə vaxta ' +
         "qədər — şagirdin siyahısına düşür. Eyni test bir neçə qrupa verilə bilər.</p>" +
+      '<details class="more tkind"><summary>Hansı test nə vaxt?</summary>' +
+        '<ul class="muted">' +
+          "<li><b>Hazır test və öz testiniz</b> — bu ekran: seçin, tapşırın.</li>" +
+          "<li><b>Ev tapşırığı</b> — dərs planında mövzunu «Keçildi» edəndə sistem özü təklif edir.</li>" +
+          "<li><b>Diaqnostik test</b> — yeni şagird nəyi bilmir: şagirdin hesabatında.</li>" +
+          "<li><b>Səhvlərdən təkrar</b> — şagirdin öz səhvlərindən: şagirdin hesabatında.</li>" +
+        "</ul></details>" +
       '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
       /* Bu ekran test YARATMIR - hazir testi qrupa yoneldir.
@@ -3044,7 +3062,7 @@
         "<b>" + (f === "off" ? "Bağlı tapşırıq yoxdur" : "Aktiv tapşırıq yoxdur") +
         "</b>" +
         (f === "off"
-          ? "Son tarixi keçən və götürülən tapşırıqlar bura düşür."
+          ? "Son tarixi keçən və götürülən tapşırıqlar bura düşür; nəticələr qalır."
           : "Aşağıdan test seçib tapşırıq verin.") + "</div>";
     }
     //  "Bagli" il boyu boyuyur: ilk 8 + "Daha N" (AEXP acanda hamisi)
@@ -3068,7 +3086,7 @@
           '<span class="pill' + (open ? " on" : "") + '">' +
             (open ? "Aktiv" : "Bağlı") + "</span>" +
           '<button class="btn sm ghost icon" data-del="' + esc(a.id) + '" ' +
-            'title="Tapşırığı götür" aria-label="Tapşırığı götür">' + ic("x") + "</button>" +
+            'title="Tapşırığı götür — yazılmış nəticələr qalır" aria-label="Tapşırığı götür">' + ic("x") + "</button>" +
         "</div>" +
         '<div class="l2">' + esc(a.subject || "") + " · " +
           (Number(a.questions) || 0) + " sual · " + tries +
@@ -3228,7 +3246,7 @@
       box.innerHTML = note +
         '<label for="aTest">Test</label>' +
         '<select id="aTest">' +
-          grp(gl ? "Platforma · " + gl : "Platforma", here) +
+          grp(gl ? "Hazır bank · " + gl : "Hazır bank", here) +
           grp("Öz testləriniz", own) +
           grp("Aşağı siniflər", lower) +
         "</select>" +
@@ -3501,7 +3519,7 @@
       '<div class="spacer"></div>' +
       '<div id="admList" class="card pad0">' + admRows(rows) + "</div>" +
       '<div class="spacer"></div>' +
-      "<h2>Bildirişlər" + (reps.length
+      "<h2>Sual bildirişləri" + (reps.length
         ? ' <span class="rcnt">' + reps.length + "</span>" : "") + "</h2>" +
       '<div class="chips" id="repF">' +
         '<button class="chip on" data-rs="new">Yeni</button>' +
@@ -4261,7 +4279,7 @@
       '<div class="card tight">' +
         '<div class="segs" id="gPool">' +
           seg("mine", "Öz suallarım", f.pool) +
-          seg("platform", "Platforma", f.pool) +
+          seg("platform", "Hazır bank", f.pool) +
           seg("all", "Hamısı", f.pool) +
         "</div>" +
         (f.cls && f.topics.length
@@ -4273,7 +4291,7 @@
           : "") +
         (f.pool !== "mine" && !(ACC && ACC.plan)
           ? '<div class="warn" style="margin:12px 0 0">' + ic("warn") +
-            "<span>Platforma hovuzu abunə paketinə daxildir. " +
+            "<span>Hazır bank abunə paketinə daxildir. " +
             "Öz suallarınızdan yığa bilərsiniz.</span></div>"
           : "") +
         '<div style="margin-top:12px"><label for="gsub">Fənn</label>' +
@@ -4435,7 +4453,7 @@
               ? msg("warn", "Hələ öz sualınız yoxdur. «Sual bankı»nda yazın" +
                     ((ACC && ACC.plan)
                       ? " və ya yuxarıda «Platforma» seçin."
-                      : " — platforma hovuzu abunə paketi ilə açılır."))
+                      : " — hazır bank abunə paketi ilə açılır."))
               : msg("err", "Bu süzgəclə yalnız " + found + " fərqli sual tapıldı (" +
                     want + " istənilir). Süzgəci genişləndirin və ya sayı azaldın."));
       })
@@ -4832,7 +4850,7 @@
               (q.topic ? "<span>" + esc(q.topic) + "</span><span>·</span>" : "") +
               '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
                 DIFF[Number(q.difficulty) || 2] + "</span>" +
-              "<span>·</span><span>" + (q.mine ? "öz sualınız" : "platforma") + "</span>" +
+              "<span>·</span><span>" + (q.mine ? "öz sualınız" : "hazır bank") + "</span>" +
               (q.remedial
                 ? '<span class="rem">səhvə bənzər</span>' : "") +
               '<button class="rlink" data-rq="' + esc(q.id) + '">Səhv bildir</button>' +
@@ -5029,7 +5047,7 @@
       '<div class="card tight" id="bFilt">' +
         '<div class="segs" id="bPool">' +
           seg("mine", "Öz suallarım", f.pool) +
-          seg("platform", "Platforma", f.pool) +
+          seg("platform", "Hazır bank", f.pool) +
           seg("all", "Hamısı", f.pool) +
         "</div>" +
         '<div class="spacer"></div>' +
@@ -5393,7 +5411,7 @@
           if (!f.subject && q.subject) meta.push(esc(q.subject));
           if (!f.level && q.level)     meta.push(esc(q.level));
           if (q.topic)                 meta.push(esc(q.topic));
-          if (!mine)                   meta.push("platforma");
+          if (!mine)                   meta.push("hazır bank");
           /*  Variantlar setrin ALTINDA gosterilir - numune kartlari
               ile eyni gorunusde.  Evvel siyahida yalniz basliq vardi:
               muellim "butun suallari gor" deyende numunede gorduyu
@@ -5923,8 +5941,8 @@
   var btnBell = document.createElement("button");
   btnBell.id = "btnBell";
   btnBell.className = "bellbtn hide";
-  btnBell.title = "Bildirişlər";
-  btnBell.setAttribute("aria-label", "Bildirişlər");
+  btnBell.title = "Siqnallar";
+  btnBell.setAttribute("aria-label", "Siqnallar");
   btnBell.innerHTML = ic("bell") + '<i id="bellDot" class="hide"></i>';
   topWho.parentNode.insertBefore(btnBell, topWho);
   btnBell.addEventListener("click", function () { nav("#/n"); });

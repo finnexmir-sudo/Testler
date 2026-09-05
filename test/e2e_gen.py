@@ -169,7 +169,7 @@ with sync_playwright() as pw:
        "onizleme durust: hovuzda yalniz 12 sual", pg.inner_text("#gPrev")[:70])
 
     print("C · Abunəsiz platforma hovuzu")
-    pg.locator("#gPool .seg", has_text="Platforma").click()
+    pg.locator("#gPool .seg", has_text="Hazır bank").click()
     pg.wait_for_selector("#gPool .seg.on", timeout=4000)
     ok("abunə paketinə daxildir" in pg.inner_text("#main"),
        "platforma secilende abune xeberdarligi cixir")
@@ -281,7 +281,7 @@ with sync_playwright() as pw:
     pg.goto(PANEL); pg.wait_for_timeout(300)
     pg.reload(); pg.wait_for_selector("#gForm", timeout=8000)
     pg.click("#bnav a[href='#/gen']"); pg.wait_for_selector("#gPool", timeout=8000)
-    pg.locator("#gPool .seg", has_text="Platforma").click()
+    pg.locator("#gPool .seg", has_text="Hazır bank").click()
     pg.wait_for_timeout(500)
     ok("abunə paketinə daxildir" not in pg.inner_text("#main"),
        "abune ile xeberdarliq itir")
@@ -304,7 +304,7 @@ with sync_playwright() as pw:
     pg.click("#btnMake")
     pg.wait_for_selector(".paper", timeout=8000)
     ok(pg.locator(".paper .pq").count() == 12, "12 sualliq platforma testi yigildi")
-    ok("platforma" in pg.inner_text(".paper"), "platforma nisani gorunur")
+    ok("hazır bank" in pg.inner_text(".paper"), "hazır bank nisani gorunur")
     # movzular arasinda beraberlik: 12 movzudan 12 sual - hersinden 1
     tt = db("""select count(distinct q.topic_id) n
                  from public.test_questions tq

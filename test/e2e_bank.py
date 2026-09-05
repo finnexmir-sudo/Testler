@@ -103,7 +103,7 @@ with sync_playwright() as pw:
     #  Oz suali olmayan muellime bank PLATFORMA ile acilir (UX yoxlamasi) -
     #  bos "Sual tapilmadi" ilk ekran olmasin
     pg.wait_for_selector(".bpick .pkb", timeout=8000)   # platforma: fenn secimi
-    ok("Platforma" in pg.locator("#bPool .seg.on").inner_text(), "oz suali yoxdursa Platforma acilir",
+    ok("Hazır bank" in pg.locator("#bPool .seg.on").inner_text(), "oz suali yoxdursa Hazır bank acilir",
        pg.locator("#bPool .seg.on").inner_text())
     pg.locator("#bPool .seg", has_text="Öz suallarım").click()
     pg.wait_for_selector("#bList .empty", timeout=8000)
@@ -254,7 +254,7 @@ with sync_playwright() as pw:
     pg.locator("#bDiff .chip", has_text="Asan").click(); pg.wait_for_timeout(500)
     ok(pg.locator(".qrow").count() == 1, "suzgec geri qaytarilir")
 
-    pool_click(pg, "Platforma")
+    pool_click(pg, "Hazır bank")
     # suzgecsiz platforma hovuzu siyahi tokmur - fenn secimi teklif edir
     pg.wait_for_selector(".bpick .pkb", timeout=8000)
     ok(pg.locator(".qrow").count() == 0,
@@ -478,7 +478,7 @@ with sync_playwright() as pw:
        "where email = 'bank@t.az' on conflict do nothing")
     pg.goto(PANEL + "#/b"); pg.reload()
     pg.wait_for_selector("#bPool", timeout=15000)
-    pool_click(pg, "Platforma")
+    pool_click(pg, "Hazır bank")
     pg.wait_for_selector(".bpick .pkb", timeout=15000)
     ok(pg.locator(".bpick .pkb").count() >= 1, "fenn secicisi cixir",
        pg.locator(".bpick .pkb").count())
@@ -590,7 +590,7 @@ with sync_playwright() as pw:
     #  «daha gostər»: 50-den cox netice veren axtarisa kecirik
     pg.goto(PANEL + "#/b"); pg.reload()
     pg.wait_for_selector("#bPool", timeout=15000)
-    pool_click(pg, "Platforma")
+    pool_click(pg, "Hazır bank")
     #  DIQQET: reload-dan sonra hovuz "mine"-dir ve OZ suallarinin
     #  siyahisi ekrandadir.  Sadece ".qrow" gozlesek kohne setirlere
     #  baxariq - fenn secicisini gozleyib teze render-i tesdiqleyirik.
@@ -623,7 +623,7 @@ with sync_playwright() as pw:
     #  cixiriq ve 113 nisan tokulmesin deye sinif teleb olunur.
     pg.goto(PANEL + "#/b"); pg.reload()
     pg.wait_for_selector("#bPool", timeout=15000)
-    pool_click(pg, "Platforma")
+    pool_click(pg, "Hazır bank")
     pg.wait_for_selector(".bpick .pkb", timeout=15000)
     pg.locator("details.filt summary").click()
     pg.wait_for_selector("#bsub", timeout=15000)
@@ -664,13 +664,13 @@ with sync_playwright() as pw:
     pg.route("**/rpc/rpc_bank_list", slow_first_list)
     pg.goto(PANEL + "#/b"); pg.reload()
     pg.wait_for_selector("#bPool", timeout=20000)
-    pool_click(pg, "Platforma")           # kohne sorgu HELE ucusdadir
+    pool_click(pg, "Hazır bank")           # kohne sorgu HELE ucusdadir
     pg.wait_for_selector(".bpick .pkb", timeout=20000)
     ok(calls["n"] >= 1, "lengidilen sorgu hequiqeten gedib", calls["n"])
     pg.wait_for_timeout(2600)             # lengidilen cavab bu araliqda gelir
     seg  = pg.locator("#bPool .seg.on").inner_text()
     rows = pg.locator(".qrow").count()
-    ok(seg == "Platforma", "seqment Platforma qalir", seg)
+    ok(seg == "Hazır bank", "seqment Hazır bank qalir", seg)
     ok(rows == 0, "KOHNE hovuzun siyahisi ustune DUSMUR", "%d setir" % rows)
     ok(pg.locator(".bpick .pkb").count() >= 1, "fenn secicisi yerinde qalir")
     pg.unroute("**/rpc/rpc_bank_list")
