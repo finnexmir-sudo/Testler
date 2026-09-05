@@ -1287,6 +1287,20 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## Qrup + fərdi təyinat eyni testə — db/123
+
+Canlı hadisə (2026-09-05): şagird «Bitir» basanda «more than one row
+returned by a subquery». 28-dən bəri eyni test həm bütün qrupa, həm də
+ayrıca bir şagirdə təyin oluna bilir → iki açıq təyinat. `rpc_submit_attempt`
+cəhd həddini «class + test + açıq» ilə skalyar alt-sorğuda axtarırdı.
+`rpc_start_attempt` isə `select into` ilə ilk gələni götürürdü — xəta
+yox, amma BAŞQA şagirdin fərdi təyinatı da düşə bilərdi.
+
+Qayda: təyinat axtaranda həmişə `(student_id is null or student_id =
+v_student)` + `order by student_id nulls last limit 1` (fərdi üstündür).
+Test: `db/test/smoke_teyinat_ikili.sql` (4 yoxlama; düzəlişdən əvvəl 1-ci
+eyni canlı xəta ilə düşür).
+
 ## «Bizə yaz» — istifadəçi təklifləri (db/122)
 
 İstifadəçinin sözü: «real təcrübədən gələn təkliflər olacaq, biz
