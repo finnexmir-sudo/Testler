@@ -1287,6 +1287,19 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## Şagird adları — tam ad müəllimə, qısa ad lövhəyə (db/124)
+
+Canlı sual: «Kimə» seçimində «Hüseynov M.» iki nəfər — kim kimdir?
+Qayda: müəllim panelindəki bütün şagird seçimləri (`aWho`, `pWho`,
+diaqnostika qeydi) **tam adı** göstərir. Qısa ad (`display_name`) şagird
+lövhəsi üçündür; `rpc_add_student` onu qrupda təkrarsız yaradır
+(`app.unique_display_name`: «Murad H.» → «Murad Hə.» → «Murad Hədiyev»
+→ «… 2»), 124 mövcud təkrarları bir dəfəlik düzəldir. Müəllimin əl ilə
+verdiyi qısa ad toxunulmur.
+
+Şagird hesabatında «Test tapşır» düyməsi: tapşırıq ekranı `#/a/<gid>/<sid>`
+ilə açılır, «Kimə» həmin şagird seçili, Geri hesabata qaytarır (`ASG_PRE`).
+
 ## Qrup + fərdi təyinat eyni testə — db/123
 
 Canlı hadisə (2026-09-05): şagird «Bitir» basanda «more than one row

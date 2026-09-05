@@ -2436,7 +2436,11 @@
           '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:6px">' +
             "<span>" + esc(s.display_name) + "</span>" +
             '<span class="code key">' + esc(s.login_code) + "</span></div>" +
-          "</div></div></div>" +
+          "</div>" +
+          //  Tek bu sagirde hazir test: tapsiriq ekrani o secilmis acilir
+          '<button class="btn sm sasg" id="btnAsgStu" title="Yalnız bu şagirdə hazır test tapşır">' +
+            ic("plus") + "Test tapşır</button>" +
+        "</div></div>" +
         '<div class="stats">' +
           statTile(sm.attempts || 0, "test", "g1") +
           statTile(pct(sm.avg) + "%", "orta", "g2") +
@@ -2700,7 +2704,12 @@
         });
         on("vCopy", "click", function () { copyText($("vTxt").value, $("vCopy")); });
       }
-      on("btnB", "click", function () { nav("#/r/" + classId); });
+      //  Qrup ekranindan gelibse ora, yoxsa qrup hesabatina (canli sual:
+      //  "Geri" qrupa yox, hesabata atirdi)
+      on("btnB", "click", function () {
+        nav(PREV_HASH === "#/g/" + classId ? PREV_HASH : "#/r/" + classId);
+      });
+      on("btnAsgStu", "click", function () { nav("#/a/" + classId + "/" + id); });
       on("btnRem", "click", function () { remedialGen(classId, sweakAll); });
 
       //  Sehvler uzerinde is: mehz sehv edilen suallardan ferdi test
@@ -2773,8 +2782,13 @@
      TAPSIRIQLAR  -  muellim teste "son tarix" qoyub qrupa verir.
      Sagird panelinde bu testler "Tapsiriqlar" bolmesinde gorunur.
      ================================================================ */
-  function screenAssign(gid) {
+  /*  ASG_PRE: sagird hesabatindan "Test tapsir" ile gelende hemin
+      sagird "Kime" secimində evvelceden secilir, Geri ora qaytarir.  */
+  var ASG_PRE = "";
+  var PREV_HASH = "", CUR_HASH = "";   // route() doldurur
+  function screenAssign(gid, sid) {
     var live = guard();
+    ASG_PRE = sid || "";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     Promise.all([
       sb.select("classes", { select: "id,name,level_id", eq: { id: gid } }),
@@ -2782,15 +2796,19 @@
       loadLevels(),
       //  "kime" secimi ucun qrupun aktiv sagirdleri
       sb.select("students", {
-        select: "id,display_name",
+        select: "id,full_name",
         eq: { class_id: gid, is_active: true },
-        order: "display_name"
+        order: "full_name"
       }).catch(function () { return []; })
     ]).then(function (res) {
       if (!live()) return;
       var rows = res[0];
       if (!rows || !rows.length) throw new Error("Qrup tapılmadı.");
       drawAssign(rows[0], res[1] || {}, res[3] || []);
+      if (ASG_PRE) {
+        var pk = $("pick");
+        if (pk && pk.scrollIntoView) pk.scrollIntoView({ block: "start" });
+      }
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
@@ -2800,7 +2818,8 @@
     var free  = d.free_practice !== false;
 
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") + esc(g.name) + "</button>" +
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") +
+        (ASG_PRE ? "Şagird hesabatı" : esc(g.name)) + "</button>" +
       '<div class="spacer"></div>' +
       '<div class="card tight">' +
         "<h1>Tapşırıqlar</h1>" +
@@ -2839,7 +2858,9 @@
       "</div>"
     );
 
-    on("btnBack", "click", function () { nav("#/g/" + g.id); });
+    on("btnBack", "click", function () {
+      nav(ASG_PRE ? "#/s/" + ASG_PRE + "/" + g.id : "#/g/" + g.id);
+    });
     on("btnGenHere", "click", function () { genForClass(g); });
     on("fp", "change", function () {
       var el = $("fp");
@@ -3087,7 +3108,7 @@
               students.length + " şagird)</option>" +
               students.map(function (st) {
                 return '<option value="' + esc(st.id) + '">yalnız ' +
-                  esc(st.display_name || "") + "</option>";
+                  esc(st.full_name || "") + "</option>";
               }).join("") + "</select>"
           : "") +
         '<div class="fieldrow">' +
@@ -3106,6 +3127,15 @@
         '<div id="aErr"></div>' +
         '<button class="btn go" id="btnAsg">' + ic("plus") + "Tapşırıq ver</button>";
       if (isNew && $("aTest")) $("aTest").value = neu;
+      //  sagird hesabatindan gelib: hemin sagird secili, yazi ile
+      if (ASG_PRE && $("aWho")) {
+        $("aWho").value = ASG_PRE;
+        var pre = students.filter(function (st) { return st.id === ASG_PRE; })[0];
+        if ($("aWho").value === ASG_PRE && pre) {
+          $("aErr").innerHTML = msg("ok", "Yalnız " + (pre.full_name || "bu şagird") +
+            " üçün — testi seçin, «Tapşırıq ver» basın.");
+        }
+      }
       on("btnAsg", "click", function () { doAssign(g); });
     }).catch(function (e) {
       if (!live()) return;
@@ -3136,7 +3166,7 @@
       p_closes_at: closes, p_max_attempts: Number(($("aTry") || {}).value || 1),
       //  bos = butun qrup
       p_student_id: (($("aWho") || {}).value || null)
-    }).then(function () { screenAssign(g.id); })
+    }).then(function () { screenAssign(g.id, ASG_PRE); })
       .catch(function (e) {
         setBusy("btnAsg", false, "Tapşırıq ver");
         $("aErr").innerHTML = msg("err", fail(e));
@@ -4372,9 +4402,9 @@
         .catch(function () { return []; }),
       //  "kime" secimi: hesabin butun aktiv sagirdleri, qrupa gore suzulur
       sb.select("students", {
-        select: "id,display_name,class_id",
+        select: "id,full_name,class_id",
         eq: { account_id: ACC.id, is_active: true },
-        order: "display_name"
+        order: "full_name"
       }).catch(function () { return []; })
     ]).then(function (res) {
       if (!live()) return;
@@ -4516,7 +4546,7 @@
           '<div class="card" id="pDiag">' +
             '<div class="pgrow">' + ic("person") + "<span>Hər mövzudan 3 sual — " +
               (diagStu
-                ? "yalnız <b>" + esc(diagStu.display_name || "") + "</b> üçün"
+                ? "yalnız <b>" + esc(diagStu.full_name || "") + "</b> üçün"
                 : "yalnız bir şagird üçün") +
               ", bir cəhd.</span></div>" +
             '<p class="muted" style="margin:10px 0 0">Qrupa verilmir və yenidən yığılmır: ' +
@@ -4524,7 +4554,7 @@
               //  qisa ad noqte ile bitir ("Huseynov M.") - cumle sonuna ikinci noqte qoyulmur
               (diagStu
                 ? ' <a href="#/s/' + esc(diagStu.id) + "/" + esc(diagStu.class_id || "") +
-                  '">' + esc(diagStu.display_name || "Şagird") + " → şagird ekranı</a>"
+                  '">' + esc(diagStu.full_name || "Şagird") + " → şagird ekranı</a>"
                 : "") +
             "</p>" +
           "</div>"
@@ -4628,7 +4658,7 @@
         (mine.length ? " (" + mine.length + " şagird)" : "") + "</option>" +
         mine.map(function (st) {
           return '<option value="' + esc(st.id) + '">yalnız ' +
-            esc(st.display_name || "") + "</option>";
+            esc(st.full_name || "") + "</option>";
         }).join("");
     }
     fillWho();
@@ -5729,10 +5759,12 @@
         birbasa cagirir, ora dusmur. */
     if (GF && m[0] !== "gen") { GF.back = ""; GF.backName = ""; }
     if (m[0] !== "me" && m[0] !== "adm") FB_FROM = FB_PAGE[m[0] || ""] || (m[0] || "İcmal");
+    //  "Geri" geldiyi yere qaytarsin deye evvelki unvan yadda saxlanir
+    if ((location.hash || "#/") !== CUR_HASH) { PREV_HASH = CUR_HASH; CUR_HASH = location.hash || "#/"; }
     bnavShow({ b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "g" && m[1]) return screenGroup(m[1]);
     if (m[0] === "r" && m[1]) return screenReport(m[1]);
-    if (m[0] === "a" && m[1]) return screenAssign(m[1]);
+    if (m[0] === "a" && m[1]) return screenAssign(m[1], m[2]);
     if (m[0] === "b") return screenBank();
     if (m[0] === "gen") return screenGen();
     if (m[0] === "t" && m[1]) return screenPaper(m[1]);
