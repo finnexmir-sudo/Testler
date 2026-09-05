@@ -791,6 +791,86 @@
      Sistem OZU deyir: kim gerileyir, kim zeif movzudadir, kim
      sabitdir.  Muellim tek-tek hesabat acmaga mecbur deyil.
      Az melumatda server susur - yalan siqnal inami oldurur. */
+  /* ------------------------------------------------ «Bu gunun dersi»
+     Dersden evvel bir kart: novbeti movzu, son kecilen, tapsirigi
+     etmeyenler, hazir addimlar.  Melumat rpc_lesson_prep-den (db/126).
+     Plan "kecildi" olanda da yenilenir (planDone -> loadPrep).  */
+  function loadPrep(g) {
+    var live = guard();
+    sb.rpc("rpc_lesson_prep", { p_class_id: g.id }).then(function (d) {
+      if (!live()) return;
+      var box = $("prep");
+      if (!box || !d) return;
+      var nx = d.next, ls = d.last, pend = d.pending || [];
+      function row(icon, label, body, cls) {
+        return '<div class="prow' + (cls ? " " + cls : "") + '">' + ic(icon) +
+          '<div><span class="pl">' + label + "</span>" + body + "</div></div>";
+      }
+      var h = '<div class="spacer"></div><div class="card prep">' +
+        '<div class="pt"><b>Bu günün dərsi</b>' +
+          '<span class="muted">dərsdən əvvəl bir baxış</span></div>';
+      //  1. novbeti movzu
+      if (!d.has_plan) {
+        h += row("doc", "Növbəti mövzu",
+          '<span class="muted">Dərs planı yoxdur. Plan qursanız növbəti mövzu və hazır test burada olacaq. ' +
+          '<a href="#" id="prepPlan">Planı qur</a></span>');
+      } else if (nx) {
+        h += row("doc", "Növbəti mövzu", "<b>" + esc(nx.topic) + "</b>" +
+          (nx.group ? ' <s class="muted">· ' + esc(nx.group) + " · " + nx.gpos + "/" + nx.gtotal + "</s>" : ""));
+      } else {
+        h += row("doc", "Növbəti mövzu", '<span class="muted">Plan tam keçilib. 🎉</span>');
+      }
+      //  2. son kecilen
+      if (ls) {
+        h += row("check", "Son keçilən", "<b>" + esc(ls.topic) + "</b>" +
+          ' <s class="muted">· ' + dateAz(ls.done_at) +
+          (ls.test_id
+            ? (ls.avg != null ? " · test " + Math.round(ls.avg) + "% · " + (ls.takers || 0) + " şagird"
+                               : " · test verilib, hələ yazan yoxdur")
+            : "") + "</s>");
+      }
+      //  3. tapsirigi etmeyenler
+      if (!d.open) {
+        h += row("clip", "Ev tapşırığı", '<span class="muted">Açıq tapşırıq yoxdur.</span>');
+      } else if (!pend.length) {
+        h += row("clip", "Ev tapşırığı", '<span class="pok">Hamı edib ✓</span>');
+      } else {
+        h += row("clip", "Etməyənlər", pend.slice(0, 8).map(function (x) {
+          return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '">' + esc(x.name) + "</a>" +
+            (x.n > 1 ? " (" + x.n + ")" : "");
+        }).join(", ") + (pend.length > 8 ? " və daha " + (pend.length - 8) : "") +
+          ' <s class="muted">· ' + pend.length + "/" + d.students + " şagird</s>", "pwarn");
+      }
+      //  4. addimlar
+      h += '<div class="pbtns">' +
+        (ls && d.paid
+          //  suallar fesle baglidir - duymede fesil adi (alt movzu deyil)
+          ? '<button class="btn sm" id="prepGen">' + ic("gen") + "«" + esc(ls.group || ls.topic) + "» testi yığ</button>"
+          : "") +
+        '<button class="btn sm ghost" id="prepAsg">' + ic("clip") + "Tapşırıq ver</button>" +
+      "</div></div>";
+      box.innerHTML = h;
+      on("prepAsg", "click", function () { nav("#/a/" + g.id); });
+      on("prepPlan", "click", function (e) {
+        e.preventDefault();
+        var b = document.querySelector('#gTabs [data-v="p"]');
+        if (b) b.click();
+        var op = $("btnPlOpen");
+        if (op && !op.classList.contains("hide")) op.click();
+      });
+      on("prepGen", "click", function () {
+        //  generator: qrupun fenn/sinfi + son kecilen fesil secili
+        var f = genFilter();
+        f.subject = d.subject || ""; f.levels = d.level ? [d.level] : [];
+        f.topics = ls.topic_id ? [ls.topic_id] : []; f.remNames = [];
+        f.difficulty = []; f.cls = ""; f.title = ""; f.asg = "";
+        f.count = 10;
+        f.back = g.id; f.backName = g.name || "";
+        nav("#/gen");
+      });
+    }).catch(function () {});   /* kart yardimcidir - xetasi ekrani pozmasin */
+  }
+
   function loadAlerts(gid) {
     var live = guard();
     sb.rpc("rpc_class_alerts", { p_class_id: gid }).then(function (v) {
@@ -1187,6 +1267,7 @@
         planCanTest(p);
       });
       drawPlan(g);
+      loadPrep(g);
       var slot = plan && $("pls-" + plan.id);
       if (slot) {
         slot.innerHTML = offerHtml(
@@ -1330,6 +1411,7 @@
           '<button class="btn wide" id="btnRep">' + ic("chart") + "Hesabat</button>" +
         "</div>" +
       "</div>" +
+      '<div id="prep"></div>' +
       '<div id="alerts"></div>' +
       /*  Iki sekme (istifadeci teklifi): plan + 30 sagird + forma alt-alta
           on ekran olurdu.  Sagirdler acıq gelir; "Yeni sagird" formasi
@@ -1372,6 +1454,7 @@
     on("btnBack", "click", function () { nav("#/"); });
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
+    loadPrep(g);
     loadAlerts(g.id);
     loadPlan(g);
     on("btnRen", "click", function () { renameGroup(g); });

@@ -1369,6 +1369,20 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## «Bu günün dərsi» — dərsə hazırlıq kartı (db/126)
+
+Yol xəritəsi 21.1. Qrup ekranında qrup kartından sonra, siqnallardan
+əvvəl `#prep`: növbəti mövzu (plan üzrə ilk keçilməmiş ders, fəsil və
+n/N), son keçilən (tarix, testi varsa ortalama və yazan sayı), ev
+tapşırığını etməyənlər adbaad (açıq təyinat, submit yoxdur; qrup + fərdi,
+fərdi yalnız sahibində), düymələr «… testi yığ» (generator: fənn, sinif,
+son keçilən FƏSİL seçili — suallar fəslə bağlıdır) və «Tapşırıq ver».
+Plan yoxdursa «Planı qur» linki plan sekməsini və formanı açır.
+`rpc_lesson_prep(p_class_id)` — `app.plan_class` ilə qorunur; «keçildi»
+olanda `planDone` → `loadPrep` kartı yeniləyir. Zəif/risk siqnalları
+ayrıca (`rpc_class_alerts`) qalır. Testlər: `smoke_bu_gun.sql` (5),
+`test/e2e_bugun.py` (17/17); bələdçi addım 8, şəkil `m11_bu_gun.png`.
+
 ## Admin: kim nə vaxt girib (db/125)
 
 İstifadəçi sualı: «admin olaraq kimlərin girdiyini izləyə bilərəm?».

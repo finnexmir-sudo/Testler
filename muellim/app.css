@@ -426,6 +426,20 @@ details.more.filt .fn{
 .pex{margin-top:10px;font-size:12.5px;color:var(--fg-2);line-height:1.5;
   border-left:3px solid var(--n-150);padding-left:10px}
 
+/* ---------------------------------------------- «Bu gunun dersi» */
+.prep .pt{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.prep .pt b{font-size:15px;font-weight:650}
+.prow{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--n-100);font-size:13.5px;line-height:1.5}
+.prow>svg{width:16px;height:16px;flex:0 0 16px;margin-top:3px;color:var(--fg-3)}
+.prow>div{flex:1;min-width:0}
+.prow .pl{display:block;font-size:11.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--fg-3)}
+.prow s{text-decoration:none;font-size:12.5px}
+.prow a{color:var(--brand);font-weight:600;text-decoration:none}
+.prow a:hover{text-decoration:underline}
+.prow.pwarn>svg{color:#b54708}
+.prow .pok{color:var(--ok);font-weight:600}
+.pbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
 /* ------------------------------------------------ tehluke zonasi */
 .al{
   display:flex;align-items:center;gap:10px;width:100%;text-align:left;

@@ -193,6 +193,19 @@ with sync_playwright() as p:
     if not ONLY or "m10_diaqnostika" in ONLY:
         t.locator("#diagBox").screenshot(path=f"{OUT}/m10_diaqnostika.png"); print("   m10_diaqnostika")
 
+    # ---------------- «BU GUNUN DERSI»: plan qurulur, bir movzu kecilir, kart cekilir
+    lev = db("select l.code c from public.classes c join public.levels l on l.id=c.level_id limit 1", one=True)["c"]
+    t.goto(PANEL + "#/g/" + gid); t.wait_for_selector("#gTabs", timeout=15000)
+    t.click("#gTabs [data-v='p']"); t.wait_for_selector("#btnPlOpen", timeout=15000); t.click("#btnPlOpen")
+    t.wait_for_function("document.querySelectorAll('#plSub option').length > 1", timeout=15000)
+    t.select_option("#plSub", "riyaziyyat"); t.select_option("#plLev", lev); t.click("#btnPlMk")
+    t.wait_for_selector(".plcur [data-pldone]", timeout=15000)
+    t.locator("[data-pldone]").first.click(); t.wait_for_selector(".ploffer", timeout=15000)
+    t.wait_for_function("document.querySelector('#prep .prep') && document.querySelector('#prep .prep').textContent.indexOf('Son keçilən') >= 0", timeout=15000)
+    t.evaluate("document.getElementById('prep').scrollIntoView()"); t.wait_for_timeout(400)
+    if not ONLY or "m11_bu_gun" in ONLY:
+        t.locator("#prep .prep").screenshot(path=f"{OUT}/m11_bu_gun.png"); print("   m11_bu_gun")
+
     # ---------------- VALIDEYN (390x844)
     v = page(ctx, 390, 844)
     v.goto(PARENT); v.wait_for_selector("#code", timeout=15000)
