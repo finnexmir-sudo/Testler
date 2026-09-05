@@ -112,6 +112,32 @@ yoxlanandan sonra. Yoxsa:
   where ext_key like '<prefiks>%' and ext_key ~ '<son suallar
   aralığı>'` sətri qoy — tam-əvəzləmə fayllarında olduğu kimi, sayı
   az olsa da fərq etmir.
+- **`inf-8-kompyuter` (2026-09, «informatika ni yoxla» auditi).**
+  Mövzu «İş masasının nizamlanması, İnformasiya modelinin ağac
+  forması, Faylların axtarışı, Ağacşəkilli struktur əsasında məsələ
+  həlli» idi (37_movzular_orta8.sql-ə görə), 20 sualın **hamısı** isə
+  kompüter aparatı (ana plata, prosessor, RAM, videokart, SSD/HDD) —
+  bu, tamam başqa mövzunun (`inf-9-komputer`) məzmunu idi. `bio-11-
+  insan-muhit` ilə eyni tələ: sual sayı düz (20/20), çətinlik bölgüsü
+  «məqbul», amma mövzu adı ilə məzmun arasında sıfır əlaqə. Eyni
+  auditdə `inf-8-tetbiqi`də ikinci, daha yüngül hal: 6 alt-başlıqdan
+  4-ü («Üçölçülü qrafika», «Tillər və üzlər», «Üçölçülü modellərin
+  qurulması», «Mətn redaktorunun obyektləri») heç toxunulmamışdı, 20
+  sualın hamısı yalnız elektron cədvəl (SUM/MAX/filtr) haqqında idi —
+  `tarix-11-mustemleke` tipli «bir fəsil tam unudulub» tələsi, sadəcə
+  burada dörd fəsil idi. Hər ikisi `db/132`-də tam yenidən yazıldı.
+  **Əlavə tapıntı:** yeni yazılan əvəzləyici suallardan biri
+  (`inf8-internet` üçün şəbəkə sualları, ilk qaralamada) qonşu
+  siniflərin (`inf-9-texnologiya`, `inf-10-sebeke`) suallarına
+  pg_trgm-də **1.00 (tam eyni)** çıxdı — özüm yazdığım YENİ məzmunda
+  da köhnə tələ təkrarlana bilər, «yeni yazdım» «unikaldır» demək
+  deyil. Hər yeni fayldan sonra pg_trgm yoxlaması bütöv fənn üzrə
+  aparılmalıdır, təkcə köhnə bankla deyil, öz-özü ilə də.
+  Nəticə: `db/132` (tam əvəz, 2 mövzu), `db/133` (`inf-8-internet`,
+  «Kompüter şəbəkələri» bölməsi 6 sual), `db/134` (`inf-11-sistemler`,
+  3 alt-başlıq — CİS/GİS, axtarış sistemləri, böyük verilənlər — 6
+  sual), `db/135`/`db/136` (`inf-3-informasiya`/`inf-3-kompyuter`,
+  daha kiçik alt-başlıq boşluqları).
 
 Ortaq kök birdir: **qurduğumu yoxlamaq, istənəni yoxlamaq deyil.**
 
