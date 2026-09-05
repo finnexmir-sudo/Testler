@@ -1369,6 +1369,24 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## Ev tapşırığı avtomatı və WhatsApp mətni (yol xəritəsi 21.2)
+
+SQL yoxdur, yalnız panel. Üç yer:
+- **Tapşırıqdan sonra** (`doAssign` → `ASG_FLASH` → `drawAssign` `#asgFlash`):
+  «Tapşırıq verildi: «…»» + «WhatsApp-a göndər» (`wa.me/?text=`) +
+  «Mətni kopyala». Mətn `waAsgText(title, closes, who)`: fərdi
+  təyinatda şagirdin adı ilə. Şagirdə bildiriş göndərə bilmirik (xarici
+  şəbəkə yoxdur) — müəllim bir toxunuşla qrupa atır.
+- **Plan «Keçildi»** təklifi «Ev tapşırığı verilsinmi?», 10 sual (əvvəl 15);
+  yığılandan sonra eyni WhatsApp qutusu (testin adı `tests`-dən bir
+  sətirlik oxunur — RPC adı qaytarmır).
+- **Generator «Tövsiyə olunan»** (`loadGenRec`): dərs planı olan qruplar
+  üçün (qrupdan gəlmişiksə yalnız o, yoxsa 5-ə qədər) son keçilən
+  fəsildən 10 sual; «Yığ» filtrləri qoyub `makeTest()` çağırır → test
+  yığılır, tapşırıq ekranı təzə test seçili açılır (`PICKNEW`). Ad:
+  «Fəsil — ev tapşırığı». Yalnız abunəli hesabda (hovuz «all»).
+Testlər: `e2e_bugun.py` C və G bölmələri, `e2e_plan.py` təklif mətni.
+
 ## «Bu günün dərsi» — dərsə hazırlıq kartı (db/126)
 
 Yol xəritəsi 21.1. Qrup ekranında qrup kartından sonra, siqnallardan

@@ -96,6 +96,14 @@ with sync_playwright() as pw:
     lbl = next(o for o in opts if "Vurma cədvəli" in o)
     pg.select_option("#aTest", label=lbl); pg.click("#btnAsg")
     pg.wait_for_selector(".asg", timeout=15000)
+    #  tapsiriqdan sonra hazir WhatsApp metni
+    pg.wait_for_selector("#asgFlash", timeout=8000)
+    fl = pg.inner_text("#asgFlash")
+    ok("Tapşırıq verildi" in fl and "Vurma cədvəli" in fl, "tapsiriqdan sonra netice qutusu", fl[:80])
+    href = pg.locator("#asgFlash a[href^='https://wa.me/']").get_attribute("href") or ""
+    ok("wa.me" in href and "Vurma" in __import__("urllib.parse").parse.unquote(href) and "Tap%C5%9F%C4%B1r%C4%B1qlar" in href,
+       "WhatsApp linki test adi ve 'Tapşırıqlar' ile", href[:60])
+    ok("Kodunla gir" in pg.locator("#asgFlash .watxt").input_value(), "metn qutuda kopyalanmaga hazir")
     pg.click("#btnBack"); t = prep(pg)
     ok("Etməyənlər" in t and "Ayan Bir" in t and "Murad İki" in t, "iki sagird etmeyib", t[-120:])
     ok("2/2 şagird" in t, "2/2 sagird")
@@ -146,6 +154,16 @@ with sync_playwright() as pw:
                   order by i.ord limit 1""", one=True)["n"]
     ok(chap in pg.locator("#gTop .chip.on").first.inner_text(), "fesil secili", (chap, pg.locator("#gTop .chip.on").all_inner_texts()))
     pg.screenshot(path="/tmp/bugun_gen.png", full_page=False)
+
+    print("G · Generatorda «Tövsiyə olunan»: bir toxunuşla ev tapşırığı")
+    pg.wait_for_selector("#gRec .grow", timeout=8000)
+    ok(chap in pg.inner_text("#gRec") and "3-cü sinif" in pg.inner_text("#gRec"), "tovsiye: fesil + qrup", pg.inner_text("#gRec")[:80])
+    pg.locator("#gRec [data-grec]").first.click()
+    pg.wait_for_selector("#asgFlash, #aTest", timeout=20000)
+    pg.wait_for_function("document.querySelectorAll('#aTest option').length > 0", timeout=15000)
+    sel = pg.locator("#aTest option:checked").inner_text()
+    ok("ev tapşırığı" in sel, "tapsiriq ekrani teze test secili acilir", sel)
+    ok(db("select count(*) n from public.tests where owner_type='educator' and title like '%%ev tapşırığı%%'", one=True)["n"] == 1, "test bazada")
     pg.goto(PANEL + "#/g/" + GID); prep(pg)
     pg.locator("#prep .prep").screenshot(path="/tmp/bugun_kart.png")
     br.close()

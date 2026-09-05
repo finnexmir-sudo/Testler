@@ -514,6 +514,14 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .plcur b{display:block;font-size:14px;font-weight:600;margin-bottom:10px}
 .plbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .plbtns input{flex:0 0 72px;text-align:center}
+.asgwa{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 14px}
+.asgwa .watxt{flex-basis:100%;width:100%;resize:vertical;font:inherit;font-size:12.5px;line-height:1.45;
+  padding:8px 10px;border:1px solid var(--n-200);border-radius:10px;background:var(--n-25);color:var(--fg-2)}
+.asgwa a.btn{text-decoration:none}
+.grec .pt{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.grec .pt b{font-size:14px;font-weight:650}
+.grow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--n-100);font-size:13.5px}
+.grow>div{flex:1;min-width:0}
 .ploffer{margin-top:12px;padding:12px;border:1px dashed var(--ok-line);
   border-radius:10px;background:var(--ok-tint)}
 .ploffer b{font-size:13px}

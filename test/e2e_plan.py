@@ -127,7 +127,7 @@ with sync_playwright() as pw:
     print("C · «Keçildi» → təklif → test + tapşırıq")
     pg.locator("[data-pldone]").click()
     pg.wait_for_selector(".ploffer", timeout=8000)
-    ok("Yoxlama testi yığılsınmı" in pg.inner_text(".ploffer"), "teklif cixir")
+    ok("Ev tapşırığı verilsinmi" in pg.inner_text(".ploffer"), "teklif cixir")
     pg.fill("#plCnt", "5")
     pg.locator("[data-pltest]").click()
     # .ok sinfi .plrow.done ile toqqusur - netice qutusu plm- konteynerindedir

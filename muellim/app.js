@@ -1271,7 +1271,7 @@
       var slot = plan && $("pls-" + plan.id);
       if (slot) {
         slot.innerHTML = offerHtml(
-          "«" + esc(topic) + "» keçildi. Yoxlama testi yığılsınmı?",
+          "«" + esc(topic) + "» keçildi. Ev tapşırığı verilsinmi?",
           itemId, plan.id);
       }
     }).catch(function (e) {
@@ -1284,11 +1284,11 @@
   function offerHtml(head, itemId, planId) {
     return '<div class="ploffer">' +
       "<b>" + head + "</b>" +
-      '<p class="muted" style="margin:4px 0 10px">Test bu mövzunun ' +
-        "suallarından yığılır və qrupa dərhal tapşırıq verilir " +
-        "(son tarix: 7 gün, 1 cəhd).</p>" +
+      '<p class="muted" style="margin:4px 0 10px">Sistem bu fəsildən test yığır ' +
+        "və qrupa dərhal tapşırır (son tarix 7 gün, 1 cəhd). Sonra şagirdlərə " +
+        "hazır WhatsApp mətni çıxır.</p>" +
       '<div class="plbtns">' +
-        '<input id="plCnt" type="number" min="3" max="50" value="15">' +
+        '<input id="plCnt" type="number" min="3" max="50" value="10">' +
         '<button class="btn go sm" data-pltest="' + esc(itemId) + '">' +
           "Yığ və tapşırıq ver</button>" +
         '<button class="btn sm ghost" data-plskip="' + esc(planId) +
@@ -1312,7 +1312,7 @@
     var m = $("plm-" + plan.id);
     if (m) {
       m.innerHTML = offerHtml(
-        "«" + esc(topic) + "» — yoxlama testi yığılsınmı?", itemId, plan.id);
+        "«" + esc(topic) + "» — ev tapşırığı verilsinmi?", itemId, plan.id);
       m.scrollIntoView({ block: "nearest" });
     }
   }
@@ -1348,11 +1348,24 @@
           });
         }
         drawPlan(g);
+        loadPrep(g);
         var m = $("plm-" + pid);
         //  msg() metni esc edir - link ucun qutunu ozumuz yigiriq
-        if (m) m.innerHTML = '<div class="ok">' + ic("check") +
-          "<span>Test yığıldı və qrupa tapşırıq verildi. " +
-          '<a href="#/t/' + esc(r.test_id) + '">Vərəqə bax</a></span></div>';
+        if (m) {
+          m.innerHTML = '<div class="ok">' + ic("check") +
+            "<span>Test yığıldı və qrupa tapşırıq verildi. " +
+            '<a href="#/t/' + esc(r.test_id) + '">Vərəqə bax</a></span></div>' +
+            '<div id="plwa-' + esc(pid) + '"></div>';
+          //  testin adi RPC-den gelmir - bir setirlik oxuma, sonra WhatsApp qutusu
+          sb.select("tests", { select: "title", eq: { id: r.test_id } }).then(function (rows) {
+            var w = $("plwa-" + pid);
+            if (!w) return;
+            var ttl = (rows && rows[0] && rows[0].title) || "Ev tapşırığı";
+            w.innerHTML = asgShareBox(ttl, new Date(Date.now() + 7 * 864e5).toISOString(), "")
+              .replace(/^<div class="ok asgok">[\s\S]*?<\/div>/, "");
+            bindWaCopy(w);
+          }).catch(function () {});
+        }
       })
       .catch(function (e) {
         busy = false; b.disabled = false;
@@ -1860,6 +1873,37 @@
             "Giriş kodu: " + s.login_code + "\n\n" +
             "Linki açıb kodu yazmaq kifayətdir.";
     return "https://wa.me/?text=" + encodeURIComponent(t);
+  }
+
+  /*  Tapsiriqdan sonra hazir WhatsApp metni.  Sagirde bildiris gondere
+      bilmirik (xarici sebeke yoxdur) - muellim bir toxunusla qrupa atir.  */
+  function waAsgText(title, closes, who) {
+    var url = (window.CFG && window.CFG.STUDENT_URL) || "";
+    return "Salam" + (who ? ", " + who.split(" ")[0] : "") + "! Bil10-da yeni tapşırıq var: «" +
+      title + "».\n" +
+      (closes ? "Son tarix: " + dateAz(closes) + ".\n" : "") +
+      "Link: " + url + "\nKodunla gir — «Tapşırıqlar»da gözləyir.";
+  }
+  function asgShareBox(title, closes, who) {
+    var t = waAsgText(title, closes, who);
+    return '<div class="ok asgok">' + ic("check") +
+      "<span><b>Tapşırıq verildi:</b> «" + esc(title) + "»" +
+      (who ? " — yalnız " + esc(who) : "") + ". Şagirdlərə xəbər verin:</span></div>" +
+      '<div class="asgwa">' +
+        '<a class="btn sm go" target="_blank" rel="noopener" href="https://wa.me/?text=' +
+          encodeURIComponent(t) + '">' + ic("send") + "WhatsApp-a göndər</a>" +
+        '<button class="btn sm ghost" type="button" data-wacopy="1">' + ic("copy") + "Mətni kopyala</button>" +
+        '<textarea class="watxt" readonly rows="4">' + esc(t) + "</textarea>" +
+      "</div>";
+  }
+  function bindWaCopy(root) {
+    Array.prototype.forEach.call((root || document).querySelectorAll("[data-wacopy]"), function (b) {
+      if (b.dataset.bound) return; b.dataset.bound = "1";
+      b.addEventListener("click", function () {
+        var ta = b.parentElement.querySelector(".watxt");
+        if (ta) copyText(ta.value, b);
+      });
+    });
   }
 
   function copyText(t, btn) {
@@ -2868,6 +2912,7 @@
   /*  ASG_PRE: sagird hesabatindan "Test tapsir" ile gelende hemin
       sagird "Kime" secimində evvelceden secilir, Geri ora qaytarir.  */
   var ASG_PRE = "";
+  var ASG_FLASH = null;   // son verilen tapsiriq - bir defelik WhatsApp qutusu
   var PREV_HASH = "", CUR_HASH = "";   // route() doldurur
   function screenAssign(gid, sid) {
     var live = guard();
@@ -2919,6 +2964,7 @@
       "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Verilmiş tapşırıqlar</h2>" +
+      (ASG_FLASH ? '<div id="asgFlash">' + asgShareBox(ASG_FLASH.title, ASG_FLASH.closes, ASG_FLASH.who) + "</div>" : "") +
       '<div class="segs asgf" id="asgTabs"></div>' +
       '<div id="asgList" class="card pad0"></div>' +
       '<div class="spacer"></div>' +
@@ -2941,6 +2987,8 @@
       "</div>"
     );
 
+    ASG_FLASH = null;
+    bindWaCopy($("asgFlash"));
     on("btnBack", "click", function () {
       nav(ASG_PRE ? "#/s/" + ASG_PRE + "/" + g.id : "#/g/" + g.id);
     });
@@ -3244,12 +3292,19 @@
     }
     $("aErr").innerHTML = "";
     setBusy("btnAsg", true, "Tapşırıq ver");
+    var selT = $("aTest"), selW = $("aWho");
+    var ttl = selT && selT.selectedIndex >= 0 ? selT.options[selT.selectedIndex].text : "Test";
+    var whoName = selW && selW.value && selW.selectedIndex >= 0
+      ? selW.options[selW.selectedIndex].text.replace(/^yalnız\s+/, "") : "";
     sb.rpc("rpc_assign_test", {
       p_class_id: g.id, p_test_id: tid,
       p_closes_at: closes, p_max_attempts: Number(($("aTry") || {}).value || 1),
       //  bos = butun qrup
-      p_student_id: (($("aWho") || {}).value || null)
-    }).then(function () { screenAssign(g.id, ASG_PRE); })
+      p_student_id: (selW && selW.value) || null
+    }).then(function (r) {
+      ASG_FLASH = { title: (r && r.test) || ttl.replace(/\s+\(\d+ sual\)$/, ""), closes: closes, who: whoName };
+      screenAssign(g.id, ASG_PRE);
+    })
       .catch(function (e) {
         setBusy("btnAsg", false, "Tapşırıq ver");
         $("aErr").innerHTML = msg("err", fail(e));
@@ -4072,6 +4127,7 @@
         if (!live()) return;
         FAC = fac || {}; GFKEY = genFacKey(f); GFSEQ++;
         drawGen();
+        loadGenRec(f);
       })
       .catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -4200,6 +4256,7 @@
           "hovuzdan balanslı test yığacaq: mövzular arasında bərabər, " +
           "təkrarsız.</p>" +
       "</div>" +
+      '<div id="gRec"></div>' +
       '<div class="spacer"></div>' +
       '<div class="card tight">' +
         '<div class="segs" id="gPool">' +
@@ -4400,6 +4457,55 @@
       return Number(a) - Number(b); }).join(", ") + " siniflər");
     parts.push(dateAz(new Date().toISOString()));
     return parts.join(" · ");
+  }
+
+  /*  «Tövsiyə olunan» - dərs planı olan qruplar üçün son keçilən fəsildən
+      10 sual: bir toxunuşla yığılır və tapşırıq ekranına keçir.  Qrupdan
+      gəlmişiksə yalnız o qrup, yoxsa hesabın qrupları (5-ə qədər).  */
+  var GREC_SEQ = 0;
+  function loadGenRec(f) {
+    var box = $("gRec");
+    if (!box || !(ACC && ACC.plan)) return;
+    var seq = ++GREC_SEQ;
+    var q = f.back
+      ? sb.select("classes", { select: "id,name", eq: { id: f.back } })
+      : sb.select("classes", { select: "id,name", eq: { account_id: ACC.id }, order: "name" });
+    q.then(function (cls) {
+      cls = (cls || []).slice(0, 5);
+      return Promise.all(cls.map(function (c) {
+        return sb.rpc("rpc_lesson_prep", { p_class_id: c.id })
+          .then(function (d) { return { c: c, d: d || {} }; })
+          .catch(function () { return null; });
+      }));
+    }).then(function (rows) {
+      if (seq !== GREC_SEQ || !$("gRec")) return;
+      rows = (rows || []).filter(function (x) { return x && x.d.last && x.d.subject; });
+      if (!rows.length) return;
+      $("gRec").innerHTML = '<div class="spacer"></div><div class="card tight grec">' +
+        '<div class="pt"><b>Tövsiyə olunan</b><span class="muted">son keçilən fəsildən · 10 sual</span></div>' +
+        rows.map(function (x, i) {
+          var ch = x.d.last.group || x.d.last.topic;
+          return '<div class="grow"><div><b>' + esc(ch) + "</b>" +
+            '<span class="muted"> · ' + esc(x.c.name) + "</span></div>" +
+            '<button class="btn sm" data-grec="' + i + '">' + ic("gen") + "Yığ</button></div>";
+        }).join("") + "</div>";
+      Array.prototype.forEach.call($("gRec").querySelectorAll("[data-grec]"), function (b) {
+        b.addEventListener("click", function () {
+          var x = rows[Number(b.getAttribute("data-grec"))];
+          if (!x || busy) return;
+          var ff = genFilter();
+          ff.pool = "all";
+          ff.subject = x.d.subject; ff.levels = x.d.level ? [x.d.level] : [];
+          ff.topics = x.d.last.topic_id ? [x.d.last.topic_id] : [];
+          ff.difficulty = []; ff.cls = ""; ff.remNames = []; ff.asg = "";
+          ff.count = 10;
+          ff.title = (x.d.last.group || x.d.last.topic) + " — ev tapşırığı";
+          ff.back = x.c.id; ff.backName = x.c.name;
+          b.disabled = true; b.textContent = "Yığılır…";
+          makeTest();
+        });
+      });
+    }).catch(function () {});
   }
 
   function makeTest() {
