@@ -22,6 +22,11 @@ begin
   end if;
 end $$;
 
+delete from public.question_options o
+ using public.questions q
+ where o.question_id = q.id
+   and q.ext_key like 'utarix8-serq#%' and q.ext_key ~ '#(3[2-5])$';
+
 with d(ext, diff, body, why, opts, correct) as (values
 ('utarix8-serq#32',2,'XVII-XVIII əsrlərdə Qafqaz bölgəsi əsasən hansı iki dövlətin təsir dairəsi uğrunda mübarizə meydanına çevrilmişdi?','Qafqaz bu dövrdə Osmanlı və Səfəvi dövlətləri arasında təsir dairəsi mübarizəsinin mərkəzlərindən biri idi.',array['Osmanlı və Səfəvi dövlətləri','Rusiya və Çin','Fransa və Britaniya','Hindistan və İran'],1),
 ('utarix8-serq#33',2,'XVII-XVIII əsrlərdə Volqaboyu türk xalqları (məsələn tatarlar) hansı dövlətin tərkibinə qatılmışdı?','Volqaboyu türk xalqları bu dövrdə Rusiya dövlətinin tərkibinə qatılmışdı.',array['Rusiya dövlətinin','Osmanlı imperiyasının','Çin imperiyasının','Səfəvi dövlətinin'],1),

@@ -22,6 +22,11 @@ begin
   end if;
 end $$;
 
+delete from public.question_options o
+ using public.questions q
+ where o.question_id = q.id
+   and q.ext_key like 'kim11-aldehid-tursu#%' and q.ext_key ~ '#(3[2-5])$';
+
 with d(ext, diff, body, why, opts, correct) as (values
 ('kim11-aldehid-tursu#32',1,'Aldehidlərin izomerliyi əsasən nə ilə bağlıdır?','Karbon zəncirinin düz və ya budaqlanmış olması ilə bağlıdır.',array['Karbon zəncirinin budaqlanması ilə','Molekulun rəngi ilə','Qaynama nöqtəsi ilə','İyi ilə'],1),
 ('kim11-aldehid-tursu#33',2,'C4H8O tərkibli butanalın struktur izomeri hansıdır?','2-metilpropanal (izobutiraldehid) butanalın struktur izomeridir.',array['2-metilpropanal','Butanol','Butan turşusu','Propanal'],1),

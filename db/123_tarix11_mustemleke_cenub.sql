@@ -24,6 +24,11 @@ begin
   end if;
 end $$;
 
+delete from public.question_options o
+ using public.questions q
+ where o.question_id = q.id
+   and q.ext_key like 'tarix11-mustemleke#%' and q.ext_key ~ '#(3[1-8])$';
+
 with d(ext, diff, body, why, opts, correct) as (values
 ('tarix11-mustemleke#31',1,'Cənubi Azərbaycan XIX əsrdə hansı dövlətin tərkibində idi?','Cənubi Azərbaycan Qacarlar dövlətinin (İranın) tərkibində idi.',array['Qacarlar dövlətinin (İran)','Osmanlı imperiyasının','Rusiya imperiyasının','Əfqanıstanın'],1),
 ('tarix11-mustemleke#32',2,'Cənubi Azərbaycanın iqtisadi həyatında hansı münasibətlər üstünlük təşkil edirdi?','Yarımfeodal münasibətlər - kənd təsərrüfatı və sənətkarlıq əsas idi.',array['Yarımfeodal kənd təsərrüfatı münasibətləri','Sənaye kapitalizmi','Köçəri maldarlıq','Dəniz ticarəti'],1),

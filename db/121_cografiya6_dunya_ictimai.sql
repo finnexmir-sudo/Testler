@@ -23,6 +23,11 @@ begin
   end if;
 end $$;
 
+delete from public.question_options o
+ using public.questions q
+ where o.question_id = q.id
+   and q.ext_key like 'cog6-dunya#%' and q.ext_key ~ '#(3[1-9]|4[0-8])$';
+
 with d(ext, diff, body, why, opts, correct) as (values
 ('cog6-dunya#31',1,'Sosial həyat termini nəyi ifadə edir?','Sosial həyat insanların bir-biri ilə münasibətdə, birgə yaşamasıdır.',array['İnsanların bir-biri ilə münasibətdə yaşaması','Yalnız təbiət hadisələri','Yalnız iqtisadi göstəricilər','Yalnız hava şəraiti'],1),
 ('cog6-dunya#32',1,'Cəmiyyətin ən kiçik özəyi hansı qurumdur?','Ailə cəmiyyətin ən kiçik özəyi sayılır.',array['Ailə','Şirkət','Dövlət','Qonşuluq'],1),

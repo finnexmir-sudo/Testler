@@ -22,6 +22,11 @@ begin
   end if;
 end $$;
 
+delete from public.question_options o
+ using public.questions q
+ where o.question_id = q.id
+   and q.ext_key like 'fiz7-olcme#%' and q.ext_key ~ '#(3[1-4])$';
+
 with d(ext, diff, body, why, opts, correct) as (values
 ('fiz7-olcme#31',1,'Skalyar kəmiyyət nə ilə xarakterizə olunur?','Skalyar kəmiyyət yalnız ədədi qiymətlə (istiqamətsiz) xarakterizə olunur.',array['Yalnız ədədi qiymətlə','Ədədi qiymət və istiqamətlə','Yalnız istiqamətlə','Rənglə'],1),
 ('fiz7-olcme#32',2,'Vektorial kəmiyyət skalyar kəmiyyətdən nə ilə fərqlənir?','Vektorial kəmiyyətin ədədi qiymətdən əlavə istiqaməti də var.',array['İstiqamətinin olması ilə','Vahidinin olmaması ilə','Ölçülə bilməməsi ilə','Rəqəmlə ifadə olunmaması ilə'],1),

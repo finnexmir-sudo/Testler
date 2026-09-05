@@ -23,6 +23,11 @@ begin
   end if;
 end $$;
 
+delete from public.question_options o
+ using public.questions q
+ where o.question_id = q.id
+   and q.ext_key like 'hey4-ferd-aile#%' and q.ext_key ~ '#(2[1-3])$';
+
 with d(ext, diff, body, why, opts, correct) as (values
 ('hey4-ferd-aile#21',1,'Dini dəyərlərə hörmət etmək ailə həyatında nəyə kömək edir?','Ailə üzvləri arasında qarşılıqlı hörməti və anlaşmanı gücləndirir.',array['Qarşılıqlı hörməti gücləndirir','Ailəni parçalayır','Heç bir təsiri yoxdur','Yalnız bayramlarda lazımdır'],1),
 ('hey4-ferd-aile#22',2,'Ramazan və Qurban bayramları Azərbaycanda hansı əhəmiyyətə malikdir?','Bu bayramlar dini-mənəvi dəyərləri və ailə birliyini yaşadan ənənəvi bayramlardır.',array['Dini-mənəvi dəyərləri və ailə birliyini yaşadır','Yalnız adi iş günüdür','Heç bir əhəmiyyəti yoxdur','Yalnız uşaqlar üçündür'],1),
