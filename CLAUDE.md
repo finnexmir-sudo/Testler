@@ -642,15 +642,8 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     `07_seed_tests.sql`-dəki «Nümunə — ödənişli test» (riy-3-analiz) bunun
     nümunə-yer tutucusudur, məhsul deyil (canlıda yoxdur).
 
-19. **«Bizə yaz» — istifadəçi təklifləri.** İstifadəçinin sözü: real
-    təcrübədən gələn təkliflər olacaq, biz dəyərləndirəcəyik. Qayda:
-    tətbiqdən kənara şəbəkə müraciəti yoxdur → təklif Supabase-də
-    cədvələ yazılır (`feedback`: kim, hansı tətbiq, mətn, tarix), RLS
-    bağlı, yazmaq RPC ilə (müəllim `auth.uid()`, şagird/valideyn öz
-    tokeni ilə), oxumaq yalnız İdarəetmədə. Müəllim Profildə,
-    şagird/valideyn giriş/ev ekranında kiçik «Bizə yaz» forması.
-    WhatsApp linki bunu əvəz etmir: təkliflər bir yerə yığılmalıdır ki,
-    dəyərləndirilsin. Kiçik iş — pilotla eyni vaxtda faydalıdır.
+19. ~~**«Bizə yaz» — istifadəçi təklifləri.**~~ **EDİLDİ** —
+    `db/122_bize_yaz.sql`, bax «Bizə yaz» bölməsi aşağıda.
 
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); valideyn
@@ -947,7 +940,7 @@ funksiyalara `anon` üçün EXECUTE-u **birbaşa** verir — PUBLIC-dən geri
 almaq ona toxunmur. Müəllim funksiyası yazanda mütləq
 `revoke all on function ... from public, anon` yaz.
 İkinci qat: `05_grants.sql` sonda `anon`-dan bütün funksiyaları geri
-alır və yalnız ağ siyahını (8 şagird + 3 valideyn RPC-si) saxlayır —
+alır və yalnız ağ siyahını (8 şagird + 3 valideyn + 2 «Bizə yaz» RPC-si) saxlayır —
 unudulsa da sızmır.
 
 **`05_grants.sql`-i köhnə sırada işlətmək huquq siləcək — özü bunu düzəldir.**
@@ -1293,6 +1286,37 @@ Mövzular: fənn çipləri (`#tSub`, müəllimin tək fənni seçili gəlir),
 zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzular»
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
+
+## «Bizə yaz» — istifadəçi təklifləri (db/122)
+
+İstifadəçinin sözü: «real təcrübədən gələn təkliflər olacaq, biz
+dəyərləndirəcəyik». Tətbiqdən kənara şəbəkə müraciəti yoxdur, ona görə
+hər şey Supabase-də `public.feedback` cədvəlindədir. RLS açıq, siyasət
+yoxdur → cədvələ birbaşa giriş yoxdur; yalnız security definer RPC-lər.
+
+| Kim | Haradan | RPC | Hədd |
+|-----|---------|-----|------|
+| Müəllim | Profil → «Bizə yazın» kartı | `rpc_feedback_send(kind, body, page)` | 10 / gün |
+| Şagird | test siyahısının sonu, yığılmış `<details>` | `rpc_student_feedback(token, …)` (anon) | 5 / gün |
+| Valideyn | ev ekranının sonu, yığılmış `<details>` | `rpc_parent_feedback(token, …)` (anon) | 5 / gün |
+| Admin | İdarəetmə → «Bizə yazılanlar» | `rpc_admin_feedback(status)`, `_count()`, `_set(id, status, note)` | `app.admin_ok` (2FA) |
+
+Növ: `teklif · problem · sual · tesekkur`. Status: `new → seen → planned →
+done → closed`. Mətn 10–2000 simvol (`app.feedback_check`). `page` —
+müəllimdə hansı ekrandan Profilə gəlib (`FB_FROM`, route()-da yazılır:
+«Qrup», «Sual bankı»…), şagird/valideyndə sabit.
+
+**Dövrə bağlanır:** admin status + qeyd yazır → müəllim Profildə
+«Yazdıqlarınız» siyahısında status nişanını və «Cavabımız» qutusunu
+görür (`rpc_feedback_mine`, son 30, 5-dən sonra «Daha N»). Şagird və
+valideynə cavab göstərilmir (onların hesabı yoxdur) — admin kartında
+kimin valideyni / hansı sinif yazılır, müəllim vasitəsilə çatdırılır.
+İcmalda admin kartı «N yeni müraciət» deyir (`rpc_admin_feedback_count`).
+
+Anon ağ siyahı (05_grants, iki massiv) 13 RPC: `rpc_student_feedback`,
+`rpc_parent_feedback` əlavə olundu. Testlər: `db/test/smoke_bize_yaz.sql`
+(7), `test/e2e_bize.py` (16/16). Admin kartında müəllimin adı
+`profiles.full_name`-dən, şagirdin `students.full_name`-dən gəlir.
 
 ## Bələdçi — `komek/`
 

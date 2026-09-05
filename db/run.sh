@@ -50,6 +50,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 119_diaqnostika_qoruyucu.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 120_icmal_diaqnostikasiz.sql
 #  121 yer tutucu testi gizledir - yerli testler onu acıq gozleyir
 [ "$LOCAL" = "--local" ] || psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 121_numune_test_gizli.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 122_bize_yaz.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql

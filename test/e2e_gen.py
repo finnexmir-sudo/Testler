@@ -78,7 +78,8 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#groups .item", timeout=8000)
     pg.click("#groups .item")
     pg.wait_for_selector("#gTabs", timeout=8000)
-    if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
+    try: pg.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
+    except Exception: pg.click("#btnStuOpen")
     pg.fill("#sname", "Kənan Əliyev"); pg.click("#btnStu")
     pg.wait_for_selector(".stu", timeout=8000)
 

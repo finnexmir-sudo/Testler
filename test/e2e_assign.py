@@ -96,7 +96,8 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#groups .item", timeout=8000)
     pg.click("#groups .item")
     pg.wait_for_selector("#gTabs", timeout=8000)
-    if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
+    try: pg.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
+    except Exception: pg.click("#btnStuOpen")
     pg.fill("#sname", "Aysu Məmmədova"); pg.click("#btnStu")
     pg.wait_for_selector(".stu", timeout=8000)
 
@@ -267,7 +268,8 @@ with sync_playwright() as pw:
     #  ikinci sagird elave edilir ki, "yalniz o gorur" yoxlanila bilsin
     pg.goto(PANEL + "#/g/" + GID); pg.reload()
     pg.wait_for_selector("#gTabs", timeout=8000)
-    if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
+    try: pg.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
+    except Exception: pg.click("#btnStuOpen")
     pg.fill("#sname", "Ikinci Sagird"); pg.click("#btnStu")
     pg.wait_for_function("document.querySelectorAll('.stu').length >= 2", timeout=8000)
     SID1 = db("select id::text i from public.students where login_code = %s",

@@ -97,7 +97,9 @@ declare
         --  valideyn tetbiqi (db/107_valideyn.sql): eynen sagird kimi
         --  anon-la, giris kodu ile isleyir.  rpc_parent_home DUZ CAVABI
         --  ve usagin giris kodunu QAYTARMIR.
-        'rpc_parent_login','rpc_parent_home','rpc_parent_logout'];
+        'rpc_parent_login','rpc_parent_home','rpc_parent_logout',
+        --  «Bize yaz» (db/122): sagird ve valideyn tokenle yazir
+        'rpc_student_feedback','rpc_parent_feedback'];
   fn text;
 begin
   --  a) artiq acilmis olani bagla.  "from public" VACIBDIR: Postgres
@@ -138,7 +140,9 @@ declare
         'rpc_start_attempt','rpc_submit_attempt',
         'rpc_leaderboard','rpc_test_result',
         'rpc_report_question_student','rpc_student_my_results',
-        'rpc_parent_login','rpc_parent_home','rpc_parent_logout'];
+        'rpc_parent_login','rpc_parent_home','rpc_parent_logout',
+        --  «Bize yaz» (db/122): sagird ve valideyn tokenle yazir
+        'rpc_student_feedback','rpc_parent_feedback'];
   leak text;
   v_say int;
 begin

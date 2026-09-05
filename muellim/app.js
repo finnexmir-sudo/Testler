@@ -355,6 +355,100 @@
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
+  /* ------------------------------------------------------ «Bizə yazın»
+     Muellim profildən, sagird ve valideyn oz ekranindan yazir; admin
+     Idareetmede oxuyur, status ve qeyd qoyur - muellim qeydi burada
+     gorur.  FB_FROM: profile hansi ekrandan gelib (admin ucun kontekst). */
+  var FB_FROM = "İcmal";
+  var FB_KIND = [["teklif", "Təklif"], ["problem", "Problem"],
+                 ["sual", "Sual"], ["tesekkur", "Təşəkkür"]];
+  var FB_ST = { "new": "Yeni", seen: "Baxılıb", planned: "Planda",
+                done: "Edilib", closed: "Bağlı" };
+  var FB_PAGE = { "": "İcmal", g: "Qrup", r: "Qrup hesabatı", a: "Tapşırıq",
+                  b: "Sual bankı", gen: "Test yığ", t: "Test vərəqi", p: "Paket",
+                  adm: "İdarəetmə", n: "Bildirişlər", q: "Sual", s: "Şagird hesabatı" };
+  function fbKind(k) {
+    for (var i = 0; i < FB_KIND.length; i++) if (FB_KIND[i][0] === k) return FB_KIND[i][1];
+    return k;
+  }
+  function fbForm(id) {
+    return '<div class="chips fbk" id="' + id + 'K">' +
+        FB_KIND.map(function (k, i) {
+          return '<button type="button" class="chip' + (i === 0 ? " on" : "") +
+            '" data-k="' + k[0] + '">' + k[1] + "</button>";
+        }).join("") + "</div>" +
+      '<textarea id="' + id + 'T" rows="4" maxlength="2000" ' +
+        'placeholder="Nə təklif edirsiniz, nə işləmir, nə maraqlıdır? Konkret yazın — belə daha tez kömək edə bilirik."></textarea>' +
+      '<div class="fbrow"><span class="fbn" id="' + id + 'N">0 / 2000</span>' +
+        '<button class="btn go" id="' + id + 'Go">Göndər</button></div>' +
+      '<div id="' + id + 'M"></div>';
+  }
+  function fbBind(id, send, after) {
+    var ta = $(id + "T"), n = $(id + "N");
+    on(id + "K", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest(".chip") : null;
+      if (!b) return;
+      Array.prototype.forEach.call(document.querySelectorAll("#" + id + "K .chip"), function (x) {
+        x.classList.toggle("on", x === b);
+      });
+    });
+    on(id + "T", "input", function () {
+      if (n) n.textContent = ta.value.length + " / 2000";
+    });
+    on(id + "Go", "click", function () {
+      if (busy) return;
+      var k = document.querySelector("#" + id + "K .chip.on");
+      var body = (ta.value || "").trim();
+      if (body.length < 10) {
+        $(id + "M").innerHTML = msg("warn", "Bir az ətraflı yazın — ən azı 10 simvol.");
+        ta.focus(); return;
+      }
+      setBusy(id + "Go", true, "Göndər");
+      send((k && k.getAttribute("data-k")) || "teklif", body).then(function () {
+        setBusy(id + "Go", false, "Göndər");
+        ta.value = ""; if (n) n.textContent = "0 / 2000";
+        $(id + "M").innerHTML = msg("ok", "Təşəkkür edirik! Mesajınız çatdı — oxuyub cavab yazacağıq.");
+        if (after) after();
+      }).catch(function (e) {
+        setBusy(id + "Go", false, "Göndər");
+        $(id + "M").innerHTML = msg("err", fail(e));
+      });
+    });
+  }
+  function fbMineLoad() {
+    var live = guard();
+    sb.rpc("rpc_feedback_mine", {}).then(function (rows) {
+      if (!live()) return;
+      var box = $("fbMine");
+      if (!box) return;
+      rows = rows || [];
+      if (!rows.length) { box.innerHTML = ""; return; }
+      var CAP = 5;
+      box.innerHTML = '<div class="spacer"></div><h2>Yazdıqlarınız</h2>' +
+        '<div class="card pad0" id="fbList">' + rows.map(function (r, i) {
+          return '<div class="fbi' + (i >= CAP ? " hide" : "") + '">' +
+            '<div class="fbh"><span class="pill">' + esc(fbKind(r.kind)) + "</span>" +
+              '<span class="fbst st-' + esc(r.status) + '">' + (FB_ST[r.status] || r.status) + "</span>" +
+              '<span class="fbat">' + dateAz(r.at) + "</span></div>" +
+            '<p class="fbb">' + esc(r.body) + "</p>" +
+            (r.note
+              ? '<div class="fbre">' + ic("check") + "<div><b>Cavabımız</b>" +
+                esc(r.note) + "</div></div>"
+              : "") +
+          "</div>";
+        }).join("") +
+        (rows.length > CAP
+          ? '<button class="morebtn" id="fbMore">Daha ' + (rows.length - CAP) + " mesaj</button>"
+          : "") + "</div>";
+      on("fbMore", "click", function () {
+        Array.prototype.forEach.call(document.querySelectorAll("#fbList .fbi.hide"), function (x) {
+          x.classList.remove("hide");
+        });
+        $("fbMore").remove();
+      });
+    }).catch(function () {});
+  }
+
   /* ----------------------------------------------------------- profil */
   function screenMe() {
     topTitle.textContent = "Profil";
@@ -371,6 +465,14 @@
         '<button class="btn go" id="btnMeSave">Yadda saxla</button>' +
       "</div>" +
       '<div class="spacer"></div>' +
+      '<div class="card" id="fbCard">' +
+        "<h1>Bizə yazın</h1>" +
+        '<p class="note">Təklifiniz, rastlaşdığınız problem və ya sualınız — ' +
+          "birbaşa bizə çatır. Cavabımızı burada, mesajın altında görəcəksiniz.</p>" +
+        fbForm("fb") +
+      "</div>" +
+      '<div id="fbMine"></div>' +
+      '<div class="spacer"></div>' +
       '<div class="card tight">' +
         "<b>Necə işləyir?</b>" +
         '<p class="note" style="margin:4px 0 0">Qrup, şagird kodu, tapşırıq, hesabat — ' +
@@ -379,6 +481,10 @@
       "</div>");
     on("btnBack", "click", function () { nav("#/"); });
     subChips("meSubs", mySubs());
+    fbBind("fb", function (kind, body) {
+      return sb.rpc("rpc_feedback_send", { p_kind: kind, p_body: body, p_page: FB_FROM });
+    }, function () { fbMineLoad(); });
+    fbMineLoad();
     on("btnMeSave", "click", function () {
       if (busy) return;
       setBusy("btnMeSave", true, "Yadda saxla");
@@ -452,14 +558,14 @@
               "</span></button>"
             : "") +
           '<button class="qact qd" id="btnMe">' + ic("person") +
-            "<b>Profil</b><span>fənlər və hesab</span></button>" +
+            "<b>Profil</b><span>fənlər · bizə yazın</span></button>" +
         "</div>" +
       "</div>" +
       (isAdmin()
         ? '<div class="spacer"></div>' +
           '<div class="card pad0"><button class="item" id="btnAdm">' +
           '<div class="ic">' + ic("group") + "</div>" +
-          '<div class="g"><b>İdarəetmə</b><i><span>Hesablar və ' +
+          '<div class="g"><b>İdarəetmə</b><i><span id="admSub">Hesablar və ' +
             "abunələr (admin)</span></i></div>" +
           '<span class="arrow">' + ic("right") + "</span></button></div>"
         : "") +
@@ -494,6 +600,12 @@
     on("btnPkt", "click", function () { nav("#/p"); });
     on("btnMe", "click", function () { nav("#/me"); });
     on("btnAdm", "click", function () { nav("#/adm"); });
+    if (isAdmin()) {
+      sb.rpc("rpc_admin_feedback_count", {}).then(function (n) {
+        var e = $("admSub");
+        if (e && n > 0) e.innerHTML = "Hesablar, abunələr · <b>" + n + " yeni müraciət</b>";
+      }).catch(function () {});
+    }
 
     on("btnGroup", "click", function () {
       if (busy) return;
@@ -3137,10 +3249,11 @@
       Promise.all([
         sb.rpc("rpc_admin_stats", {}),
         sb.rpc("rpc_admin_accounts", { p_q: null }),
-        sb.rpc("rpc_admin_reports", { p_status: "new" })
+        sb.rpc("rpc_admin_reports", { p_status: "new" }),
+        sb.rpc("rpc_admin_feedback", { p_status: "new" })
       ]).then(function (r) {
         if (!live()) return;
-        drawAdmin(r[0] || {}, r[1] || [], r[2] || []);
+        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || []);
       }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -3178,7 +3291,7 @@
     on("ulCode", "keydown", function (e) { if (e.key === "Enter") go(); });
   }
 
-  function drawAdmin(st, rows, reps) {
+  function drawAdmin(st, rows, reps, fbs) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "repetitor-25", name: "Repetitor — 25 şagird" }];
     show(
@@ -3228,6 +3341,17 @@
       "</div>" +
       '<div id="repList">' + (REPS_CACHE = reps, repCards(reps, "new")) + "</div>" +
       '<div class="spacer"></div>' +
+      '<h2 id="fbH">Bizə yazılanlar' + (fbs.length
+        ? ' <span class="rcnt">' + fbs.length + "</span>" : "") + "</h2>" +
+      '<div class="chips" id="fbF">' +
+        [["new", "Yeni"], ["seen", "Baxılıb"], ["planned", "Planda"],
+         ["done", "Edilib"], ["closed", "Bağlı"], ["all", "Hamısı"]].map(function (f) {
+          return '<button class="chip' + (f[0] === "new" ? " on" : "") +
+            '" data-fs="' + f[0] + '">' + f[1] + "</button>";
+        }).join("") +
+      "</div>" +
+      '<div id="fbList">' + fbCards(fbs, "new") + "</div>" +
+      '<div class="spacer"></div>' +
       "<h2>Təhlükəsizlik</h2>" +
       '<div class="card" id="secBox">' + secCard() + "</div>"
     );
@@ -3276,6 +3400,86 @@
       }).catch(function () {});
     });
     bindSec();
+    on("fbF", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest(".chip") : null;
+      if (!b) return;
+      var cur = document.querySelector("#fbF .chip.on");
+      if (cur) cur.classList.remove("on");
+      b.classList.add("on");
+      var st2 = b.getAttribute("data-fs");
+      sb.rpc("rpc_admin_feedback", { p_status: st2 }).then(function (r) {
+        var box = $("fbList");
+        if (box) box.innerHTML = fbCards(r || [], st2);
+      }).catch(function () {});
+    });
+    on("fbList", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-fbsave]") : null;
+      if (!b || busy) return;
+      var id = b.getAttribute("data-fbsave");
+      var card = b.closest(".fbc");
+      var sel = card.querySelector("select"), ta = card.querySelector("textarea");
+      var m = card.querySelector(".fbcm");
+      busy = true; b.disabled = true;
+      sb.rpc("rpc_admin_feedback_set", {
+        p_id: id, p_status: sel.value, p_note: (ta.value || "").trim() || null
+      }).then(function () {
+        busy = false; b.disabled = false;
+        card.classList.add("saved");
+        m.innerHTML = msg("ok", "Yadda saxlanıldı" +
+          (ta.value.trim() ? " — müəllim cavabı profilində görəcək." : "."));
+        var cur = document.querySelector("#fbF .chip.on");
+        var fs = cur ? cur.getAttribute("data-fs") : "new";
+        if (fs !== "all" && fs !== sel.value) {
+          setTimeout(function () {
+            card.remove();
+            var h = $("fbH"), left = document.querySelectorAll("#fbList .fbc").length;
+            if (h && fs === "new") {
+              h.innerHTML = "Bizə yazılanlar" + (left ? ' <span class="rcnt">' + left + "</span>" : "");
+            }
+            if (!left) $("fbList").innerHTML = fbCards([], fs);
+          }, 900);
+        }
+      }).catch(function (e) {
+        busy = false; b.disabled = false;
+        m.innerHTML = msg("err", fail(e));
+      });
+    });
+  }
+
+  /* «Bizə yazılanlar» kartlari: kim · nov · sehife · tarix, metn,
+     status + cavab qeydi.  Cavab muellimin profilinde gorunur. */
+  function fbCards(rows, st) {
+    if (!rows.length) {
+      return '<div class="card"><p class="muted" style="margin:0">' +
+        (st === "new" ? "Yeni müraciət yoxdur. 👌" : "Bu siyahı boşdur.") + "</p></div>";
+    }
+    var AT = { teacher: "müəllim", student: "şagird", parent: "valideyn" };
+    return rows.map(function (r) {
+      var meta = [AT[r.author_type] || r.author_type];
+      if (r.author_type === "teacher" && r.account) meta.push(r.account);
+      if (r.author_type === "teacher" && r.email) meta.push(r.email);
+      if (r.author_type !== "teacher" && r.account) meta.push(r.account);
+      if (r["class"]) meta.push(r["class"]);
+      if (r.page) meta.push("ekran: " + r.page);
+      return '<div class="card fbc" data-id="' + esc(r.id) + '">' +
+        '<div class="fbh"><span class="pill on">' + esc(fbKind(r.kind)) + "</span>" +
+          "<b>" + esc(r.who || "") + "</b>" +
+          '<span class="fbat">' + dateAz(r.at) + "</span></div>" +
+        '<div class="qm">' + meta.map(function (x) { return "<span>" + esc(x) + "</span>"; })
+          .join("<span>·</span>") + "</div>" +
+        '<p class="fbb">' + esc(r.body) + "</p>" +
+        '<div class="fbact">' +
+          "<select>" + Object.keys(FB_ST).map(function (k) {
+            return '<option value="' + k + '"' + (k === r.status ? " selected" : "") + ">" +
+              FB_ST[k] + "</option>";
+          }).join("") + "</select>" +
+          '<textarea rows="2" maxlength="1000" placeholder="Cavab (müəllim profilində görür)">' +
+            esc(r.note || "") + "</textarea>" +
+          '<button class="btn sm" data-fbsave="' + esc(r.id) + '">Yadda saxla</button>' +
+        "</div>" +
+        '<div class="fbcm"></div>' +
+      "</div>";
+    }).join("");
   }
 
   function admRows(rows) {
@@ -5524,6 +5728,7 @@
         ekranina atilardi.  Suzgec deyisiklikleri screenGen()-i
         birbasa cagirir, ora dusmur. */
     if (GF && m[0] !== "gen") { GF.back = ""; GF.backName = ""; }
+    if (m[0] !== "me" && m[0] !== "adm") FB_FROM = FB_PAGE[m[0] || ""] || (m[0] || "İcmal");
     bnavShow({ b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "g" && m[1]) return screenGroup(m[1]);
     if (m[0] === "r" && m[1]) return screenReport(m[1]);

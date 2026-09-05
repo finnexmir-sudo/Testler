@@ -413,7 +413,7 @@ details.more.filt .fn{
 .paper .pq{padding:16px;border-bottom:1px solid var(--n-100)}
 .paper .pq:last-child{border-bottom:0}
 .paper .qh b{font-size:14.5px;font-weight:590;letter-spacing:-.008em;line-height:1.45}
-.paper .qm,.repc .qm{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+.paper .qm,.repc .qm,.fbc .qm{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
   font-size:12px;color:var(--fg-2);margin:6px 0 10px}
 .popt{display:flex;align-items:center;gap:8px;padding:6px 10px;
   border:1px solid var(--n-100);border-radius:var(--r);margin-top:6px;
@@ -906,3 +906,38 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .stu .l3 [data-pnew]{margin-left:auto}
 .stu .l3 .btn.arch{margin-left:0}
 @media (min-width:721px){ .stu .l3 [data-pnew]{margin-left:6px} }
+
+/* ---------------------------------------------------------- «Bizə yazın»
+   Profil: nov cipleri + metn + sayğac; "Yazdiqlariniz" siyahisi statusla
+   ve adminin cavabi ile.  Idareetme: .fbc kartlari - status + qeyd. */
+.fbk{margin:0 0 10px}
+#fbCard textarea,.fbc textarea{width:100%;resize:vertical;font:inherit;
+  font-size:14px;line-height:1.5;padding:10px 12px;border:1px solid var(--n-200);
+  border-radius:10px;background:var(--surface);color:var(--fg)}
+.fbrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.fbn{font-size:12px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+.fbi{padding:12px 16px;border-bottom:1px solid var(--n-100)}
+.fbi:last-of-type{border-bottom:0}
+.fbh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fbh b{font-size:14px;font-weight:600}
+.fbat{margin-left:auto;font-size:12px;color:var(--fg-3);white-space:nowrap}
+.fbst{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;
+  background:var(--n-100);color:var(--fg-2)}
+.fbst.st-new{background:var(--brand-tint);color:var(--brand)}
+.fbst.st-planned{background:#fff4e0;color:#8a5a00}
+.fbst.st-done{background:var(--ok-tint,#e6f6ec);color:var(--ok)}
+.fbst.st-closed{background:var(--n-100);color:var(--fg-3)}
+.fbb{margin:8px 0 0;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.fbre{display:flex;gap:8px;margin-top:10px;padding:10px 12px;border-radius:10px;
+  background:var(--brand-tint);border:1px solid var(--brand-line);font-size:13.5px;line-height:1.5}
+.fbre svg{width:16px;height:16px;flex:0 0 auto;color:var(--brand);margin-top:2px}
+.fbre b{display:block;font-size:12px;color:var(--brand);margin-bottom:2px}
+.fbc .fbact{display:grid;grid-template-columns:150px 1fr auto;gap:8px;align-items:start;
+  margin-top:12px;padding-top:12px;border-top:1px dashed var(--n-100)}
+.fbc .fbact select{min-height:38px}
+.fbc textarea{min-height:38px;padding:8px 10px;font-size:13.5px}
+.fbc.saved{border-color:var(--ok)}
+.fbcm .ok,.fbcm .err{margin-top:8px}
+@media (max-width:600px){
+  .fbc .fbact{grid-template-columns:1fr}
+}

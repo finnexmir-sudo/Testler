@@ -458,7 +458,55 @@
           }).join("") + "</div>";
       }
 
+      /* 5. Bize yaz - yigilmis; sagird teklif/problem yazir, admin oxuyur */
+      h += '<div class="spacer"></div>' +
+        '<details class="more fbd" id="fbBox"><summary>Bizə yaz</summary>' +
+        '<div class="card fbcard">' +
+          '<p class="note" style="margin:0 0 10px">Təklifin var, nəsə işləmir, ' +
+            "sualın var? Yaz — oxuyub nəzərə alacağıq.</p>" +
+          '<div class="chips" id="fbK">' +
+            [["teklif", "Təklif"], ["problem", "Problem"], ["sual", "Sual"],
+             ["tesekkur", "Təşəkkür"]].map(function (k, i) {
+              return '<button type="button" class="chip' + (i === 0 ? " on" : "") +
+                '" data-k="' + k[0] + '">' + k[1] + "</button>";
+            }).join("") + "</div>" +
+          '<textarea id="fbT" rows="4" maxlength="2000" ' +
+            'placeholder="Nə təklif edirsən, nə işləmir? Konkret yaz."></textarea>' +
+          '<div class="fbrow"><span class="fbn" id="fbN">0 / 2000</span>' +
+            '<button class="btn go" id="fbGo">Göndər</button></div>' +
+          '<div id="fbM"></div>' +
+        "</div></details>";
+
       show(h);
+      on("fbK", "click", function (e) {
+        var b = e.target.closest ? e.target.closest(".chip") : null;
+        if (!b) return;
+        Array.prototype.forEach.call(document.querySelectorAll("#fbK .chip"), function (x) {
+          x.classList.toggle("on", x === b);
+        });
+      });
+      on("fbT", "input", function () { $("fbN").textContent = $("fbT").value.length + " / 2000"; });
+      on("fbGo", "click", function () {
+        if (busy) return;
+        var body = ($("fbT").value || "").trim();
+        var k = document.querySelector("#fbK .chip.on");
+        if (body.length < 10) {
+          $("fbM").innerHTML = msg("warn", "Bir az ətraflı yaz — ən azı 10 simvol.");
+          $("fbT").focus(); return;
+        }
+        setBusy("fbGo", true, "Göndər");
+        sb.rpc("rpc_student_feedback", {
+          p_token: TOKEN, p_kind: (k && k.getAttribute("data-k")) || "teklif",
+          p_body: body, p_page: "testlər"
+        }).then(function () {
+          setBusy("fbGo", false, "Göndər");
+          $("fbT").value = ""; $("fbN").textContent = "0 / 2000";
+          $("fbM").innerHTML = msg("ok", "Təşəkkür! Mesajın çatdı. 🙌");
+        }).catch(function (e) {
+          setBusy("fbGo", false, "Göndər");
+          $("fbM").innerHTML = msg("err", fail(e));
+        });
+      });
       function bindRows() {
         Array.prototype.forEach.call(main.querySelectorAll("[data-t]:not([data-bound])"), function (b) {
           b.setAttribute("data-bound", "1");

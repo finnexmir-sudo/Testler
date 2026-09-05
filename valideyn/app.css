@@ -91,3 +91,22 @@ input{min-height:52px;font-size:17px}
     nişan görünmür; keçid burada ayrıca lazımdır. */
 .homelink,.helplink{color:var(--fg-3);text-decoration:none;font-size:12.5px}
 .homelink:hover,.helplink:hover{color:var(--brand);text-decoration:underline}
+
+/* -------------------------------------------------- «Bizə yazın» */
+details.fbd{margin-top:8px}
+details.fbd summary{cursor:pointer;list-style:none;text-align:center;font-size:13.5px;
+  font-weight:600;color:var(--fg-3);padding:8px 2px 12px}
+details.fbd summary::-webkit-details-marker{display:none}
+details.fbd summary::before{content:"";display:inline-block;width:7px;height:7px;margin-right:8px;
+  border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
+  transform:rotate(-45deg) translateY(-2px);transition:transform .15s}
+details.fbd[open] summary{color:var(--fg-2)}
+details.fbd[open] summary::before{transform:rotate(45deg) translateY(-2px)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.chip{min-height:34px;padding:0 12px;border:1px solid var(--n-200);background:var(--surface);
+  border-radius:999px;font:inherit;font-size:13.5px;color:var(--fg-2);cursor:pointer;transition:.12s}
+.chip.on{background:var(--brand-tint);border-color:var(--brand-line);color:var(--brand);font-weight:550}
+.fbcard textarea{width:100%;resize:vertical;font:inherit;font-size:15.5px;line-height:1.5;
+  padding:10px 12px;border:1px solid var(--n-200);border-radius:10px;background:var(--surface);color:var(--fg)}
+.fbrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.fbn{font-size:12px;color:var(--fg-3);font-variant-numeric:tabular-nums}

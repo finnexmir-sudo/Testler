@@ -86,7 +86,8 @@ with sync_playwright() as p:
     t.wait_for_timeout(500); shot(t, "m3_icmal")
     t.click("#groups .item"); t.wait_for_selector("#gTabs", timeout=15000)
     for nm in ("Aysu Məmmədova", "Kənan Əliyev", "Nigar Həsənova"):
-        if t.locator("#btnStuOpen").count() and t.locator("#btnStuOpen").is_visible(): t.click("#btnStuOpen")   # forma duyme ile acilir
+        try: t.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
+        except Exception: t.click("#btnStuOpen")
         t.fill("#sname", nm); t.click("#btnStu"); t.wait_for_timeout(700)
     t.wait_for_selector(".stu", timeout=15000)
     # valideyn girisini ilk sagird ucun ac

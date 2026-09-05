@@ -258,7 +258,9 @@ with sync_playwright() as pw:
     ok("3-cü sinif" in pg.inner_text("#gMeta"), "sinif qrup ekraninda da gorunur",
        pg.inner_text("#gMeta").replace("\n", " "))
 
-    if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
+    try: pg.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
+
+    except Exception: pg.click("#btnStuOpen")
     pg.fill("#sname", "Aysu Məmmədova")
     pg.click("#btnStu")
     pg.wait_for_selector(".stu", timeout=8000)
@@ -271,7 +273,8 @@ with sync_playwright() as pw:
 
     ok(pg.locator("#snick").count() == 0,
        "leqeb sahesi yoxdur - qisa forma avtomatik yaranir")
-    if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
+    try: pg.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
+    except Exception: pg.click("#btnStuOpen")
     pg.fill("#sname", "Kənan Əliyev")
     pg.click("#btnStu"); pg.wait_for_timeout(900)
     ok(pg.locator(".stu").count() == 2, "ikinci sagird elave olunur")
@@ -294,13 +297,16 @@ with sync_playwright() as pw:
 
     print("E · Paket limiti panel içində")
     for nm in ["Sagird 3", "Sagird 4", "Sagird 5"]:
-        if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
+        try: pg.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
+        except Exception: pg.click("#btnStuOpen")
         pg.fill("#sname", nm)
         pg.click("#btnStu"); pg.wait_for_timeout(700)
     ok(pg.locator(".stu").count() == 5, "5 sagird elave olundu",
        pg.locator(".stu").count())
 
-    if pg.locator("#btnStuOpen").count() and pg.locator("#btnStuOpen").is_visible(): pg.click("#btnStuOpen")   # forma duyme ile acilir
+    try: pg.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
+
+    except Exception: pg.click("#btnStuOpen")
     pg.fill("#sname", "Altinci Sagird")
     pg.click("#btnStu"); pg.wait_for_timeout(900)
     err = pg.inner_text("#sErr")

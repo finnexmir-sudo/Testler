@@ -288,9 +288,56 @@
     }
 
     out += '<p class="note" style="text-align:center;margin:18px 0 4px">' +
-      "Suallarınızı müəllimə verin — bu ekran yalnız baxmaq üçündür.</p>";
+      "Uşağınızla bağlı suallarınızı müəllimə verin — bu ekran yalnız baxmaq üçündür.</p>";
+
+    /* ---- bize yazin: tetbiq haqqinda teklif/problem - admin oxuyur ---- */
+    out += '<details class="fbd" id="fbBox"><summary>Tətbiq haqqında bizə yazın</summary>' +
+      '<div class="card fbcard">' +
+        '<p class="note" style="margin:0 0 10px">Nəsə aydın deyil, işləmir və ya ' +
+          "təklifiniz var? Yazın — oxuyub nəzərə alacağıq.</p>" +
+        '<div class="chips" id="fbK">' +
+          [["teklif", "Təklif"], ["problem", "Problem"], ["sual", "Sual"],
+           ["tesekkur", "Təşəkkür"]].map(function (k, i) {
+            return '<button type="button" class="chip' + (i === 0 ? " on" : "") +
+              '" data-k="' + k[0] + '">' + k[1] + "</button>";
+          }).join("") + "</div>" +
+        '<textarea id="fbT" rows="4" maxlength="2000" ' +
+          'placeholder="Nə təklif edirsiniz, nə işləmir? Konkret yazın."></textarea>' +
+        '<div class="fbrow"><span class="fbn" id="fbN">0 / 2000</span>' +
+          '<button class="btn go" id="fbGo">Göndər</button></div>' +
+        '<div id="fbM"></div>' +
+      "</div></details>";
 
     show(out);
+    on("fbK", "click", function (e) {
+      var b = e.target.closest ? e.target.closest(".chip") : null;
+      if (!b) return;
+      Array.prototype.forEach.call(document.querySelectorAll("#fbK .chip"), function (x) {
+        x.classList.toggle("on", x === b);
+      });
+    });
+    on("fbT", "input", function () { $("fbN").textContent = $("fbT").value.length + " / 2000"; });
+    on("fbGo", "click", function () {
+      if (busy) return;
+      var body = ($("fbT").value || "").trim();
+      var k = document.querySelector("#fbK .chip.on");
+      if (body.length < 10) {
+        $("fbM").innerHTML = msg("warn", "Bir az ətraflı yazın — ən azı 10 simvol.");
+        $("fbT").focus(); return;
+      }
+      setBusy("fbGo", true, "Göndər");
+      sb.rpc("rpc_parent_feedback", {
+        p_token: TOKEN, p_kind: (k && k.getAttribute("data-k")) || "teklif",
+        p_body: body, p_page: "valideyn"
+      }).then(function () {
+        setBusy("fbGo", false, "Göndər");
+        $("fbT").value = ""; $("fbN").textContent = "0 / 2000";
+        $("fbM").innerHTML = msg("ok", "Təşəkkür edirik! Mesajınız çatdı.");
+      }).catch(function (e) {
+        setBusy("fbGo", false, "Göndər");
+        $("fbM").innerHTML = msg("err", fail(e));
+      });
+    });
   }
 
   /* ================================================================
