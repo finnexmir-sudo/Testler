@@ -3549,13 +3549,13 @@
           "<span>" + (a.students || 0) + " şagird</span><span>·</span>" +
           "<span>" + (a.tests || 0) + " test</span><span>·</span>" +
           "<span>" + (a.attempts || 0) + " cəhd</span><span>·</span>" +
-          "<span>aktivlik: " + agoAz(a.last_active) + "</span>" +
+          "<span>aktivlik: " + whenAz(a.last_active) + "</span>" +
         "</i>" +
         //  Girisler: muellim paneli ne vaxt acib, sagird/valideyn kodla ne vaxt girib.
         //  7 gundur girmeyen muellim narinci - pilotda zeng etmek vaxtidir.
         '<i class="lg">' +
-          '<span class="' + (seenCls(a.last_login)) + '">müəllim girişi: ' + agoAz(a.last_login) + "</span>" +
-          "<span>·</span><span>şagird girişi: " + agoAz(a.student_login) + "</span>" +
+          '<span class="' + (seenCls(a.last_login)) + '">müəllim girişi: ' + whenAz(a.last_login) + "</span>" +
+          "<span>·</span><span>şagird girişi: " + whenAz(a.student_login) + "</span>" +
         "</i></div>" +
         '<div class="btns">' +
           '<button class="btn sm" data-m="1">+1 ay</button>' +
@@ -3565,6 +3565,16 @@
     }).join("");
   }
 
+  /* Giris vaxti saatla: "bu gun 14:32", "dunen 09:10"; 2 gunden kohne
+     yalniz gun (saat artiq menasizdir) */
+  function whenAz(iso) {
+    var t = agoAz(iso);
+    if (!iso) return t;
+    var d = new Date(iso);
+    if (isNaN(d) || (Date.now() - d.getTime()) > 2 * 86400000) return t;
+    var hh = d.getHours(), mm = d.getMinutes();
+    return t + " " + (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm;
+  }
   function seenCls(iso) {
     if (!iso) return "lg-no";
     var g = (Date.now() - new Date(iso).getTime()) / 86400000;
