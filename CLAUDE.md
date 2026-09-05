@@ -645,6 +645,31 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
 19. ~~**«Bizə yaz» — istifadəçi təklifləri.**~~ **EDİLDİ** —
     `db/122_bize_yaz.sql`, bax «Bizə yaz» bölməsi aşağıda.
 
+20. **Müəllim gözü ilə audit (2026-09-05) — istifadəçi «bunları edə
+    bilərik, yadda saxla» dedi.** Sıra ilə:
+    a. **Ad sırası.** Şagird formasında «Ad Soyad» yönləndirməsi (və ya
+       iki ayrı sahə); «Hüseynov Mirhüseyn» yazılanda qısa ad və valideyn
+       mətni soyadı ad kimi işlədir.
+    b. **«Test yığ» ağırdır.** «Tövsiyə olunan» tək düymə: qrupun
+       sinfi + planda növbəti/son keçilən mövzu + 10 sual; parametrlər
+       «Özüm seçim» altında.
+    c. **Tapşırıq verildi, sonra nə?** Tapşırıqdan sonra hazır WhatsApp
+       mətni «Tapşırıq verdim: … son tarix …» + «Göndər» düyməsi
+       (şagirdə bildiriş göndərə bilmirik — şəbəkə qaydası).
+    d. **Hesabatda «nə edim» sətri.** Qrup hesabatının üstündə tək
+       cümlə: «Bu həftə 3 uşağa vurma cədvəlini təkrar ver» (mövzu
+       mənimsəməsindən çıxarılır, «Səhvlərdən test» düyməsi ilə).
+    e. 10-dan çox şagirddə ad axtarışı; test vərəqi yığcam çap rejimi.
+    f. Çətin başa düşülənlər: üç test növünün (adi · diaqnostik ·
+       səhvlər) bir sətir izahı tapşırıq ekranında; «Sərbəst məşq»
+       açarında «bağlasanız uşaq yalnız tapşırıqları görər»;
+       «Platforma» → «Hazır bank»; tapşırığı götürəndə «nəticələr
+       qalır» izahı; «Bildirişlər» sözü iki mənada (admin sual
+       bildirişi / müəllim siqnalları) — ad ayrılmalıdır.
+    g. Tez olanlar: ana səhifədə 4 lövhə tək qruplu müəllimə boşdur;
+       valideyn mətnində Səmimi/Rəsmi iki üslub artıqdır; lövhə
+       (liderlik) 6-dan az şagirddə gizlənsin.
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); valideyn
 girişində qiymət modeli — pilotdan sonra (təfərrüat: yerli strategiya
