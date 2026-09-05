@@ -1287,6 +1287,22 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## Admin: kim nə vaxt girib (db/125)
+
+İstifadəçi sualı: «admin olaraq kimlərin girdiyini izləyə bilərəm?».
+«aktivlik» yalnız cəhd/test yığmağı ölçürdü. İndi hər hesab sətrində
+«müəllim girişi: bu gün» və «şagird girişi: 3 gün əvvəl»; 5-ci lövhə
+«girib · son 7 gün»; süzgəc «Girməyənlər» (7 gündür heç bir üzv
+girməyib, 7 gündən köhnə giriş narıncı).
+
+Mənbə: `profiles.last_seen_at` — panel açılanda `rpc_seen()` yazır
+(15 dəqiqədə bir dəfədən çox yox; `boot()`-da çağırılır). Supabase-in
+`auth.users.last_sign_in_at`-i yalnız parolla girişdə yenilənir, sessiya
+aylarla qalır — ona görə ikisinin böyüyü götürülür. Şagird/valideyn
+girişi = `student_sessions`/`parent_sessions.created_at` (kodla giriş).
+Yerli stub `auth.users`-ə `last_sign_in_at` əlavə olundu, mock signup və
+signin-də yazır. Test: `smoke_admin_giris.sql` (4), e2e_paket genişləndi.
+
 ## Şagird adları — tam ad müəllimə, qısa ad lövhəyə (db/124)
 
 Canlı sual: «Kimə» seçimində «Hüseynov M.» iki nəfər — kim kimdir?

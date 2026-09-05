@@ -146,8 +146,8 @@ class H(BaseHTTPRequestHandler):
         try:
             with db() as c, c.cursor() as cur:
                 cur.execute(
-                    "insert into auth.users (email, raw_user_meta_data) "
-                    "values (%s, %s::jsonb) returning id",
+                    "insert into auth.users (email, raw_user_meta_data, last_sign_in_at) "
+                    "values (%s, %s::jsonb, now()) returning id",
                     (email, json.dumps(meta)))
                 uid = str(cur.fetchone()["id"])
         except Exception as e:
@@ -161,6 +161,12 @@ class H(BaseHTTPRequestHandler):
         rec = PASSWORDS.get(email)
         if not rec or rec[1] != (b.get("password") or ""):
             return self.send(400, {"message": "E-poct ve ya parol yanlisdir."})
+        #  Supabase parolla girisde last_sign_in_at-i yenileyir
+        try:
+            with db() as c, c.cursor() as cur:
+                cur.execute("update auth.users set last_sign_in_at = now() where id = %s", (rec[0],))
+        except Exception:
+            pass
         return self.send(200, issue(rec[0]))
 
     # -------------------------------------------------------- rpc / select

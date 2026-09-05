@@ -93,19 +93,34 @@ with sync_playwright() as pw:
     ok(True, "admin rolunda Idareetme bendi gorunur")
     pg.click("#btnAdm")
     pg.wait_for_selector(".admr", timeout=8000)
-    ok(pg.locator(".tile").count() == 4, "gosterici lovheleri gorunur",
+    ok(pg.locator(".tile").count() == 5, "gosterici lovheleri gorunur",
        pg.locator(".tile").count())
     tl = pg.inner_text(".tiles").replace("\n", " ")
     ok("hesab" in tl and "pullu" in tl and "pulsuz" in tl and "gəlir" in tl,
        "lovhelerde hesab/pullu/pulsuz/gelir var", tl[:70])
-    ok(pg.locator("#admF .chip").count() == 4,
-       "pullu/pulsuz/bitir suzgec cipleri var")
+    ok(pg.locator("#admF .chip").count() == 5,
+       "pullu/pulsuz/bitir/girmir suzgec cipleri var")
+    ok(pg.locator(".tile").count() == 5 and "girib" in tl, "5-ci lovhe: hesab girib · son 7 gun", tl[-60:])
     npo = pg.locator("#admPlan option").count()
     ok(npo >= 2, "plan secimi bazadan dolur", npo)
     row = pg.inner_text(".admr").replace("\n", " ")
     ok("pkt@t.az" in row, "hesab siyahida e-poctla gorunur", row[:60])
     ok("paketsiz" in row, "paketsiz nisani gorunur")
     ok("aktivlik" in row, "son aktivlik gorunur", row[:80])
+    ok("müəllim girişi: bu gün" in row, "muellim girisi bu gun (rpc_seen)", row[-90:])
+    ok("şagird girişi: heç vaxt" in row, "sagird girisi hele yoxdur")
+    ok("1" in pg.inner_text(".tile.e"), "girib lovhesi 1", pg.inner_text(".tile.e").replace("\n", " "))
+    #  Girmeyenler: bu hesab bu gun girib - cixmir; 10 gun evvele cekende cixir
+    pg.locator("#admF .chip[data-f='girmir']").click(); pg.wait_for_timeout(700)
+    ok("Hesab tapılmadı" in pg.inner_text("#admList"), "girmeyenler: bu gun giren cixmir")
+    db("update public.profiles set last_seen_at = now() - interval '10 days'; "
+       "update auth.users set last_sign_in_at = now() - interval '10 days'")
+    pg.locator("#admF .chip[data-f='']").click(); pg.wait_for_timeout(500)
+    pg.locator("#admF .chip[data-f='girmir']").click(); pg.wait_for_selector(".admr", timeout=8000)
+    ok("pkt@t.az" in pg.inner_text(".admr") and "10 gün əvvəl" in pg.inner_text(".admr"),
+       "girmeyenler: 10 gundur girmeyen cixir, narinci", pg.inner_text(".admr .lg-old"))
+    ok(pg.locator(".admr .lg-old").count() == 1, "koхne giris narinci sinifle")
+    pg.locator("#admF .chip[data-f='']").click(); pg.wait_for_selector(".admr", timeout=8000)
 
     print("D · Bir kliklə abunə açmaq")
     pg.on("dialog", lambda d: d.accept())

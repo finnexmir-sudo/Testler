@@ -17,7 +17,8 @@ create table if not exists auth.users (
   email              text unique,
   encrypted_password text,
   raw_user_meta_data jsonb not null default '{}'::jsonb,
-  created_at         timestamptz not null default now()
+  created_at         timestamptz not null default now(),
+  last_sign_in_at    timestamptz
 );
 
 -- Supabase-deki auth.uid() eynisi: JWT-deki sub iddiasini oxuyur.

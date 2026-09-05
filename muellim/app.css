@@ -640,6 +640,15 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .hi{font-size:20px;font-weight:650;letter-spacing:-.02em;margin:2px 0 14px}
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 @media (max-width:520px){ .tiles{grid-template-columns:1fr 1fr} }
+.tiles.five{grid-template-columns:repeat(5,1fr)}
+@media (max-width:760px){ .tiles.five{grid-template-columns:repeat(3,1fr)} }
+@media (max-width:520px){ .tiles.five{grid-template-columns:1fr 1fr} .tiles.five .tile.e{grid-column:1/-1} }
+.tile.e{background:linear-gradient(135deg,#5b3fb8,#7c5ce6)}
+/* Idareetme setri: giris setiri - 7 gundur girmeyen narinci */
+.admr .g i.lg{margin-top:2px}
+.admr .lg-ok{color:var(--ok)}
+.admr .lg-old{color:#b54708;font-weight:600}
+.admr .lg-no{color:var(--fg-3)}
 .tile{border-radius:12px;padding:14px 12px;color:#fff;
   box-shadow:0 4px 14px rgba(21,26,36,.10)}
 .tile b{display:block;font-size:22px;font-weight:680;letter-spacing:-.02em}

@@ -3327,7 +3327,7 @@
     show(
       '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
       '<div class="spacer"></div>' +
-      '<div class="tiles">' +
+      '<div class="tiles five">' +
         '<div class="tile a"><b>' + (st.accounts || 0) + "</b><span>hesab" +
           ((st.accounts_week || 0) > 0 ? " · +" + st.accounts_week + " bu həftə" : "") +
           "</span></div>" +
@@ -3335,6 +3335,7 @@
           Math.max(0, (st.accounts || 0) - (st.paid_accounts || 0)) + " pulsuz</span></div>" +
         '<div class="tile c"><b>' + azn(st.mrr_minor || 0) + "</b><span>aylıq gəlir</span></div>" +
         '<div class="tile d"><b>' + (st.attempts_week || 0) + "</b><span>cəhd · son 7 gün</span></div>" +
+        '<div class="tile e"><b>' + (st.seen_week || 0) + "</b><span>girib · son 7 gün</span></div>" +
       "</div>" +
       '<div class="card tight">' +
         "<h1>Hesablar</h1>" +
@@ -3351,7 +3352,7 @@
         "</div>" +
         '<div class="chips" id="admF">' +
           [["", "Hamısı"], ["pullu", "Pullu"], ["pulsuz", "Pulsuz"],
-           ["bitir", "Bitmək üzrə"]]
+           ["bitir", "Bitmək üzrə"], ["girmir", "Girməyənlər"]]
             .map(function (f) {
               return '<button class="chip' + (f[0] === "" ? " on" : "") +
                 '" data-f="' + f[0] + '">' + f[1] + "</button>";
@@ -3549,6 +3550,12 @@
           "<span>" + (a.tests || 0) + " test</span><span>·</span>" +
           "<span>" + (a.attempts || 0) + " cəhd</span><span>·</span>" +
           "<span>aktivlik: " + agoAz(a.last_active) + "</span>" +
+        "</i>" +
+        //  Girisler: muellim paneli ne vaxt acib, sagird/valideyn kodla ne vaxt girib.
+        //  7 gundur girmeyen muellim narinci - pilotda zeng etmek vaxtidir.
+        '<i class="lg">' +
+          '<span class="' + (seenCls(a.last_login)) + '">müəllim girişi: ' + agoAz(a.last_login) + "</span>" +
+          "<span>·</span><span>şagird girişi: " + agoAz(a.student_login) + "</span>" +
         "</i></div>" +
         '<div class="btns">' +
           '<button class="btn sm" data-m="1">+1 ay</button>' +
@@ -3556,6 +3563,12 @@
           (pl ? '<button class="btn sm ghost" data-stop="1">Dayandır</button>' : "") +
         "</div></div>";
     }).join("");
+  }
+
+  function seenCls(iso) {
+    if (!iso) return "lg-no";
+    var g = (Date.now() - new Date(iso).getTime()) / 86400000;
+    return g > 7 ? "lg-old" : "lg-ok";
   }
 
   function bindAdm() {
@@ -5822,6 +5835,8 @@
       btnOut.classList.remove("hide");
       topWho.textContent = (CTX.profile && CTX.profile.full_name) || "";
       route();
+      //  "son giris" - Idareetme ucun; server 15 deqiqede bir yazir
+      sb.rpc("rpc_seen", {}).catch(function () {});
       //  zeng noktesi - hansi sehifeden acilmasindan asili olmadan
       if (ACC) sb.rpc("rpc_home", {}).then(function (v) {
         bellDot(v && v.alerts ? v.alerts.length : 0);
