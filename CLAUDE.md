@@ -670,6 +670,63 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
        valideyn mətnində Səmimi/Rəsmi iki üslub artıqdır; lövhə
        (liderlik) 6-dan az şagirddə gizlənsin.
 
+21. **Böyük təkliflər (2026-09-05, istifadəçi «yadda saxla» dedi).**
+    Repetitorun üç ağrısı: dərsə hazırlıq vaxtı, valideynə dəyəri sübut
+    etmək, yeni şagird tapmaq. Sıra: 1–2 ucuz və dərhal hiss olunur,
+    3–4 müəllimi saxlayır və gətirir, 5 uşağa, 6–7 böyük iş.
+    1. **«Bu günün dərsi» ekranı** — dərsdən əvvəl bir kart: kim
+       tapşırığı etməyib, kim hansı mövzuda zəifdir, növbəti mövzu,
+       hazır test «Ver». Məlumat bazadadır, yalnız bir ekranda yığılır.
+    2. **Ev tapşırığı avtomatı** — planda «keçdik» → həmin mövzudan 10
+       sual yığılır, növbəti dərsə qədər tapşırılır, WhatsApp mətni hazır.
+    3. **Paylaşılan irəliləyiş kartı** — brauzerdə şəkil: «Ayan,
+       sentyabr: 52% → 78%, müəllim Arzu». Müəllimin öz reklamı =
+       Bil10-un reklamı. Şəbəkə lazım deyil (canvas → PNG → paylaş).
+    4. **Davamiyyət və ödəniş dəftəri** — «iştirak etdi», ay sonu «8 dərs,
+       6 ödənilib», valideyn iştirak sayını görür. Gündəlik istifadə
+       gətirən yapışqan xüsusiyyət.
+    5. **Şagirdin səhv dəftəri** — səhv sual düz cavablanana qədər qalır,
+       bir həftə sonra yenə gəlir (aralıqlı təkrar); müəllim yalnız
+       «12 qalıb, 30 bağlanıb» görür.
+    6. **DİM formatında sınaq imtahanı** — 9/11-ci sinif, vaxt limiti,
+       DİM ballama; bank tərəfi böyükdür, bazar ən çox bunu ödəyir.
+    7. **Sinifdə canlı yarış** — müəllim başladır, uşaqlar telefondan
+       cavab verir, lövhədə canlı sıralama (3 saniyəlik RPC sorğusu ilə,
+       realtime lazım deyil).
+
+22. **Dünya praktikasından yüksək məhsuldarlıqlı təkliflər (2026-09-05).**
+    a. **Parametrik (şablon) suallar** — «245 + 138» şablonu → sonsuz
+       variant; uşaq cavabı əzbərləyə bilmir, «10 000+ sual» həqiqət
+       olur. Riyaziyyat üçün ən böyük bank rıçağı.
+    b. **Adaptiv məşq (IXL/Khan mənimsəmə)** — şagirdin səviyyəsinə görə
+       növbəti sual seçilir; mövzu «mənimsənildi» olana qədər; müəllim
+       vaxtı sərf olunmur.
+    c. **«Tələsik səhv» və inam göstəricisi** — cavab vaxtı artıq var
+       (<5 san + səhv = diqqətsizlik); cavabda «əminəm / əmin deyiləm»
+       seçimi → «bilmədən düz» görünür. Ucuz, dərin.
+    d. **Kurikulum paketi («course in a box»)** — hər dərs üçün hazır:
+       5 sual isinmə + 10 ev tapşırığı + rüb sınağı, e-dərslik TOC-a
+       bağlı. Təcrübəsiz repetitor üçün hazır il.
+    e. **Müəllimin öz səhifəsi (Classplus/Teachmint modeli)** —
+       bil10.az/arzu: profil, nəticələr, əlaqə; sonra valideyn
+       müəllim axtarır (ikitərəfli bazar).
+    f. **Ölkə üzrə müqayisə** — anonim benchmark: «sizin 5-ci sinif
+       ortalama 62%, ölkə 58%»; valideynə «ilk 20%». Data yığıldıqca
+       özü işləyir.
+    g. **Sual keyfiyyəti təhlili** — cəhdlərdən ayırdetmə və distraktor
+       analizi; heç seçilməyən variant, hamının səhv etdiyi sual admin-ə
+       siqnal. Bank özü-özünü təmizləyir.
+    h. **Müəllim bankı (UGC)** — müəllim öz sualını platformaya
+       «bağışlayır», qəbul olunanda pulsuz ay; moderasiya mövcud
+       bildiriş axını ilə. Bank ucuz böyüyür.
+    i. **Foto ilə sual soruş** — şagird ev tapşırığının şəklini atır,
+       müəllim tətbiqdə cavablayır (Supabase Storage, eyni host).
+    j. **Məktəb rejimi** — sinif müəllimi 30 şagird, məktəb admini
+       lövhəsi; özəl məktəblərə B2B.
+    k. **Dəvət dövrəsi** — müəllim müəllimi dəvət edir → pulsuz ay.
+    Qayda: heç biri tətbiqdən xarici şəbəkəyə çıxmır; AI ilə izah/variant
+    yaradılması yalnız oflayn, admin tərəfində, banka yazılaraq.
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); valideyn
 girişində qiymət modeli — pilotdan sonra (təfərrüat: yerli strategiya
