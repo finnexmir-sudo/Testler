@@ -1,0 +1,40 @@
+# Supabase-in pulsuz layihesi 7 gun sorgu olmayanda dayanir.
+# Bu is her gun bir yungul sorgu atir ki, layihe oyaq qalsin.
+#
+# Acar ve unvan muellim/config.js-den oxunur - anon acar onsuz da
+# brauzerde aciqdir, sirr deyil.  service_role acari BURADA YOXDUR
+# ve olmamalidir.
+#
+# Qeyd: GitHub repoda 60 gun commit olmasa cedvelli isleri ozu
+# sondurur - Actions sekmesinde "Enable workflow" ile geri acilir.
+name: Supabase-i oyaq saxla
+
+on:
+  schedule:
+    - cron: "17 5 * * *"     # her gun 05:17 UTC (Baki 09:17)
+  workflow_dispatch:         # el ile de isletmek olur
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: muellim/config.js
+          sparse-checkout-cone-mode: false
+
+      - name: Kataloqdan bir setir oxu
+        run: |
+          set -euo pipefail
+          URL=$(grep -oE 'SUPABASE_URL: *"[^"]+"' muellim/config.js | sed -E 's/.*"([^"]+)"/\1/')
+          KEY=$(grep -oE 'SUPABASE_ANON_KEY: *"[^"]+"' muellim/config.js | sed -E 's/.*"([^"]+)"/\1/')
+          [ -n "$URL" ] && [ -n "$KEY" ] || { echo "config.js-de unvan/acar tapilmadi"; exit 1; }
+          code=$(curl -sS -o /tmp/cavab.json -w '%{http_code}' \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+            "$URL/rest/v1/plans?select=slug&limit=1")
+          echo "HTTP $code: $(cat /tmp/cavab.json)"
+          [ "$code" = "200" ] || { echo "Supabase cavab vermedi - layihe dayanib ola biler"; exit 1; }

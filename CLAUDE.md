@@ -1338,6 +1338,15 @@ Video hələ yoxdur: səssiz avtomatik video az fayda verir; istifadəçi
 telefon/OBS ilə səsli çəksə, `<video>` ilə `komek/`-ə qoyulur (öz
 serverimizdən — xarici embed CSP/qayda ilə bağlıdır).
 
+## Supabase-i oyaq saxlamaq — `.github/workflows/oyaq-saxla.yml`
+
+Pulsuz Supabase 7 gün sorğu olmayanda layihəni dayandırır. GitHub
+Actions hər gün 05:17 UTC-də `plans` kataloqundan bir sətir oxuyur
+(anon açar `muellim/config.js`-dən götürülür — onsuz da açıqdır; sirr
+yoxdur). Uğursuz olanda GitHub e-poçt bildirişi göndərir. GitHub 60 gün
+commit olmayan repoda cədvəlli işi söndürür — Actions sekməsində
+«Enable workflow». Bu körpüdür: real istifadə başlayanda ehtiyac qalmır.
+
 ## Keş — vacib
 
 GitHub Pages CSS/JS-i **10 dəqiqə** keşdə saxlayır (`max-age=600`). Nişan
