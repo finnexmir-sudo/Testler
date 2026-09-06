@@ -3611,41 +3611,84 @@
           "<b>Bütün testlər verilib</b>Bu sinif üçün başqa test qalmayıb.</div>";
         return;
       }
-      function optOf(t) {
+      /*  Siyahi cox qarisiq gorunurdu (canli sikayet, telefon): fenn,
+          ad, sinif, sual sayi, abune, "basqa qrupa da verilib" - hamisi
+          bir setirde.  Indi setirde yalniz AD (+ fenn, + fərqli sinif,
+          + "verilib"), qalani secimden sonra altdaki izah setrindedir.
+          Ustde fenn dugmeleri ve axtaris siyahini suzur.  */
+      var gl = levelName(g.level_id) || "";
+      function optOf(t, hideSub) {
         /* Testin adi onsuz da fennle baslayirsa fenni tekrar yazmiriq:
-           "Azerbaycan dili - Azerbaycan dili - 1" cirkin cixirdi. */
+           "Azerbaycan dili - Azerbaycan dili - 1" cirkin cixirdi.
+           Fenn dugmesi secilibse fenn onsuz da bellidir - yazilmir. */
         var sub = String(t.subject || "");
         var ttl = String(t.title || "");
-        var lbl = (sub && ttl.indexOf(sub) !== 0) ? sub + " — " + ttl : ttl;
+        var lbl = (sub && !hideSub && ttl.indexOf(sub) !== 0) ? sub + " — " + ttl : ttl;
         /*  Siyahida ASAGI sinif testleri de var - hansi sinif ucun
             yigildigi GORUNMELIDIR.  Qrupun oz sinfi tekrarlanmir.  */
         var lv = String(t.level || "");
-        if (lv && lv !== (levelName(g.level_id) || "")) lbl += " · " + lv;
-        return '<option value="' + esc(t.id) + '">' + esc(lbl) +
-          " (" + (Number(t.questions) || 0) + " sual)" +
-          (t.is_free ? "" : " · abunə") +
-          (elsew[t.id] ? " · başqa qrupa da verilib" : "") + "</option>";
+        if (lv && lv !== gl) lbl += " · " + lv;
+        if (elsew[t.id]) lbl += " · verilib";
+        return '<option value="' + esc(t.id) + '">' + esc(lbl) + "</option>";
       }
+      //  Fennler siyahi sirasinda - muellimin oz fenni birinci gelir
+      var subsAll = [];
+      free.forEach(function (t) {
+        var sx = String(t.subject || "");
+        if (sx && subsAll.indexOf(sx) < 0) subsAll.push(sx);
+      });
       /*  Siyahi uc bolmede: bu sinfin platforma testleri, muellimin oz
           testleri, asagi sinifler.  Evvel hamisi bir yerde idi - 8-ci
           sinif riyaziyyat qrupu ucun ilk setir "Azerbaycan dili - 5-ci
           sinif" cixirdi (canli sual).  Bolme bosdursa gorunmur.  */
-      var gl = levelName(g.level_id) || "";
-      var own = free.filter(function (t) { return t.mine; });
-      var here = free.filter(function (t) { return !t.mine && (!gl || String(t.level || "") === gl); });
-      var lower = free.filter(function (t) { return !t.mine && gl && String(t.level || "") !== gl; });
-      function grp(label, list) {
-        return list.length
-          ? '<optgroup label="' + esc(label) + '">' + list.map(optOf).join("") + "</optgroup>"
-          : "";
+      function optsHtml(sub, q) {
+        var rows = free.filter(function (t) {
+          if (sub && String(t.subject || "") !== sub) return false;
+          if (q && (String(t.subject || "") + " " + String(t.title || "") + " " +
+                    String(t.level || "")).toLowerCase().indexOf(q) < 0) return false;
+          return true;
+        });
+        if (!rows.length) return '<option value="" disabled selected>Uyğun test yoxdur</option>';
+        var own = rows.filter(function (t) { return t.mine; });
+        var here = rows.filter(function (t) { return !t.mine && (!gl || String(t.level || "") === gl); });
+        var lower = rows.filter(function (t) { return !t.mine && gl && String(t.level || "") !== gl; });
+        function grp(label, l) {
+          return l.length
+            ? '<optgroup label="' + esc(label) + '">' +
+              l.map(function (t) { return optOf(t, !!sub); }).join("") + "</optgroup>"
+            : "";
+        }
+        return grp(gl ? "Hazır bank · " + gl : "Hazır bank", here) +
+          grp("Öz testləriniz", own) +
+          grp("Aşağı siniflər", lower);
       }
+      //  Secilmis testin qalan melumati - bir setir, secimin altinda
+      function hintOf(id) {
+        var t = free.filter(function (x) { return x.id === id; })[0];
+        if (!t) return "";
+        var bits = [(Number(t.questions) || 0) + " sual"];
+        if (t.level && String(t.level) !== gl) bits.push(String(t.level));
+        if (t.mine) bits.push("öz testiniz");
+        if (!t.is_free) bits.push("abunə tələb edir");
+        if (elsew[t.id]) bits.push("başqa qrupa da verilib");
+        return esc(bits.join(" · "));
+      }
+      var PSUB = "";
       box.innerHTML = note +
         '<label for="aTest">Test</label>' +
-        '<select id="aTest">' +
-          grp(gl ? "Hazır bank · " + gl : "Hazır bank", here) +
-          grp("Öz testləriniz", own) +
-          grp("Aşağı siniflər", lower) +
-        "</select>" +
+        (subsAll.length > 1
+          ? '<div class="chips subpick pickf" id="aSubs">' +
+            '<button type="button" class="chip on" data-sub="">Hamısı</button>' +
+            subsAll.map(function (sx) {
+              return '<button type="button" class="chip" data-sub="' + esc(sx) + '">' +
+                esc(sx) + "</button>";
+            }).join("") + "</div>"
+          : "") +
+        (free.length > 6
+          ? '<input id="aQ" class="stuq" placeholder="Test axtar…" autocomplete="off">'
+          : "") +
+        '<select id="aTest">' + optsHtml("", "") + "</select>" +
+        '<p class="muted pickhint" id="aHint"></p>' +
         //  Kime: butun qrup (kohne davranis) ve ya tek sagird
         (students.length
           ? '<label for="aWho">Kimə</label>' +
@@ -3671,7 +3714,34 @@
           (students.length ? "; tək şagird seçsəniz onu yalnız o görəcək." : ".") + "</p>" +
         '<div id="aErr"></div>' +
         '<button class="btn go" id="btnAsg">' + ic("plus") + "Tapşırıq ver</button>";
+      function pickHint() {
+        var h = $("aHint"), sel = $("aTest");
+        if (h && sel) h.innerHTML = hintOf(sel.value);
+      }
+      function pickRedraw() {
+        var sel = $("aTest");
+        if (!sel) return;
+        var cur = sel.value;
+        sel.innerHTML = optsHtml(PSUB, (($("aQ") || {}).value || "").trim().toLowerCase());
+        if (cur) sel.value = cur;
+        if (!sel.value && sel.options.length && !sel.options[0].disabled) sel.selectedIndex = 0;
+        pickHint();
+      }
       if (isNew && $("aTest")) $("aTest").value = neu;
+      pickHint();
+      on("aTest", "change", pickHint);
+      on("aQ", "input", pickRedraw);
+      if ($("aSubs")) {
+        $("aSubs").addEventListener("click", function (ev) {
+          var b = ev.target.closest("[data-sub]");
+          if (!b) return;
+          PSUB = b.getAttribute("data-sub") || "";
+          Array.prototype.forEach.call($("aSubs").querySelectorAll(".chip"), function (c) {
+            c.classList.toggle("on", c === b);
+          });
+          pickRedraw();
+        });
+      }
       //  sagird hesabatindan gelib: hemin sagird secili, yazi ile
       if (ASG_PRE && $("aWho")) {
         $("aWho").value = ASG_PRE;

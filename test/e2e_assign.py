@@ -121,6 +121,24 @@ with sync_playwright() as pw:
            if t.count("Azərbaycan dili") > 1 or t.count("Riyaziyyat") > 1]
     ok(not dup, "fenn adi siyahida tekrarlanmir", dup[:1] or labels[0])
 
+    #  Fenn dugmeleri ve axtaris siyahini suzur (canli sikayet: qarisiq)
+    if pg.locator("#aSubs").count():
+        chips = pg.locator("#aSubs .chip")
+        ok(chips.count() >= 3, "fenn dugmeleri: Hamisi + fennler", chips.count())
+        chips.nth(1).click()
+        m = pg.locator("#aTest option").count()
+        ok(0 < m < n, "fenn secilende siyahi qisalir", (m, n))
+        ok(pg.locator("#aHint").inner_text().strip() != "", "secilmis testin izahi yazilir",
+           pg.locator("#aHint").inner_text())
+        chips.nth(0).click()
+        ok(pg.locator("#aTest option").count() == n, "Hamisi - siyahi qayidir")
+    if pg.locator("#aQ").count():
+        pg.fill("#aQ", "vurma")
+        vs = pg.locator("#aTest option").all_inner_texts()
+        ok(vs and all("Vurma" in v for v in vs), "axtaris yalniz uygun testleri saxlayir", vs[:2])
+        pg.fill("#aQ", "")
+        ok(pg.locator("#aTest option").count() == n, "axtaris silinende siyahi qayidir")
+
     print("B · Tapşırıq vermək")
     lbl = [t for t in pg.locator("#aTest option").all_inner_texts()
            if "Vurma cədvəli" in t][0]

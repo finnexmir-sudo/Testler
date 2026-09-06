@@ -1485,6 +1485,16 @@ Testlər: `smoke_cavab_terzi.sql` (3), `test/e2e_inam.py`.
   «bağlasanız yalnız verdiyiniz tapşırıqları görər»; «götür» düyməsinin
   ipucu və Bağlı boş-halı «nəticələr qalır».
 
+## Tapşırıq ekranında test seçimi (canlı şikayət: «qarışıq»)
+
+`loadPick` (`muellim/app.js`). `<select id="aTest">` qalır (testlər ona
+bağlıdır), amma sətir qısadır: fənn (fənn düyməsi seçilibsə yazılmır) —
+ad — fərqli sinif — «verilib». Sual sayı, sinif, «öz testiniz», abunə,
+«başqa qrupa da verilib» seçimin altındakı `#aHint` sətrindədir.
+Üstdə `#aSubs` fənn çipləri (yalnız ≥2 fənn varsa, «Hamısı» ilkin) və
+`#aQ` axtarış (yalnız >6 test varsa) — `optsHtml(sub,q)` optgroup-ları
+yenidən qurur, seçili dəyər qalır. Yoxlama: `e2e_assign.py` (çip + axtarış).
+
 ## Ev tapşırığı avtomatı və WhatsApp mətni (yol xəritəsi 21.2)
 
 SQL yoxdur, yalnız panel. Üç yer:
