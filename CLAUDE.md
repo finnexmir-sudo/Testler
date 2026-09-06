@@ -715,9 +715,8 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     f. **Ölkə üzrə müqayisə** — anonim benchmark: «sizin 5-ci sinif
        ortalama 62%, ölkə 58%»; valideynə «ilk 20%». Data yığıldıqca
        özü işləyir.
-    g. **Sual keyfiyyəti təhlili** — cəhdlərdən ayırdetmə və distraktor
-       analizi; heç seçilməyən variant, hamının səhv etdiyi sual admin-ə
-       siqnal. Bank özü-özünü təmizləyir.
+    g. ~~**Sual keyfiyyəti təhlili**~~ **EDİLDİ** — `db/134`, bax
+       «Sual keyfiyyəti təhlili» bölməsi aşağıda.
     h. **Müəllim bankı (UGC)** — müəllim öz sualını platformaya
        «bağışlayır», qəbul olunanda pulsuz ay; moderasiya mövcud
        bildiriş axını ilə. Bank ucuz böyüyür.
@@ -1482,6 +1481,31 @@ Testlər: `smoke_cavab_terzi.sql` (3), `test/e2e_inam.py`.
   ev tapşırığı, diaqnostik, səhvlərdən təkrar); «Sərbəst məşq» açarında
   «bağlasanız yalnız verdiyiniz tapşırıqları görər»; «götür» düyməsinin
   ipucu və Bağlı boş-halı «nəticələr qalır».
+
+## Sual keyfiyyəti təhlili (yol xəritəsi 22.g)
+
+`db/134_sual_keyfiyyeti.sql`. Cədvəl `question_stats(question_id, n, p,
+rpb, opts, flags[], sev, hidden_at, computed_at)`. `app.qstat_rows(q)`
+set-əsaslı hesablayır (yalnız submit olunmuş cəhdlər, `is_correct not
+null`): `p` düz faizi, `rpb = corr(düz/səhv, cəhdin faizi)` nöqtə-biserial
+ayırdetmə, `opts[{id,body,correct,n,pct}]`. Siqnallar `n ≥ app.qstat_min()
+= 20`: `acar` (distraktor düzdən çox seçilib, sev 4), `menfi` (rpb<0, 3),
+`cetin` (p<20, 2), `olu` (seçilməyən distraktor <2%, 1), `zeif`
+(0≤rpb<0.1, n≥30, 1), `asan` (p>95, n≥40, 0). Yazılı sualda acar/olu yoxdur.
+- `rpc_admin_qstats(flag, limit, force)` — 1 saatdan köhnədirsə və ya
+  `force` `app.qstat_refresh()`; `{computed_at, min_n, rated, counts{all,
+  acar,…,hidden}, items[…]}` sev/n sırası; `flag='hidden'` baxılanlar.
+  `rpc_admin_qstat_hide(q, bool)` «Baxıldı»/«Geri qaytar»; yenidən
+  hesablama gizlini geri gətirmir. Düzəliş (`rpc_admin_fix_question`)
+  sonra panel özü `hide` çağırır — köhnə cəhdlər köhnə açarla sayılıb.
+- `rpc_bank_question.stats{n,p,rpb,flags}` canlı (bir sual üçün) —
+  redaktorda `.qstat` sətri (`qstatText`, n≥10).
+- Panel: admin ekranında «Sual keyfiyyəti» (`qsSection/qsCards/bindQs`,
+  `#qsF` çipləri sayğacla + `#qsRefresh`, `.qsc` kart: `.qsflags`,
+  `.qso` variant zolaqları, «Düzəlt» = `fixForm` (opts `correct` →
+  `is_correct` çevrilir), `[data-qhide]/[data-qshow]`).
+- Yoxlama: `smoke_keyfiyyet.sql` (3), `test/e2e_keyfiyyet.py`; bələdçi
+  müəllim addım 5 bullet.
 
 ## Adaptiv mövzu məşqi (yol xəritəsi 22.b)
 

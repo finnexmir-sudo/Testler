@@ -90,3 +90,6 @@ python3 test/e2e_parametrik.py
 echo
 echo "24/24 adaptiv mesq"
 python3 test/e2e_adaptiv.py
+echo
+echo "25/25 sual keyfiyyeti"
+python3 test/e2e_keyfiyyet.py

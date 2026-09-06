@@ -3954,10 +3954,13 @@
         sb.rpc("rpc_admin_stats", {}),
         sb.rpc("rpc_admin_accounts", { p_q: null }),
         sb.rpc("rpc_admin_reports", { p_status: "new" }),
-        sb.rpc("rpc_admin_feedback", { p_status: "new" })
+        sb.rpc("rpc_admin_feedback", { p_status: "new" }),
+        //  134: sual keyfiyyeti (kohne olsa serverde yenilenir)
+        sb.rpc("rpc_admin_qstats", { p_flag: null, p_limit: 50, p_force: false })
+          .catch(function () { return null; })
       ]).then(function (r) {
         if (!live()) return;
-        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || []);
+        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4]);
       }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -3995,7 +3998,7 @@
     on("ulCode", "keydown", function (e) { if (e.key === "Enter") go(); });
   }
 
-  function drawAdmin(st, rows, reps, fbs) {
+  function drawAdmin(st, rows, reps, fbs, qs) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "repetitor-25", name: "Repetitor — 25 şagird" }];
     show(
@@ -4046,6 +4049,8 @@
       "</div>" +
       '<div id="repList">' + (REPS_CACHE = reps, repCards(reps, "new")) + "</div>" +
       '<div class="spacer"></div>' +
+      //  134: sual keyfiyyeti - cehdlerden siqnallar
+      (qs ? qsSection(qs) : "") +
       '<h2 id="fbH">Bizə yazılanlar' + (fbs.length
         ? ' <span class="rcnt">' + fbs.length + "</span>" : "") + "</h2>" +
       '<div class="chips" id="fbF">' +
@@ -4091,6 +4096,7 @@
     });
     bindAdm();
     bindRep();
+    bindQs();
     on("repF", "click", function (ev) {
       var b = ev.target.closest ? ev.target.closest(".chip") : null;
       if (!b) return;
@@ -4296,6 +4302,184 @@
   /* --------------------------------------- admin: bildiris kartlari */
   var R_LBL = { cavab: "Cavab səhvdir", sert: "Şərt qüsurludur",
                 yazi: "Yazı xətası", diger: "Digər" };
+
+  /* ================================================================
+     SUAL KEYFIYYETI (db/134): cehdlerden siqnallar - acar subheli,
+     menfi ayirdetme, cox cetin, olu variant.  Kart: variant zolaqlari,
+     "Duzelt" (bildiris redaktoru ile eyni forma), "Baxildi".
+     ================================================================ */
+  var QS_LBL = {
+    acar: ["açar şübhəli", "səhv variant düz variantdan çox seçilib — açar yanlış ola bilər"],
+    menfi: ["mənfi ayırdetmə", "güclü şagirdlər zəiflərdən çox səhv edir — sual ikimənalı və ya açar səhvdir"],
+    cetin: ["çox çətin", "20%-dən az düz cavab"],
+    olu: ["ölü variant", "heç seçilməyən variant — distraktor işləmir"],
+    zeif: ["zəif ayırdetmə", "güclü və zəif şagird eyni cavab verir"],
+    asan: ["çox asan", "95%-dən çox düz — qüsur deyil, məlumatdır"],
+    hidden: ["baxılıb", ""]
+  };
+  var QS_CACHE = [];
+  function qsSection(qs) {
+    var c = qs.counts || {};
+    var all = Number(c.all) || 0;
+    return "<h2>Sual keyfiyyəti" + (all ? ' <span class="rcnt">' + all + "</span>" : "") + "</h2>" +
+      '<p class="muted" style="margin:-4px 0 10px" id="qsInfo">' + qsInfo(qs) + "</p>" +
+      '<div class="chips" id="qsF">' +
+        '<button class="chip on" data-qf="">Hamısı' + (all ? " · " + all : "") + "</button>" +
+        ["acar", "menfi", "cetin", "olu", "zeif", "asan", "hidden"].map(function (k) {
+          var n = Number(c[k]) || 0;
+          return '<button class="chip" data-qf="' + k + '">' + QS_LBL[k][0] + (n ? " · " + n : "") + "</button>";
+        }).join("") +
+        '<button class="chip" id="qsRefresh" title="Yenidən hesabla">↻ Yenilə</button>' +
+      "</div>" +
+      '<div id="qsList">' + (QS_CACHE = qs.items || [], qsCards(QS_CACHE, "")) + "</div>" +
+      '<div class="spacer"></div>';
+  }
+  function qsInfo(qs) {
+    return "Cəhdlərdən hesablanır: " + (Number(qs.rated) || 0) + " sual " + (qs.min_n || 20) +
+      "+ cavabla qiymətləndirilib" + (qs.computed_at ? " · " + whenAz(qs.computed_at) : "") +
+      ". Ayırdetmə: güclü şagirdlər daha çox düz edirsə müsbət; mənfi — açar səhv ola bilər.";
+  }
+  function qsCards(items, f) {
+    if (!items.length) {
+      return '<div class="card"><p class="muted" style="margin:0">' +
+        (f === "hidden" ? "Baxılmış sual yoxdur."
+          : "Siqnal yoxdur — " + (f ? "bu növdən " : "") + "bank təmizdir. 👌 (20-dən az cavabı olan suallar qiymətləndirilmir.)") +
+        "</p></div>";
+    }
+    return items.map(function (r) {
+      var qid = r.question_id;
+      var flags = r.flags || [];
+      var rpb = r.rpb == null ? "—" : (Number(r.rpb) >= 0 ? "+" : "") + Number(r.rpb).toFixed(2);
+      return '<div class="card repc qsc" data-q="' + esc(qid) + '">' +
+        '<div class="rhead"><b>' + esc(r.body) + "</b>" +
+          '<span class="rcnt" title="cavab sayı">' + r.n + "</span></div>" +
+        '<div class="qm">' +
+          (r.subject ? "<span>" + esc(r.subject) + "</span>" : "") +
+          (r.level ? "<span>·</span><span>" + esc(r.level) + "</span>" : "") +
+          (r.topic ? "<span>·</span><span>" + esc(r.topic) + "</span>" : "") +
+          "<span>·</span><span>" + (r.owner === "platform" ? "platforma" : "müəllimin öz sualı") + "</span>" +
+          "<span>·</span><span><b>" + Math.round(Number(r.p) || 0) + "%</b> düz</span>" +
+          "<span>·</span><span>ayırdetmə <b>" + rpb + "</b></span>" +
+        "</div>" +
+        '<div class="qsflags">' + flags.map(function (k) {
+          var l = QS_LBL[k] || [k, ""];
+          return '<span class="qsf ' + esc(k) + '" title="' + esc(l[1]) + '">' + esc(l[0]) + "</span>";
+        }).join("") + "</div>" +
+        (r.options || []).map(function (o) {
+          var pct = Number(o.pct) || 0;
+          return '<div class="qso' + (o.correct ? " ok" : "") + '">' +
+            '<span class="qsb"><i style="width:' + pct + '%"></i></span>' +
+            "<span class=\"qst\">" + (o.correct ? ic("check") : "") + esc(o.body) + "</span>" +
+            '<span class="qsn">' + pct + "%</span></div>";
+        }).join("") +
+        '<div class="rbtns">' +
+          (r.owner === "platform" ? '<button class="btn sm" data-qfix="' + esc(qid) + '">Düzəlt</button>' : "") +
+          (r.hidden
+            ? '<button class="btn sm ghost" data-qshow="' + esc(qid) + '">Geri qaytar</button>'
+            : '<button class="btn sm ghost" data-qhide="' + esc(qid) + '">Baxıldı</button>') +
+        "</div>" +
+        '<div class="fslot" id="qs-' + esc(qid) + '"></div>' +
+        '<div id="qm-' + esc(qid) + '"></div>' +
+      "</div>";
+    }).join("");
+  }
+  function qsLoad(f, force) {
+    sb.rpc("rpc_admin_qstats", { p_flag: f || null, p_limit: 50, p_force: !!force }).then(function (qs) {
+      QS_CACHE = (qs && qs.items) || [];
+      var box = $("qsList");
+      if (box) box.innerHTML = qsCards(QS_CACHE, f);
+      var inf = $("qsInfo");
+      if (inf && qs) inf.textContent = qsInfo(qs);
+      //  sayğaclar cipde
+      var c = (qs && qs.counts) || {};
+      Array.prototype.forEach.call(document.querySelectorAll("#qsF .chip[data-qf]"), function (b) {
+        var k = b.getAttribute("data-qf"), n = Number(k ? c[k] : c.all) || 0;
+        b.textContent = (k ? QS_LBL[k][0] : "Hamısı") + (n ? " · " + n : "");
+      });
+    }).catch(function () {});
+  }
+  function bindQs() {
+    on("qsF", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest(".chip") : null;
+      if (!b) return;
+      if (b.id === "qsRefresh") {
+        var cur0 = document.querySelector("#qsF .chip.on");
+        b.disabled = true;
+        qsLoad(cur0 ? cur0.getAttribute("data-qf") : "", true);
+        setTimeout(function () { b.disabled = false; }, 1500);
+        return;
+      }
+      var cur = document.querySelector("#qsF .chip.on");
+      if (cur) cur.classList.remove("on");
+      b.classList.add("on");
+      qsLoad(b.getAttribute("data-qf"));
+    });
+    var box = $("qsList");
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = "1";
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b || busy) return;
+      var qid = b.getAttribute("data-qfix");
+      var curF = document.querySelector("#qsF .chip.on");
+      var f = curF ? curF.getAttribute("data-qf") : "";
+      if (qid) {
+        var slot = $("qs-" + qid);
+        if (!slot) return;
+        if (slot.innerHTML) { slot.innerHTML = ""; return; }
+        var r = null;
+        QS_CACHE.forEach(function (x) { if (x.question_id === qid) r = x; });
+        if (!r) return;
+        //  bildiris redaktoru ile eyni forma - variant sahesi "is_correct" gozleyir
+        slot.innerHTML = fixForm({
+          question_id: qid, body: r.body, explanation: r.explanation,
+          options: (r.options || []).map(function (o) { return { id: o.id, body: o.body, is_correct: !!o.correct }; })
+        });
+        return;
+      }
+      qid = b.getAttribute("data-fcancel");
+      if (qid) { var s2 = $("qs-" + qid); if (s2) s2.innerHTML = ""; return; }
+      qid = b.getAttribute("data-qhide") || b.getAttribute("data-qshow");
+      if (qid) {
+        busy = true; b.disabled = true;
+        sb.rpc("rpc_admin_qstat_hide", { p_question: qid, p_hidden: !!b.getAttribute("data-qhide") })
+          .then(function () { busy = false; qsLoad(f); })
+          .catch(function (e) {
+            busy = false; b.disabled = false;
+            var m = $("qm-" + qid); if (m) m.innerHTML = msg("err", fail(e));
+          });
+        return;
+      }
+      qid = b.getAttribute("data-save");
+      if (qid) {
+        var slot3 = $("qs-" + qid);
+        if (!slot3) return;
+        var opts = [];
+        Array.prototype.forEach.call(slot3.querySelectorAll(".fob"), function (inp) {
+          var oid = inp.getAttribute("data-oid");
+          var rad = slot3.querySelector('input[type="radio"][data-oid="' + oid + '"]');
+          opts.push({ id: oid, body: inp.value, is_correct: !!(rad && rad.checked) });
+        });
+        busy = true; b.disabled = true;
+        sb.rpc("rpc_admin_fix_question", {
+          p_question: qid,
+          p_body: (slot3.querySelector(".fbody") || {}).value || "",
+          p_explanation: (slot3.querySelector(".fexp") || {}).value || "",
+          p_options: opts
+        }).then(function () {
+          //  duzeldilen sual siyahidan cixir (kohne cehdler kohne acarla hesablanib)
+          return sb.rpc("rpc_admin_qstat_hide", { p_question: qid, p_hidden: true }).catch(function () {});
+        }).then(function () {
+          busy = false;
+          admFlash = msg("ok", "Sual düzəldildi və keyfiyyət siyahısından çıxarıldı.");
+          screenAdmin();
+        }).catch(function (e) {
+          busy = false; b.disabled = false;
+          var m2 = $("qm-" + qid); if (m2) m2.innerHTML = msg("err", fail(e));
+        });
+      }
+    });
+  }
 
   function repCards(reps, st) {
     if (!reps.length) {
@@ -6036,7 +6220,7 @@
           return { body: o.body, correct: !!o.correct };
         }),
         used_in: Number(q.used_in) || 0, answered: Number(q.answered) || 0,
-        paramsText: paramsToStr(q.params)
+        paramsText: paramsToStr(q.params), stats: q.stats || null
       } : {
         id: null, body: "", kind: "single", explanation: "", difficulty: 2,
         subject: f.subject || "riyaziyyat", level: f.level || "",
@@ -6068,6 +6252,8 @@
           seg2("text", "Yazılı", q.kind) +
         "</div>" +
         '<p class="muted" style="margin:8px 0 0" id="qkindNote"></p>' +
+        //  134: sualin statistikasi (10+ cavab olanda)
+        (q.stats && Number(q.stats.n) >= 10 ? '<p class="muted qstat">' + qstatText(q.stats) + "</p>" : "") +
       "</div>" +
       '<div class="spacer"></div>' +
 
@@ -6426,6 +6612,17 @@
         (r.explanation ? '<p class="muted">' + esc(r.explanation) + "</p>" : "") +
         '<p class="muted">Hər açılışda başqa rəqəmlər çıxır — yenə basın.</p></div>';
     }).catch(function (e) { if ($("qparOut")) $("qparOut").innerHTML = msg("err", fail(e)); });
+  }
+
+  function qstatText(st) {
+    var rpb = st.rpb == null ? null : Number(st.rpb);
+    var t = "Statistika: " + st.n + " cavab · " + Math.round(Number(st.p) || 0) + "% düz";
+    if (rpb != null) {
+      t += " · ayırdetmə " + (rpb >= 0 ? "+" : "") + rpb.toFixed(2) +
+        (rpb < 0 ? " (güclü şagirdlər daha çox səhv edir — açarı yoxlayın)" : (rpb < 0.1 ? " (zəif)" : ""));
+    }
+    (st.flags || []).forEach(function (k) { if (QS_LBL[k] && k !== "menfi") t += " · " + QS_LBL[k][0]; });
+    return t;
   }
 
   function collect() {
