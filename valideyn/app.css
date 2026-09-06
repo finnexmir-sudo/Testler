@@ -116,3 +116,10 @@ details.fbd[open] summary::before{transform:rotate(45deg) translateY(-2px)}
 .att p{margin:6px 0 0;font-size:14.5px;line-height:1.5}
 .att .payok{color:var(--ok);font-weight:600}
 .att .paywait{color:var(--warn);font-weight:600}
+
+/* Bir nece usaq: secim cipleri (yol xeritesi 16) */
+.kids{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px}
+.kid{min-height:36px;padding:0 14px;border:1px solid var(--n-200);border-radius:999px;background:var(--surface);
+  font:inherit;font-size:14px;font-weight:600;color:var(--fg-2);cursor:pointer}
+.kid.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.kid.add{color:var(--brand);border-style:dashed;font-weight:500}

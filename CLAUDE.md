@@ -611,10 +611,13 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     Bazar sınağı və qiymət modeli müzakirəsi ayrıca saxlanılıb (bax:
     yerli strategiya qeydləri). Sıra hələ dəyişmir.
 
-16. **Bir valideyn — bir neçə uşaq.** İndi hər şagirdin ayrı valideyn
-    kodu var: iki uşağı olan valideyn iki kod daşıyır. Müştəri sayı
-    artanda bunlar bir girişdə birləşməlidir (bir kod → uşaq seçimi).
-    İstifadəçi ilə razılaşdırılıb: **hələlik ayrı, gələcəkdə birgə.**
+16. ~~**Bir valideyn — bir neçə uşaq.**~~ **EDİLDİ (yalnız tətbiqdə).**
+    Hər uşağın kodu ayrı qalır; valideyn tətbiqi tokenləri bir siyahıda
+    saxlayır (`KIDS`, `localStorage` `{kids:[{t,c}], cur}`; köhnə `{t,c}`
+    formatı oxunur), ev ekranında ad çipləri (`.kids`), «uşaq əlavə et»
+    → giriş ekranı «əlavə» rejimində (`ADD_MODE`). Bir uşağın sessiyası
+    bitəndə yalnız o düşür (`kidDrop`); «Çıxış» hamısını bağlayır.
+    Test: `test/e2e_valideyn_iki.py`.
 
 17. **Aktiv müəllimə aylıq endirim.** İstifadəçinin təklifi (ilk canlı
     müəllim söhbətindən sonra): proqramı fəal işlədən müəllimə növbəti

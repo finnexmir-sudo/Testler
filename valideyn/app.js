@@ -23,6 +23,38 @@
   var busy  = false;
 
   var LS = "valideyn_ses";
+  /*  Bir valideyn - bir nece usaq (yol xeritesi 16).  Her usagin oz
+      valideyn kodu ve tokeni var; telefonda hamisi bir siyahida saxlanir,
+      ekranin ustunde usaq secimi.  Serverde deyisiklik yoxdur.  */
+  var KIDS = [];       // [{t, c}]
+  var ADD_MODE = false;
+  function kidsSave() {
+    try { localStorage.setItem(LS, JSON.stringify({ kids: KIDS, cur: TOKEN })); } catch (e) {}
+  }
+  function kidsLoad() {
+    var raw = null;
+    try { raw = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) {}
+    if (!raw) return;
+    if (raw.kids && raw.kids.length) {
+      KIDS = raw.kids.filter(function (k) { return k && k.t; });
+      var cur = KIDS.filter(function (k) { return k.t === raw.cur; })[0] || KIDS[0];
+      if (cur) { TOKEN = cur.t; CHILD = cur.c || null; }
+    } else if (raw.t) {                  // kohne format: tek usaq
+      KIDS = [{ t: raw.t, c: raw.c || null }];
+      TOKEN = raw.t; CHILD = raw.c || null;
+    }
+  }
+  function kidAdd(t, c) {
+    KIDS = KIDS.filter(function (k) { return k.t !== t && !(c && k.c && k.c.name === c.name && k.c.class === c.class); });
+    KIDS.push({ t: t, c: c || null });
+    TOKEN = t; CHILD = c || null;
+    kidsSave();
+  }
+  function kidDrop(t) {
+    KIDS = KIDS.filter(function (k) { return k.t !== t; });
+    if (TOKEN === t) { TOKEN = KIDS.length ? KIDS[0].t : null; CHILD = KIDS.length ? KIDS[0].c : null; }
+    kidsSave();
+  }
 
   function $(id) { return document.getElementById(id); }
   function on(id, ev, fn) { var e = $(id); if (e) e.addEventListener(ev, fn); }
@@ -84,8 +116,9 @@
       //  iki giris ekrani eyni gorunmelidir.  Evvel valideyn ekraninda
       //  hec bir kimlik yox idi: saytin adi da, loqosu da gorunmurdu.
       '<div class="hero"><div class="mark"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lgQ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4acb"/><stop offset="1" stop-color="#0e9384"/></linearGradient></defs><path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="url(#lgQ)"/><g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/></g><path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#ffc94d"/><path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#1a2233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
-        "<h1>Uşağınızı izləyin</h1>" +
-        "<p>Müəllimin verdiyi valideyn kodunu yazın.</p></div>" +
+        "<h1>" + (ADD_MODE ? "İkinci uşağı əlavə edin" : "Uşağınızı izləyin") + "</h1>" +
+        "<p>" + (ADD_MODE ? "Bu uşaq üçün müəllimin verdiyi valideyn kodunu yazın — hər uşağın öz kodu var."
+                          : "Müəllimin verdiyi valideyn kodunu yazın.") + "</p></div>" +
       '<div class="card" style="margin-top:18px">' +
         (note || "") +
         '<div id="lErr"></div>' +
@@ -93,7 +126,8 @@
         '<input id="code" maxlength="10" autocomplete="off" autocorrect="off" ' +
           'autocapitalize="characters" spellcheck="false" placeholder="VABCD123" ' +
           'inputmode="text" enterkeyhint="go">' +
-        '<button class="btn go wide" id="btnIn">Daxil ol</button>' +
+        '<button class="btn go wide" id="btnIn">' + (ADD_MODE ? "Əlavə et" : "Daxil ol") + "</button>" +
+        (ADD_MODE ? '<button class="btn ghost wide" id="btnAddCancel" style="margin-top:8px">Ləğv et</button>' : "") +
       "</div>" +
       '<p class="note" style="text-align:center;margin-top:16px">' +
         "Kod yoxdursa müəllimdən istəyin. Giriş 30 gün açıq qalır.</p>" +
@@ -108,6 +142,7 @@
     });
     inp.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
     on("btnIn", "click", go);
+    on("btnAddCancel", "click", function () { ADD_MODE = false; screenHome(); });
 
     function go() {
       if (busy) return;
@@ -124,10 +159,8 @@
           $("lErr").innerHTML = msg("err", (d && d.error) || "Kod yanlışdır.");
           return;
         }
-        TOKEN = d.token; CHILD = d.child;
-        try {
-          localStorage.setItem(LS, JSON.stringify({ t: TOKEN, c: CHILD }));
-        } catch (e) {}
+        kidAdd(d.token, d.child);
+        ADD_MODE = false;
         screenHome();
       }).catch(function (e) {
         setBusy("btnIn", false, "Daxil ol");
@@ -149,7 +182,12 @@
       .then(function (d) { drawHome(d || {}); })
       .catch(function (e) {
         var t = (e && e.message) || "";
-        if (/Sessiya bitib/i.test(t)) { logout(true); return; }
+        if (/Sessiya bitib/i.test(t)) {
+          //  yalniz bu usagin sessiyasi bitib - qalanlar qalir
+          kidDrop(TOKEN);
+          if (TOKEN) { screenHome(); return; }
+          logout(true); return;
+        }
         show(msg("err", fail(e)) +
           '<button class="btn wide" id="btnRetry" style="margin-top:12px">' +
           "Yenidən cəhd et</button>");
@@ -160,6 +198,14 @@
   function drawHome(d) {
     var s   = d.summary || {};
     var out = "";
+
+    /* ---- usaq secimi: bir nece usaq varsa ---- */
+    if (KIDS.length > 1) {
+      out += '<div class="kids" id="kids">' + KIDS.map(function (k) {
+        return '<button type="button" class="kid' + (k.t === TOKEN ? " on" : "") + '" data-k="' + esc(k.t) + '">' +
+          esc((k.c && k.c.name) || "Uşaq") + "</button>";
+      }).join("") + '<button type="button" class="kid add" id="kidAdd">+ uşaq</button></div>';
+    }
 
     /* ---- basliq: kimin ekranidir ---- */
     out +=
@@ -305,7 +351,10 @@
     }
 
     out += '<p class="note" style="text-align:center;margin:18px 0 4px">' +
-      "Uşağınızla bağlı suallarınızı müəllimə verin — bu ekran yalnız baxmaq üçündür.</p>";
+      "Uşağınızla bağlı suallarınızı müəllimə verin — bu ekran yalnız baxmaq üçündür.</p>" +
+      (KIDS.length > 1 ? "" :
+        '<p class="note" style="text-align:center;margin:0 0 4px">Başqa uşağınız da bu müəllimdədirsə: ' +
+        '<a href="#" id="kidAdd">uşaq əlavə et</a></p>');
 
     /* ---- bize yazin: tetbiq haqqinda teklif/problem - admin oxuyur ---- */
     out += '<details class="fbd" id="fbBox"><summary>Tətbiq haqqında bizə yazın</summary>' +
@@ -326,6 +375,15 @@
       "</div></details>";
 
     show(out);
+    on("kidAdd", "click", function (e) { e.preventDefault(); ADD_MODE = true; screenLogin(""); });
+    on("kids", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-k]") : null;
+      if (!b || b.getAttribute("data-k") === TOKEN) return;
+      var k = KIDS.filter(function (x) { return x.t === b.getAttribute("data-k"); })[0];
+      if (!k) return;
+      TOKEN = k.t; CHILD = k.c || null; kidsSave();
+      screenHome();
+    });
     on("fbK", "click", function (e) {
       var b = e.target.closest ? e.target.closest(".chip") : null;
       if (!b) return;
@@ -361,10 +419,11 @@
      CIXIS
      ================================================================ */
   function logout(expired) {
-    var t = TOKEN;
-    TOKEN = null; CHILD = null;
+    var all = KIDS.map(function (k) { return k.t; });
+    if (TOKEN && all.indexOf(TOKEN) < 0) all.push(TOKEN);
+    TOKEN = null; CHILD = null; KIDS = []; ADD_MODE = false;
     try { localStorage.removeItem(LS); } catch (e) {}
-    if (t) { sb.rpc("rpc_parent_logout", { p_token: t }).catch(function () {}); }
+    all.forEach(function (t) { sb.rpc("rpc_parent_logout", { p_token: t }).catch(function () {}); });
     screenLogin(expired ? msg("warn", "Giriş vaxtı bitib. Kodu yenidən yazın.") : "");
   }
 
@@ -374,14 +433,8 @@
      BASLANGIC
      ================================================================ */
   function boot() {
-    var raw = null;
-    try { raw = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) {}
-    if (raw && raw.t) {
-      TOKEN = raw.t; CHILD = raw.c || null;
-      screenHome();
-    } else {
-      screenLogin("");
-    }
+    kidsLoad();
+    if (TOKEN) screenHome(); else screenLogin("");
   }
 
   boot();
