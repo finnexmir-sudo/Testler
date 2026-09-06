@@ -502,7 +502,7 @@ with sync_playwright() as pw:
           values ('cccc2222-0000-0000-0000-0000000000e2', %s, %s,
                   'tutor_group', 'Iki qrup', 'KODIKI01')""", (AID, UID))
     pg.goto(PANEL + "#/a/cccc2222-0000-0000-0000-0000000000e2"); pg.reload()
-    pg.wait_for_selector("#aTest", timeout=8000)
+    pg.wait_for_selector("#aList", timeout=8000)
     opts = " | ".join(pg.locator("#aTest option").all_inner_texts())
     ok("· verilib" in opts, "verilib nisani gorunur", opts[:80])
     ok("səhvlər üzərində iş" not in opts,
@@ -679,7 +679,7 @@ with sync_playwright() as pw:
         "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
         "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
     pg.click("#btnMake")
-    pg.wait_for_selector("#aTest", timeout=10000)
+    pg.wait_for_selector("#aList", timeout=10000)
     ok(pg.url.endswith("#/a/" + GID), "tapsiriq ekranina QAYIDIR", pg.url[-20:])
     ok("seçildi" in pg.inner_text("#pick .ok"), "bildiris cixir",
        pg.inner_text("#pick .ok")[:60].replace("\n", " "))
@@ -716,7 +716,7 @@ with sync_playwright() as pw:
         "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
         "document.querySelector('#gPrev').innerText.length > 5", timeout=10000)
     pg.click("#btnMake")
-    pg.wait_for_selector("#aTest", timeout=10000)
+    pg.wait_for_selector("#aList", timeout=10000)
 
     LOW = db("""select id::text i from public.tests
                  where title = 'Ikinci sinif tekrari'""", one=True)
@@ -737,7 +737,7 @@ with sync_playwright() as pw:
     ok(any("sinif" in o for o in pg.locator("#aTest option").all_inner_texts()),
        "asagi sinif testinin sinfi secim setrinde yazilir")
 
-    pg.select_option("#aTest", NEWT["i"])
+    pg.click("#aList [data-t='" + NEWT["i"] + "']")
     pg.select_option("#aWho", "")
     pg.click("#btnAsg")
     #  DIQQET: ".asg" gozlemek AZDIR - bu qrupda onsuz da teyinat var,
@@ -752,7 +752,7 @@ with sync_playwright() as pw:
        "«Tapsiriq ver» basilanda teyinat yazilir")
 
     #  bildiris bir defelikdir - ekran yenilenende qalmamalidir
-    pg.reload(); pg.wait_for_selector("#aTest", timeout=8000)
+    pg.reload(); pg.wait_for_selector("#aList", timeout=8000)
     ok(pg.locator("#pick .ok").count() == 0, "bildiris bir defelikdir")
 
     print("P · YUXARI sinif seçiləndə səbəb yazılır")
@@ -788,7 +788,7 @@ with sync_playwright() as pw:
 
     print("R · İmtina və niyyətin təmizlənməsi")
     pg.click("#btnGenHere"); pg.wait_for_selector("#btnMake", timeout=8000)
-    pg.click("#btnBack"); pg.wait_for_selector("#aTest", timeout=8000)
+    pg.click("#btnBack"); pg.wait_for_selector("#aList", timeout=8000)
     ok(pg.url.endswith("#/a/" + GID), "geri duymesi tapsiriq ekranina qaytarir",
        pg.url[-20:])
     #  niyyet silinir: adi "Test yig"dan girende qrup sahesi geri gelir

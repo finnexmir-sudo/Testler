@@ -121,28 +121,34 @@ with sync_playwright() as pw:
            if t.count("Azərbaycan dili") > 1 or t.count("Riyaziyyat") > 1]
     ok(not dup, "fenn adi siyahida tekrarlanmir", dup[:1] or labels[0])
 
-    #  Fenn dugmeleri ve axtaris siyahini suzur (canli sikayet: qarisiq)
+    #  Fenn dugmeleri ve axtaris siyahini suzur (canli sikayet: qarisiq).
+    #  Secim <select> deyil - sehifenin icindeki setirlerdir (#aList).
+    rows = pg.locator("#aList .trow")
+    ok(rows.count() == n, "siyahi setirleri gizli select ile eynidir", (rows.count(), n))
+    ok(rows.first.get_attribute("class").find("on") >= 0, "ilk test secili gelir")
+    ok("sual" in rows.first.inner_text(), "setirde sual sayi var", rows.first.inner_text())
     if pg.locator("#aSubs").count():
         chips = pg.locator("#aSubs .chip")
         ok(chips.count() >= 3, "fenn dugmeleri: Hamisi + fennler", chips.count())
         chips.nth(1).click()
-        m = pg.locator("#aTest option").count()
+        m = rows.count()
         ok(0 < m < n, "fenn secilende siyahi qisalir", (m, n))
-        ok(pg.locator("#aHint").inner_text().strip() != "", "secilmis testin izahi yazilir",
-           pg.locator("#aHint").inner_text())
+        ok(pg.locator("#aList .trow.on").count() == 1, "suzgecden sonra da bir test secilidir")
+        ok(pg.input_value("#aTest") == pg.locator("#aList .trow.on").get_attribute("data-t"),
+           "secili setir gizli select ile uygundur")
         chips.nth(0).click()
-        ok(pg.locator("#aTest option").count() == n, "Hamisi - siyahi qayidir")
+        ok(rows.count() == n, "Hamisi - siyahi qayidir")
     if pg.locator("#aQ").count():
         pg.fill("#aQ", "vurma")
-        vs = pg.locator("#aTest option").all_inner_texts()
+        vs = rows.all_inner_texts()
         ok(vs and all("Vurma" in v for v in vs), "axtaris yalniz uygun testleri saxlayir", vs[:2])
         pg.fill("#aQ", "")
-        ok(pg.locator("#aTest option").count() == n, "axtaris silinende siyahi qayidir")
+        ok(rows.count() == n, "axtaris silinende siyahi qayidir")
 
     print("B · Tapşırıq vermək")
     lbl = [t for t in pg.locator("#aTest option").all_inner_texts()
            if "Vurma cədvəli" in t][0]
-    pg.select_option("#aTest", label=lbl)
+    pg.click("#aList [data-t='" + pg.evaluate("l => Array.from(document.querySelectorAll('#aTest option')).filter(o => o.textContent === l)[0].value", lbl) + "']")
     day = (datetime.date.today() + datetime.timedelta(days=7)).isoformat()
     pg.fill("#aDate", day)
     pg.select_option("#aTry", "2")
@@ -243,7 +249,7 @@ with sync_playwright() as pw:
     pg.click("#btnRen"); pg.wait_for_selector("#gLev", timeout=8000)
     pg.select_option("#gLev", "4"); pg.click("#gSave")
     pg.wait_for_timeout(900)
-    pg.click("#btnAsgs"); pg.wait_for_selector("#aTest", timeout=8000)
+    pg.click("#btnAsgs"); pg.wait_for_selector("#aList", timeout=8000)
     ok(pg.locator("#aTest option").count() >= 1,
        "4-cu sinif qrupu ASAGI sinif testlerini gorur",
        pg.locator("#aTest option").count())
@@ -267,7 +273,7 @@ with sync_playwright() as pw:
     pg.click("#btnRen"); pg.wait_for_selector("#gLev", timeout=8000)
     pg.select_option("#gLev", "3"); pg.click("#gSave")
     pg.wait_for_timeout(900)
-    pg.click("#btnAsgs"); pg.wait_for_selector("#aTest", timeout=8000)
+    pg.click("#btnAsgs"); pg.wait_for_selector("#aList", timeout=8000)
     ok(pg.locator("#aTest option").count() >= 3,
        "sinif duzelende testler qayidir", pg.locator("#aTest option").count())
 

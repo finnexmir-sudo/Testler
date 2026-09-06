@@ -79,7 +79,7 @@ with sync_playwright() as pw:
           select %s, p.id, 'active', now() + interval '30 days' from public.plans p where p.slug='repetitor-25'""", (AID,))
     pg.goto(PANEL + "#/a/" + GID); pg.wait_for_function("document.querySelectorAll('#aTest option').length > 0", timeout=15000)
     lbl = next(o for o in pg.locator("#aTest option").all_inner_texts() if "Vurma cədvəli" in o)
-    pg.select_option("#aTest", label=lbl); pg.click("#btnAsg"); pg.wait_for_selector(".asg", timeout=15000)
+    pg.click("#aList [data-t='" + pg.evaluate("l => Array.from(document.querySelectorAll('#aTest option')).filter(o => o.textContent === l)[0].value", lbl) + "']"); pg.click("#btnAsg"); pg.wait_for_selector(".asg", timeout=15000)
 
     print("B · Şagird: tez və səhv yazır, 1-ci sualda «Əmin deyiləm»")
     KEY = {r["q"]: r["o"] for r in db("""select q.id::text q, o.id::text o from public.questions q

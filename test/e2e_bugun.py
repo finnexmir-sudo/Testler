@@ -90,11 +90,11 @@ with sync_playwright() as pw:
     ok(pg.locator("#prepGen").count() == 0 and pg.locator("#prepAsg").count() == 1, "yalniz «Tapşırıq ver» duymesi")
 
     print("C · Tapşırıq verilir → etməyənlər adbaad")
-    pg.click("#prepAsg"); pg.wait_for_selector("#aTest", timeout=15000)
+    pg.click("#prepAsg"); pg.wait_for_selector("#aList", timeout=15000)
     pg.wait_for_function("document.querySelectorAll('#aTest option').length > 0", timeout=15000)
     opts = pg.locator("#aTest option").all_inner_texts()
     lbl = next(o for o in opts if "Vurma cədvəli" in o)
-    pg.select_option("#aTest", label=lbl); pg.click("#btnAsg")
+    pg.click("#aList [data-t='" + pg.evaluate("l => Array.from(document.querySelectorAll('#aTest option')).filter(o => o.textContent === l)[0].value", lbl) + "']"); pg.click("#btnAsg")
     pg.wait_for_selector(".asg", timeout=15000)
     #  tapsiriqdan sonra hazir WhatsApp metni
     pg.wait_for_selector("#asgFlash", timeout=8000)
@@ -159,7 +159,7 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#gRec .grow", timeout=8000)
     ok(chap in pg.inner_text("#gRec") and "3-cü sinif" in pg.inner_text("#gRec"), "tovsiye: fesil + qrup", pg.inner_text("#gRec")[:80])
     pg.locator("#gRec [data-grec]").first.click()
-    pg.wait_for_selector("#asgFlash, #aTest", timeout=20000)
+    pg.wait_for_selector("#asgFlash, #aList", timeout=20000)
     pg.wait_for_function("document.querySelectorAll('#aTest option').length > 0", timeout=15000)
     sel = pg.locator("#aTest option:checked").inner_text()
     ok("ev tapşırığı" in sel, "tapsiriq ekrani teze test secili acilir", sel)

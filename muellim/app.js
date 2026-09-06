@@ -3641,37 +3641,60 @@
           testleri, asagi sinifler.  Evvel hamisi bir yerde idi - 8-ci
           sinif riyaziyyat qrupu ucun ilk setir "Azerbaycan dili - 5-ci
           sinif" cixirdi (canli sual).  Bolme bosdursa gorunmur.  */
-      function optsHtml(sub, q) {
-        var rows = free.filter(function (t) {
+      function rowsOf(sub, q) {
+        return free.filter(function (t) {
           if (sub && String(t.subject || "") !== sub) return false;
           if (q && (String(t.subject || "") + " " + String(t.title || "") + " " +
                     String(t.level || "")).toLowerCase().indexOf(q) < 0) return false;
           return true;
         });
-        if (!rows.length) return '<option value="" disabled selected>Uyğun test yoxdur</option>';
-        var own = rows.filter(function (t) { return t.mine; });
-        var here = rows.filter(function (t) { return !t.mine && (!gl || String(t.level || "") === gl); });
-        var lower = rows.filter(function (t) { return !t.mine && gl && String(t.level || "") !== gl; });
-        function grp(label, l) {
-          return l.length
-            ? '<optgroup label="' + esc(label) + '">' +
-              l.map(function (t) { return optOf(t, !!sub); }).join("") + "</optgroup>"
-            : "";
-        }
-        return grp(gl ? "Hazır bank · " + gl : "Hazır bank", here) +
-          grp("Öz testləriniz", own) +
-          grp("Aşağı siniflər", lower);
       }
-      //  Secilmis testin qalan melumati - bir setir, secimin altinda
-      function hintOf(id) {
-        var t = free.filter(function (x) { return x.id === id; })[0];
-        if (!t) return "";
-        var bits = [(Number(t.questions) || 0) + " sual"];
+      function split3(rows) {
+        return {
+          own: rows.filter(function (t) { return t.mine; }),
+          here: rows.filter(function (t) { return !t.mine && (!gl || String(t.level || "") === gl); }),
+          lower: rows.filter(function (t) { return !t.mine && gl && String(t.level || "") !== gl; })
+        };
+      }
+      var GRPL = [["here", gl ? "Hazır bank · " + gl : "Hazır bank"],
+                  ["own", "Öz testləriniz"], ["lower", "Aşağı siniflər"]];
+      /*  Gizli <select> - deyer ve testler ucun (butun testler, hemise).
+          Gorunen siyahi - .tlist setirleri; telefonda dogma acilan
+          pencere fenn dugmelerini ortduyu ucun secim sehifenin
+          icindedir, suzgecler ustde qalir.  */
+      function optsHtml(rows) {
+        var g3 = split3(rows);
+        return GRPL.map(function (x) {
+          var l = g3[x[0]];
+          return l.length
+            ? '<optgroup label="' + esc(x[1]) + '">' +
+              l.map(function (t) { return optOf(t, false); }).join("") + "</optgroup>"
+            : "";
+        }).join("");
+      }
+      function metaOf(t, hideSub) {
+        var sub = String(t.subject || ""), ttl = String(t.title || "");
+        var bits = [];
+        if (sub && !hideSub && ttl.indexOf(sub) !== 0) bits.push(sub);
         if (t.level && String(t.level) !== gl) bits.push(String(t.level));
-        if (t.mine) bits.push("öz testiniz");
-        if (!t.is_free) bits.push("abunə tələb edir");
+        bits.push((Number(t.questions) || 0) + " sual");
+        if (!t.is_free) bits.push("abunə");
         if (elsew[t.id]) bits.push("başqa qrupa da verilib");
-        return esc(bits.join(" · "));
+        return bits.join(" · ");
+      }
+      function listHtml(rows, hideSub, cur) {
+        if (!rows.length) return '<p class="muted tnone">Uyğun test yoxdur.</p>';
+        var g3 = split3(rows);
+        return GRPL.map(function (x) {
+          var l = g3[x[0]];
+          if (!l.length) return "";
+          return '<div class="tgh">' + esc(x[1]) + "</div>" + l.map(function (t) {
+            return '<button type="button" class="trow' + (t.id === cur ? " on" : "") +
+              '" data-t="' + esc(t.id) + '">' + ic("check") +
+              "<span><b>" + esc(String(t.title || "")) + "</b><small>" +
+              esc(metaOf(t, hideSub)) + "</small></span></button>";
+          }).join("");
+        }).join("");
       }
       var PSUB = "";
       box.innerHTML = note +
@@ -3687,8 +3710,8 @@
         (free.length > 6
           ? '<input id="aQ" class="stuq" placeholder="Test axtar…" autocomplete="off">'
           : "") +
-        '<select id="aTest">' + optsHtml("", "") + "</select>" +
-        '<p class="muted pickhint" id="aHint"></p>' +
+        '<select id="aTest" class="hide">' + optsHtml(free) + "</select>" +
+        '<div class="tlist' + (free.length > 7 ? " scroll" : "") + '" id="aList"></div>' +
         //  Kime: butun qrup (kohne davranis) ve ya tek sagird
         (students.length
           ? '<label for="aWho">Kimə</label>' +
@@ -3714,23 +3737,37 @@
           (students.length ? "; tək şagird seçsəniz onu yalnız o görəcək." : ".") + "</p>" +
         '<div id="aErr"></div>' +
         '<button class="btn go" id="btnAsg">' + ic("plus") + "Tapşırıq ver</button>";
-      function pickHint() {
-        var h = $("aHint"), sel = $("aTest");
-        if (h && sel) h.innerHTML = hintOf(sel.value);
+      function pickMark() {
+        var sel = $("aTest"), box2 = $("aList");
+        if (!sel || !box2) return;
+        Array.prototype.forEach.call(box2.querySelectorAll(".trow"), function (r) {
+          r.classList.toggle("on", r.getAttribute("data-t") === sel.value);
+        });
       }
-      function pickRedraw() {
-        var sel = $("aTest");
-        if (!sel) return;
-        var cur = sel.value;
-        sel.innerHTML = optsHtml(PSUB, (($("aQ") || {}).value || "").trim().toLowerCase());
-        if (cur) sel.value = cur;
-        if (!sel.value && sel.options.length && !sel.options[0].disabled) sel.selectedIndex = 0;
-        pickHint();
+      function pickRedraw(first) {
+        var sel = $("aTest"), box2 = $("aList");
+        if (!sel || !box2) return;
+        var q = (($("aQ") || {}).value || "").trim().toLowerCase();
+        var rows = rowsOf(PSUB, q);
+        //  secili test suzgecden kenarda qalibsa - siyahinin ilkini sec
+        if (!rows.filter(function (t) { return t.id === sel.value; }).length) {
+          sel.value = rows.length ? rows[0].id : "";
+        }
+        box2.innerHTML = listHtml(rows, !!PSUB || subsAll.length < 2, sel.value);
+        var onr = box2.querySelector(".trow.on");
+        if (onr && first && box2.classList.contains("scroll") && onr.scrollIntoView) {
+          onr.scrollIntoView({ block: "nearest" });
+        }
       }
       if (isNew && $("aTest")) $("aTest").value = neu;
-      pickHint();
-      on("aTest", "change", pickHint);
-      on("aQ", "input", pickRedraw);
+      pickRedraw(true);
+      on("aQ", "input", function () { pickRedraw(false); });
+      on("aList", "click", function (ev) {
+        var r = ev.target.closest("[data-t]");
+        if (!r || !$("aTest")) return;
+        $("aTest").value = r.getAttribute("data-t");
+        pickMark();
+      });
       if ($("aSubs")) {
         $("aSubs").addEventListener("click", function (ev) {
           var b = ev.target.closest("[data-sub]");
@@ -3739,7 +3776,7 @@
           Array.prototype.forEach.call($("aSubs").querySelectorAll(".chip"), function (c) {
             c.classList.toggle("on", c === b);
           });
-          pickRedraw();
+          pickRedraw(false);
         });
       }
       //  sagird hesabatindan gelib: hemin sagird secili, yazi ile
@@ -3762,7 +3799,7 @@
   function doAssign(g) {
     if (busy) return;
     var tid = ($("aTest") || {}).value;
-    if (!tid) return;
+    if (!tid) { if ($("aErr")) $("aErr").innerHTML = msg("err", "Əvvəl siyahıdan test seçin."); return; }
     var day = ($("aDate") || {}).value || "";
     var closes = null;
     if (day) {

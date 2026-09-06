@@ -1487,13 +1487,16 @@ Testlər: `smoke_cavab_terzi.sql` (3), `test/e2e_inam.py`.
 
 ## Tapşırıq ekranında test seçimi (canlı şikayət: «qarışıq»)
 
-`loadPick` (`muellim/app.js`). `<select id="aTest">` qalır (testlər ona
-bağlıdır), amma sətir qısadır: fənn (fənn düyməsi seçilibsə yazılmır) —
-ad — fərqli sinif — «verilib». Sual sayı, sinif, «öz testiniz», abunə,
-«başqa qrupa da verilib» seçimin altındakı `#aHint` sətrindədir.
-Üstdə `#aSubs` fənn çipləri (yalnız ≥2 fənn varsa, «Hamısı» ilkin) və
-`#aQ` axtarış (yalnız >6 test varsa) — `optsHtml(sub,q)` optgroup-ları
-yenidən qurur, seçili dəyər qalır. Yoxlama: `e2e_assign.py` (çip + axtarış).
+`loadPick` (`muellim/app.js`). `<select id="aTest">` GİZLİDİR (`.hide`),
+bütün testləri saxlayır — dəyər və testlər üçün. Görünən seçim `#aList`
+sətirləridir (`.trow[data-t]`, ad + alt sətirdə fənn · sinif · N sual ·
+abunə · «başqa qrupa da verilib»); toxunanda gizli select-in dəyəri
+dəyişir. Telefonda doğma açılan pəncərə fənn düymələrini örtürdü — ona
+görə siyahı səhifənin içindədir, >7 testdə `.scroll` (46vh). Üstdə
+`#aSubs` fənn çipləri (≥2 fənn, «Hamısı» ilkin) və `#aQ` axtarış (>6 test)
+`pickRedraw()` ilə siyahını süzür; seçili test süzgəcdən kənarda qalsa
+ilk sətir seçilir. Testlərdə `select_option` yox — `#aList [data-t=…]`
+klik; `wait_for_selector("#aList")`. Yoxlama: `e2e_assign.py`.
 
 ## Ev tapşırığı avtomatı və WhatsApp mətni (yol xəritəsi 21.2)
 

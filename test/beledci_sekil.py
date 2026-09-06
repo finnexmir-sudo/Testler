@@ -103,7 +103,7 @@ with sync_playwright() as p:
     t.wait_for_function("document.querySelectorAll('#aTest option').length > 0", timeout=15000)
     opts = t.locator("#aTest option").all_inner_texts()
     lbl = next(o for o in opts if "Vurma cədvəli" in o)
-    t.select_option("#aTest", label=lbl)
+    t.click("#aList [data-t='" + t.evaluate("l => Array.from(document.querySelectorAll('#aTest option')).filter(o => o.textContent === l)[0].value", lbl) + "']")
     t.fill("#aDate", (datetime.date.today() + datetime.timedelta(days=7)).isoformat())
     t.select_option("#aTry", "2")
     shot(t, "m5_tapsiriq_ver")
