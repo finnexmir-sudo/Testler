@@ -731,6 +731,49 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     Qayda: heç biri tətbiqdən xarici şəbəkəyə çıxmır; AI ilə izah/variant
     yaradılması yalnız oflayn, admin tərəfində, banka yazılaraq.
 
+23. **İzah qatı: ipucu · həll addımları · mövzu kartı (2026-09-06,
+    müzakirə olunub, HƏLƏ EDİLMƏYİB — istifadəçi «yadda saxla» dedi).**
+    Vəziyyət: hər sualda izah var, amma orta 40 simvol — bir cümləlik
+    fakt, «niyə» yoxdur; şəkilli sual 0. Eskiz (üç işləyən ekran):
+    https://claude.ai/code/artifact/ab21a607-df7e-4ceb-90f1-a3f1f6fc9c09
+    Qərarlar:
+    - Üç pillə: **ipucu** (cavabdan əvvəl, yalnız mövzu məşqində, bal
+      yarıya), **həll addımları** (səhvdən sonra bir-bir açılır; mövcud
+      `explanation` sahəsi «1) 2) 3)» ilə başlayanda addım kimi göstərilir,
+      sxem dəyişmir), **mövzu kartı** (kök mövzuya bir dəfə: qayda, 2
+      nümunə, tipik səhv, özünü yoxla; «Mövzunu oxu» səhvdən, məşqdən,
+      plandan açılır). Hər səhv varianta «niyə səhvdir» cümləsi.
+    - Fənn növünə görə: riyaziyyat/fizika/kimya/informatika — addımlar
+      (7+ sinifdə düstur göstəricisi lazımdır: kəsr, kök, dərəcə, indeks,
+      kənar kitabxanasız); Az dili/ingilis — «qayda → nümunə → tətbiq»;
+      tarix/ədəbiyyat/coğrafiya/biologiya — yalnız kart + distraktor
+      cümləsi (ipucu işləmir). Bilik fənləri bankın yarısından çoxudur.
+    - Hamısına yox: kart 618 kök mövzuya (bütün sualları bir dəfəyə
+      örtür); addım/distraktor yalnız `question_stats`-ın göstərdiyi ən
+      çox səhv edilən suallara («izah gözləyən» növbə, ən çox səhv əvvəl).
+      Şablon suallarda addımlar da şablondur (`{a%10}`).
+    - Bölgü: **bu depo** — sxem (sualda `hint`, variantda `why`, mövzuda
+      `card`), «1)» addım göstərilməsi, ipucu/«Həlli göstər»/«Mövzunu
+      oxu», düstur göstəricisi, müəllimin «İzah yaz» + admin təsdiqi +
+      pulsuz gün, «izah aydın deyil» bildiriş səbəbi, bank faylları üçün
+      format nümunəsi + yoxlayıcı (riyaziyyatda addımların son cavabı
+      açarla düz gəlməlidir), növbə skripti. **bil10-bank** (o biri
+      sessiya; format: hər fənn-sinif bir SQL, sətir = ext_key, mövzu,
+      diff, rüb, body, why, opts[], correct; `tools/*.py` yaradır) —
+      sətirlərə `ipucu`, `sehv_niye[]` sütunları (izah «1)» ilə), yeni
+      `kart_<fenn><sinif>.sql` fayl tipi, riyaziyyat suallarının şablona
+      çevrilməsi. Görüş nöqtəsi yalnız sütun adlarıdır.
+    - Sıra və qapı: kod (2–3 gün) → məzmun yalnız 3-cü sinif riyaziyyat
+      (8 kart + o fəsillərin sualları) → ölçü: səhv dəftərində bağlanma
+      payı, mövzu məşqində mənimsəmə faizi, «izah aydın deyil» sayı,
+      izahlı/izahsız mövzu müqayisəsi → rəqəm göstərsə genişlənir, yoxsa
+      618 kart yazılmır. Bələdçiyə edilməmiş iş yazılmır.
+    - Dəyər qiymətləndirməsi: şagirdə çox (izahsız səhv dəftəri və məşq
+      təxminetməyə çevrilir), valideynə orta (abunənin qalması), müəllimə
+      az (alış qərarını dəyişmir; bəzi repetitor istəməyəcək). Pilot
+      üçün lazım deyil; «test sistemi»ndən «öyrənmə sistemi»nə keçid
+      üçün lazımdır. Hər halda həqiqi istifadəçi rəyi bundan vacibdir.
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); valideyn
 girişində qiymət modeli — pilotdan sonra (təfərrüat: yerli strategiya
