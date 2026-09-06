@@ -641,6 +641,9 @@
       if (!live() || !v) return;
       var st = v.stats || {};
       var t = $("hTiles");
+      //  tek qruplu muellime "1 qrup · N sagird" lovheleri hec ne demir -
+      //  reqemler onsuz da asagida gorunur (UX auditi)
+      if (t) t.classList.toggle("hide", (Number(st.groups) || 0) < 2);
       if (t) {
         t.innerHTML =
           '<div class="tile a"><b>' + (st.groups || 0) + "</b><span>qrup</span></div>" +
@@ -1805,6 +1808,19 @@
           ? '<details class="arxiv"><summary>Dayandırılmış <span>' + dayan.length +
             "</span></summary>" + dayan.map(stuRow).join("") + "</details>"
           : "");
+      //  10-dan cox sagirdde ad axtarisi (siyahi uzanir, barmaqla gezmek cetin)
+      var q = $("stuQ");
+      if (aktiv.length > 10 && !q) {
+        box.insertAdjacentHTML("beforebegin",
+          '<input id="stuQ" class="stuq" placeholder="Şagird axtar…" autocomplete="off">');
+        q = $("stuQ");
+        q.addEventListener("input", function () {
+          var v = q.value.trim().toLowerCase();
+          Array.prototype.forEach.call(document.querySelectorAll("#stu .stu[data-row]"), function (r) {
+            r.classList.toggle("hide", !!v && r.textContent.toLowerCase().indexOf(v) < 0);
+          });
+        });
+      } else if (aktiv.length <= 10 && q) { q.remove(); }
 
       function stuRow(s) {
         //  Dayandirilmis sagirdin kodu ONSUZ DA islemir (app.session_student
@@ -2938,10 +2954,8 @@
       if (r.topics !== null) {
         hX += "<h2>Valideyn üçün xülasə</h2>" +
           '<div class="card">' +
-            '<div class="segs" id="vSty">' +
-              seg("isti",  "Səmimi", VSTY) +
-              seg("resmi", "Rəsmi",  VSTY) +
-            "</div>" +
+            //  Semimi/Resmi secimi cixarildi: muellim birini secib bir daha
+            //  deyismirdi (UX auditi) - tek uslub, tek duyme
             '<textarea id="vTxt" class="veltxt" readonly rows="12"></textarea>' +
             '<p class="muted" style="margin:0 0 12px">Mətni kopyalayıb ' +
               "WhatsApp-da valideynə göndərin.</p>" +
@@ -5090,6 +5104,8 @@
     box.innerHTML = '<table class="ppw"><tfoot><tr><td>' +
       '<div class="ppfoot">' + foot + "</div></td></tr></tfoot>" +
       "<tbody><tr><td>" + h + "</td></tr></tbody></table>";
+    //  yigcam: kicik srift, variantlar bir setirde - 30 sual 2 sehifeye sigir
+    box.classList.toggle("compact", !!($("prnC") && $("prnC").checked));
     document.body.classList.add("printing");
     function off() {
       document.body.classList.remove("printing");
@@ -5138,6 +5154,7 @@
             "Çap / PDF</button>" +
           '<button class="btn sm ghost" id="btnPrnK">' + ic("key") +
             "Cavab açarı ilə</button>" +
+          '<label class="prnc"><input type="checkbox" id="prnC"> Yığcam</label>' +
           (t.gen_rule && !done && !diag
             ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
               "Yenidən yığ</button>"

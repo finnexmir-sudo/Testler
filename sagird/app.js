@@ -1071,13 +1071,20 @@
             '<p class="muted" style="margin:6px 0 0">' +
               (CLS ? esc(CLS.name) + " qrupundan " : "") +
               "bu testi işləyənlər</p></div>";
+        //  6 neferden az yazibsa siralama yoxdur: kicik qrupda sonuncu
+        //  olmaq kederlendirir (UX auditi).  Yalniz oz neticesi gorunur.
+        var few = rows && rows.length > 0 && rows.length < 6;
+        if (few) {
+          rows = rows.filter(function (x) { return x.is_me; });
+          h += '<p class="note" style="margin:0 0 8px">Sıralama 6 nəfərdən sonra açılır. Hələlik öz nəticən:</p>';
+        }
         if (!rows || !rows.length) {
           h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("cup") +
                "</div><b>Lövhə boşdur</b>Bu testi hələ kimsə işləməyib.</div></div>";
         } else {
           h += '<div class="card pad0">' + rows.map(function (x) {
             return '<div class="lb' + (x.is_me ? " me" : "") + '">' +
-              '<span class="rk">' + x.rank + "</span>" +
+              '<span class="rk">' + (few ? "•" : x.rank) + "</span>" +
               '<span class="nm">' + esc(x.name) +
                 (x.tries > 1 ? ' <s>' + x.tries + " cəhd</s>" : "") + "</span>" +
               '<span class="pc">' + Math.round(x.percent) + "%</span></div>";

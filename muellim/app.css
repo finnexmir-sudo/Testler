@@ -785,7 +785,10 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
    #printBox ekranda hec vaxt gorunmur - yalniz cap zamani.
    body.printing sinfi paperPrint() icinde qoyulub goturulur. */
 #printBox{display:none}
-.prnrow{display:flex;gap:8px;flex-wrap:wrap}
+.prnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.prnc{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--fg-2);cursor:pointer}
+.prnc input{width:16px;height:16px;min-height:0;margin:0;accent-color:var(--brand)}
+.stuq{margin:0 0 10px}
 @media print{
   @page{margin:12mm}
   body.printing>:not(#printBox){display:none!important}
@@ -801,6 +804,13 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   #printBox .ppmu{font-weight:400;font-style:italic;font-size:11px}
   #printBox .ppo{margin:2px 0 2px 16px}
   #printBox .ppl{margin:8px 0 2px 16px}
+  #printBox.compact{font-size:11px;line-height:1.35}
+  #printBox.compact h1{font-size:15px}
+  #printBox.compact .pph{margin:0 0 8px;padding-bottom:5px}
+  #printBox.compact .ppq{margin:0 0 6px}
+  #printBox.compact .ppb{margin:0 0 1px}
+  #printBox.compact .ppo{display:inline-block;margin:0 14px 0 8px}
+  #printBox.compact .ppl{margin:2px 0 0 8px}
   #printBox .ppk{break-before:page;page-break-before:always}
   #printBox .ppk h2{font-size:15px;margin:0 0 10px;color:#000;
     text-transform:none;letter-spacing:0}

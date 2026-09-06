@@ -338,14 +338,15 @@ with sync_playwright() as pw:
 
     # Esas sehife: lovheler dolur, hesab-boyu tehluke zonasi gorunur
     pg.goto(PANEL + "#/"); pg.reload()
-    pg.wait_for_selector(".tiles", timeout=8000)
+    pg.wait_for_selector(".tiles", state="attached", timeout=8000)
     pg.wait_for_function(
         "document.querySelector('.tile b') && document.querySelector('.tile b').innerText !== '—'",
         timeout=8000)
     ok("Xoş gəlmisiniz" in pg.inner_text("#main"), "salamlasma var")
-    ok(pg.locator(".tile").count() == 4, "4 stat lovhesi var")
-    ok(pg.inner_text(".tile.c b") == "1", "sagird sayi lovhede",
-       pg.inner_text(".tile.c b"))
+    #  tek qruplu muellimde 4 lovhe gizlidir (UX auditi); DOM-da qalir
+    ok(pg.locator(".tile").count() == 4 and not pg.locator("#hTiles").is_visible(), "tek qrupda stat lovheleri gizlidir")
+    ok(pg.locator(".tile.c b").inner_text() == "1", "sagird sayi lovhede (gizli)",
+       pg.locator(".tile.c b").inner_text())
     pg.wait_for_selector("#hAlerts .al", timeout=8000)
     ok("geriləyir" in pg.inner_text("#hAlerts"), "ev sehifesinde de siqnal var")
     ok(pg.locator("#hRecent .trow").count() >= 1, "son neticeler lenti dolur",
@@ -431,15 +432,12 @@ with sync_playwright() as pw:
     ok("%" in t, "faizler metndedir")
     ok("↘" in t, "enme trendi gorunur (gerileyen sagird)")
     ok("Vurma və bölmə" in t, "zeif movzu metnde adi ile var")
-    pg.locator("#vSty .seg", has_text="Rəsmi").click(); pg.wait_for_timeout(200)
-    t2 = pg.input_value("#vTxt")
-    ok("Hörmətli valideyn" in t2, "resmi uslub muracietle baslayir")
-    ok("📊" not in t2, "resmi uslubda emoji yoxdur")
+    ok(pg.locator("#vSty").count() == 0, "uslub secimi yoxdur - tek (semimi) metn")
     pg.click("#vCopy"); pg.wait_for_timeout(400)
     ok("Kopyalandı" in pg.inner_text("#vCopy"), "kopyalama tesdiqi gorunur",
        pg.inner_text("#vCopy"))
     cb = pg.evaluate("navigator.clipboard.readText()")
-    ok(cb == t2, "mubadile buferine TAM metn dusur")
+    ok(cb == t, "mubadile buferine TAM metn dusur")
 
     print("M · Dinamika, cavab vərəqi, səhvlərdən test")
     pg.click("#sTabs [data-v='t']"); pg.wait_for_timeout(150)

@@ -1373,6 +1373,18 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## Xırdalar (yol xəritəsi 20e, 20g)
+
+- 10-dan çox aktiv şagirddə qrup siyahısının üstündə «Şagird axtar…»
+  (`#stuQ`, client-side, sətir `.hide`).
+- Test vərəqində «Yığcam» çap: `#printBox.compact` (11px, variantlar bir
+  sətirdə) — 30 sual 2 səhifəyə.
+- Lövhə: 6 nəfərdən az yazıbsa sıralama yoxdur, yalnız öz nəticəsi
+  (`few`); e2e_student tək nəticə ilə keçir.
+- İcmalda 4 lövhə yalnız 2+ qrupda görünür (`#hTiles.hide`).
+- Valideyn mətnində Səmimi/Rəsmi seçimi çıxarıldı — tək (səmimi) mətn,
+  `velText("isti")`; «resmi» şablonu kodda qalır.
+
 ## Fərdi plan (db/131, yol xəritəsi 18c)
 
 `student_plans(student_id, subject_id unique, level_id, attempt_id)`,
