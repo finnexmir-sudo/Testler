@@ -815,6 +815,53 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     bəndlərindən (ölkə müqayisəsi, müəllimin səhifəsi) vacibdir.
     Bələdçiyə edilməmiş iş yazılmır.
 
+25. **Unutma əyrisi: gündəlik 5 dəqiqə (2026-09-06, istifadəçi «çox
+    bəyəndim» dedi, HƏLƏ EDİLMƏYİB).** Səhv dəftəri səhvləri qaytarır;
+    düz bilinən mövzular da unudulur. Hər gün 5 sual: keçmiş mövzulardan,
+    aralıqlı təkrar cədvəli ilə (mövzu keçiləndən / mənimsəniləndən 1
+    həftə, 1 ay, 3 ay sonra; düz cavab intervalı uzadır, səhv qısaldır).
+    Mənbə: plandakı keçilmiş mövzular (`class_plan_items.done_at`), mövzu
+    məşqində mənimsənilənlər (`practice.mastered_at`), yazılmış testlərin
+    mövzuları. Sual seçimi `app.practice_pool`-dan (görülməmiş əvvəl,
+    şablon suallar təzə rəqəmlə); düz variant getmir; səhv `mistake_note`
+    ilə dəftərə. Şagird ev ekranında «Bu günün 5-i» kartı + ardıcıllıq
+    (streak) sayğacı; 5-i bitirəndə «sabah yenə». Müəllim hesabatında
+    «unutma»: hansı köhnə mövzu yenidən zəifləyib (təkrar dərs siqnalı).
+    Cədvəl: `review_topics(student_id, topic_id, next_at, interval_days,
+    ok_n, bad_n)`. Elmi əsas ən möhkəm öyrənmə üsuludur (aralıqlı
+    təkrar); bütün məlumat var, həcm orta.
+
+26. **Kağız rejimi: QR vərəq (2026-09-06, istifadəçi «çox bəyəndim»
+    dedi, HƏLƏ EDİLMƏYİB).** Çox müəllim dərsdə telefonu qadağan edir.
+    Axın: test vərəqi çap olunur (mövcud `#/t/` vərəqi), üstündə test
+    kodu/QR; şagird kağızda işləyir; müəllim telefonunda «Kağızdan daxil
+    et» ekranında şagirdi seçib cavabları hərflə vurur (A C B D … — bir
+    sətir, 20 saniyə); sistem `rpc_paper_submit(class, test, student,
+    answers text)` ilə cəhd yaradır (`attempts` + `attempt_answers`,
+    `source='paper'`), bal serverdə, hesabat/səhv dəftəri/mövzu xəritəsi
+    eyni işləyir. Vərəqdə hər sualın variantları çapda sabit sırada
+    olmalıdır (shuffle söndürülür, vərəqdəki sıra = daxiletmə sırası —
+    `paper_seed` ilə saxlanır). Şablon suallar vərəqdə bir variantla
+    çıxır — daxiletmə həmin variantın açarı ilə yoxlanır (vərəq
+    yaradılanda `params` saxlanmalıdır). Boş cavab «-» = cavabsız
+    (null). Yazılı sual dəstəklənmir (yalnız variantlı). Toplu rejim:
+    bir ekranda bütün qrup, sətir-sətir. Yerli bazarda kağız + rəqəm
+    birləşməsini heç kim vermir; həcm orta.
+
+27. **Kiçik faydalı ideyalar (2026-09-06, hələ seçilməyib).**
+    a. Ayrılma xəbərdarlığı: tapşırıq edilmə düşür + valideyn ekranı
+       açılmır + davamiyyət seyrəlir → müəllimə «ayrılma riski» sətri.
+    b. Köçürmə siqnalı: evdə yazılan testdə iki şagirdin səhvləri eyni
+       və vaxtları yaxın → sakit nişan, hökm yox.
+    c. Plan sürəti: plan × təqvim → «bu sürətlə iyunda 4 fəsil qalır».
+    d. Valideynə həftəlik hazır mesaj (cümə): tapşırıq sayı, faiz,
+       zəif mövzu, gələn həftə — bir toxunuşla WhatsApp.
+    e. Ödəniş xatırlatması: dəftərdə «ödənilməyib» → nəzakətli hazır
+       mətn, bir toxunuşla göndərmə.
+    f. Valideyndən «bu gün gələ bilmir» düyməsi → müəllimin dəftərində.
+    g. İl sonu sertifikatı: mənimsənilmiş mövzular, ən yaxşı nəticələr,
+       müəllimin adı ilə şəkil (irəliləyiş kartının il versiyası).
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); valideyn
 girişində qiymət modeli — pilotdan sonra (təfərrüat: yerli strategiya
