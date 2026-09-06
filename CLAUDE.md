@@ -1369,6 +1369,26 @@ zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzul
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
 
+## Dəftər: davamiyyət və ödəniş (db/130, yol xəritəsi 21.4)
+
+`lessons(class_id, held_on unique)`, `attendance(lesson_id, student_id,
+present)`, `fee_payments(student_id, month, paid, amount_minor, note)` —
+`payments` adı abunə sistemində məşğuldur, ona görə `fee_payments`.
+RLS bağlı; RPC: `rpc_lesson_mark(class, date, present[], absent[])`
+(upsert; yad şagird rədd; gələcək tarix rədd), `rpc_lesson_delete`,
+`rpc_payment_set(student, month, paid, amount, note)` (məbləğ və qeyd
+toggle-da itmir), `rpc_ledger_get(class, month)` → ay: dərslər, bu günün
+vərəqi, şagird başına iştirak/ödəniş. Hamısı `app.plan_class` ilə
+qorunur, abunə qapısı yoxdur (yapışqan, pulsuz).
+Panel: qrup ekranında üçüncü sekmə «Dəftər» (`GTAB='d'`, `loadLedger`,
+`LED_M` ay, `LED_EDIT` vərəq açıq): «Dərs oldu» → ad çipləri (hamı
+seçili, toxunub söndür) → «Yadda saxla»; şagird sətrində «5/6 dərs» və
+ödəniş düyməsi (toggle); «Dərslər» yığılmış siyahı, sil.
+Valideyn: `rpc_parent_home.attendance` {lessons, attended, paid|null} →
+«Davamiyyət · ay» kartı (ödəniş yalnız qeyd varsa).
+Testlər: `smoke_davamiyyet.sql` (4), `test/e2e_davamiyyet.py`; bələdçi
+addım 9 (`m12_defter.png`), valideyn addım 2.
+
 ## İrəliləyiş kartı (yol xəritəsi 21.3) və Səhv dəftəri (db/129, 21.5)
 
 **İrəliləyiş kartı** — SQL yoxdur. Şagird hesabatı Xülasə, 2+ cəhddə:

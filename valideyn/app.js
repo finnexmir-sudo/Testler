@@ -197,6 +197,23 @@
 
     /* ---- gozleyen tapsiriq: ekranin en vacib hissesi ---- */
     var pend = d.pending || [];
+    /* ---- davamiyyet ve odenis (db/130): bu ay ---- */
+    var at = d.attendance || {};
+    if (Number(at.lessons) > 0 || at.paid != null) {
+      var ayv = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avqust","sentyabr","oktyabr","noyabr","dekabr"];
+      out += "<h2>Davamiyyət · " + ayv[new Date().getMonth()] + "</h2>" +
+        '<div class="card att">' +
+          (Number(at.lessons) > 0
+            ? '<div class="big2">' + at.attended + " / " + at.lessons + "</div>" +
+              "<p>" + at.lessons + " dərsdən <b>" + at.attended + "</b>-də iştirak edib." +
+              (Number(at.lessons) - Number(at.attended) > 0
+                ? " " + (Number(at.lessons) - Number(at.attended)) + " dərsə gəlməyib." : "") + "</p>"
+            : "<p>Bu ay hələ dərs qeyd olunmayıb.</p>") +
+          (at.paid === true ? '<p class="payok">Bu ayın ödənişi: edilib ✓</p>'
+            : (at.paid === false ? '<p class="paywait">Bu ayın ödənişi: gözlənilir</p>' : "")) +
+        "</div>";
+    }
+
     out += '<h2>Gözləyən tapşırıq</h2>';
     if (!pend.length) {
       out += '<div class="card ok-box">Gözləyən tapşırıq yoxdur.</div>';

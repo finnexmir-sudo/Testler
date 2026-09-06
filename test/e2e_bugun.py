@@ -105,7 +105,7 @@ with sync_playwright() as pw:
        "WhatsApp linki test adi ve 'Tapşırıqlar' ile", href[:60])
     ok("Kodunla gir" in pg.locator("#asgFlash .watxt").input_value(), "metn qutuda kopyalanmaga hazir")
     pg.click("#btnBack"); t = prep(pg)
-    ok("Etməyənlər" in t and "Ayan Bir" in t and "Murad İki" in t, "iki sagird etmeyib", t[-120:])
+    ok("Etməyənlər" in t and "Ayan" in t and "Murad" in t and "Ayan Bir" not in t, "iki sagird etmeyib - yalniz ad", t[-120:])
     ok("2/2 şagird" in t, "2/2 sagird")
 
     print("D · Ayan yazır → siyahıdan çıxır")
@@ -119,7 +119,7 @@ with sync_playwright() as pw:
             perform public.rpc_submit_attempt(tok, att, ans);
           end $$""", (CODE1, T1, T1))
     pg.reload(); t = prep(pg)
-    ok("Murad İki" in t and "Ayan Bir" not in t and "1/2 şagird" in t, "yalniz Murad qalib", t[-100:])
+    ok("Murad" in t and "Ayan" not in t and "1/2 şagird" in t, "yalniz Murad qalib", t[-100:])
     ok(pg.locator("#prep a[href^='#/s/']").count() == 1, "ad sagird hesabatina linkdir")
 
     print("E · Plan qurulur → növbəti mövzu; «Keçildi» → son keçilən + test düyməsi")

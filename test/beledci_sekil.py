@@ -206,6 +206,16 @@ with sync_playwright() as p:
     if not ONLY or "m11_bu_gun" in ONLY:
         t.locator("#prep .prep").screenshot(path=f"{OUT}/m11_bu_gun.png"); print("   m11_bu_gun")
 
+    # ---------------- DEFTER: bu gun ders oldu, biri gelmeyib, biri odeyib
+    t.goto(PANEL + "#/g/" + gid); t.wait_for_selector("#gTabs", timeout=15000)
+    t.click("#gTabs [data-v='d']"); t.wait_for_selector("#ledOpen", timeout=15000); t.click("#ledOpen")
+    t.wait_for_selector("#ledChips [data-st]", timeout=15000)
+    t.locator("#ledChips [data-st]").nth(2).click(); t.click("#ledSave")
+    t.wait_for_selector("#ledEdit", timeout=15000)
+    t.locator("[data-pay]").first.click(); t.wait_for_selector(".pay.on", timeout=15000); t.wait_for_timeout(400)
+    if not ONLY or "m12_defter" in ONLY:
+        t.locator("#ledgerBox").screenshot(path=f"{OUT}/m12_defter.png"); print("   m12_defter")
+
     # ---------------- VALIDEYN (390x844)
     v = page(ctx, 390, 844)
     v.goto(PARENT); v.wait_for_selector("#code", timeout=15000)

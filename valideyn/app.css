@@ -110,3 +110,9 @@ details.fbd[open] summary::before{transform:rotate(45deg) translateY(-2px)}
   padding:10px 12px;border:1px solid var(--n-200);border-radius:10px;background:var(--surface);color:var(--fg)}
 .fbrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
 .fbn{font-size:12px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+
+/* Davamiyyet (db/130) */
+.att .big2{font-size:30px;font-weight:700;letter-spacing:-.02em;color:var(--brand)}
+.att p{margin:6px 0 0;font-size:14.5px;line-height:1.5}
+.att .payok{color:var(--ok);font-weight:600}
+.att .paywait{color:var(--warn);font-weight:600}

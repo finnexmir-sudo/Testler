@@ -58,20 +58,23 @@ echo
 echo "13/14 tedris fennleri"
 python3 test/e2e_fenn.py
 echo
-echo "14/19 valideyn girisi"
+echo "14/20 valideyn girisi"
 python3 test/e2e_valideyn.py
 echo
-echo "15/19 diaqnostika"
+echo "15/20 diaqnostika"
 python3 test/e2e_diaq.py
 echo
-echo "16/19 bize yaz"
+echo "16/20 bize yaz"
 python3 test/e2e_bize.py
 echo
-echo "17/19 bu gunun dersi"
+echo "17/20 bu gunun dersi"
 python3 test/e2e_bugun.py
 echo
-echo "18/19 cavab terzi"
+echo "18/20 cavab terzi"
 python3 test/e2e_inam.py
 echo
-echo "19/19 sehv defteri"
+echo "19/20 sehv defteri"
 python3 test/e2e_defter.py
+echo
+echo "20/20 davamiyyet"
+python3 test/e2e_davamiyyet.py

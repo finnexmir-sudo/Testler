@@ -426,6 +426,27 @@ details.more.filt .fn{
 .pex{margin-top:10px;font-size:12.5px;color:var(--fg-2);line-height:1.5;
   border-left:3px solid var(--n-150);padding-left:10px}
 
+/* ------------------------------------------ defter: davamiyyet + odenis */
+.lhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lhead b{font-size:15px;font-weight:650}
+.lhead .muted{margin-left:auto;font-size:12.5px}
+.ltoday{margin-top:10px}
+.lt1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lt1 b{font-size:14px}
+.lt1 .btn{margin-left:auto}
+.lchips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.lch{min-height:36px;padding:0 12px;border:1px solid var(--n-200);border-radius:999px;background:var(--surface);
+  font:inherit;font-size:13.5px;color:var(--fg-3);cursor:pointer}
+.lch.on{background:var(--ok-tint);border-color:var(--ok-line);color:#05603a;font-weight:600}
+.lrow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--n-100)}
+.lrow:last-child{border-bottom:0}
+.lrow .g{flex:1;min-width:0}
+.lrow .g b{display:block;font-size:14px;font-weight:600}
+.lrow .g i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-3);margin-top:2px}
+.pay{min-height:32px;padding:0 11px;border:1px solid var(--n-200);border-radius:999px;background:var(--surface);
+  font:inherit;font-size:12.5px;font-weight:600;color:var(--fg-3);cursor:pointer;white-space:nowrap}
+.pay.on{background:var(--ok-tint);border-color:var(--ok-line);color:#05603a}
+
 /* ---------------------------------------- irelileyis karti (canvas) */
 .pcard canvas{display:block;width:100%;max-width:360px;height:auto;border-radius:14px;
   border:1px solid var(--n-100);box-shadow:0 8px 24px -12px rgba(43,74,203,.4)}

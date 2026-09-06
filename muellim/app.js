@@ -791,6 +791,132 @@
      Sistem OZU deyir: kim gerileyir, kim zeif movzudadir, kim
      sabitdir.  Muellim tek-tek hesabat acmaga mecbur deyil.
      Az melumatda server susur - yalan siqnal inami oldurur. */
+  /* ================================================================
+     DEFTER - davamiyyet ve odenis (db/130, yol xeritesi 21.4)
+     Her repetitorun defterçesi: "Bu gun ders oldu" -> kim gelib;
+     ay sonunda "6 ders, 5-de istirak, odenilib".  Valideyn oz
+     ekraninda istirak sayini gorur.  Pulsuz.
+     ================================================================ */
+  var LED_M = null;    // baxilan ay (YYYY-MM-01)
+  var LED_D = null;    // son cavab
+  var AYL = ["Yanvar","Fevral","Mart","Aprel","May","İyun","İyul","Avqust","Sentyabr","Oktyabr","Noyabr","Dekabr"];
+  function monthKey(d) { return d.getFullYear() + "-" + (d.getMonth() < 9 ? "0" : "") + (d.getMonth() + 1) + "-01"; }
+  function todayKey() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth() < 9 ? "0" : "") + (d.getMonth() + 1) + "-" + (d.getDate() < 10 ? "0" : "") + d.getDate(); }
+  function loadLedger(g) {
+    var live = guard();
+    if (!LED_M) LED_M = monthKey(new Date());
+    sb.rpc("rpc_ledger_get", { p_class_id: g.id, p_month: LED_M }).then(function (d) {
+      if (!live()) return;
+      LED_D = d || {};
+      drawLedger(g);
+    }).catch(function (e) {
+      var box = $("ledgerBox");
+      if (box) box.innerHTML = msg("err", fail(e));
+    });
+  }
+  function drawLedger(g) {
+    var box = $("ledgerBox");
+    if (!box) return;
+    var d = LED_D, m = new Date(LED_M), cur = monthKey(new Date()) === LED_M;
+    var sts = d.students || [], les = d.lessons || [];
+    var paidN = sts.filter(function (x) { return x.paid; }).length;
+    var tk = todayKey();
+    var today = d.today;
+    var h =
+      '<div class="card tight lhead">' +
+        '<button class="btn sm ghost icon" id="ledPrev" aria-label="Əvvəlki ay">' + ic("back") + "</button>" +
+        "<b>" + AYL[m.getMonth()] + " " + m.getFullYear() + "</b>" +
+        '<button class="btn sm ghost icon" id="ledNext" aria-label="Növbəti ay"' + (cur ? " disabled" : "") + ">" + ic("right") + "</button>" +
+        '<span class="muted">' + les.length + " dərs · ödənilib " + paidN + "/" + sts.length + "</span>" +
+      "</div>";
+    //  bu gun
+    if (cur) {
+      h += '<div class="card ltoday" id="ledToday">';
+      if (today && !LED_EDIT) {
+        h += '<div class="lt1"><b>Bu gün dərs oldu ✓</b><span class="muted">' +
+          (today.present || []).length + " gəlib · " + (today.absent || []).length + " gəlməyib</span>" +
+          '<button class="btn sm ghost" id="ledEdit">Düzəlt</button></div>';
+      } else if (!LED_EDIT) {
+        h += '<div class="lt1"><b>Bu gün</b><span class="muted">' + dateAz(new Date().toISOString()) +
+          "</span>" + '<button class="btn sm go" id="ledOpen">' + ic("check") + "Dərs oldu</button></div>" +
+          '<p class="muted" style="margin:6px 0 0">Bir toxunuşla kimin gəldiyini qeyd edin — valideyn öz ekranında iştirak sayını görür.</p>';
+      } else {
+        var pres = today ? (today.present || []) : sts.map(function (x) { return x.id; });
+        h += '<div class="lt1"><b>Bu gün kim gəlib?</b><span class="muted">toxunub dəyişin</span></div>' +
+          '<div class="lchips" id="ledChips">' + sts.map(function (x) {
+            var on = pres.indexOf(x.id) >= 0;
+            return '<button type="button" class="lch' + (on ? " on" : "") + '" data-st="' + esc(x.id) + '">' +
+              (on ? "✓ " : "") + esc(firstName(x.name) || x.name) + "</button>";
+          }).join("") + "</div>" +
+          '<div class="row" style="gap:8px;margin-top:10px">' +
+            '<button class="btn go" id="ledSave">Yadda saxla</button>' +
+            '<button class="btn ghost" id="ledCancel">Ləğv et</button>' +
+          "</div><div id=\"ledMsg\"></div>";
+      }
+      h += "</div>";
+    }
+    //  sagirdler: istirak + odenis
+    h += '<div class="card pad0">' + (sts.length ? sts.map(function (x) {
+      var tot = les.length;
+      return '<div class="lrow"><div class="g"><b>' + esc(x.name) + "</b>" +
+        "<i>" + (tot ? x.present + "/" + tot + " dərs" : "dərs yoxdur") +
+          (x.absent ? " · " + x.absent + " gəlməyib" : "") + "</i></div>" +
+        '<button class="pay' + (x.paid ? " on" : "") + '" data-pay="' + esc(x.id) + '" data-v="' + (x.paid ? 0 : 1) + '">' +
+          (x.paid ? "Ödənilib ✓" : "Ödənilməyib") + "</button></div>";
+    }).join("") : '<div class="empty"><b>Şagird yoxdur</b></div>') + "</div>";
+    //  dersler
+    if (les.length) {
+      h += '<details class="more filt" style="margin-top:10px"><summary>Dərslər <span class="fn">' + les.length + "</span></summary>" +
+        '<div class="card pad0" style="margin-top:10px">' + les.map(function (l) {
+          return '<div class="lrow"><div class="g"><b>' + dateAz(l.held_on) + "</b><i>" + l.present + " gəlib" +
+            (l.absent ? " · " + l.absent + " gəlməyib" : "") + "</i></div>" +
+            '<button class="btn sm ghost icon" data-ldel="' + esc(l.id) + '" title="Dərsi sil" aria-label="Dərsi sil">' + ic("x") + "</button></div>";
+        }).join("") + "</div></details>";
+    }
+    box.innerHTML = h;
+    on("ledPrev", "click", function () { var x = new Date(LED_M); x.setMonth(x.getMonth() - 1); LED_M = monthKey(x); LED_EDIT = false; loadLedger(g); });
+    on("ledNext", "click", function () { var x = new Date(LED_M); x.setMonth(x.getMonth() + 1); LED_M = monthKey(x); LED_EDIT = false; loadLedger(g); });
+    on("ledOpen", "click", function () { LED_EDIT = true; drawLedger(g); });
+    on("ledEdit", "click", function () { LED_EDIT = true; drawLedger(g); });
+    on("ledCancel", "click", function () { LED_EDIT = false; drawLedger(g); });
+    on("ledChips", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-st]") : null;
+      if (!b) return;
+      var on2 = !b.classList.contains("on");
+      b.classList.toggle("on", on2);
+      b.textContent = (on2 ? "✓ " : "") + b.textContent.replace(/^✓ /, "");
+    });
+    on("ledSave", "click", function () {
+      if (busy) return;
+      var pr = [], ab = [];
+      Array.prototype.forEach.call(document.querySelectorAll("#ledChips [data-st]"), function (b) {
+        (b.classList.contains("on") ? pr : ab).push(b.getAttribute("data-st"));
+      });
+      setBusy("ledSave", true, "Yadda saxla");
+      sb.rpc("rpc_lesson_mark", { p_class_id: g.id, p_held_on: tk, p_present: pr, p_absent: ab })
+        .then(function () { busy = false; LED_EDIT = false; loadLedger(g); })
+        .catch(function (e) { setBusy("ledSave", false, "Yadda saxla"); $("ledMsg").innerHTML = msg("err", fail(e)); });
+    });
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-pay],[data-ldel]") : null;
+      if (!b || busy) return;
+      if (b.getAttribute("data-pay")) {
+        busy = true; b.disabled = true;
+        sb.rpc("rpc_payment_set", { p_student_id: b.getAttribute("data-pay"), p_month: LED_M,
+                                    p_paid: b.getAttribute("data-v") === "1" })
+          .then(function () { busy = false; loadLedger(g); })
+          .catch(function (e) { busy = false; b.disabled = false; alert(fail(e)); });
+      } else {
+        if (!confirm("Bu dərs və iştirak qeydi silinsin?")) return;
+        busy = true;
+        sb.rpc("rpc_lesson_delete", { p_lesson_id: b.getAttribute("data-ldel") })
+          .then(function () { busy = false; loadLedger(g); })
+          .catch(function (e) { busy = false; alert(fail(e)); });
+      }
+    });
+  }
+  var LED_EDIT = false;
+
   /* ------------------------------------------------ «Bu gunun dersi»
      Dersden evvel bir kart: novbeti movzu, son kecilen, tapsirigi
      etmeyenler, hazir addimlar.  Melumat rpc_lesson_prep-den (db/126).
@@ -836,8 +962,9 @@
         h += row("clip", "Ev tapşırığı", '<span class="pok">Hamı edib ✓</span>');
       } else {
         h += row("clip", "Etməyənlər", pend.slice(0, 8).map(function (x) {
-          return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '">' + esc(x.name) + "</a>" +
-            (x.n > 1 ? " (" + x.n + ")" : "");
+          //  yalniz ad: tam adlar telefonda uc setir tuturdu (istifadeci)
+          return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '" title="' + esc(x.name) + '">' +
+            esc(firstName(x.name) || x.name) + "</a>" + (x.n > 1 ? " (" + x.n + ")" : "");
         }).join(", ") + (pend.length > 8 ? " və daha " + (pend.length - 8) : "") +
           ' <s class="muted">· ' + pend.length + "/" + d.students + " şagird</s>", "pwarn");
       }
@@ -1432,6 +1559,7 @@
       '<div class="segs stabs" id="gTabs">' +
         seg("s", 'Şagirdlər <span class="tn hide" id="gTabN"></span>', GTAB) +
         seg("p", "Dərs planı", GTAB) +
+        seg("d", "Dəftər", GTAB) +
       "</div>" +
       '<div class="stab" id="gtab-s"' + (GTAB === "s" ? "" : " hidden") + ">" +
         '<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
@@ -1448,6 +1576,9 @@
       "</div>" +
       '<div class="stab" id="gtab-p"' + (GTAB === "p" ? "" : " hidden") + ">" +
         '<div id="planBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>' +
+      "</div>" +
+      '<div class="stab" id="gtab-d"' + (GTAB === "d" ? "" : " hidden") + ">" +
+        '<div id="ledgerBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>' +
       "</div>"
     );
     on("gTabs", "click", function (e) {
@@ -1461,6 +1592,8 @@
       Array.prototype.forEach.call(document.querySelectorAll(".stab"), function (x) {
         x.hidden = x.id !== "gtab-" + GTAB;
       });
+      //  defter sekmesi acilanda teze siyahi (yeni sagird elave olunmus ola biler)
+      if (GTAB === "d") { LED_EDIT = false; loadLedger(g); }
     });
     on("btnStuOpen", "click", function () { openStuForm(true); });
 
@@ -1470,6 +1603,7 @@
     loadPrep(g);
     loadAlerts(g.id);
     loadPlan(g);
+    loadLedger(g);
     on("btnRen", "click", function () { renameGroup(g); });
     on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(); });
     on("btnStu", "click", addStudent);
