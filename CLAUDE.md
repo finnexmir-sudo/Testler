@@ -774,6 +774,47 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
       üçün lazım deyil; «test sistemi»ndən «öyrənmə sistemi»nə keçid
       üçün lazımdır. Hər halda həqiqi istifadəçi rəyi bundan vacibdir.
 
+24. **Kurs rejimi: rəhbər lövhəsi (2026-09-06, istifadəçi «yaz saxla»
+    dedi; 22.j «məktəb rejimi»nin dəqiqləşməsi, HƏLƏ EDİLMƏYİB).**
+    Ssenari: çoxlu qrupu olan kurs; rəhbər bütün qrupların gedişini,
+    şagirdlərin vəziyyətini və səviyyəsini bir yerdən izləyir.
+    Niyə asandır: baza hazırdır — bir hesabda bir neçə müəllim
+    (`account_members`), qrup müəllimə bağlı, nəticə/dəftər/davamiyyət/
+    ödəniş qrup səviyyəsində yığılır; rəhbər ekranı yeni məlumat yaratmır,
+    mövcudu bir pillə yuxarıda cəmləyir.
+    Rəhbər ekranı (bölmələr):
+    - Lövhə: qrup sayı, şagird sayı, bu həftə tapşırıq edənlər, ortalama,
+      davamiyyət, ödənilməmiş şagirdlər.
+    - Qruplar cədvəli: müəllim · sinif · fənn · şagird · son 30 gün
+      ortalama · tapşırıq edilmə faizi · sonuncu dərs tarixi; zəif gedən
+      qrup qırmızı.
+    - Müəllimlər: hər müəllimin qrupları üzrə eyni göstəricilər (müqayisə
+      — ən qiymətli və ən həssas hissə).
+    - Şagird axtarışı bütün kurs üzrə: qrupu, səviyyəsi, ödənişi.
+    - Siqnallar: 3 həftə tapşırıq verilməyən qrup, davamiyyəti düşən
+      şagird, ödənişi gecikən.
+    Lazım olan işlər:
+    1. Rol: «üzv»dən ayrı «rəhbər» (hər şeyi görür; müəllim yalnız öz
+       qruplarını) — RLS-ə toxunur, diqqətli iş. `app.can_read_student`,
+       `app.plan_class` və qrup RPC-lərinin hamısı rol qaydasına uymalıdır.
+    2. Hesab səviyyəli hesabat RPC-ləri (`rpc_course_overview`,
+       `rpc_course_groups`, `rpc_course_teachers`, `rpc_course_find`) —
+       mövcud `rpc_class_report`/`rpc_student_report`/`rpc_ledger_get`-in
+       cəmi; `last_seen_at` (db/125) müəllim aktivliyi üçün.
+    3. Müəllimi hesaba dəvət (şagird kodu kimi bir kod; indi yalnız
+       `rpc_admin_grant`-la əl ilə).
+    4. Paket: 25 yerdən böyük (100–300 şagird) kurs paketi və qiyməti.
+    5. Qərar: müəllim kursdan gedəndə qrupları kimə qalır (hesaba, yəni
+       rəhbərə — təklif budur); müəllimin öz sualları hesabda qalır.
+    Xəbərdarlıq: rəhbər ekranı müəllimə nəzarət alətidir — müəllim
+    hiss edən kimi az işlədə bilər. Yumşaltma: eyni göstəriciləri
+    müəllimin özünə də açmaq, müqayisəni «reytinq» yox, «kömək lazım
+    olan qrup» dilində vermək.
+    Dəyər: bir kurs bir dəfəyə 10–30 müəllim gətirir, satış bir nəfərlə;
+    repetitor-repetitor satmaqdan qat-qat sürətli. D qrupunun bəzi
+    bəndlərindən (ölkə müqayisəsi, müəllimin səhifəsi) vacibdir.
+    Bələdçiyə edilməmiş iş yazılmır.
+
 Açıq qərarlar: abunə bitəndə öz suallarının taleyi; platforma bankının
 mənbə strategiyası; bil10.az qeydiyyatı (istifadəçinin işi); valideyn
 girişində qiymət modeli — pilotdan sonra (təfərrüat: yerli strategiya
