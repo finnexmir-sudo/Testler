@@ -2762,7 +2762,8 @@
           : '<p class="muted" style="margin:0">Bu sinif üçün sual bankında kifayət qədər mövzu yoxdur.</p>') +
         "</div>";
     }
-    box.innerHTML = h;
+    box.innerHTML = h + '<div id="splanBox"></div>';
+    if (paid) loadSPlan(id, classId, d);
 
     on("dgGo", "click", function () {
       if (busy) return;
@@ -2787,7 +2788,97 @@
     });
   }
 
-  var STAB = "x";   // sagird hesabatinda secilmis sekme (sessiya boyu)
+  /* ================================================================
+     FERDI PLAN (db/131, yol xeritesi 18c) - diaqnostikadan sagirdin oz
+     plani: zeif + orta fesiller kurikulum sirasi ile, 3-6 setir.
+     "Kecildi" sagird uzre; "Test ver" yalniz bu sagirde.
+     ================================================================ */
+  function loadSPlan(id, classId, d) {
+    var live = guard();
+    sb.rpc("rpc_student_plan_get", { p_student_id: id }).then(function (plans) {
+      if (!live()) return;
+      var box = $("splanBox");
+      if (!box) return;
+      plans = plans || [];
+      var h = "";
+      if (!plans.length) {
+        if (!d.has) return;                       // diaqnostika yoxdur - hele tez
+        h = '<div class="card tight splan" style="margin-top:10px">' +
+          "<b>Fərdi plan</b>" +
+          '<p class="muted" style="margin:4px 0 10px">Xəritədəki zəif və orta fəsillər kurikulum sırası ilə ' +
+            "şagirdin öz planına düşür: «Keçildi» yalnız bu şagird üçün, «Test ver» yalnız ona.</p>" +
+          '<button class="btn go" id="spMake">' + ic("plus") + "Fərdi plan qur" +
+            (d.weak_now != null ? " (" + ((Number(d.weak_now) || 0) + (Number(d.mid_now) || 0)) + " mövzu)" : "") + "</button>" +
+          '<div id="spMsg"></div></div>';
+      } else {
+        h = plans.map(function (p) {
+          //  diaqnostika plandan yenidirse "Yenile" teklif olunur
+          var stale = d.has && d.taken_at && p.updated_at && new Date(d.taken_at) > new Date(p.updated_at);
+          return '<div class="card tight splan" style="margin-top:10px" data-sp="' + esc(p.id) + '">' +
+            '<div class="sph"><b>Fərdi plan · ' + esc(p.subject) + "</b>" +
+              '<span class="spn">' + p.done + "/" + p.total + "</span>" +
+              (stale ? '<button class="btn sm ghost" id="spRenew">' + ic("refresh") + "Yenilə</button>" : "") +
+            "</div>" +
+            (p.total ? "" : '<p class="muted" style="margin:6px 0 0">Zəif mövzu qalmayıb. 🎉</p>') +
+            '<div class="sprows">' + (p.items || []).map(function (it) {
+              return '<div class="sprow' + (it.done ? " done" : "") + '">' +
+                "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
+                '<div class="g"><b>' + esc(it.topic) + "</b>" +
+                  '<span class="dst st-' + (it.kind === "weak" ? "weak" : "mid") + '">' + (it.kind === "weak" ? "zəif" : "orta") + "</span>" +
+                  (it.test_id
+                    ? '<a class="spt" href="#/t/' + esc(it.test_id) + '">test' + (it.pct != null ? " · " + it.pct + "%" : " · gözlənilir") + "</a>"
+                    : "") +
+                "</div>" +
+                '<div class="spb">' +
+                  (it.test_id ? "" : '<button class="btn sm ghost" data-sptest="' + esc(it.id) + '">Test ver</button>') +
+                  '<button class="btn sm' + (it.done ? " ghost" : "") + '" data-spdone="' + esc(it.id) + '" data-v="' + (it.done ? 0 : 1) + '">' +
+                    (it.done ? "Geri" : "Keçildi") + "</button>" +
+                "</div></div>";
+            }).join("") + "</div>" +
+            '<div id="spMsg"></div></div>';
+        }).join("");
+      }
+      box.innerHTML = h;
+      function again() { loadSPlan(id, classId, d); }
+      on("spMake", "click", function () {
+        if (busy) return;
+        setBusy("spMake", true, "Fərdi plan qur");
+        sb.rpc("rpc_student_plan_make", { p_student_id: id, p_subject: null })
+          .then(function () { busy = false; again(); })
+          .catch(function (e) { setBusy("spMake", false, "Fərdi plan qur"); $("spMsg").innerHTML = msg("err", fail(e)); });
+      });
+      on("spRenew", "click", function () {
+        if (busy) return; busy = true;
+        sb.rpc("rpc_student_plan_make", { p_student_id: id, p_subject: null })
+          .then(function () { busy = false; again(); })
+          .catch(function (e) { busy = false; $("spMsg").innerHTML = msg("err", fail(e)); });
+      });
+      box.addEventListener("click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest("[data-spdone],[data-sptest]") : null;
+        if (!b || busy) return;
+        busy = true; b.disabled = true;
+        if (b.getAttribute("data-spdone")) {
+          sb.rpc("rpc_student_plan_done", { p_item_id: b.getAttribute("data-spdone"), p_done: b.getAttribute("data-v") === "1" })
+            .then(function () { busy = false; again(); })
+            .catch(function (e) { busy = false; b.disabled = false; $("spMsg").innerHTML = msg("err", fail(e)); });
+        } else {
+          b.textContent = "Yığılır…";
+          sb.rpc("rpc_student_plan_test", { p_item_id: b.getAttribute("data-sptest"), p_count: 10 })
+            .then(function (r) {
+              busy = false; again();
+              setTimeout(function () {
+                var m = $("spMsg");
+                if (m) m.innerHTML = '<div class="ok">' + ic("check") + "<span>" + (Number(r.count) || 0) +
+                  ' sual yığıldı, yalnız bu şagirdə tapşırıldı (7 gün). <a href="#/t/' + esc(r.test_id) + '">Vərəqə bax</a></span></div>';
+              }, 300);
+            })
+            .catch(function (e) { busy = false; b.disabled = false; b.textContent = "Test ver"; $("spMsg").innerHTML = msg("err", fail(e)); });
+        }
+      });
+    }).catch(function () {});
+  }
+
+  var STAB = "x";   // sagird hesabinda secilmis sekme (sessiya boyu)
   function screenStudent(id, classId) {
     var live = guard();
     topTitle.textContent = "Şagird hesabatı";

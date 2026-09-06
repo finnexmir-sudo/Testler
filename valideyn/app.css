@@ -123,3 +123,6 @@ details.fbd[open] summary::before{transform:rotate(45deg) translateY(-2px)}
   font:inherit;font-size:14px;font-weight:600;color:var(--fg-2);cursor:pointer}
 .kid.on{background:var(--brand);border-color:var(--brand);color:#fff}
 .kid.add{color:var(--brand);border-style:dashed;font-weight:500}
+
+/* Ferdi plan (db/131) */
+.plan2{font-size:14.5px;margin-top:10px}

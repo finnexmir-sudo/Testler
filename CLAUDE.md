@@ -629,7 +629,8 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
 
 18. **Diaqnostik test → şagird üzrə mövzu xəritəsi → fərdi dərs planı.**
     (a) və (b) **hazırdır** — `db/118_diaqnostika.sql`, bax «Diaqnostik
-    test» bölməsi; (c) fərdi plan açıqdır.
+    test» bölməsi; (c) fərdi plan **EDİLDİ** — `db/131_ferdi_plan.sql`,
+    bax «Fərdi plan» bölməsi aşağıda.
     İstifadəçi «möhtəşəm» dedi, ilk pilot müəllimindən sonra. Üç pillə:
     (a) «Diaqnostik test ver» — sinfin BÜTÜN mövzularından hər birinə
     3 sual (`app.min_topic_answers()` = 3 olmasa analiz susur; fəsil
@@ -1371,6 +1372,24 @@ Mövzular: fənn çipləri (`#tSub`, müəllimin tək fənni seçili gəlir),
 zəifdən yaxşıya, ilk 8 sətir + «Daha N», ≥80% olanlar «Yaxşı mövzular»
 altında. Səhvlər: server ən çox səhv edilən 10 sualı verir (27_hesabat),
 ilk 5 açıq + «Daha N»; düymə siyahının üstündədir.
+
+## Fərdi plan (db/131, yol xəritəsi 18c)
+
+`student_plans(student_id, subject_id unique, level_id, attempt_id)`,
+`student_plan_items(plan_id, topic_id unique, ord, kind weak|mid,
+done_at, test_id)`; RLS bağlı. `rpc_student_plan_make(student, subject)`:
+son diaqnostikanın `app.diag_map`-indən zəif+orta fəsillər kurikulum
+`sort` sırası ilə (3–6 sətir); yenidən qurulanda «ok» olan çıxır,
+keçilmiş sətrin `done_at`-ı qalır. `rpc_student_plan_get`,
+`rpc_student_plan_done(item, done)`, `rpc_student_plan_test(item, count)`
+(fəsildən test → `rpc_assign_test` fərdi, 7 gün, ad «Fəsil — Ad»).
+Abunə: plan qurmaq paid; hamısı `app.can_read_student`.
+Panel: `drawDiag` sonunda `#splanBox` → `loadSPlan`: plan yoxdursa və
+diaqnostika varsa «Fərdi plan qur (N mövzu)»; varsa sətirlər (№/✓,
+fəsil, zəif/orta, test linki + %), «Keçildi/Geri», «Test ver»;
+diaqnostika plandan yenidirsə «Yenilə». Valideyn: `plan {done,total}` →
+«Fərdi plan: 2 / 5 mövzu keçilib». Testlər: `smoke_ferdi_plan.sql` (4),
+`test/e2e_ferdi_plan.py`.
 
 ## Dəftər: davamiyyət və ödəniş (db/130, yol xəritəsi 21.4)
 

@@ -243,6 +243,12 @@
 
     /* ---- gozleyen tapsiriq: ekranin en vacib hissesi ---- */
     var pend = d.pending || [];
+    /* ---- ferdi plan (db/131): "2/5 movzu kecilib" ---- */
+    if (d.plan && Number(d.plan.total) > 0) {
+      out += '<div class="card plan2"><b>Fərdi plan:</b> ' + d.plan.done + " / " + d.plan.total +
+        " mövzu keçilib" + (Number(d.plan.done) >= Number(d.plan.total) ? " — tamamlanıb 🎉" : "") + "</div>";
+    }
+
     /* ---- davamiyyet ve odenis (db/130): bu ay ---- */
     var at = d.attendance || {};
     if (Number(at.lessons) > 0 || at.paid != null) {
