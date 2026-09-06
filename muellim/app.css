@@ -616,6 +616,11 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .pkexr{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--n-100);font-size:13px;text-decoration:none;color:var(--fg)}
 .pkexr b{white-space:nowrap}
 @media (max-width:480px){.pkh,.pkr{grid-template-columns:1fr 78px 78px;padding:9px 10px}}
+/* numune hesab zolagi (136) */
+.demobar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:1080px;margin:10px auto 0;
+  padding:10px 14px;border:1px solid var(--warn-line);background:var(--warn-tint);border-radius:12px;font-size:13px;color:#93370d}
+.demobar code{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--warn-line);border-radius:6px;padding:1px 6px}
+.demobar .btn{margin-left:auto}
 .plbar{height:7px;border-radius:999px;background:var(--n-100);
   overflow:hidden;margin-bottom:14px}
 .plbar i{display:block;height:100%;border-radius:999px;

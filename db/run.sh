@@ -64,6 +64,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 132_parametrik_sual.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 133_adaptiv_mesq.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 134_sual_keyfiyyeti.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 135_kurikulum_paketi.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 136_numune_hesab.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql

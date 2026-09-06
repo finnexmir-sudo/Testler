@@ -139,6 +139,16 @@ class H(BaseHTTPRequestHandler):
         email = (b.get("email") or "").strip().lower()
         pw = b.get("password") or ""
         meta = b.get("data") or {}
+        #  Anonim giris (Supabase "anonymous sign-ins"): bos govde -> e-poctsuz istifadeci
+        if not email and not pw:
+            try:
+                with db() as c, c.cursor() as cur:
+                    cur.execute("insert into auth.users (email, raw_user_meta_data, last_sign_in_at) "
+                                "values (null, '{}'::jsonb, now()) returning id")
+                    uid = str(cur.fetchone()["id"])
+            except Exception as e:
+                return self.send(400, {"message": str(e)})
+            return self.send(200, issue(uid))
         if not email or len(pw) < 6:
             return self.send(400, {"message": "E-poct ve parol lazimdir."})
         if email in PASSWORDS:

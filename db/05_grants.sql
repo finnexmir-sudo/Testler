@@ -102,7 +102,9 @@ declare
         'rpc_student_feedback','rpc_parent_feedback',
         'rpc_student_mistakes','rpc_student_mistake_answer',
         --  Adaptiv movzu mesqi (db/133)
-        'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer'];
+        'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer',
+        --  Numune hesabin gece sifirlanmasi (db/136) - is axini anon acarla cagirir
+        'rpc_demo_reset'];
   fn text;
 begin
   --  a) artiq acilmis olani bagla.  "from public" VACIBDIR: Postgres
@@ -148,7 +150,9 @@ declare
         'rpc_student_feedback','rpc_parent_feedback',
         'rpc_student_mistakes','rpc_student_mistake_answer',
         --  Adaptiv movzu mesqi (db/133)
-        'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer'];
+        'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer',
+        --  Numune hesabin gece sifirlanmasi (db/136) - is axini anon acarla cagirir
+        'rpc_demo_reset'];
   leak text;
   v_say int;
 begin

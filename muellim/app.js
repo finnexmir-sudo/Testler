@@ -5456,6 +5456,61 @@
     });
   }
 
+  /* ================================================================
+     NUMUNE HESAB (db/136): anonim giris + rpc_demo_start - ziyaretcinin
+     oz nusxesi.  Ust zolaq: numune oldugunu, sagird/valideyn kodlarini
+     ve "oz hesabini ac" yolunu gosterir.
+     ================================================================ */
+  function screenDemo() {
+    var live = guard();
+    topTitle.textContent = "Nümunə hesab";
+    show('<div class="card"><div class="skel">Nümunə hesab hazırlanır…</div>' +
+         '<p class="muted" style="margin:8px 0 0">İki qrup, 20 şagird, 45 günlük nəticə tarixçəsi qurulur — bir neçə saniyə.</p></div>');
+    var p = sb.session() ? Promise.resolve() : sb.signInAnon();
+    p.then(function () { return sb.rpc("rpc_demo_start", {}); })
+     .then(function () { return refreshContext(); })
+     .then(function () {
+       if (!live()) return;
+       btnOut.classList.remove("hide");
+       topWho.textContent = (CTX.profile && CTX.profile.full_name) || "";
+       demoBar();
+       nav("#/");
+     })
+     .catch(function (e) {
+       if (!live()) return;
+       var t = fail(e);
+       if (/anonymous|anonim|422|disabled/i.test(t)) {
+         t = "Nümunə hesab hazır deyil (anonim giriş bağlıdır).";
+       }
+       show(msg("warn", t) +
+         '<div class="card"><p style="margin:0 0 10px">Öz hesabınızı 1 dəqiqəyə açın — e-poçt və parol kifayətdir, pulsuzdur.</p>' +
+         '<button class="btn go" id="demoUp">Hesab aç</button></div>');
+       on("demoUp", "click", function () { sb.signOut().then(function () { nav("#/"); screenAuth("up"); }); });
+     });
+  }
+  function demoBar() {
+    var old = document.getElementById("demoBar");
+    if (old) old.remove();
+    if (!ACC || !ACC.is_demo) return;
+    var c = ACC.demo_codes || {};
+    var d = document.createElement("div");
+    d.id = "demoBar"; d.className = "demobar";
+    d.innerHTML = "<span><b>Nümunə hesab</b> — hər şeyi sınaya bilərsiniz, 24 saat sonra silinir." +
+      (c.student ? " Şagird kodu <code>" + esc(c.student) + "</code>" : "") +
+      (c.parent ? " · valideyn kodu <code>" + esc(c.parent) + "</code>" : "") + "</span>" +
+      '<button class="btn sm go" id="demoOwn">Öz hesabımı aç</button>';
+    var main0 = document.getElementById("main");
+    main0.parentNode.insertBefore(d, main0);
+    on("demoOwn", "click", function () {
+      sb.signOut().then(function () {
+        CTX = null; ACC = null;
+        var b = document.getElementById("demoBar"); if (b) b.remove();
+        try { history.replaceState(null, "", location.pathname); } catch (e) {}
+        screenAuth("up");
+      });
+    });
+  }
+
   function screenPaper(id) {
     var live = guard();
     topTitle.textContent = "Test vərəqi";
@@ -6937,6 +6992,7 @@
     if (m[0] === "gen") return screenGen();
     if (m[0] === "t" && m[1]) return screenPaper(m[1]);
     if (m[0] === "pk" && m[1]) return screenPack(m[1]);
+    if (m[0] === "demo") return screenDemo();
     //  gizli olanda unvanla da acilmir - ana sehifeye qaytarilir
     if (m[0] === "p") return plansOn() ? screenPaket() : nav("#/");
     if (m[0] === "adm") return screenAdmin();
@@ -6984,12 +7040,15 @@
            "anon açar ictimaidir, onu gizlətmək lazım deyil.</p>");
       return;
     }
+    //  136: "Muellim kimi bax" - sessiyasiz da acilir
+    if (!sb.session() && /^#\/demo\b/.test(location.hash || "")) { screenDemo(); return; }
     if (!sb.session()) { screenAuth("in"); return; }
 
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     refreshContext().then(function () {
       btnOut.classList.remove("hide");
       topWho.textContent = (CTX.profile && CTX.profile.full_name) || "";
+      demoBar();
       route();
       //  "son giris" - Idareetme ucun; server 15 deqiqede bir yazir
       sb.rpc("rpc_seen", {}).catch(function () {});

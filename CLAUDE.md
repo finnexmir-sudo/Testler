@@ -1616,6 +1616,46 @@ Testlər: `smoke_cavab_terzi.sql` (3), `test/e2e_inam.py`.
   «bağlasanız yalnız verdiyiniz tapşırıqları görər»; «götür» düyməsinin
   ipucu və Bağlı boş-halı «nəticələr qalır».
 
+## Nümunə (demo) hesab — «Müəllim kimi bax»
+
+`db/136_numune_hesab.sql`. Yayılma üçün: müəllim qeydiyyatsız, dolu
+hesabı görsün. **Canlıda Supabase → Authentication → Sign In / Providers
+→ «Allow anonymous sign-ins» AÇIQ olmalıdır** — müəllim nümunəsi bunsuz
+işləmir (panel «Nümunə hesab hazır deyil» deyir və qeydiyyat təklif edir).
+- Üç giriş (ana səhifə `#demo` qutusu): `muellim/#/demo` → anonim giriş
+  (`sb.signInAnon()`, boş gövdə ilə `/auth/v1/signup`) + `rpc_demo_start()`
+  → ziyarətçinin **öz** nüsxəsi (`accounts.is_demo`, kodlar təsadüfi);
+  `sagird/?kod=DEMO0001` və `valideyn/?kod=VDEMO001` → **paylaşılan**
+  nümunə (sabit sahib `app.demo_owner()` = `d0000000-…-000000000001`,
+  `numune@bil10.local`, heç kim onunla daxil olmur; hesab
+  `app.demo_account()`). `?kod=` şagird/valideyn tətbiqində avtomatik
+  giriş, ünvandan silinir.
+- Qurucu `app.demo_build(owner, account, fixed)`: təmizləyir və yenidən
+  qurur — 2 qrup (3-cü sinif 12 şagird, 7-ci sinif 8), abunə (1 il),
+  plan (9 mövzu keçilib, tarixlər 45…3 gün əvvəl), hər keçilmiş mövzuya
+  ev tapşırığı + cəhdlər (`app.demo_attempt`: bacarıq 0.42–0.92, zəif
+  mövzularda −0.3; şablon suallar `pq_seed` ilə), son 3 mövzuya isinmə,
+  6-cı mövzudan sonra rüb sınağı (`plan_exams`), diaqnostika (35 gün
+  əvvəl), açıq tapşırıq (4 nəfər etməyib → «Bu günün dərsi»), mövzu
+  məşqi (3 şagird), dəftər (şənbələr, bu ay 8 ödənib), «Bizə yaz», sual
+  bildirişi. Zəif mövzular: «Kəsrlər» (diaqnostikada) + 6-cı dərsin fəsli
+  (ev tapşırıqlarında). 1-ci şagird (DEMO0001/VDEMO001) orta səviyyəli
+  — zəif mövzu və səhv dəftəri görünsün. `setseed(0.4242)` → paylaşılan
+  nümunə hər gün eyni. Səhv dəftəri trigger ilə özü dolur.
+- `rpc_demo_reset()` (anon, 05_grants siyahısı 19): 10 dəqiqədə bir
+  (`app_state.demo_reset`), paylaşılanı yenidən qurur, 24 saatdan köhnə
+  anonim nüsxələri silir (sıra: qruplar → testlər → şagirdlər → hesab →
+  `auth.users`; `owner_id`/`teacher_id` RESTRICT-dir). İş axını
+  `oyaq-saxla.yml` hər gecə çağırır (404 = 136 hələ tətbiq olunmayıb,
+  iş dayanmır). `rpc_demo_start()` (authenticated): öz hesabı olan
+  istifadəçi ala bilmir; nümunə hesabı olan yenidən qurur.
+- `rpc_my_context.accounts[].is_demo, demo_codes{student,parent}` →
+  panel `#demoBar` zolağı («24 saat sonra silinir», kodlar, «Öz hesabımı
+  aç» → çıxış + qeydiyyat). Mock `signup` boş gövdəni anonim istifadəçi
+  kimi qəbul edir (`email null`).
+- Yoxlama: `smoke_numune.sql` (4), `test/e2e_numune.py`; bələdçi FAQ
+  «Nümunə hesab nədir?».
+
 ## Kurikulum paketi — dərs paketi (yol xəritəsi 22.d)
 
 `db/135_kurikulum_paketi.sql`. Mövcud generator + təyinat üzərində:

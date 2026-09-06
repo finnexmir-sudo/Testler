@@ -130,6 +130,18 @@
       });
     },
 
+    /*  Anonim giris (numune hesab, db/136): Supabase-de "Allow anonymous
+        sign-ins" acıq olmalidir.  Bagli olanda 422 qayidir - tetbiq
+        "numune hazir deyil" deyir.  */
+    signInAnon: function () {
+      return request("/auth/v1/signup", { method: "POST", auth: false, body: {} })
+        .then(function (d) {
+          if (!d || !d.access_token) throw new Error("Anonim giriş alınmadı.");
+          saveSession(d);
+          return d;
+        });
+    },
+
     signIn: function (email, password) {
       return request("/auth/v1/token?grant_type=password", {
         method: "POST", auth: false,

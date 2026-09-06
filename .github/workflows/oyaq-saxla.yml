@@ -38,3 +38,15 @@ jobs:
             "$URL/rest/v1/plans?select=slug&limit=1")
           echo "HTTP $code: $(cat /tmp/cavab.json)"
           [ "$code" = "200" ] || { echo "Supabase cavab vermedi - layihe dayanib ola biler"; exit 1; }
+
+      - name: Numune hesabi yeniden qur (db/136)
+        run: |
+          set -euo pipefail
+          URL=$(grep -oE 'SUPABASE_URL: *"[^"]+"' muellim/config.js | sed -E 's/.*"([^"]+)"/\1/')
+          KEY=$(grep -oE 'SUPABASE_ANON_KEY: *"[^"]+"' muellim/config.js | sed -E 's/.*"([^"]+)"/\1/')
+          code=$(curl -sS -o /tmp/demo.json -w '%{http_code}' -X POST \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+            -d '{}' "$URL/rest/v1/rpc/rpc_demo_reset")
+          echo "HTTP $code: $(cat /tmp/demo.json)"
+          #  136 hele canliya tetbiq olunmayibsa 404 gelir - is dayanmir
+          [ "$code" = "200" ] || [ "$code" = "404" ] || { echo "numune sifirlanmadi"; exit 1; }

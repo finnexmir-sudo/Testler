@@ -207,6 +207,15 @@
         '<a href="../komek/#sagird" class="helplink">Necə işləyir?</a></p>'
     );
     var inp = $("code");
+    //  136: ana sehifedeki "Sagird/Valideyn kimi bax" - ?kod=DEMO0001
+    var qk = (function () {
+      try { return (new URLSearchParams(location.search).get("kod") || "").toUpperCase(); } catch (e) { return ""; }
+    })();
+    if (qk) {
+      inp.value = qk.replace(/[^A-Z0-9]/g, "");
+      try { history.replaceState(null, "", location.pathname + location.hash); } catch (e) {}
+      setTimeout(go, 50);
+    }
     inp.focus();
     inp.addEventListener("input", function () {
       inp.value = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
