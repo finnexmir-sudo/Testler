@@ -451,13 +451,17 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    **Tələ:** `rpc_assign_test`-in mənbəyi `09_assignments.sql`-dir —
    `10_teyinat_migrasiya.sql` `run.sh`-də yoxdur və orada abunə qapısı
    yoxdur; oradan kopyalama.
-8. ~~PWA quraşdırma~~ — hazırdır. Hər iki tətbiq ayrıca quraşdırılır:
-   `muellim/manifest.json` və `sagird/manifest.json` (fərqli ad, start_url,
-   tema rəngi), ikonlar `assets/icons/` (192/512 + maskable). Kökdə **bir**
-   `sw.js` — hər iki tətbiqi əhatə edir (`register("../sw.js", {scope:"../"})`;
-   ehatə skriptin yerinə görə müəyyən olunur, ona görə alt qovluqdan da
-   qeydiyyat keçir). `assets/pwa.js` həm qeydiyyatı, həm «Ana ekrana əlavə et»
-   zolağını idarə edir.
+8. ~~PWA quraşdırma~~ — hazırdır. Üç tətbiq ayrıca quraşdırılır:
+   `muellim/`, `sagird/`, `valideyn/manifest.json` (fərqli ad, start_url,
+   tema rəngi), ikonlar `assets/icons/` (192/512 + maskable). **Kökdə də
+   `manifest.json`** var (ad «Bil10», `scope ./` = bütün sayt): ana
+   səhifə və `komek/` onu göstərir — ana səhifədən quraşdırılan tətbiqin
+   içində panel/şagird/valideyn/bələdçi linkləri brauzer zolağısız açılır
+   (canlı şikayət: ana səhifə «vebdə açılmış kimi» görünürdü). Kökdə
+   **bir** `sw.js`; `assets/pwa.js` kök ünvanı öz `src`-indən çıxarır
+   (`ROOT + "sw.js"`, `{scope: ROOT}`) — əvvəlki `"../sw.js"` kökdəki ana
+   səhifədə saytı tərk edirdi. `pwa.js` həm qeydiyyatı, həm «Ana ekrana
+   əlavə et» zolağını idarə edir; ana səhifə və bələdçi də onu yükləyir.
    **Qaydalar — pozma:** (1) Supabase sorğuları HEÇ VAXT keşlənmir — sw.js
    yalnız öz mənşəyini emal edir; (2) HTML network-first, yoxsa `./bump.sh`
    ilə buraxılan yeni versiya istifadəçiyə çatmaz; (3) service worker yalnız

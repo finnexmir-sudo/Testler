@@ -6,7 +6,14 @@
 <meta name="color-scheme" content="light">
 <title>Bil10 — necə işləyir</title>
 <meta name="description" content="Bil10 bələdçisi: müəllim qrup yaradır, şagird kodla girir, valideyn nəticəni izləyir. Addım-addım, real ekran şəkilləri ilə.">
-<link rel="stylesheet" href="../assets/base.css?v=339">
+<link rel="stylesheet" href="../assets/base.css?v=340">
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#3559de">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bil10">
+<link rel="apple-touch-icon" href="../assets/icons/icon-192.png">
 <style>
   /* Beledci: uzun oxunan sehife.  Ekran sekilleri telefon cercivesinde,
      metn onlarin YANINDA (masaustu) ve ya USTUNDE (telefon). */
@@ -435,8 +442,10 @@
       <p>Yox. Seçdiyiniz cavablar telefonda saxlanır; eyni testi yenidən açanda geri qayıdır.
          «Testi bitir» yalnız internet olanda göndərilir.</p></details>
     <details><summary>Telefona necə quraşdırım?</summary>
-      <p>Brauzerdə səhifəni açıb menyudan «Ana ekrana əlavə et» (Android: Chrome menyusu, iPhone: Paylaş → Ana ekrana əlavə et).
-         Ayrıca mağaza yoxdur — bu, veb tətbiqdir.</p></details>
+      <p>Ana səhifəni açanda aşağıda «Tətbiqi telefona qur → Quraşdır» zolağı çıxır; yoxdursa brauzer menyusundan «Ana ekrana əlavə et»
+         (Android: Chrome menyusu, iPhone: Paylaş → Ana ekrana əlavə et). Ayrıca mağaza yoxdur — bu, veb tətbiqdir.</p>
+      <p>Ana səhifədən quraşdırılan «Bil10» ikonu ilə açanda brauzer zolağı (ünvan, X) olmur; panel, şagird, valideyn və bu bələdçi
+         hamısı tətbiqin içində açılır. WhatsApp-dan gələn link yenə brauzerdə aça bilər — menyuda «Bil10-da aç» seçin.</p></details>
     <details><summary>«Diaqnostik test ver» düyməsi yoxdur</summary>
       <p>Diaqnostika abunə paketi ilədir — düymənin yerində «abunə lazımdır» yazısı görünür.
          Bir də: şagirdə artıq açıq diaqnostika verilibsə, o yazılana qədər ikincisi yaradılmır.</p></details>
@@ -457,5 +466,6 @@
   <p class="foot">Bələdçi tətbiqlə birlikdə yenilənir. Sual qaldı? Müəlliminizə yazın —
      müəllimsinizsə <a href="../muellim/">paneldə</a> «Profil» bölməsindən bizə çatın.</p>
 </div>
+  <script src="../assets/pwa.js?v=340"></script>
 </body>
 </html>

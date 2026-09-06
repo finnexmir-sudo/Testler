@@ -93,10 +93,17 @@
   }
 
   //  ---------------------------------------------------------- qurulus
+  //  Kok unvani skriptin oz yolundan: .../assets/pwa.js -> .../
+  //  (ana sehife kokdedir, panel/sagird/valideyn/beledci bir pille altda -
+  //  "../sw.js" kokde sayti terk edirdi)
+  var ROOT = (function () {
+    var s = document.currentScript && document.currentScript.src;
+    return s ? s.replace(/assets\/pwa\.js.*$/, "") : "../";
+  })();
   if (location.protocol === "https:" && "serviceWorker" in navigator) {
     window.addEventListener("load", function () {
       //  Kokdeki sw.js butun sayti ehate edir (/Testler/).
-      navigator.serviceWorker.register("../sw.js", { scope: "../" })
+      navigator.serviceWorker.register(ROOT + "sw.js", { scope: ROOT })
         .catch(function () { /* qurulmadisa tetbiq yene isleyir */ });
     });
   }
