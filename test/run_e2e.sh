@@ -84,3 +84,6 @@ python3 test/e2e_valideyn_iki.py
 echo
 echo "22/22 ferdi plan"
 python3 test/e2e_ferdi_plan.py
+echo
+echo "23/23 sablon suallar"
+python3 test/e2e_parametrik.py

@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light">
 <title>Bil10 — necə işləyir</title>
 <meta name="description" content="Bil10 bələdçisi: müəllim qrup yaradır, şagird kodla girir, valideyn nəticəni izləyir. Addım-addım, real ekran şəkilləri ilə.">
-<link rel="stylesheet" href="../assets/base.css?v=335">
+<link rel="stylesheet" href="../assets/base.css?v=336">
 <style>
   /* Beledci: uzun oxunan sehife.  Ekran sekilleri telefon cercivesinde,
      metn onlarin YANINDA (masaustu) ve ya USTUNDE (telefon). */
@@ -234,6 +234,24 @@
         </ul>
       </div>
       <figure class="ph"><img src="img/m12_defter.png" alt="Dəftər: davamiyyət və ödəniş" loading="lazy"><figcaption>Dərs oldu · kim gəlib · ödənilib</figcaption></figure>
+    </div>
+
+    <div class="step">
+      <div>
+        <span class="n">10</span>
+        <h3>Şablon sual: hər şagirdə fərqli rəqəmlər</h3>
+        <p>Sual bankında «Yeni sual» yazanda «Şablon» bölməsini açın. Sualda rəqəmin yerinə
+           <b>{a}</b>, <b>{b}</b>, variantlarda <b>{a+b}</b> kimi ifadə yazın və dəyişənlərin aralığını göstərin:
+           «a = 100..999, b = 100..999; şərt: a > b». Hər şagird testi açanda öz rəqəmlərini görür,
+           ikinci cəhddə yenə başqa rəqəmlər çıxır — cavab əzbərlənmir, bir sual yüzlərlə sual olur.</p>
+        <ul>
+          <li>«Nümunə göstər» bir dəst rəqəmlə sualı olduğu kimi göstərir; səhv ifadə və ya eyni çıxan variantlar dərhal bildirilir.</li>
+          <li>İfadədə toplama, çıxma, vurma, bölmə, qalıq və mötərizə olar: {a*b}, {(a+b)/2}, {a%b}. Şərt: «a > b», «a%b = 0».</li>
+          <li>Yazılı sualda cavab da ifadə ilə yazılır: sual «{a} × {b} = ?», cavab «{a*b}».</li>
+          <li>Hesabatda və cavab vərəqində şagirdin gördüyü rəqəmlər saxlanır; test vərəqində bir variant çap olunur, «şablon» nişanı ilə.</li>
+        </ul>
+      </div>
+      <figure class="ph"><img src="img/m13_sablon.png" alt="Şablon sual redaktoru: dəyişənlər və nümunə" loading="lazy"><figcaption>{a} + {b} · a = 100..999 · nümunə</figcaption></figure>
     </div>
   </section>
 

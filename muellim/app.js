@@ -5359,6 +5359,8 @@
               "<span>·</span><span>" + (q.mine ? "öz sualınız" : "hazır bank") + "</span>" +
               (q.remedial
                 ? '<span class="rem">səhvə bənzər</span>' : "") +
+              //  132: sablon sual - vereqdeki bir variantdir
+              (q.tpl ? '<span class="tpl">şablon · hər şagirdə fərqli rəqəm</span>' : "") +
               '<button class="rlink" data-rq="' + esc(q.id) + '">Səhv bildir</button>' +
             "</div>" +
             '<div class="rslot" id="rs-' + esc(q.id) + '"></div>' +
@@ -5918,6 +5920,7 @@
           if (!f.level && q.level)     meta.push(esc(q.level));
           if (q.topic)                 meta.push(esc(q.topic));
           if (!mine)                   meta.push("hazır bank");
+          if (q.tpl)                   meta.push("şablon");
           /*  Variantlar setrin ALTINDA gosterilir - numune kartlari
               ile eyni gorunusde.  Evvel siyahida yalniz basliq vardi:
               muellim "butun suallari gor" deyende numunede gorduyu
@@ -6017,13 +6020,14 @@
         options: (q.options || []).map(function (o) {
           return { body: o.body, correct: !!o.correct };
         }),
-        used_in: Number(q.used_in) || 0, answered: Number(q.answered) || 0
+        used_in: Number(q.used_in) || 0, answered: Number(q.answered) || 0,
+        paramsText: paramsToStr(q.params)
       } : {
         id: null, body: "", kind: "single", explanation: "", difficulty: 2,
         subject: f.subject || "riyaziyyat", level: f.level || "",
         topic_id: "", quarter: "", month: "", tags: [],
         options: [{ body: "", correct: true }, { body: "", correct: false }],
-        used_in: 0, answered: 0
+        used_in: 0, answered: 0, paramsText: ""
       };
       drawQuestion();
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
@@ -6050,6 +6054,26 @@
         "</div>" +
         '<p class="muted" style="margin:8px 0 0" id="qkindNote"></p>' +
       "</div>" +
+      '<div class="spacer"></div>' +
+
+      /*  Sablon (parametrik) sual - db/132.  Deyisenler bir setirde
+          yazilir, sualda/variantda {a} {a+b} yer tutucusu.  Server
+          yoxlayir; "Numune goster" bir qiymet desti ile render edir.  */
+      '<details class="more"' + (q.paramsText ? " open" : "") + ">" +
+        "<summary>Şablon — hər şagirdə fərqli rəqəmlər</summary>" +
+        '<div class="card" style="margin-top:10px">' +
+          '<label for="qpar">Dəyişənlər</label>' +
+          '<input id="qpar" maxlength="300" autocomplete="off" ' +
+            'placeholder="a = 100..999, b = 100..999; şərt: a > b" value="' + esc(q.paramsText || "") + '">' +
+          '<p class="muted" style="margin:8px 0 10px">Sualda və variantlarda ' +
+            "<b>{a}</b>, <b>{b}</b>, <b>{a+b}</b> yazın — hər şagird başqa rəqəmlər görür, " +
+            "cavab əzbərlənmir. Məsələn sual «{a} + {b} neçə edər?», variantlar " +
+            "«{a+b}», «{a+b+10}», «{a-b}». Yazılı sualda cavab «{a*b}» kimi yazılır. " +
+            "İfadədə yalnız + − × ÷ olar: + - * / % və mötərizə.</p>" +
+          '<button type="button" class="btn sm ghost" id="qparTry">Nümunə göstər</button>' +
+          '<div id="qparOut"></div>' +
+        "</div>" +
+      "</details>" +
       '<div class="spacer"></div>' +
 
       '<h2 id="optTitle">Variantlar</h2>' +
@@ -6135,6 +6159,7 @@
     );
 
     on("btnBack", "click", function () { nav("#/b"); });
+    on("qparTry", "click", paramsPreview);
     drawOptions();
     bindOptions();
     kindNote();
@@ -6331,9 +6356,67 @@
   }
 
   /* Ekrandaki deyerleri QD-ye yigir - yeniden cizmeden EVVEL cagirilir */
+  /*  Sablon parametrleri: "a = 100..999, b = 1..9; şərt: a > b"
+      <-> {"vars":{"a":[100,999],"b":[1,9]},"cond":"a > b"}  */
+  function parseParams(txt) {
+    txt = String(txt || "").trim();
+    if (!txt) return { spec: null };
+    var vars = {}, cond = "", n = 0, err = "";
+    txt.split(/[;\n]+/).forEach(function (part) {
+      part = part.trim();
+      if (!part || err) return;
+      var m = part.match(/^(şərt|şert|sert|cond)\s*[:=]\s*(.+)$/i);
+      if (m) { cond = m[2].trim(); return; }
+      part.split(",").forEach(function (v) {
+        v = v.trim();
+        if (!v || err) return;
+        var mm = v.match(/^([a-h])\s*=\s*(-?\d+)\s*(?:\.\.|…|–)\s*(-?\d+)$/);
+        if (!mm) { err = "Dəyişəni belə yazın: a = 100..999 (yanlış: «" + v + "»)"; return; }
+        if (Number(mm[2]) > Number(mm[3])) { err = "Dəyişən " + mm[1] + ": əvvəl kiçik, sonra böyük."; return; }
+        vars[mm[1]] = [Number(mm[2]), Number(mm[3])]; n++;
+      });
+    });
+    if (err) return { err: err };
+    if (!n) return { err: "Ən azı bir dəyişən yazın: a = 1..9" };
+    var spec = { vars: vars };
+    if (cond) spec.cond = cond;
+    return { spec: spec };
+  }
+  function paramsToStr(spec) {
+    if (!spec || !spec.vars) return "";
+    var s = Object.keys(spec.vars).map(function (k) {
+      return k + " = " + spec.vars[k][0] + ".." + spec.vars[k][1];
+    }).join(", ");
+    return s + (spec.cond ? "; şərt: " + spec.cond : "");
+  }
+  function paramsPreview() {
+    collect();
+    var out = $("qparOut");
+    if (!out) return;
+    var pp = parseParams(QD.paramsText);
+    if (pp.err) { out.innerHTML = msg("err", pp.err); return; }
+    if (!pp.spec) { out.innerHTML = msg("warn", "Əvvəl dəyişənləri yazın: a = 100..999"); return; }
+    out.innerHTML = '<div class="skel">Yoxlanılır…</div>';
+    sb.rpc("rpc_pq_preview", {
+      p_params: pp.spec, p_body: QD.body,
+      p_options: QD.options.filter(function (o) { return o.body.trim(); })
+                   .map(function (o) { return { body: o.body.trim(), correct: !!o.correct }; }),
+      p_explanation: QD.explanation || ""
+    }).then(function (r) {
+      if (!$("qparOut")) return;
+      $("qparOut").innerHTML = '<div class="qsample"><b>' + esc(r.body || "") + "</b>" +
+        '<ul class="qopts">' + (r.options || []).map(function (o) {
+          return "<li" + (o.correct ? ' class="c"' : "") + ">" + esc(o.body) + "</li>";
+        }).join("") + "</ul>" +
+        (r.explanation ? '<p class="muted">' + esc(r.explanation) + "</p>" : "") +
+        '<p class="muted">Hər açılışda başqa rəqəmlər çıxır — yenə basın.</p></div>';
+    }).catch(function (e) { if ($("qparOut")) $("qparOut").innerHTML = msg("err", fail(e)); });
+  }
+
   function collect() {
     if ($("qbody")) QD.body = $("qbody").value || "";
     if ($("qexp")) QD.explanation = $("qexp").value || "";
+    if ($("qpar")) QD.paramsText = $("qpar").value || "";
     if ($("qsub")) QD.subject = $("qsub").value || "";
     if ($("qlev")) QD.level = $("qlev").value || "";
     if ($("qtop")) QD.topic_id = $("qtop").value || "";
@@ -6387,6 +6470,8 @@
       else if (q.kind === "single" && ok.length !== 1) bad = "Bir doğru cavab seçin.";
       else if (q.kind === "multi" && ok.length < 1) bad = "Ən azı bir doğru cavab seçin.";
     }
+    var pp = parseParams(q.paramsText);
+    if (!bad && pp.err) bad = pp.err;
     if (bad) { $("qErr").innerHTML = msg("err", bad); return; }
     $("qErr").innerHTML = "";
 
@@ -6402,7 +6487,8 @@
       p_difficulty: q.difficulty,
       p_quarter: q.quarter ? Number(q.quarter) : null,
       p_month: q.month ? Number(q.month) : null,
-      p_tags: q.tags || []
+      p_tags: q.tags || [],
+      p_params: pp.spec
     }).then(function () { nav("#/b"); })
       .catch(function (e) {
         setBusy("qSave", false, q.id ? "Dəyişikliyi saxla" : "Sualı yadda saxla");

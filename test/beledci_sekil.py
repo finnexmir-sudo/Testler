@@ -112,6 +112,15 @@ with sync_playwright() as p:
     # bank ve generator
     t.goto(PANEL + "#/b"); t.wait_for_timeout(1800)
     shot(t, "m7_bank")
+    # sablon (parametrik) sual - redaktor, numune ile (db/132)
+    t.goto(PANEL + "#/q/new"); t.wait_for_selector("#qbody", timeout=15000)
+    t.fill("#qbody", "{a} + {b} neçə edər?")
+    t.locator(".obody").nth(0).fill("{a+b}"); t.locator(".obody").nth(1).fill("{a+b+10}")
+    t.locator("details.more summary", has_text="Şablon").click()
+    t.fill("#qpar", "a = 100..999, b = 100..999; şərt: a > b")
+    t.click("#qparTry"); t.wait_for_selector("#qparOut .qsample", timeout=15000)
+    t.evaluate("document.querySelector('#qbody').scrollIntoView()")
+    shot(t, "m13_sablon")
     t.goto(PANEL + "#/gen"); t.wait_for_timeout(1200); shot(t, "m8_test_yig")
 
     # ---------------- SAGIRD (390x844)

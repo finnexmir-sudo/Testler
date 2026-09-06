@@ -699,9 +699,8 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
        realtime lazım deyil).
 
 22. **Dünya praktikasından yüksək məhsuldarlıqlı təkliflər (2026-09-05).**
-    a. **Parametrik (şablon) suallar** — «245 + 138» şablonu → sonsuz
-       variant; uşaq cavabı əzbərləyə bilmir, «10 000+ sual» həqiqət
-       olur. Riyaziyyat üçün ən böyük bank rıçağı.
+    a. ~~**Parametrik (şablon) suallar**~~ **EDİLDİ** — `db/132`,
+       bax «Parametrik (şablon) suallar» bölməsi aşağıda.
     b. **Adaptiv məşq (IXL/Khan mənimsəmə)** — şagirdin səviyyəsinə görə
        növbəti sual seçilir; mövzu «mənimsənildi» olana qədər; müəllim
        vaxtı sərf olunmur.
@@ -1484,6 +1483,43 @@ Testlər: `smoke_cavab_terzi.sql` (3), `test/e2e_inam.py`.
   ev tapşırığı, diaqnostik, səhvlərdən təkrar); «Sərbəst məşq» açarında
   «bağlasanız yalnız verdiyiniz tapşırıqları görər»; «götür» düyməsinin
   ipucu və Bağlı boş-halı «nəticələr qalır».
+
+## Parametrik (şablon) suallar (yol xəritəsi 22.a)
+
+`db/132_parametrik_sual.sql`. `questions.params` =
+`{"vars":{"a":[100,999],"b":[100,999]},"cond":"a>b"}`; sual/variant/izah
+mətnində `{a}`, `{a+b}` yer tutucuları. Ad `a`–`h` tək hərf, ən çox 6
+dəyişən, tam ədəd aralığı ≤ 1 000 000, şərt ≤ 120 simvol.
+
+- **Hesablama** `app.pq_eval(expr, vars)`: dəyişənlər əvvəlcə rəqəmlə
+  əvəz olunur, tək rəqəmlərə `.0` qoşulur (7/2 = 3.5), sonra
+  `^[0-9+\-*/%(). ]+$` yoxlanır və yalnız ondan sonra `execute` —
+  inyeksiya mümkün deyil (smoke 1 bunu sınayır). `app.pq_render`
+  `{…}`-ləri əvəz edir; `p_vars` null olanda mətnə toxunmur (adi sualda
+  `{1, 2}` çoxluğu qalır). `app.pq_cond` şərt üçün eyni yol
+  (`and`/`or` icazəlidir).
+- **Qiymətlər cəhdə bağlıdır**: `rpc_start_attempt` yeni cəhddə
+  `attempts.params = {sual_id: {a,b}}` yazır (`app.pq_seed`: şərt
+  ödənənə və variantlar fərqli çıxana qədər 40 cəhd), davam edən cəhd
+  eyni rəqəmləri alır. Ballama dəyişmir — variantın `is_correct`-i
+  şablon səviyyəsindədir, şagird ID göndərir; yazılı sualda düz cavab
+  render olunub müqayisə edilir. `attempt_answers.question_body` və
+  izah render olunmuş yazılır; `rpc_test_result`, `rpc_attempt_sheet`
+  seçilmiş/düz variantı cəhdin qiymətləri ilə render edir.
+- **Təzə rəqəm** hər dəfə: `rpc_student_mistakes` (məşq) və
+  `rpc_test_preview` (vərəq, `tpl` nişanı).
+- **Yadda saxlama** `rpc_bank_save_question(..., p_params)` — köhnə 13
+  parametrli imza SİLİNİB (iki imza PostgREST-də «best candidate»
+  xətası verir); `app.pq_spec` + `app.pq_check` (yer tutucu var, hər
+  ifadə hesablanır, 12 nümunədə 4-dən çox toqquşma → rədd).
+  `rpc_pq_preview` redaktorun «Nümunə göstər» düyməsi.
+- **Panel**: redaktorda «Şablon» `<details>` (`#qpar` mətn sahəsi
+  `a = 100..999, b = 1..9; şərt: a > b` ↔ `parseParams/paramsToStr`,
+  `#qparTry/#qparOut`), siyahıda və vərəqdə «şablon» nişanı
+  (`rpc_bank_list.tpl`). Şagird tətbiqi dəyişmir — hər şey serverdə
+  render olunur.
+- Yoxlama: `smoke_parametrik.sql` (5), `test/e2e_parametrik.py`;
+  bələdçi addım 10, şəkil `m13_sablon`.
 
 ## Tapşırıq ekranında test seçimi (canlı şikayət: «qarışıq»)
 
