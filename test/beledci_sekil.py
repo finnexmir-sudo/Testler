@@ -219,6 +219,11 @@ with sync_playwright() as p:
     t.evaluate("document.getElementById('prep').scrollIntoView()"); t.wait_for_timeout(400)
     if not ONLY or "m11_bu_gun" in ONLY:
         t.locator("#prep .prep").screenshot(path=f"{OUT}/m11_bu_gun.png"); print("   m11_bu_gun")
+    # ders paketi (db/135): ilk movzunun isinmesi yigilib, cedvel
+    pkid = db("select id::text i from public.class_plans limit 1", one=True)["i"]
+    t.goto(PANEL + "#/pk/" + pkid); t.wait_for_selector(".pktab", timeout=15000)
+    t.locator(".pkr").first.locator("[data-pkwarm]").click(); t.wait_for_selector("#pkMsg .ok", timeout=25000)
+    shot(t, "m14_paket")
 
     # ---------------- DEFTER: bu gun ders oldu, biri gelmeyib, biri odeyib
     t.goto(PANEL + "#/g/" + gid); t.wait_for_selector("#gTabs", timeout=15000)

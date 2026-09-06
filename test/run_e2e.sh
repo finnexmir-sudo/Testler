@@ -93,3 +93,6 @@ python3 test/e2e_adaptiv.py
 echo
 echo "25/25 sual keyfiyyeti"
 python3 test/e2e_keyfiyyet.py
+echo
+echo "26/26 kurikulum paketi"
+python3 test/e2e_kurikulum.py

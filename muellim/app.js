@@ -945,7 +945,13 @@
           '<a href="#" id="prepPlan">Planı qur</a></span>');
       } else if (nx) {
         h += row("doc", "Növbəti mövzu", "<b>" + esc(nx.topic) + "</b>" +
-          (nx.group ? ' <s class="muted">· ' + esc(nx.group) + " · " + nx.gpos + "/" + nx.gtotal + "</s>" : ""));
+          (nx.group ? ' <s class="muted">· ' + esc(nx.group) + " · " + nx.gpos + "/" + nx.gtotal + "</s>" : "") +
+          //  135: isinme - dersden evvel 5 sual
+          (nx.warm_test_id
+            ? ' <s class="muted">· isinmə ' + (nx.warm_takers
+                ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird"
+                : "verilib") + ' · <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></s>'
+            : (d.paid ? ' <button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">isinmə 5 sual</button>' : "")));
       } else {
         h += row("doc", "Növbəti mövzu", '<span class="muted">Plan tam keçilib. 🎉</span>');
       }
@@ -981,6 +987,14 @@
       "</div></div>";
       box.innerHTML = h;
       on("prepAsg", "click", function () { nav("#/a/" + g.id); });
+      on("prepWarm", "click", function () {
+        var b = $("prepWarm");
+        if (busy || !b) return;
+        busy = true; b.disabled = true; b.textContent = "Yığılır…";
+        sb.rpc("rpc_pack_warm", { p_item_id: b.getAttribute("data-item"), p_count: 5 })
+          .then(function () { busy = false; loadPrep(g); })
+          .catch(function (e) { busy = false; b.disabled = false; b.textContent = "isinmə 5 sual"; alert(fail(e)); });
+      });
       on("prepPlan", "click", function (e) {
         e.preventDefault();
         var b = document.querySelector('#gTabs [data-v="p"]');
@@ -1177,6 +1191,8 @@
       return '<div class="card plan" data-p="' + esc(p.id) + '">' +
         '<div class="plhead"><b>' + esc(p.subject) + " · " + esc(p.level) + "</b>" +
           "<span>" + p.done + " / " + p.total + unit + pct + "%</span></div>" +
+        //  135: her movzunun uc parcasi bir ekranda
+        '<a href="#/pk/' + esc(p.id) + '" class="plpack">' + ic("doc") + "Dərs paketi: isinmə · ev tapşırığı · rüb sınağı</a>" +
         '<div class="plbar"><i style="width:' + pct + '%"></i></div>' +
         (cur
           ? '<div class="plcur"><span class="pltag">Növbəti ' +
@@ -5322,6 +5338,124 @@
     });
   }
 
+  /* ================================================================
+     DERS PAKETI (db/135): plan uzre her movzunun uc parcasi - isinme
+     (dersden evvel, 5 sual), ev tapsirigi (Kecildi-den sonra, 10 sual),
+     rub sinagi (son sinaqdan beri kecilenler, 20 sual).  Hamisi bir
+     ekranda, bir toxunusla; neticeler setrin icinde.
+     ================================================================ */
+  var PKD = null, PK_FLASH = "";
+  function screenPack(planId) {
+    var live = guard();
+    topTitle.textContent = "Dərs paketi";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_pack_get", { p_plan_id: planId }).then(function (d) {
+      if (!live()) return;
+      PKD = d;
+      drawPack(planId);
+    }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+  function pkCell(x, kind, it, paid) {
+    if (x && x.test_id) {
+      return '<a href="#/t/' + esc(x.test_id) + '" class="pkc has" title="vərəq">' +
+        (x.takers ? '<b class="' + (x.avg >= 80 ? "pvh" : (x.avg >= 60 ? "pvm" : "pvl")) + '">' + Math.round(x.avg || 0) + "%</b><s>" + x.takers + " şagird</s>"
+                  : "<b>verilib</b><s>hələ yazan yoxdur</s>") + "</a>";
+    }
+    if (kind === "warm") {
+      return '<button class="pkb" data-pkwarm="' + esc(it.id) + '"' + (paid ? "" : ' disabled title="Abunə paketi ilə"') + ">5 sual</button>";
+    }
+    //  ev tapsirigi yalniz kecilmis movzuya (movcud qayda)
+    return it.done
+      ? '<button class="pkb" data-pkhw="' + esc(it.id) + '"' + (paid ? "" : ' disabled title="Abunə paketi ilə"') + ">10 sual</button>"
+      : '<span class="pkc no" title="əvvəl «Keçildi»">—</span>';
+  }
+  function drawPack(planId) {
+    var d = PKD, pl = d.plan || {}, items = d.items || [], exams = d.exams || [];
+    var pend = Number(d.exam_pending) || 0;
+    var h = '<button class="btn sm ghost" id="btnBack">' + ic("back") + esc(pl.class || "Qrup") + "</button>" +
+      '<div class="spacer"></div>' +
+      '<div class="card">' +
+        "<h1>" + esc(pl.subject || "") + " · " + esc(pl.level || "") + "</h1>" +
+        '<p class="muted" style="margin:4px 0 0">' + pl.done + " / " + pl.total + " mövzu keçilib · " +
+          (d.students || 0) + " şagird. Hər dərs üçün hazır üç parça: <b>isinmə</b> dərsdən əvvəl 5 asan sual (1 gün), " +
+          "<b>ev tapşırığı</b> «Keçildi»dən sonra 10 sual (7 gün), <b>rüb sınağı</b> keçilmiş mövzulardan 20 sual (7 gün). " +
+          "Bir toxunuş — test yığılır və qrupa tapşırılır.</p>" +
+        (d.paid ? "" : '<div class="warn" style="margin-top:10px">' + ic("info") + "<span>Hazır bankdan test yığmaq abunə paketi ilədir.</span></div>") +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      //  sinaq karti
+      '<div class="card pkexam">' +
+        '<div class="pt"><b>Rüb sınağı</b><span class="muted">' +
+          (pend ? "son sınaqdan sonra " + pend + " mövzu keçilib" : "sınaq gözləyən mövzu yoxdur") + "</span></div>" +
+        '<div class="plbtns">' +
+          '<input id="pkCnt" type="number" min="5" max="50" value="20">' +
+          '<button class="btn go sm" id="pkExam"' + (pend && d.paid ? "" : " disabled") + '>Sınaq yığ və tapşır</button>' +
+          (pl.done > pend && pl.done > 0
+            ? '<button class="btn sm ghost" id="pkExamAll"' + (d.paid ? "" : " disabled") + ' title="Bütün keçilmiş mövzulardan">Hamısından</button>' : "") +
+        "</div>" +
+        '<div id="pkMsg">' + PK_FLASH + "</div>" +
+        (exams.length
+          ? '<div class="pkexl">' + exams.map(function (e) {
+              return '<a href="#/t/' + esc(e.test_id) + '" class="pkexr"><span>' + esc(e.title) +
+                ' <s class="muted">· ' + dateAz(e.created_at) + " · " + e.questions + " sual</s></span>" +
+                (e.takers ? '<b class="' + (e.avg >= 80 ? "pvh" : (e.avg >= 60 ? "pvm" : "pvl")) + '">' + Math.round(e.avg || 0) + "% · " + e.takers + "</b>" : "<b>hələ yazan yoxdur</b>") + "</a>";
+            }).join("") + "</div>"
+          : "") +
+      "</div>" +
+      '<div class="spacer"></div>' +
+      //  movzu cedveli
+      '<div class="card pad0 pktab">' +
+        '<div class="pkh"><span>Mövzu</span><span>İsinmə</span><span>Ev tapşırığı</span></div>' +
+        (function () {
+          var out = "", grp = null;
+          items.forEach(function (it) {
+            if (it.group && it.group !== grp) { grp = it.group; out += '<div class="pkg">' + esc(grp) + "</div>"; }
+            out += '<div class="pkr' + (it.done ? " done" : "") + '" data-i="' + esc(it.id) + '">' +
+              "<span><i>" + (it.done ? "✓" : it.ord) + "</i>" + esc(it.topic) +
+                (it.examined ? ' <s class="pkex" title="rüb sınağına düşüb">sınaq</s>' : "") + "</span>" +
+              pkCell(it.warm, "warm", it, d.paid) +
+              pkCell(it.hw, "hw", it, d.paid) +
+            "</div>";
+          });
+          return out;
+        })() +
+      "</div>";
+    show(h);
+    on("btnBack", "click", function () { nav("#/g/" + pl.class_id); });
+    //  yeniden yuklenende mesaj itmesin: bir defelik flash
+    PK_FLASH = "";
+    function done(msgTxt) {
+      busy = false;
+      PK_FLASH = msgTxt ? msg("ok", msgTxt) : "";
+      screenPack(planId);
+    }
+    on("pkExam", "click", function () { pkExam(false); });
+    on("pkExamAll", "click", function () { pkExam(true); });
+    function pkExam(all) {
+      if (busy) return;
+      var n = Number(($("pkCnt") || {}).value) || 20;
+      busy = true; $("pkExam").disabled = true; $("pkMsg").innerHTML = "";
+      sb.rpc("rpc_pack_exam", { p_plan_id: planId, p_count: n, p_all: all }).then(function (r) {
+        done("Sınaq yığıldı və tapşırıldı: " + r.items + " mövzu, " + r.count + " sual, 7 gün.");
+      }).catch(function (e) { busy = false; $("pkExam").disabled = false; $("pkMsg").innerHTML = msg("err", fail(e)); });
+    }
+    var tab = document.querySelector(".pktab");
+    if (tab) tab.addEventListener("click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("button") : null;
+      if (!b || busy) return;
+      var wid = b.getAttribute("data-pkwarm"), hid = b.getAttribute("data-pkhw");
+      if (!wid && !hid) return;
+      busy = true; b.disabled = true; b.textContent = "Yığılır…";
+      if ($("pkMsg")) $("pkMsg").innerHTML = "";
+      (wid ? sb.rpc("rpc_pack_warm", { p_item_id: wid, p_count: 5 })
+           : sb.rpc("rpc_plan_test", { p_item_id: hid, p_count: 10 }))
+        .then(function (r) {
+          done((wid ? "İsinmə yığıldı və tapşırıldı: " : "Ev tapşırığı yığıldı və tapşırıldı: ") + (r.count || "") + " sual.");
+        })
+        .catch(function (e) { busy = false; b.disabled = false; b.textContent = wid ? "5 sual" : "10 sual"; alert(fail(e)); });
+    });
+  }
+
   function screenPaper(id) {
     var live = guard();
     topTitle.textContent = "Test vərəqi";
@@ -6802,6 +6936,7 @@
     if (m[0] === "b") return screenBank();
     if (m[0] === "gen") return screenGen();
     if (m[0] === "t" && m[1]) return screenPaper(m[1]);
+    if (m[0] === "pk" && m[1]) return screenPack(m[1]);
     //  gizli olanda unvanla da acilmir - ana sehifeye qaytarilir
     if (m[0] === "p") return plansOn() ? screenPaket() : nav("#/");
     if (m[0] === "adm") return screenAdmin();

@@ -706,9 +706,8 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
     c. **«Tələsik səhv» və inam göstəricisi** — cavab vaxtı artıq var
        (<5 san + səhv = diqqətsizlik); cavabda «əminəm / əmin deyiləm»
        seçimi → «bilmədən düz» görünür. Ucuz, dərin.
-    d. **Kurikulum paketi («course in a box»)** — hər dərs üçün hazır:
-       5 sual isinmə + 10 ev tapşırığı + rüb sınağı, e-dərslik TOC-a
-       bağlı. Təcrübəsiz repetitor üçün hazır il.
+    d. ~~**Kurikulum paketi («course in a box»)**~~ **EDİLDİ** — `db/135`,
+       bax «Kurikulum paketi» bölməsi aşağıda.
     e. **Müəllimin öz səhifəsi (Classplus/Teachmint modeli)** —
        bil10.az/arzu: profil, nəticələr, əlaqə; sonra valideyn
        müəllim axtarır (ikitərəfli bazar).
@@ -1481,6 +1480,31 @@ Testlər: `smoke_cavab_terzi.sql` (3), `test/e2e_inam.py`.
   ev tapşırığı, diaqnostik, səhvlərdən təkrar); «Sərbəst məşq» açarında
   «bağlasanız yalnız verdiyiniz tapşırıqları görər»; «götür» düyməsinin
   ipucu və Bağlı boş-halı «nəticələr qalır».
+
+## Kurikulum paketi — dərs paketi (yol xəritəsi 22.d)
+
+`db/135_kurikulum_paketi.sql`. Mövcud generator + təyinat üzərində:
+- `class_plan_items.warm_test_id` (isinmə; `test_id` ev tapşırığıdır),
+  `plan_exams(plan_id, test_id, item_ids[], created_at)`.
+- `rpc_pack_warm(item, count=5)` — mövzu keçilməmiş də olar; qayda
+  `{pool all, topics [fəsil], difficulty ["1","2"], pack 'warm'}`, ad
+  «İsinmə — Fəsil», 1 gün, 1 cəhd; ikinci dəfə rədd.
+- `rpc_pack_exam(plan, count=20, all=false)` — keçilmiş və hələ heç bir
+  sınaqda olmayan mövzular (`all` → hamısı), ad «Rüb sınağı — Fənn · N
+  mövzu», 7 gün, 1 cəhd, `plan_exams` sətri; `gen_rule.pack='exam',
+  plan`.
+- Ev tapşırığı — mövcud `rpc_plan_test(item, 10)`.
+- `rpc_pack_get(plan)` → `{plan{…,total,done}, paid, students,
+  exam_pending, items[{…, warm{test_id,avg,takers}|null, hw{…}|null,
+  examined}], exams[…]}`. `rpc_lesson_prep.next` + `warm_test_id/
+  warm_avg/warm_takers`, üst `plan_id`; `rpc_plan_get` item +
+  `warm_test_id`.
+- Panel: `#/pk/<plan>` `screenPack/drawPack` (`.pktab` cədvəl
+  `.pkr[data-i]`, `[data-pkwarm]/[data-pkhw]`, `.pkc.has` nəticə,
+  `#pkExam/#pkExamAll/#pkCnt`, `#pkMsg` — `PK_FLASH` yenidən yükləmədə
+  qalır); plan kartında `.plpack` linki; «Bu günün dərsi»də `#prepWarm`.
+- Yoxlama: `smoke_kurikulum.sql` (3), `test/e2e_kurikulum.py`; bələdçi
+  müəllim addım 11 + addım 8 bullet, şəkil `m14_paket`.
 
 ## Sual keyfiyyəti təhlili (yol xəritəsi 22.g)
 

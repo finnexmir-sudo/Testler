@@ -92,6 +92,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          132_parametrik_sual.sql \
          133_adaptiv_mesq.sql \
          134_sual_keyfiyyeti.sql \
+         135_kurikulum_paketi.sql \
          05_grants.sql; do
   printf "  %-22s" "$f"
   #  Bank fayllari (16,17,19,20,30-99) bu repoda YOXDUR - private
