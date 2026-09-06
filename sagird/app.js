@@ -437,6 +437,7 @@
 
       /* 2b. Sehv defteri (db/129): sayğac serverden ayrica gelir - yer
          tutucu; rpc_student_mistakes yuklenende dolur.  */
+      h += '<div id="adBox"></div>';
       h += '<div id="mistBox"></div>';
 
       /* 3. Zeif movzular - haradan basla, konkret cavab.  .myr/.best
@@ -546,6 +547,7 @@
       });
       on("btnMyRes", "click", screenMyResults);
       loadMistakes();
+      loadPractice();
       bindRows();
     }).catch(function (e) {
       if (e && (e.status === 403 || /Sessiya/i.test(e.message || ""))) {
@@ -942,6 +944,157 @@
         "</div>";
       on("btnMist", "click", screenMistakes);
     }).catch(function () {});
+  }
+
+  /* ================================================================
+     MOVZU MESQI (db/133) - adaptiv: movzu secilir, suallar bir-bir,
+     cetinlik bala uygunlasir, 100 = menimsenildi.  Duz variant gelmir.
+     ================================================================ */
+  var AD = null;   // {tid, d}
+  function loadPractice() {
+    sb.rpc("rpc_student_practice_topics", { p_token: TOKEN }).then(function (d) {
+      var box = $("adBox");
+      if (!box || !d) return;
+      var subs = d.subjects || [];
+      var all = [];
+      subs.forEach(function (sj) {
+        (sj.topics || []).forEach(function (t) { t.subject = sj.name; all.push(t); });
+      });
+      if (!d.enabled) {
+        if (d.reason && /sinfi/.test(d.reason)) return;   // sinifsiz qrup - sakit
+        return;
+      }
+      if (!all.length) return;
+      //  ustde: davam edenler (en teze evvel), sonra tovsiye, en coxu 4
+      var top = all.filter(function (t) { return t.answered > 0 && !t.mastered; })
+        .sort(function (a, b) { return String(b.at || "").localeCompare(String(a.at || "")); });
+      all.forEach(function (t) { if (t.why && !t.mastered && top.indexOf(t) < 0) top.push(t); });
+      if (!top.length) top = all.filter(function (t) { return !t.mastered; }).slice(0, 3);
+      top = top.slice(0, 4);
+      function row(t) {
+        var sc = Number(t.score) || 0;
+        return '<button class="arow" data-t="' + esc(t.id) + '">' +
+          '<div class="g"><b>' + esc(t.name) + "</b><i>" + esc(t.subject) +
+            (t.mastered ? " · mənimsənilib ✓" : (t.why === "zəif" ? " · zəif mövzu" : (t.why === "dərs" ? " · dərsdə keçildi" :
+             (t.answered ? " · " + t.answered + " cavab" : "")))) + "</i></div>" +
+          '<span class="abar' + (t.mastered ? " done" : "") + '"><i style="width:' + sc + '%"></i></span>' +
+          '<span class="asc">' + sc + "</span></button>";
+      }
+      box.innerHTML = '<div class="spacer"></div><h2>Mövzu məşqi</h2>' +
+        '<div class="card pad0 adap">' +
+          '<p class="note" style="padding:12px 16px 4px;margin:0">Mövzunu seç — suallar bir-bir gəlir, çətinlik sənə uyğunlaşır. ' +
+            "Bal 100 olanda mövzu mənimsənilib." +
+            (d.mastered ? " <b>" + d.mastered + " mövzu mənimsənilib.</b>" : "") + "</p>" +
+          top.map(row).join("") +
+          '<details class="more adall"><summary>Bütün mövzular <span class="fn">' + all.length + "</span></summary>" +
+            subs.map(function (sj) {
+              return '<p class="note adsub">' + esc(sj.name) + "</p>" + (sj.topics || []).map(row).join("");
+            }).join("") + "</details>" +
+        "</div>";
+      Array.prototype.forEach.call(box.querySelectorAll("[data-t]"), function (b) {
+        b.addEventListener("click", function () { screenPractice(b.getAttribute("data-t")); });
+      });
+    }).catch(function () {});
+  }
+  var LVL = ["", "asan", "orta", "çətin"];
+  function screenPractice(tid) {
+    markScreen(false);
+    topTitle.textContent = "Mövzu məşqi";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_student_practice_next", { p_token: TOKEN, p_topic_id: tid }).then(function (d) {
+      AD = { tid: tid, d: d };
+      drawPrac();
+    }).catch(function (e) { errScreen(e, function () { screenPractice(tid); }); });
+  }
+  function pracHead(score, level, streak, done) {
+    return '<div class="adhead"><b>' + esc(AD.d.topic || "") + "</b><span>" + esc(AD.d.subject || "") + "</span></div>" +
+      '<div class="prog adprog"><div class="bar"><i style="width:' + score + '%"></i></div>' +
+        '<span class="cnt">' + score + " / 100</span></div>" +
+      '<p class="note" style="margin:-8px 0 12px">' +
+        (done ? "Mənimsənilib ✓ · " : "") + "Səviyyə: " + (LVL[level] || "orta") +
+        (streak >= 2 ? " · " + streak + " ardıcıl düz 🔥" : "") + "</p>";
+  }
+  function drawPrac() {
+    var d = AD.d, q = d.question || {};
+    var multi = q.kind === "multi";
+    show(
+      pracHead(Number(d.score) || 0, Number(d.level) || 2, Number(d.streak) || 0, !!d.mastered) +
+      '<div class="q"><div class="body">' + esc(q.body || "") + "</div></div>" +
+      (q.kind === "text"
+        ? '<div class="opts"><input id="pans" class="tans" maxlength="120" autocomplete="off" placeholder="Cavabı yaz"></div>'
+        : '<div class="opts" id="popts">' + (q.options || []).map(function (o, k) {
+            return '<button class="opt" data-o="' + esc(o.id) + '">' +
+              '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
+              '<span class="t">' + esc(o.body) + "</span></button>";
+          }).join("") + "</div>") +
+      (multi ? '<p class="note">Bir neçə düz cavab ola bilər — seçib «Cavabla» bas.</p>' : "") +
+      ((multi || q.kind === "text") ? '<button class="btn go wide" id="btnPAns">Cavabla</button>' : "") +
+      '<div id="pFb"></div>'
+    );
+    function send(ids, txt) {
+      if (busy) return;
+      busy = true;
+      Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (x) { x.disabled = true; });
+      var ba = $("btnPAns"); if (ba) ba.disabled = true;
+      sb.rpc("rpc_student_practice_answer", {
+        p_token: TOKEN, p_topic_id: AD.tid, p_question_id: q.id,
+        p_option_ids: ids && ids.length ? ids : null, p_text: txt || null
+      }).then(function (r) {
+        busy = false;
+        (ids || []).forEach(function (id) {
+          var b = main.querySelector('[data-o="' + id + '"]');
+          if (b) b.classList.add(r.correct ? "right" : "wrong");
+        });
+        var g = Number(r.gain) || 0;
+        var jm = !!r.just_mastered;
+        $("pFb").innerHTML =
+          '<div class="' + (r.correct ? "ok" : "warn") + '">' + ic(r.correct ? "check" : "info") +
+            "<span>" + (r.correct
+              ? "Düzdür! <b>+" + g + "</b> bal." + (jm ? " 🏆 <b>Mövzu mənimsənilib!</b>" : "")
+              : "Səhvdir. <b>" + g + "</b> bal. Səhv dəftərinə düşdü — sonra bir də gələcək.") +
+            (r.explanation ? "<br><i>" + esc(r.explanation) + "</i>" : "") + "</span></div>" +
+          '<div class="row" style="margin-top:10px">' +
+            '<button class="btn go" id="btnPNext" style="flex:1">' + (jm ? "Davam et" : "Növbəti") + "</button>" +
+            '<button class="btn" id="btnPHome">' + (jm ? "Mövzulara qayıt" : "Çıx") + "</button></div>";
+        //  ust zolaq: bal ve seviyye derhal yenilenir
+        var head = main.querySelector(".adhead");
+        if (head) {
+          var tmp = document.createElement("div");
+          tmp.innerHTML = pracHead(Number(r.score) || 0, Number(r.level) || 2, Number(r.streak) || 0, !!r.mastered);
+          var prog = main.querySelector(".adprog"), note = prog && prog.nextElementSibling;
+          if (prog) prog.replaceWith(tmp.children[1]);
+          if (note) note.replaceWith(tmp.children[1]);
+        }
+        on("btnPNext", "click", function () { screenPractice(AD.tid); });
+        on("btnPHome", "click", screenTests);
+      }).catch(function (e) {
+        busy = false;
+        Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (x) { x.disabled = false; });
+        if ($("btnPAns")) $("btnPAns").disabled = false;
+        $("pFb").innerHTML = msg("err", fail(e)) +
+          '<button class="btn wide" id="btnPNext" style="margin-top:8px">Növbəti sual</button>';
+        on("btnPNext", "click", function () { screenPractice(AD.tid); });
+      });
+    }
+    Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (b) {
+      b.addEventListener("click", function () {
+        if (busy) return;
+        if (multi) { b.classList.toggle("sel"); return; }
+        b.classList.add("sel");
+        send([b.getAttribute("data-o")], null);
+      });
+    });
+    on("btnPAns", "click", function () {
+      if (q.kind === "text") {
+        var v = ($("pans") || {}).value || "";
+        if (!v.trim()) { $("pFb").innerHTML = msg("warn", "Əvvəl cavabı yaz."); return; }
+        send(null, v.trim());
+      } else {
+        var ids = Array.prototype.map.call(main.querySelectorAll("[data-o].sel"), function (x) { return x.getAttribute("data-o"); });
+        if (!ids.length) { $("pFb").innerHTML = msg("warn", "Əvvəl variant seç."); return; }
+        send(ids, null);
+      }
+    });
   }
 
   var MQ = null;   // mesq veziyyeti

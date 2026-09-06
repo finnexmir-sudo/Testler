@@ -283,6 +283,10 @@ with sync_playwright() as pw:
     ok("Ayan Q." in vp.inner_text("#main"), "sehife yenilenende sessiya qalir")
     vp.click("#btnOut"); vp.wait_for_selector("#code", timeout=15000)
     ok(vp.locator("#code").count() == 1, "cixisdan sonra giris ekrani")
+    #  cixis RPC-si arxa planda gedir - bazani 3 saniyeye qeder gozleyirik
+    for _ in range(15):
+        if db("select count(*) n from public.parent_sessions", one=True)["n"] == 0: break
+        vp.wait_for_timeout(200)
     ok(db("select count(*) n from public.parent_sessions", one=True)["n"] == 0,
        "cixis sessiyani bazadan da silir")
 

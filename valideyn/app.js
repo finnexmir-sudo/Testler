@@ -249,6 +249,12 @@
         " mövzu keçilib" + (Number(d.plan.done) >= Number(d.plan.total) ? " — tamamlanıb 🎉" : "") + "</div>";
     }
 
+    /* ---- movzu mesqi (db/133) ---- */
+    if (d.practice && (Number(d.practice.mastered) || 0) + (Number(d.practice.active) || 0) > 0) {
+      out += '<div class="card plan2"><b>Mövzu məşqi:</b> ' + (d.practice.mastered || 0) +
+        " mövzu mənimsənilib · " + (d.practice.active || 0) + " davam edir</div>";
+    }
+
     /* ---- davamiyyet ve odenis (db/130): bu ay ---- */
     var at = d.attendance || {};
     if (Number(at.lessons) > 0 || at.paid != null) {

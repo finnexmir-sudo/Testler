@@ -87,3 +87,6 @@ python3 test/e2e_ferdi_plan.py
 echo
 echo "23/23 sablon suallar"
 python3 test/e2e_parametrik.py
+echo
+echo "24/24 adaptiv mesq"
+python3 test/e2e_adaptiv.py

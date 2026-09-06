@@ -701,9 +701,8 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
 22. **Dünya praktikasından yüksək məhsuldarlıqlı təkliflər (2026-09-05).**
     a. ~~**Parametrik (şablon) suallar**~~ **EDİLDİ** — `db/132`,
        bax «Parametrik (şablon) suallar» bölməsi aşağıda.
-    b. **Adaptiv məşq (IXL/Khan mənimsəmə)** — şagirdin səviyyəsinə görə
-       növbəti sual seçilir; mövzu «mənimsənildi» olana qədər; müəllim
-       vaxtı sərf olunmur.
+    b. ~~**Adaptiv məşq (IXL/Khan mənimsəmə)**~~ **EDİLDİ** — `db/133`,
+       bax «Adaptiv mövzu məşqi» bölməsi aşağıda.
     c. **«Tələsik səhv» və inam göstəricisi** — cavab vaxtı artıq var
        (<5 san + səhv = diqqətsizlik); cavabda «əminəm / əmin deyiləm»
        seçimi → «bilmədən düz» görünür. Ucuz, dərin.
@@ -1483,6 +1482,40 @@ Testlər: `smoke_cavab_terzi.sql` (3), `test/e2e_inam.py`.
   ev tapşırığı, diaqnostik, səhvlərdən təkrar); «Sərbəst məşq» açarında
   «bağlasanız yalnız verdiyiniz tapşırıqları görər»; «götür» düyməsinin
   ipucu və Bağlı boş-halı «nəticələr qalır».
+
+## Adaptiv mövzu məşqi (yol xəritəsi 22.b)
+
+`db/133_adaptiv_mesq.sql`. Cədvəl `practice(student_id, topic_id, score
+0..100, streak, answered, correct, seen uuid[] (son 30), cur jsonb
+{q, params, at}, mastered_at)`. Üç anon RPC (05_grants siyahısı 18):
+- `rpc_student_practice_topics(token)` → `{enabled, reason, level,
+  mastered, active, subjects[{name, topics[{id,name,n,score,answered,
+  mastered,level,why(zəif|dərs),at}]}]}`. Əhatə `app.practice_scope`:
+  qrupun `free_practice` bağlıdırsa və ya `level_id` yoxdursa `enabled=false`
+  (səbəblə). Mövzular: **kök** mövzular (platforma sualları kök mövzuya
+  bağlıdır), qrupun sinfi, hesabın `subjects` (boşdursa hamısı), hovuzda
+  ≥5 sual (`app.practice_pool`: platforma + hesabın öz dərc olunmuş
+  sualları, `level_id` = sinif və ya null).
+- `rpc_student_practice_next(token, topic)` → sual (düz variantsız,
+  şablon 132 təzə rəqəmlə). `cur` 1 saat ərzində cavabsızdırsa eynisi
+  qayıdır (səhifə yeniləmə). Seçim: çətinlik `app.practice_level(score)`-ə
+  ən yaxın (<35 → 1, <75 → 2, sonra 3), `seen`-də olmayan əvvəl, sonra ən
+  köhnə, sonra random.
+- `rpc_student_practice_answer(token, topic, q, option_ids[], text)` —
+  yalnız `cur.q`-ya qəbul (təkrar göndərmə yoxdur). Bal: düz `+8+4·çətinlik`
+  (bal<80) / `+4+2·çətinlik` (≥80); səhv `−8` / `−12`; 100 → `mastered_at`
+  (`just_mastered` bir dəfə). Səhv `app.mistake_note(…, false)` ilə
+  dəftərə düşür. Qaytarır `correct, gain, score, level, streak, mastered,
+  just_mastered, explanation` (yalnız səhvdə).
+- Hesabat: `rpc_student_report.practice{mastered,active,answered,items[6]}`,
+  `rpc_parent_home.practice{mastered,active}`.
+- UI: şagird ev ekranı `#adBox` (`loadPractice`: üstdə davam edən +
+  tövsiyə ≤4, `details` «Bütün mövzular»), `screenPractice/drawPrac`
+  (`.adhead/.adprog`, `#popts/#pans/#btnPAns`, `#pFb`, `#btnPNext/#btnPHome`);
+  müəllim Xülasə «Mövzu məşqi» kartı (`.mkbox`, səhv olmasa da çəkilir),
+  valideyn `.plan2` sətri.
+- Yoxlama: `smoke_adaptiv.sql` (4), `test/e2e_adaptiv.py`; bələdçi şagird
+  addım 7, şəkil `s7_mesq`.
 
 ## Parametrik (şablon) suallar (yol xəritəsi 22.a)
 

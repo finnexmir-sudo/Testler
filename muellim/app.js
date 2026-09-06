@@ -3072,6 +3072,21 @@
 
       /* ---------------- SEHVLER ---------------- */
       var hS = "";
+      //  133: movzu mesqi - sagird ozu isleyir, muellim yalniz gorur
+      var pr = r.practice || {};
+      if ((Number(pr.mastered) || 0) + (Number(pr.active) || 0) > 0) {
+        hS += '<div class="card tight mkbox"><b>Mövzu məşqi</b> ' +
+          '<span class="muted">şagird özü işləyir</span>' +
+          '<div class="mkrow"><span class="okc"><b>' + (pr.mastered || 0) + "</b> mənimsənilib</span>" +
+            "<span><b>" + (pr.active || 0) + "</b> davam edir</span>" +
+            "<span><b>" + (pr.answered || 0) + "</b> cavab</span></div>" +
+          (pr.items || []).map(function (it) {
+            return '<div class="mkit"><span>' + esc(it.topic) + "</span><b>" +
+              (it.mastered ? "✓ " : "") + it.score + "</b></div>";
+          }).join("") +
+          '<p class="muted" style="margin:6px 0 0">Şagird mövzunu seçir, çətinlik balına uyğunlaşır; 100 bal — mənimsənilib.</p>' +
+        "</div>";
+      }
       if (r.weak === null) {
         hS += upsell("Səhv edilən suallar");
       } else if (!weak.length) {

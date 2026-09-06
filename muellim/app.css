@@ -494,6 +494,8 @@ details.more.filt .fn{
 .pcard a.btn{text-decoration:none}
 /* sehv defteri sayğaclari (129) */
 .mkbox{margin-bottom:10px}
+.mkbox .mkit{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0;border-top:1px solid var(--n-100)}
+.mkbox .mkit b{font-variant-numeric:tabular-nums}
 .mkbox .mkrow{display:flex;gap:16px;margin-top:6px;font-size:13.5px;color:var(--fg-2)}
 .mkbox .mkrow b{font-size:18px;font-weight:700;color:var(--fg)}
 .mkbox .mkrow .okc b{color:var(--ok)}

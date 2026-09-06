@@ -150,6 +150,11 @@ with sync_playwright() as p:
             s.once("dialog", lambda d: d.accept()); s.click("#btnFinish"); break
     s.wait_for_selector(".ring", timeout=15000); shot(s, "s4_netice", full=True)
     s.click("#btnHome"); s.wait_for_selector(".test", timeout=15000); shot(s, "s5_ev_ekrani", full=True)
+    # movzu mesqi (db/133): ilk movzunu ac, bir sual - ekran
+    s.wait_for_selector("#adBox .arow", timeout=15000)
+    s.locator("#adBox .arow").first.click(); s.wait_for_selector(".adprog", timeout=15000)
+    shot(s, "s7_mesq")
+    s.click("#btnBack"); s.wait_for_selector(".test", timeout=15000)
 
     # ---------------- MUELLIM: hesabat
     t.goto(PANEL + "#/r/" + gid); t.wait_for_timeout(1500); shot(t, "m9_hesabat")
