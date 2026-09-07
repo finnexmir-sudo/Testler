@@ -995,6 +995,16 @@ Bankı ayrı sessiya doldurur. Nömrə bölgüsü belədir:
 Yeni **kod** faylı 100-dən başlayır. Bank faylına toxunma; bank
 sessiyası da 100+ aralığına girmir.
 
+**2026-09-07 razılaşması:** kod faylları 140-a qədər doludur (121–140
+bu sessiya). Bank sessiyası **141–147** aralığını götürür (bank-content
+düzəlişləri, faylın adında `_bank` olsun, yeri `bil10-bank/db/`, burada
+yalnız symlink); kod sessiyası **148-dən** davam edir. Bank faylı bu
+repoya heç vaxt commit olunmur — commit-dən əvvəl yoxlama artıq nömrəyə
+yox, private repo-da eyni adlı faylın olmasına baxır:
+`git diff --cached --name-only | while read f; do [ -e "../bil10-bank/db/$(basename "$f")" ] && echo "BANK: $f"; done`
+(112 bu yoxlamadan keçməmişdi — 103 sual açıq repoda qalmışdı, 2026-09-07
+private-ə köçürüldü).
+
 **2026-09-03-dən bank fayllarının (16,17,19,20 və 30-99 aralığı) +
 `tools/` + `mundericat/` yeri dəyişib: ayrıca PRIVATE repo-dadır —
 `finnexmir-sudo/bil10-bank`.** Səbəb: bu repo (`Testler`) PUBLIC-dir,
