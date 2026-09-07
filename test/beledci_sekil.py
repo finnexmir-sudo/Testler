@@ -132,12 +132,16 @@ with sync_playwright() as p:
     s.fill("#code", code); shot(s, "s1_giris")
     s.click("#btnIn"); s.wait_for_selector(".test", timeout=15000); shot(s, "s2_tapsiriqlar")
     s.locator(".test.asg").first.click(); s.wait_for_selector(".opt", timeout=15000)
-    s.locator(".opt").first.click(); s.wait_for_timeout(200); shot(s, "s3_sual")
     # duzgun cavablarla bitir ki, netice guzel gorunsun (2 sehv buraxiriq)
     key = {r["q"]: r["o"] for r in db("""select q.id::text q, o.id::text o from public.questions q
         join public.question_options o on o.question_id=q.id and o.is_correct
         join public.test_questions tq on tq.question_id=q.id join public.tests t on t.id=tq.test_id
         where t.slug='riy-3-vurma-1'""")}
+    #  sekil: DUZ variant secili (ilk variant secilende "4 x 9 = 32" kimi
+    #  sehv cavab secilmis gorunurdu - reklamda yanlis tesir)
+    ids0 = s.locator(".opt").evaluate_all("els => els.map(e => e.getAttribute('data-o'))")
+    s.locator("[data-o='%s']" % next((o for o in ids0 if o in key.values()), ids0[0])).click()
+    s.wait_for_timeout(200); shot(s, "s3_sual")
     i = 0
     while True:
         ids = s.locator(".opt").evaluate_all("els => els.map(e => e.getAttribute('data-o'))")
