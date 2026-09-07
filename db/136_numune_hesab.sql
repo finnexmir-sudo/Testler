@@ -72,7 +72,7 @@ revoke all on function app.demo_test(uuid, uuid, uuid, uuid, uuid[], int, text, 
   from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------
---  Cehd: sagirdin bacarigina (0..1) gore cavablar; zeif movzuda -0.3
+--  Cehd: sagirdin bacarigina (0..1) gore cavablar; zeif movzuda -0.22
 -- ---------------------------------------------------------------------
 create or replace function app.demo_attempt(p_student uuid, p_test uuid, p_class uuid,
   p_ability numeric, p_weak uuid[], p_at timestamptz)
@@ -99,7 +99,7 @@ begin
     v_par := app.pq_seed(r.params, r.id);
     if v_par is not null then v_params := v_params || jsonb_build_object(r.id::text, v_par); end if;
     if random() < 0.04 then continue; end if;   -- cavabsiz
-    v_pc := p_ability - case when r.topic_id = any(p_weak) then 0.3 else 0 end;
+    v_pc := p_ability - case when r.topic_id = any(p_weak) then 0.22 else 0 end;
     v_ok := random() < v_pc;
     select o.id into v_sel from public.question_options o
      where o.question_id = r.id and o.is_correct = v_ok order by random() limit 1;
@@ -142,8 +142,10 @@ declare
                            'Səbinə Qasımova','Tunar Bağırov','Lalə Hacıyeva','Ülvi Salmanov'];
   --  1-ci sagird (DEMO0001 / VDEMO001 - numune girisleri) ORTA seviyyeli:
   --  zeif movzu ve sehv defteri gorunsun.  Gucluler 3 ve 4-dur.
-  v_abil1 numeric[] := array[0.72,0.86,0.92,0.78,0.74,0.70,0.68,0.66,0.62,0.55,0.48,0.42];
-  v_abil2 numeric[] := array[0.85,0.75,0.72,0.66,0.62,0.58,0.52,0.45];
+  --  Canli baxisdan sonra qaldirildi: orta 50% ve 7 nefer tehluke zonasinda
+  --  hedden artiq zeif gorunurdu; hedef orta 60-65%, zonada 3-4 nefer.
+  v_abil1 numeric[] := array[0.82,0.94,0.97,0.88,0.85,0.82,0.80,0.78,0.74,0.68,0.60,0.52];
+  v_abil2 numeric[] := array[0.90,0.82,0.78,0.74,0.70,0.66,0.60,0.52];
   v_stu1 uuid[] := '{}'; v_stu2 uuid[] := '{}';
   v_sid uuid; v_code text; v_pcode text; i int; k int;
   v_plan uuid; v_plan2 uuid;
@@ -207,8 +209,9 @@ begin
     (select t.id from public.topics t where t.subject_id = v_riy and t.level_id = v_l3.id and t.parent_id is null and t.name ilike 'Kəsr%' limit 1),
     (select tp.o_id from app.pack_topic((select topic_id from public.class_plan_items where id = v_items[8])) tp))
     into v_topic;
-  --  zeif movzular: Kesrler (diaqnostikada gorunur) + 6-ci dersin fesli
-  --  (ev tapsiriqlarinda gorunur - sagird hesabatinda "zeif" cixsin)
+  --  zeif movzular: Kesrler (diaqnostikada, hamiya) + 6-ci dersin fesli
+  --  YALNIZ bes sagirde (1, 7, 10, 11, 12) - ilk 9 ders eyni fesildedir,
+  --  hamiya versek butun qrup "zeif" cixir (canli baxis: 7 nefer zonada)
   v_weak := array[v_topic];
   if cardinality(v_items) >= 6 then
     v_weak := v_weak || (select tp.o_id from app.pack_topic((select topic_id from public.class_plan_items where id = v_items[6])) tp);
@@ -230,9 +233,9 @@ begin
       --  sonuncu (acıq) tapsiriq: 4 nefer hele etmeyib
       if i = 9 then
         if k in (3, 7, 10, 12) then continue; end if;
-        perform app.demo_attempt(v_stu1[k], v_test, v_c1, v_abil1[k], v_weak, now() - make_interval(hours => 6 + floor(random() * 60)::int));
+        perform app.demo_attempt(v_stu1[k], v_test, v_c1, v_abil1[k], case when k in (1, 7, 10, 11, 12) then v_weak else v_weak[1:1] end, now() - make_interval(hours => 6 + floor(random() * 60)::int));
       elsif random() < 0.86 then
-        perform app.demo_attempt(v_stu1[k], v_test, v_c1, v_abil1[k], v_weak, v_at + make_interval(hours => 20 + floor(random() * 96)::int));
+        perform app.demo_attempt(v_stu1[k], v_test, v_c1, v_abil1[k], case when k in (1, 7, 10, 11, 12) then v_weak else v_weak[1:1] end, v_at + make_interval(hours => 20 + floor(random() * 96)::int));
       end if;
     end loop;
     --  isinme: son uc movzuda
@@ -245,7 +248,7 @@ begin
       values (v_c1, v_test, p_owner, v_at - interval '1 day', v_at, 1, v_at - interval '1 day');
       for k in 1..12 loop
         if random() < 0.7 then
-          perform app.demo_attempt(v_stu1[k], v_test, v_c1, v_abil1[k] + 0.1, v_weak, v_at - make_interval(hours => 2 + floor(random() * 14)::int));
+          perform app.demo_attempt(v_stu1[k], v_test, v_c1, v_abil1[k] + 0.1, case when k in (1, 7, 10, 11, 12) then v_weak else v_weak[1:1] end, v_at - make_interval(hours => 2 + floor(random() * 14)::int));
         end if;
       end loop;
     end if;
@@ -262,7 +265,7 @@ begin
       values (v_c1, v_exam, p_owner, v_at + interval '1 day', v_at + interval '8 days', 1, v_at + interval '1 day');
       for k in 1..12 loop
         if k <> 6 and k <> 11 then
-          perform app.demo_attempt(v_stu1[k], v_exam, v_c1, v_abil1[k], v_weak, v_at + make_interval(days => 2, hours => floor(random() * 96)::int));
+          perform app.demo_attempt(v_stu1[k], v_exam, v_c1, v_abil1[k], case when k in (1, 7, 10, 11, 12) then v_weak else v_weak[1:1] end, v_at + make_interval(days => 2, hours => floor(random() * 96)::int));
         end if;
       end loop;
     end if;
@@ -278,8 +281,10 @@ begin
               '{1,2,3}', 3, true, v_at);
   insert into public.assignments (class_id, test_id, assigned_by, opens_at, closes_at, max_attempts, created_at)
   values (v_c1, v_diag, p_owner, v_at, v_at + interval '7 days', 1, v_at);
+  --  diaqnostika dersden EVVELdir: bacariq 0.12 asagi, Kesrler hamiya zeif
+  --  (qrup hesabatinda "axsayan movzu" gorunsun)
   for k in 1..12 loop
-    perform app.demo_attempt(v_stu1[k], v_diag, v_c1, v_abil1[k], v_weak, v_at + make_interval(hours => 10 + floor(random() * 100)::int));
+    perform app.demo_attempt(v_stu1[k], v_diag, v_c1, v_abil1[k] - 0.12, v_weak, v_at + make_interval(hours => 10 + floor(random() * 100)::int));
   end loop;
 
   -- ---- movzu mesqi: uc sagird
