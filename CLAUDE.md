@@ -67,6 +67,87 @@ yoxlanandan sonra. Yoxsa:
 - «19 təkrar variant» — hərf böyüklüyünə baxmayan yoxlama.
 - «Şəxsi» nişanı — düzəliş testi üçün əvəzedici siqnal götürüldü,
   altı nəticənin üçündə çıxdı.
+- **bio-11-insan-muhit (2026-09).** İstifadəçi soruşdu: «testlərimiz
+  mövzunun bütün əsas bilik və bacarıqlarını bilmək üçün kifayət
+  edirmi?». Mövzu «İnsan, onun inkişafı və mühit» idi (embrional
+  inkişaf + psixika + ailə sağlamlığı), 30 sualın **hamısı** isə
+  ekologiya idi (çirklənmə, milli parklar) — başqa mövzunun məzmunu
+  səhv slug-a yazılmışdı. Sual sayı düz idi (30/30), çətinlik bölgüsü
+  də «məqbul» görünürdü — heç kim mövzu ADI ilə sualların MƏZMUNUNU
+  tutuşdurmamışdı, çünki bunu ölçən avtomatik yoxlama yox idi.
+- **inf-11-komputer-veb (2026-09, eyni audit).** Mövzu «Kompüterin
+  idarə edilməsi. Veb-layihə» idi (İdarəetmə paneli, Ailə
+  təhlükəsizliyi, Word/Excel/PowerPoint-də veb-səhifə və s. — 8
+  konkret alt-başlıq), 20 sualın hamısı isə ÜMUMİ kompüter aparatı
+  (CPU/RAM/SSD) və ümumi veb-dizayn (HTML/CSS/JS) idi — mövzunun heç
+  bir konkret bacarığına toxunmurdu. Bu, `bio-11-insan-muhit`-dən
+  fərqli tələ idi: məzmun tamam YAD deyildi (hələ də informatika,
+  hətta «yaxın» görünürdü), sadəcə kurikulumun TƏLƏB ETDİYİ konkret
+  bacarıqlar əvəzinə ümumi/tanış mövzu yazılmışdı — «fənnə aiddir»
+  «mövzuya aiddir» demək deyil.
+- **tarix-11-mustemleke (2026-09, eyni audit).** Bu ikisindən fərqli,
+  daha yüngül hal: mövzunun 10 real alt-başlığından 8-i yaxşı
+  örtülmüşdü, YALNIZ «Cənubi Azərbaycan XIX əsrdə» və «Məşrutə
+  inqilabı» (IV fəsil) heç toxunulmamışdı — 31 sualın hamısı Şimali
+  Azərbaycan idi. Nəticə: **hər mövzunun HƏR fəsli/alt-başlığı**
+  yoxlanmalıdır, «əksəriyyəti düzdür» kifayət etmir — bir fəslin tam
+  unudulması asanlıqla gözdən qaça bilər.
+- **Additiv sual faylları — idempotentlik (2026-09).** `db/141-148`
+  (mövcud mövzuya bir neçə əlavə sual yazan kiçik fayllar) yazanda
+  `questions` sətrini `on conflict (ext_key) do update` ilə düzgün
+  qurdum, amma `question_options`-u əvvəlcədən silmədim — yalnız
+  db/142 və db/144-də (tam-əvəzləmə tipli fayllar) bu addım var idi,
+  qalan 6 faylda YOX idi. İkinci dəfə işlədiləndə `question_options`
+  unique constraint-ə (question_id, ord) çırpılırdı. İstifadəçi
+  bunu **canlı Supabase-də** tapdı, mən tapmadım — çünki commit
+  mesajında «idempotentlik yoxlanıldı» yazsam da, əslində yalnız
+  db/142 və db/144-ü iki dəfə işlədib yoxlamışdım, qalan 6 faylı
+  YOX. «Yoxladım» dedim, amma hamısını yoxlamamışdım — məhz «HAZIRDIR»
+  qaydasının 4-cü bəndinin pozulması («ölçmədiyimi deməmək —
+  aldatmaqdır»). Düzəlişdən sonra HƏR additiv faylı — 142/144 daxil,
+  hamısını — İKİ, bəzilərini ÜÇ dəfə ardıcıl işlədib sual/variant
+  sayının sabit qaldığını təsdiqlədim. **Qayda:** yeni additiv sual
+  faylı yazanda başına həmişə `delete from question_options ...
+  where ext_key like '<prefiks>%' and ext_key ~ '<son suallar
+  aralığı>'` sətri qoy — tam-əvəzləmə fayllarında olduğu kimi, sayı
+  az olsa da fərq etmir.
+- **`inf-8-kompyuter` (2026-09, «informatika ni yoxla» auditi).**
+  Mövzu «İş masasının nizamlanması, İnformasiya modelinin ağac
+  forması, Faylların axtarışı, Ağacşəkilli struktur əsasında məsələ
+  həlli» idi (37_movzular_orta8.sql-ə görə), 20 sualın **hamısı** isə
+  kompüter aparatı (ana plata, prosessor, RAM, videokart, SSD/HDD) —
+  bu, tamam başqa mövzunun (`inf-9-komputer`) məzmunu idi. `bio-11-
+  insan-muhit` ilə eyni tələ: sual sayı düz (20/20), çətinlik bölgüsü
+  «məqbul», amma mövzu adı ilə məzmun arasında sıfır əlaqə. Eyni
+  auditdə `inf-8-tetbiqi`də ikinci, daha yüngül hal: 6 alt-başlıqdan
+  4-ü («Üçölçülü qrafika», «Tillər və üzlər», «Üçölçülü modellərin
+  qurulması», «Mətn redaktorunun obyektləri») heç toxunulmamışdı, 20
+  sualın hamısı yalnız elektron cədvəl (SUM/MAX/filtr) haqqında idi —
+  `tarix-11-mustemleke` tipli «bir fəsil tam unudulub» tələsi, sadəcə
+  burada dörd fəsil idi. Hər ikisi `db/152`-də tam yenidən yazıldı.
+  **Əlavə tapıntı:** yeni yazılan əvəzləyici suallardan biri
+  (`inf8-internet` üçün şəbəkə sualları, ilk qaralamada) qonşu
+  siniflərin (`inf-9-texnologiya`, `inf-10-sebeke`) suallarına
+  pg_trgm-də **1.00 (tam eyni)** çıxdı — özüm yazdığım YENİ məzmunda
+  da köhnə tələ təkrarlana bilər, «yeni yazdım» «unikaldır» demək
+  deyil. Hər yeni fayldan sonra pg_trgm yoxlaması bütöv fənn üzrə
+  aparılmalıdır, təkcə köhnə bankla deyil, öz-özü ilə də.
+  Nəticə: `db/152` (tam əvəz, 2 mövzu), `db/153` (`inf-8-internet`,
+  «Kompüter şəbəkələri» bölməsi 6 sual), `db/154` (`inf-11-sistemler`,
+  3 alt-başlıq — CİS/GİS, axtarış sistemləri, böyük verilənlər — 6
+  sual), `db/155`/`db/156` (`inf-3-informasiya`/`inf-3-kompyuter`,
+  daha kiçik alt-başlıq boşluqları), `db/157` (`inf-10-informasiya`,
+  «İnformasiyanın miqdarı» — bit/bayt ölçü vahidləri — 5 sual),
+  `db/158` (`inf-11-modellesdirme`, «Proqramlaşdırma dillərinin
+  köməyi ilə riyazi modelləşdirmə» + «Üçölçülü qrafik modellər» 4
+  sual). Cəmi 56 informatika mövzusunun **hamısı** tək-tək
+  yoxlanıldı (alt-başlıq siyahısı ↔ sual mətnləri) — bu, təkcə bir
+  neçə nümunə mövzu yox, bütöv fənn üzrə ilk tam audit idi. Bu 18
+  fayl əvvəlcə `Testler/db/121-138` kimi yazılmışdı (bank sessiyası
+  budağı), amma eyni müddətdə kod sessiyası `main`-də HƏMİN nömrələri
+  (121-140) tamam başqa fayllarla tutmuşdu — 2026-09-07 razılaşması
+  ilə 141-158-ə köçürüldü, `_bank` şəkilçisi əlavə olundu, fayllar
+  `bil10-bank/db/`-yə daşındı (bax yuxarı «db/ fayl nömrələri»).
 
 Ortaq kök birdir: **qurduğumu yoxlamaq, istənəni yoxlamaq deyil.**
 

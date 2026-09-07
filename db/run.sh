@@ -149,6 +149,26 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 99_bank_ingilis8_788.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 89_alt_movzular_ingilis6_11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 118_bank_umumi_tarix_bosluqlar.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 112_bank_cetin_birlesme.sql
+# 141-158: bank sessiyasinin movzu-uygunsuzluq/bosluq duzelisleri
+# (2026-09-07 nomre razilasmasi, CLAUDE.md "db/ fayl nomreleri").
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 141_bank_cografiya6_dunya_ictimai.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 142_bank_bio11_insan_muhit_duzelis.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 143_bank_tarix11_mustemleke_cenub.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 144_bank_inf11_komputer_veb_duzelis.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 145_bank_kim11_aldehid_izomer.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 146_bank_fiz7_skalyar_vektorial.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 147_bank_hey4_dini_deyerler.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 148_bank_utarix8_qafqaz_medeniyyet.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 149_bank_inf4_kompyuter_duzelis.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 150_bank_inf3_alqoritm_obyekt.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 151_bank_inf3_metn_duzelis.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 152_bank_inf8_kompyuter_tetbiqi_duzelis.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 153_bank_inf8_internet_sebeke.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 154_bank_inf11_sistemler_bosluqlar.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 155_bank_inf3_informasiya_bosluqlar.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 156_bank_inf3_kompyuter_is_masasi_qovluq.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 157_bank_inf10_informasiya_miqdari.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 158_bank_inf11_modellesdirme_bosluqlar.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql

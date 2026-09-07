@@ -61,6 +61,24 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          89_alt_movzular_ingilis6_11.sql \
          118_bank_umumi_tarix_bosluqlar.sql \
          112_bank_cetin_birlesme.sql \
+         141_bank_cografiya6_dunya_ictimai.sql \
+         142_bank_bio11_insan_muhit_duzelis.sql \
+         143_bank_tarix11_mustemleke_cenub.sql \
+         144_bank_inf11_komputer_veb_duzelis.sql \
+         145_bank_kim11_aldehid_izomer.sql \
+         146_bank_fiz7_skalyar_vektorial.sql \
+         147_bank_hey4_dini_deyerler.sql \
+         148_bank_utarix8_qafqaz_medeniyyet.sql \
+         149_bank_inf4_kompyuter_duzelis.sql \
+         150_bank_inf3_alqoritm_obyekt.sql \
+         151_bank_inf3_metn_duzelis.sql \
+         152_bank_inf8_kompyuter_tetbiqi_duzelis.sql \
+         153_bank_inf8_internet_sebeke.sql \
+         154_bank_inf11_sistemler_bosluqlar.sql \
+         155_bank_inf3_informasiya_bosluqlar.sql \
+         156_bank_inf3_kompyuter_is_masasi_qovluq.sql \
+         157_bank_inf10_informasiya_miqdari.sql \
+         158_bank_inf11_modellesdirme_bosluqlar.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
