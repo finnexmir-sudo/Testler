@@ -1980,6 +1980,22 @@ Video hələ yoxdur: səssiz avtomatik video az fayda verir; istifadəçi
 telefon/OBS ilə səsli çəksə, `<video>` ilə `komek/`-ə qoyulur (öz
 serverimizdən — xarici embed CSP/qayda ilə bağlıdır).
 
+## Domen — bil10.az (2026-09-07)
+
+Sahiblik online.az (illik ~20 AZN, sənəd yoxlanışı «pending» → «aktiv»);
+online.az DNS zonası vermir, ona görə nameserver **Cloudflare Free**-dədir
+(`miles/zara.ns.cloudflare.com`), yazılar orada: 4 × A `@` →
+185.199.108–111.153, CNAME `www` → `finnexmir-sudo.github.io`, hamısı
+**DNS only** (boz bulud — narıncı olsa GitHub HTTPS sertifikatı verə
+bilmir). Repo kökündə `CNAME` (= `bil10.az`) → GitHub Pages saytı kökdən
+verir, köhnə `github.io/Testler/` ora yönlənir. `muellim/config.js`
+STUDENT_URL/PARENT_URL `bil10.az`-dadır; parol bərpası `location.origin`
+işlətdiyi üçün Supabase → Authentication → URL Configuration-da Site URL
+`https://bil10.az` və Redirect `https://bil10.az/**` olmalıdır. Yeni domen
+ilk günlər FortiGuard-da «Newly Observed Domain» kimi bloklana bilər
+(iş/məktəb şəbəkəsi) — «re-evaluate» sorğusu göndərilib, vaxtla düşür.
+Geri qaytarmaq: `CNAME` faylını sil, config ünvanlarını qaytar.
+
 ## Supabase-i oyaq saxlamaq — `.github/workflows/oyaq-saxla.yml`
 
 Pulsuz Supabase 7 gün sorğu olmayanda layihəni dayandırır. GitHub

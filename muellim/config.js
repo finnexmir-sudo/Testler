@@ -5,8 +5,8 @@
 window.CFG = {
   SUPABASE_URL: "https://trsgfmlfiuozscjzkkjp.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_MNyO1nTpvz05LYUKxX0-Jg_eyDbVrv_",   // Supabase -> Settings -> API Keys -> anon public
-  STUDENT_URL: "https://finnexmir-sudo.github.io/Testler/sagird/",  // sagird tetbiqi
-  PARENT_URL:  "https://finnexmir-sudo.github.io/Testler/valideyn/",  // valideyn tetbiqi
+  STUDENT_URL: "https://bil10.az/sagird/",  // sagird tetbiqi
+  PARENT_URL:  "https://bil10.az/valideyn/",  // valideyn tetbiqi
   CONTACT_WHATSAPP: "",  // paket satisi ucun nomren, mes: "+994501234567"
   //  Paket/qiymet bolmesi gorunsunmu?  false olanda alt menyudan,
   //  suretli emeliyyatlardan ve unvandan gizlenir.  Satisa hazir
