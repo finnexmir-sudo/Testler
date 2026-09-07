@@ -111,6 +111,25 @@ with sync_playwright() as pw:
     ok(r["student_code"] == "DEMO0001" and r["deleted_copies"] == 0 and r["students"] == 25, "sifirlama: eyni kod, 25 sagird, teze nusxe silinmir", r)
     ok(db("select count(*) n from public.students where login_code='DEMO0001'", one=True)["n"] == 1, "DEMO0001 tekdir")
 
+    print("F · (159) Saatlıq hədd: sakit kart, «Yenidən cəhd et»")
+    db("""insert into auth.users (id, email)
+         select ('11110000-0000-0000-0000-00000000e1' || lpad(g::text, 2, '0'))::uuid, null from generate_series(1,20) g;
+         insert into public.accounts (id, type, name, owner_id, is_demo)
+         select ('aaaa0000-0000-0000-0000-00000000e1' || lpad(g::text, 2, '0'))::uuid, 'tutor', 'Nümunə hesabı',
+                ('11110000-0000-0000-0000-00000000e1' || lpad(g::text, 2, '0'))::uuid, true from generate_series(1,20) g""")
+    ctx3 = br.new_context(); pg3 = page(ctx3, 430, 900)
+    pg3.goto(PANEL + "#/demo")
+    pg3.wait_for_selector("#demoLim", timeout=20000)
+    ok("Nümunə hazırlanır" in pg3.inner_text("#demoLim") and pg3.locator("#demoRetry").count() == 1,
+       "hedd kecende sakit kart ve Yeniden cehd duymesi", pg3.inner_text("#demoLim")[:60])
+    ok(pg3.locator("#demoBar").count() == 0, "nusxe qurulmadi")
+    db("""delete from public.accounts where owner_id::text like '11110000-0000-0000-0000-00000000e1%%';
+         delete from auth.users where id::text like '11110000-0000-0000-0000-00000000e1%%'""")
+    pg3.click("#demoRetry")
+    pg3.wait_for_selector("#demoBar", timeout=40000)
+    ok(pg3.locator("#demoBar").count() == 1, "hedd kecdikden sonra Yeniden cehd nusxeni qurur")
+    ctx3.close()
+
     br.close()
 
 print()

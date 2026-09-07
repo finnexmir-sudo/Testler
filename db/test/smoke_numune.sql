@@ -187,4 +187,55 @@ end $$;
 reset role; reset request.jwt.claim.sub;
 \echo 'OK  5 · numune bildirisi/cehdleri/bize-yaz mesaji admin bolmelerinde yoxdur'
 
+-- =====================================================================
+--  6. (159) Hedd: saatda 20 yeni nusxe; movcud nusxe 10 deqiqede bir qurulur;
+--     hesabsiz anonim istifadeci 24 saatdan sonra silinir
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+--  20 "teze" nusxe (bos hesab kifayetdir - hedd created_at-a baxir)
+insert into auth.users (id, email)
+select ('11110000-0000-0000-0000-0000000001' || lpad(g::text, 2, '0'))::uuid, null from generate_series(1,20) g;
+insert into public.accounts (id, type, name, owner_id, is_demo)
+select ('aaaa0000-0000-0000-0000-0000000001' || lpad(g::text, 2, '0'))::uuid, 'tutor', 'Nümunə hesabı',
+       ('11110000-0000-0000-0000-0000000001' || lpad(g::text, 2, '0'))::uuid, true from generate_series(1,20) g;
+insert into auth.users (id, email) values ('11110000-0000-0000-0000-0000000000d9', null);
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d9';
+do $$
+declare bad boolean := false; m text;
+begin
+  begin perform public.rpc_demo_start();
+  exception when others then bad := true; m := sqlerrm; end;
+  assert bad and position('yeniden cehd' in m) > 0, 'hedd islemedi: ' || coalesce(m, 'xeta yox');
+  assert not exists (select 1 from public.accounts where owner_id = '11110000-0000-0000-0000-0000000000d9'), 'hedde baxmayaraq hesab yarandi';
+end $$;
+--  hedd kecir: 20 nusxe bir saatdan kohne olsun
+reset role; reset request.jwt.claim.sub;
+update public.accounts set created_at = now() - interval '2 hours' where owner_id::text like '11110000-0000-0000-0000-0000000001%';
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d9';
+do $$
+declare v jsonb; v2 jsonb;
+begin
+  v := public.rpc_demo_start();
+  assert (v->>'ok')::boolean and v->>'student_code' is not null, 'hedd kecdikden sonra nusxe qurulmadi';
+  --  eyni istifadeci derhal yeniden: qurulmur, eyni kodlar qayidir
+  v2 := public.rpc_demo_start();
+  assert (v2->>'reused')::boolean, 'tekrar cagirisda yeniden quruldu';
+  assert v2->>'student_code' = v->>'student_code', 'tekrar cagirisda kod deyisdi';
+end $$;
+--  hesabsiz anonim istifadeci: 24 saatdan sonra reset silir, tezesine toxunmur
+reset role; reset request.jwt.claim.sub;
+insert into auth.users (id, email, created_at) values
+  ('11110000-0000-0000-0000-0000000000d7', null, now() - interval '2 days'),
+  ('11110000-0000-0000-0000-0000000000d8', null, now());
+update public.app_state set val = jsonb_build_object('at', now() - interval '1 hour') where key = 'demo_reset';
+select public.rpc_demo_reset();
+do $$
+begin
+  assert not exists (select 1 from auth.users where id = '11110000-0000-0000-0000-0000000000d7'), 'kohne hesabsiz anonim silinmedi';
+  assert exists (select 1 from auth.users where id = '11110000-0000-0000-0000-0000000000d8'), 'teze anonim silindi';
+end $$;
+\echo 'OK  6 · hedd: saatda 20 nusxe, 10 deq tekrar qurulmur, hesabsiz anonim temizlenir'
+
 \echo 'NUMUNE: BUTUN YOXLAMALAR KECDI'

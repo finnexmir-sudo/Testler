@@ -69,6 +69,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 137_mesq_limit.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 138_sinaq_abune.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 139_numune_admin_gizli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 140_numune_bize_yaz_gizli.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 159_demo_hedd.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql

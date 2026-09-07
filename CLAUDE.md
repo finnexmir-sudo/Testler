@@ -1932,6 +1932,21 @@ olanda `planDone` → `loadPrep` kartı yeniləyir. Zəif/risk siqnalları
 ayrıca (`rpc_class_alerts`) qalır. Testlər: `smoke_bu_gun.sql` (5),
 `test/e2e_bugun.py` (17/17); bələdçi addım 8, şəkil `m11_bu_gun.png`.
 
+## Nümunə nüsxəsi həddi — bot müdafiəsi (db/159)
+
+Təhlükəsizlik yoxlaması (2026-09-07): anonim giriş açıqdır, hər «Müəllim
+kimi bax» ~1 MB nüsxə qurur, hədd yox idi — bot gündə ~700 nüsxə ilə
+pulsuz bazanı doldura bilərdi. `db/159_demo_hedd.sql`: saatda ən çox
+`app.demo_hour_limit()`=20 **yeni** nüsxə (keçəndə `53400` «Numune
+hazirlanir - bir nece deqiqeden sonra yeniden cehd edin»; panel `#demoLim`
+sakit kartı + `#demoRetry`); mövcud nüsxə 10 dəqiqədə birdən çox
+qurulmur (`reused:true`, mövcud kodlar qayıdır); `rpc_demo_reset`
+hesabsız anonim istifadəçiləri (`auth.users.email is null`, 24 saat+)
+silir — bu silmə `get diagnostics`-dən SONRA gəlir, yoxsa
+`deleted_copies` sayğacını pozur. Yoxlama: `smoke_numune.sql` 6,
+`e2e_numune.py` F. Qalan tövsiyələr (edilməyib): CSP meta, Supabase
+«Confirm email» + min parol 8, dörd hesabda 2FA.
+
 ## Nümunə məlumatı admin bölmələrinə düşmür (db/139, 140)
 
 138-dən sonra görünən: «Sual bildirişləri 4» — hamısı demo qurucusunun

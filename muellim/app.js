@@ -5490,7 +5490,7 @@
     var live = guard();
     topTitle.textContent = "Nümunə hesab";
     show('<div class="card"><div class="skel">Nümunə hesab hazırlanır…</div>' +
-         '<p class="muted" style="margin:8px 0 0">İki qrup, 20 şagird, 45 günlük nəticə tarixçəsi qurulur — bir neçə saniyə.</p></div>');
+         '<p class="muted" style="margin:8px 0 0">Üç qrup, 25 şagird, 45 günlük nəticə tarixçəsi qurulur — bir neçə saniyə.</p></div>');
     var p = sb.session() ? Promise.resolve() : sb.signInAnon();
     p.then(function () { return sb.rpc("rpc_demo_start", {}); })
      .then(function () { return refreshContext(); })
@@ -5504,6 +5504,17 @@
      .catch(function (e) {
        if (!live()) return;
        var t = fail(e);
+       //  159: saatliq hedd (bot mudafiesi) - sakit kart, "Yeniden cehd et"
+       if (/yeniden cehd|yenidən cəhd/i.test(t)) {
+         show('<div class="card" id="demoLim"><b>Nümunə hazırlanır</b>' +
+           '<p class="muted" style="margin:8px 0 14px">Bu saat çox adam baxır. Bir neçə dəqiqədən sonra yenidən cəhd edin, ' +
+           'ya da öz hesabınızı 1 dəqiqəyə açın — pulsuzdur.</p>' +
+           '<div class="btns"><button class="btn" id="demoRetry">Yenidən cəhd et</button> ' +
+           '<button class="btn ghost" id="demoUp">Hesab aç</button></div></div>');
+         on("demoRetry", "click", function () { screenDemo(); });
+         on("demoUp", "click", function () { sb.signOut().then(function () { nav("#/"); screenAuth("up"); }); });
+         return;
+       }
        if (/anonymous|anonim|422|disabled/i.test(t)) {
          t = "Nümunə hesab hazır deyil (anonim giriş bağlıdır).";
        }
