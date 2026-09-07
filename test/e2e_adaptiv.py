@@ -143,6 +143,8 @@ with sync_playwright() as pw:
     ok(sp.locator("#btnPHome").inner_text().strip() == "Mövzulara qayıt", "menimsenilende duyme")
     sp.click("#btnPHome"); sp.wait_for_selector("#adBox", timeout=15000)
     ok("1 mövzu mənimsənilib" in sp.inner_text("#adBox"), "ev ekraninda menimsenilib sayı")
+    #  137: abunesiz hesab - gundelik sayğac gorunur
+    ok("/ 20" in sp.inner_text("#adBox") and "limitsiz" in sp.inner_text("#adBox"), "gundelik limit sayğaci", sp.locator("#adBox .adq").inner_text() if sp.locator("#adBox .adq").count() else "yoxdur")
 
     print("E · Müəllim hesabatı və valideyn")
     pg.goto(PANEL + "#/s/" + SID + "/" + GID); pg.reload(); pg.wait_for_selector("#sTabs", timeout=15000)

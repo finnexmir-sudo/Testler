@@ -1616,6 +1616,21 @@ Testlər: `smoke_cavab_terzi.sql` (3), `test/e2e_inam.py`.
   «bağlasanız yalnız verdiyiniz tapşırıqları görər»; «götür» düyməsinin
   ipucu və Bağlı boş-halı «nəticələr qalır».
 
+## Mövzu məşqində gündəlik limit (abunəsiz)
+
+`db/137_mesq_limit.sql` (istifadəçi qərarı, 2026-09-07). Mövzu məşqi hazır
+bankın özüdür — abunəsiz hesabda şagird başına gündə
+`app.practice_daily_limit()` = 20 cavab; müəllimin abunəsi ilə limitsiz;
+səhv dəftəri limitsiz. `practice_days(student_id, day, n)` hər cavabda +1
+(`rpc_student_practice_answer`). `app.practice_quota(student) →
+(paid, used, max)`; `rpc_student_practice_topics.quota`, cavabda `quota`.
+`rpc_student_practice_next` limit dolubsa rədd edir (`42501`, mətndə
+«limit»), verilmiş cavabsız sual (1 saat) yenə qayıdır. Şagird tətbiqi:
+ev kartında `.adq` «Bu gün 12 / 20 sual», cavabdan sonra limit dolanda
+«Növbəti» yox, «Mövzulara qayıt»; `screenPractice` xətası «limit»
+sözünü tanıyıb sakit kart göstərir. Yoxlama: `smoke_mesq_limit.sql` (2),
+`e2e_adaptiv.py` sayğac yoxlaması.
+
 ## Nümunə (demo) hesab — «Müəllim kimi bax»
 
 `db/136_numune_hesab.sql`. Yayılma üçün: müəllim qeydiyyatsız, dolu
@@ -1631,15 +1646,19 @@ işləmir (panel «Nümunə hesab hazır deyil» deyir və qeydiyyat təklif edi
   `app.demo_account()`). `?kod=` şagird/valideyn tətbiqində avtomatik
   giriş, ünvandan silinir.
 - Qurucu `app.demo_build(owner, account, fixed)`: təmizləyir və yenidən
-  qurur — 2 qrup (3-cü sinif 12 şagird, 7-ci sinif 8), abunə (1 il),
+  qurur — 3 qrup (**7-ci sinif** 12 şagird əsas/zəngin, 3-cü sinif 8,
+  11-ci sinif DİM 5 — repetitor auditoriyası 5–11-dir), abunə (1 il),
   plan (9 mövzu keçilib, tarixlər 45…3 gün əvvəl), hər keçilmiş mövzuya
   ev tapşırığı + cəhdlər (`app.demo_attempt`: bacarıq 0.42–0.92, zəif
   mövzularda −0.3; şablon suallar `pq_seed` ilə), son 3 mövzuya isinmə,
   6-cı mövzudan sonra rüb sınağı (`plan_exams`), diaqnostika (35 gün
   əvvəl), açıq tapşırıq (4 nəfər etməyib → «Bu günün dərsi»), mövzu
   məşqi (3 şagird), dəftər (şənbələr, bu ay 8 ödənib), «Bizə yaz», sual
-  bildirişi. Zəif mövzular: «Kəsrlər» (diaqnostikada) + 6-cı dərsin fəsli
-  (ev tapşırıqlarında). 1-ci şagird (DEMO0001/VDEMO001) orta səviyyəli
+  bildirişi. Zəif mövzular: ilk 9 dərsin fəsillərindən OLMAYAN ilk fəsil
+  (diaqnostikada, hamıya, bacarıq −0.12) + 6-cı dərsin fəsli yalnız 5
+  şagirdə (1, 7, 10, 11, 12; ilk 9 dərs eyni fəsildədir — hamıya versək
+  bütün qrup «zəif» çıxırdı). Bacarıqlar 0.52–0.97, zəifdə −0.22 → orta
+  ~70%, zonada 5–7 nəfər. 1-ci şagird (DEMO0001/VDEMO001) orta səviyyəli
   — zəif mövzu və səhv dəftəri görünsün. `setseed(0.4242)` → paylaşılan
   nümunə hər gün eyni. Səhv dəftəri trigger ilə özü dolur.
 - `rpc_demo_reset()` (anon, 05_grants siyahısı 19): 10 dəqiqədə bir

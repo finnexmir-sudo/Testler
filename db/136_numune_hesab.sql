@@ -12,7 +12,7 @@
 --  Paylasilan numune her gece (is axini, anon acar ile) rpc_demo_reset()
 --  ile yeniden qurulur - ziyaretcilerin yazdigi cehdler silinir.
 --
---  Qurucu app.demo_build(owner, account, fixed): iki qrup, 20 sagird, ders
+--  Qurucu app.demo_build(owner, account, fixed): uc qrup (7-ci esas, 3-cu, 11-ci DIM), 25 sagird, ders
 --  plani (9 movzu kecilib), ev tapsiriqlari + isinmeler + rub sinagi +
 --  diaqnostika, 45 gunluk cehd tarixcesi (zeif movzu: Kesrler), acıq
 --  tapsiriq (4 nefer etmeyib), sehv defteri (trigger ile), movzu mesqi,
@@ -133,13 +133,16 @@ create or replace function app.demo_build(p_owner uuid, p_account uuid, p_fixed 
 returns jsonb
 language plpgsql as $$
 declare
-  v_riy  uuid; v_l3 record; v_l7 record;
+  v_riy  uuid; v_lm record; v_l3 record; v_l11 record;   -- esas qrup 7-ci sinif
   v_c1 uuid; v_c2 uuid;
   v_names1 text[] := array['Ayan Məmmədova','Murad Həsənov','Nigar Əliyeva','Tural Quliyev','Leyla Hüseynova',
                            'Elvin Rəhimov','Aysel Kərimova','Kənan İbrahimov','Zəhra Abbasova','Rəşad Nəbiyev',
                            'Fidan Səfərova','Orxan Mustafayev'];
   v_names2 text[] := array['Aytac Cəfərova','Nihad Vəliyev','Günel Əhmədova','Rauf Ağayev',
                            'Səbinə Qasımova','Tunar Bağırov','Lalə Hacıyeva','Ülvi Salmanov'];
+  v_names3 text[] := array['Cavid Məmmədli','Nərmin Əsgərova','Emil Tağıyev','Aylin Şirinova','Fərid Zeynalov'];
+  v_abil3 numeric[] := array[0.88,0.80,0.72,0.66,0.58];
+  v_c3 uuid; v_stu3 uuid[] := '{}'; v_plan3 uuid;
   --  1-ci sagird (DEMO0001 / VDEMO001 - numune girisleri) ORTA seviyyeli:
   --  zeif movzu ve sehv defteri gorunsun.  Gucluler 3 ve 4-dur.
   --  Canli baxisdan sonra qaldirildi: orta 50% ve 7 nefer tehluke zonasinda
@@ -176,12 +179,13 @@ begin
   end if;
 
   select id into v_riy from public.subjects where slug = 'riyaziyyat';
-  select l.* into v_l3 from public.levels l where l.code = '3' order by l.sort limit 1;
-  select l.* into v_l7 from public.levels l where l.code = '7' order by l.sort limit 1;
+  select l.* into v_lm  from public.levels l where l.code = '7'  order by l.sort limit 1;
+  select l.* into v_l3  from public.levels l where l.code = '3'  order by l.sort limit 1;
+  select l.* into v_l11 from public.levels l where l.code = '11' order by l.sort limit 1;
 
-  -- ---- qrup 1: 3-cu sinif, 12 sagird
+  -- ---- qrup 1 (esas, zengin): 7-ci sinif, 12 sagird
   insert into public.classes (account_id, teacher_id, kind, program_id, level_id, name, join_code)
-  values (p_account, p_owner, 'tutor_group', v_l3.program_id, v_l3.id, '3-cü sinif — şənbə qrupu', app.gen_login_code(8))
+  values (p_account, p_owner, 'tutor_group', v_lm.program_id, v_lm.id, '7-ci sinif — şənbə qrupu', app.gen_login_code(8))
   returning id into v_c1;
   for i in 1..12 loop
     v_code := case when p_fixed then 'DEMO' || lpad(i::text, 4, '0') else app.gen_login_code(8) end;
@@ -194,24 +198,27 @@ begin
     if i = 1 then v_code1 := v_code; v_pcode1 := v_pcode; end if;
   end loop;
 
-  -- ---- plan: riyaziyyat 3, yarpaqlar, ilk 9 kecilib
+  -- ---- plan: riyaziyyat (esas sinif), yarpaqlar, ilk 9 kecilib
   insert into public.class_plans (class_id, subject_id, level_id, created_at)
-  values (v_c1, v_riy, v_l3.id, now() - interval '48 days') returning id into v_plan;
+  values (v_c1, v_riy, v_lm.id, now() - interval '48 days') returning id into v_plan;
   insert into public.class_plan_items (plan_id, topic_id, ord)
   select v_plan, t.id, row_number() over (order by coalesce(par.sort, t.sort), coalesce(par.name, t.name), t.sort, t.name)
     from public.topics t left join public.topics par on par.id = t.parent_id
-   where t.subject_id = v_riy and t.level_id = v_l3.id
+   where t.subject_id = v_riy and t.level_id = v_lm.id
      and not exists (select 1 from public.topics c where c.parent_id = t.id);
   select array_agg(id order by ord) into v_items from public.class_plan_items where plan_id = v_plan;
 
-  --  zeif movzu: "Kesrler" fesli (yoxdursa 8-ci movzunun fesli)
-  select coalesce(
-    (select t.id from public.topics t where t.subject_id = v_riy and t.level_id = v_l3.id and t.parent_id is null and t.name ilike 'Kəsr%' limit 1),
-    (select tp.o_id from app.pack_topic((select topic_id from public.class_plan_items where id = v_items[8])) tp))
-    into v_topic;
-  --  zeif movzular: Kesrler (diaqnostikada, hamiya) + 6-ci dersin fesli
-  --  YALNIZ bes sagirde (1, 7, 10, 11, 12) - ilk 9 ders eyni fesildedir,
-  --  hamiya versek butun qrup "zeif" cixir (canli baxis: 7 nefer zonada)
+  --  zeif movzu (diaqnostikada, hamiya): ilk 9 dersin fesillerinden OLMAYAN
+  --  ilk fesil - hovuz ferqli olsun deye
+  select t.id into v_topic from public.topics t
+   where t.subject_id = v_riy and t.level_id = v_lm.id and t.parent_id is null
+     and t.id not in (select tp.o_id from unnest(v_items[1:least(9, cardinality(v_items))]) x
+                        join public.class_plan_items it on it.id = x
+                        cross join lateral app.pack_topic(it.topic_id) tp)
+   order by t.sort limit 1;
+  if v_topic is null then
+    select tp.o_id into v_topic from app.pack_topic((select topic_id from public.class_plan_items where id = v_items[cardinality(v_items)])) tp;
+  end if;
   v_weak := array[v_topic];
   if cardinality(v_items) >= 6 then
     v_weak := v_weak || (select tp.o_id from app.pack_topic((select topic_id from public.class_plan_items where id = v_items[6])) tp);
@@ -223,7 +230,7 @@ begin
     update public.class_plan_items set done_at = v_at where id = v_item;
     select * into v_par from app.pack_topic((select topic_id from public.class_plan_items where id = v_item));
     --  ev tapsirigi
-    v_test := app.demo_test(p_owner, v_riy, v_l3.id, v_l3.program_id, array[v_par.o_id], 10,
+    v_test := app.demo_test(p_owner, v_riy, v_lm.id, v_lm.program_id, array[v_par.o_id], 10,
                 v_par.o_name || ' — yoxlama', jsonb_build_object('pack','hw','topics',jsonb_build_array(v_par.o_id::text)),
                 '{1,2,3}', null, false, v_at);
     update public.class_plan_items set test_id = v_test where id = v_item;
@@ -240,7 +247,7 @@ begin
     end loop;
     --  isinme: son uc movzuda
     if i >= 7 then
-      v_test := app.demo_test(p_owner, v_riy, v_l3.id, v_l3.program_id, array[v_par.o_id], 5,
+      v_test := app.demo_test(p_owner, v_riy, v_lm.id, v_lm.program_id, array[v_par.o_id], 5,
                   'İsinmə — ' || v_par.o_name, jsonb_build_object('pack','warm','topics',jsonb_build_array(v_par.o_id::text)),
                   '{1,2}', null, false, v_at - interval '1 day');
       update public.class_plan_items set warm_test_id = v_test where id = v_item;
@@ -257,7 +264,7 @@ begin
       select array_agg(distinct tp.o_id) into v_topics
         from unnest(v_items[1:6]) x join public.class_plan_items it on it.id = x
         cross join lateral app.pack_topic(it.topic_id) tp;
-      v_exam := app.demo_test(p_owner, v_riy, v_l3.id, v_l3.program_id, v_topics, 20,
+      v_exam := app.demo_test(p_owner, v_riy, v_lm.id, v_lm.program_id, v_topics, 20,
                   'Rüb sınağı — Riyaziyyat · 6 mövzu', jsonb_build_object('pack','exam','plan',v_plan::text,'topics',to_jsonb(v_topics)),
                   '{1,2,3}', null, false, v_at + interval '1 day');
       insert into public.plan_exams (plan_id, test_id, item_ids, created_at) values (v_plan, v_exam, v_items[1:6], v_at + interval '1 day');
@@ -273,11 +280,11 @@ begin
 
   -- ---- diaqnostika (35 gun evvel): her kok movzudan 3 sual
   select array_agg(t.id) into v_topics from public.topics t
-   where t.subject_id = v_riy and t.level_id = v_l3.id and t.parent_id is null;
+   where t.subject_id = v_riy and t.level_id = v_lm.id and t.parent_id is null;
   v_at := now() - interval '35 days';
-  v_diag := app.demo_test(p_owner, v_riy, v_l3.id, v_l3.program_id, v_topics, 3 * cardinality(v_topics),
-              'Diaqnostika · Riyaziyyat · ' || v_l3.name,
-              jsonb_build_object('kind','diagnostic','subject','riyaziyyat','level',v_l3.code,'per_topic',3),
+  v_diag := app.demo_test(p_owner, v_riy, v_lm.id, v_lm.program_id, v_topics, 3 * cardinality(v_topics),
+              'Diaqnostika · Riyaziyyat · ' || v_lm.name,
+              jsonb_build_object('kind','diagnostic','subject','riyaziyyat','level',v_lm.code,'per_topic',3),
               '{1,2,3}', 3, true, v_at);
   insert into public.assignments (class_id, test_id, assigned_by, opens_at, closes_at, max_attempts, created_at)
   values (v_c1, v_diag, p_owner, v_at, v_at + interval '7 days', 1, v_at);
@@ -324,9 +331,9 @@ begin
     values (v_q, v_stu1[4], 'yazi', 'Sualda «neçə edər» sözü iki dəfə yazılıb.', now() - interval '2 days');
   end if;
 
-  -- ---- qrup 2: 7-ci sinif, 8 sagird, plan 2 movzu
+  -- ---- qrup 2: 3-cu sinif, 8 sagird, plan 2 movzu
   insert into public.classes (account_id, teacher_id, kind, program_id, level_id, name, join_code)
-  values (p_account, p_owner, 'tutor_group', v_l7.program_id, v_l7.id, '7-ci sinif — DİM hazırlıq', app.gen_login_code(8))
+  values (p_account, p_owner, 'tutor_group', v_l3.program_id, v_l3.id, '3-cü sinif — ibtidai', app.gen_login_code(8))
   returning id into v_c2;
   for i in 1..8 loop
     v_code := case when p_fixed then 'DEMO' || lpad((12 + i)::text, 4, '0') else app.gen_login_code(8) end;
@@ -337,11 +344,11 @@ begin
     v_stu2 := v_stu2 || v_sid;
   end loop;
   insert into public.class_plans (class_id, subject_id, level_id, created_at)
-  values (v_c2, v_riy, v_l7.id, now() - interval '28 days') returning id into v_plan2;
+  values (v_c2, v_riy, v_l3.id, now() - interval '28 days') returning id into v_plan2;
   insert into public.class_plan_items (plan_id, topic_id, ord)
   select v_plan2, t.id, row_number() over (order by coalesce(par.sort, t.sort), coalesce(par.name, t.name), t.sort, t.name)
     from public.topics t left join public.topics par on par.id = t.parent_id
-   where t.subject_id = v_riy and t.level_id = v_l7.id
+   where t.subject_id = v_riy and t.level_id = v_l3.id
      and not exists (select 1 from public.topics c where c.parent_id = t.id);
   select array_agg(id order by ord) into v_items from public.class_plan_items where plan_id = v_plan2;
   if cardinality(v_items) >= 2 then
@@ -349,7 +356,7 @@ begin
     update public.class_plan_items set done_at = now() - interval '12 days' where id = v_items[2];
     select * into v_par from app.pack_topic((select topic_id from public.class_plan_items where id = v_items[2]));
     v_at := now() - interval '12 days';
-    v_test := app.demo_test(p_owner, v_riy, v_l7.id, v_l7.program_id, array[v_par.o_id], 10,
+    v_test := app.demo_test(p_owner, v_riy, v_l3.id, v_l3.program_id, array[v_par.o_id], 10,
                 v_par.o_name || ' — yoxlama', jsonb_build_object('pack','hw','topics',jsonb_build_array(v_par.o_id::text)),
                 '{1,2,3}', null, false, v_at);
     update public.class_plan_items set test_id = v_test where id = v_items[2];
@@ -362,8 +369,45 @@ begin
     end loop;
   end if;
 
+  -- ---- qrup 3: 11-ci sinif DIM hazirliq, 5 sagird, 1 movzu kecilib
+  insert into public.classes (account_id, teacher_id, kind, program_id, level_id, name, join_code)
+  values (p_account, p_owner, 'tutor_group', v_l11.program_id, v_l11.id, '11-ci sinif — DİM hazırlıq', app.gen_login_code(8))
+  returning id into v_c3;
+  for i in 1..5 loop
+    v_code := case when p_fixed then 'DEMO' || lpad((20 + i)::text, 4, '0') else app.gen_login_code(8) end;
+    insert into public.students (account_id, class_id, created_by, full_name, display_name, login_code, created_at)
+    values (p_account, v_c3, p_owner, v_names3[i], app.unique_display_name(v_c3, v_names3[i]), v_code,
+            now() - interval '20 days' + make_interval(mins => i))
+    returning id into v_sid;
+    v_stu3 := v_stu3 || v_sid;
+  end loop;
+  insert into public.class_plans (class_id, subject_id, level_id, created_at)
+  values (v_c3, v_riy, v_l11.id, now() - interval '18 days') returning id into v_plan3;
+  insert into public.class_plan_items (plan_id, topic_id, ord)
+  select v_plan3, t.id, row_number() over (order by coalesce(par.sort, t.sort), coalesce(par.name, t.name), t.sort, t.name)
+    from public.topics t left join public.topics par on par.id = t.parent_id
+   where t.subject_id = v_riy and t.level_id = v_l11.id
+     and not exists (select 1 from public.topics c where c.parent_id = t.id);
+  select array_agg(id order by ord) into v_items from public.class_plan_items where plan_id = v_plan3;
+  if cardinality(v_items) >= 1 then
+    v_at := now() - interval '9 days';
+    update public.class_plan_items set done_at = v_at where id = v_items[1];
+    select * into v_par from app.pack_topic((select topic_id from public.class_plan_items where id = v_items[1]));
+    v_test := app.demo_test(p_owner, v_riy, v_l11.id, v_l11.program_id, array[v_par.o_id], 10,
+                v_par.o_name || ' — yoxlama', jsonb_build_object('pack','hw','topics',jsonb_build_array(v_par.o_id::text)),
+                '{1,2,3}', null, false, v_at);
+    update public.class_plan_items set test_id = v_test where id = v_items[1];
+    insert into public.assignments (class_id, test_id, assigned_by, opens_at, closes_at, max_attempts, created_at)
+    values (v_c3, v_test, p_owner, v_at, v_at + interval '7 days', 1, v_at);
+    for k in 1..5 loop
+      if k <> 4 then
+        perform app.demo_attempt(v_stu3[k], v_test, v_c3, v_abil3[k], '{}', v_at + make_interval(hours => 20 + floor(random() * 96)::int));
+      end if;
+    end loop;
+  end if;
+
   return jsonb_build_object('ok', true, 'account_id', p_account, 'student_code', v_code1, 'parent_code', v_pcode1,
-                            'classes', 2, 'students', 20);
+                            'classes', 3, 'students', 25);
 end $$;
 revoke all on function app.demo_build(uuid, uuid, boolean) from public, anon, authenticated;
 

@@ -28,11 +28,11 @@ declare v jsonb; c1 uuid; n int; p uuid; d jsonb;
 begin
   v := public.rpc_demo_reset();
   assert (v->>'ok')::boolean and v->>'student_code' = 'DEMO0001' and v->>'parent_code' = 'VDEMO001', 'kodlar: ' || v::text;
-  assert (select count(*) from public.classes where account_id = app.demo_account()) = 2, '2 qrup';
-  assert (select count(*) from public.students where account_id = app.demo_account()) = 20, '20 sagird';
+  assert (select count(*) from public.classes where account_id = app.demo_account()) = 3, '3 qrup';
+  assert (select count(*) from public.students where account_id = app.demo_account()) = 25, '25 sagird';
   assert (select is_demo from public.accounts where id = app.demo_account()), 'is_demo';
   assert app.has_active_subscription(app.demo_account()), 'abune';
-  select id into c1 from public.classes where account_id = app.demo_account() and name like '3-cü%';
+  select id into c1 from public.classes where account_id = app.demo_account() and name like '7-ci%';
   select count(*) into n from public.class_plan_items i join public.class_plans pl on pl.id = i.plan_id
    where pl.class_id = c1 and i.done_at is not null;
   assert n = 9, '9 movzu kecilib: ' || n;
@@ -47,7 +47,7 @@ begin
   assert (select count(*) from public.feedback where account_id = app.demo_account()) = 1, 'bize yaz';
   perform set_config('smoke.c1', c1::text, false);
 end $$;
-\echo 'OK  1 · paylasilan numune: 2 qrup, 20 sagird, tarixce, defter, sinaq'
+\echo 'OK  1 · paylasilan numune: 3 qrup, 25 sagird, tarixce, defter, sinaq'
 
 -- =====================================================================
 --  2. Sahib RPC-leri: bu gunun dersi (4 etmeyib), zeif movzu, my_context
@@ -93,7 +93,7 @@ begin
   update public.app_state set val = jsonb_build_object('at', now() - interval '1 hour') where key = 'demo_reset';
   v := public.rpc_demo_reset();
   assert not coalesce((v->>'skipped')::boolean, false) and v->>'student_code' = 'DEMO0001', 'yeniden qurulur, eyni kod';
-  assert (select count(*) from public.students where account_id = app.demo_account()) = 20, 'yeniden 20 sagird';
+  assert (select count(*) from public.students where account_id = app.demo_account()) = 25, 'yeniden 25 sagird';
 end $$;
 \echo 'OK  3 · sagird/valideyn kodla girir; sifirlama atlanir ve eyni kodlarla qurulur'
 
@@ -129,8 +129,8 @@ reset role;
 do $$
 declare v jsonb;
 begin
-  assert (select count(*) from public.students where account_id = current_setting('smoke.acc')::uuid) = 20, 'nusxede 20 sagird';
-  assert (select count(*) from public.students where account_id = app.demo_account()) = 20, 'paylasilan toxunulmayib';
+  assert (select count(*) from public.students where account_id = current_setting('smoke.acc')::uuid) = 25, 'nusxede 25 sagird';
+  assert (select count(*) from public.students where account_id = app.demo_account()) = 25, 'paylasilan toxunulmayib';
   --  kohne nusxe: 2 gun evvel yaradilmis kimi -> sifirlama silir
   update public.accounts set created_at = now() - interval '2 days' where id = current_setting('smoke.acc')::uuid;
   update public.app_state set val = jsonb_build_object('at', now() - interval '1 hour') where key = 'demo_reset';

@@ -355,6 +355,8 @@ details.fbd[open] summary{color:var(--fg-2)}
 .abar i{display:block;height:100%;background:var(--brand);border-radius:999px}
 .abar.done i{background:var(--ok)}
 .asc{flex:0 0 28px;text-align:right;font-size:13px;font-weight:640;color:var(--fg-2);font-variant-numeric:tabular-nums}
+.adq{padding:0 16px 8px;margin:0}
+.adq.full{color:var(--warn)}
 .adall{margin:4px 16px 12px}
 .adall summary{font-size:13px;color:var(--brand);cursor:pointer}
 .adsub{margin:10px 0 0;font-weight:600;color:var(--fg-2)}

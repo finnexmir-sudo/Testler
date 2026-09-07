@@ -989,11 +989,18 @@
           '<span class="abar' + (t.mastered ? " done" : "") + '"><i style="width:' + sc + '%"></i></span>' +
           '<span class="asc">' + sc + "</span></button>";
       }
+      //  137: abunesiz gundelik limit
+      var qt = d.quota || {};
+      var qtxt = (!qt.paid && qt.max)
+        ? '<p class="note adq' + (qt.used >= qt.max ? " full" : "") + '">Bu gün <b>' + (qt.used || 0) + " / " + qt.max + "</b> sual" +
+          (qt.used >= qt.max ? " — bugünkü limit dolub, sabah davam et." : "") +
+          " Müəllimin abunəsi ilə limitsizdir.</p>"
+        : "";
       box.innerHTML = '<div class="spacer"></div><h2>Mövzu məşqi</h2>' +
         '<div class="card pad0 adap">' +
           '<p class="note" style="padding:12px 16px 4px;margin:0">Mövzunu seç — suallar bir-bir gəlir, çətinlik sənə uyğunlaşır. ' +
             "Bal 100 olanda mövzu mənimsənilib." +
-            (d.mastered ? " <b>" + d.mastered + " mövzu mənimsənilib.</b>" : "") + "</p>" +
+            (d.mastered ? " <b>" + d.mastered + " mövzu mənimsənilib.</b>" : "") + "</p>" + qtxt +
           top.map(row).join("") +
           '<details class="more adall"><summary>Bütün mövzular <span class="fn">' + all.length + "</span></summary>" +
             subs.map(function (sj) {
@@ -1013,7 +1020,18 @@
     sb.rpc("rpc_student_practice_next", { p_token: TOKEN, p_topic_id: tid }).then(function (d) {
       AD = { tid: tid, d: d };
       drawPrac();
-    }).catch(function (e) { errScreen(e, function () { screenPractice(tid); }); });
+    }).catch(function (e) {
+      var t = fail(e);
+      //  137: gundelik limit - xeta deyil, sakit kart
+      if (/limit/i.test(t)) {
+        show('<div class="card" style="text-align:center"><h1>Bugünkü məşq bitdi ⏳</h1>' +
+          '<p class="note">' + esc(t) + "</p>" +
+          '<button class="btn go wide" id="btnPLim" style="margin-top:12px">Testlərə qayıt</button></div>');
+        on("btnPLim", "click", screenTests);
+        return;
+      }
+      errScreen(e, function () { screenPractice(tid); });
+    });
   }
   function pracHead(score, level, streak, done) {
     return '<div class="adhead"><b>' + esc(AD.d.topic || "") + "</b><span>" + esc(AD.d.subject || "") + "</span></div>" +
@@ -1056,15 +1074,19 @@
         });
         var g = Number(r.gain) || 0;
         var jm = !!r.just_mastered;
+        var qq = r.quota || {};
+        var lim = !qq.paid && qq.max && qq.used >= qq.max;
         $("pFb").innerHTML =
           '<div class="' + (r.correct ? "ok" : "warn") + '">' + ic(r.correct ? "check" : "info") +
             "<span>" + (r.correct
               ? "Düzdür! <b>+" + g + "</b> bal." + (jm ? " 🏆 <b>Mövzu mənimsənilib!</b>" : "")
               : "Səhvdir. <b>" + g + "</b> bal. Səhv dəftərinə düşdü — sonra bir də gələcək.") +
             (r.explanation ? "<br><i>" + esc(r.explanation) + "</i>" : "") + "</span></div>" +
+          (lim ? '<p class="note" style="margin:8px 0 0">Bugünkü ' + qq.max + " sual bitdi — sabah davam et. Müəllimin abunəsi ilə limitsizdir.</p>" : "") +
           '<div class="row" style="margin-top:10px">' +
-            '<button class="btn go" id="btnPNext" style="flex:1">' + (jm ? "Davam et" : "Növbəti") + "</button>" +
-            '<button class="btn" id="btnPHome">' + (jm ? "Mövzulara qayıt" : "Çıx") + "</button></div>";
+            (lim ? "" : '<button class="btn go" id="btnPNext" style="flex:1">' + (jm ? "Davam et" : "Növbəti") + "</button>") +
+            '<button class="btn' + (lim ? " go" : "") + '" id="btnPHome"' + (lim ? ' style="flex:1"' : "") + ">" +
+              (lim || jm ? "Mövzulara qayıt" : "Çıx") + "</button></div>";
         //  ust zolaq: bal ve seviyye derhal yenilenir
         var head = main.querySelector(".adhead");
         if (head) {

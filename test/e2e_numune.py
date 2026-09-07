@@ -73,9 +73,9 @@ with sync_playwright() as pw:
     ok(len(codes) == 2 and codes[0] != "DEMO0001" and len(codes[0]) == 8 and codes[1].startswith("V"), "oz nusxenin kodlari (paylasilan deyil)", codes)
     ok(db("select count(*) n from public.accounts where is_demo", one=True)["n"] == 2, "paylasilan + nusxe = 2 numune hesab")
     pg.wait_for_selector("#groups .item", timeout=15000)
-    ok(pg.locator("#groups .item").count() == 2, "iki qrup", pg.locator("#groups .item").count())
+    ok(pg.locator("#groups .item").count() == 3, "uc qrup", pg.locator("#groups .item").count())
     ok("Nümunə Müəllim" in pg.inner_text("#topWho"), "ad: Numune Muellim")
-    pg.locator("#groups .item", has_text="3-cü sinif").first.click(); pg.wait_for_selector("#gTabs", timeout=15000)
+    pg.locator("#groups .item", has_text="7-ci sinif").first.click(); pg.wait_for_selector("#gTabs", timeout=15000)
     pg.wait_for_selector("#prep .prep", timeout=20000)
     #  CSS boyuk herf edir - textContent oxunur
     pt = pg.evaluate("document.querySelector('#prep').textContent")
@@ -108,7 +108,7 @@ with sync_playwright() as pw:
     print("E · Sıfırlama: paylaşılan yenidən qurulur, kodlar eyni")
     db("update public.app_state set val = jsonb_build_object('at', now() - interval '1 hour') where key='demo_reset'")
     r = db("select public.rpc_demo_reset() v", one=True)["v"]
-    ok(r["student_code"] == "DEMO0001" and r["deleted_copies"] == 0, "sifirlama: eyni kod, teze nusxe silinmir", r)
+    ok(r["student_code"] == "DEMO0001" and r["deleted_copies"] == 0 and r["students"] == 25, "sifirlama: eyni kod, 25 sagird, teze nusxe silinmir", r)
     ok(db("select count(*) n from public.students where login_code='DEMO0001'", one=True)["n"] == 1, "DEMO0001 tekdir")
 
     br.close()
