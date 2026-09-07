@@ -996,9 +996,9 @@ Yeni **kod** faylı 100-dən başlayır. Bank faylına toxunma; bank
 sessiyası da 100+ aralığına girmir.
 
 **2026-09-07 razılaşması:** kod faylları 140-a qədər doludur (121–140
-bu sessiya). Bank sessiyası **141–147** aralığını götürür (bank-content
-düzəlişləri, faylın adında `_bank` olsun, yeri `bil10-bank/db/`, burada
-yalnız symlink); kod sessiyası **148-dən** davam edir. Bank faylı bu
+bu sessiya). Bank sessiyası **141–158** aralığını götürür (18 bank-content
+düzəlişi, faylın adında `_bank` olsun, yeri `bil10-bank/db/`, burada
+yalnız symlink); kod sessiyası **159-dan** davam edir. Bank faylı bu
 repoya heç vaxt commit olunmur — commit-dən əvvəl yoxlama artıq nömrəyə
 yox, private repo-da eyni adlı faylın olmasına baxır:
 `git diff --cached --name-only | while read f; do [ -e "../bil10-bank/db/$(basename "$f")" ] && echo "BANK: $f"; done`
