@@ -1841,7 +1841,7 @@ olanda `planDone` → `loadPrep` kartı yeniləyir. Zəif/risk siqnalları
 ayrıca (`rpc_class_alerts`) qalır. Testlər: `smoke_bu_gun.sql` (5),
 `test/e2e_bugun.py` (17/17); bələdçi addım 8, şəkil `m11_bu_gun.png`.
 
-## Nümunə məlumatı admin bölmələrinə düşmür (db/139)
+## Nümunə məlumatı admin bölmələrinə düşmür (db/139, 140)
 
 138-dən sonra görünən: «Sual bildirişləri 4» — hamısı demo qurucusunun
 uydurduğu «Tural Q.» bildirişi (hər nüsxədə bir); «Sual keyfiyyəti 16» —
@@ -1849,7 +1849,9 @@ demo cəhdlərindən hesablanmış «ölü variant» siqnalları. `db/139`:
 `rpc_admin_reports` / `rpc_admin_reports_count` `is_demo` hesabın
 (müəllim və ya şagirdinin) bildirişini göstərmir; `app.qstat_rows` demo
 şagirdlərinin cəhdlərini statistikaya salmır (migrasiya `question_stats`-ı
-bir dəfə yenidən hesablayır). Demo qurucusu (136) dəyişmir. Qayda: **demo
+bir dəfə yenidən hesablayır). `db/140`: `rpc_admin_feedback` / `_count`
+de eyni cür (`app.feedback_is_demo(account, student)`) — «Bizə yazılanlar»
+da demo mesajını göstərmir. Demo qurucusu (136) dəyişmir. Qayda: **demo
 məlumatı yalnız demo hesabın öz panelində görünməlidir** — yeni admin
 bölməsi yazanda `is_demo`-nu çıxar. Yoxlama: `smoke_numune.sql` 5.
 

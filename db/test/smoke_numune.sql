@@ -161,6 +161,11 @@ begin
   assert (select count(*) from public.attempts a join public.students st on st.id = a.student_id
            join public.accounts ac on ac.id = st.account_id and ac.is_demo) > 20, 'demo cehdleri yoxdur';
   assert (select count(*) from app.qstat_rows(null)) = 0, 'demo cehdleri sual statistikasina dusdu';
+  assert (select count(*) from public.feedback fb join public.accounts a on a.id = fb.account_id and a.is_demo) >= 1,
+         'demo bize-yaz mesaji yoxdur - test menasizdir';
+  perform set_config('smoke.fbnew', (select count(*) from public.feedback fb
+                                       where fb.status = 'new'
+                                         and not app.feedback_is_demo(fb.account_id, fb.student_id))::text, false);
 end $$;
 set role authenticated;
 set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000da';
@@ -170,11 +175,16 @@ begin
   v := public.rpc_admin_reports('new');
   assert jsonb_array_length(v) = 0, 'demo bildirisi admin siyahisindadir: ' || jsonb_array_length(v);
   assert public.rpc_admin_reports_count() = 0, 'demo bildirisi sayğacdadir';
+  --  140: "Bize yaz" mesaji da gorunmur
+  assert not exists (select 1 from jsonb_array_elements(public.rpc_admin_feedback('all')) x
+                      where x->>'account' = 'Nümunə hesabı'), 'demo bize-yaz mesaji admin siyahisindadir';
+  assert public.rpc_admin_feedback_count() = current_setting('smoke.fbnew')::int,
+         'demo bize-yaz mesaji sayğacdadir';
   st := public.rpc_admin_stats();
   assert (st->>'attempts_week')::int = 0, 'demo cehdleri heftelik sayda: ' || (st->>'attempts_week');
   assert (st->>'accounts')::int = (select count(*) from public.accounts where not is_demo), 'hesab sayinda demo var';
 end $$;
 reset role; reset request.jwt.claim.sub;
-\echo 'OK  5 · numune bildirisi/cehdleri admin bolmelerinde yoxdur'
+\echo 'OK  5 · numune bildirisi/cehdleri/bize-yaz mesaji admin bolmelerinde yoxdur'
 
 \echo 'NUMUNE: BUTUN YOXLAMALAR KECDI'
