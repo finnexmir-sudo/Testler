@@ -142,4 +142,39 @@ begin
 end $$;
 \echo 'OK  4 · anonim nusxe ferqli kodla; oz hesabi olan ala bilmir; kohne nusxe silinir'
 
+-- =====================================================================
+--  5. (139) Numune bildirisi ve cehdleri admin bolmelerine dusmur
+-- =====================================================================
+insert into auth.users (id, email) values ('11110000-0000-0000-0000-0000000000da', 'numadm@t.az')
+on conflict do nothing;
+insert into public.user_roles (user_id, role) values ('11110000-0000-0000-0000-0000000000da', 'admin')
+on conflict do nothing;
+do $$
+declare n int; v jsonb;
+begin
+  --  demo qurucusu bildiris yaradib (demo muellimin oz paneli ucun)
+  select count(*) into n from public.question_reports r
+    join public.students st on st.id = r.student_id
+    join public.accounts a on a.id = st.account_id and a.is_demo;
+  assert n >= 1, 'demo bildirisi yoxdur - test menasizdir';
+  --  demo cehdleri var, amma statistikaya dusmur
+  assert (select count(*) from public.attempts a join public.students st on st.id = a.student_id
+           join public.accounts ac on ac.id = st.account_id and ac.is_demo) > 20, 'demo cehdleri yoxdur';
+  assert (select count(*) from app.qstat_rows(null)) = 0, 'demo cehdleri sual statistikasina dusdu';
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000da';
+do $$
+declare v jsonb; st jsonb;
+begin
+  v := public.rpc_admin_reports('new');
+  assert jsonb_array_length(v) = 0, 'demo bildirisi admin siyahisindadir: ' || jsonb_array_length(v);
+  assert public.rpc_admin_reports_count() = 0, 'demo bildirisi sayğacdadir';
+  st := public.rpc_admin_stats();
+  assert (st->>'attempts_week')::int = 0, 'demo cehdleri heftelik sayda: ' || (st->>'attempts_week');
+  assert (st->>'accounts')::int = (select count(*) from public.accounts where not is_demo), 'hesab sayinda demo var';
+end $$;
+reset role; reset request.jwt.claim.sub;
+\echo 'OK  5 · numune bildirisi/cehdleri admin bolmelerinde yoxdur'
+
 \echo 'NUMUNE: BUTUN YOXLAMALAR KECDI'
