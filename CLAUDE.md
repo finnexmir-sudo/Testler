@@ -1980,6 +1980,17 @@ Video hələ yoxdur: səssiz avtomatik video az fayda verir; istifadəçi
 telefon/OBS ilə səsli çəksə, `<video>` ilə `komek/`-ə qoyulur (öz
 serverimizdən — xarici embed CSP/qayda ilə bağlıdır).
 
+## «Sınaq» nişanı (2026-09-07)
+
+Pul alınmır, VÖEN yoxdur, paketlər sınaq kimi pulsuz verilir; canlıda
+`SHOW_PLANS=false` (qiymət görünmür — hüquqi əsas budur, nişan yox).
+Nişan gözləntini idarə etmək üçündür: üst zolaqda `.wm`-dən sonra
+`<span class="beta">sınaq</span>` (müəllim/şagird/valideyn, stil
+`assets/base.css .top .beta`), ana səhifədə loqo yanında `i.beta` +
+`.beta-note` cümləsi, bələdçidə loqo nişanı + FAQ «Sınaq nişanı nədir».
+İlk ödənişdən əvvəl: VÖEN → `SHOW_PLANS=true` → nişanı çıxar (dörd yer).
+`.wm` mətni dəyişmir — e2e_bank onu `== "Bil10"` yoxlayır.
+
 ## Domen — bil10.az (2026-09-07)
 
 Sahiblik online.az (illik ~20 AZN, sənəd yoxlanışı «pending» → «aktiv»);
