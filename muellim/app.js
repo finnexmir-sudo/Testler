@@ -2119,7 +2119,12 @@
     if (!iso) return "heç vaxt";
     var d = new Date(iso);
     if (isNaN(d)) return "heç vaxt";
-    var g = Math.floor((Date.now() - d.getTime()) / 86400000);
+    //  Teqvim gunu ile: dunen 19:30 bu gun 19:11-de "bu gun" cixirdi
+    //  (24 saatliq pencere) - istifadeci "hele 19:30 olmayib" dedi.
+    var now = new Date();
+    var d0 = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    var n0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    var g = Math.round((n0 - d0) / 86400000);
     if (g <= 0) return "bu gün";
     if (g === 1) return "dünən";
     if (g < 30) return g + " gün əvvəl";
