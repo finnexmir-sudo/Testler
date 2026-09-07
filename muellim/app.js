@@ -531,8 +531,9 @@
           '<div><div class="num">' + used +
             ' <s>/ ' + (lim > 1000000 ? "∞" : lim) + "</s></div>" +
             '<div class="lbl">şagird yeri</div></div>' +
-          '<span class="pill' + (ACC.plan ? " on" : "") + '">' +
-            esc(ACC.plan ? ACC.plan.name : "Paketsiz") + "</span>" +
+          '<span class="pill' + ((ACC.plan || (isAdmin() && ACC.is_owner)) ? " on" : "") + '">' +
+            esc(ACC.plan ? ACC.plan.name
+                : ((isAdmin() && ACC.is_owner) ? "Admin · daimi" : "Paketsiz")) + "</span>" +
         "</div>" +
         '<div class="' + cls + '"><i style="width:' + pct + '%"></i></div>' +
         (pct >= 100
@@ -3911,6 +3912,7 @@
         (cur
           ? '<p class="muted" style="margin:8px 0 0">Hazırkı paket: <b>' +
             esc(cur.plan) + "</b>" +
+            (cur.status === "trialing" ? " · pulsuz sınaq" : "") +
             (cur.ends ? " · bitmə tarixi: " + dateAz(cur.ends) : "") + "</p>"
           : '<p class="muted" style="margin:8px 0 0">Hazırda abunəniz yoxdur. ' +
             "Öz suallarınız və əsas hesabat pulsuzdur; platforma sual bankı, " +
@@ -4024,17 +4026,28 @@
         '<div class="tile a"><b>' + (st.accounts || 0) + "</b><span>hesab" +
           ((st.accounts_week || 0) > 0 ? " · +" + st.accounts_week + " bu həftə" : "") +
           "</span></div>" +
+        //  138: pullu = yalniz odenisli; sinaq (pulsuz verilen paket) ayri;
+        //  gelir yalniz odenisli abunelerden.  Numune nusxeleri hec bir
+        //  sayda yoxdur (server cixarir).
         '<div class="tile b"><b>' + (st.paid_accounts || 0) + "</b><span>pullu · " +
-          Math.max(0, (st.accounts || 0) - (st.paid_accounts || 0)) + " pulsuz</span></div>" +
-        '<div class="tile c"><b>' + azn(st.mrr_minor || 0) + "</b><span>aylıq gəlir</span></div>" +
+          (st.trial_accounts || 0) + " sınaq · " +
+          Math.max(0, (st.accounts || 0) - (st.paid_accounts || 0) - (st.trial_accounts || 0)) +
+          " pulsuz</span></div>" +
+        '<div class="tile c"><b>' + azn(st.mrr_minor || 0) + "</b><span>aylıq gəlir · yalnız ödənişli</span></div>" +
         '<div class="tile d"><b>' + (st.attempts_week || 0) + "</b><span>cəhd · son 7 gün</span></div>" +
         '<div class="tile e"><b>' + (st.seen_week || 0) + "</b><span>girib · son 7 gün</span></div>" +
       "</div>" +
       '<div class="card tight">' +
         "<h1>Hesablar</h1>" +
         '<p class="muted" style="margin:8px 0 0">«+1 ay / +6 ay» seçilmiş planı ' +
-          "həmin hesaba açır. Eyni plan aktivdirsə, müddət " +
-          "üstünə əlavə olunur.</p>" +
+          "həmin hesaba <b>ödənişli</b> açır, «Sınaq» eyni paketi pulsuz verir " +
+          "(gəlirə düşmür; sonra ödəyəndə «+1 ay» ödənişliyə çevirir). " +
+          "Eyni plan aktivdirsə, müddət üstünə əlavə olunur." +
+          ((st.demo_accounts || 0) > 0
+            ? " Nümunə nüsxələri (" + st.demo_accounts + ") saylarda yoxdur, " +
+              "«Nümunə» süzgəcindədir; 24 saat sonra özü silinir."
+            : "") +
+          "</p>" +
         '<div class="fieldrow" style="margin-top:12px">' +
           '<div><input id="admQ" placeholder="Ad və ya e-poçtla axtar…"></div>' +
           '<div style="flex:0 0 230px"><select id="admPlan">' +
@@ -4044,8 +4057,8 @@
           "</select></div>" +
         "</div>" +
         '<div class="chips" id="admF">' +
-          [["", "Hamısı"], ["pullu", "Pullu"], ["pulsuz", "Pulsuz"],
-           ["bitir", "Bitmək üzrə"], ["girmir", "Girməyənlər"]]
+          [["", "Hamısı"], ["pullu", "Pullu"], ["sinaq", "Sınaq"], ["pulsuz", "Pulsuz"],
+           ["bitir", "Bitmək üzrə"], ["girmir", "Girməyənlər"], ["numune", "Nümunə"]]
             .map(function (f) {
               return '<button class="chip' + (f[0] === "" ? " on" : "") +
                 '" data-f="' + f[0] + '">' + f[1] + "</button>";
@@ -4216,7 +4229,13 @@
     }
     return rows.map(function (a) {
       var pl = a.plan, badge;
-      if (pl) {
+      //  138: admin sahibli hesab daimidir - plan ve duyme lazim deyil;
+      //  numune nusxesi anonimdir (e-poct yox), ona abune acilmaz
+      if (a.admin) {
+        badge = '<span class="pb y">admin · daimi</span>';
+      } else if (a.demo) {
+        badge = '<span class="pb s">nümunə · özü silinir</span>';
+      } else if (pl) {
         //  bitmesine 7 gunden az qalibsa narinci - uzatmaq vaxtidir
         var gq = pl.ends
           ? Math.max(0, Math.ceil((new Date(pl.ends).getTime() - Date.now()) / 86400000))
@@ -4230,8 +4249,10 @@
             yr = " " + ed.getFullYear();
           }
         }
-        badge = '<span class="pb ' + (gq !== null && gq < 7 ? "z" : "y") + '">' +
-          esc(pl.name) +
+        //  sinaq (pulsuz verilen paket) goy nisanla - odenisliden secilsin
+        var trial = pl.status === "trialing";
+        badge = '<span class="pb ' + (gq !== null && gq < 7 ? "z" : (trial ? "s" : "y")) + '">' +
+          (trial ? "sınaq · " : "") + esc(pl.name) +
           (pl.ends ? " → " + dateAz(pl.ends) + yr + " · " + gq + " gün" : "") +
           "</span>";
       } else {
@@ -4254,9 +4275,11 @@
           "<span>·</span><span>şagird girişi: " + whenAz(a.student_login) + "</span>" +
         "</i></div>" +
         '<div class="btns">' +
-          '<button class="btn sm" data-m="1">+1 ay</button>' +
-          '<button class="btn sm" data-m="6">+6 ay</button>' +
-          (pl ? '<button class="btn sm ghost" data-stop="1">Dayandır</button>' : "") +
+          ((a.admin || a.demo) ? "" :
+            '<button class="btn sm" data-m="1">+1 ay</button>' +
+            '<button class="btn sm" data-m="6">+6 ay</button>' +
+            '<button class="btn sm ghost" data-m="1" data-trial="1">Sınaq 1 ay</button>' +
+            (pl ? '<button class="btn sm ghost" data-stop="1">Dayandır</button>' : "")) +
         "</div></div>";
     }).join("");
   }
@@ -4296,10 +4319,12 @@
         var ay = Number(b.getAttribute("data-m")) || 1;
         var ad = (sel && sel.selectedIndex >= 0)
           ? sel.options[sel.selectedIndex].text : "";
-        if (!confirm(em + " → " + ad + " (+" + ay + " ay). Açılsın?")) return;
+        var trial = !!b.getAttribute("data-trial");
+        if (!confirm(em + " → " + ad + " (+" + ay + " ay" +
+                     (trial ? ", SINAQ — pulsuz" : ", ödənişli") + "). Açılsın?")) return;
         call = "rpc_admin_grant";
         args = { p_email: em, p_plan: (sel || {}).value || "repetitor-25",
-                 p_months: ay };
+                 p_months: ay, p_trial: trial };
       }
       busy = true; b.disabled = true;
       sb.rpc(call, args).then(function (res) {

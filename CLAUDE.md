@@ -1841,6 +1841,37 @@ olanda `planDone` → `loadPrep` kartı yeniləyir. Zəif/risk siqnalları
 ayrıca (`rpc_class_alerts`) qalır. Testlər: `smoke_bu_gun.sql` (5),
 `test/e2e_bugun.py` (17/17); bələdçi addım 8, şəkil `m11_bu_gun.png`.
 
+## Sınaq abunə, admin daimi, nümunə saylarda yox (db/138)
+
+Şikayət (2026-09-07): İdarəetmədə «aylıq gəlir 233 ₼» — halbuki hamısı
+pulsuz sınaq idi; admin hesabına da abunə «verilirdi»; nümunə nüsxələri
+4 dənə görünürdü. `db/138_sinaq_abune.sql`:
+- **Sınaq abunə.** `rpc_admin_grant(p_email, p_plan, p_months, p_trial)`
+  — köhnə üç-parametrli imza silinib. `p_trial=true` → `status='trialing'`,
+  `provider='trial'`: müəllim paketin bütün imkanlarını alır (bütün
+  qapılar `trialing`-i aktiv sayır), amma «pullu» sayına və gəlirə düşmür.
+  Sınaq bitmədən ödənişli grant gələndə ödənişli müddət **bu gündən**
+  başlayır (sınaq qalığı üstünə gəlmir). Ödənişli hesaba «Sınaq» vermək
+  ödənişli saxlayır, müddəti uzadır (hədiyyə ay). Panel: sətirdə «Sınaq
+  1 ay» düyməsi, göy `.pb.s` nişanı «sınaq · Repetitor…»; lövhə «N pullu ·
+  M sınaq · K pulsuz»; gəlir lövhəsi «yalnız ödənişli»; süzgəc «Sınaq».
+  Paket səhifəsi «· pulsuz sınaq» yazır.
+- **Admin daimi.** `app.account_is_admin(hesab)` (sahibi admin rolludur)
+  → `app.has_active_subscription` true, `app.account_seat_limit` sonsuz
+  (02_rls-dəkilərin üstündən). Statistikada pullu/sınaq/gəlirdə yoxdur;
+  siyahıda «admin · daimi» nişanı, düymə yoxdur; Paket səhifəsi və ana
+  səhifə pill-i «Admin — daimi». Admin abunə almalı deyil.
+- **Nümunə saylarda yox.** `rpc_admin_stats` bütün saylarda `is_demo`
+  hesabları çıxarır (`demo_accounts` ayrıca gəlir → izah sətri);
+  `rpc_admin_accounts` onları yalnız `p_f='numune'` süzgəcində verir
+  (sətirdə `demo` bayrağı, «nümunə · özü silinir», düymə yoxdur). Hər
+  «Müəllim kimi bax» kliki bir nüsxədir, 24 saat sonra `rpc_demo_reset`
+  silir — əl ilə silmək lazım deyil.
+- Canlıda köhnə «pulsuz verilmiş» aktiv abunələri sınağa çevirmək üçün
+  (yalnız hamısı sınaqdırsa!): `update public.subscriptions set
+  status='trialing', provider='trial' where status='active';`
+- Yoxlama: `smoke_paket.sql` 11–14, `test/e2e_paket.py` D0 addımı.
+
 ## Admin: kim nə vaxt girib (db/125)
 
 İstifadəçi sualı: «admin olaraq kimlərin girdiyini izləyə bilərəm?».

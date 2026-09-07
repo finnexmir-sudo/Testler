@@ -173,7 +173,7 @@ do $$
 begin
   assert not has_function_privilege('anon', 'public.rpc_paket(uuid)', 'EXECUTE'),
          'anon paket sehifesini gorur';
-  assert not has_function_privilege('anon', 'public.rpc_admin_grant(text, text, int)', 'EXECUTE'),
+  assert not has_function_privilege('anon', 'public.rpc_admin_grant(text, text, int, boolean)', 'EXECUTE'),
          'anon abune aca bilir';
 end $$;
 \echo 'OK  8 · anon paket/admin funksiyalarini gormur'
@@ -238,3 +238,126 @@ begin
     || coalesce(n::text,'null') || ')';
 end $$;
 \echo 'OK 10 · class_id-siz test admin sayğacinda gorunur'
+
+-- =====================================================================
+--  11. (138) SINAQ ABUNE: pulsuz verilir, tam imkan, gelire dusmur
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+delete from public.subscriptions;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
+do $$
+declare v jsonb; st jsonb;
+begin
+  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1, true);
+  assert (v->>'ok')::boolean and (v->>'trial')::boolean, 'sinaq grant alinmadi';
+  assert app.has_active_subscription('aaaa0000-0000-0000-0000-0000000000e2'),
+         'sinaq abune aktiv gorunmur - muellim imkan almir';
+  assert app.account_seat_limit('aaaa0000-0000-0000-0000-0000000000e2') = 25,
+         'sinaqda yer limiti paketinki deyil';
+  assert exists (select 1 from public.subscriptions
+                  where status = 'trialing' and provider = 'trial'), 'status trialing deyil';
+  st := public.rpc_admin_stats();
+  assert (st->>'paid_accounts')::int = 0, 'sinaq pullu sayildi';
+  assert (st->>'trial_accounts')::int = 1, 'sinaq sayi 1 deyil';
+  assert (st->>'mrr_minor')::int = 0, 'sinaq gelire dusdu: ' || (st->>'mrr_minor');
+  --  suzgecler
+  assert jsonb_array_length(public.rpc_admin_accounts(null, 'sinaq')) = 1, 'sinaq suzgeci tapmir';
+  assert jsonb_array_length(public.rpc_admin_accounts(null, 'pullu')) = 0, 'sinaq pullu suzgecine dusdu';
+  assert jsonb_array_length(public.rpc_admin_accounts(null, 'pulsuz')) = 0, 'sinaq pulsuz suzgecine dusdu';
+  assert public.rpc_admin_accounts('muellim')->0->'plan'->>'status' = 'trialing', 'siyahida status trialing deyil';
+  --  sinaq + sinaq = sinaq qalir, muddet uzanir
+  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1, true);
+  assert (v->>'trial')::boolean, 'ikinci sinaq odenisliye cevrildi';
+  assert (select count(*) from public.subscriptions) = 1, 'sinaq dublikat yaratdi';
+end $$;
+\echo 'OK 11 · sinaq abune: tam imkan, pullu deyil, gelir sifir'
+
+-- =====================================================================
+--  12. (138) Sinaq odenisliye kecir: status active, muddet BU GUNDEN
+-- =====================================================================
+do $$
+declare v jsonb; st jsonb; e timestamptz;
+begin
+  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1, false);
+  assert not (v->>'trial')::boolean, 'odenisli grant sinaq qaldi';
+  select current_period_end into e from public.subscriptions where status = 'active';
+  assert e is not null, 'status active olmadi';
+  assert e < now() + interval '32 days' and e > now() + interval '27 days',
+         'odenisli muddet bu gunden baslamadi (sinaq qaligi ustune geldi): ' || e::text;
+  assert (select provider from public.subscriptions) = 'manual', 'provider manual deyil';
+  st := public.rpc_admin_stats();
+  assert (st->>'paid_accounts')::int = 1 and (st->>'trial_accounts')::int = 0, 'odenisliye kecid saylarda yoxdur';
+  assert (st->>'mrr_minor')::int = 2900, 'gelir 29 AZN deyil: ' || (st->>'mrr_minor');
+  --  odenisli + sinaq = odenisli qalir (hediyye ay), gelir deyismir
+  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1, true);
+  assert not (v->>'trial')::boolean, 'odenisli hesab sinaga endi';
+  assert (select status from public.subscriptions) = 'active', 'odenisli status pozuldu';
+end $$;
+\echo 'OK 12 · sinaq -> odenisli: bu gunden, gelir 29 AZN; odenisli sinaga enmir'
+
+-- =====================================================================
+--  13. (138) Admin sahibli hesab DAIMIDIR: abunesiz limitsiz, saylarda yox
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+insert into public.accounts (id, type, name, owner_id) values
+  ('aaaa0000-0000-0000-0000-0000000000e1','tutor','Admin hesabi',
+   '11110000-0000-0000-0000-0000000000e1');
+insert into public.account_members values
+  ('aaaa0000-0000-0000-0000-0000000000e1','11110000-0000-0000-0000-0000000000e1',true);
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
+do $$
+declare v jsonb; st jsonb; p jsonb;
+begin
+  assert app.account_is_admin('aaaa0000-0000-0000-0000-0000000000e1'), 'admin hesabi taninmir';
+  assert not app.account_is_admin('aaaa0000-0000-0000-0000-0000000000e2'), 'adi hesab admin sayildi';
+  assert app.has_active_subscription('aaaa0000-0000-0000-0000-0000000000e1'),
+         'admin hesabi abunesiz aktiv deyil';
+  assert app.account_seat_limit('aaaa0000-0000-0000-0000-0000000000e1') > 1000000,
+         'admin hesabi limitsiz deyil';
+  st := public.rpc_admin_stats();
+  assert (st->>'accounts')::int = 2, 'admin hesabi hesab sayinda olmalidir';
+  assert (st->>'paid_accounts')::int = 1, 'admin pullu sayildi';
+  assert (st->>'mrr_minor')::int = 2900, 'admin gelire dusdu';
+  --  siyahi: admin nisani, pullu/pulsuz suzgecinde yoxdur
+  v := public.rpc_admin_accounts('Admin hesabi');
+  assert (v->0->>'admin')::boolean, 'siyahida admin nisani yoxdur';
+  assert jsonb_array_length(public.rpc_admin_accounts(null, 'pulsuz')) = 0, 'admin pulsuz suzgecine dusdu';
+  assert jsonb_array_length(public.rpc_admin_accounts(null, 'pullu')) = 1, 'pullu suzgecinde admin var';
+  --  paket sehifesi: "Admin - daimi"
+  p := public.rpc_paket('aaaa0000-0000-0000-0000-0000000000e1');
+  assert p->'current'->>'slug' = 'admin', 'paket sehifesi admin daimi demir';
+end $$;
+\echo 'OK 13 · admin sahibli hesab daimidir: limitsiz, gelir/pullu sayinda yox'
+
+-- =====================================================================
+--  14. (138) Numune nusxesi saylarda YOX, yalniz numune suzgecinde
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+insert into auth.users (id, email) values ('11110000-0000-0000-0000-0000000000e3', null);
+insert into public.accounts (id, type, name, owner_id, is_demo) values
+  ('aaaa0000-0000-0000-0000-0000000000e3','tutor','Nümunə hesabı',
+   '11110000-0000-0000-0000-0000000000e3', true);
+insert into public.subscriptions (account_id, plan_id, status, seats, current_period_end)
+select 'aaaa0000-0000-0000-0000-0000000000e3', id, 'active', 25, now() + interval '365 days'
+  from public.plans where slug = 'repetitor-25';
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
+do $$
+declare st jsonb; v jsonb;
+begin
+  st := public.rpc_admin_stats();
+  assert (st->>'accounts')::int = 2, 'numune hesab sayina dusdu';
+  assert (st->>'paid_accounts')::int = 1, 'numune pullu sayildi';
+  assert (st->>'mrr_minor')::int = 2900, 'numune gelire dusdu: ' || (st->>'mrr_minor');
+  assert (st->>'demo_accounts')::int = 1, 'numune sayi ayrica gelmir';
+  v := public.rpc_admin_accounts(null, null);
+  assert not exists (select 1 from jsonb_array_elements(v) x where (x->>'demo')::boolean),
+         'numune "Hamisi" siyahisindadir';
+  assert jsonb_array_length(public.rpc_admin_accounts(null, 'pullu')) = 1, 'numune pullu suzgecinde';
+  v := public.rpc_admin_accounts(null, 'numune');
+  assert jsonb_array_length(v) = 1 and (v->0->>'demo')::boolean, 'numune suzgeci nusxeni gostermir';
+end $$;
+reset role; reset request.jwt.claim.sub;
+\echo 'OK 14 · numune nusxesi saylarda yox, yalniz numune suzgecinde'

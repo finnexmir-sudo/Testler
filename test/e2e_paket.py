@@ -88,8 +88,20 @@ with sync_playwright() as pw:
     print("C · Admin rolu ilə idarəetmə")
     UID = db("select id::text i from auth.users", one=True)["i"]
     db("insert into public.user_roles (user_id, role) values (%s, 'admin') on conflict do nothing", (UID,))
+    #  138: admin sahibli hesab DAIMIDIR (duyme yoxdur) - abune emeliyyatlari
+    #  ucun ikinci, adi muellim hesabi lazimdir
+    db("""insert into auth.users (id, email) values ('22220000-0000-0000-0000-0000000000a2', 'iki@t.az');
+          update public.profiles set full_name = 'Iki Muellim' where id = '22220000-0000-0000-0000-0000000000a2';
+          insert into public.accounts (id, type, name, owner_id) values
+            ('aaaa2222-0000-0000-0000-0000000000a2', 'tutor', 'Iki hesabi', '22220000-0000-0000-0000-0000000000a2');
+          insert into public.account_members values
+            ('aaaa2222-0000-0000-0000-0000000000a2', '22220000-0000-0000-0000-0000000000a2', true)""")
+    ROW = ".admr[data-em='iki@t.az']"
+    ADM = ".admr[data-em='pkt@t.az']"
     pg.goto(PANEL); pg.reload()
     pg.wait_for_selector("#btnAdm", timeout=8000)
+    ok("Admin · daimi" in pg.inner_text(".seat"), "ana sehifede pill 'Admin · daimi'",
+       pg.inner_text(".seat").replace("\n", " "))
     ok(True, "admin rolunda Idareetme bendi gorunur")
     pg.click("#btnAdm")
     pg.wait_for_selector(".admr", timeout=8000)
@@ -98,18 +110,26 @@ with sync_playwright() as pw:
     tl = pg.inner_text(".tiles").replace("\n", " ")
     ok("hesab" in tl and "pullu" in tl and "pulsuz" in tl and "gəlir" in tl,
        "lovhelerde hesab/pullu/pulsuz/gelir var", tl[:70])
-    ok(pg.locator("#admF .chip").count() == 5,
-       "pullu/pulsuz/bitir/girmir suzgec cipleri var")
+    ok(pg.locator("#admF .chip").count() == 7,
+       "pullu/sinaq/pulsuz/bitir/girmir/numune suzgec cipleri var",
+       pg.locator("#admF .chip").count())
+    ok("sınaq" in tl, "pullu lovhesinde sinaq sayi var", tl[:70])
+    ok("yalnız ödənişli" in tl, "gelir lovhesi 'yalniz odenisli' deyir")
     ok(pg.locator(".tile").count() == 5 and "girib" in tl, "5-ci lovhe: hesab girib · son 7 gun", tl[-60:])
     npo = pg.locator("#admPlan option").count()
     ok(npo >= 2, "plan secimi bazadan dolur", npo)
-    row = pg.inner_text(".admr").replace("\n", " ")
-    ok("pkt@t.az" in row, "hesab siyahida e-poctla gorunur", row[:60])
+    ok(pg.locator(".admr").count() == 2, "iki hesab siyahida", pg.locator(".admr").count())
+    arow = pg.inner_text(ADM).replace("\n", " ")
+    ok("admin · daimi" in arow, "admin hesabi 'admin · daimi' nisani ile", arow[:60])
+    ok(pg.locator(ADM + " button").count() == 0, "admin setrinde duyme yoxdur")
+    row = pg.inner_text(ROW).replace("\n", " ")
+    ok("iki@t.az" in row, "hesab siyahida e-poctla gorunur", row[:60])
     ok("paketsiz" in row, "paketsiz nisani gorunur")
+    row = arow
     ok("aktivlik" in row, "son aktivlik gorunur", row[:80])
     ok("müəllim girişi: bu gün" in row, "muellim girisi bu gun (rpc_seen)", row[-90:])
     ok("şagird girişi: heç vaxt" in row, "sagird girisi hele yoxdur")
-    ok("1" in pg.inner_text(".tile.e"), "girib lovhesi 1", pg.inner_text(".tile.e").replace("\n", " "))
+    ok(pg.inner_text(".tile.e").startswith("1"), "girib lovhesi 1", pg.inner_text(".tile.e").replace("\n", " "))
     #  Girmeyenler: bu hesab bu gun girib - cixmir; 10 gun evvele cekende cixir
     pg.locator("#admF .chip[data-f='girmir']").click(); pg.wait_for_timeout(700)
     ok("Hesab tapılmadı" in pg.inner_text("#admList"), "girmeyenler: bu gun giren cixmir")
@@ -117,20 +137,44 @@ with sync_playwright() as pw:
        "update auth.users set last_sign_in_at = now() - interval '10 days'")
     pg.locator("#admF .chip[data-f='']").click(); pg.wait_for_timeout(500)
     pg.locator("#admF .chip[data-f='girmir']").click(); pg.wait_for_selector(".admr", timeout=8000)
-    ok("pkt@t.az" in pg.inner_text(".admr") and "10 gün əvvəl" in pg.inner_text(".admr"),
-       "girmeyenler: 10 gundur girmeyen cixir, narinci", pg.inner_text(".admr .lg-old"))
-    ok(pg.locator(".admr .lg-old").count() == 1, "koхne giris narinci sinifle")
+    ok("pkt@t.az" in pg.inner_text("#admList") and "10 gün əvvəl" in pg.inner_text(ADM),
+       "girmeyenler: 10 gundur girmeyen cixir, narinci", pg.inner_text(ADM + " .lg-old"))
+    ok(pg.locator(".admr .lg-old").count() == 2, "koхne giris narinci sinifle")
     pg.locator("#admF .chip[data-f='']").click(); pg.wait_for_selector(".admr", timeout=8000)
 
-    print("D · Bir kliklə abunə açmaq")
+    print("D0 · (138) Sınaq — pulsuz paket: tam imkan, gəlirə düşmür")
     pg.on("dialog", lambda d: d.accept())
-    pg.locator(".admr [data-m='6']").click()
-    pg.wait_for_selector(".admr .pb.y", timeout=8000)
-    ok("Repetitor" in pg.inner_text(".admr .pb.y"), "abune nisani setirde gorunur",
-       pg.inner_text(".admr .pb.y")[:40])
+    ok(pg.locator(".admr [data-trial]").count() == 1, "adi setirde 'Sinaq 1 ay' duymesi var (adminde yox)")
+    pg.locator(ROW + " [data-trial]").click()
+    pg.wait_for_selector(ROW + " .pb.s", timeout=8000)
+    ok("sınaq" in pg.inner_text(ROW + " .pb.s") and "Repetitor" in pg.inner_text(ROW + " .pb.s"),
+       "goy sinaq nisani setirde", pg.inner_text(ROW + " .pb.s")[:40])
+    a0 = db("select s.status, s.provider from public.subscriptions s", one=True)
+    ok(a0 and a0["status"] == "trialing" and a0["provider"] == "trial",
+       "bazada trialing/trial abune var", a0)
+    tb = pg.inner_text(".tile.b").replace("\n", " ")
+    ok(tb.startswith("0") and "1 sınaq" in tb, "lovhe: 0 pullu · 1 sinaq", tb)
+    ok("0,00" in pg.inner_text(".tile.c") or "0 ₼" in pg.inner_text(".tile.c"),
+       "gelir sifirdir", pg.inner_text(".tile.c").replace("\n", " "))
+    pg.locator("#admF .chip[data-f='sinaq']").click()
+    #  siyahi yeniden cizilene qeder gozle (kohne siyahida da .pb.s var)
+    pg.wait_for_function("document.querySelectorAll('.admr').length === 1", timeout=8000)
+    ok("iki@t.az" in pg.inner_text(".admr") and pg.locator(".admr").count() == 1,
+       "sinaq suzgecinde yalniz o hesab gorunur")
+    pg.locator("#admF .chip[data-f='pullu']").click(); pg.wait_for_timeout(700)
+    ok("Hesab tapılmadı" in pg.inner_text("#admList"), "pullu suzgecinde sinaq hesab cixmir")
+    pg.locator("#admF .chip[data-f='']").click(); pg.wait_for_selector(".admr", timeout=8000)
+
+    print("D · Bir kliklə abunə açmaq (sınaq → ödənişli)")
+    pg.locator(ROW + " [data-m='6']").click()
+    pg.wait_for_selector(ROW + " .pb.y", timeout=8000)
+    ok("Repetitor" in pg.inner_text(ROW + " .pb.y"), "abune nisani setirde gorunur",
+       pg.inner_text(ROW + " .pb.y")[:40])
     ok("yerinə yetirildi" in pg.inner_text("#admMsg"), "netice mesaji gorunur")
-    ok("1" in pg.inner_text(".tile.b"), "aktiv abune lovhesi yenilenir",
+    ok(pg.inner_text(".tile.b").replace("\n", " ").startswith("1"), "aktiv abune lovhesi yenilenir",
        pg.inner_text(".tile.b").replace("\n", " "))
+    ok("29,00" in pg.inner_text(".tile.c") or "29 ₼" in pg.inner_text(".tile.c"),
+       "gelir 29 AZN oldu", pg.inner_text(".tile.c").replace("\n", " "))
     a = db("""select s.status, s.provider from public.subscriptions s""", one=True)
     ok(a and a["status"] == "active" and a["provider"] == "manual",
        "bazada active/manual abune var")
@@ -139,8 +183,9 @@ with sync_playwright() as pw:
     ok("Hesab tapılmadı" in pg.inner_text("#admList"),
        "pulsuz suzgecinde abuneli hesab cixmir")
     pg.locator("#admF .chip[data-f='pullu']").click()
-    pg.wait_for_selector(".admr .pb.y", timeout=8000)
-    ok("pkt@t.az" in pg.inner_text(".admr"), "pullu suzgecinde hesab gorunur")
+    pg.wait_for_function("document.querySelectorAll('.admr').length === 1", timeout=8000)
+    ok("iki@t.az" in pg.inner_text(".admr") and pg.locator(".admr").count() == 1,
+       "pullu suzgecinde yalniz odenisli hesab gorunur (admin yox)")
     pg.locator("#admF .chip[data-f='']").click()
     pg.wait_for_timeout(500)
 
@@ -148,12 +193,14 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/p"); pg.reload()
     pg.wait_for_selector(".pkt", timeout=8000)
     ok("Hazırkı paket" in pg.inner_text("#main"), "hazirki paket gorunur")
-    ok("bitmə tarixi" in pg.inner_text("#main"), "bitme tarixi gorunur")
+    ok("Admin — daimi" in pg.inner_text("#main"), "admin ucun 'Admin — daimi', tarix yoxdur",
+       pg.inner_text("#main")[:80].replace("\n", " "))
 
     print("F · Dayandırmaq")
     pg.goto(PANEL + "#/adm"); pg.reload()
     pg.wait_for_selector(".admr", timeout=8000)
-    pg.locator(".admr [data-stop]").click()
+    ok(pg.locator(".admr [data-stop]").count() == 1, "Dayandir yalniz abuneli adi setirde")
+    pg.locator(ROW + " [data-stop]").click()
     pg.wait_for_timeout(900)
     pg.wait_for_selector(".admr", timeout=8000)
     ok(not db("select 1 ok from public.subscriptions where status='active'", one=True),
