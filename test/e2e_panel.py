@@ -25,7 +25,8 @@ CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
 TEST_CFG = """window.CFG = {
   SUPABASE_URL: "http://127.0.0.1:54321",
   SUPABASE_ANON_KEY: "test-anon-key",
-  STUDENT_URL: "https://example.test/Testler/"
+  STUDENT_URL: "https://example.test/Testler/",
+  CONTACT_WHATSAPP: "+994501234567"
 };"""
 
 def empty_icons(pg):
@@ -125,6 +126,8 @@ with sync_playwright() as pw:
     ok(pg.is_visible("#btnAuth"), "giris ekrani acilir")
     ok("Daxil ol" in pg.inner_text("#main"), "basliq duzgun")
 
+    #  160: hediyye paket ayari yerli bazada baglidir - bu addim ucun acilir
+    db("update public.app_state set val = val || jsonb_build_object('on', true) where key = 'hediyye'")
     signup(pg, "leyla@test.az", "Leyla Muellim")
     pg.wait_for_selector("#btnSetup", timeout=8000)
     ok(True, "qeydiyyatdan sonra quraşdirma ekrani acilir")
@@ -134,6 +137,22 @@ with sync_playwright() as pw:
     pg.click("#btnSetup")
     pg.wait_for_selector("#btnGroup", timeout=8000)
     ok(True, "hesab yaranir, esas ekran acilir")
+    print("A1 · (160) Hədiyyə paket kartı")
+    ok(pg.locator("#giftCard").count() == 1 and "hədiyyədir" in pg.inner_text("#giftCard"),
+       "qeydiyyatdan sonra hediyye karti", pg.inner_text("#giftCard")[:60].replace("\n", " "))
+    ok("Bitmə:" in pg.inner_text("#giftCard") and "gün)" in pg.inner_text("#giftCard"), "kartda bitme tarixi ve gun sayi")
+    ok("0 / 25" in pg.inner_text(".seat") and "Repetitor" in pg.inner_text(".seat"),
+       "hediyye ile yer 25, pill paket adi", pg.inner_text(".seat").replace("\n"," "))
+    ok(pg.locator("#giftCard a[href*='wa.me/994501234567']").count() == 1, "kartda WhatsApp duymesi")
+    #  ilk qrup formasi kartin ALTINDADIR (h1 -> kart -> forma); qruplar
+    #  asinxron gelir - forma kocurulene qeder gozle
+    pg.wait_for_function("(function(){var g=document.querySelector('#giftCard');"
+                         "return g && g.nextElementSibling && g.nextElementSibling.id==='gForm';})()", timeout=8000)
+    ok(True, "ilk qrup formasi kartin altinda")
+    #  qalan yoxlamalar pulsuz hedd ucundur - hediyye silinir, ayar baglanir
+    db("update public.app_state set val = val || jsonb_build_object('on', false) where key = 'hediyye'; delete from public.subscriptions")
+    pg.reload(); pg.wait_for_selector("#btnGroup", timeout=8000)
+    ok(pg.locator("#giftCard").count() == 0, "abune olmayanda kart yoxdur")
     ok("0 / 5" in pg.inner_text(".seat"), "yer gostericisi 0 / 5", pg.inner_text(".seat").replace("\n"," "))
     ok("Leyla Muellim" in pg.inner_text("#topWho"), "ustlukde ad gorunur")
 

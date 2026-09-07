@@ -5,6 +5,15 @@
 #                 (test/ qovlugundakilari YOX).
 set -euo pipefail
 DB="${1:-tehsil}"; LOCAL="${2:-}"
+#  Bank MEZMUN fayllari private bil10-bank repo-sundadir (symlink ile
+#  gelir).  Fayl yoxdursa DAYANMIRIQ - xeberdarliqla atlayirig.  Sebeb:
+#  2026-09-07 141-158 setirleri elave olundu, yerli qovluqda fayl yox idi,
+#  set -e ile run.sh yarida kesildi, 01/05_grants islemedi ve harness
+#  RLS-siz bazada "kecdi" - sessiz tehluke.
+bank() {
+  if [ -f "$1" ]; then psql -v ON_ERROR_STOP=1 -q -d "$DB" -f "$1"
+  else echo "  !! bank fayli yoxdur, atlandi: $1  (../bil10-bank klonla, symlink qur)" >&2; fi
+}
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/00_supabase_stub.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 01_schema.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 02_rls.sql
@@ -70,60 +79,61 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 138_sinaq_abune.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 139_numune_admin_gizli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 140_numune_bize_yaz_gizli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 159_demo_hedd.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 160_hediyye_paket.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 16_bank_riy4.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 17_bank_sinif4.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 19_bank_riy3.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 20_bank_sinif3.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 75_bank_sinif1.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 76_bank_sinif2.sql
+bank 16_bank_riy4.sql
+bank 17_bank_sinif4.sql
+bank 19_bank_riy3.sql
+bank 20_bank_sinif3.sql
+bank 75_bank_sinif1.sql
+bank 76_bank_sinif2.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 77_movzular_orta5.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 78_bank_riy5.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 79_bank_sinif5.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 80_bank_ing.sql
+bank 78_bank_riy5.sql
+bank 79_bank_sinif5.sql
+bank 80_bank_ing.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 81_movzular_orta6.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 30_bank_riy6.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 31_bank_sinif6.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 32_bank_fenn6.sql
+bank 30_bank_riy6.sql
+bank 31_bank_sinif6.sql
+bank 32_bank_fenn6.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 33_movzular_orta7.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 34_bank_riy7.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 35_bank_sinif7.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 36_bank_fenn7.sql
+bank 34_bank_riy7.sql
+bank 35_bank_sinif7.sql
+bank 36_bank_fenn7.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 37_movzular_orta8.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 38_bank_riy8.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 39_bank_sinif8.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 40_bank_fenn8.sql
+bank 38_bank_riy8.sql
+bank 39_bank_sinif8.sql
+bank 40_bank_fenn8.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 41_movzular_orta9.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 42_bank_riy9.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 43_bank_sinif9.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 44_bank_fenn9.sql
+bank 42_bank_riy9.sql
+bank 43_bank_sinif9.sql
+bank 44_bank_fenn9.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 45_movzular_orta10.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 46_bank_riy10.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 47_bank_sinif10.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 48_bank_fenn10.sql
+bank 46_bank_riy10.sql
+bank 47_bank_sinif10.sql
+bank 48_bank_fenn10.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 49_movzular_orta11.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 50_bank_riy11.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 51_bank_sinif11.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 52_bank_fenn11.sql
+bank 50_bank_riy11.sql
+bank 51_bank_sinif11.sql
+bank 52_bank_fenn11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 53_movzular_umumi_tarix.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 54_bank_tarix_umumi.sql
+bank 54_bank_tarix_umumi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 55_movzular_edebiyyat11.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 56_bank_edebiyyat11.sql
+bank 56_bank_edebiyyat11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 57_sinif_dubli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 58_movzular_edebiyyat9_10.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 59_bank_edebiyyat10.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 60_bank_edebiyyat9.sql
+bank 59_bank_edebiyyat10.sql
+bank 60_bank_edebiyyat9.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 61_movzular_edebiyyat5_8.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 62_bank_edebiyyat5.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 63_bank_edebiyyat6.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 64_bank_edebiyyat7.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 65_bank_edebiyyat8.sql
+bank 62_bank_edebiyyat5.sql
+bank 63_bank_edebiyyat6.sql
+bank 64_bank_edebiyyat7.sql
+bank 65_bank_edebiyyat8.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 66_movzular_umumi_tarix6_8.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 67_bank_tarix_umumi6_8.sql
+bank 67_bank_tarix_umumi6_8.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 68_movzular_umumi_tarix10.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 69_bank_tarix_umumi10.sql
+bank 69_bank_tarix_umumi10.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 70_movzular_umumi_tarix7.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 71_bank_tarix_umumi7.sql
+bank 71_bank_tarix_umumi7.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 72_bos_fennler.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 73_buraxilis_proqrami.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 74_alt_movzular_riy8.sql
@@ -143,36 +153,39 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 94_umumi_tarix_8_9_11_restruktur.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 95_alt_movzular_utarix7.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 96_alt_movzular_utarix8_9_11.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 97_alt_movzular_utarix10.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 99_bank_ingilis8_788.sql
+bank 99_bank_ingilis8_788.sql
 # 89, digerlerinden ferqli olaraq, BURADA (99-dan sonra) islenir - 8-ci
 # sinif alt-movzulari 99-un yaratdigi/adini deyisdiyi movzulara baglanir
 # (94-den sonra 96-nin islenmesi ile eyni sebeb).
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 89_alt_movzular_ingilis6_11.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 118_bank_umumi_tarix_bosluqlar.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 112_bank_cetin_birlesme.sql
+bank 118_bank_umumi_tarix_bosluqlar.sql
+bank 112_bank_cetin_birlesme.sql
 # 141-158: bank sessiyasinin movzu-uygunsuzluq/bosluq duzelisleri
 # (2026-09-07 nomre razilasmasi, CLAUDE.md "db/ fayl nomreleri").
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 141_bank_cografiya6_dunya_ictimai.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 142_bank_bio11_insan_muhit_duzelis.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 143_bank_tarix11_mustemleke_cenub.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 144_bank_inf11_komputer_veb_duzelis.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 145_bank_kim11_aldehid_izomer.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 146_bank_fiz7_skalyar_vektorial.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 147_bank_hey4_dini_deyerler.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 148_bank_utarix8_qafqaz_medeniyyet.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 149_bank_inf4_kompyuter_duzelis.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 150_bank_inf3_alqoritm_obyekt.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 151_bank_inf3_metn_duzelis.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 152_bank_inf8_kompyuter_tetbiqi_duzelis.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 153_bank_inf8_internet_sebeke.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 154_bank_inf11_sistemler_bosluqlar.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 155_bank_inf3_informasiya_bosluqlar.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 156_bank_inf3_kompyuter_is_masasi_qovluq.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 157_bank_inf10_informasiya_miqdari.sql
-psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 158_bank_inf11_modellesdirme_bosluqlar.sql
+bank 141_bank_cografiya6_dunya_ictimai.sql
+bank 142_bank_bio11_insan_muhit_duzelis.sql
+bank 143_bank_tarix11_mustemleke_cenub.sql
+bank 144_bank_inf11_komputer_veb_duzelis.sql
+bank 145_bank_kim11_aldehid_izomer.sql
+bank 146_bank_fiz7_skalyar_vektorial.sql
+bank 147_bank_hey4_dini_deyerler.sql
+bank 148_bank_utarix8_qafqaz_medeniyyet.sql
+bank 149_bank_inf4_kompyuter_duzelis.sql
+bank 150_bank_inf3_alqoritm_obyekt.sql
+bank 151_bank_inf3_metn_duzelis.sql
+bank 152_bank_inf8_kompyuter_tetbiqi_duzelis.sql
+bank 153_bank_inf8_internet_sebeke.sql
+bank 154_bank_inf11_sistemler_bosluqlar.sql
+bank 155_bank_inf3_informasiya_bosluqlar.sql
+bank 156_bank_inf3_kompyuter_is_masasi_qovluq.sql
+bank 157_bank_inf10_informasiya_miqdari.sql
+bank 158_bank_inf11_modellesdirme_bosluqlar.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
+#  160: yerli test bazasinda hediyye paket SONDURULUR - e2e/smoke-lerin pulsuz
+#  hedd (0 / 5) yoxlamalari pozulmasin; smoke_hediyye ve e2e_panel ozu acir.
+[ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -c "update public.app_state set val = val || jsonb_build_object('on', false) where key = 'hediyye'"
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 05_grants.sql
 # Statistika toplanir.  Teze qurulmus bazada planlayicinin hec bir
 # statistikasi olmur ve TAM BASQA plan secir: olcduk, rpc_bank_facets

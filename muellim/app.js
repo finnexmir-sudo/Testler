@@ -502,6 +502,39 @@
     });
   }
 
+  /* ------------------------------------------------------ hediyye karti (160)
+     Qeydiyyatda sistem ozu sinaq paketi acir (provider gift) - kart
+     muellime bunu deyir.  7 gun qalanda narinci + WhatsApp.  Odenisli
+     (active) abunede kart yoxdur - pill onsuz da paketi gosterir.  */
+  function giftCard() {
+    var pl = ACC && ACC.plan;
+    if (!pl || pl.status !== "trialing" || !pl.ends) return "";
+    var end = new Date(pl.ends);
+    if (isNaN(end)) return "";
+    var days = Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86400000));
+    var soon = days <= 7;
+    var wa = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
+    var me = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    var href = wa
+      ? "https://wa.me/" + wa.replace(/[^0-9]/g, "") + "?text=" +
+        encodeURIComponent("Salam! Bil10 paketi haqqında sualım var." + (me ? " Hesab: " + me : ""))
+      : "";
+    return '<div class="card gift' + (soon ? " soon" : "") + '" id="giftCard">' +
+      "<b>" + (soon
+        ? "Hədiyyə paketin bitməsinə " + days + " gün qalır"
+        : "Tam paket sizə hədiyyədir 🎁") + "</b>" +
+      "<p>" + (soon
+        ? "Davam etmək istəsəniz bizə yazın, paketi uzadaq."
+        : "Bil10-a qoşulduğunuz üçün: 25 şagird yeri, hazır sual bankı, avtomatik test, " +
+          "diaqnostika, dərs planı.") +
+        " Bitmə: <b>" + dateAz(pl.ends) + "</b>" + (soon ? "" : " (" + days + " gün)") + ".</p>" +
+      (href
+        ? '<a class="btn sm' + (soon ? "" : " ghost") + '" target="_blank" rel="noopener" href="' +
+          esc(href) + '">WhatsApp-la yazın</a>'
+        : "") +
+      "</div>";
+  }
+
   /* ------------------------------------------------------ qrup siyahisi */
   function screenHome() {
     topTitle.textContent = ACC.name;
@@ -513,6 +546,8 @@
 
     var html =
       '<h1 class="hi">Xoş gəlmisiniz' + (ad ? ", " + esc(ad) : "") + "! 👋</h1>" +
+      //  160: qosulana hediyye paket karti (sinaq abunesi varsa)
+      giftCard() +
       /*  Bos hesabda (qrup yoxdur) bu blok gizlenir ve "Qrup yarat"
           formasi basliğin altina qalxir - yeni muellim ilk isi
           sehifenin dibinde axtarmasin (loadGroups).  */
@@ -766,7 +801,8 @@
         if (gf && h1 && !gf.classList.contains("first")) {
           gf.classList.add("first");
           gf.insertAdjacentHTML("afterbegin", '<div class="fttl">İlk qrupunuzu yaradın</div>');
-          h1.insertAdjacentElement("afterend", gf);
+          //  hediyye karti varsa forma onun altina (160)
+          ($("giftCard") || h1).insertAdjacentElement("afterend", gf);
         }
         return;
       }
@@ -4070,6 +4106,8 @@
             }).join("") +
         "</div>" +
         '<div id="admMsg">' + admFlash + "</div>" +
+        //  160: qosulana hediyye paket ayari (serverden doldurulur)
+        '<div class="hedbox" id="hedBox"><span class="muted">Hədiyyə paket: yüklənir…</span></div>' +
       "</div>" +
       '<div class="spacer"></div>' +
       '<div id="admList" class="card pad0">' + admRows(rows) + "</div>" +
@@ -4131,6 +4169,7 @@
     bindAdm();
     bindRep();
     bindQs();
+    loadHed();
     on("repF", "click", function (ev) {
       var b = ev.target.closest ? ev.target.closest(".chip") : null;
       if (!b) return;
@@ -4304,6 +4343,45 @@
     var g = (Date.now() - new Date(iso).getTime()) / 86400000;
     return g > 7 ? "lg-old" : "lg-ok";
   }
+
+  /* 160: hediyye paket ayari - oxu/yaz */
+  function loadHed(cfg) {
+    var box = $("hedBox");
+    if (!box) return;
+    var p = cfg ? Promise.resolve(cfg) : sb.rpc("rpc_admin_hediyye", {});
+    p.then(function (v) {
+      v = v || {};
+      if (!$("hedBox")) return;
+      $("hedBox").innerHTML =
+        "<b>Hədiyyə paket</b> <span class=\"muted\">— qeydiyyatdan keçən repetitor/məktəbə " +
+        "Repetitor-25 sınaq kimi açılır (gəlirə düşmür).</span>" +
+        '<div class="hedrow">' +
+          '<label><select id="hedOn"><option value="1"' + (v.on ? " selected" : "") + ">açıq</option>" +
+            '<option value="0"' + (!v.on ? " selected" : "") + ">bağlı</option></select></label>" +
+          '<label><input id="hedDays" type="number" min="1" max="365" value="' + (Number(v.days) || 30) + '"> gün</label>' +
+          '<label>beta bitmə <input id="hedBeta" type="date" value="' + esc(v.beta_until || "") + '"></label>' +
+          '<button class="btn sm" id="hedSave">Saxla</button>' +
+        "</div>" +
+        '<p class="muted" style="margin:6px 0 0">Beta bitənə qədər hədiyyə həmin tarixə qədərdir; ' +
+          "beta tarixi boşdursa və ya keçibsə, qeydiyyatdan N gün.</p>";
+      on("hedSave", "click", function () {
+        if (busy) return;
+        var beta = ($("hedBeta") || {}).value || "";
+        var args = { p_on: ($("hedOn") || {}).value === "1",
+                     p_days: Number(($("hedDays") || {}).value) || 30,
+                     p_beta_until: beta || null, p_clear_beta: !beta };
+        busy = true;
+        sb.rpc("rpc_admin_hediyye", args).then(function (v2) {
+          busy = false;
+          admFlashHed("Hədiyyə ayarı saxlanıldı.");
+          loadHed(v2);
+        }).catch(function (e) { busy = false; $("admMsg").innerHTML = msg("err", fail(e)); });
+      });
+    }).catch(function () {
+      if ($("hedBox")) $("hedBox").innerHTML = '<span class="muted">Hədiyyə paket ayarı yüklənmədi (db/160 tətbiq olunmayıb?).</span>';
+    });
+  }
+  function admFlashHed(t) { var m = $("admMsg"); if (m) m.innerHTML = msg("ok", t); }
 
   function bindAdm() {
     var box = $("admList");

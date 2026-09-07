@@ -1932,6 +1932,40 @@ olanda `planDone` → `loadPrep` kartı yeniləyir. Zəif/risk siqnalları
 ayrıca (`rpc_class_alerts`) qalır. Testlər: `smoke_bu_gun.sql` (5),
 `test/e2e_bugun.py` (17/17); bələdçi addım 8, şəkil `m11_bu_gun.png`.
 
+## `run.sh` — bank faylı yoxdursa dayanmır (2026-09-07)
+
+Tələ: bank sessiyası `run.sh`-ə 141–158 sətirlərini əlavə etdi, yerli
+qovluqda fayl yox idi, `set -e` ilə `run.sh` yarıda kəsildi,
+`test/01_grants.sql` və `05_grants.sql` işləmədi — harness **RLS-siz
+bazada** iki suite xəta verdi (`ANON students cedvelini oxudu`, «Pulsuz
+hedd asildi»), qalanı «keçdi». İndi bank məzmun faylları `bank <fayl>`
+funksiyası ilə yüklənir: fayl yoxdursa stderr-ə `!! bank fayli yoxdur,
+atlandi` yazır, davam edir. Kod faylları (11, 12, 29, 106) əvvəlki kimi
+`psql -f`. Yeni bank faylı əlavə edəndə: `bil10-bank`-ı çək, `db/`-də
+symlink qur (`ln -s ../../bil10-bank/db/<fayl> db/<fayl>`), `run.sh`-də
+`bank <fayl>` sətri. Harnessdə «XETA» görəndə əvvəl `run.sh <db> --local`
+çıxış kodunu yoxla.
+
+## Qoşulana hədiyyə paket + ana səhifə kartı (db/160)
+
+İstifadəçi ideyası: «yeni qeydiyyatdan keçənə admin mesaj versin».
+Sistem özü edir: `app_state.hediyye = {on, days, beta_until}` (canlıda
+on=true, 30 gün, beta 2026-12-31); `rpc_create_account` (repetitor/
+məktəb) → `app.hediyye_grant`: Repetitor-25, `status='trialing'`,
+`provider='gift'`, bitmə = max(beta_until günün sonu, indi+days) —
+beta boyunca «hər şey pulsuzdur» vədi ilə ziddiyyət olmasın. Gəlirə
+düşmür. `rpc_my_context.plan` → `status/ends/provider`; panel ana
+səhifədə h1-in altında `#giftCard` («Tam paket sizə hədiyyədir 🎁 … Bitmə:
+7 okt (30 gün)»), ≤7 gün qalanda `.soon` narıncı + WhatsApp
+(`CONTACT_WHATSAPP` artıq config-də: reklamdakı nömrə). Boş hesabda ilk
+qrup forması kartın ALTINA keçir. Admin: «Hesablar» kartında `#hedBox`
+(açıq/bağlı, gün, beta tarixi) → `rpc_admin_hediyye(p_on, p_days,
+p_beta_until, p_clear_beta)`. **Yerli test bazasında ayar bağlıdır**
+(`run.sh --local` söndürür) — 27 e2e-nin «0 / 5» yoxlamaları pozulmasın;
+`smoke_hediyye.sql` (5) və `e2e_panel` A1 ayarı özü açır. Beta bitəndə:
+admin panelində beta tarixini sil (və ya keçmişə çək), ana səhifədəki
+beta qeydini və nişanı çıxar. Bələdçi: Qeydiyyat addımı + FAQ.
+
 ## Nümunə nüsxəsi həddi — bot müdafiəsi (db/159)
 
 Təhlükəsizlik yoxlaması (2026-09-07): anonim giriş açıqdır, hər «Müəllim
