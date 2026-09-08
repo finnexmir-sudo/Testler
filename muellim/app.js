@@ -74,7 +74,39 @@
   function $(id) { return document.getElementById(id); }
   /* Yeni ekran cizilende "gozleyin" veziyyeti hemise sifirlanir -
      eks halda kecid ugurlu olanda duymeler olu qalir. */
-  function show(html) { busy = false; main.innerHTML = html; main.scrollTop = 0; }
+  var BAND_KEEP = false;
+  function show(html) {
+    busy = false; main.innerHTML = html; main.scrollTop = 0;
+    //  yeni ekran hemise yuxaridan baslasin - zolaq (basliq) gorunsun
+    try { window.scrollTo(0, 0); } catch (e) {}
+    //  bandHead() show()-dan EVVEL cagirilibsa zolaq qalir
+    if (BAND_KEEP) BAND_KEEP = false; else setBand("");
+  }
+  /*  Ekran basligi zolaqda: geri duymesi, kicik alt basliq, h1, izah,
+      solda avatar, sagda duyme.  show()-dan bir addim EVVEL cagirilir.  */
+  function bandHead(o) {
+    setBand(
+      (o.back ? '<button class="btn sm ghost bback" id="' + o.back.id + '">' +
+        ic("back") + esc(o.back.label) + "</button>" : "") +
+      '<div class="bh">' + (o.av || "") +
+        '<div class="bt">' +
+          (o.eye ? '<span class="beye">' + esc(o.eye) + "</span>" : "") +
+          "<h1" + (o.id ? ' id="' + o.id + '"' : "") + ">" + (o.html || esc(o.title || "")) + "</h1>" +
+          (o.sub ? "<p" + (o.subId ? ' id="' + o.subId + '"' : "") + ">" + o.sub + "</p>" : "") +
+        "</div>" +
+        (o.right ? '<div class="br">' + o.right + "</div>" : "") +
+      "</div>");
+    BAND_KEEP = true;
+  }
+  /*  Marka zolagi (#band, #main-den evvel): basliq + bir setir izah,
+      ag yazi.  Bos veriləndə gizlenir ve #main adi yerine qayidir.  */
+  function setBand(html) {
+    var b = $("band");
+    if (!b) return;
+    b.innerHTML = html ? '<div class="bandin">' + html + "</div>" : "";
+    b.classList.toggle("hide", !html);
+    main.classList.toggle("over", !!html);
+  }
   function on(id, ev, fn) { var e = $(id); if (e) e.addEventListener(ev, fn); }
 
   function msg(kind, text) {
@@ -334,9 +366,12 @@
       v = v || {};
       var al = v.alerts || [];
       bellDot(al.length);
-      var h = '<button class="btn sm ghost" id="btnBack">' + ic("back") +
-        "Əsas səhifə</button>" + '<div class="spacer"></div>' +
-        "<h2>Siqnallar</h2>";
+      bandHead({
+        back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Bildirişlər",
+        title: "Siqnallar",
+        sub: "Geriləyən və zəif mövzuda ilişən şagirdlər — hesabatdan avtomatik."
+      });
+      var h = "";
       if (v.alerts === null) {
         h += '<div class="card"><p class="muted" style="margin:0">Geriləyən və ' +
           "zəif mövzuda ilişən şagird siqnalları abunə paketi ilə açılır." +
@@ -452,12 +487,14 @@
   /* ----------------------------------------------------------- profil */
   function screenMe() {
     topTitle.textContent = "Profil";
+    bandHead({
+      back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Profil",
+      title: (CTX && CTX.profile && CTX.profile.full_name) || "Profil",
+      sub: esc((ACC && ACC.name) || "")
+    });
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") +
-        "Əsas səhifə</button>" +
-      '<div class="spacer"></div>' +
       '<div class="card">' +
-        "<h1>Tədris etdiyiniz fənlər</h1>" +
+        '<h2 class="ch">Tədris etdiyiniz fənlər</h2>' +
         '<p class="note">Seçilmiş fənlər sual bankı, test yığma və dərs planı ' +
           "siyahılarını daraldır. Boş saxlasanız bütün fənlər görünür.</p>" +
         '<div class="chips subpick" id="meSubs"><span class="skel">Yüklənir…</span></div>' +
@@ -466,7 +503,7 @@
       "</div>" +
       '<div class="spacer"></div>' +
       '<div class="card" id="fbCard">' +
-        "<h1>Bizə yazın</h1>" +
+        '<h2 class="ch">Bizə yazın</h2>' +
         '<p class="note">Təklifiniz, rastlaşdığınız problem və ya sualınız — ' +
           "birbaşa bizə çatır. Cavabımızı burada, mesajın altında görəcəksiniz.</p>" +
         fbForm("fb") +
@@ -545,7 +582,6 @@
     var ad = ((CTX.profile && CTX.profile.full_name) || "").split(" ")[0];
 
     var html =
-      '<h1 class="hi">Xoş gəlmisiniz' + (ad ? ", " + esc(ad) : "") + "! 👋</h1>" +
       //  160: qosulana hediyye paket karti (sinaq abunesi varsa)
       giftCard() +
       /*  Bos hesabda (qrup yoxdur) bu blok gizlenir ve "Qrup yarat"
@@ -554,10 +590,10 @@
       '<div id="hTop">' +
       /* Reqemler bir baxisda - "Fealiyyet merkezi"nin ust lovheleri */
       '<div class="tiles" id="hTiles">' +
-        '<div class="tile a"><b>—</b><span>qrup</span></div>' +
-        '<div class="tile b"><b>—</b><span>test</span></div>' +
-        '<div class="tile c"><b>—</b><span>şagird</span></div>' +
-        '<div class="tile d"><b>—</b><span>orta bal</span></div>' +
+        '<div class="tile a"><i class="ti">' + ic("group") + "</i><b>—</b><span>qrup</span></div>" +
+        '<div class="tile b"><i class="ti">' + ic("doc") + "</i><b>—</b><span>test</span></div>" +
+        '<div class="tile c"><i class="ti">' + ic("person") + "</i><b>—</b><span>şagird</span></div>" +
+        '<div class="tile d"><i class="ti">' + ic("chart") + "</i><b>—</b><span>orta bal</span></div>" +
       "</div>" +
       '<div id="hAlerts"></div>' +
       '<div class="spacer"></div>' +
@@ -583,17 +619,17 @@
       '<div class="card quick">' +
         '<div class="qhead">Sürətli əməliyyatlar</div>' +
         '<div class="qgrid">' +
-          '<button class="qact qa" id="btnGen">' + ic("gen") +
+          '<button class="qact qa" id="btnGen"><span class="qi">' + ic("gen") + "</span>" +
             "<b>Test yığ</b><span>mövzu və çətinliyə görə</span></button>" +
-          '<button class="qact qb" id="btnBank">' + ic("doc") +
+          '<button class="qact qb" id="btnBank"><span class="qi">' + ic("doc") + "</span>" +
             "<b>Sual bankı</b><span>öz suallarınız</span></button>" +
           (plansOn()
-            ? '<button class="qact qc" id="btnPkt">' + ic("star") +
+            ? '<button class="qact qc" id="btnPkt"><span class="qi">' + ic("star") + "</span>" +
               "<b>Paket</b><span>" +
               (ACC.plan ? "abunə və müddət" : "qiymətlər və abunə") +
               "</span></button>"
             : "") +
-          '<button class="qact qd" id="btnMe">' + ic("person") +
+          '<button class="qact qd" id="btnMe"><span class="qi">' + ic("person") + "</span>" +
             "<b>Profil</b><span>fənlər · bizə yazın</span></button>" +
         "</div>" +
       "</div>" +
@@ -623,6 +659,16 @@
         '<button class="btn go" id="btnGroup">' + ic("plus") + "Qrup yarat</button>" +
       "</div>";
     show(html);
+    /*  Marka zolagi: salam + hesab adi + paket.  Ilk kart (hediyye ve ya
+        lovheler) zolagin alt kenarini kesir.  */
+    var plan = ACC.plan ? ACC.plan.name
+      : ((isAdmin() && ACC.is_owner) ? "Admin · daimi" : "Pulsuz");
+    setBand(
+      '<span class="beye">İcmal</span>' +
+      "<h1>Xoş gəlmisiniz" + (ad ? ", " + esc(ad) : "") + "! 👋</h1>" +
+      "<p>" + esc(ACC.name || "") + "</p>" +
+      '<span class="bpill">' + ic("star") + esc(plan) + "</span>"
+    );
 
     loadLevels().then(function () {
       var sel = $("glevel");
@@ -682,10 +728,10 @@
       if (t) t.classList.toggle("hide", (Number(st.groups) || 0) < 2);
       if (t) {
         t.innerHTML =
-          '<div class="tile a"><b>' + (st.groups || 0) + "</b><span>qrup</span></div>" +
-          '<div class="tile b"><b>' + (st.tests || 0) + "</b><span>öz testiniz</span></div>" +
-          '<div class="tile c"><b>' + (st.students || 0) + "</b><span>şagird</span></div>" +
-          '<div class="tile d"><b>' +
+          '<div class="tile a"><i class="ti">' + ic("group") + "</i><b>" + (st.groups || 0) + "</b><span>qrup</span></div>" +
+          '<div class="tile b"><i class="ti">' + ic("doc") + "</i><b>" + (st.tests || 0) + "</b><span>öz testiniz</span></div>" +
+          '<div class="tile c"><i class="ti">' + ic("person") + "</i><b>" + (st.students || 0) + "</b><span>şagird</span></div>" +
+          '<div class="tile d"><i class="ti">' + ic("chart") + "</i><b>" +
             (st.attempts ? pct(st.avg) + "%" : "—") + "</b><span>orta bal</span></div>";
       }
 
@@ -796,13 +842,16 @@
         box.innerHTML = '<div class="empty"><div class="ic">' + ic("group") + "</div>" +
           "<b>Hələ qrup yoxdur</b>Şagirdlər və tapşırıqlar qrupun içindədir.</div>";
         //  ilk addim ustde: forma basliğin altina, reqemler gizli
-        var top = $("hTop"), gf = $("gForm"), h1 = document.querySelector("h1.hi");
+        //  salamlama zolaqdadir (#band) - forma main-in en ustune, hediyye
+        //  karti varsa onun altina (160)
+        var top = $("hTop"), gf = $("gForm");
         if (top) top.hidden = true;
-        if (gf && h1 && !gf.classList.contains("first")) {
+        if (gf && !gf.classList.contains("first")) {
           gf.classList.add("first");
           gf.insertAdjacentHTML("afterbegin", '<div class="fttl">İlk qrupunuzu yaradın</div>');
-          //  hediyye karti varsa forma onun altina (160)
-          ($("giftCard") || h1).insertAdjacentElement("afterend", gf);
+          var gc = $("giftCard");
+          if (gc) gc.insertAdjacentElement("afterend", gf);
+          else main.insertAdjacentElement("afterbegin", gf);
         }
         return;
       }
@@ -1589,19 +1638,15 @@
   }
   function drawGroup(g) {
     topTitle.textContent = g.name;
+    bandHead({
+      back: { id: "btnBack", label: "Qruplar" }, eye: "Qrup",
+      id: "gName", title: g.name, subId: "gMeta",
+      sub: (levelName(g.level_id) ? "<span>" + esc(levelName(g.level_id)) + "</span>" : ""),
+      right: '<button class="btn sm ghost icon" id="btnRen" title="Adı dəyiş" ' +
+        'aria-label="Adı dəyiş">' + ic("pen") + "</button>"
+    });
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Qruplar</button>" +
-      '<div class="spacer"></div>' +
       '<div class="card tight" id="gCard">' +
-        '<div class="ttl"><h1 id="gName">' + esc(g.name) + "</h1>" +
-          '<button class="btn sm ghost icon" id="btnRen" title="Adı dəyiş" ' +
-            'aria-label="Adı dəyiş">' + ic("pen") + "</button></div>" +
-        '<div class="muted" style="display:flex;align-items:center;gap:7px;' +
-          'margin-top:8px;flex-wrap:wrap" id="gMeta">' +
-          (levelName(g.level_id)
-            ? "<span>" + esc(levelName(g.level_id)) + "</span>" : "") +
-          "</div>" +
-        '<div class="spacer"></div>' +
         '<div class="row two">' +
           '<button class="btn wide" id="btnAsgs">' + ic("clip") + "Tapşırıqlar</button>" +
           '<button class="btn wide" id="btnRep">' + ic("chart") + "Hesabat</button>" +
@@ -2192,22 +2237,20 @@
       if (!live()) return;
       topTitle.textContent = (r.class && r.class.name) || "Hesabat";
       var sm = r.summary || {};
+      bandHead({
+        back: { id: "btnB", label: "Qrup" }, eye: "Hesabat",
+        title: (r.class && r.class.name) || "Hesabat",
+        sub: r.paid ? "" : "Son 7 günün məlumatı göstərilir.",
+        right: '<button class="btn sm ghost" id="btnRef" title="Yenilə">' +
+          ic("refresh") + "Yenilə</button>"
+      });
       var h =
-        '<div class="row" style="justify-content:space-between;align-items:center">' +
-          '<button class="btn sm ghost" id="btnB">' + ic("back") + "Qrup</button>" +
-          '<button class="btn sm ghost" id="btnRef" title="Yenilə">' +
-            ic("refresh") + "Yenilə</button></div>" +
-        '<div class="spacer"></div>' +
         '<div class="stats">' +
           statTile(sm.active + " / " + sm.students, "aktiv şagird", "g1") +
           statTile(pct(sm.avg) + "%", "orta nəticə", "g2") +
           statTile(sm.attempts || 0, "işlənmiş test", "g3") +
         "</div>";
 
-      if (!r.paid) {
-        h += '<p class="muted" style="margin:2px 0 16px">' + ic("clock") +
-             " Son " + 7 + " günün məlumatı göstərilir.</p>";
-      }
 
       /*  Uc sekme: Sagirdler / Movzular / Fealiyyet.  Movzular butun
           fennlerden 30+ setir, fealiyyet 11 setir - bir sehifede
@@ -2961,19 +3004,16 @@
     sb.rpc("rpc_student_report", { p_student_id: id }).then(function (r) {
       if (!live()) return;
       var s = r.student || {}, sm = r.summary || {};
+      bandHead({
+        back: { id: "btnB", label: "Geri" }, eye: "Şagird hesabatı",
+        av: av(s.full_name), title: s.full_name,
+        sub: "<span>" + esc(s.display_name) + "</span> " +
+          '<span class="code key">' + esc(s.login_code) + "</span>",
+        //  Tek bu sagirde hazir test: tapsiriq ekrani o secilmis acilir
+        right: '<button class="btn sm sasg" id="btnAsgStu" title="Yalnız bu şagirdə hazır test tapşır">' +
+          ic("plus") + "Test tapşır</button>"
+      });
       var h =
-        '<button class="btn sm ghost" id="btnB">' + ic("back") + "Geri</button>" +
-        '<div class="spacer"></div>' +
-        '<div class="card tight"><div class="shead">' + av(s.full_name) +
-          "<div><h1>" + esc(s.full_name) + "</h1>" +
-          '<div class="muted" style="display:flex;align-items:center;gap:7px;margin-top:6px">' +
-            "<span>" + esc(s.display_name) + "</span>" +
-            '<span class="code key">' + esc(s.login_code) + "</span></div>" +
-          "</div>" +
-          //  Tek bu sagirde hazir test: tapsiriq ekrani o secilmis acilir
-          '<button class="btn sm sasg" id="btnAsgStu" title="Yalnız bu şagirdə hazır test tapşır">' +
-            ic("plus") + "Test tapşır</button>" +
-        "</div></div>" +
         '<div class="stats">' +
           statTile(sm.attempts || 0, "test", "g1") +
           statTile(pct(sm.avg) + "%", "orta", "g2") +
@@ -3424,15 +3464,13 @@
     var items = d.items || [];
     var free  = d.free_practice !== false;
 
+    bandHead({
+      back: { id: "btnBack", label: ASG_PRE ? "Şagird hesabatı" : g.name },
+      eye: g.name, title: "Tapşırıqlar",
+      sub: "Şagird tapşırığı öz siyahısında görür; son tarix keçəndə bağlanır."
+    });
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") +
-        (ASG_PRE ? "Şagird hesabatı" : esc(g.name)) + "</button>" +
-      '<div class="spacer"></div>' +
       '<div class="card tight">' +
-        "<h1>Tapşırıqlar</h1>" +
-        '<p class="muted" style="margin:8px 0 0">Şagird tapşırığı öz ' +
-          "siyahısında görür; son tarix keçəndə bağlanır.</p>" +
-        '<div class="spacer"></div>' +
         '<div class="swrap"><label class="switch" for="fp">' +
           '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
           '<span class="track"><i></i></span>' +
@@ -4062,9 +4100,11 @@
   function drawAdmin(st, rows, reps, fbs, qs, vs) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "repetitor-25", name: "Repetitor — 25 şagird" }];
+    bandHead({
+      back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Admin",
+      title: "İdarəetmə", sub: "Hesablar, abunələr, hesabatlar, rəylər, ziyarətlər."
+    });
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
-      '<div class="spacer"></div>' +
       '<div class="tiles five">' +
         '<div class="tile a"><b>' + (st.accounts || 0) + "</b><span>hesab" +
           ((st.accounts_week || 0) > 0 ? " · +" + st.accounts_week + " bu həftə" : "") +
@@ -4081,7 +4121,7 @@
         '<div class="tile e"><b>' + (st.seen_week || 0) + "</b><span>girib · son 7 gün</span></div>" +
       "</div>" +
       '<div class="card tight">' +
-        "<h1>Hesablar</h1>" +
+        '<h2 class="ch">Hesablar</h2>' +
         '<p class="muted" style="margin:8px 0 0">«+1 ay / +6 ay» seçilmiş planı ' +
           "həmin hesaba <b>ödənişli</b> açır, «Sınaq» eyni paketi pulsuz verir " +
           "(gəlirə düşmür; sonra ödəyəndə «+1 ay» ödənişliyə çevirir). " +
@@ -5145,16 +5185,12 @@
 
   function drawGen() {
     var f = genFilter();
+    bandHead({
+      back: { id: "btnBack", label: f.back ? (f.backName || "Tapşırıqlar") : "Əsas səhifə" },
+      eye: "Test yığ", title: "Avtomatik test",
+      sub: "Süzgəci seçin — sistem hovuzdan balanslı test yığacaq: mövzular arasında bərabər, təkrarsız."
+    });
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") +
-        (f.back ? esc(f.backName || "Tapşırıqlar") : "Əsas səhifə") + "</button>" +
-      '<div class="spacer"></div>' +
-      '<div class="card">' +
-        "<h1>Avtomatik test</h1>" +
-        '<p class="muted" style="margin:8px 0 0">Süzgəci seçin — sistem ' +
-          "hovuzdan balanslı test yığacaq: mövzular arasında bərabər, " +
-          "təkrarsız.</p>" +
-      "</div>" +
       '<div id="gRec"></div>' +
       '<div class="spacer"></div>' +
       '<div class="card tight">' +
@@ -5673,7 +5709,8 @@
       (c.student ? " Şagird kodu <code>" + esc(c.student) + "</code>" : "") +
       (c.parent ? " · valideyn kodu <code>" + esc(c.parent) + "</code>" : "") + "</span>" +
       '<button class="btn sm go" id="demoOwn">Öz hesabımı aç</button>';
-    var main0 = document.getElementById("main");
+    //  zolaq (#band) varsa onun ustune - zolaq kartla birlesik qalsin
+    var main0 = document.getElementById("band") || document.getElementById("main");
     main0.parentNode.insertBefore(d, main0);
     on("demoOwn", "click", function () {
       sb.signOut().then(function () {
@@ -6099,9 +6136,12 @@
     var used = Number(use.used) || 0, lim = Number(use.limit) || 0;
     var pct = lim > 0 ? Math.min(100, Math.round(used * 100 / lim)) : 0;
 
+    bandHead({
+      back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Bank",
+      title: "Sual bankı",
+      sub: "Öz suallarınızı yazın, hazır bankdan seçin — fənn, sinif, mövzu və çətinliyə görə."
+    });
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
-      '<div class="spacer"></div>' +
       '<div class="card">' +
         '<div class="seat"><div>' +
           '<div class="num">' + used + ' <s>/ ' + (lim > 100000 ? "∞" : lim) + "</s></div>" +

@@ -342,7 +342,8 @@ with sync_playwright() as pw:
     pg.wait_for_function(
         "document.querySelector('.tile b') && document.querySelector('.tile b').innerText !== '—'",
         timeout=8000)
-    ok("Xoş gəlmisiniz" in pg.inner_text("#main"), "salamlasma var")
+    #  salamlama marka zolagindadir (#band), main-de deyil
+    ok("Xoş gəlmisiniz" in pg.inner_text("#band"), "salamlasma var")
     #  tek qruplu muellimde 4 lovhe gizlidir (UX auditi); DOM-da qalir
     ok(pg.locator(".tile").count() == 4 and not pg.locator("#hTiles").is_visible(), "tek qrupda stat lovheleri gizlidir")
     ok(pg.locator(".tile.c b").inner_text() == "1", "sagird sayi lovhede (gizli)",

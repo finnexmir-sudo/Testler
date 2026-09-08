@@ -278,20 +278,25 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 /* ana sehife: suretli emeliyyatlar */
 .qhead{font-size:11.5px;font-weight:640;letter-spacing:.5px;
   text-transform:uppercase;color:var(--fg-3);margin:0 0 12px}
-.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/*  Uc sutun - ucuncu kart tek qalmasin; ikon rengli cipde (ana
+    sehifedeki imkan kartlari kimi).  */
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:560px){ .qgrid{grid-template-columns:1fr 1fr} }
 .qact{display:flex;flex-direction:column;align-items:flex-start;gap:2px;
   padding:13px 14px;border:1px solid var(--line);border-radius:var(--r-lg);
-  background:var(--n-25);cursor:pointer;font:inherit;text-align:left;
-  transition:background .12s,border-color .12s,transform .06s}
-.qact:hover{background:var(--brand-tint);border-color:var(--brand-line)}
+  background:var(--surface);cursor:pointer;font:inherit;text-align:left;
+  box-shadow:0 1px 2px rgba(21,26,36,.04);
+  transition:background .12s,border-color .12s,transform .06s,box-shadow .12s}
+.qact:hover{border-color:var(--brand-line);box-shadow:0 8px 20px -10px rgba(16,24,40,.28)}
 .qact:active{transform:scale(.98)}
-.qact svg{width:21px;height:21px;margin-bottom:7px}
+.qact .qi{display:flex;width:32px;height:32px;border-radius:9px;align-items:center;
+  justify-content:center;margin-bottom:9px;background:var(--brand-tint);color:var(--brand)}
+.qact .qi svg{width:17px;height:17px;stroke-width:1.75}
 .qact b{font-size:13.5px}
 .qact span{font-size:11px;color:var(--fg-3)}
-.qact.qa svg{color:var(--brand)}
-.qact.qb svg{color:var(--teal)}
-.qact.qc svg{color:var(--warn)}
-.qact.qd svg{color:var(--n-600)}
+.qact.qb .qi{background:var(--teal-tint);color:var(--teal)}
+.qact.qc .qi{background:var(--warn-tint);color:var(--warn)}
+.qact.qd .qi{background:var(--n-100);color:var(--n-600)}
 
 /* alt naviqasiya - yalniz telefonda gorunur */
 .bnav{display:none}
@@ -816,9 +821,39 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .vfun{margin:14px 0 0;line-height:1.55}
 .vfun b{color:var(--fg)}
 /* 160: hediyye paket karti (ana sehife) ve admin ayari */
-.card.gift{background:var(--brand-tint);border:1px solid var(--brand-line)}
-.card.gift.soon{background:var(--warn-tint);border-color:var(--warn-line)}
+/*  Hediyye karti ag kartdir, sol kenari sari (logo rengi) - zolagin
+    ustunden cixanda oxunaqli qalir.  Bitmeye az qalanda kehreba.  */
+.card.gift{background:var(--surface);border:1px solid var(--line);border-left:4px solid #ffc94d;
+  box-shadow:0 18px 44px rgba(9,20,60,.14)}
+.card.gift>b{font-size:15.5px;letter-spacing:-.01em}
 .card.gift p{margin:6px 0 12px;color:var(--fg-2);line-height:1.5}
+.card.gift.soon{background:var(--warn-tint);border-color:var(--warn-line);border-left-color:var(--warn)}
+
+/* ------------------------------------------------ marka zolagi (#band) */
+/*  Ana sehifenin hero-su panelde: ust zolaqla eyni qradiyent davam
+    edir, basliq ag, altinda bir setir izah.  Ilk kart (#main.over)
+    zolagin alt kenarini kesir - ana sehifedeki onizleme kimi.  */
+.band{color:#fff;padding:22px 0 78px;
+  background:linear-gradient(120deg,#2b4acb 0%,#2f5fd4 42%,#0e9384 100%)}
+.band.hide{display:none}
+.bandin{max-width:760px;margin:0 auto;padding:0 20px}
+.band .beye{display:block;font-size:11.5px;font-weight:650;letter-spacing:.08em;
+  text-transform:uppercase;color:rgba(255,255,255,.72)}
+.band h1{color:#fff;font-size:25px;font-weight:700;letter-spacing:-.024em;margin:5px 0 4px}
+.band p{margin:0;color:rgba(255,255,255,.84);font-size:13.5px;line-height:1.5}
+.band .bpill svg{width:13px;height:13px;stroke-width:2}
+.band .bpill{display:inline-flex;align-items:center;gap:6px;margin-top:12px;
+  padding:4px 11px;border-radius:999px;font-size:12px;font-weight:560;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.30);color:#fff}
+#main.over{margin-top:-56px;position:relative;z-index:1}
+@media (max-width:600px){ .band{padding:18px 0 66px} .band h1{font-size:22px} #main.over{margin-top:-48px} }
+
+/*  Bolme basliqlari (h2) ana sehife dilinde: tund yazi, altinda qisa
+    qradiyent xett.  base.css-de boz CAPS idi.  */
+#main h2{font-size:15px;line-height:1.3;font-weight:650;letter-spacing:-.012em;
+  text-transform:none;color:var(--fg);margin:26px 0 10px}
+#main h2::after{content:"";display:block;width:30px;height:3px;border-radius:3px;
+  margin-top:6px;background:linear-gradient(90deg,var(--brand),var(--teal))}
 .hedbox{margin-top:14px;padding-top:12px;border-top:1px solid var(--n-100);font-size:13.5px}
 .hedrow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:8px}
 .hedrow label{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--fg-2)}
@@ -834,20 +869,38 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .tiles.five{grid-template-columns:repeat(5,1fr)}
 @media (max-width:760px){ .tiles.five{grid-template-columns:repeat(3,1fr)} }
 @media (max-width:520px){ .tiles.five{grid-template-columns:1fr 1fr} .tiles.five .tile.e{grid-column:1/-1} }
-.tile.e{background:linear-gradient(135deg,#5b3fb8,#7c5ce6)}
 /* Idareetme setri: giris setiri - 7 gundur girmeyen narinci */
 .admr .g i.lg{margin-top:2px}
 .admr .lg-ok{color:var(--ok)}
 .admr .lg-old{color:#b54708;font-weight:600}
 .admr .lg-no{color:var(--fg-3)}
-.tile{border-radius:12px;padding:14px 12px;color:#fff;
-  box-shadow:0 4px 14px rgba(21,26,36,.10)}
-.tile b{display:block;font-size:22px;font-weight:680;letter-spacing:-.02em}
-.tile span{font-size:11.5px;opacity:.85}
-.tile.a{background:linear-gradient(135deg,#2b4acb,#4a63e0)}
-.tile.b{background:linear-gradient(135deg,#0e9384,#18b8a6)}
-.tile.c{background:linear-gradient(135deg,#175d97,#2f86c8)}
-.tile.d{background:linear-gradient(135deg,#1c2a52,#31437a)}
+/*  Lovheler ag kartdir (ana sehifedeki "Neticeler" onizlemesi ile eyni
+    dil): ikon cipi, renkli reqem, boz yazi.  Rengli dolu lovheler
+    sehifeni agirlasdirirdi.  */
+/*  Lovheler BIR ag kartin icindedir, aralarinda nazik xett (ana
+    sehifedeki "Neticeler" onizlemesi kimi).  */
+.tiles{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:4px;gap:0;box-shadow:0 18px 44px rgba(9,20,60,.14)}
+.tile{border-radius:10px;padding:12px 14px 11px;color:var(--fg);background:none;border:0}
+.tile+.tile{border-left:1px solid var(--n-100)}
+@media (max-width:520px){
+  .tile:nth-child(3){border-left:0}
+  .tile:nth-child(n+3){border-top:1px solid var(--n-100)}
+}
+.tiles.five{padding:6px;gap:6px}
+.tiles.five .tile{border:0}
+.tile .ti{display:flex;width:28px;height:28px;border-radius:8px;align-items:center;
+  justify-content:center;margin-bottom:8px;background:var(--brand-tint);color:var(--brand)}
+.tile .ti svg{width:15px;height:15px;stroke-width:1.7}
+.tile b{display:block;font-size:24px;line-height:1.15;font-weight:680;letter-spacing:-.02em;color:var(--brand)}
+.tile span{font-size:11.5px;color:var(--fg-3)}
+.tile.b b{color:var(--teal)}
+.tile.b .ti{background:var(--teal-tint);color:var(--teal)}
+.tile.c b{color:#175d97}
+.tile.c .ti{background:#e8f2fb;color:#175d97}
+.tile.d b{color:#1c2a52}
+.tile.d .ti{background:#e9ecf5;color:#1c2a52}
+.tile.e b{color:#5b3fb8}
 
 /* xos detallar - panel */
 .stats{gap:10px}
@@ -1106,7 +1159,7 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 }
 
 /* ---- yumsaq derinlik (istifadeci secimi): rengli kartlar, sekmeler, setirler ---- */
-.stat,.tile{box-shadow:0 2px 4px rgba(16,24,40,.08),0 10px 22px -10px rgba(43,74,203,.45)}
+.stat{box-shadow:0 2px 4px rgba(16,24,40,.08),0 10px 22px -10px rgba(43,74,203,.45)}
 .segs{box-shadow:inset 0 1px 3px rgba(16,24,40,.08)}
 .seg.on{box-shadow:0 1px 3px rgba(16,24,40,.14),0 4px 10px -4px rgba(16,24,40,.18)}
 /* masaustunde siyahi setri ustune gelende yungulce qalxir - klik olundugu hiss olunsun */
@@ -1153,3 +1206,37 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 @media (max-width:600px){
   .fbc .fbact{grid-template-columns:1fr}
 }
+
+/* ---------------------------------------------- zolaq basligi (bandHead) */
+/*  Geri duymesi, avatar, sagdaki duymeler zolaqda suse kimidir; "Test
+    tapsir" sari (ana sehifedeki esas CTA kimi).  */
+.band .bback{color:#fff;border-color:rgba(255,255,255,.42);background:rgba(255,255,255,.10);
+  margin-bottom:14px}
+.band .bback:hover{background:rgba(255,255,255,.22);border-color:#fff;color:#fff}
+.bh{display:flex;align-items:center;gap:14px}
+.bt{flex:1;min-width:0}
+.br{flex:0 0 auto;align-self:flex-start;display:flex;gap:8px}
+.band .br .btn{color:#fff;border-color:rgba(255,255,255,.42);background:rgba(255,255,255,.10)}
+.band .br .btn:hover{background:rgba(255,255,255,.22);border-color:#fff;color:#fff}
+.band .br .btn.sasg{background:#ffc94d;border-color:#ffc94d;color:#1a2233;font-weight:620}
+.band .br .btn.sasg:hover{background:#ffd970;border-color:#ffd970;color:#1a2233}
+.band .av{width:50px;height:50px;flex:0 0 50px;border-radius:15px;font-size:19px;
+  box-shadow:0 8px 20px rgba(9,20,60,.28);border:2px solid rgba(255,255,255,.55)}
+.band .code{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.32);color:#fff}
+.band p .muted{color:rgba(255,255,255,.7)}
+@media (max-width:480px){ .bh{flex-wrap:wrap} .br{align-self:center} }
+/*  kartin icindeki basliq (evvel h1 idi) - ust bosluqsuz  */
+#main h2.ch{margin:0 0 8px;font-size:16px}
+#main h2.ch::after{margin-top:5px}
+
+/*  Hesabat lovheleri (.stats) - Icmal lovheleri ile eyni ag kart  */
+.stats{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:4px;gap:0;margin:0 0 12px;box-shadow:0 18px 44px rgba(9,20,60,.14)}
+.stat{background:none;border:0;border-radius:10px;box-shadow:none;color:var(--fg)}
+.stat+.stat{border-left:1px solid var(--n-100)}
+.stat::before{display:none}
+.stat.g1,.stat.g2,.stat.g3{background:none;color:var(--fg)}
+.stat.g1 b{color:var(--brand)}
+.stat.g2 b{color:var(--teal)}
+.stat.g3 b{color:#1c2a52}
+.stat.g1 span,.stat.g2 span,.stat.g3 span{color:var(--fg-3)}

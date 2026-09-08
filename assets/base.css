@@ -51,7 +51,9 @@ a{color:var(--brand);text-decoration:none}
     tetbiqde eyni; yazi, duyme ve zeng ag.  */
 .top{
   display:flex;align-items:center;gap:12px;
-  height:56px;padding:0 20px;background:var(--top-bg);color:#fff;
+  height:56px;padding:0 20px;color:#fff;
+  /* ana sehifenin hero zolagi ile eyni marka qradiyenti (indigo -> teal) */
+  background:linear-gradient(120deg,#2b4acb 0%,#2f5fd4 55%,#0e9384 100%);
   border-bottom:0;position:sticky;top:0;z-index:10;
 }
 /*  Nisan ag yuvarlaq kvadratda (tetbiq ikonu kimi) - mavi nisan mavi
@@ -69,7 +71,7 @@ a{color:var(--brand);text-decoration:none}
 .top .btn.ghost:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.6);color:#fff}
 .top .bellbtn{color:#fff}
 .top .bellbtn:hover{color:#fff;background:rgba(255,255,255,.14)}
-.top .bellbtn i{border-color:var(--top-bg)}
+.top .bellbtn i{border-color:#2f5fd4}
 .top a.mark:focus-visible{outline-color:#fff}
 /*  Nisan Bil10 qabarcigidir - qradiyent SVG-nin icindedir,
     fon-kvadrat yoxdur.  Olcu 26px qalir (testler bunu olcur). */
