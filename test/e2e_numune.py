@@ -86,6 +86,46 @@ with sync_playwright() as pw:
     #  zolaq her ekranda qalir
     pg.goto(PANEL + "#/"); pg.reload(); pg.wait_for_selector("#demoBar", timeout=15000)
     ok(pg.locator("#demoBar").count() == 1, "yenilenende zolaq qalir")
+    print("B2 · (167) Ən yaxşı şagirdlər — qrup üzrə, klik şagirdə girir")
+    #  Numune hesabda yalniz BIR qrupda 3+ testli sagird var - cip
+    #  cixmasi ucun ikinci qrupa da cehd elave edirik (nusxe hesaba).
+    db("""
+      insert into public.attempts (student_id, test_id, status, percent, finished_at)
+      select s.id, t.id, 'submitted', 70 + (g * 5), now() - (g || ' days')::interval
+        from public.students s
+        join public.classes c on c.id = s.class_id and c.name like '3-c%%'
+        join public.accounts a on a.id = s.account_id
+                              and a.is_demo and a.id <> app.demo_account()
+        cross join lateral (select id from public.tests
+                             where owner_id = a.owner_id limit 1) t
+        cross join generate_series(1, 3) g
+       where s.is_active""")
+    pg.goto(PANEL + "#/"); pg.reload()
+    pg.wait_for_selector("#hTop5 .lrow", timeout=25000)
+    pg.wait_for_selector("#topF .chip", timeout=15000)
+    ok(pg.locator("#topF .chip").count() >= 2, "qrup cipleri cixir",
+       pg.locator("#topF .chip").count())
+    #  Siralama MUQAYISEDIR - "Hamisi" cipi OLMAMALIDIR (ferqli
+    #  qruplarin faizini yan-yana qoymaq mehz yanlis olan seydir)
+    cips = pg.locator("#topF .chip").all_inner_texts()
+    ok("Hamısı" not in cips, "«Hamısı» cipi yoxdur (siyahi muqayisedir)", cips)
+    ok(pg.locator("#topF .chip.on").count() == 1, "hemise bir qrup secilidir")
+    ok(pg.locator("#hTop5 .lrow").count() <= 5, "qrup basina en cox 5 setir",
+       pg.locator("#hTop5 .lrow").count())
+    ilk = pg.inner_text("#hTop5")
+    #  Ikinci qrupa kecende siyahi DEYISIR
+    pg.locator("#topF .chip").nth(1).click(); pg.wait_for_timeout(600)
+    ok(pg.locator("#topF .chip.on").count() == 1, "kecidde de bir cip secili qalir")
+    ok(pg.inner_text("#hTop5") != ilk, "cip deyisende siyahi deyisir")
+    #  Klik SAGIRDE girir - evvel qrup id-si oturulmediyi ucun marsrut
+    #  tanimir ve ana ekran yeniden cizilirdi ("sehife yuxari qalxdi")
+    pg.locator("#hTop5 .lrow").first.click()
+    pg.wait_for_timeout(1000)
+    ok("#/s/" in pg.url, "klik sagird hesabatina girir (qrup id-si ile)",
+       pg.url.split("#")[-1])
+    ok(pg.locator("#hTop5").count() == 0, "ana ekrana qayitmayib")
+    pg.goto(PANEL + "#/"); pg.wait_for_selector("#groups .gcard", timeout=20000)
+
     #  "Oz hesabimi ac" -> qeydiyyat ekrani
     pg.click("#demoOwn"); pg.wait_for_selector("#btnAuth", timeout=15000)
     ok(pg.locator("#demoBar").count() == 0 and pg.locator("#fname").count() == 1, "oz hesab: qeydiyyat ekrani, zolaq yoxdur")

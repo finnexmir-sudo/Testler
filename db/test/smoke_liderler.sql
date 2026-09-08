@@ -157,3 +157,63 @@ begin
 end $$;
 
 \echo 'OK  3 · abunesiz hesabda da dolu, yalniz oz sagirdi'
+
+-- ---------------------------------------------------------------------
+--  167: siralama HER QRUPUN ICINDE
+--  A hesabina IKINCI qrup: ustunde cemi 2 sagird, amma onlarin bali
+--  birinci qrupun sonuncularindan ASAGIDIR.  Kohne qayda (hesab uzre
+--  tek siyahi) ile onlar 5-likden kenarda qalardi; yeni qayda ile
+--  ise OZ qruplarinin ilk ikisidir.
+-- ---------------------------------------------------------------------
+insert into public.classes (id, account_id, teacher_id, kind, name, join_code) values
+  ('ccc00000-0000-0000-0000-0000000167a1','aaaa0000-0000-0000-0000-0000000163a1',
+   '11110000-0000-0000-0000-0000000163a1','tutor_group','Ikinci qrup','KODLDR03');
+insert into public.students (id, account_id, class_id, created_by, full_name, display_name, login_code, is_active) values
+  ('55500000-0000-0000-0000-0000000167a1','aaaa0000-0000-0000-0000-0000000163a1','ccc00000-0000-0000-0000-0000000167a1','11110000-0000-0000-0000-0000000163a1','Kamran Zeif','Kamran Z.','LDR00011',true),
+  ('55500000-0000-0000-0000-0000000167a2','aaaa0000-0000-0000-0000-0000000163a1','ccc00000-0000-0000-0000-0000000167a1','11110000-0000-0000-0000-0000000163a1','Leyla Zeif','Leyla Z.','LDR00012',true);
+do $$
+declare r record; i int;
+begin
+  for r in select * from (values
+      ('55500000-0000-0000-0000-0000000167a1'::uuid, 55),
+      ('55500000-0000-0000-0000-0000000167a2'::uuid, 40)
+    ) v(sid, pct)
+  loop
+    for i in 1..3 loop
+      insert into public.attempts (student_id, test_id, status, percent, finished_at)
+      values (r.sid, '77700000-0000-0000-0000-0000000163a1', 'submitted', r.pct,
+              now() - (i || ' days')::interval);
+    end loop;
+  end loop;
+end $$;
+
+do $$
+declare v jsonb; t jsonb; q1 int; q2 int;
+begin
+  perform set_config('request.jwt.claim.sub','11110000-0000-0000-0000-0000000163a1', true);
+  perform set_config('role','authenticated', true);
+  v := public.rpc_home('aaaa0000-0000-0000-0000-0000000163a1');
+  t := v->'top';
+
+  select count(*) into q1 from jsonb_array_elements(t) e
+   where e->>'class' = 'Lider qrupu';
+  select count(*) into q2 from jsonb_array_elements(t) e
+   where e->>'class' = 'Ikinci qrup';
+
+  --  hedd HER QRUP ucun ayricadir: birinci qrupda 5, ikincide 2
+  assert q1 = 5, 'birinci qrupda 5 setir olmalidir, geldi: ' || q1;
+  assert q2 = 2, 'ikinci qrupda 2 setir olmalidir, geldi: ' || q2;
+
+  --  Ashagi balli sagird OZ qrupunda gorunur (kohne qayda ile
+  --  hesab uzre 5-likden kenarda qalirdi)
+  assert t::text like '%Kamran Zeif%', 'ikinci qrupun birincisi siyahida yoxdur';
+  assert t::text like '%Leyla Zeif%',  'ikinci qrupun ikincisi siyahida yoxdur';
+
+  --  her setirde qrup id-si VAR: panel #/s/<id>/<qrup> marsrutunu
+  --  onunla qurur; olmasa klik ana ekrani yeniden cizirdi
+  assert not exists (
+    select 1 from jsonb_array_elements(t) e
+     where coalesce(e->>'class_id','') = ''), 'setirde class_id yoxdur';
+end $$;
+
+\echo 'OK  4 · siralama her qrupun icinde, hedd qrup basina, class_id var'

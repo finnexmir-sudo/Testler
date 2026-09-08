@@ -375,7 +375,10 @@ with sync_playwright() as pw:
     ok(pg.locator(".stu").count() == 5, "limit asilmadi - hele de 5 sagird")
     ok(pg.is_visible("#btnStu"), "xetadan sonra panel cokmur")
 
-    pg.click("#btnBack"); pg.wait_for_selector(".seat", timeout=8000)
+    #  Qrup zolagindaki kart da .seat sinfindedir - ana ekrani
+    #  gozlemesek onu oxuyuruq (yaris).  #hTiles yalniz Icmaldadir.
+    pg.click("#btnBack"); pg.wait_for_selector("#hTiles", timeout=8000)
+    pg.wait_for_selector(".bseat .seat", timeout=8000)
     ok("5 / 5" in pg.inner_text(".seat"), "yer gostericisi 5 / 5 gosterir",
        pg.inner_text(".seat").replace("\n", " "))
     ok("dolub" in pg.inner_text("#main").lower(), "limit xeberdarligi gorunur")

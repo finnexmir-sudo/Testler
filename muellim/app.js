@@ -833,23 +833,69 @@
       /*  En yaxsi sagirdler (163): sirali siyahi - nomre, ad, doluluq
           xetti, faiz.  Serverde en azi 3 test sertdir, ona gore ilk
           heftelerde bos gelir - onda bolme umumiyyetle cizilmir.  */
+      /*  En yaxsi sagirdler - HER QRUPUN ICINDE (167).
+          Qrup cipi var, amma "Hamisi" cipi YOXDUR: "Son neticeler"
+          hadise lentidir, orada "hamisi" menaliidir; bu ise
+          SIRALAMADIR - ferqli qruplarin faizini yan-yana qoymaq
+          mehz yanlis olan seydir.  Hemise bir qrup secilidir.  */
       var tp = $("hTop5");
       if (tp && v.top && v.top.length) {
+        var topAll = v.top;
+        var tgs = [];
+        topAll.forEach(function (x) {
+          if (x.class_id && !tgs.some(function (g) { return g.id === x.class_id; })) {
+            tgs.push({ id: x.class_id, name: x["class"] || "" });
+          }
+        });
+        var TF = tgs.length ? tgs[0].id : "";
+        function topRows() {
+          return topAll.filter(function (x) { return x.class_id === TF; })
+            .map(function (x, i) {
+              var p = Math.round(Number(x.avg) || 0);
+              /*  Marsrut HEM sagird, HEM qrup id-si isteyir
+                  (#/s/<id>/<qrup>).  Qrupsuz gonderilende route()
+                  tanimir ve ana ekrani yeniden cizirdi - istifadeciye
+                  "sehife yuxari qalxdi" kimi gorunurdu.  */
+              return '<button class="lrow" data-s="' + esc(x.student_id) +
+                '" data-c="' + esc(x.class_id || "") + '">' +
+                '<span class="ln">' + (i + 1) + "</span>" + av(x.name) +
+                '<div class="g"><b>' + esc(x.name) + "</b>" +
+                "<i>" + (x.attempts || 0) + " test</i></div>" +
+                '<span class="lbar"><i style="width:' + p + '%"></i></span>' +
+                '<span class="lp">' + p + "%</span></button>";
+            }).join("");
+        }
+        function topDraw() {
+          var tl = $("topList");
+          if (!tl) return;
+          tl.innerHTML = topRows();
+          Array.prototype.forEach.call(tl.querySelectorAll("[data-s]"), function (b) {
+            b.addEventListener("click", function () {
+              var c = b.getAttribute("data-c");
+              if (c) nav("#/s/" + b.getAttribute("data-s") + "/" + c);
+            });
+          });
+        }
         tp.innerHTML = '<div class="spacer"></div>' +
           h2r("Ən yaxşı şagirdlər") +
-          '<div class="card pad0">' + v.top.map(function (x, i) {
-            var p = Math.round(Number(x.avg) || 0);
-            return '<button class="lrow" data-s="' + esc(x.student_id) + '">' +
-              '<span class="ln">' + (i + 1) + "</span>" + av(x.name) +
-              '<div class="g"><b>' + esc(x.name) + "</b>" +
-              "<i>" + esc(x["class"] || "") + " · " + (x.attempts || 0) + " test</i></div>" +
-              '<span class="lbar"><i style="width:' + p + '%"></i></span>' +
-              '<span class="lp">' + p + "%</span></button>";
-          }).join("") + "</div>";
-        Array.prototype.forEach.call(tp.querySelectorAll("[data-s]"), function (b) {
-          b.addEventListener("click", function () {
-            nav("#/s/" + b.getAttribute("data-s"));
+          (tgs.length > 1
+            ? '<div class="chips recf" id="topF">' +
+              tgs.map(function (g, i) {
+                return '<button class="chip' + (i ? "" : " on") +
+                  '" data-tg="' + esc(g.id) + '">' + esc(g.name) + "</button>";
+              }).join("") + "</div>"
+            : "") +
+          '<div class="card pad0" id="topList"></div>';
+        topDraw();
+        var tf = $("topF");
+        if (tf) tf.addEventListener("click", function (ev) {
+          var b = ev.target.closest ? ev.target.closest("[data-tg]") : null;
+          if (!b) return;
+          TF = b.getAttribute("data-tg");
+          Array.prototype.forEach.call(tf.querySelectorAll(".chip"), function (c) {
+            c.classList.toggle("on", c === b);
           });
+          topDraw();
         });
       }
 
