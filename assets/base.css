@@ -294,7 +294,7 @@ body.bnav-on .pwabar{bottom:76px}
 /* ===================================================== tetbiq altligi */
 /*  Ana sehifenin tund altliginin yigcam variyanti - sehife kesik
     bitmesin.  Uc tetbiqde eyni; kecidler her tetbiqin oz index.html-inde. */
-.afoot{background:linear-gradient(180deg,#151a24 0%,#111726 100%);color:#fff;
+.afoot{background:linear-gradient(120deg,#1d2b5c 0%,#1f3a6e 48%,#0f4a50 100%);color:#fff;
   margin-top:28px;padding:24px 0 20px}
 .afoot .in{max-width:760px;margin:0 auto;padding:0 20px;display:flex;align-items:center;
   justify-content:space-between;gap:14px 24px;flex-wrap:wrap}
@@ -312,3 +312,6 @@ body.bnav-on .pwabar{bottom:76px}
 @media print{ .afoot{display:none} }
 /*  altliq varken sehifenin alt bosluqu (72px) artiq lazim deyil  */
 .wrap#main{padding-bottom:20px}
+
+.afoot .c a{color:rgba(255,255,255,.8);text-decoration:underline;text-underline-offset:3px}
+.afoot .c a:hover{color:#fff}
