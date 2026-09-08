@@ -374,3 +374,31 @@ details.fbd[open] summary{color:var(--fg-2)}
 .opt.wrong .k{background:var(--err);color:#fff}
 .opt[disabled]{cursor:default;opacity:.9}
 #mFb .ok i,#mFb .warn i{font-style:normal;display:block;margin-top:4px;opacity:.85}
+
+/* ---------------------------------------- marka zolagi: salam + lovheler */
+/*  Salamlama zolaqda (ag), gostericiler bir ag kartda zolagin altindan
+    cixir (muellim panelindeki Icmal ile eyni dil).  */
+.band .shero{margin:0}
+.band .shero b{color:#fff;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.band .shero i{color:rgba(255,255,255,.8)}
+.band .shero .av{width:50px;height:50px;flex:0 0 50px;border-radius:15px;font-size:19px;
+  box-shadow:0 8px 20px rgba(9,20,60,.28);border:2px solid rgba(255,255,255,.55)}
+.bandin{max-width:600px}
+.stiles{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:4px;gap:0;margin:0 0 14px;box-shadow:0 18px 44px rgba(9,20,60,.14)}
+.st{background:none;border:0;border-radius:10px;color:var(--fg);box-shadow:none}
+.st+.st{border-left:1px solid var(--n-100)}
+.st b{color:var(--brand)}
+.st span{color:var(--fg-3);opacity:1}
+.st.b b{color:var(--teal)}
+.st.c{background:none;color:var(--brand)}
+.st.c b{color:var(--brand)}
+.st.c:hover{background:var(--brand-tint)}
+.beststat{margin:-4px 0 16px}
+/*  .st.a/.st.b qradiyentleri (yuxarida) daha spesifikdir - burada sondurulur  */
+.st.a,.st.b,.st.c{background:none;color:var(--fg)}
+.st.a b{color:var(--brand)}
+.st.b b{color:var(--teal)}
+
+/*  altliq ekranla eyni enlikde  */
+.afoot .in{max-width:600px}

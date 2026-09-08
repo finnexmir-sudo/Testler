@@ -111,7 +111,21 @@
     });
   }
   function $(id) { return document.getElementById(id); }
-  function show(html) { busy = false; stopSay(); main.innerHTML = html; window.scrollTo(0, 0); }
+  function show(html) {
+    busy = false; stopSay(); main.innerHTML = html; window.scrollTo(0, 0);
+    if (BAND_KEEP) BAND_KEEP = false; else setBand("");
+  }
+  /*  Marka zolagi (#band): ana ekranin salamlamasi.  show()-dan EVVEL
+      cagirilir; bos verilende gizlenir, main adi yerine qayidir.  */
+  var BAND_KEEP = false;
+  function setBand(html) {
+    var b = $("band");
+    if (!b) return;
+    b.innerHTML = html ? '<div class="bandin">' + html + "</div>" : "";
+    b.classList.toggle("hide", !html);
+    main.classList.toggle("over", !!html);
+    BAND_KEEP = !!html;
+  }
   function on(id, ev, fn) { var e = $(id); if (e) e.addEventListener(ev, fn); }
   function msg(kind, text) {
     var i = kind === "ok" ? "check" : "info";
@@ -365,9 +379,11 @@
       var streakTxt = Number(d.streak) >= 2
         ? " · 🔥 " + Number(d.streak) + " gün ardıcıl" : "";
 
-      var h = '<div class="shero">' + av(ME ? ME.display_name : "?") +
+      //  salamlama marka zolagindadir; gostericiler zolagin altindan cixir
+      setBand('<div class="shero">' + av(ME ? ME.display_name : "?") +
         "<div><b>Salam, " + esc(ME ? ME.display_name : "") + "! 👋</b>" +
-        (CLS ? "<i>" + esc(CLS.name) + streakTxt + "</i>" : "") + "</div></div>";
+        (CLS ? "<i>" + esc(CLS.name) + streakTxt + "</i>" : "") + "</div></div>");
+      var h = "";
       if (worked.length) {
         h += '<div class="stiles">' +
           '<div class="st a"><b>' + worked.length +

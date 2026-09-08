@@ -106,7 +106,8 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".test", timeout=8000)
     ok(True, "kodla giris isleyir")
     ok("Aysu M." in pg.inner_text("#topTitle"), "ustlukde leqeb gorunur")
-    ok("3-B qrupu" in pg.inner_text("#main"), "qrup adi gorunur")
+    #  salamlama (ad + qrup) marka zolagindadir (#band)
+    ok("3-B qrupu" in pg.inner_text("#band"), "qrup adi gorunur")
     ok(pg.locator(".shero .av").count() == 1, "salamlama basligi avatarlidir")
     ok(pg.locator(".stiles").count() == 0, "islenmis test yoxdur - statlar gizlidir")
 

@@ -223,7 +223,8 @@ with sync_playwright() as pw:
 
     vp.fill("#code", kod); vp.click("#btnIn")
     vp.wait_for_selector(".who", timeout=15000)
-    metn = vp.inner_text("#main")
+    #  ad, qrup, muellim marka zolagindadir (#band); bolmeler main-de
+    metn = vp.inner_text("#band") + "\n" + vp.inner_text("#main")
     metn2 = metn
     ok("Ayan Q." in metn, "usagin GORUNEN adi cixir")
     ok("Qasimova" not in metn, "TAM AD ekranda YOXDUR")
@@ -240,7 +241,8 @@ with sync_playwright() as pw:
     #  2. .lower() ile duzeltmek de olmur: Python "TAPŞIRIQ".lower()
     #     -> "tapşiriq" verir (noqtesiz "ı" noqteli "i"-ye cevrilir).
     #  Ona gore noqtesiz "ı" olmayan hisseye baxiriq.
-    ok("GÖZLƏYƏN" in metn, "gozleyen tapsiriq bolmesi var")
+    #  h2 artiq boyuk herfle deyil (marka sablonu) - adi yazi ile yoxlanir
+    ok("Gözləyən tapşırıq" in metn, "gozleyen tapsiriq bolmesi var")
     ok("Gozleyen test" in metn, "gozleyen tapsiriq siyahida")
     ok("sabah bitir" in metn or "saat qalıb" in metn or "bu gün bitir" in metn,
        "son tarixe ne qaldigi yazilir")
@@ -265,9 +267,9 @@ with sync_playwright() as pw:
        "butun siyahida YALNIZ BIR nisan var", vp.locator(".row .tag").count())
 
     print("C2 · Boş bölmələr səssizcə yox olmur")
-    ok("ZƏİF MÖVZULAR" in metn2 or "ZƏİF MÖVZULAR" in vp.inner_text("#main"),
+    ok("Zəif mövzular" in metn2 or "Zəif mövzular" in vp.inner_text("#main"),
        "zeif movzu bolmesi bos olanda da gorunur")
-    ok("KEÇİLƏN DƏRSLƏR" in vp.inner_text("#main"),
+    ok("Keçilən dərslər" in vp.inner_text("#main"),
        "kecilen ders bolmesi bos olanda da gorunur")
     ok("dərs planını" in vp.inner_text("#main"),
        "bos ders bolmesinde SEBEB yazilir")

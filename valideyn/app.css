@@ -126,3 +126,18 @@ details.fbd[open] summary::before{transform:rotate(45deg) translateY(-2px)}
 
 /* Ferdi plan (db/131) */
 .plan2{font-size:14.5px;margin-top:10px}
+
+/* ---------------------------------------- marka zolagi: usaq secimi + ad */
+.bandin{max-width:600px}
+.band .who{padding:0}
+.band .who b{color:#fff;font-size:24px;font-weight:700;letter-spacing:-.024em;margin-top:4px}
+.band .who .muted{color:rgba(255,255,255,.8);font-size:13.5px}
+.band .kids{margin:0 0 14px}
+.band .kid{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
+.band .kid.on{background:#fff;border-color:#fff;color:var(--brand)}
+.band .kid.add{color:#fff;border-style:dashed}
+/*  veziyyet karti zolagin altindan cixir  */
+.card.sum{box-shadow:0 18px 44px rgba(9,20,60,.14)}
+
+/*  altliq ekranla eyni enlikde  */
+.afoot .in{max-width:600px}

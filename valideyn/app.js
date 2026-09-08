@@ -63,7 +63,20 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  function show(html) { busy = false; main.innerHTML = html; window.scrollTo(0, 0); }
+  function show(html) {
+    busy = false; main.innerHTML = html; window.scrollTo(0, 0);
+    if (BAND_KEEP) BAND_KEEP = false; else setBand("");
+  }
+  /*  Marka zolagi (#band): usaq secimi + ad.  show()-dan EVVEL cagirilir.  */
+  var BAND_KEEP = false;
+  function setBand(html) {
+    var b = $("band");
+    if (!b) return;
+    b.innerHTML = html ? '<div class="bandin">' + html + "</div>" : "";
+    b.classList.toggle("hide", !html);
+    main.classList.toggle("over", !!html);
+    BAND_KEEP = !!html;
+  }
   function msg(kind, text) {
     return '<div class="' + kind + '"><span>' + esc(text) + "</span></div>";
   }
@@ -216,9 +229,10 @@
       }).join("") + '<button type="button" class="kid add" id="kidAdd">+ uşaq</button></div>';
     }
 
-    /* ---- basliq: kimin ekranidir ---- */
-    out +=
+    /* ---- basliq: kimin ekranidir - marka zolaginda (usaq cipleri de) ---- */
+    setBand(out +
       '<div class="who">' +
+        '<span class="beye">Valideyn paneli</span>' +
         "<b>" + esc((d.child && d.child.name) || "Uşağım") + "</b>" +
         '<span class="muted">' +
           //  Adi bos olan muellimde "müəllim: " yazib bos qoymuruq
@@ -226,7 +240,8 @@
             (d.teacher || "").trim() ? "müəllim: " + d.teacher.trim() : "" ]
             .filter(Boolean).map(esc).join(" · ") +
         "</span>" +
-      "</div>";
+      "</div>");
+    out = "";
 
     /* ---- veziyyet: CILPAQ FAIZ YOX, MEYL ----
        Valideyn "64%" gorende bunun yaxsi olub-olmadigini bilmir.
