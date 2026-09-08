@@ -549,6 +549,8 @@
     if (!pl || pl.status !== "trialing" || !pl.ends) return "";
     var end = new Date(pl.ends);
     if (isNaN(end)) return "";
+    //  165: vaxt kecibse xatirlatmani payBar() verir - iki kart olmasin
+    if (Number(pl.days_left) < 0) return "";
     var days = Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86400000));
     var soon = days <= 7;
     var wa = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
@@ -582,14 +584,86 @@
         ic("right") + "</button>" : "") + "</div>";
   }
 
+  /*  Zolagin sag terefindeki suse kart.  Iki hal var:
+      - PAKETLI (kohne qayda): "12 / 25 sagird yeri" + doluluq xetti
+      - SAGIRD BASINA (165): limit yoxdur, ona gore doluluq xetti de
+        menasizdir - onun yerine bu ayin meblegi yazilir.  */
+  function seatCard() {
+    var pl = ACC && ACC.plan;
+    var used = ACC.students_used, lim = ACC.students_limit;
+    var plan = pl ? pl.name
+      : ((isAdmin() && ACC.is_owner) ? "Admin · daimi" : "Paketsiz");
+    var pill = '<span class="pill' + ((pl || (isAdmin() && ACC.is_owner)) ? " on" : "") +
+      '">' + esc(plan) + "</span>";
+
+    if (pl && Number(pl.per_seat_minor) > 0) {
+      return '<div class="bseat gseat">' +
+        '<div class="seat"><div><div class="num">' + used + "</div>" +
+          '<div class="lbl">aktiv şagird</div></div>' + pill + "</div>" +
+        '<div class="gsep"></div>' +
+        '<div class="grow"><span>Bu ay</span><b>' + azn(pl.due_minor) + "</b></div>" +
+      "</div>";
+    }
+    var pct = lim > 0 ? Math.min(100, Math.round(used * 100 / lim)) : 0;
+    var cls = pct >= 100 ? "bar full" : (pct >= 80 ? "bar warn" : "bar");
+    return '<div class="bseat">' +
+      '<div class="seat"><div><div class="num">' + used +
+        ' <s>/ ' + (lim > 1000000 ? "∞" : lim) + "</s></div>" +
+        '<div class="lbl">şagird yeri</div></div>' + pill + "</div>" +
+      '<div class="' + cls + '"><i style="width:' + pct + '%"></i></div>' +
+    "</div>";
+  }
+
+  /*  Odenis xatirlatmasi (165).  Iki hal:
+      - vaxt kecib, guzest muddetindedir -> tund xeberdarliq, nece gun
+        qaldigi yazilir (hesab hele tam isleyir)
+      - odenisli abunenin bitmesine 7 gun ve ya az qalib -> sakit
+        xatirlatma, bu ayin meblegi ile
+      Sinaq abunesi giftCard()-dedir - burada tekrarlanmir.  */
+  function payBar() {
+    var old = document.getElementById("payBar");
+    if (old) old.remove();
+    var pl = ACC && ACC.plan;
+    if (!pl || pl.days_left == null) return;
+    var left = Number(pl.days_left);
+    var grace = Number(pl.grace_days) || 0;
+    //  Guzestde qalan gun: vaxt 2 gun evvel bitibse (left = -2) ve
+    //  guzest 3 gundursa, hesab daha 1 gun isleyir.
+    var over = left < 0;
+    var qalan = over ? Math.max(0, grace + left) : left;
+    if (!over && (pl.status !== "active" || left > 7)) return;
+
+    var wa = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
+    var me = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    var href = wa
+      ? "https://wa.me/" + wa.replace(/[^0-9]/g, "") + "?text=" +
+        encodeURIComponent("Salam! Bil10 abunəsini uzatmaq istəyirəm." + (me ? " Hesab: " + me : ""))
+      : "";
+    var d = document.createElement("div");
+    d.id = "payBar"; d.className = "demobar paybar" + (over ? " over" : "");
+    d.innerHTML = "<span><b>" + (over
+        ? "Abunənin vaxtı bitib"
+        : (left === 0 ? "Abunə bu gün bitir" : "Abunə " + left + " gün sonra bitir")) +
+      "</b> — " + (over
+        ? (qalan > 0
+            ? qalan + " gün ərzində ödəniş edilməsə yeni şagird əlavə etmək bağlanacaq. " +
+              "Mövcud şagirdlər işləməkdə davam edir."
+            : "Yeni şagird əlavə etmək bağlandı. Mövcud şagirdlər işləməkdə davam edir.")
+        : ACC.students_used + " aktiv şagird · " + azn(pl.due_minor)) + "</span>" +
+      (href ? '<a class="btn sm go" href="' + href + '" target="_blank" rel="noopener">' +
+              "Ödəniş</a>" : "");
+    var main0 = document.getElementById("band") || document.getElementById("main");
+    main0.parentNode.insertBefore(d, main0);
+  }
+
   /* ------------------------------------------------------ qrup siyahisi */
   function screenHome() {
     topTitle.textContent = ACC.name;
     show("");
     var used = ACC.students_used, lim = ACC.students_limit;
     var pct = lim > 0 ? Math.min(100, Math.round(used * 100 / lim)) : 0;
-    var cls = pct >= 100 ? "bar full" : (pct >= 80 ? "bar warn" : "bar");
     var ad = ((CTX.profile && CTX.profile.full_name) || "").split(" ")[0];
+    payBar();
 
     var html =
       //  160: qosulana hediyye paket karti (sinaq abunesi varsa)
@@ -662,9 +736,7 @@
     show(html);
     /*  Marka zolagi: salam + hesab adi + paket.  Ilk kart (hediyye ve ya
         lovheler) zolagin alt kenarini kesir.  */
-    var plan = ACC.plan ? ACC.plan.name
-      : ((isAdmin() && ACC.is_owner) ? "Admin · daimi" : "Paketsiz");
-    //  sag terefde suse kart: sagird yeri + paket + doluluq xetti
+    //  sag terefde suse kart - seatCard() qurur
     //  (.seat sinfi qalir - testler onu oxuyur)
     bandHead({
       eye: "İcmal",
@@ -673,14 +745,7 @@
       //  iki esas emeliyyat zolaqda - ekran ne teklif etdiyini deyir
       acts: '<button class="bcta pri" id="bGen">' + ic("gen") + "Yeni test yığ</button>" +
         '<button class="bcta" id="bBank">' + ic("doc") + "Sual bankı</button>",
-      right: '<div class="bseat">' +
-        '<div class="seat"><div><div class="num">' + used +
-          ' <s>/ ' + (lim > 1000000 ? "∞" : lim) + "</s></div>" +
-          '<div class="lbl">şagird yeri</div></div>' +
-          '<span class="pill' + ((ACC.plan || (isAdmin() && ACC.is_owner)) ? " on" : "") + '">' +
-            esc(plan) + "</span></div>" +
-        '<div class="' + cls + '"><i style="width:' + pct + '%"></i></div>' +
-      "</div>"
+      right: seatCard()
     });
     BAND_KEEP = false;
     on("bGen", "click", function () { nav("#/gen"); });
@@ -5815,6 +5880,7 @@
       sb.signOut().then(function () {
         CTX = null; ACC = null;
         var b = document.getElementById("demoBar"); if (b) b.remove();
+        var pb = document.getElementById("payBar"); if (pb) pb.remove();
         try { history.replaceState(null, "", location.pathname); } catch (e) {}
         screenAuth("up");
       });

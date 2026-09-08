@@ -162,7 +162,20 @@ end $$;
 --  5. Abune bitende movzu analizi yeniden baglanir
 -- =====================================================================
 reset role;
+--  165: bitme tarixinden sonra 3 gun GUZEST var - hesab hele isleyir.
+--  Ona gore burada guzest muddetini de kecmis tarix qoyulur; guzestin
+--  ozu db/test/smoke_qiymet.sql-de yoxlanilir.
 update public.subscriptions set current_period_end = now() - interval '1 day'
+ where account_id = 'aaaa0000-0000-0000-0000-000000000001';
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-000000000001';
+do $$
+begin
+  assert (public.rpc_class_report('cccc0000-0000-0000-0000-000000000001')
+          ->>'paid')::boolean, 'guzest muddetinde hesabat baglanib!';
+end $$;
+reset role;
+update public.subscriptions set current_period_end = now() - interval '10 days'
  where account_id = 'aaaa0000-0000-0000-0000-000000000001';
 set role authenticated;
 set request.jwt.claim.sub = '11110000-0000-0000-0000-000000000001';

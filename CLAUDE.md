@@ -2176,6 +2176,59 @@ gözlənilir, sonra commit + push. Yalnız məntiq/baza dəyişikliyində
 (görünüşə toxunmayan) birbaşa push olar. Aşağıdakı önbaxış saytı
 qurulmayıb (istifadəçi «uzun oldu» dedi) — lazım olsa sonra.
 
+## Qiymət modeli — şagird başına (db/165, 2026-09-08) — HƏLƏ GİZLİDİR
+
+**Qərar (istifadəçi ilə müzakirə):**
+
+- **Şagird və valideyn həmişə pulsuzdur.** Bazadakı `valideyn-aylik`
+  (9.90 ₼) və `valideyn-illik` (99 ₼) paketləri **bağlandı** —
+  ana səhifədəki «həmişə pulsuz» vədi ilə ziddiyyət təşkil edirdi.
+- **Müəllim: paket yox, şagird başına — aktiv şagird başına ayda 1.50 ₼.**
+  Səbəb: repetitorların çoxunda **6–10 şagird** olur (istifadəçinin
+  bazar məlumatı). Pilləli paketlərdə 25→26 keçidi qiyməti iki qat
+  artırırdı və müəllimi şagird əlavə etməməyə sövq edirdi.
+- **Güzəşt müddəti 3 gün.** Vaxt bitəndə hesab dərhal dayanmır:
+  3 gün tam işləyir, ekranda xatırlatma görünür. Sonra pulsuz həddə
+  (5 yer) düşür — **mövcud şagirdlər işləməkdə davam edir**, yalnız
+  yenisi əlavə olunmur.
+- Ödəniş: gələcəkdə **bankın öz səhifəsi** (yönləndirmə + Supabase
+  Edge Function webhook). CSP kənar skripti bloklayır — kart forması
+  sayta yerləşdirilə bilməz. Hazırda abunə admin panelindən əl ilə
+  verilir; 20+ ödəyən müştəriyə qədər bu kifayətdir.
+- Fərdi güzəşti admin əl ilə verir (rpc_admin_grant).
+
+**HAZIRDA HEÇ NƏ DƏYİŞMİR.** Plan (`sagird-basi`) yaradılıb, amma
+heç bir hesaba verilməyib; qiymət səhifəsi gizlidir
+(`config.js` → `SHOW_PLANS: false`); saytda qiymət yazılmayıb —
+istifadəçi əvvəl müəllimlərlə danışır. Tək real dəyişiklik güzəşt
+müddətidir, o da hamıya xeyrinədir (+3 gün).
+
+**Ayarlar miqrasiyasız dəyişir:** `app_state.qiymet` =
+`{"per_seat_minor": 150, "grace_days": 3}`.
+
+**Kod:**
+- `app.qiymet_cfg()`, `app.grace_days()` — ayarlar
+- `app.has_active_subscription()`, `app.account_seat_limit()` —
+  bitmə tarixinə güzəşt əlavə olunur
+- `rpc_my_context().accounts[].plan` — `per_seat_minor`, `due_minor`
+  (aktiv şagird × tarif), `days_left` (**mənfi = güzəştdə**),
+  `grace_days`. Güzəşt bitənə qədər plan qaytarılır ki, xatırlatma
+  göstərmək üçün məlumat qalsın.
+- `muellim/app.js` → `seatCard()` (şagird başına planda «Bu ay N ₼»),
+  `payBar()` (#payBar — 7 gün qalanda sakit, vaxt keçəndə qırmızı).
+  Sınaq abunəsinin xatırlatması `giftCard()`-dədir; güzəştdə susur ki,
+  iki kart olmasın.
+
+**`days_left` tam GÜN fərqidir** (`::date - current_date`), saniyə ilə
+yox — yoxsa «5 gün sonra bitir» saniyə qırıntısına görə «4» yazırdı.
+
+**Test yazanda diqqət:** bitmiş abunə fikstürü artıq `now() - 1 day`
+deyil — güzəştə düşür. Güzəşti keçmək üçün `now() - 10 days` yazın
+(`smoke_reports.sql`-də belə düzəldildi). `status='canceled'` qoyulan
+fiksturlara güzəşt təsir etmir. Həmçinin `app.has_active_subscription()`
+**admin üçün həmişə true**-dur — e2e-də admin hesabla güzəşt yoxlamayın
+(`smoke_qiymet.sql` düzgün hesabla yoxlayır).
+
 ## Dizayn şablonu — marka zolağı (2026-09-08, v374–377)
 
 Ana səhifə Oxuyan üslubunda yenidən yığıldı (istifadəçi bəyəndi) və

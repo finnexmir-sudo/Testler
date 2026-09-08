@@ -630,6 +630,12 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   padding:10px 14px;border:1px solid var(--warn-line);background:var(--warn-tint);border-radius:12px;font-size:13px;color:#93370d}
 .demobar code{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--warn-line);border-radius:6px;padding:1px 6px}
 .demobar .btn{margin-left:auto}
+/*  Odenis xatirlatmasi (165) - numune zolagi ile eyni qelibde.
+    Adi hal sakit (narinci), vaxt kecende ise qirmizi: muellim bunu
+    gormemis olmasin.  Hesab yene isleyir - ton xeberdarliqdir,
+    bloklama deyil.  */
+.paybar .btn,.paybar a.btn{margin-left:auto;text-decoration:none}
+.paybar.over{border-color:var(--err-line);background:var(--err-tint);color:#912018}
 .plbar{height:7px;border-radius:999px;background:var(--n-100);
   overflow:hidden;margin-bottom:14px}
 .plbar i{display:block;height:100%;border-radius:999px;
