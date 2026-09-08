@@ -801,6 +801,20 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   border:1px solid var(--warn-line)}
 .admr .pb.n{background:var(--n-25);color:var(--fg-3);
   border:1px solid var(--n-100)}
+/* 161: ziyaret qrafiki - tek seriya, brend rengi, ince sutunlar, 2px ara */
+.vhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.vchart{display:flex;align-items:flex-end;gap:2px;height:120px;padding:18px 0 22px;position:relative;
+  border-bottom:1px solid var(--n-100)}
+.vb{flex:1 1 0;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
+.vb i{display:block;width:100%;background:var(--brand);border-radius:4px 4px 0 0;min-height:2px}
+.vb i.z{background:var(--n-100)}
+.vb:hover i{background:var(--brand-hover)}
+.vb em{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-style:normal;font-size:11px;
+  font-weight:650;color:var(--fg-2)}
+.vb s{position:absolute;bottom:-20px;left:0;text-decoration:none;font-size:10.5px;color:var(--fg-3);white-space:nowrap}
+.vb:last-child s{left:auto;right:0}
+.vfun{margin:14px 0 0;line-height:1.55}
+.vfun b{color:var(--fg)}
 /* 160: hediyye paket karti (ana sehife) ve admin ayari */
 .card.gift{background:var(--brand-tint);border:1px solid var(--brand-line)}
 .card.gift.soon{background:var(--warn-tint);border-color:var(--warn-line)}

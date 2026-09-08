@@ -1946,6 +1946,24 @@ symlink qur (`ln -s ../../bil10-bank/db/<fayl> db/<fayl>`), `run.sh`-də
 `bank <fayl>` sətri. Harnessdə «XETA» görəndə əvvəl `run.sh <db> --local`
 çıxış kodunu yoxla.
 
+## Ziyarət sayğacı (db/161)
+
+«Ziyarətçi sayını görə bilərəm?» — GitHub Pages statistika vermir,
+Cloudflare DNS-only trafiki görmür, kənar skript qadağandır. Öz sayğac:
+`assets/visit.js` (ana səhifə + bələdçi, `muellim/config.js`-dən sonra
+yüklənir, `body[data-page]`) anon açarla `rpc_visit(page, ev)` çağırır —
+açılanda `view`, `[data-ev]` linklərində `demo_muellim/demo_sagird/
+demo_valideyn/panel/beledci`. Cədvəl `visits` (RLS, siyasət yox);
+unikal = `md5(günlük təsadüfi duz + IP + UA)`, duz `app_state.visit_salt`,
+IP saxlanmır; PostgREST `request.headers` yoxdursa (yerli mock) `vid`
+null. Spam: vid başına gündə 200. `rpc_admin_visits(p_days)`: bu gün /
+7 / 30 (baxış, unikal, demo, qeydiyyat), günlər massivi, hadisə bölgüsü;
+90 gündən köhnə sətirlər silinir. Panel: İdarəetmədə «Ziyarətlər» (4
+lövhə, 30 günlük sütun qrafiki `.vchart` tək seriya, huni sətri).
+Anon ağ siyahısı **20** (05_grants iki massiv, smoke_huquq 20).
+e2e: `**/config.js*` marşrutu landing-də də mock-a yönləndirir, ona görə
+kənar sorğu olmur. Yoxlama: `smoke_ziyaret.sql` (3), e2e_panel landing.
+
 ## Qoşulana hədiyyə paket + ana səhifə kartı (db/160)
 
 İstifadəçi ideyası: «yeni qeydiyyatdan keçənə admin mesaj versin».

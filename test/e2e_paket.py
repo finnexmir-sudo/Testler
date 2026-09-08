@@ -105,9 +105,9 @@ with sync_playwright() as pw:
     ok(True, "admin rolunda Idareetme bendi gorunur")
     pg.click("#btnAdm")
     pg.wait_for_selector(".admr", timeout=8000)
-    ok(pg.locator(".tile").count() == 5, "gosterici lovheleri gorunur",
+    ok(pg.locator(".tiles.five .tile").count() == 5, "gosterici lovheleri gorunur",
        pg.locator(".tile").count())
-    tl = pg.inner_text(".tiles").replace("\n", " ")
+    tl = pg.inner_text(".tiles.five").replace("\n", " ")
     ok("hesab" in tl and "pullu" in tl and "pulsuz" in tl and "gəlir" in tl,
        "lovhelerde hesab/pullu/pulsuz/gelir var", tl[:70])
     ok(pg.locator("#admF .chip").count() == 7,
@@ -115,7 +115,7 @@ with sync_playwright() as pw:
        pg.locator("#admF .chip").count())
     ok("sınaq" in tl, "pullu lovhesinde sinaq sayi var", tl[:70])
     ok("yalnız ödənişli" in tl, "gelir lovhesi 'yalniz odenisli' deyir")
-    ok(pg.locator(".tile").count() == 5 and "girib" in tl, "5-ci lovhe: hesab girib · son 7 gun", tl[-60:])
+    ok(pg.locator(".tiles.five .tile").count() == 5 and "girib" in tl, "5-ci lovhe: hesab girib · son 7 gun", tl[-60:])
     print("C1 · (160) Hədiyyə paket ayarı")
     pg.wait_for_selector("#hedSave", timeout=8000)
     ok("Hədiyyə paket" in pg.inner_text("#hedBox"), "ayar qutusu yuklenir")

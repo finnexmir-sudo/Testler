@@ -4016,10 +4016,12 @@
         sb.rpc("rpc_admin_feedback", { p_status: "new" }),
         //  134: sual keyfiyyeti (kohne olsa serverde yenilenir)
         sb.rpc("rpc_admin_qstats", { p_flag: null, p_limit: 50, p_force: false })
-          .catch(function () { return null; })
+          .catch(function () { return null; }),
+        //  161: ziyaret saygaci (kohne bazada yoxdursa bolme cixmir)
+        sb.rpc("rpc_admin_visits", { p_days: 30 }).catch(function () { return null; })
       ]).then(function (r) {
         if (!live()) return;
-        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4]);
+        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4], r[5]);
       }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -4057,7 +4059,7 @@
     on("ulCode", "keydown", function (e) { if (e.key === "Enter") go(); });
   }
 
-  function drawAdmin(st, rows, reps, fbs, qs) {
+  function drawAdmin(st, rows, reps, fbs, qs, vs) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "repetitor-25", name: "Repetitor — 25 şagird" }];
     show(
@@ -4112,6 +4114,8 @@
       '<div class="spacer"></div>' +
       '<div id="admList" class="card pad0">' + admRows(rows) + "</div>" +
       '<div class="spacer"></div>' +
+      //  161: ziyaretler
+      (vs ? visitsSection(vs) : "") +
       "<h2>Sual bildirişləri" + (reps.length
         ? ' <span class="rcnt">' + reps.length + "</span>" : "") + "</h2>" +
       '<div class="chips" id="repF">' +
@@ -4422,6 +4426,55 @@
     });
   }
 
+
+  /* ================================================================
+     ZIYARETLER (db/161): ana sehife/beledci baxislari, unikal ziyaretci,
+     demo klikleri, qeydiyyat - 30 gunluk sutun qrafiki + huni.
+     Tek seriya (unikal ziyaretci) - legenda lazim deyil, basliq deyir.
+     ================================================================ */
+  function visitsSection(vs) {
+    var t = vs.today || {}, w = vs.d7 || {}, m = vs.d30 || {};
+    var days = vs.days || [];
+    var ev = vs.events || {};
+    var demo = (Number(ev.demo_muellim) || 0) + (Number(ev.demo_sagird) || 0) + (Number(ev.demo_valideyn) || 0);
+    var mx = 0;
+    days.forEach(function (d) { if ((Number(d.uniq) || 0) > mx) mx = Number(d.uniq) || 0; });
+    var imax = -1;
+    days.forEach(function (d, i) { if (mx > 0 && Number(d.uniq) === mx && imax < 0) imax = i; });
+    function tile(cls, a, lbl) {
+      return '<div class="tile ' + cls + '"><b>' + (a.views || 0) + "</b><span>" + lbl +
+        " · " + (a.uniq || 0) + " unikal</span></div>";
+    }
+    var bars = days.map(function (d, i) {
+      var u = Number(d.uniq) || 0, h = mx ? Math.max(u ? 6 : 2, Math.round(u * 100 / mx)) : 2;
+      //  her 7 gunde bir etiket; sonuncu yalniz evvelkinden 4+ gun uzaqdirsa
+      var last = days.length - 1;
+      var lbl = (i % 7 === 0 || (i === last && last % 7 >= 4)) ? dateAz(d.day) : "";
+      return '<div class="vb" title="' + esc(dateAz(d.day)) + ": " + (d.views || 0) + " baxış, " + u +
+        " unikal, " + (d.demo || 0) + " demo, " + (d.signup || 0) + ' qeydiyyat">' +
+        '<i style="height:' + h + '%"' + (u ? "" : ' class="z"') + "></i>" +
+        (i === imax && mx ? "<em>" + u + "</em>" : "") +
+        "<s>" + esc(lbl) + "</s></div>";
+    }).join("");
+    var uniq30 = Number(m.uniq) || 0, sign30 = Number(m.signup) || 0;
+    var conv = uniq30 ? Math.round(sign30 * 100 / uniq30) : 0;
+    return "<h2>Ziyarətlər</h2>" +
+      '<div class="tiles" id="vsTiles">' +
+        tile("a", t, "bu gün") + tile("b", w, "7 gün") + tile("c", m, "30 gün") +
+        '<div class="tile d"><b>' + demo + "</b><span>demo kliki · 30 gün</span></div>" +
+      "</div>" +
+      '<div class="card" id="vsCard">' +
+        '<div class="vhead"><b>Unikal ziyarətçi, gün üzrə</b><span class="muted">ana səhifə + bələdçi · son ' + days.length + " gün</span></div>" +
+        '<div class="vchart">' + bars + "</div>" +
+        '<p class="muted vfun">Son 30 gün: <b>' + uniq30 + "</b> unikal ziyarətçi → <b>" + demo +
+          "</b> demo kliki → <b>" + sign30 + "</b> qeydiyyat" + (uniq30 ? " (" + conv + "%)" : "") +
+          ". Klik bölgüsü: müəllim " + (ev.demo_muellim || 0) + " · şagird " + (ev.demo_sagird || 0) +
+          " · valideyn " + (ev.demo_valideyn || 0) + " · panelə keç " + (ev.panel || 0) +
+          " · bələdçi " + (ev.beledci || 0) + ".</p>" +
+        '<p class="muted" style="margin:6px 0 0">IP saxlanmır; unikal = günlük duzla hash. Reklam bağlantıları, botlar da sayılır — meylə bax, rəqəmə yox.</p>' +
+      "</div>" +
+      '<div class="spacer"></div>';
+  }
 
   /* --------------------------------------- admin: bildiris kartlari */
   var R_LBL = { cavab: "Cavab səhvdir", sert: "Şərt qüsurludur",

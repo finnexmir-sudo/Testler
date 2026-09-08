@@ -104,7 +104,9 @@ declare
         --  Adaptiv movzu mesqi (db/133)
         'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer',
         --  Numune hesabin gece sifirlanmasi (db/136) - is axini anon acarla cagirir
-        'rpc_demo_reset'];
+        'rpc_demo_reset',
+        --  Ziyaret saygaci (db/161): ana sehife/beledci anon acarla yazir
+        'rpc_visit'];
   fn text;
 begin
   --  a) artiq acilmis olani bagla.  "from public" VACIBDIR: Postgres
@@ -152,7 +154,9 @@ declare
         --  Adaptiv movzu mesqi (db/133)
         'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer',
         --  Numune hesabin gece sifirlanmasi (db/136) - is axini anon acarla cagirir
-        'rpc_demo_reset'];
+        'rpc_demo_reset',
+        --  Ziyaret saygaci (db/161): ana sehife/beledci anon acarla yazir
+        'rpc_visit'];
   leak text;
   v_say int;
 begin
