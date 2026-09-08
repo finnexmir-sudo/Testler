@@ -7,7 +7,7 @@
 <meta name="description" content="Bil10 — repetitor və müəllimlər üçün onlayn test sistemi. Qrup yaradın, tapşırıq təyin edin, nəticələr avtomatik yığılsın.">
 <title>Bil10 — onlayn test sistemi</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20aria-hidden%3D%22true%22%3E%20%3Cdefs%3E%3ClinearGradient%20id%3D%22fvG%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232b4acb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230e9384%22%2F%3E%20%3C%2FlinearGradient%3E%3C%2Fdefs%3E%20%3Cpath%20d%3D%22M12.5%203.5%20H18%20A8.4%208.4%200%200%201%2026.4%2011.9%20A8.4%208.4%200%200%201%2018%2020.3%20H13.1%20L8.3%2024.6%20Q7.1%2025.6%207.1%2024%20V19.1%20A8.4%208.4%200%200%201%204.1%2011.9%20A8.4%208.4%200%200%201%2012.5%203.5%20Z%22%20fill%3D%22url%28%23fvG%29%22%2F%3E%20%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M10.2%2010.2%2012.5%208.4%20V16%22%2F%3E%20%3Cellipse%20cx%3D%2218.4%22%20cy%3D%2212%22%20rx%3D%223.1%22%20ry%3D%224.1%22%2F%3E%20%3C%2Fg%3E%20%3Cpath%20d%3D%22M22.5%2019.5%20h4.2%20a3.6%203.6%200%200%201%203.6%203.6%20a3.6%203.6%200%200%201-3.6%203.6%20h-1%20l2%203.4%20-4.6-3.5%20a3.6%203.6%200%200%201-4.2-3.5%20a3.6%203.6%200%200%201%203.6-3.6%20Z%22%20fill%3D%22%23ffc94d%22%2F%3E%20%3Cpath%20d%3D%22M23.4%2023.2%20l1.5%201.5%202.6-3%22%20fill%3D%22none%22%20stroke%3D%22%231a2233%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3C%2Fsvg%3E">
-<link rel="stylesheet" href="assets/base.css?v=372">
+<link rel="stylesheet" href="assets/base.css?v=374">
 <!-- Kok manifest: butun sayti (/Testler/) ehate edir - ana sehifeden
      qurasdirilanda panel, sagird, valideyn ve beledci de tetbiqin
      icinde (brauzer zolaqsiz) acilir -->
@@ -20,29 +20,14 @@
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <style>
   /* ---------------------------------------------------------- karkas */
-  /*  Fon acıq boz-mavi, kartlar ag: kart harda baslayir, harda bitir
-      gorunsun (istifadeci: "ag fonda kartlar pis gorunur").  */
-  /*  Fon: duz, acıq boz-mavi, naxissiz (istifadeci: "yungul, sade").
-      Kartlar ag, kolge ile secilir.  */
-  body{position:relative;min-height:100vh;background:#f3f5f9}
+  /*  Sehife AG.  Ust zolaq (.topband = ag basliq + hero) marka
+      qradiyentidir (indigo -> teal), yazilar ag.  Onizleme karti zolagin
+      alt kenarini kesir (Oxuyan uslubu - istifadeci beyendi).  Bolmeler
+      ag / acıq mavi novbelenir.  Noqte naxisi, uzen daire YOXDUR. */
+  body{position:relative;min-height:100vh;background:#fff}
   .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
   @media (max-width:600px){ .wrap{padding:0 18px} }
 
-  /* numune hesab (136) */
-  .demo{margin:14px 0 0;padding:14px 16px;border:1px dashed var(--brand-line);border-radius:14px;
-    background:var(--brand-tint);font-size:14px;line-height:1.6;color:var(--fg-2);
-    display:flex;gap:14px;align-items:flex-start}
-  .demo .dic{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:var(--surface);
-    border:1px solid var(--brand-line);color:var(--brand);display:flex;align-items:center;justify-content:center}
-  .demo .dic svg{width:20px;height:20px;stroke-width:1.6}
-  .demo .dtx{flex:1 1 auto;min-width:0}
-  @media (max-width:520px){ .demo .dic{display:none} }
-  .demo b{color:var(--fg)}
-  .demo .dlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-  .demo a{display:inline-block;padding:7px 14px;border-radius:999px;
-    background:var(--surface);border:1px solid var(--brand-line);color:var(--brand);font-weight:600;text-decoration:none}
-  .demo a.pri{background:var(--brand);border-color:var(--brand);color:#fff}
-  .demo a:hover{background:var(--brand);color:#fff}
   /* --------------------------------------------------------- ustluk */
   .site{
     display:flex;align-items:center;justify-content:space-between;
@@ -60,15 +45,11 @@
     -webkit-background-clip:text;background-clip:text;color:transparent}
   .logo s{text-decoration:none;color:var(--fg-3);font-size:12.5px;font-weight:500;
     letter-spacing:0;display:block;margin-top:-2px}
-  /* sinaq merhelesi nisani */
+  /* beta nisani */
   .logo .beta{font-style:normal;font-size:10px;font-weight:650;letter-spacing:.04em;
     text-transform:uppercase;color:var(--brand);background:var(--brand-tint);
     border:1px solid var(--brand-line);border-radius:999px;padding:1px 7px;
     margin-left:7px;vertical-align:3px}
-  .beta-note{margin:14px 0 18px;font-size:13.5px;color:var(--fg-2);
-    padding:10px 14px;border-radius:12px;background:var(--brand-tint);
-    border:1px solid var(--brand-line)}
-  .beta-note b{color:var(--brand)}
   .site .enter{font-size:14px;font-weight:560;color:#fff;text-decoration:none;
     background:var(--brand);border-radius:9px;padding:9px 16px}
   .site .enter:hover{filter:brightness(1.08)}
@@ -78,125 +59,102 @@
   @media (max-width:720px){ .mnav{display:none} }
 
   /* ----------------------------------------------------------- hero */
-  /*  Fon USTLUK + hero-nu birlikde ehate edir.  Yalniz hero-ya versek,
-      ust kenari kesik xett kimi gorunur. */
   /*  Ad "top" OLA BILMEZ: base.css-de tetbiqin basliq zolagidir
       (display:flex) ve seedeni yan-yana duzurdu. */
-  .topband{background:transparent}
-  /*  Ag basliq zolagi - hero-dan ayrilir (GPT eskizi)  */
-  .sitebar{background:var(--surface);border-bottom:1px solid var(--line);
+  .topband{color:#fff;padding-bottom:150px;
+    background:linear-gradient(120deg,#2b4acb 0%,#2f5fd4 42%,#0e9384 100%)}
+  /*  Ag basliq zolagi - qradiyentin ustunde ag qalir (istifadeci istedi) */
+  .sitebar{background:var(--surface);color:var(--fg);border-bottom:1px solid var(--line);
     box-shadow:0 1px 0 rgba(21,26,36,.03),0 6px 18px rgba(21,26,36,.05)}
-  .hero{position:relative;padding:46px 0 58px}
+  .hero{position:relative;padding:54px 0 0}
   .kicker{
     display:inline-flex;align-items:center;gap:7px;margin:0 0 20px;
     padding:5px 12px 5px 8px;border-radius:999px;
-    background:var(--brand-tint);border:1px solid var(--brand-line);
-    color:var(--brand);font-size:12.5px;font-weight:550;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.30);
+    color:#fff;font-size:12.5px;font-weight:550;
   }
   .kicker svg{width:14px;height:14px;stroke-width:2}
   h1{
-    font-size:clamp(30px,5.2vw,52px);line-height:1.08;letter-spacing:-.036em;
-    font-weight:680;margin:0 0 18px;max-width:16ch;
+    font-size:clamp(30px,5.2vw,54px);line-height:1.08;letter-spacing:-.036em;
+    font-weight:700;margin:0 0 18px;max-width:16ch;color:#fff;
   }
-  h1 em{font-style:normal;
-    background:linear-gradient(96deg,var(--brand) 10%,var(--teal) 95%);
-    -webkit-background-clip:text;background-clip:text;color:transparent}
-  .lead{font-size:clamp(15px,1.9vw,17.5px);line-height:1.6;color:var(--fg-2);
-    margin:0 0 34px;max-width:52ch}
+  /*  Vurgu sari - qradiyent yazi qradiyent fonda itir  */
+  h1 em{font-style:normal;color:#ffd970}
+  .lead{font-size:clamp(15px,1.9vw,17.5px);line-height:1.6;color:rgba(255,255,255,.86);
+    margin:0 0 30px;max-width:50ch}
 
-  /* -------------------------------------------- hero iki sutun + qapilar */
-  .hgrid{display:grid;grid-template-columns:1fr 400px;gap:44px;align-items:center}
+  /* -------------------------------------------- hero iki sutun + duymeler */
+  .hgrid{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center}
   @media (max-width:920px){ .hgrid{grid-template-columns:1fr} .hright{display:none} }
 
-  .doors{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:640px;
-    align-items:stretch}
+  /*  Iki boyuk duyme: kim ucun oldugu altinda yazilib (Oxuyan kimi).
+      Muellim sari (logo rengi), sagird ag.  */
+  .doors{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px}
   @media (max-width:640px){ .doors{grid-template-columns:1fr} }
   .door{
-    display:flex;flex-direction:column;gap:10px;text-decoration:none;color:inherit;
-    background:var(--surface);border:1px solid var(--line);
-    border-radius:14px;padding:20px;
-    box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.09);
-    transition:border-color .14s,box-shadow .14s,transform .14s;
+    display:flex;align-items:center;gap:12px;text-decoration:none;
+    padding:14px 18px;border-radius:14px;color:#1a2233;background:#ffc94d;
+    box-shadow:0 10px 26px rgba(9,20,60,.22);
+    transition:transform .14s,filter .14s,box-shadow .14s;
   }
-  .door{position:relative;overflow:hidden;border-color:#d7e0fb;
-    background:linear-gradient(180deg,#fff 0%,#f4f7ff 100%)}
-  .door.b{border-color:#c3e9df;background:linear-gradient(180deg,#fff 0%,#eefaf6 100%)}
-  .door .dwm{position:absolute;right:-6px;bottom:-10px;width:112px;height:112px;
-    color:var(--brand);opacity:.09;pointer-events:none}
-  .door.b .dwm{color:var(--teal)}
-  .door .dwm svg{width:100%;height:100%;stroke-width:1.3}
-  .door:hover{border-color:var(--brand-line);box-shadow:0 12px 30px rgba(21,26,36,.10);
-    transform:translateY(-2px)}
-  .door.b:hover{border-color:var(--teal)}
-  .door .dh{display:flex;align-items:center;gap:11px;margin-bottom:3px}
-  .door .ic{width:38px;height:38px;flex:0 0 38px;border-radius:11px;
-    background:var(--brand-tint);color:var(--brand);
+  .door:hover{transform:translateY(-2px);filter:brightness(1.03);
+    box-shadow:0 14px 30px rgba(9,20,60,.26)}
+  .door.b{background:#fff;color:var(--brand)}
+  .door .ic{width:40px;height:40px;flex:0 0 40px;border-radius:11px;
+    background:rgba(26,34,51,.10);color:#1a2233;
     display:flex;align-items:center;justify-content:center}
-  .door.b .ic{background:var(--teal-tint);color:var(--teal)}
-  .door .ic svg{width:19px;height:19px;stroke-width:1.7}
-  .door b{font-size:15px;font-weight:600;letter-spacing:-.012em}
-  .door .dl{display:flex;align-items:center;gap:7px;font-size:12.5px;
-    color:var(--fg-2);line-height:1.4}
-  .door .dl svg{width:13px;height:13px;flex:0 0 13px;stroke-width:2.2;
-    color:var(--ok)}
-  .door .dbtn{
-    margin-top:auto;padding-top:11px;
-    display:inline-flex;align-items:center;gap:7px;align-self:flex-start;
-    background:var(--brand);color:#fff;border-radius:9px;
-    padding:9px 16px;font-size:13px;font-weight:570;margin-top:12px;
-  }
-  .door .dbtn.g2{background:var(--teal)}
-  .door .dbtn svg{width:14px;height:14px;stroke-width:2.2}
-  .door:hover .dbtn{filter:brightness(1.08)}
+  .door.b .ic{background:var(--brand-tint);color:var(--brand)}
+  .door .ic svg{width:20px;height:20px;stroke-width:1.7}
+  .door .tx{min-width:0}
+  .door .tx b{display:block;font-size:15.5px;font-weight:650;letter-spacing:-.012em;line-height:1.2}
+  .door .tx s{text-decoration:none;display:block;font-size:12px;opacity:.72;margin-top:2px}
+  .door .ar{margin-left:auto;flex:0 0 auto;display:flex;opacity:.55}
+  .door .ar svg{width:16px;height:16px;stroke-width:2.2}
+  .door:hover .ar{opacity:1}
 
-  /*  Valideyn girisi UCUNCU KART DEYIL - bu sehife muellime satis
-      sehifesidir ve ucuncu beraber kart esas mesaji seyreldir.  Amma
-      cilpaq metn setri de iki seliqeli kartin altinda yarimciq
-      gorunurdu.  Ona gore: TAM ENLI, ALCAQ zolaq - kartlarla eyni
-      aile (haşiye, radius, seth), amma bir setirlik ceki.
-      Renk UCUNCU olcudur: muellim goy, sagird yasil, valideyn kehreba -
-      uc yolu bir-birinden ayirir.  */
+  /*  Valideyn: ucuncu boyuk duyme deyil - suse kimi alcaq setir, ayni
+      enle (max-width duymelerle eyni).  */
   .pdoor{
-    display:flex;align-items:center;gap:13px;max-width:640px;
-    margin:14px 0 0;padding:13px 16px;text-decoration:none;color:inherit;
-    background:var(--surface);border:1px solid var(--line);
-    border-radius:14px;transition:border-color .14s,box-shadow .14s;
-    box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.09);
+    display:flex;align-items:center;gap:12px;max-width:560px;
+    margin:12px 0 0;padding:11px 16px;text-decoration:none;color:#fff;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);
+    border-radius:14px;transition:background .14s;
   }
-  .pdoor:hover{border-color:var(--warn-line);
-    box-shadow:0 8px 22px rgba(21,26,36,.07)}
+  .pdoor:hover{background:rgba(255,255,255,.20)}
   .pdoor .ic{
-    width:34px;height:34px;flex:0 0 34px;border-radius:10px;
-    background:var(--warn-tint);color:var(--warn);
+    width:32px;height:32px;flex:0 0 32px;border-radius:9px;
+    background:rgba(255,255,255,.18);color:#fff;
     display:flex;align-items:center;justify-content:center;
   }
-  .pdoor .ic svg{width:18px;height:18px;stroke-width:1.7}
-  .pdoor .tx{flex:1;min-width:0;font-size:12.5px;color:var(--fg-2);
+  .pdoor .ic svg{width:17px;height:17px;stroke-width:1.7}
+  .pdoor .tx{flex:1;min-width:0;font-size:12.5px;color:rgba(255,255,255,.80);
     line-height:1.4}
   .pdoor .tx b{display:block;font-size:14px;font-weight:600;
-    color:var(--fg);letter-spacing:-.01em;margin-bottom:1px}
-  .pdoor .ar{flex:0 0 auto;color:var(--n-300);display:flex}
+    color:#fff;letter-spacing:-.01em;margin-bottom:1px}
+  .pdoor .ar{flex:0 0 auto;color:rgba(255,255,255,.7);display:flex}
   .pdoor .ar svg{width:16px;height:16px;stroke-width:2.2}
-  .pdoor:hover .ar{color:var(--warn)}
   @media (max-width:640px){
     .pdoor .tx b{font-size:13.5px}
     .pdoor .tx{font-size:12px}
   }
 
-  /* ------------------------------------------------- panel onizlemesi */
-  .hright{align-self:center;display:flex;flex-direction:column;align-items:stretch}
-  /*  GPT-nin cekdiyi illustrasiya (assets/hero.png, seffaf): panel
-      onizlemesinin ustunde, kartlar onun altina bir az girir  */
-  .hart{width:min(100%,400px);height:auto;align-self:flex-end;margin:-6px -4px -30px 0;position:relative;z-index:0;
-    filter:drop-shadow(0 10px 20px rgba(21,26,36,.08))}
-  .shot{position:relative;z-index:1}
-  /*  telefonda sag sutun (illustrasiya + onizleme) gizlidir - yuxaridaki
-      media qaydasini bu blok ezmesin  */
+  /*  Illustrasiya (assets/hero.png, seffaf) sag sutunda  */
+  .hright{display:flex;justify-content:center;align-items:center}
+  .hart{width:100%;max-width:470px;height:auto;
+    filter:drop-shadow(0 16px 30px rgba(9,20,60,.28))}
+  /*  telefonda illustrasiya gizlidir - yuxaridaki .hright qaydasi media
+      qaydasindan SONRA geldiyi ucun burada tekrar yazilir  */
   @media (max-width:920px){ .hright{display:none} }
+
+  /* ------------------------------------------------- panel onizlemesi */
+  /*  Zolagin altindan "cixir": menfi ust bosluq zolagin padding-bottom-u
+      ile uygundur.  Sual karti sag alt kuncde ust-uste dusur.  */
+  .under{margin-top:-130px;position:relative;z-index:1}
+  .preview{position:relative;max-width:820px;margin:0 auto}
   .shot{
     background:var(--surface);border:1px solid var(--line);
-    border-radius:14px;padding:16px;
-    box-shadow:0 18px 44px rgba(21,26,36,.10);
+    border-radius:16px;padding:18px 20px;
+    box-shadow:0 24px 60px rgba(9,20,60,.18);
   }
   .sdots{display:flex;align-items:center;gap:5px;margin-bottom:14px}
   .sdots i{width:8px;height:8px;border-radius:50%;background:var(--n-200)}
@@ -208,18 +166,18 @@
   .sdots span::after{content:"";width:7px;height:7px;border-radius:50%;
     background:var(--ok);animation:puls 2s ease-in-out infinite}
   @keyframes puls{0%,100%{opacity:1}50%{opacity:.35}}
-  .stiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-  .st{background:var(--n-25);border:1px solid var(--n-100);border-radius:9px;
-    padding:8px 6px;text-align:center}
-  .st i{display:flex;width:22px;height:22px;margin:0 auto 4px;border-radius:7px;align-items:center;
+  .stiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .st{background:var(--n-25);border:1px solid var(--n-100);border-radius:10px;
+    padding:10px 6px;text-align:center}
+  .st i{display:flex;width:24px;height:24px;margin:0 auto 5px;border-radius:7px;align-items:center;
     justify-content:center;background:var(--brand-tint);color:var(--brand)}
   .st:nth-child(even) i{background:var(--teal-tint);color:var(--teal)}
-  .st i svg{width:13px;height:13px;stroke-width:1.7}
-  .st b{display:block;font-size:15px;font-weight:660;letter-spacing:-.02em}
-  .st span{font-size:10px;color:var(--fg-3)}
-  .srow{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:12px;
-    color:var(--fg-2)}
-  .srow>span:first-child{flex:0 0 108px;white-space:nowrap;overflow:hidden;
+  .st i svg{width:14px;height:14px;stroke-width:1.7}
+  .st b{display:block;font-size:17px;font-weight:660;letter-spacing:-.02em}
+  .st span{font-size:10.5px;color:var(--fg-3)}
+  .srow{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:12.5px;
+    color:var(--fg-2);max-width:520px}
+  .srow>span:first-child{flex:0 0 130px;white-space:nowrap;overflow:hidden;
     text-overflow:ellipsis}
   .srow .sbar{flex:1;height:6px;border-radius:999px;background:var(--n-100);
     overflow:hidden}
@@ -227,13 +185,16 @@
     background:linear-gradient(90deg,var(--brand),var(--teal))}
   .srow b{flex:0 0 34px;text-align:right;font-size:12px;font-weight:620;
     color:var(--fg)}
-  /*  Sual karti panelin ALTINDAN cixir - yalniz kunc ust-uste dusur,
-      panelin mezmununu ortmur.  Yungul meyil derinlik hissi verir. */
   .shot.q{
-    width:248px;margin:-26px -12px 0 auto;position:relative;
+    position:absolute;right:-22px;bottom:-40px;width:248px;
     padding:14px;border-radius:12px;
     box-shadow:0 14px 34px rgba(21,26,36,.16);
     transform:rotate(1.6deg);
+  }
+  @media (max-width:760px){
+    .shot.q{display:none}
+    .stiles{grid-template-columns:repeat(2,1fr)}
+    .srow>span:first-child{flex-basis:110px}
   }
   .sq{font-size:10.5px;font-weight:640;color:var(--fg-3);
     letter-spacing:.05em;text-transform:uppercase;margin-bottom:7px}
@@ -245,12 +206,41 @@
     color:var(--ok);font-weight:590}
   .sopt svg{width:13px;height:13px;stroke-width:2.4}
 
+  /* ------------------------------------- numune hesab (136) + beta qeydi */
+  /*  Onizlemenin altinda iki kart: numune (genis) + beta qeydi.  */
+  .under2{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin-top:48px}
+  @media (max-width:760px){ .under2{grid-template-columns:1fr;margin-top:32px} }
+  .demo{margin:0;padding:16px 18px;border:1px solid var(--line);border-radius:14px;
+    background:var(--surface);font-size:14px;line-height:1.6;color:var(--fg-2);
+    display:flex;gap:14px;align-items:flex-start;
+    box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.08)}
+  .demo .dic{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:var(--brand-tint);
+    border:1px solid var(--brand-line);color:var(--brand);display:flex;align-items:center;justify-content:center}
+  .demo .dic svg{width:20px;height:20px;stroke-width:1.6}
+  .demo .dtx{flex:1 1 auto;min-width:0}
+  @media (max-width:520px){ .demo .dic{display:none} }
+  .demo b{color:var(--fg)}
+  .demo .dlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .demo a{display:inline-block;padding:7px 14px;border-radius:999px;
+    background:var(--surface);border:1px solid var(--brand-line);color:var(--brand);font-weight:600;text-decoration:none}
+  .demo a.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+  .demo a:hover{background:var(--brand);color:#fff}
+  .beta-note{margin:0;font-size:13.5px;line-height:1.6;color:var(--fg-2);
+    padding:16px 18px;border-radius:14px;background:var(--brand-tint);
+    border:1px solid var(--brand-line)}
+  .beta-note b{color:var(--brand)}
+
   /* -------------------------------------------------------- bolmeler */
-  section{padding:64px 0;border-top:1px solid var(--n-100)}
-  section:first-of-type{border-top:0}
-  .stitle{font-size:clamp(21px,3vw,28px);line-height:1.2;letter-spacing:-.028em;
-    font-weight:640;margin:0 0 10px;
+  /*  Her bolme tam enli blokdur (.wrap icerde) - fon novbelensin.  */
+  section{padding:64px 0}
+  section.tint{background:linear-gradient(180deg,#f7faff 0%,#eef7ff 100%)}
+  .eyebrow{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--teal);margin:0 0 8px}
+  .stitle{font-size:clamp(22px,3vw,30px);line-height:1.2;letter-spacing:-.028em;
+    font-weight:660;margin:0 0 10px;
     text-transform:none;color:var(--fg)}   /* base.css-de h2 boz+CAPS-dir */
+  .stitle::after{content:"";display:block;width:44px;height:3px;border-radius:3px;
+    margin-top:12px;background:linear-gradient(90deg,var(--brand),var(--teal))}
   .ssub{color:var(--fg-2);font-size:15px;line-height:1.6;margin:0 0 36px;max-width:56ch}
 
   /* addimlar */
@@ -264,7 +254,7 @@
       color:var(--n-300);font-size:15px;
     }
   }
-  .step{background:var(--surface);box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.09);border:1px solid var(--line);
+  .step{background:var(--surface);box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.08);border:1px solid var(--line);
     border-radius:var(--r-lg);padding:22px 20px}
   .step .n{width:28px;height:28px;border-radius:8px;background:var(--brand);
     color:#fff;font-size:13px;font-weight:640;display:flex;
@@ -278,7 +268,7 @@
   @media (max-width:860px){ .feat{grid-template-columns:1fr 1fr} }
   @media (max-width:560px){ .feat{grid-template-columns:1fr} }
   .f{border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;
-    background:var(--surface);box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.09)}
+    background:var(--surface);box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.08)}
   .f .ic{width:34px;height:34px;border-radius:9px;background:var(--brand-tint);
     color:var(--brand);display:flex;align-items:center;justify-content:center;
     margin-bottom:13px}
@@ -316,18 +306,19 @@
   footer .note svg{width:13px;height:13px;stroke-width:2}
 
   /* ------------------------------------------------- telefonda seliqe
-     360px-de sehife "bos" gorunurdu.  Sebeb: masaustu ucun secilmis
-     dikine olculer telefonda oldugu kimi qalirdi - hero-nun alti (76px)
-     bolmenin ustu (64px) ile toplanib 140px bosluq verirdi.  Sutunlar
-     bir-birinin altina dusende yan bosluq gedir, dikine ise qalir. */
+     Masaustu ucun secilmis dikine olculer telefonda oldugu kimi qalanda
+     sehife "bos" gorunur - hamisi kicilir. */
   @media (max-width:600px){
     .site{height:56px}
-    .hero{padding:24px 0 32px}
+    .topband{padding-bottom:104px}
+    .under{margin-top:-84px}
+    .hero{padding:28px 0 0}
     .kicker{margin-bottom:13px}
     h1{margin-bottom:11px;max-width:20ch}
     .lead{margin-bottom:20px}
     .doors{gap:10px}
-    .door{padding:15px;gap:12px}
+    .door{padding:12px 14px}
+    .shot{padding:14px}
     section{padding:32px 0}
     .stitle{margin-bottom:7px}
     .ssub{margin-bottom:18px;font-size:14.5px}
@@ -373,89 +364,42 @@
 
 <div class="wrap">
   <div class="hero">
+    <div class="hgrid">
+    <div class="hleft">
     <span class="kicker">
       <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
         stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg>
       Şagird və valideyn üçün tamamilə pulsuz
     </span>
 
-    <div class="hgrid">
-    <div class="hleft">
     <h1>Testi verin, <em>qalanını sistem etsin</em></h1>
 
     <p class="lead">Qrup yaradın, şagirdə bir giriş kodu verin.
       Nəticələr özü yığılır, bal serverdə hesablanır, hansı mövzunun
       axsadığı hesabatda görünür.</p>
 
-    <p class="beta-note"><b>Bil10 hələ hazırlanır (beta).</b> Bu dövrdə bütün
-      imkanlar müəllimlər üçün pulsuzdur; pullu mərhələyə keçəndə əvvəlcədən
-      xəbər veriləcək, açılmış müddət qalacaq.</p>
-
     <div class="doors">
       <a class="door" href="muellim/" data-ev="panel">
-        <span class="dh"><span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M13 15.5a3.5 3.5 0 0 0-7 0"/><circle cx="9.5" cy="8" r="2.4"/>
-          <path d="M15.5 14.5a3 3 0 0 0-2.2-2.9"/><path d="M13.2 6.2a2.2 2.2 0 0 1 0 4.2"/>
-        </svg></span><b>Müəllim / repetitor</b></span>
-        <span class="dl"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-            stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg>
-          Qrup yaradın</span>
-        <span class="dl"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-            stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg>
-          Test təyin edin</span>
-        <span class="dl"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-            stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg>
-          Nəticələrə baxın</span>
-        <span class="dbtn">Başla
-          <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-            stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>
-        </span>
-        <span class="dwm" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+        <span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M13 15.5a3.5 3.5 0 0 0-7 0"/><circle cx="9.5" cy="8" r="2.4"/>
           <path d="M15.5 14.5a3 3 0 0 0-2.2-2.9"/><path d="M13.2 6.2a2.2 2.2 0 0 1 0 4.2"/>
         </svg></span>
+        <span class="tx"><b>Müəllim kimi başla</b><s>qrup, tapşırıq, hesabat</s></span>
+        <span class="ar"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg></span>
       </a>
 
       <a class="door b" href="sagird/">
-        <span class="dh"><span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/>
-          <path d="M13 6l2 2"/>
-        </svg></span><b>Şagird</b></span>
-        <span class="dl"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-            stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg>
-          Kodla daxil olun</span>
-        <span class="dl"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-            stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg>
-          Testi həll edin</span>
-        <span class="dl"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-            stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg>
-          Nəticənizi görün</span>
-        <span class="dbtn g2">Daxil ol
-          <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-            stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>
-        </span>
-        <span class="dwm" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+        <span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
           stroke-linecap="round" stroke-linejoin="round">
           <circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/>
           <path d="M13 6l2 2"/>
         </svg></span>
+        <span class="tx"><b>Şagird kimi daxil ol</b><s>kodla, qeydiyyatsız</s></span>
+        <span class="ar"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg></span>
       </a>
-    </div>
-
-    <div class="demo" id="demo">
-      <span class="dic" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-        stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="9.5" r="7"/><circle cx="9.5" cy="9.5" r="3.6"/><circle cx="9.5" cy="9.5" r=".6"/></svg></span>
-      <div class="dtx">
-      <b>Əvvəl baxmaq istəyirsiniz?</b> Qeydiyyatsız nümunə hesab — üç qrup (3, 7 və 11-ci sinif), 25 şagird, 45 günlük nəticə.
-      <div class="dlinks">
-        <a class="pri" href="muellim/#/demo" data-ev="demo_muellim">Müəllim kimi bax</a>
-        <a href="sagird/?kod=DEMO0001" data-ev="demo_sagird">Şagird kimi bax</a>
-        <a href="valideyn/?kod=VDEMO001" data-ev="demo_valideyn">Valideyn kimi bax</a>
-      </div>
-      </div>
     </div>
 
     <a class="pdoor" href="valideyn/">
@@ -472,42 +416,65 @@
     </a>
     </div>
 
-    <!--  Panel onizlemesi: shekil deyil, temiz HTML/CSS - CSP xarici
-          resurs buraxmir, bize de lazim deyil.  Reqemler numunedir. -->
     <div class="hright" aria-hidden="true">
-      <img class="hart" src="assets/hero.png" alt="" width="1000" height="563" loading="eager">
-      <div class="shot">
-        <div class="sdots"><i></i><i></i><i></i><span>Nəticələr</span></div>
-        <div class="stiles">
-          <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 15.5a3.5 3.5 0 0 0-7 0"/><circle cx="9.5" cy="8" r="2.4"/><path d="M15.5 14.5a3 3 0 0 0-2.2-2.9"/><path d="M13.2 6.2a2.2 2.2 0 0 1 0 4.2"/></svg></i><b>3</b><span>qrup</span></div>
-          <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="11" height="13" rx="2"/><path d="M7 7.5h5M7 10.5h5M7 13.5h3"/></svg></i><b>24</b><span>test</span></div>
-          <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/><path d="M13 6l2 2"/></svg></i><b>56</b><span>şagird</span></div>
-          <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13.5 8 9l3 3 4.5-5.5"/><path d="M12 6.5h3.5V10"/></svg></i><b>82%</b><span>orta bal</span></div>
-        </div>
-        <div class="srow"><span>Riyaziyyat testi</span>
-          <span class="sbar"><i style="width:85%"></i></span><b>85%</b></div>
-        <div class="srow"><span>Azərbaycan dili</span>
-          <span class="sbar"><i style="width:72%"></i></span><b>72%</b></div>
-        <div class="srow"><span>Həyat bilgisi</span>
-          <span class="sbar"><i style="width:90%"></i></span><b>90%</b></div>
-      </div>
-      <div class="shot q">
-        <div class="sq">Sual 7 / 20</div>
-        <div class="sqb">Azərbaycanın paytaxtı haradır?</div>
-        <div class="sopt">A) Gəncə</div>
-        <div class="sopt ok">B) Bakı
-          <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-            stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg></div>
-        <div class="sopt">C) Şəki</div>
-      </div>
+      <img class="hart" src="assets/hero.png" alt="" width="1000" height="568" loading="eager">
     </div>
     </div>
   </div>
 </div>
 </div>
 
-<div class="wrap">
-  <section id="addimlar">
+<div class="wrap under">
+  <!--  Panel onizlemesi: shekil deyil, temiz HTML/CSS - CSP xarici
+        resurs buraxmir, bize de lazim deyil.  Reqemler numunedir. -->
+  <div class="preview" aria-hidden="true">
+    <div class="shot">
+      <div class="sdots"><i></i><i></i><i></i><span>Nəticələr</span></div>
+      <div class="stiles">
+        <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 15.5a3.5 3.5 0 0 0-7 0"/><circle cx="9.5" cy="8" r="2.4"/><path d="M15.5 14.5a3 3 0 0 0-2.2-2.9"/><path d="M13.2 6.2a2.2 2.2 0 0 1 0 4.2"/></svg></i><b>3</b><span>qrup</span></div>
+        <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="11" height="13" rx="2"/><path d="M7 7.5h5M7 10.5h5M7 13.5h3"/></svg></i><b>24</b><span>test</span></div>
+        <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/><path d="M13 6l2 2"/></svg></i><b>56</b><span>şagird</span></div>
+        <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13.5 8 9l3 3 4.5-5.5"/><path d="M12 6.5h3.5V10"/></svg></i><b>82%</b><span>orta bal</span></div>
+      </div>
+      <div class="srow"><span>Riyaziyyat testi</span>
+        <span class="sbar"><i style="width:85%"></i></span><b>85%</b></div>
+      <div class="srow"><span>Azərbaycan dili</span>
+        <span class="sbar"><i style="width:72%"></i></span><b>72%</b></div>
+      <div class="srow"><span>Həyat bilgisi</span>
+        <span class="sbar"><i style="width:90%"></i></span><b>90%</b></div>
+    </div>
+    <div class="shot q">
+      <div class="sq">Sual 7 / 20</div>
+      <div class="sqb">Azərbaycanın paytaxtı haradır?</div>
+      <div class="sopt">A) Gəncə</div>
+      <div class="sopt ok">B) Bakı
+        <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg></div>
+      <div class="sopt">C) Şəki</div>
+    </div>
+  </div>
+
+  <div class="under2">
+    <div class="demo" id="demo">
+      <span class="dic" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+        stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="9.5" r="7"/><circle cx="9.5" cy="9.5" r="3.6"/><circle cx="9.5" cy="9.5" r=".6"/></svg></span>
+      <div class="dtx">
+      <b>Əvvəl baxmaq istəyirsiniz?</b> Qeydiyyatsız nümunə hesab — üç qrup (3, 7 və 11-ci sinif), 25 şagird, 45 günlük nəticə.
+      <div class="dlinks">
+        <a class="pri" href="muellim/#/demo" data-ev="demo_muellim">Müəllim kimi bax</a>
+        <a href="sagird/?kod=DEMO0001" data-ev="demo_sagird">Şagird kimi bax</a>
+        <a href="valideyn/?kod=VDEMO001" data-ev="demo_valideyn">Valideyn kimi bax</a>
+      </div>
+      </div>
+    </div>
+    <p class="beta-note"><b>Bil10 hələ hazırlanır (beta).</b> Bu dövrdə bütün
+      imkanlar müəllimlər üçün pulsuzdur; pullu mərhələyə keçəndə əvvəlcədən
+      xəbər veriləcək, açılmış müddət qalacaq.</p>
+  </div>
+</div>
+
+<section id="addimlar"><div class="wrap">
+    <p class="eyebrow">Necə işləyir</p>
     <h2 class="stitle">Üç addım</h2>
     <p class="ssub">Qurmaq bir dəfəlik işdir. Sonra hər həftə eyni axınla gedir.
       <a href="komek/">Addım-addım bələdçi, ekran şəkilləri ilə →</a></p>
@@ -525,9 +492,10 @@
         <p>Kim işlədi, kim işləmədi, orta bal nədir, hansı mövzu
            axsayır — hamısı hazır.</p></div>
     </div>
-  </section>
+</div></section>
 
-  <section id="imkanlar">
+<section id="imkanlar" class="tint"><div class="wrap">
+    <p class="eyebrow">İmkanlar</p>
     <h2 class="stitle">Nə edir</h2>
     <p class="ssub">Repetitorun həftəlik vaxtını yeyən işlər.</p>
     <div class="feat">
@@ -593,9 +561,9 @@
       </div>
 
     </div>
-  </section>
+</div></section>
 
-  <section>
+<section><div class="wrap">
     <div class="free">
       <div class="t">
         <h3>Şagird və valideyn heç nə ödəmir</h3>
@@ -605,8 +573,7 @@
       </div>
       <span class="badge">Şagird və valideyn — həmişə pulsuz</span>
     </div>
-  </section>
-</div>
+</div></section>
 
 <div class="wrap">
   <footer>
@@ -621,8 +588,8 @@
   </footer>
 </div>
 
-  <script src="assets/pwa.js?v=372"></script>
-  <script src="muellim/config.js?v=372"></script>
-  <script src="assets/visit.js?v=372"></script>
+  <script src="assets/pwa.js?v=374"></script>
+  <script src="muellim/config.js?v=374"></script>
+  <script src="assets/visit.js?v=374"></script>
 </body>
 </html>

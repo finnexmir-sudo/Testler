@@ -96,7 +96,8 @@ with sync_playwright() as pw:
     #  sətri de var.  Yoxlamanin meqsedi "olu bosluq olmasin"dir -
     #  MEZMUN elave etmek onu pozmamalidir, bosluq buraxmaq pozmalidir.
     ara = pg.evaluate("""() => {
-        const last = document.querySelector('.pdoor') ||
+        const last = document.querySelector('.under2') ||
+                     document.querySelector('.pdoor') ||
                      document.querySelector('.doors');
         const d = last.getBoundingClientRect();
         const s = document.querySelector('.stitle').getBoundingClientRect();
