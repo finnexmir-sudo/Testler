@@ -2167,6 +2167,21 @@ ilk günlər FortiGuard-da «Newly Observed Domain» kimi bloklana bilər
 (iş/məktəb şəbəkəsi) — «re-evaluate» sorğusu göndərilib, vaxtla düşür.
 Geri qaytarmaq: `CNAME` faylını sil, config ünvanlarını qaytar.
 
+## Önbaxış saytı — yeni.bil10.az (2026-09-08)
+
+Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi baxıb bəyənsin deyə.
+GitHub Pages hər repoya bir sayt verir, ona görə ayrıca açıq repo
+**`finnexmir-sudo/bil10-yeni`** var; Cloudflare-də CNAME `yeni` →
+`finnexmir-sudo.github.io` (DNS only). Supabase eynidir (prod baza) —
+frontend-in ehtiyac duyduğu miqrasiya əvvəl canlıya tətbiq olunmalıdır.
+
+Axın: iş `beta` budağında → `./yeni.sh` (müvəqqəti budaq, CNAME
+`yeni.bil10.az`, `yeni/main`-ə force-push) → istifadəçi yoxlayır →
+«çıxar» deyəndə `git checkout main && git merge beta && git push`.
+Kiçik dizayn işində skript əvəzinə əvvəl ekran şəkli göndərilir.
+`assets/visit.js` `yeni.` host-unda saymır. Skript iş ağacı təmiz
+olmasa dayanır. Repo-nun uzaq adı `yeni` (skript özü əlavə edir).
+
 ## Supabase-i oyaq saxlamaq — `.github/workflows/oyaq-saxla.yml`
 
 Pulsuz Supabase 7 gün sorğu olmayanda layihəni dayandırır. GitHub

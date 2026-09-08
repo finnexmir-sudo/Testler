@@ -5,6 +5,8 @@
 (function () {
   var C = window.CFG;
   if (!C || !C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) return;
+  /* Onbaxis sayti (yeni.bil10.az) sayilmir - orada yalniz biz baxiriq. */
+  if (location.hostname.indexOf("yeni.") === 0) return;
   var page = (document.body && document.body.getAttribute("data-page")) || "home";
   function send(ev) {
     try {
