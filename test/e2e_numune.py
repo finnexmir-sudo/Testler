@@ -96,6 +96,15 @@ with sync_playwright() as pw:
     ok("Ayan" in sp.inner_text("body"), "sagird girdi (Ayan)", sp.inner_text("#topTitle") if sp.locator("#topTitle").count() else "")
     ok(sp.locator(".test.asg").count() == 1, "bir acıq tapsiriq")
     ok("kod=" not in sp.url, "unvandan kod silinib")
+    #  Bu uc bolme AYRICA sorgularla gelir (sehv defteri, movzu mesqi) -
+    #  derhal oxusaq bezen hele bos olur.  Gorunene qeder gozleyirik.
+    try:
+        sp.wait_for_function(
+            "() => { const t = document.body.textContent;"
+            " return t.includes('Zəif mövzular') && t.includes('Səhv dəftəri')"
+            " && t.includes('Mövzu məşqi'); }", timeout=15000)
+    except Exception:
+        pass
     st = sp.evaluate("document.body.textContent")
     ok("Zəif mövzular" in st and "Səhv dəftəri" in st and "Mövzu məşqi" in st, "zeif movzu, sehv defteri, movzu mesqi kartlari")
 

@@ -1239,8 +1239,8 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   transition:background .12s,border-color .12s,transform .06s}
 .bcta:hover{background:rgba(255,255,255,.24);border-color:#fff}
 .bcta:active{transform:scale(.98)}
-.bcta.pri{background:#fff;border-color:#fff;color:var(--brand)}
-.bcta.pri:hover{background:#f2f5ff}
+.bcta.pri{background:#fff;border-color:#fff;color:var(--teal)}
+.bcta.pri:hover{background:#eefaf6}
 .bcta svg{width:16px;height:16px;stroke-width:1.9}
 
 /*  Hediyye karti UFUQI zolaqdir: solda ikon, ortada metn, sagda kecid.  */
@@ -1303,3 +1303,32 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .gcard .arrow{flex:0 0 auto;display:flex;color:var(--n-300);transition:transform .15s,color .15s}
 .gcard .arrow svg{width:16px;height:16px;stroke-width:2}
 .gcard:hover .arrow{transform:translateX(3px);color:var(--brand)}
+
+/*  En yaxsi sagirdler (163): nomre, avatar, ad, doluluq xetti, faiz.
+    Telefonda xett gizlenir - faiz onsuz da sagdadir.  */
+.lrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:12px 16px;border:0;border-bottom:1px solid var(--n-100);
+  background:none;font:inherit;color:inherit;cursor:pointer;transition:background .12s}
+.lrow:last-child{border-bottom:0}
+.lrow:hover{background:var(--n-25)}
+.lrow .ln{flex:0 0 24px;width:24px;height:24px;border-radius:8px;display:flex;
+  align-items:center;justify-content:center;font-size:12px;font-weight:680;
+  background:var(--n-100);color:var(--fg-2)}
+.lrow:nth-child(1) .ln{background:#fef3c7;color:#a16207}
+.lrow:nth-child(2) .ln{background:#eef2f7;color:#64748b}
+.lrow:nth-child(3) .ln{background:#fdece0;color:#b45309}
+.lrow .av{width:32px;height:32px;flex:0 0 32px;border-radius:10px;font-size:13px}
+.lrow .g{flex:0 0 auto;min-width:0;max-width:38%}
+.lrow .g b{display:block;font-size:14px;font-weight:580;letter-spacing:-.008em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .g i{display:block;font-style:normal;font-size:12px;color:var(--fg-3);margin-top:2px}
+.lrow .lbar{flex:1;min-width:60px;height:8px;border-radius:999px;
+  background:var(--n-100);overflow:hidden}
+.lrow .lbar i{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--brand),var(--teal))}
+.lrow .lp{flex:0 0 46px;text-align:right;font-size:14px;font-weight:660;
+  font-variant-numeric:tabular-nums;color:var(--fg)}
+@media (max-width:560px){
+  .lrow .lbar{display:none}
+  .lrow .g{flex:1;max-width:none}
+}

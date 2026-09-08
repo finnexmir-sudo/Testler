@@ -607,6 +607,7 @@
       "</div>" +
       //  genis ekranda iki sutun: solda tehluke zonasi, sagda son neticeler
       '<div class="hcols"><div id="hAlerts"></div><div id="hRecent"></div></div>' +
+      '<div id="hTop5"></div>' +
       //  sagird yeri gostericisi zolagin sag terefindedir (asagida);
       //  burada yalniz limit dolanda xeberdarliq qalir
       (pct >= 100
@@ -762,6 +763,29 @@
             alAll.slice(0, alCap).map(alertRow).join("") + "</div>";
         bindAlerts(ab);
         on("alMore", "click", function () { nav("#/n"); });
+      }
+
+      /*  En yaxsi sagirdler (163): sirali siyahi - nomre, ad, doluluq
+          xetti, faiz.  Serverde en azi 3 test sertdir, ona gore ilk
+          heftelerde bos gelir - onda bolme umumiyyetle cizilmir.  */
+      var tp = $("hTop5");
+      if (tp && v.top && v.top.length) {
+        tp.innerHTML = '<div class="spacer"></div>' +
+          h2r("Ən yaxşı şagirdlər") +
+          '<div class="card pad0">' + v.top.map(function (x, i) {
+            var p = Math.round(Number(x.avg) || 0);
+            return '<button class="lrow" data-s="' + esc(x.student_id) + '">' +
+              '<span class="ln">' + (i + 1) + "</span>" + av(x.name) +
+              '<div class="g"><b>' + esc(x.name) + "</b>" +
+              "<i>" + esc(x["class"] || "") + " · " + (x.attempts || 0) + " test</i></div>" +
+              '<span class="lbar"><i style="width:' + p + '%"></i></span>' +
+              '<span class="lp">' + p + "%</span></button>";
+          }).join("") + "</div>";
+        Array.prototype.forEach.call(tp.querySelectorAll("[data-s]"), function (b) {
+          b.addEventListener("click", function () {
+            nav("#/s/" + b.getAttribute("data-s"));
+          });
+        });
       }
 
       var rc = $("hRecent");

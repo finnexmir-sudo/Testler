@@ -11,7 +11,6 @@
 
   /* ---- vurgu: tund goy (esas) + tirkiz (ikinci) ---- */
   --brand:#2b4acb;      --brand-hover:#2440ad;  --brand-press:#1d3590;
-  --top-bg:#3559de;     /* ust zolaq - markadan bir ton acıq (istifadeci istedi) */
   --brand-tint:#eef2ff; --brand-line:#c7d2fe;
   --teal:#0e9384;       --teal-tint:#ecfdf5;    --teal-line:#a7f3d0;
 
@@ -27,6 +26,21 @@
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
   --r-sm:6px; --r:8px; --r-lg:12px;
   --ring:0 0 0 3px rgba(43,74,203,.14);
+
+  /*  Marka qradiyenti (istifadeci secimi): tund teal -> markanin teal-i
+      -> firuzeyi.  Sol teref MAVIYE calir (okean) - markanin indiqo
+      kimliyi ile korpudur; orta markanin oz teal-i; sag acıq firuzeyi.
+      Deyerler OKLCH-den cevrilib; ISIQLILIQ v0 eskizindeki kimi qaldirilib
+      (L .52 -> .62 -> .72), yoxsa zolaq tund ve agir gorunurdu.
+      HEKS yazilir - kohne brauzerlerde oklch() destelenmir.
+      BUCAQ 120deg DEYIL, "to right"dir: ust zolaq (56px) ve onun altindaki
+      zolaq AYRI elementlerdir; meyilli bucaqda hər biri qradiyentin ayri
+      dilimini gosterir ve aralarinda TIKIS gorunur.  Ufuqi qradiyentde
+      ikisi eyni rengi eyni x-de verir - bir butov seth kimi oxunur.
+      Ust zolaq, ekran zolagi (#band) ve ana sehifenin hero-su bunu isledir.  */
+  --grad:linear-gradient(to right,#007a91 0%,#009c9e 50%,#3abbb1 100%);
+  /*  Altliq: eyni cerge, yalniz tund - ust zolaqla eyni aileden.  */
+  --grad-dark:linear-gradient(to right,#002f3d 0%,#003c3f 50%,#104642 100%);
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -55,7 +69,7 @@ a{color:var(--brand);text-decoration:none}
   display:flex;align-items:center;gap:12px;
   height:56px;padding:0 20px;color:#fff;
   /* ana sehifenin hero zolagi ile eyni marka qradiyenti (indigo -> teal) */
-  background:linear-gradient(120deg,#2b4acb 0%,#2f5fd4 55%,#0e9384 100%);
+  background:var(--grad);
   border-bottom:0;position:sticky;top:0;z-index:10;
 }
 /*  Nisan ag yuvarlaq kvadratda (tetbiq ikonu kimi) - mavi nisan mavi
@@ -73,7 +87,7 @@ a{color:var(--brand);text-decoration:none}
 .top .btn.ghost:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.6);color:#fff}
 .top .bellbtn{color:#fff}
 .top .bellbtn:hover{color:#fff;background:rgba(255,255,255,.14)}
-.top .bellbtn i{border-color:#2f5fd4}
+.top .bellbtn i{border-color:#0e9384}
 .top a.mark:focus-visible{outline-color:#fff}
 /*  Nisan Bil10 qabarcigidir - qradiyent SVG-nin icindedir,
     fon-kvadrat yoxdur.  Olcu 26px qalir (testler bunu olcur). */
@@ -258,7 +272,7 @@ body.bnav-on .pwabar{bottom:76px}
     edir, basliq ag, altinda bir setir izah.  Ilk kart (#main.over)
     zolagin alt kenarini kesir - ana sehifedeki onizleme kimi.  */
 .band{color:#fff;padding:22px 0 78px;
-  background:linear-gradient(120deg,#2b4acb 0%,#2f5fd4 42%,#0e9384 100%)}
+  background:var(--grad)}
 .band.hide{display:none}
 .bandin{max-width:760px;margin:0 auto;padding:0 20px}
 .band .beye{display:block;font-size:11.5px;font-weight:650;letter-spacing:.08em;
@@ -299,7 +313,7 @@ body.bnav-on .pwabar{bottom:76px}
 /* ===================================================== tetbiq altligi */
 /*  Ana sehifenin tund altliginin yigcam variyanti - sehife kesik
     bitmesin.  Uc tetbiqde eyni; kecidler her tetbiqin oz index.html-inde. */
-.afoot{background:linear-gradient(120deg,#1d2b5c 0%,#1f3a6e 48%,#0f4a50 100%);color:#fff;
+.afoot{background:var(--grad-dark);color:#fff;
   margin-top:28px;padding:24px 0 20px}
 .afoot .in{max-width:760px;margin:0 auto;padding:0 20px;display:flex;align-items:center;
   justify-content:space-between;gap:14px 24px;flex-wrap:wrap}
