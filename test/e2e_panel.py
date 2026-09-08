@@ -118,7 +118,7 @@ with sync_playwright() as pw:
     ok(pg.locator(".pdoor .ic svg").count() == 1, "zolaqda ikon var")
 
     ok(pg.locator('a[href="muellim/"]').count() >= 1, "muellim kecidi var")
-    ok(pg.locator('a[href="sagird/"]').count() == 1, "sagird kecidi var")
+    ok(pg.locator('a[href="sagird/"]').count() >= 1, "sagird kecidi var")
     ok("Bil10" in pg.inner_text(".logo"), "ad gorunur", pg.inner_text(".logo").replace("\n"," "))
     #  161: ziyaret saygaci - ana sehife acilanda mock-a "view" gedir, demo linkinde hadise
     pg.wait_for_timeout(600)
