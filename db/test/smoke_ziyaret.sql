@@ -69,6 +69,9 @@ reset role;
 
 -- 3. admin cemi; adi muellim yox; kohne setir silinir
 insert into public.visits (at, page, ev, vid) values (now() - interval '100 days', 'home', 'view', 'old');
+insert into auth.users (id, email) values ('11110000-0000-0000-0000-00000000f1a3','zy-old@t.az');
+insert into public.accounts (id, type, name, owner_id, created_at) values
+  ('aaaa0000-0000-0000-0000-00000000f1a3','tutor','Kohne hesab','11110000-0000-0000-0000-00000000f1a3', now() - interval '10 days');
 insert into public.visits (at, page, ev, vid) values (now() - interval '3 days', 'home', 'view', 'w1');
 set role authenticated;
 set request.jwt.claim.sub = '11110000-0000-0000-0000-00000000f1a2';
@@ -88,7 +91,10 @@ begin
   assert (v->'today'->>'demo')::int = 1, 'bu gun demo: ' || (v->'today'->>'demo');
   assert (v->'d7'->>'views')::int = 205, '7 gun baxis: ' || (v->'d7'->>'views');
   assert (v->'today'->>'signup')::int = 1, 'bu gun qeydiyyat: ' || (v->'today'->>'signup');
+  --  162: saygacdan EVVEL acilmis hesab huniye dusmur
+  assert (v->>'start') = (current_date - 3)::text, 'baslangic gunu (w1, 3 gun evvel): ' || (v->>'start');
   assert jsonb_array_length(v->'days') = 30, 'gun sayi 30 deyil';
+  assert (v->'d30'->>'signup')::int = 1, '30 gun qeydiyyat (kohne hesab dusdu?): ' || (v->'d30'->>'signup');
   assert (v->'events'->>'demo_muellim')::int = 1, 'hadise sayi';
 end $$;
 reset role; reset request.jwt.claim.sub;

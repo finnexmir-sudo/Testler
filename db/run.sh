@@ -81,6 +81,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 140_numune_bize_yaz_gizli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 159_demo_hedd.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 160_hediyye_paket.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 161_ziyaret.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 162_ziyaret_huni.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql
