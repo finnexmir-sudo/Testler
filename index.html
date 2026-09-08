@@ -7,7 +7,7 @@
 <meta name="description" content="Bil10 — repetitor və müəllimlər üçün onlayn test sistemi. Qrup yaradın, tapşırıq təyin edin, nəticələr avtomatik yığılsın.">
 <title>Bil10 — onlayn test sistemi</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20aria-hidden%3D%22true%22%3E%20%3Cdefs%3E%3ClinearGradient%20id%3D%22fvG%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232b4acb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230e9384%22%2F%3E%20%3C%2FlinearGradient%3E%3C%2Fdefs%3E%20%3Cpath%20d%3D%22M12.5%203.5%20H18%20A8.4%208.4%200%200%201%2026.4%2011.9%20A8.4%208.4%200%200%201%2018%2020.3%20H13.1%20L8.3%2024.6%20Q7.1%2025.6%207.1%2024%20V19.1%20A8.4%208.4%200%200%201%204.1%2011.9%20A8.4%208.4%200%200%201%2012.5%203.5%20Z%22%20fill%3D%22url%28%23fvG%29%22%2F%3E%20%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M10.2%2010.2%2012.5%208.4%20V16%22%2F%3E%20%3Cellipse%20cx%3D%2218.4%22%20cy%3D%2212%22%20rx%3D%223.1%22%20ry%3D%224.1%22%2F%3E%20%3C%2Fg%3E%20%3Cpath%20d%3D%22M22.5%2019.5%20h4.2%20a3.6%203.6%200%200%201%203.6%203.6%20a3.6%203.6%200%200%201-3.6%203.6%20h-1%20l2%203.4%20-4.6-3.5%20a3.6%203.6%200%200%201-4.2-3.5%20a3.6%203.6%200%200%201%203.6-3.6%20Z%22%20fill%3D%22%23ffc94d%22%2F%3E%20%3Cpath%20d%3D%22M23.4%2023.2%20l1.5%201.5%202.6-3%22%20fill%3D%22none%22%20stroke%3D%22%231a2233%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3C%2Fsvg%3E">
-<link rel="stylesheet" href="assets/base.css?v=369">
+<link rel="stylesheet" href="assets/base.css?v=371">
 <!-- Kok manifest: butun sayti (/Testler/) ehate edir - ana sehifeden
      qurasdirilanda panel, sagird, valideyn ve beledci de tetbiqin
      icinde (brauzer zolaqsiz) acilir -->
@@ -22,14 +22,9 @@
   /* ---------------------------------------------------------- karkas */
   /*  Fon acıq boz-mavi, kartlar ag: kart harda baslayir, harda bitir
       gorunsun (istifadeci: "ag fonda kartlar pis gorunur").  */
-  /*  Fon: agimtil, uzerinde nazik xetli tor (istifadeci: "yungul xetli,
-      divar kagizi kimi").  Rengli leke yoxdur; kartlar ag, kolge ile secilir.
-      Yuxarida tor bir az solgunlasir ki, basliq altinda sakit olsun.  */
-  body{position:relative;min-height:100vh;background-color:#fafbfe;
-    background-image:
-      linear-gradient(rgba(43,74,203,.075) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(43,74,203,.075) 1px, transparent 1px);
-    background-size:28px 28px;background-position:-1px -1px}
+  /*  Fon: duz, acıq boz-mavi, naxissiz (istifadeci: "yungul, sade").
+      Kartlar ag, kolge ile secilir.  */
+  body{position:relative;min-height:100vh;background:#f3f5f9}
   .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
   @media (max-width:600px){ .wrap{padding:0 18px} }
 
@@ -87,7 +82,7 @@
       ust kenari kesik xett kimi gorunur. */
   /*  Ad "top" OLA BILMEZ: base.css-de tetbiqin basliq zolagidir
       (display:flex) ve seedeni yan-yana duzurdu. */
-  .topband{background:linear-gradient(180deg,rgba(250,251,254,.85) 0%,rgba(250,251,254,0) 60%)}
+  .topband{background:transparent}
   /*  Ag basliq zolagi - hero-dan ayrilir (GPT eskizi)  */
   .sitebar{background:var(--surface);border-bottom:1px solid var(--line);
     box-shadow:0 1px 0 rgba(21,26,36,.03),0 6px 18px rgba(21,26,36,.05)}
@@ -189,7 +184,15 @@
   }
 
   /* ------------------------------------------------- panel onizlemesi */
-  .hright{align-self:center}
+  .hright{align-self:center;display:flex;flex-direction:column;align-items:stretch}
+  /*  GPT-nin cekdiyi illustrasiya (assets/hero.png, seffaf): panel
+      onizlemesinin ustunde, kartlar onun altina bir az girir  */
+  .hart{width:min(100%,400px);height:auto;align-self:flex-end;margin:-6px -4px -30px 0;position:relative;z-index:0;
+    filter:drop-shadow(0 10px 20px rgba(21,26,36,.08))}
+  .shot{position:relative;z-index:1}
+  /*  telefonda sag sutun (illustrasiya + onizleme) gizlidir - yuxaridaki
+      media qaydasini bu blok ezmesin  */
+  @media (max-width:920px){ .hright{display:none} }
   .shot{
     background:var(--surface);border:1px solid var(--line);
     border-radius:14px;padding:16px;
@@ -472,6 +475,7 @@
     <!--  Panel onizlemesi: shekil deyil, temiz HTML/CSS - CSP xarici
           resurs buraxmir, bize de lazim deyil.  Reqemler numunedir. -->
     <div class="hright" aria-hidden="true">
+      <img class="hart" src="assets/hero.png" alt="" width="1000" height="563" loading="eager">
       <div class="shot">
         <div class="sdots"><i></i><i></i><i></i><span>Nəticələr</span></div>
         <div class="stiles">
@@ -617,8 +621,8 @@
   </footer>
 </div>
 
-  <script src="assets/pwa.js?v=369"></script>
-  <script src="muellim/config.js?v=369"></script>
-  <script src="assets/visit.js?v=369"></script>
+  <script src="assets/pwa.js?v=371"></script>
+  <script src="muellim/config.js?v=371"></script>
+  <script src="assets/visit.js?v=371"></script>
 </body>
 </html>
