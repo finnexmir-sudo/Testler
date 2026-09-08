@@ -7,7 +7,7 @@
 <meta name="description" content="Bil10 — repetitor və müəllimlər üçün onlayn test sistemi. Qrup yaradın, tapşırıq təyin edin, nəticələr avtomatik yığılsın.">
 <title>Bil10 — onlayn test sistemi</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20aria-hidden%3D%22true%22%3E%20%3Cdefs%3E%3ClinearGradient%20id%3D%22fvG%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232b4acb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230e9384%22%2F%3E%20%3C%2FlinearGradient%3E%3C%2Fdefs%3E%20%3Cpath%20d%3D%22M12.5%203.5%20H18%20A8.4%208.4%200%200%201%2026.4%2011.9%20A8.4%208.4%200%200%201%2018%2020.3%20H13.1%20L8.3%2024.6%20Q7.1%2025.6%207.1%2024%20V19.1%20A8.4%208.4%200%200%201%204.1%2011.9%20A8.4%208.4%200%200%201%2012.5%203.5%20Z%22%20fill%3D%22url%28%23fvG%29%22%2F%3E%20%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M10.2%2010.2%2012.5%208.4%20V16%22%2F%3E%20%3Cellipse%20cx%3D%2218.4%22%20cy%3D%2212%22%20rx%3D%223.1%22%20ry%3D%224.1%22%2F%3E%20%3C%2Fg%3E%20%3Cpath%20d%3D%22M22.5%2019.5%20h4.2%20a3.6%203.6%200%200%201%203.6%203.6%20a3.6%203.6%200%200%201-3.6%203.6%20h-1%20l2%203.4%20-4.6-3.5%20a3.6%203.6%200%200%201-4.2-3.5%20a3.6%203.6%200%200%201%203.6-3.6%20Z%22%20fill%3D%22%23ffc94d%22%2F%3E%20%3Cpath%20d%3D%22M23.4%2023.2%20l1.5%201.5%202.6-3%22%20fill%3D%22none%22%20stroke%3D%22%231a2233%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3C%2Fsvg%3E">
-<link rel="stylesheet" href="assets/base.css?v=367">
+<link rel="stylesheet" href="assets/base.css?v=368">
 <!-- Kok manifest: butun sayti (/Testler/) ehate edir - ana sehifeden
      qurasdirilanda panel, sagird, valideyn ve beledci de tetbiqin
      icinde (brauzer zolaqsiz) acilir -->
@@ -22,14 +22,14 @@
   /* ---------------------------------------------------------- karkas */
   /*  Fon acıq boz-mavi, kartlar ag: kart harda baslayir, harda bitir
       gorunsun (istifadeci: "ag fonda kartlar pis gorunur").  */
-  body{background:var(--n-100)}
+  body{background:var(--n-50)}
   /*  Reklamdaki kimi boyuk yumsaq lekeler: goy yuxari-sol, yasil asagi-sag.
       Sabit (fixed) deyil - sehife ile axir, kartlar onun ustunde ag qalir.  */
   body::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
     background:
-      radial-gradient(700px 520px at 8% 4%,   rgba(43,74,203,.20), transparent 62%),
-      radial-gradient(640px 520px at 96% 26%, rgba(14,147,132,.22), transparent 60%),
-      radial-gradient(420px 380px at 4% 62%,  rgba(255,201,77,.22), transparent 62%),
+      radial-gradient(700px 520px at 8% 4%,   rgba(43,74,203,.14), transparent 62%),
+      radial-gradient(640px 520px at 96% 26%, rgba(14,147,132,.18), transparent 60%),
+      radial-gradient(420px 380px at 4% 62%,  rgba(255,201,77,.18), transparent 62%),
       radial-gradient(560px 460px at 92% 92%, rgba(43,74,203,.16), transparent 60%)}
   body{position:relative;min-height:100vh}
   .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
@@ -37,7 +37,13 @@
 
   /* numune hesab (136) */
   .demo{margin:14px 0 0;padding:14px 16px;border:1px dashed var(--brand-line);border-radius:14px;
-    background:var(--brand-tint);font-size:14px;line-height:1.6;color:var(--fg-2)}
+    background:var(--brand-tint);font-size:14px;line-height:1.6;color:var(--fg-2);
+    display:flex;gap:14px;align-items:flex-start}
+  .demo .dic{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:var(--surface);
+    border:1px solid var(--brand-line);color:var(--brand);display:flex;align-items:center;justify-content:center}
+  .demo .dic svg{width:20px;height:20px;stroke-width:1.6}
+  .demo .dtx{flex:1 1 auto;min-width:0}
+  @media (max-width:520px){ .demo .dic{display:none} }
   .demo b{color:var(--fg)}
   .demo .dlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .demo a{display:inline-block;padding:7px 14px;border-radius:999px;
@@ -83,7 +89,10 @@
       ust kenari kesik xett kimi gorunur. */
   /*  Ad "top" OLA BILMEZ: base.css-de tetbiqin basliq zolagidir
       (display:flex) ve seedeni yan-yana duzurdu. */
-  .topband{background:transparent}
+  .topband{background:linear-gradient(180deg,#e9efff 0%,#f1f5fd 55%,var(--n-50) 100%)}
+  /*  Ag basliq zolagi - hero-dan ayrilir (GPT eskizi)  */
+  .sitebar{background:var(--surface);border-bottom:1px solid var(--line);
+    box-shadow:0 1px 0 rgba(21,26,36,.03),0 6px 18px rgba(21,26,36,.05)}
   .hero{position:relative;padding:46px 0 58px}
   .kicker{
     display:inline-flex;align-items:center;gap:7px;margin:0 0 20px;
@@ -116,6 +125,13 @@
     box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.09);
     transition:border-color .14s,box-shadow .14s,transform .14s;
   }
+  .door{position:relative;overflow:hidden;border-color:#d7e0fb;
+    background:linear-gradient(180deg,#fff 0%,#f4f7ff 100%)}
+  .door.b{border-color:#c3e9df;background:linear-gradient(180deg,#fff 0%,#eefaf6 100%)}
+  .door .dwm{position:absolute;right:-6px;bottom:-10px;width:112px;height:112px;
+    color:var(--brand);opacity:.09;pointer-events:none}
+  .door.b .dwm{color:var(--teal)}
+  .door .dwm svg{width:100%;height:100%;stroke-width:1.3}
   .door:hover{border-color:var(--brand-line);box-shadow:0 12px 30px rgba(21,26,36,.10);
     transform:translateY(-2px)}
   .door.b:hover{border-color:var(--teal)}
@@ -194,6 +210,10 @@
   .stiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
   .st{background:var(--n-25);border:1px solid var(--n-100);border-radius:9px;
     padding:8px 6px;text-align:center}
+  .st i{display:flex;width:22px;height:22px;margin:0 auto 4px;border-radius:7px;align-items:center;
+    justify-content:center;background:var(--brand-tint);color:var(--brand)}
+  .st:nth-child(even) i{background:var(--teal-tint);color:var(--teal)}
+  .st i svg{width:13px;height:13px;stroke-width:1.7}
   .st b{display:block;font-size:15px;font-weight:660;letter-spacing:-.02em}
   .st span{font-size:10px;color:var(--fg-3)}
   .srow{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:12px;
@@ -324,7 +344,7 @@
 <body data-page="home">
 
 <div class="topband">
-<div class="wrap">
+<div class="sitebar"><div class="wrap">
   <header class="site">
     <a class="logo" href="./">
       <span class="m"><svg viewBox="0 0 32 32" aria-hidden="true">
@@ -348,7 +368,7 @@
     </nav>
     <a class="enter" href="muellim/" data-ev="panel">Panelə keç →</a>
   </header>
-</div>
+</div></div>
 
 <div class="wrap">
   <div class="hero">
@@ -390,6 +410,11 @@
           <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
             stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>
         </span>
+        <span class="dwm" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 15.5a3.5 3.5 0 0 0-7 0"/><circle cx="9.5" cy="8" r="2.4"/>
+          <path d="M15.5 14.5a3 3 0 0 0-2.2-2.9"/><path d="M13.2 6.2a2.2 2.2 0 0 1 0 4.2"/>
+        </svg></span>
       </a>
 
       <a class="door b" href="sagird/">
@@ -411,15 +436,24 @@
           <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
             stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>
         </span>
+        <span class="dwm" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/>
+          <path d="M13 6l2 2"/>
+        </svg></span>
       </a>
     </div>
 
     <div class="demo" id="demo">
+      <span class="dic" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
+        stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="9.5" r="7"/><circle cx="9.5" cy="9.5" r="3.6"/><circle cx="9.5" cy="9.5" r=".6"/></svg></span>
+      <div class="dtx">
       <b>Əvvəl baxmaq istəyirsiniz?</b> Qeydiyyatsız nümunə hesab — üç qrup (3, 7 və 11-ci sinif), 25 şagird, 45 günlük nəticə.
       <div class="dlinks">
         <a class="pri" href="muellim/#/demo" data-ev="demo_muellim">Müəllim kimi bax</a>
         <a href="sagird/?kod=DEMO0001" data-ev="demo_sagird">Şagird kimi bax</a>
         <a href="valideyn/?kod=VDEMO001" data-ev="demo_valideyn">Valideyn kimi bax</a>
+      </div>
       </div>
     </div>
 
@@ -443,10 +477,10 @@
       <div class="shot">
         <div class="sdots"><i></i><i></i><i></i><span>Nəticələr</span></div>
         <div class="stiles">
-          <div class="st"><b>3</b><span>qrup</span></div>
-          <div class="st"><b>24</b><span>test</span></div>
-          <div class="st"><b>56</b><span>şagird</span></div>
-          <div class="st"><b>82%</b><span>orta bal</span></div>
+          <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 15.5a3.5 3.5 0 0 0-7 0"/><circle cx="9.5" cy="8" r="2.4"/><path d="M15.5 14.5a3 3 0 0 0-2.2-2.9"/><path d="M13.2 6.2a2.2 2.2 0 0 1 0 4.2"/></svg></i><b>3</b><span>qrup</span></div>
+          <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="11" height="13" rx="2"/><path d="M7 7.5h5M7 10.5h5M7 13.5h3"/></svg></i><b>24</b><span>test</span></div>
+          <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="12.5" r="3"/><path d="M8.7 10.3 15.5 3.5"/><path d="M13 6l2 2"/></svg></i><b>56</b><span>şagird</span></div>
+          <div class="st"><i><svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13.5 8 9l3 3 4.5-5.5"/><path d="M12 6.5h3.5V10"/></svg></i><b>82%</b><span>orta bal</span></div>
         </div>
         <div class="srow"><span>Riyaziyyat testi</span>
           <span class="sbar"><i style="width:85%"></i></span><b>85%</b></div>
@@ -585,8 +619,8 @@
   </footer>
 </div>
 
-  <script src="assets/pwa.js?v=367"></script>
-  <script src="muellim/config.js?v=367"></script>
-  <script src="assets/visit.js?v=367"></script>
+  <script src="assets/pwa.js?v=368"></script>
+  <script src="muellim/config.js?v=368"></script>
+  <script src="assets/visit.js?v=368"></script>
 </body>
 </html>
