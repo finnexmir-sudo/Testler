@@ -75,8 +75,8 @@ with sync_playwright() as pw:
                          timeout=8000)
     pg.fill("#gname", "4-A qrupu"); pg.select_option("#glevel", "4")
     pg.click("#btnGroup")
-    pg.wait_for_selector("#groups .item", timeout=8000)
-    pg.click("#groups .item")
+    pg.wait_for_selector("#groups .gcard", timeout=8000)
+    pg.click("#groups .gcard")
     pg.wait_for_selector("#gTabs", timeout=8000)
     try: pg.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
     except Exception: pg.click("#btnStuOpen")

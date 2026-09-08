@@ -70,7 +70,7 @@ with sync_playwright() as pw:
     pg.select_option("#atype", "tutor"); pg.fill("#aname", "KF hesabı"); pg.click("#btnSetup")
     pg.wait_for_selector("#btnGroup", timeout=15000)
     pg.fill("#gname", "3-cü sinif"); pg.select_option("#glevel", "3"); pg.click("#btnGroup")
-    pg.wait_for_selector("#groups .item", timeout=15000)
+    pg.wait_for_selector("#groups .gcard", timeout=15000)
     UID = db("select id::text i from auth.users limit 1", one=True)["i"]
     AID = db("select id::text i from public.accounts limit 1", one=True)["i"]
     GID = db("select id::text i from public.classes limit 1", one=True)["i"]

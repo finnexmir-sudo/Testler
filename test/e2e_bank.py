@@ -92,9 +92,10 @@ with sync_playwright() as pw:
     ok(True, "esas sehifede 'Sual banki' var")
     # Terif olunmayan ikon BOS svg verir - gozle gorunmur, ona gore yoxlanilir
     ok(empty_icons(pg) == 0, "esas sehifede bos ikon yoxdur", empty_icons(pg))
+    #  suretli emeliyyatlar artiq AYRI kartlardir - duymenin OZU kartdir
     ok(pg.locator("#btnBank").evaluate(
-        "e => getComputedStyle(e.closest('.card')).backgroundColor") != "rgba(0, 0, 0, 0)",
-       "bank kecidi kart icindedir")
+        "e => getComputedStyle(e).backgroundColor") != "rgba(0, 0, 0, 0)",
+       "bank kecidi kartdir")
     #  telefonda suretli emeliyyatlar gizlidir - alt menyudan gedirik
     pg.click("#bnav a[href='#/b']"); pg.wait_for_selector("#btnNewQ", timeout=8000)
     ok("/b" in pg.url, "bankin oz unvani var", pg.url.split("#")[-1])

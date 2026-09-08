@@ -70,8 +70,8 @@ with sync_playwright() as pw:
     pg.select_option("#atype", "tutor"); pg.fill("#aname", "Bizə hesabı"); pg.click("#btnSetup")
     pg.wait_for_selector("#btnGroup", timeout=15000)
     pg.fill("#gname", "5-ci sinif"); pg.click("#btnGroup")
-    pg.wait_for_selector("#groups .item", timeout=15000)
-    pg.click("#groups .item"); pg.wait_for_selector("#gTabs", timeout=15000)
+    pg.wait_for_selector("#groups .gcard", timeout=15000)
+    pg.click("#groups .gcard"); pg.wait_for_selector("#gTabs", timeout=15000)
     try: pg.wait_for_selector("#sname", state="visible", timeout=3000)     # 0 sagirdde forma ozu acilir
     except Exception: pg.click("#btnStuOpen")
     pg.fill("#sname", "Leyla Həsənova"); pg.click("#btnStu")

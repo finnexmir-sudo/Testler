@@ -283,11 +283,12 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 .qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 @media (max-width:560px){ .qgrid{grid-template-columns:1fr 1fr} }
 .qact{display:flex;flex-direction:column;align-items:flex-start;gap:2px;
-  padding:13px 14px;border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:16px;border:1px solid var(--line);border-radius:14px;
   background:var(--surface);cursor:pointer;font:inherit;text-align:left;
-  box-shadow:0 1px 2px rgba(21,26,36,.04);
+  box-shadow:0 1px 2px rgba(16,24,40,.06),0 10px 24px -12px rgba(16,24,40,.28);
   transition:background .12s,border-color .12s,transform .06s,box-shadow .12s}
-.qact:hover{border-color:var(--brand-line);box-shadow:0 8px 20px -10px rgba(16,24,40,.28)}
+.qact:hover{border-color:var(--brand-line);transform:translateY(-2px);
+  box-shadow:0 14px 30px -12px rgba(16,24,40,.34)}
 .qact:active{transform:scale(.98)}
 .qact .qi{display:flex;width:32px;height:32px;border-radius:9px;align-items:center;
   justify-content:center;margin-bottom:9px;background:var(--brand-tint);color:var(--brand)}
@@ -852,30 +853,35 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 /*  Lovheler ag kartdir (ana sehifedeki "Neticeler" onizlemesi ile eyni
     dil): ikon cipi, renkli reqem, boz yazi.  Rengli dolu lovheler
     sehifeni agirlasdirirdi.  */
-/*  Lovheler BIR ag kartin icindedir, aralarinda nazik xett (ana
-    sehifedeki "Neticeler" onizlemesi kimi).  */
-.tiles{background:var(--surface);border:1px solid var(--line);border-radius:14px;
-  padding:4px;gap:0;box-shadow:0 18px 44px rgba(9,20,60,.14)}
-.tile{border-radius:10px;padding:12px 14px 11px;color:var(--fg);background:none;border:0}
-.tile+.tile{border-left:1px solid var(--n-100)}
-@media (max-width:520px){
-  .tile:nth-child(3){border-left:0}
-  .tile:nth-child(n+3){border-top:1px solid var(--n-100)}
-}
-.tiles.five{padding:6px;gap:6px}
-.tiles.five .tile{border:0}
-.tile .ti{display:flex;width:28px;height:28px;border-radius:8px;align-items:center;
-  justify-content:center;margin-bottom:8px;background:var(--brand-tint);color:var(--brand)}
-.tile .ti svg{width:15px;height:15px;stroke-width:1.7}
-.tile b{display:block;font-size:24px;line-height:1.15;font-weight:680;letter-spacing:-.02em;color:var(--brand)}
+/*  Lovheler AYRI-AYRI kartlardir (Bolt eskizi): ust kenarinda incə
+    rengli xett, sol ust kuncde ikon cipi, altda boyuk reqem.  Evvel
+    hamisi bir kartda idi - "yasti" gorunurdu (istifadeci).  */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;
+  background:none;border:0;padding:0;box-shadow:none}
+@media (max-width:520px){ .tiles{grid-template-columns:1fr 1fr;gap:10px} }
+.tile{position:relative;overflow:hidden;border-radius:14px;padding:16px 14px 14px;
+  color:var(--fg);background:var(--surface);border:1px solid var(--line);
+  box-shadow:0 1px 2px rgba(16,24,40,.06),0 10px 24px -12px rgba(16,24,40,.28)}
+.tile::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
+  background:var(--brand)}
+.tile.b::before{background:var(--teal)}
+.tile.c::before{background:#175d97}
+.tile.d::before{background:#1c2a52}
+.tile.e::before{background:#5b3fb8}
+.tile .ti{display:flex;width:32px;height:32px;border-radius:9px;align-items:center;
+  justify-content:center;margin-bottom:12px;background:var(--brand-tint);color:var(--brand)}
+.tile .ti svg{width:16px;height:16px;stroke-width:1.7}
+.tile b{display:block;font-size:26px;line-height:1.1;font-weight:680;letter-spacing:-.024em;
+  color:var(--fg)}
 .tile span{font-size:11.5px;color:var(--fg-3)}
-.tile.b b{color:var(--teal)}
 .tile.b .ti{background:var(--teal-tint);color:var(--teal)}
-.tile.c b{color:#175d97}
 .tile.c .ti{background:#e8f2fb;color:#175d97}
-.tile.d b{color:#1c2a52}
 .tile.d .ti{background:#e9ecf5;color:#1c2a52}
-.tile.e b{color:#5b3fb8}
+.tile.e .ti{background:#efeafc;color:#5b3fb8}
+.tiles.five{grid-template-columns:repeat(5,1fr);padding:0;gap:12px}
+@media (max-width:760px){ .tiles.five{grid-template-columns:repeat(3,1fr)} }
+@media (max-width:520px){ .tiles.five{grid-template-columns:1fr 1fr} .tiles.five .tile.e{grid-column:1/-1} }
+.tiles.five .tile{border:1px solid var(--line)}
 
 /* xos detallar - panel */
 .stats{gap:10px}
@@ -1222,3 +1228,78 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 @media (max-width:600px){ .band .bseat{min-width:0;width:100%} }
 /*  telefonda sag blok (sagird yeri) basligin altina tam enle  */
 @media (max-width:600px){ .bh{flex-wrap:wrap} .br{width:100%;align-self:auto} .br .bseat{flex:1} }
+
+
+/* ---------------------------------------------- Bolt eskizinden (1-7) */
+/*  Zolaqda iki esas emeliyyat - ekran ne teklif etdiyini deyir.  */
+.bacts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.bcta{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 18px;
+  border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.30);color:#fff;
+  transition:background .12s,border-color .12s,transform .06s}
+.bcta:hover{background:rgba(255,255,255,.24);border-color:#fff}
+.bcta:active{transform:scale(.98)}
+.bcta.pri{background:#fff;border-color:#fff;color:var(--brand)}
+.bcta.pri:hover{background:#f2f5ff}
+.bcta svg{width:16px;height:16px;stroke-width:1.9}
+
+/*  Hediyye karti UFUQI zolaqdir: solda ikon, ortada metn, sagda kecid.  */
+.card.gift{display:flex;align-items:center;gap:16px;padding:16px 18px;
+  background:var(--surface);border:1px solid var(--line);border-left:4px solid #ffc94d;
+  box-shadow:0 18px 44px rgba(9,20,60,.14)}
+.card.gift .gi{flex:0 0 40px;width:40px;height:40px;border-radius:12px;display:flex;
+  align-items:center;justify-content:center;background:#fff6e0;color:#b8860b}
+.card.gift .gi svg{width:20px;height:20px;stroke-width:1.7}
+.card.gift .gt{flex:1;min-width:0}
+.card.gift .gt b{font-size:15px;letter-spacing:-.01em}
+.card.gift .gt p{margin:4px 0 0;color:var(--fg-2);line-height:1.5;font-size:13.5px}
+.card.gift .glink{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;
+  font-size:13.5px;font-weight:600;color:var(--brand);white-space:nowrap}
+.card.gift .glink svg{width:15px;height:15px;stroke-width:2}
+.card.gift .glink:hover{text-decoration:underline;text-underline-offset:3px}
+.card.gift.soon{background:var(--warn-tint);border-color:var(--warn-line);border-left-color:var(--warn)}
+.card.gift.soon .gi{background:#fff;color:var(--warn)}
+@media (max-width:640px){
+  .card.gift{flex-wrap:wrap;gap:12px}
+  .card.gift .gi{display:none}
+  .card.gift .glink{width:100%}
+}
+
+/*  Bolme basligi + sagda kecid  */
+.h2row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.h2row h2{flex:1;min-width:0}
+.h2l{display:inline-flex;align-items:center;gap:5px;border:0;background:none;
+  font:inherit;font-size:13px;font-weight:600;color:var(--brand);cursor:pointer;
+  padding:0 0 12px}
+.h2l svg{width:14px;height:14px;stroke-width:2.2}
+.h2l:hover{text-decoration:underline;text-underline-offset:3px}
+
+/*  Genis ekranda iki sutun: solda tehluke zonasi, sagda son neticeler.
+    Dar ekranda alt-alta - eyni HTML.  */
+.hcols{display:grid;gap:0 20px}
+@media (min-width:1100px){
+  .hcols{grid-template-columns:1fr 1fr;align-items:start}
+  .hcols>div:empty{display:none}
+}
+
+/*  Qruplar: siyahi setri deyil, kart toru  */
+.gcards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:900px){ .gcards{grid-template-columns:1fr 1fr} }
+@media (max-width:560px){ .gcards{grid-template-columns:1fr} }
+.gcards .skel,.gcards .empty{grid-column:1/-1;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-lg)}
+.gcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:16px;border-radius:14px;background:var(--surface);border:1px solid var(--line);
+  cursor:pointer;font:inherit;color:inherit;
+  box-shadow:0 1px 2px rgba(16,24,40,.06),0 10px 24px -12px rgba(16,24,40,.28);
+  transition:border-color .14s,box-shadow .14s,transform .12s}
+.gcard:hover{border-color:var(--brand-line);transform:translateY(-2px);
+  box-shadow:0 14px 30px -12px rgba(16,24,40,.34)}
+.gcard .av{width:40px;height:40px;flex:0 0 40px;border-radius:12px;font-size:16px}
+.gcard .g{flex:1;min-width:0}
+.gcard .g b{display:block;font-size:14.5px;font-weight:600;letter-spacing:-.008em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard .g i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-3);margin-top:3px}
+.gcard .arrow{flex:0 0 auto;display:flex;color:var(--n-300);transition:transform .15s,color .15s}
+.gcard .arrow svg{width:16px;height:16px;stroke-width:2}
+.gcard:hover .arrow{transform:translateX(3px);color:var(--brand)}

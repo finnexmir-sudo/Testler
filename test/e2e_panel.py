@@ -173,7 +173,7 @@ with sync_playwright() as pw:
     ok(pg.locator(".qact").count() == 3, "suretli emeliyyatlar 3 kartdir",
        pg.locator(".qact").count())
     #  telefonda (430px) kart gizlidir - alt menyu eyni uc duymeni dasiyir
-    ok(not pg.locator(".card.quick").is_visible(), "telefonda suretli emeliyyatlar gizlidir (alt menyu var)")
+    ok(not pg.locator(".quick").is_visible(), "telefonda suretli emeliyyatlar gizlidir (alt menyu var)")
     ok(pg.locator("#btnMe").count() == 1, "profil qisayolu var")
     ok(pg.locator("#bnav a").count() == 4, "alt naviqasiya 4 bendlidir",
        pg.locator("#bnav a").count())
@@ -246,7 +246,7 @@ with sync_playwright() as pw:
     pg.fill("#gname", "Cume qrupu")
     pg.select_option("#glevel", "3")
     pg.click("#btnGroup")
-    pg.wait_for_selector("#groups .item", timeout=8000)
+    pg.wait_for_selector("#groups .gcard", timeout=8000)
     txt = pg.inner_text("#groups")
     ok("Cume qrupu" in txt, "qrup siyahida gorunur")
     ok("3-cü sinif" in txt, "SINIF siyahida gorunur", txt.replace("\n", " ")[:70])
@@ -282,7 +282,7 @@ with sync_playwright() as pw:
        "proqram sinifden toreyib (ibtidai qalmayib)", row and row["program"])
 
     print("C · Şagird əlavə etmək")
-    pg.click("#groups .item")
+    pg.click("#groups .gcard")
     pg.wait_for_selector("#gTabs", timeout=8000)
     ok("Cume qrupu" in pg.inner_text("h1"), "qrup ekrani acilir")
     ok("3-cü sinif" in pg.inner_text("#gMeta"), "sinif qrup ekraninda da gorunur",
@@ -351,7 +351,7 @@ with sync_playwright() as pw:
     ok("dolub" in pg.inner_text("#main").lower(), "limit xeberdarligi gorunur")
 
     print("F · Kodu yeniləmək")
-    pg.click("#groups .item"); pg.wait_for_selector(".stu", timeout=8000)
+    pg.click("#groups .gcard"); pg.wait_for_selector(".stu", timeout=8000)
     pg.on("dialog", lambda d: d.accept())
     # Kod yenilemek siyahida yox, qelemin altindadir (nadir + geri donusu yox)
     ok(pg.locator(".stu [data-reset]").count() == 0,
@@ -366,7 +366,7 @@ with sync_playwright() as pw:
 
     print("F2 · Telefonda şagird sətri")
     pg.set_viewport_size({"width": 360, "height": 780})
-    pg.click("#groups .item") if pg.locator("#groups .item").count() else None
+    pg.click("#groups .gcard") if pg.locator("#groups .gcard").count() else None
     pg.wait_for_selector(".stu", timeout=8000)
     h = pg.locator(".stu").first.evaluate("e => e.getBoundingClientRect().height")
     ok(h <= 120, "sagird setri telefonda yigcamdir", str(round(h)) + "px")
@@ -382,12 +382,12 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".seat", timeout=8000)
     ok("5 / 5" in pg.inner_text(".seat"), "yenidən girişdə melumat yerindedir")
 
-    pg.reload(); pg.wait_for_selector("#groups .item", timeout=8000)
+    pg.reload(); pg.wait_for_selector("#groups .gcard", timeout=8000)
     ok("Cume qrupu" in pg.inner_text("#groups"), "sessiya sehife yenilenmesinden sonra qalir",
        pg.inner_text("#groups").replace("\n", " ")[:50])
 
     print("H · Ad dəyişmək")
-    pg.click("#groups .item"); pg.wait_for_selector("#btnRen", timeout=8000)
+    pg.click("#groups .gcard"); pg.wait_for_selector("#btnRen", timeout=8000)
     pg.click("#btnRen"); pg.wait_for_selector("#gNew", timeout=8000)
     ok(pg.input_value("#gNew") == "Cume qrupu", "hazirki ad forma dolur",
        pg.input_value("#gNew"))
@@ -462,9 +462,9 @@ with sync_playwright() as pw:
     #  etmek yolu YOX idi: yer bir defe tutulurdu ve geri qayitmirdi.
     #  Kecen ilin sagirdi bu ilin yerini yeyirdi.
     pg.goto(PANEL + "#/"); pg.reload()
-    pg.wait_for_selector("#groups .item", timeout=8000)
+    pg.wait_for_selector("#groups .gcard", timeout=8000)
     used0 = pg.inner_text(".seat .num").split("/")[0].strip()
-    pg.locator("#groups .item").first.click()
+    pg.locator("#groups .gcard").first.click()
     pg.wait_for_selector(".stu", timeout=8000)
     n0 = pg.locator(".stu").count()
     #  «Dayandır» setirde deyil, qelemin altindadir (nadir emeliyyat)
@@ -514,7 +514,7 @@ with sync_playwright() as pw:
        pg.inner_text("#groups").replace("\n", " ")[:70])
 
     print("I3 · Davam etdirmək")
-    pg.locator("#groups .item").first.click()
+    pg.locator("#groups .gcard").first.click()
     pg.wait_for_selector("details.arxiv", timeout=8000)
     if pg.locator("details.arxiv:not([open])").count():
         pg.locator("details.arxiv summary").click()

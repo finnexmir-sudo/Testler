@@ -66,8 +66,8 @@ with sync_playwright() as pw:
     pg.select_option("#atype", "tutor"); pg.fill("#aname", "İki hesabı"); pg.click("#btnSetup")
     pg.wait_for_selector("#btnGroup", timeout=15000)
     pg.fill("#gname", "4-cü sinif"); pg.click("#btnGroup")
-    pg.wait_for_selector("#groups .item", timeout=15000)
-    pg.click("#groups .item"); pg.wait_for_selector("#gTabs", timeout=15000)
+    pg.wait_for_selector("#groups .gcard", timeout=15000)
+    pg.click("#groups .gcard"); pg.wait_for_selector("#gTabs", timeout=15000)
     for nm in ("Ayan Bir", "Murad İki"):
         try: pg.wait_for_selector("#sname", state="visible", timeout=3000)
         except Exception: pg.click("#btnStuOpen")

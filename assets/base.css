@@ -20,7 +20,9 @@
   --err:#b42318;  --err-tint:#fef3f2;  --err-line:#fecdca;
 
   --fg:var(--n-900); --fg-2:var(--n-600); --fg-3:var(--n-400);
-  --bg:var(--n-50);  --surface:var(--n-0); --line:var(--n-200);
+  /*  Fon kartdan SECILEN tonda olmalidir: #f8f9fb ag kartlarla
+      qaynayirdi, sehife "zeif" gorunurdu (istifadeci).  */
+  --bg:#eceff5;      --surface:var(--n-0); --line:var(--n-200);
 
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
   --r-sm:6px; --r:8px; --r-lg:12px;
@@ -204,7 +206,10 @@ input:focus,select:focus,textarea:focus{
   box-shadow:0 0 0 3px rgba(43,74,203,.12);
 }
 
-.card{box-shadow:0 1px 2px rgba(21,26,36,.04)}
+/*  Bu qayda evvelki .card kolgesini EZIR - real hundurluk verilir,
+    yoxsa ag kart ag fonda yastı gorunur.  */
+.card{box-shadow:0 1px 2px rgba(16,24,40,.06),0 10px 24px -12px rgba(16,24,40,.28);
+  border-color:rgba(16,24,40,.09)}
 .top{box-shadow:0 1px 2px rgba(21,26,36,.18)}
 
 .item{transition:background .12s}

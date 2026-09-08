@@ -72,10 +72,10 @@ with sync_playwright() as pw:
     codes = pg.locator("#demoBar code").all_inner_texts()
     ok(len(codes) == 2 and codes[0] != "DEMO0001" and len(codes[0]) == 8 and codes[1].startswith("V"), "oz nusxenin kodlari (paylasilan deyil)", codes)
     ok(db("select count(*) n from public.accounts where is_demo", one=True)["n"] == 2, "paylasilan + nusxe = 2 numune hesab")
-    pg.wait_for_selector("#groups .item", timeout=15000)
-    ok(pg.locator("#groups .item").count() == 3, "uc qrup", pg.locator("#groups .item").count())
+    pg.wait_for_selector("#groups .gcard", timeout=15000)
+    ok(pg.locator("#groups .gcard").count() == 3, "uc qrup", pg.locator("#groups .gcard").count())
     ok("Nümunə Müəllim" in pg.inner_text("#topWho"), "ad: Numune Muellim")
-    pg.locator("#groups .item", has_text="7-ci sinif").first.click(); pg.wait_for_selector("#gTabs", timeout=15000)
+    pg.locator("#groups .gcard", has_text="7-ci sinif").first.click(); pg.wait_for_selector("#gTabs", timeout=15000)
     pg.wait_for_selector("#prep .prep", timeout=20000)
     #  CSS boyuk herf edir - textContent oxunur
     pt = pg.evaluate("document.querySelector('#prep').textContent")

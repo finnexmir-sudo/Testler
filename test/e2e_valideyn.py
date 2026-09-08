@@ -84,7 +84,7 @@ with sync_playwright() as pw:
        (acc["id"], acc["owner_id"], acc["id"], acc["owner_id"]))
 
     pg.reload(); pg.wait_for_selector("#groups", timeout=15000)
-    pg.locator("#groups .grp, #groups .item").first.click()
+    pg.locator("#groups .grp, #groups .gcard").first.click()
     pg.wait_for_selector(".stu", timeout=15000)
 
     #  SUSMAYA GORE BAGLI - setirde HEC NE gorunmur

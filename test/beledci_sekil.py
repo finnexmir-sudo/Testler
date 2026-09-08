@@ -82,9 +82,9 @@ with sync_playwright() as p:
     t.set_viewport_size({"width": 430, "height": 1150})
     t.click("#btnSetup"); t.wait_for_selector("#btnGroup", timeout=15000)
     t.fill("#gname", "3-cü sinif — şənbə qrupu"); t.select_option("#glevel", "3")
-    t.click("#btnGroup"); t.wait_for_selector("#groups .item", timeout=15000)
+    t.click("#btnGroup"); t.wait_for_selector("#groups .gcard", timeout=15000)
     t.wait_for_timeout(500); shot(t, "m3_icmal")
-    t.click("#groups .item"); t.wait_for_selector("#gTabs", timeout=15000)
+    t.click("#groups .gcard"); t.wait_for_selector("#gTabs", timeout=15000)
     for nm in ("Aysu Məmmədova", "Kənan Əliyev", "Nigar Həsənova"):
         try: t.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
         except Exception: t.click("#btnStuOpen")

@@ -93,6 +93,7 @@
           (o.eye ? '<span class="beye">' + esc(o.eye) + "</span>" : "") +
           "<h1" + (o.id ? ' id="' + o.id + '"' : "") + ">" + (o.html || esc(o.title || "")) + "</h1>" +
           (o.sub ? "<p" + (o.subId ? ' id="' + o.subId + '"' : "") + ">" + o.sub + "</p>" : "") +
+          (o.acts ? '<div class="bacts">' + o.acts + "</div>" : "") +
         "</div>" +
         (o.right ? '<div class="br">' + o.right + "</div>" : "") +
       "</div>");
@@ -557,19 +558,28 @@
         encodeURIComponent("Salam! Bil10 paketi haqqında sualım var." + (me ? " Hesab: " + me : ""))
       : "";
     return '<div class="card gift' + (soon ? " soon" : "") + '" id="giftCard">' +
-      "<b>" + (soon
+      '<span class="gi">' + ic("star") + "</span>" +
+      '<div class="gt"><b>' + (soon
         ? "Hədiyyə paketin bitməsinə " + days + " gün qalır"
         : "Tam paket sizə hədiyyədir 🎁") + "</b>" +
       "<p>" + (soon
         ? "Davam etmək istəsəniz bizə yazın, paketi uzadaq."
         : "Bil10-a qoşulduğunuz üçün: 25 şagird yeri, hazır sual bankı, avtomatik test, " +
           "diaqnostika, dərs planı.") +
-        " Bitmə: <b>" + dateAz(pl.ends) + "</b>" + (soon ? "" : " (" + days + " gün)") + ".</p>" +
+        " Bitmə: <b>" + dateAz(pl.ends) + "</b>" + (soon ? "" : " (" + days + " gün)") + ".</p></div>" +
       (href
-        ? '<a class="btn sm' + (soon ? "" : " ghost") + '" target="_blank" rel="noopener" href="' +
-          esc(href) + '">WhatsApp-la yazın</a>'
+        ? '<a class="glink" target="_blank" rel="noopener" href="' +
+          esc(href) + '">WhatsApp-la yazın ' + ic("right") + "</a>"
         : "") +
       "</div>";
+  }
+
+  /*  Bolme basligi + sagda kecid ("Hamisina bax") - uzun siyahi
+      qisalir, kecid gorunur (Bolt eskizi).  */
+  function h2r(title, linkId, linkText) {
+    return '<div class="h2row"><h2>' + esc(title) + "</h2>" +
+      (linkId ? '<button class="h2l" id="' + linkId + '">' + esc(linkText) +
+        ic("right") + "</button>" : "") + "</div>";
   }
 
   /* ------------------------------------------------------ qrup siyahisi */
@@ -588,14 +598,15 @@
           formasi basliğin altina qalxir - yeni muellim ilk isi
           sehifenin dibinde axtarmasin (loadGroups).  */
       '<div id="hTop">' +
-      /* Reqemler bir baxisda - "Fealiyyet merkezi"nin ust lovheleri */
+      /* Reqemler bir baxisda - her biri ayrica kart (Bolt eskizi) */
       '<div class="tiles" id="hTiles">' +
         '<div class="tile a"><i class="ti">' + ic("group") + "</i><b>—</b><span>qrup</span></div>" +
         '<div class="tile b"><i class="ti">' + ic("doc") + "</i><b>—</b><span>test</span></div>" +
         '<div class="tile c"><i class="ti">' + ic("person") + "</i><b>—</b><span>şagird</span></div>" +
         '<div class="tile d"><i class="ti">' + ic("chart") + "</i><b>—</b><span>orta bal</span></div>" +
       "</div>" +
-      '<div id="hAlerts"></div>' +
+      //  genis ekranda iki sutun: solda tehluke zonasi, sagda son neticeler
+      '<div class="hcols"><div id="hAlerts"></div><div id="hRecent"></div></div>' +
       //  sagird yeri gostericisi zolagin sag terefindedir (asagida);
       //  burada yalniz limit dolanda xeberdarliq qalir
       (pct >= 100
@@ -606,8 +617,8 @@
       '<div class="spacer"></div>' +
       /* Suretli emeliyyatlar - masaustu ucun; telefonda alt menyu eyni
          uc duymeni dasidigi ucun gizlenir (CSS .quick) */
-      '<div class="card quick">' +
-        '<div class="qhead">Sürətli əməliyyatlar</div>' +
+      '<div class="quick">' +
+        h2r("Sürətli əməliyyatlar") +
         '<div class="qgrid">' +
           '<button class="qact qa" id="btnGen"><span class="qi">' + ic("gen") + "</span>" +
             "<b>Test yığ</b><span>mövzu və çətinliyə görə</span></button>" +
@@ -633,9 +644,8 @@
         : "") +
       '<div class="spacer"></div>' +
       "</div>" +
-      "<h2>Qruplar</h2>" +
-      '<div id="groups" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
-      '<div id="hRecent"></div>' +
+      h2r("Qruplar") +
+      '<div id="groups" class="gcards"><div class="skel">Yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
       '<div class="card" id="gForm">' +
         '<label for="gname">Qrup adı</label>' +
@@ -659,6 +669,9 @@
       eye: "İcmal",
       html: "Xoş gəlmisiniz" + (ad ? ", " + esc(ad) : "") + "! 👋",
       sub: esc(ACC.name || ""),
+      //  iki esas emeliyyat zolaqda - ekran ne teklif etdiyini deyir
+      acts: '<button class="bcta pri" id="bGen">' + ic("gen") + "Yeni test yığ</button>" +
+        '<button class="bcta" id="bBank">' + ic("doc") + "Sual bankı</button>",
       right: '<div class="bseat">' +
         '<div class="seat"><div><div class="num">' + used +
           ' <s>/ ' + (lim > 1000000 ? "∞" : lim) + "</s></div>" +
@@ -669,6 +682,8 @@
       "</div>"
     });
     BAND_KEEP = false;
+    on("bGen", "click", function () { nav("#/gen"); });
+    on("bBank", "click", function () { nav("#/b"); });
 
     loadLevels().then(function () {
       var sel = $("glevel");
@@ -738,10 +753,15 @@
       bellDot(v.alerts ? v.alerts.length : 0);
       var ab = $("hAlerts");
       if (ab && v.alerts && v.alerts.length) {
+        //  ilk 5 siqnal; qalani "Hamısına bax" -> siqnallar ekrani
+        var alAll = v.alerts, alCap = 5;
         ab.innerHTML = '<div class="spacer"></div>' +
-          "<h2>Təhlükə zonası</h2>" +
-          '<div class="card pad0">' + v.alerts.map(alertRow).join("") + "</div>";
+          h2r("Təhlükə zonası", alAll.length > alCap ? "alMore" : "",
+              "Hamısına bax") +
+          '<div class="card pad0">' +
+            alAll.slice(0, alCap).map(alertRow).join("") + "</div>";
         bindAlerts(ab);
+        on("alMore", "click", function () { nav("#/n"); });
       }
 
       var rc = $("hRecent");
@@ -788,7 +808,7 @@
           });
         }
         rc.innerHTML = '<div class="spacer"></div>' +
-          "<h2>Son nəticələr</h2>" +
+          h2r("Son nəticələr") +
           (rgs.length > 1
             ? '<div class="chips recf" id="recF">' +
               '<button class="chip on" data-rg="">Hamısı</button>' +
@@ -857,14 +877,14 @@
       }
       //  ilk qrup indi yarandi - ekran adi qurulusuna qayidir
       if ($("hTop") && $("hTop").hidden) { screenHome(); return; }
+      //  qruplar kart torusu - siyahi setri deyil (Bolt eskizi)
       box.innerHTML = rows.map(function (g) {
         var n = cnt[g.id] || 0;
         var lv = levelName(g.level_id);
-        return '<button class="item" data-g="' + esc(g.id) + '">' +
+        return '<button class="gcard" data-g="' + esc(g.id) + '">' +
           av(g.name) +
           '<div class="g"><b>' + esc(g.name) + "</b>" +
-          "<i>" + (lv ? "<span>" + esc(lv) + "</span><span>·</span>" : "") +
-          "<span>" + n + " şagird</span></i></div>" +
+          "<i>" + (lv ? esc(lv) + " · " : "") + n + " şagird</i></div>" +
           '<span class="arrow">' + ic("right") + "</span></button>";
       }).join("");
       Array.prototype.forEach.call(box.querySelectorAll("[data-g]"), function (b) {
