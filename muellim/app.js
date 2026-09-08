@@ -1054,6 +1054,10 @@
      Dersden evvel bir kart: novbeti movzu, son kecilen, tapsirigi
      etmeyenler, hazir addimlar.  Melumat rpc_lesson_prep-den (db/126).
      Plan "kecildi" olanda da yenilenir (planDone -> loadPrep).  */
+  /*  Zolaqdaki kartin setirleri ayri sorgulardan gelir (plan, ev
+      tapsirigi) - hazir olan kimi yerine yazilir.  */
+  function gStat(id, text) { var e = $(id); if (e) e.textContent = text; }
+
   function loadPrep(g) {
     var live = guard();
     sb.rpc("rpc_lesson_prep", { p_class_id: g.id }).then(function (d) {
@@ -1061,6 +1065,8 @@
       var box = $("prep");
       if (!box || !d) return;
       var nx = d.next, ls = d.last, pend = d.pending || [];
+      gStat("gHw", !d.open ? "yoxdur"
+        : (!pend.length ? "hamı edib" : pend.length + " nəfər qalıb"));
       function row(icon, label, body, cls) {
         return '<div class="prow' + (cls ? " " + cls : "") + '">' + ic(icon) +
           '<div><span class="pl">' + label + "</span>" + body + "</div></div>";
@@ -1208,6 +1214,16 @@
     if (!box) return;
     var d = PLD || {};
     var plans = d.plans || [];
+
+    if (!plans.length) {
+      gStat("gPlN", d.paid ? "qurulmayıb" : "paketlə");
+    } else {
+      var p0 = plans[0], pc0 = p0.total ? Math.round(p0.done * 100 / p0.total) : 0;
+      gStat("gPlN", p0.done + " / " + p0.total + " · " + pc0 + "%");
+      var bb = $("gPlBar"), bi = $("gPlB");
+      if (bb) bb.classList.remove("hide");
+      if (bi) bi.style.width = pc0 + "%";
+    }
 
     if (!plans.length) {
       if (!d.paid) {
@@ -1686,17 +1702,26 @@
       back: { id: "btnBack", label: "Qruplar" }, eye: "Qrup",
       id: "gName", title: g.name, subId: "gMeta",
       sub: (levelName(g.level_id) ? "<span>" + esc(levelName(g.level_id)) + "</span>" : ""),
-      right: '<span class="bchip" id="gCnt">' + ic("person") + "— şagird</span>" +
+      acts: '<button class="bcta pri" id="btnAsgs">' + ic("clip") + "Tapşırıqlar</button>" +
+        '<button class="bcta" id="btnRep">' + ic("chart") + "Hesabat</button>",
+      /*  Sag terefdeki suse kart: sagird sayi, plan gedisi, ev tapsirigi.
+          Tek cip ("5 sagird") zolagin sagini bos qoyurdu (istifadeci).  */
+      right: '<div class="bseat gseat" id="gStat">' +
+          '<div class="seat"><div><div class="num" id="gCnt">—</div>' +
+            '<div class="lbl">aktiv şagird</div></div>' +
+            '<span class="pill hide" id="gOff"></span></div>' +
+          '<div class="gsep"></div>' +
+          '<div class="grow"><span>Dərs planı</span><b id="gPlN">…</b></div>' +
+          '<div class="bar hide" id="gPlBar"><i id="gPlB" style="width:0%"></i></div>' +
+          '<div class="gsep"></div>' +
+          '<div class="grow"><span>Ev tapşırığı</span><b id="gHw">…</b></div>' +
+        "</div>" +
         '<button class="btn sm ghost icon" id="btnRen" title="Adı dəyiş" ' +
         'aria-label="Adı dəyiş">' + ic("pen") + "</button>"
     });
     show(
-      '<div class="card tight" id="gCard">' +
-        '<div class="row two">' +
-          '<button class="btn wide" id="btnAsgs">' + ic("clip") + "Tapşırıqlar</button>" +
-          '<button class="btn wide" id="btnRep">' + ic("chart") + "Hesabat</button>" +
-        "</div>" +
-      "</div>" +
+      /*  Adı dəyişmə forması buraya açılır - boş ikən görünmür  */
+      '<div class="card tight hide" id="gCard"></div>' +
       '<div id="prep"></div>' +
       '<div id="alerts"></div>' +
       /*  Iki sekme (istifadeci teklifi): plan + 30 sagird + forma alt-alta
@@ -1778,6 +1803,7 @@
   function renameGroup(g) {
     var card = $("gCard");
     if (!card || card.querySelector("#gRen")) return;
+    card.classList.remove("hide");
     card.insertAdjacentHTML("afterbegin",
       '<div id="gRen"><div class="fieldrow">' +
         '<div><label for="gNew">Qrupun adı</label>' +
@@ -1799,7 +1825,10 @@
     on("gCancel", "click", close);
     on("gSave", "click", save);
 
-    function close() { var el = $("gRen"); if (el) el.remove(); }
+    function close() {
+      var el = $("gRen"); if (el) el.remove();
+      if (card && !card.children.length) card.classList.add("hide");
+    }
 
     function save() {
       var nm = (inp.value || "").trim();
@@ -1931,7 +1960,13 @@
         var na = (rows || []).filter(function (x) { return x.is_active; }).length;
         tn.textContent = na; tn.classList.toggle("hide", !na);   // inline-block hidden-i ezir
         var gc = $("gCnt");
-        if (gc) gc.innerHTML = ic("person") + na + " şagird";
+        if (gc) gc.textContent = na;
+        //  dayandirilmislar ayrica cip - "niye 8 var, 5 yer tutulub"
+        var off = $("gOff"), no = (rows || []).length - na;
+        if (off) {
+          off.textContent = no ? no + " dayandırılıb" : "";
+          off.classList.toggle("hide", !no);
+        }
       }
       if (!rows || !rows.length) openStuForm(false);
       var box = $("stu");
