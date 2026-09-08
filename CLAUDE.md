@@ -2167,9 +2167,18 @@ ilk günlər FortiGuard-da «Newly Observed Domain» kimi bloklana bilər
 (iş/məktəb şəbəkəsi) — «re-evaluate» sorğusu göndərilib, vaxtla düşür.
 Geri qaytarmaq: `CNAME` faylını sil, config ünvanlarını qaytar.
 
-## Önbaxış saytı — yeni.bil10.az (2026-09-08)
+## QAYDA: görünüş dəyişikliyi əvvəl şəkil, sonra push (2026-09-08)
 
-Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi baxıb bəyənsin deyə.
+İstifadəçi hər dəyişikliyi canlıda görməkdən narazıdır («nizamsızlıq»).
+Görünən hər dəyişiklikdə (dizayn, mətn, yerləşmə) push-dan ƏVVƏL
+kompüter + telefon ekran şəkli göndərilir (SendUserFile), «ok»
+gözlənilir, sonra commit + push. Yalnız məntiq/baza dəyişikliyində
+(görünüşə toxunmayan) birbaşa push olar. Aşağıdakı önbaxış saytı
+qurulmayıb (istifadəçi «uzun oldu» dedi) — lazım olsa sonra.
+
+## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
+
+Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
 GitHub Pages hər repoya bir sayt verir, ona görə ayrıca açıq repo
 **`finnexmir-sudo/bil10-yeni`** var; Cloudflare-də CNAME `yeni` →
 `finnexmir-sudo.github.io` (DNS only). Supabase eynidir (prod baza) —
