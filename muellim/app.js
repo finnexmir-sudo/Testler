@@ -596,23 +596,13 @@
         '<div class="tile d"><i class="ti">' + ic("chart") + "</i><b>—</b><span>orta bal</span></div>" +
       "</div>" +
       '<div id="hAlerts"></div>' +
-      '<div class="spacer"></div>' +
-      '<div class="card">' +
-        '<div class="seat">' +
-          '<div><div class="num">' + used +
-            ' <s>/ ' + (lim > 1000000 ? "∞" : lim) + "</s></div>" +
-            '<div class="lbl">şagird yeri</div></div>' +
-          '<span class="pill' + ((ACC.plan || (isAdmin() && ACC.is_owner)) ? " on" : "") + '">' +
-            esc(ACC.plan ? ACC.plan.name
-                : ((isAdmin() && ACC.is_owner) ? "Admin · daimi" : "Paketsiz")) + "</span>" +
-        "</div>" +
-        '<div class="' + cls + '"><i style="width:' + pct + '%"></i></div>' +
-        (pct >= 100
-          ? '<div class="warn" style="margin:14px 0 0">' + ic("warn") +
-            "<span>Paketin limiti dolub. Yeni şagird əlavə etmək üçün " +
-            "paketi genişləndirin.</span></div>"
-          : "") +
-      "</div>" +
+      //  sagird yeri gostericisi zolagin sag terefindedir (asagida);
+      //  burada yalniz limit dolanda xeberdarliq qalir
+      (pct >= 100
+        ? '<div class="spacer"></div><div class="card"><div class="warn">' + ic("warn") +
+          "<span>Paketin limiti dolub. Yeni şagird əlavə etmək üçün " +
+          "paketi genişləndirin.</span></div></div>"
+        : "") +
       '<div class="spacer"></div>' +
       /* Suretli emeliyyatlar - masaustu ucun; telefonda alt menyu eyni
          uc duymeni dasidigi ucun gizlenir (CSS .quick) */
@@ -662,13 +652,23 @@
     /*  Marka zolagi: salam + hesab adi + paket.  Ilk kart (hediyye ve ya
         lovheler) zolagin alt kenarini kesir.  */
     var plan = ACC.plan ? ACC.plan.name
-      : ((isAdmin() && ACC.is_owner) ? "Admin · daimi" : "Pulsuz");
-    setBand(
-      '<span class="beye">İcmal</span>' +
-      "<h1>Xoş gəlmisiniz" + (ad ? ", " + esc(ad) : "") + "! 👋</h1>" +
-      "<p>" + esc(ACC.name || "") + "</p>" +
-      '<span class="bpill">' + ic("star") + esc(plan) + "</span>"
-    );
+      : ((isAdmin() && ACC.is_owner) ? "Admin · daimi" : "Paketsiz");
+    //  sag terefde suse kart: sagird yeri + paket + doluluq xetti
+    //  (.seat sinfi qalir - testler onu oxuyur)
+    bandHead({
+      eye: "İcmal",
+      html: "Xoş gəlmisiniz" + (ad ? ", " + esc(ad) : "") + "! 👋",
+      sub: esc(ACC.name || ""),
+      right: '<div class="bseat">' +
+        '<div class="seat"><div><div class="num">' + used +
+          ' <s>/ ' + (lim > 1000000 ? "∞" : lim) + "</s></div>" +
+          '<div class="lbl">şagird yeri</div></div>' +
+          '<span class="pill' + ((ACC.plan || (isAdmin() && ACC.is_owner)) ? " on" : "") + '">' +
+            esc(plan) + "</span></div>" +
+        '<div class="' + cls + '"><i style="width:' + pct + '%"></i></div>' +
+      "</div>"
+    });
+    BAND_KEEP = false;
 
     loadLevels().then(function () {
       var sel = $("glevel");
@@ -1642,7 +1642,8 @@
       back: { id: "btnBack", label: "Qruplar" }, eye: "Qrup",
       id: "gName", title: g.name, subId: "gMeta",
       sub: (levelName(g.level_id) ? "<span>" + esc(levelName(g.level_id)) + "</span>" : ""),
-      right: '<button class="btn sm ghost icon" id="btnRen" title="Adı dəyiş" ' +
+      right: '<span class="bchip" id="gCnt">' + ic("person") + "— şagird</span>" +
+        '<button class="btn sm ghost icon" id="btnRen" title="Adı dəyiş" ' +
         'aria-label="Adı dəyiş">' + ic("pen") + "</button>"
     });
     show(
@@ -1885,6 +1886,8 @@
       if (tn) {
         var na = (rows || []).filter(function (x) { return x.is_active; }).length;
         tn.textContent = na; tn.classList.toggle("hide", !na);   // inline-block hidden-i ezir
+        var gc = $("gCnt");
+        if (gc) gc.innerHTML = ic("person") + na + " şagird";
       }
       if (!rows || !rows.length) openStuForm(false);
       var box = $("stu");

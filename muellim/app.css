@@ -1197,3 +1197,28 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .stat.g2 b{color:var(--teal)}
 .stat.g3 b{color:#1c2a52}
 .stat.g1 span,.stat.g2 span,.stat.g3 span{color:var(--fg-3)}
+
+/* -------------------------- genis ekran: sutun 920px (zolaq, altliq da) */
+/*  1366+ ekranda 760px sutun zolagin ve altligin yanlarini bos qoyurdu  */
+@media (min-width:1100px){ .wrap,.bandin,.afoot .in{max-width:920px} }
+
+/*  Zolagin sag terefi: Icmalda sagird yeri (suse kart), qrupda sagird
+    sayi cipi.  Bos sag teref dolur.  */
+.band .bseat{min-width:256px;padding:12px 14px 13px;border-radius:12px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28)}
+.band .bseat .seat{margin:0 0 9px}
+.band .bseat .num{color:#fff}
+.band .bseat .num s{color:rgba(255,255,255,.65)}
+.band .bseat .lbl{color:rgba(255,255,255,.82)}
+.band .bseat .pill{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35);color:#fff}
+.band .bseat .bar{background:rgba(255,255,255,.22)}
+.band .bseat .bar i{background:#ffd970}
+.band .bseat .bar.warn i{background:#ffb454}
+.band .bseat .bar.full i{background:#ff8a80}
+.band .bchip{display:inline-flex;align-items:center;gap:6px;padding:0 12px;min-height:32px;
+  border-radius:999px;font-size:13px;font-weight:600;color:#fff;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3)}
+.band .bchip svg{width:14px;height:14px;stroke-width:1.9}
+@media (max-width:600px){ .band .bseat{min-width:0;width:100%} }
+/*  telefonda sag blok (sagird yeri) basligin altina tam enle  */
+@media (max-width:600px){ .bh{flex-wrap:wrap} .br{width:100%;align-self:auto} .br .bseat{flex:1} }
