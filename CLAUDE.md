@@ -2176,6 +2176,36 @@ gözlənilir, sonra commit + push. Yalnız məntiq/baza dəyişikliyində
 (görünüşə toxunmayan) birbaşa push olar. Aşağıdakı önbaxış saytı
 qurulmayıb (istifadəçi «uzun oldu» dedi) — lazım olsa sonra.
 
+## Dizayn şablonu — marka zolağı (2026-09-08, v374–377)
+
+Ana səhifə Oxuyan üslubunda yenidən yığıldı (istifadəçi bəyəndi) və
+eyni şablon üç tətbiqə köçürüldü. Qayda: **yeni ekran bu şablona uyğun
+olmalıdır**, köhnə «geri düyməsi + başlıq kartı» üslubu qalmayıb.
+
+- **Zolaq** (`#band`, `#main`-dən əvvəl, `assets/base.css`): indigo→teal
+  gradient, ağ yazı. Məzmun: geri düyməsi (`.bback`, şüşə), kiçik alt
+  başlıq (`.beye`), `h1`, bir sətir izah (`p`), solda `.av`, sağda `.br`
+  düymələr (`.sasg` sarı CTA). İlk kart `#main.over` ilə zolağın alt
+  kənarını kəsir.
+- **Panel** (`muellim/app.js`): `bandHead({back,eye,title,sub,av,right,
+  id,subId})` — `show()`-dan bir addım ƏVVƏL çağırılır (`BAND_KEEP`);
+  `show()` özü zolağı təmizləyir. Şagird/valideyndə sadə `setBand(html)`.
+- **Lövhələr** (`.tiles`, `.stats`, şagird `.stiles`): BİR ağ kart,
+  aralarında nazik xətt, rəngli rəqəm, ikon çipi (`.ti`). Dolu rəngli
+  qutu yoxdur.
+- **h2** (`#main h2`, base.css): tünd, altında 30px gradient xətt; artıq
+  boz CAPS deyil — testlər `inner_text`-də adi hərflə yoxlayır. Kart
+  içi başlıq `h2.ch`.
+- **Üst zolaq** `.top` eyni gradient. **Footer** `.afoot` (tünd, logo,
+  keçidlər, il) üç `index.html`-də statikdir; `.wrap#main` alt boşluğu 20px.
+- Salamlama/ad zolaqdadır → testlər `#band`-a baxır (e2e_gen,
+  e2e_student, e2e_valideyn). Boş hesabda `#gForm` `main`-in üstünə.
+- Ana səhifə: `.topband` gradient, `.doors` sarı/ağ CTA, `.under`
+  önizləmə kartı, `.under2` nümunə + beta, bölmələr tam enli
+  (`section.tint`), `.freesec` kartı `.foot`-u kəsir. GPT-nin «şəkli
+  böyüt, kartı qaldır» polişi sınandı və qaytarıldı (istifadəçi fərq
+  görmədi) — hero-ya daha toxunulmur.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
