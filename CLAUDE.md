@@ -2176,6 +2176,57 @@ gözlənilir, sonra commit + push. Yalnız məntiq/baza dəyişikliyində
 (görünüşə toxunmayan) birbaşa push olar. Aşağıdakı önbaxış saytı
 qurulmayıb (istifadəçi «uzun oldu» dedi) — lazım olsa sonra.
 
+## QAYDA: pul işi — 100 ölç, bir biç (2026-09-08)
+
+İstifadəçinin qoyduğu qayda: **«Pul işi riskli işdir. Bir dəfə səhv
+bütün inamı öldürər.»** Ödəniş, abunə, məbləğ, geri qaytarma —
+bunlara toxunan hər dəyişiklik adi kod deyil.
+
+**Sürətdən çox etibarlılıq.** Bu sahədə «sonra düzəldərik» yoxdur:
+səhv silinmiş pul geri qaytarılsa belə, müştəri qayıtmır.
+
+Pula toxunan hər işdə **məcburi**:
+
+1. **Məbləğ HEÇ VAXT müştəridən gəlmir.** Frontend yalnız «X hesabı
+   üçün ödəmək istəyirəm» deyir. Məbləği server hesablayır.
+2. **Məbləğ sifariş anında DONDURULUR** (`seats_snapshot`,
+   `period_start`, `period_end` sifariş sətrində). Müştəri bank
+   səhifəsində ikən şagird əlavə etsə, ödəyəcəyi məbləğ gördüyü
+   məbləğ olmalıdır.
+3. **Callback-ə yalnız status və provider_ref üçün etibar edilir.**
+   Hesab, plan, məbləğ — öz sifariş sətrimizdən oxunur. Callback-dəki
+   məbləğ uyğun gəlmirsə: aktivləşdirmə YOXDUR, admin siqnalı VAR.
+4. **Hər şey idempotent olmalıdır.** Şlüz callback-i təkrar göndərir —
+   bu normaldır. `unique (provider, provider_ref)` + aktivləşdirmə
+   eyni tranzaksiyada. Təkrar icra heç nəyi dəyişməməlidir.
+5. **İtən callback üçün reconciliation MƏCBURİDİR**, opsional deyil.
+   Callback və reconciliation EYNİ aktivləşdirmə funksiyasını çağırır —
+   iki ayrı yol yazılmır.
+6. **Müddəti bitmiş pending sifariş SİLİNMİR.** İstifadəçi hələ bank
+   səhifəsində ola bilər. `expired` işarələnir, gec gələn uğurlu
+   callback yenə qəbul edilir. Silmək = pul gəlir, abunə açılmır.
+7. **Kart tokeni saxlanmır** (`card_id` yoxdur, təkrarlanan ödəniş
+   yoxdur, yalnız redirect). Maskalanmış kart (son 4 rəqəm) token
+   deyil — `payments.raw`-da qala bilər.
+8. **Şlüzün gizli açarı `service_role` ilə eyni sinifdir.** Repoya,
+   `config.js`-ə, frontendə HEÇ VAXT düşmür. Yalnız Edge Function
+   secrets.
+9. **Xam callback saxlanılır** (`payments.raw`) — mübahisədə yeganə
+   sübutdur.
+10. **Tarix hesablamaları `Asia/Baku` ilə.** Baza UTC-dədir; gecə
+    yarısına yaxın gün fərqi bir gün sürüşür. Yazıda zərərsizdir,
+    pulda deyil.
+
+**Yazmadan əvvəl:** Epoint-in imza düsturu, status adları və status
+sorğusu **rəsmi sənəddən** götürülür — yaddaşdan yazılmır.
+
+**Buraxmadan əvvəl:** sandbox-da sınanır, reconciliation sınanır,
+təkrar callback sınanır, məbləğ uyğunsuzluğu sınanır. Bunlar
+smoke testə yazılır.
+
+**Nə deyilmir:** «hər şey nəzərə alınıb». Nəyə əmin olduğumuzu və
+nəyi hələ bilmədiyimizi açıq yazırıq.
+
 ## Qiymət modeli — şagird başına (db/165, 2026-09-08) — HƏLƏ GİZLİDİR
 
 **Qərar (istifadəçi ilə müzakirə):**

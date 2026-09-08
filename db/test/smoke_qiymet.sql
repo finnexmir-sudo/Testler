@@ -153,3 +153,39 @@ begin
   end if;
 end $$;
 \echo 'OK  5 · dayandirilmis sagird meblege dusmur'
+
+-- 6 · (166) qalan gun BAKI vaxti ile sayilir, bazanin UTC-si ile yox
+--  Bu yoxlama SAATDAN ASILI OLMAMALIDIR.  Ona gore EYNI Baki gununun
+--  iki fereqli saatini goturuuruk: saat 01:00 ve saat 23:00.
+--  Baki gunune gore ikisi de EYNI gundedir -> qalan gun eyni olmalidir.
+--  UTC-ye gore ise onlar AYRI gunlere dusur (01:00 Baki = evvelki gun
+--  21:00 UTC) -> UTC ile hesablansa netice ferqli cixar.
+do $$
+declare
+  b_gun  date := (now() at time zone 'Asia/Baku')::date;
+  t_erken timestamptz := ((b_gun + 3) + time '01:00') at time zone 'Asia/Baku';
+  t_gec   timestamptz := ((b_gun + 3) + time '23:00') at time zone 'Asia/Baku';
+  d_erken int; d_gec int;
+begin
+  --  yoxlama qurulusu: bu iki an UTC-de HEQIQETEN ayri gunlerdedir
+  if (t_erken at time zone 'UTC')::date = (t_gec at time zone 'UTC')::date then
+    raise exception 'yoxlama qurulusu pozulub: UTC-de eyni gune dusdu';
+  end if;
+
+  update public.subscriptions set current_period_end = t_erken
+   where account_id = 'aaaa0000-0000-0000-0000-0000000165a1';
+  d_erken := (public.rpc_my_context()->'accounts'->0->'plan'->>'days_left')::int;
+
+  update public.subscriptions set current_period_end = t_gec
+   where account_id = 'aaaa0000-0000-0000-0000-0000000165a1';
+  d_gec := (public.rpc_my_context()->'accounts'->0->'plan'->>'days_left')::int;
+
+  if d_erken <> d_gec then
+    raise exception 'eyni Baki gunu, ferqli netice: 01:00 -> %, 23:00 -> % '
+      '(UTC ile hesablanir)', d_erken, d_gec;
+  end if;
+  if d_erken <> 3 then
+    raise exception 'qalan gun yanlis: % (gozlenilen 3)', d_erken;
+  end if;
+end $$;
+\echo 'OK  6 · qalan gun Baki gunune goredir (saatdan asili deyil)'

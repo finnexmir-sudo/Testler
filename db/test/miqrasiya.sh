@@ -123,6 +123,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          163_icmal_liderler.sql \
          164_sagird_sessiya_30gun.sql \
          165_sagird_basi_qiymet.sql \
+         166_baki_vaxti.sql \
          05_grants.sql; do
   printf "  %-22s" "$f"
   #  Bank fayllari (16,17,19,20,30-99) bu repoda YOXDUR - private
