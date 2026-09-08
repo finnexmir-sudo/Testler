@@ -76,7 +76,7 @@ with sync_playwright() as pw:
     for nm in ("Ayan Bir", "Murad İki"):
         row = pg.locator('.stu:has-text("%s")' % nm)
         row.locator("[data-edit]").click(); pg.wait_for_selector('.stu:has-text("%s") .edit .pbox [data-pon]' % nm, timeout=15000)
-        row.locator("[data-pon]").click(); pg.wait_for_selector('.stu:has-text("%s") [data-poff]' % nm, timeout=15000)
+        row.locator("[data-pon]").click(); pg.wait_for_selector('.stu:has-text("%s") .l3 .code' % nm, timeout=15000)
     KA = db("select parent_code c from public.students where full_name='Ayan Bir'", one=True)["c"]
     KB = db("select parent_code c from public.students where full_name='Murad İki'", one=True)["c"]
     ok(bool(KA and KB and KA != KB), "iki ayri valideyn kodu")

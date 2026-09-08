@@ -79,7 +79,7 @@ with sync_playwright() as pw:
     pg.locator(".stu [data-edit]").first.click()
     pg.wait_for_selector(".edit .pbox [data-pon]", timeout=15000)
     pg.locator(".stu [data-pon]").first.click()
-    pg.wait_for_selector(".stu [data-poff]", timeout=15000)
+    pg.wait_for_selector(".stu .l3 .code", timeout=15000)
     UID  = db("select id::text i from auth.users where email=%s", (EMAIL,), one=True)["i"]
     code = db("select login_code c from public.students limit 1", one=True)["c"]
     pkod = db("select parent_code c from public.students limit 1", one=True)["c"]

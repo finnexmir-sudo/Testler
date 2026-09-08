@@ -130,6 +130,36 @@ with sync_playwright() as pw:
                 "a.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));})()")
     pg.wait_for_timeout(600)
     ok(db("select count(*) c from public.visits where ev='demo_muellim'", one=True)["c"] >= 1, "demo kliki sayildi")
+
+    #  0b · (164) Qurulmus tetbiq tanitim sehifesini acmir
+    #  Ana sehifeden qurulan tetbiqin start_url-i kokdur; acilanda
+    #  tanitim gorunurdu ve sagird her defe "Sagird girisi"ne basirdi.
+    #  Indi: standalone pencerede, giris varsa - birbasa oz bolmesine.
+    #  ADI BRAUZERDE hec ne deyismir (sayti gostermek isteyene mane
+    #  olmuruq) - asagidaki ilk yoxlama mehz onu qoruyur.
+    def pwa_yeniden(sehife):
+        pg.goto("http://127.0.0.1:8010/" + sehife); pg.wait_for_timeout(300)
+        pg.evaluate("() => { const mm = window.matchMedia;"
+                    " window.matchMedia = q => q.indexOf('standalone') >= 0"
+                    " ? {matches: true} : mm(q); }")
+        pg.evaluate("() => new Promise(r => { const s = document.createElement('script');"
+                    " s.src = 'assets/pwa.js?rerun=' + Math.random();"
+                    " s.onload = r; document.body.appendChild(s); })")
+        pg.wait_for_timeout(700)
+        return pg.url
+
+    pg.evaluate("localStorage.setItem('sagird_ses', JSON.stringify({t: 'yoxlama'}))")
+    pg.goto("http://127.0.0.1:8010/index.html"); pg.wait_for_timeout(700)
+    ok(pg.url.endswith("index.html"), "brauzerde ana sehife yerinde qalir", pg.url)
+    ok(pwa_yeniden("index.html").endswith("/sagird/"),
+       "qurulmus tetbiq sagird bolmesini acir", pg.url)
+    pg.evaluate("localStorage.setItem('valideyn_ses', JSON.stringify({cur: 'yox'}))")
+    pg.evaluate("localStorage.removeItem('sagird_ses')")
+    ok(pwa_yeniden("index.html").endswith("/valideyn/"),
+       "valideyn sessiyasi valideyn bolmesini acir", pg.url)
+    pg.evaluate("localStorage.clear()")
+    ok(pwa_yeniden("index.html").endswith("index.html"),
+       "giris yoxdursa tanitim yerinde qalir", pg.url)
     pg.set_viewport_size({"width": 430, "height": 900})
 
     print("A · Qeydiyyat və hesab quraşdırması")

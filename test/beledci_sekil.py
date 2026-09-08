@@ -93,7 +93,7 @@ with sync_playwright() as p:
     # valideyn girisini ilk sagird ucun ac
     row = t.locator(".stu").first
     row.locator("[data-edit]").click(); t.wait_for_selector(".edit .pbox [data-pon]", timeout=15000)
-    row.locator("[data-pon]").click(); t.wait_for_selector(".stu [data-poff]", timeout=15000)
+    row.locator("[data-pon]").click(); t.wait_for_selector(".stu .l3 .code", timeout=15000)
     t.wait_for_timeout(400); shot(t, "m4_qrup_sagirdler")
     gid = db("select id::text i from public.classes limit 1", one=True)["i"]
     code = db("select login_code c from public.students where full_name='Aysu Məmmədova'", one=True)["c"]

@@ -106,7 +106,7 @@ with sync_playwright() as pw:
     ok("dərslərini" in pg.inner_text(".edit .pbox"),
        "acmadan evvel valideynin NE gorecəyi yazilir")
     row.locator("[data-pon]").click()
-    pg.wait_for_selector('.stu:has-text("Ayan Qasimova") [data-poff]', timeout=15000)
+    pg.wait_for_selector('.stu:has-text("Ayan Qasimova") .l3 .code', timeout=15000)
     kod = db("""select parent_code c from public.students
                  where full_name = 'Ayan Qasimova'""", one=True)["c"]
     ok(bool(kod) and len(kod) == 8, "kod yarandi", kod)
@@ -297,8 +297,12 @@ with sync_playwright() as pw:
     vp.wait_for_selector(".who", timeout=15000)
     ok(True, "valideyn yeniden girdi")
 
+    #  Baglamaq QELEMIN ALTINDADIR - setirde her sagirdin altinda
+    #  "Yenile/Bagla" durmasin deye (siyahi daginiq gorunurdu).
+    row.locator("[data-edit]").click()
+    pg.wait_for_selector(".edit .pbox [data-poff]", timeout=15000)
     pg.once("dialog", lambda d: d.accept())
-    row.locator("[data-poff]").click()
+    row.locator(".edit .pbox [data-poff]").click()
     #  Baglananda setirdeki valideyn xetti ITIR (acmaq qelemin altina qayidir)
     pg.wait_for_function(
         "() => document.querySelectorAll('.stu .l3').length === 0", timeout=15000)

@@ -1872,6 +1872,32 @@
     return parts[0] + " " + parts[1].charAt(0).toUpperCase() + ".";
   }
 
+  /*  Valideyn kodunu yenilemek / girisi baglamaq.  Hem siyahida (kod
+      hele acilmayibsa "ac" duymesi), hem de qelemin altindaki vereqde
+      eyni davranis lazimdir - ona gore bir yerde.  */
+  function bindParentBtns(root, classId) {
+    Array.prototype.forEach.call(root.querySelectorAll("[data-poff]"), function (b) {
+      b.addEventListener("click", function () {
+        if (!confirm("Valideyn girişi bağlansın?\n\nAçıq baxış dərhal " +
+                     "kəsiləcək və kod işləməyəcək.")) return;
+        parentAccess(b.getAttribute("data-poff"), false, b, classId);
+      });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll("[data-pnew]"), function (b) {
+      b.addEventListener("click", function () {
+        if (!confirm("Valideyn kodu yenilənsin?\n\nKöhnə kod dərhal " +
+                     "etibarsız olacaq.")) return;
+        var lbl = b.textContent;
+        b.disabled = true; b.textContent = "Gözləyin…";
+        sb.rpc("rpc_parent_code_reset", { p_student_id: b.getAttribute("data-pnew") })
+          .then(function () { loadStudents(classId); })
+          .catch(function (e) {
+            b.disabled = false; b.textContent = lbl; alert(fail(e));
+          });
+      });
+    });
+  }
+
   /* Sagirdin adini deyismek */
   function renameStudent(s, classId) {
     var row = document.querySelector('[data-row="' + s.id + '"]');
@@ -1887,12 +1913,20 @@
       /*  Valideyn girisi burdadir, setirde yox: acmaq birdefelik
           qerardir, gundelik emeliyyat deyil.  Acilandan SONRA kod
           setirde gorunur - onu her defe kopyalamaq lazim olur.  */
-      (s.parent_code ? "" :
-        '<div class="pbox"><button class="btn sm ghost" data-pon="' +
-          esc(s.id) + '">Valideyn girişini aç</button>' +
-        '<span class="muted">Valideyn uşağın dərslərini və ' +
-          "nəticələrini görəcək. İstədiyiniz vaxt bağlaya bilərsiniz." +
-        "</span></div>") +
+      (s.parent_code
+        /*  Acıqdirsa: nadir iki emeliyyat burdadir - setirde her
+            sagirdin altinda dayanmasin (siyahi daginiq gorunurdu).  */
+        ? '<div class="pbox"><button class="btn sm ghost" data-pnew="' +
+            esc(s.id) + '">' + ic("refresh") + "Valideyn kodunu yenilə</button>" +
+          '<button class="btn sm ghost arch" data-poff="' + esc(s.id) +
+            '">Valideyn girişini bağla</button>' +
+          '<span class="muted">Bağlasanız valideyn artıq görmür. ' +
+            "İstədiyiniz vaxt yenidən aça bilərsiniz.</span></div>"
+        : '<div class="pbox"><button class="btn sm ghost" data-pon="' +
+            esc(s.id) + '">Valideyn girişini aç</button>' +
+          '<span class="muted">Valideyn uşağın dərslərini və ' +
+            "nəticələrini görəcək. İstədiyiniz vaxt bağlaya bilərsiniz." +
+          "</span></div>") +
       '<div class="danger"><button class="btn sm ghost" data-reset="' +
         esc(s.id) + '">' + ic("refresh") + "Giriş kodunu yenilə</button>" +
       '<span class="muted">Köhnə kod etibarsız olur.</span></div>' +
@@ -1912,6 +1946,7 @@
     if (pon) pon.addEventListener("click", function () {
       parentAccess(s.id, true, pon, classId);
     });
+    bindParentBtns(box, classId);
     box.querySelector("[data-arch]").addEventListener("click", function () {
       if (!confirm("«" + s.full_name + "» dayandırılsın?\n\n" +
                    "Giriş kodu dərhal işləməyi dayandırır və şagird " +
@@ -2030,7 +2065,12 @@
               "Hesabat" + ic("right") + "</button>" +
             '<button class="btn sm ghost icon" data-edit="' + esc(s.id) + '" ' +
               'title="Redaktə et" aria-label="Redaktə et">' + ic("pen") + "</button></div>" +
+          /*  Iki kod xetti EYNI qelibdedir: basliq · kod · kopyala ·
+              Gonder.  Evvel sagird xettinde basliq yox idi, valideyn
+              xettinde ise ustelik "Yenile" ve "Bagla" vardi - setir
+              daginiq gorunurdu (istifadeci).  */
           '<div class="l2">' +
+            '<span class="pcap">Şagird</span>' +
             '<span class="code key">' + esc(s.login_code) + "</span>" +
             '<button class="btn sm ghost icon" data-copy="' + esc(s.login_code) + '" ' +
               'title="Kodu kopyala" aria-label="Kodu kopyala">' + ic("copy") + "</button>" +
@@ -2056,10 +2096,6 @@
                   'aria-label="Valideyn kodunu kopyala">' + ic("copy") + "</button>" +
                 '<button class="btn sm" data-pwa="' + esc(s.id) + '">' +
                   ic("send") + "Göndər</button>" +
-                '<button class="btn sm ghost link" data-pnew="' + esc(s.id) + '">' +
-                  "Yenilə</button>" +
-                '<button class="btn sm ghost link arch" data-poff="' + esc(s.id) + '">' +
-                  "Bağla</button>" +
               "</div>"
             : "") +
           "</div>";
@@ -2076,32 +2112,13 @@
           parentAccess(b.getAttribute("data-pon"), true, b, classId);
         });
       });
-      Array.prototype.forEach.call(box.querySelectorAll("[data-poff]"), function (b) {
-        b.addEventListener("click", function () {
-          if (!confirm("Valideyn girişi bağlansın?\n\nAçıq baxış dərhal " +
-                       "kəsiləcək və kod işləməyəcək.")) return;
-          parentAccess(b.getAttribute("data-poff"), false, b, classId);
-        });
-      });
+      bindParentBtns(box, classId);
       Array.prototype.forEach.call(box.querySelectorAll("[data-pwa]"), function (b) {
         b.addEventListener("click", function () {
           var s = rows.filter(function (x) {
             return x.id === b.getAttribute("data-pwa");
           })[0];
           if (s) window.open(waLinkParent(s), "_blank", "noopener");
-        });
-      });
-      Array.prototype.forEach.call(box.querySelectorAll("[data-pnew]"), function (b) {
-        b.addEventListener("click", function () {
-          if (!confirm("Valideyn kodu yenilənsin?\n\nKöhnə kod dərhal " +
-                       "etibarsız olacaq.")) return;
-          var id = b.getAttribute("data-pnew");
-          b.disabled = true; b.textContent = "Gözləyin…";
-          sb.rpc("rpc_parent_code_reset", { p_student_id: id })
-            .then(function () { loadStudents(classId); })
-            .catch(function (e) {
-              b.disabled = false; b.textContent = "Yenilə"; alert(fail(e));
-            });
         });
       });
       Array.prototype.forEach.call(box.querySelectorAll("[data-wa]"), function (b) {

@@ -77,7 +77,7 @@ with sync_playwright() as pw:
     GID = db("select id::text i from public.classes limit 1", one=True)["i"]
     row = pg.locator('.stu:has-text("Ayan Bir")')
     row.locator("[data-edit]").click(); pg.wait_for_selector(".edit .pbox [data-pon]", timeout=15000)
-    row.locator("[data-pon]").click(); pg.wait_for_selector('.stu:has-text("Ayan Bir") [data-poff]', timeout=15000)
+    row.locator("[data-pon]").click(); pg.wait_for_selector('.stu:has-text("Ayan Bir") .l3 .code', timeout=15000)
     PKOD = db("select parent_code c from public.students where full_name='Ayan Bir'", one=True)["c"]
 
     print("B · Dəftər sekməsi: «Dərs oldu», Murad gəlməyib")

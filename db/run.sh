@@ -83,6 +83,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 160_hediyye_paket.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 161_ziyaret.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 162_ziyaret_huni.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 163_icmal_liderler.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 164_sagird_sessiya_30gun.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

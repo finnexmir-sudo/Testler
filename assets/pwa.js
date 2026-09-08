@@ -21,6 +21,15 @@
   var KEY = "bil10_pwa_gizlet";   // istifadeci bagladisa bir daha cixmasin
   var deferred = null;            // beforeinstallprompt hadisesi
 
+  /*  ANA SEHIFE VE BELEDCI TETBIQ DEYIL - tanitim sehifeleridir.
+      Evvel teklif hemin sehifelerde de cixirdi; oradan qurulan
+      tetbiqin start_url-i kok ("/") olur, yeni acilanda tanitim
+      gorunurdu ve sagird her defe "Sagird girisi"ne basmali idi
+      (istifadeci).  Indi teklif YALNIZ tetbiqin ozunde cixir -
+      orada manifest start_url onsuz da oz qovlugunu gosterir.  */
+  var PAGE = (document.body && document.body.getAttribute("data-page")) || "";
+  var SITE = PAGE === "home" || PAGE === "komek";
+
   function hidden() {
     try { return localStorage.getItem(KEY) === "1"; } catch (e) { return false; }
   }
@@ -111,15 +120,40 @@
   window.addEventListener("beforeinstallprompt", function (e) {
     e.preventDefault();          // brauzerin oz cubugu cixmasin
     deferred = e;
-    if (!hidden() && !installed()) showInstall();
+    if (!SITE && !hidden() && !installed()) showInstall();
   });
 
   //  iPhone-da hadise gelmir - sehife yuklenende ozumuz teklif edirik
   window.addEventListener("load", function () {
-    if (isIosSafari() && !hidden() && !installed()) {
+    if (!SITE && isIosSafari() && !hidden() && !installed()) {
       setTimeout(showIosHint, 1200);
     }
   });
 
   window.addEventListener("appinstalled", hide);
+
+  /* ------------------------------------------------- kokden qurulmuslar
+     Yuxaridaki qayda bundan sonrasi ucundur.  Tetbiqi ARTIQ ana
+     sehifeden qurmus olanlarda start_url yene kokdur - onlari da
+     duzeltmek lazimdir: qurulmus tetbiq acilanda, istifadeci onsuz
+     da giribse, birbasa oz bolmesine kecir.
+
+     BRAUZERDE HEC NE DEYISMIR - ana sehife oz yerinde qalir (sayti
+     kimese gostermek isteyene mane olmuruq).  Yalniz "standalone"
+     pencerede, yalniz ana sehifede islenir.  */
+  function signedInto() {
+    function ses(k, f) {
+      var v = null;
+      try { v = JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return false; }
+      return !!(v && f(v));
+    }
+    if (ses("sagird_ses", function (v) { return !!v.t; })) return "sagird/";
+    if (ses("valideyn_ses", function (v) { return !!v.cur; })) return "valideyn/";
+    if (ses("panel_session", function (v) { return !!v.access_token; })) return "muellim/";
+    return "";
+  }
+  if (PAGE === "home" && installed()) {
+    var go = signedInto();
+    if (go) location.replace(ROOT + go);
+  }
 })();

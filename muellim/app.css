@@ -48,14 +48,13 @@
 .stu .l1{display:flex;align-items:center;gap:6px}
 .stu .l1 b{flex:1;min-width:0;font-size:14.5px;font-weight:570;letter-spacing:-.008em;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.stu .l2{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
-/*  Valideyn sətri - şagird kodundan AYRI oxunsun deyə nazik xətlə
-    ayrılır və bir qədər sönükdür.  Susmaya görə bağlı olduğu üçün
-    əksər sətirlərdə burada yalnız bir keçid görünür. */
-.stu .l3{display:flex;align-items:center;gap:8px;margin-top:9px;
-  padding-top:9px;border-top:1px dashed var(--n-150);flex-wrap:wrap}
-.stu .l3 .pcap{font-size:11.5px;font-weight:600;color:var(--fg-3);
-  text-transform:uppercase;letter-spacing:.04em}
+/*  Iki kod xetti EYNI qelibdedir: basliq · kod · kopyala · Gonder.
+    Basliqlar eyni enlidir - kodlar bir sutunda duzulur, siyahi
+    daginiq gorunmur (istifadeci).  */
+.stu .l2,.stu .l3{display:flex;align-items:center;gap:8px;margin-top:8px}
+.stu .l2 .pcap,.stu .l3 .pcap{flex:0 0 62px;font-size:11px;font-weight:600;
+  color:var(--fg-3);text-transform:uppercase;letter-spacing:.04em}
+.stu .l3 .pcap{color:var(--n-400)}
 /*  Redaktə vərəqində valideyn bölməsi - «kodu yenilə» ilə eyni
     görünüşdə, amma təhlükə rəngi olmadan: bu, geri qaytarıla bilən
     qərardır. */
@@ -174,10 +173,14 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 }
 .btn.link:hover{background:var(--brand-tint);border-color:transparent}
 .btn.link svg{width:14px;height:14px;stroke-width:2}
-.stu .l2 .btn.icon{flex:0 0 30px;width:30px;min-height:30px}
+.stu .l2 .btn.icon,.stu .l3 .btn.icon{flex:0 0 30px;width:30px;min-height:30px}
 /* Kopyalama ikonu KODA aiddir - ona yaxin dayanmalidir, yoxsa
    «Gönder» ile arasinda havada asili qalir. */
-.stu .l2 .code + .btn.icon{margin-left:-4px}
+.stu .code + .btn.icon{margin-left:-4px}
+/*  Kod sutunu: uzunluqlari eyni oldugu ucun sabit en - "Gonder"
+    duymeleri de alt-alta duzulur.  */
+.stu .l2 .code,.stu .l3 .code{flex:0 0 auto}
+.stu .l2 .btn[data-wa],.stu .l3 .btn[data-pwa]{margin-left:auto}
 
 /* Kod yenilemek - nadir ve geri qaytarilmazdir */
 .stu .edit .danger{
@@ -1103,9 +1106,8 @@ details.arxiv>summary span{padding:1px 8px;border-radius:999px;
 @media (min-width:721px){
   .stu{display:flex;flex-wrap:wrap;align-items:center;column-gap:26px;row-gap:8px;padding:12px 16px}
   .stu .l1{flex:1 0 100%}
-  .stu .l2,.stu .l3{margin-top:0;padding-top:0;border-top:0}
-  .stu .l3{padding-left:22px;border-left:1px dashed var(--n-150)}
-  .stu .l3 .btn.arch{margin-left:0}
+  .stu .l2,.stu .l3{margin-top:0;padding-top:0;border-top:0;flex:0 0 auto}
+  .stu .l2 .btn[data-wa],.stu .l3 .btn[data-pwa]{margin-left:0}
   .stu .edit,.stu .stuwarn{flex:1 0 100%}
 }
 /* plan setrindeki secim qutusu base.css-in umumi input qaydasindan (40px,
