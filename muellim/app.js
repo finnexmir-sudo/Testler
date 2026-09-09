@@ -567,21 +567,23 @@
         ? "Hədiyyə paketin bitməsinə " + days + " gün qalır"
         : "Tam paket sizə hədiyyədir 🎁") + "</b>" +
       "<p>" + (soon
-        ? "Davam etmək istəsəniz bizə yazın, paketi uzadaq."
-        : "Bil10-a qoşulduğunuz üçün: şagird limiti yoxdur, hazır sual bankı, " +
-          "avtomatik test, diaqnostika, dərs planı.") +
-        " Bitmə: <b>" + dateAz(pl.ends) + "</b>" + (soon ? "" : " (" + days + " gün)") + ".</p>" +
+        ? "Davam etmək istəsəniz bizə yazın, paketi uzadaq. Bitmə: <b>" +
+          dateAz(pl.ends) + "</b>."
+        : "<b>" + dateAz(pl.ends) + "</b>-a qədər (" + days + " gün) hər şey " +
+          "açıqdır: hazır suallar, avtomatik test, diaqnostika, dərs planı, " +
+          "şagird sayına limit yoxdur.") + "</p>" +
       //  Paketin serti + "hele odenis yoxdur" - istifadeci teleb etdi:
       //  muellim indiden bilsin, amma indi pul istenildiyini dusunmesin.
-      //  Baslangicda onsuz da "beta bitendən sonra" deyilir - sonunda
-      //  tekrar etmirik, yalniz "indi tutulmur" qalir.
-      (Number(pl.per_seat_minor) > 0
-        ? '<p class="gterms">' + esc(betaAdi(pl)) + " ödəniş: <b>şagird başına " +
-          azn(pl.per_seat_minor) + "</b>, şagird sayına limit yoxdur. " +
-          "Sizdə indi <b>" + (ACC.students_used || 0) + " aktiv şagird</b> var — " +
-          "bu, <b>" + azn(pl.due_minor) + " / ay</b> edərdi. " +
-          "İndi heç nə tutulmur, vaxtı gələndə əvvəlcədən xəbər verəcəyik.</p>"
-        : "") +
+      //  Yigilan siyahi: 7 gun qalanda OZU acilir (qerar ani).
+      ferqFold(soon) +
+      //  EN VACIB SETIR: o gun NE ITIRECEYINI yazir.  Evvel «bitmə: 3
+      //  okt» yazilirdi, amma 4 oktyabrda neyin baglandigini muellim
+      //  ozu kesf edecekdi (istifadeci tutdu).  Qiymet burada TEKRAR
+      //  edilmir - o, zolaqdaki kartda bir defe yazilib.
+      '<p class="gterms"><b>' + dateAz(pl.ends) + "</b>-dan sonra hesab " +
+        "pulsuz həddə düşür: mövcud şagirdləriniz işləməyə davam edir, " +
+        "hazır suallar və diaqnostika bağlanır. Uzatmaq istəsəniz — " +
+        "bizə yazın.</p>" +
       "</div>" +
       (href
         ? '<a class="glink" target="_blank" rel="noopener" href="' +
@@ -597,9 +599,82 @@
       Meblegi indiden gostermeyin serti (istifadeci qerari): reqem
       SERTI dilde durmalidir - "bu ay 6 ₼" yox, "beta bitendən sonra
       6 ₼ olacaq".  Yoxsa muellim indi pul istenildiyini dusunur.  */
-  function betaAdi(pl) {
+  /*  PULSUZ HEDD <-> ABUNE FERQI - TEK MENBE.
+      Iki yerde islenir: hediyye karti (esas sehife) ve Abune sehifesi.
+      Siyahi TEKRARLANMAMALIDIR - yoxsa bir imkan deyisende bir yer
+      yenilenir, o biri kohne qalir ve YALAN VED yaranir.  Bendler
+      koddaki app.has_active_subscription qapilari ile uygunlasdirilib.  */
+  function ferqSiyahi(free) {
+    //  Esas sehifede server bu reqemi vermir (rpc_my_context-de yoxdur),
+    //  ona gore susma 5-dir.  O, app.free_seat_limit() ile EYNI olmalidir -
+    //  db/test/smoke_qiymet.sql bunu yoxlayir, deyisse test dayanir.
+    free = Number(free) || 5;
+    return {
+      pulsuz: [
+        "<b>" + free + " şagird yeri</b>",
+        "Öz suallarınız və öz testləriniz — tam işləyir",
+        "Nəticə: kim neçə faiz topladı",
+        //  rpc_parent_login-de abune serti YOXDUR; rpc_parent_home-da
+        //  yalniz «zeif movzular» abuneyle acilir - qalani pulsuzdur.
+        //  Bu, pulsuz heddin en guclu tereflerinden biridir.
+        "<b>Valideyn girişi</b> — uşağın nəticəsi, meyli, gözləyən tapşırıqlar",
+        "Hesabat tarixçəsi: <b>son 7 gün</b>",
+        "Şagird məşqi: <b>gündə 20 sual</b>"
+      ],
+      abune: [
+        "<b>Limitsiz şagird</b>",
+        "Hazır suallar — platforma bankından test",
+        "Avtomatik test yığımı (generator)",
+        "Diaqnostika — səviyyə testi və nəticəsi",
+        "Zəif mövzu analizi — qrup, şagird və <b>valideyn</b> ekranında",
+        "Dərs planı, kurikulum paketi, «bugünkü dərs»",
+        "Şagird üçün fərdi plan",
+        "Təhlükə siqnalları (İcmalda)",
+        "Düzəliş — təkrar-səhv testi",
+        "Cavab vərəqi — sual-sual nə yazıb",
+        "Bütün tarixçə və şagirdə limitsiz məşq"
+      ]
+    };
+  }
+  //  Iki sutunlu muqayise (Abune sehifesi ucun - basliqli)
+  function ferqCmp(free) {
+    var f = ferqSiyahi(free);
+    function ul(a, cls) {
+      return '<ul class="rul' + (cls || "") + '">' +
+        a.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>";
+    }
+    return '<div class="cmp">' +
+      '<div class="cc"><div class="ch">Pulsuz hədd</div>' + ul(f.pulsuz, " lim") + "</div>" +
+      '<div class="cc on"><div class="ch">Abunə ilə açılır</div>' + ul(f.abune) + "</div>" +
+    "</div>";
+  }
+  /*  Esas sehifede: yigilan «Pulsuz həddə nə dəyişir?».  Susmada
+      BAGLIDIR - hediyye karti «xos gəldin» kartidir, birinci gun 11
+      bend sadalasaq hediyye hede kimi oxunur.  aciq=true olanda (7
+      gun qalanda, yaxud artiq pulsuz hedde dusende) ozu acilir -
+      qerar verdiyi andir, gizletmek menasizdir.  */
+  function ferqFold(aciq) {
+    var f = ferqSiyahi();   //  esas sehife - susan hedd
+    return '<details class="fold ferq"' + (aciq ? " open" : "") + ">" +
+      "<summary>Pulsuz həddə nə dəyişir?</summary>" +
+      '<ul class="rul lim">' +
+        f.pulsuz.map(function (x) { return "<li>" + x + "</li>"; }).join("") +
+      "</ul>" +
+      '<div class="fh">Abunə ilə açılır</div>' +
+      '<ul class="rul">' +
+        f.abune.map(function (x) { return "<li>" + x + "</li>"; }).join("") +
+      "</ul></details>";
+  }
+
+  //  Zolaqdaki kartin alt qeydi.  Mebleg AYRI SETIRDE yazilmir -
+  //  yoxsa «Sınaq bitir 3 okt» ile «1,50 ₼» yanasi durur ve muellim
+  //  «3 oktyabrdan odeyecem» deye basa dusur.  Halbuki o gun hesab
+  //  PULSUZ hedde dusur; odenis beta bitende baslayir.  Iki ayri
+  //  teqvim yanasi qoyulmamalidir (istifadeci tutdu).
+  function betaKart(pl, tarif) {
     var t = pl && pl.odenis_start ? dateAz(pl.odenis_start) : "";
-    return t ? t + "-dən sonra aylıq" : "Beta bitəndən sonra aylıq";
+    return (t ? t + "-dək ödəniş yoxdur." : "Beta bitənə qədər ödəniş yoxdur.") +
+      (tarif ? " Sonra: şagird başına " + tarif + " / ay." : "");
   }
   function betaQeyd(pl) {
     var t = pl && pl.odenis_start ? dateAz(pl.odenis_start) : "";
@@ -607,6 +682,32 @@
       ? "Ödəniş " + t + "-dən başlayır — o vaxta qədər heç nə tutulmur."
       : "Bu qiymət layihənin beta dövrü bitəndən sonra qüvvəyə minəcək — " +
         "indi heç nə tutulmur, vaxtı gələndə əvvəlcədən xəbər verəcəyik.";
+  }
+
+  /*  Hesab PULSUZ HEDDEDIR (abunesi yoxdur, guzest de bitib).
+      Hediyye karti bu halda bosdur, yeni hec ne gorunmurdu - muellim
+      «niye sual banki baglandi?» sualinin cavabini tapmirdi.  Siyahi
+      burada ACIQ gelir: artiq onun realligidir.  */
+  function pulsuzKart() {
+    if (!ACC || ACC.plan) return "";                 //  abunesi var
+    if (isAdmin() && ACC.is_owner) return "";        //  admin odemir
+    var wa = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
+    var me = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    return '<div class="card gift" id="freeCard">' +
+      '<span class="gi">' + ic("star") + "</span>" +
+      '<div class="gt"><b>Hesab pulsuz həddədir</b>' +
+      "<p>Şagirdləriniz işləməyə davam edir, öz sualınız və öz testiniz " +
+        "tam açıqdır. Hazır suallar, diaqnostika və dərs planı isə " +
+        "abunə ilədir.</p>" +
+      ferqFold(true) + "</div>" +
+      (wa
+        ? '<a class="glink" target="_blank" rel="noopener" href="' +
+          esc("https://wa.me/" + wa.replace(/[^0-9]/g, "") + "?text=" +
+              encodeURIComponent("Salam! Bil10 abunəsi haqqında sualım var." +
+                (me ? " Hesab: " + me : ""))) +
+          '">WhatsApp-la yazın ' + ic("right") + "</a>"
+        : "") +
+    "</div>";
   }
 
   /*  Bolme basligi + sagda kecid ("Hamisina bax") - uzun siyahi
@@ -640,17 +741,18 @@
         '<div class="seat"><div><div class="num">' + used + "</div>" +
           '<div class="lbl">aktiv şagird</div></div>' + pill + "</div>" +
         '<div class="gsep"></div>' +
-        '<div class="grow"><span>' + (hd ? betaAdi(pl) : "Bu ay") + "</span><b>" +
-          azn(pl.due_minor) + "</b></div>" +
+        //  Pulsuz dovrde: yalniz MUDDET setri, mebleg qeydin icinde.
+        //  Odenisli hesabda kohnesi qalir: «Bu ay» + «Növbəti ödəniş».
+        (hd ? "" : '<div class="grow"><span>Bu ay</span><b>' +
+                   azn(pl.due_minor) + "</b></div>") +
         (son
           ? '<div class="grow"><span>' +
               (hd ? (pl.provider === "gift" ? "Hədiyyə bitir" : "Sınaq bitir")
                   : "Növbəti ödəniş") + "</span><b>" + son +
               (dl != null && dl >= 0 ? " · " + dl + " gün" : "") + "</b></div>"
           : "") +
-        //  Meblegi gostermeyin serti: yaninda ACIQ yazilsin ki, INDI
-        //  odenis yoxdur - yoxsa muellim pul istenildiyini dusunur.
-        (hd ? '<div class="gnote">İndi ödəniş yoxdur — məbləğ məlumat üçündür.</div>'
+        (hd ? '<div class="gnote">' +
+                esc(betaKart(pl, azn(pl.per_seat_minor))) + "</div>"
             : "") +
       "</div>";
     }
@@ -717,7 +819,7 @@
 
     var html =
       //  160: qosulana hediyye paket karti (sinaq abunesi varsa)
-      giftCard() +
+      giftCard() + pulsuzKart() +
       /*  Bos hesabda (qrup yoxdur) bu blok gizlenir ve "Qrup yarat"
           formasi basliğin altina qalxir - yeni muellim ilk isi
           sehifenin dibinde axtarmasin (loadGroups).  */
@@ -4027,7 +4129,7 @@
           lower: rows.filter(function (t) { return !t.mine && gl && String(t.level || "") !== gl; })
         };
       }
-      var GRPL = [["here", gl ? "Hazır bank · " + gl : "Hazır bank"],
+      var GRPL = [["here", gl ? "Hazır suallar · " + gl : "Hazır suallar"],
                   ["own", "Öz testləriniz"], ["lower", "Aşağı siniflər"]];
       /*  Gizli <select> - deyer ve testler ucun (butun testler, hemise).
           Gorunen siyahi - .tlist setirleri; telefonda dogma acilan
@@ -4356,30 +4458,7 @@
       //  kodla uyusur: hansi RPC abunesiz imtina edir - db-de
       //  app.has_active_subscription yoxlamalari.
       "<h2>Pulsuz həddə düşəndə nə dəyişir</h2>" +
-      '<div class="card tight"><div class="cmp">' +
-        '<div class="cc"><div class="ch">Pulsuz hədd</div>' +
-          '<ul class="rul lim">' +
-            "<li><b>" + free + " şagird yeri</b></li>" +
-            "<li>Öz suallarınız və öz testləriniz — tam işləyir</li>" +
-            "<li>Nəticə: kim neçə faiz topladı</li>" +
-            "<li>Hesabat tarixçəsi: <b>son 7 gün</b></li>" +
-            "<li>Şagird məşqi: <b>gündə 20 sual</b></li>" +
-          "</ul></div>" +
-        '<div class="cc on"><div class="ch">Abunə ilə açılır</div>' +
-          '<ul class="rul">' +
-            "<li><b>Limitsiz şagird</b></li>" +
-            "<li>Platforma sual bankı — hazır suallardan test</li>" +
-            "<li>Avtomatik test yığımı (generator)</li>" +
-            "<li>Diaqnostika — səviyyə testi və nəticəsi</li>" +
-            "<li>Zəif mövzu analizi — qrup və şagird hesabatında</li>" +
-            "<li>Dərs planı, kurikulum paketi, «bugünkü dərs»</li>" +
-            "<li>Şagird üçün fərdi plan</li>" +
-            "<li>Təhlükə siqnalları (İcmalda)</li>" +
-            "<li>Düzəliş — təkrar-səhv testi</li>" +
-            "<li>Cavab vərəqi — sual-sual nə yazıb</li>" +
-            "<li>Bütün tarixçə və şagirdə limitsiz məşq</li>" +
-          "</ul></div>" +
-      "</div></div>" +
+      '<div class="card tight">' + ferqCmp(v.free_limit) + "</div>" +
       '<div class="spacer"></div>' +
 
       //  5 - odenis
@@ -4824,7 +4903,15 @@
             ? '<s class="mut">şagird: ' + whenAz(a.student_login) + "</s>"
             : (a.students
                 ? '<s class="mut sno">şagird hələ girməyib</s>'
-                : '<s class="mut">şagird yoxdur</s>')) + "</i></td>" +
+                : '<s class="mut">şagird yoxdur</s>')) +
+          //  174: valideyn ekrani neqeder islenir?  Qiymet qerari bu
+          //  reqemden asilidir, ona gore SON GIRIS sutununda tarixi ile
+          //  yazilir.  Hec bir valideyn girmeyibse setir yazilmir -
+          //  cedvel nahaq yere uzanmasin.
+          (a.parent_login
+            ? '<s class="mut">valideyn: ' + whenAz(a.parent_login) +
+              (a.parents > 1 ? " (" + a.parents + ")" : "") + "</s>"
+            : "") + "</i></td>" +
         '<td class="c">' + (ops
           ? '<details class="rmenu"><summary aria-label="Əməliyyatlar">···</summary>' +
             '<div class="rm">' + ops + "</div></details>"
@@ -5666,7 +5753,7 @@
       '<div class="card tight">' +
         '<div class="segs" id="gPool">' +
           seg("mine", "Öz suallarım", f.pool) +
-          seg("platform", "Hazır bank", f.pool) +
+          seg("platform", "Hazır suallar", f.pool) +
           seg("all", "Hamısı", f.pool) +
         "</div>" +
         (f.cls && f.topics.length
@@ -5678,7 +5765,7 @@
           : "") +
         (f.pool !== "mine" && !(ACC && ACC.plan)
           ? '<div class="warn" style="margin:12px 0 0">' + ic("warn") +
-            "<span>Hazır bank abunə paketinə daxildir. " +
+            "<span>Hazır suallar abunə paketinə daxildir. " +
             "Öz suallarınızdan yığa bilərsiniz.</span></div>"
           : "") +
         '<div style="margin-top:12px"><label for="gsub">Fənn</label>' +
@@ -6049,7 +6136,7 @@
           (d.students || 0) + " şagird. Hər dərs üçün hazır üç parça: <b>isinmə</b> dərsdən əvvəl 5 asan sual (1 gün), " +
           "<b>ev tapşırığı</b> «Keçildi»dən sonra 10 sual (7 gün), <b>rüb sınağı</b> keçilmiş mövzulardan 20 sual (7 gün). " +
           "Bir toxunuş — test yığılır və qrupa tapşırılır.</p>" +
-        (d.paid ? "" : '<div class="warn" style="margin-top:10px">' + ic("info") + "<span>Hazır bankdan test yığmaq abunə paketi ilədir.</span></div>") +
+        (d.paid ? "" : '<div class="warn" style="margin-top:10px">' + ic("info") + "<span>Hazır suallardan test yığmaq abunə paketi ilədir.</span></div>") +
       "</div>" +
       '<div class="spacer"></div>' +
       //  sinaq karti
@@ -6608,9 +6695,9 @@
     var pct = lim > 0 ? Math.min(100, Math.round(used * 100 / lim)) : 0;
 
     bandHead({
-      back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Bank",
+      back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Suallar",
       title: "Sual bankı",
-      sub: "Öz suallarınızı yazın, hazır bankdan seçin — fənn, sinif, mövzu və çətinliyə görə."
+      sub: "Öz suallarınızı yazın, hazır suallardan seçin — fənn, sinif, mövzu və çətinliyə görə."
     });
     show(
       '<div class="card">' +
@@ -6628,7 +6715,7 @@
       '<div class="card tight" id="bFilt">' +
         '<div class="segs" id="bPool">' +
           seg("mine", "Öz suallarım", f.pool) +
-          seg("platform", "Hazır bank", f.pool) +
+          seg("platform", "Hazır suallar", f.pool) +
           seg("all", "Hamısı", f.pool) +
         "</div>" +
         '<div class="spacer"></div>' +
@@ -7635,7 +7722,7 @@
   document.body.appendChild(bnav);
   var BNAV = [
     ["",    "home",   "İcmal"],
-    ["b",   "doc",    "Bank"],
+    ["b",   "doc",    "Suallar"],
     ["gen", "gen",    "Test yığ"],
     ["p",   "star",   "Paket"],
     ["me",  "person", "Profil"]
@@ -7713,8 +7800,23 @@
         var keep = ACC ? ACC.id : null;
         ACC = CTX.accounts.filter(function (a) { return a.id === keep; })[0] || CTX.accounts[0];
       } else { ACC = null; }
+      ozBrauzer(isAdmin());
       return CTX;
     });
+  }
+
+  /*  Ziyaret saygaci OZUMUZU saymasin (istifadeci: "men tez-tez girib
+      cixiram, artima tesir etmesin").  Ana sehife anonimdir - server
+      orada kimin geldiyini bilmir, ona gore nisan BRAUZERDE qoyulur;
+      assets/visit.js onu gorende rpc_visit-i hec cagirmir.  Eyni usul
+      onbaxis sayti (yeni.bil10.az) ucun de isledilir.
+      Adi muellim hemin brauzere girse nisan SILINIR - baskasinin
+      ziyareti itmesin.  */
+  function ozBrauzer(admin) {
+    try {
+      if (admin) localStorage.setItem("bil10_oz", "1");
+      else localStorage.removeItem("bil10_oz");
+    } catch (e) {}
   }
 
   function boot() {

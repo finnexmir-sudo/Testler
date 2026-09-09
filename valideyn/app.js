@@ -260,6 +260,14 @@
       } else {
         out += '<p class="muted">Müqayisə üçün keçən ayın nəticəsi yoxdur.</p>';
       }
+    } else if (s.attempts30 > 0 && !d.paid) {
+      //  174: ABUNESIZ - «nə baş verib» qalir, «necədir» (ortalama,
+      //  meyl) baglanir.  Yazi NEYTRALDIR: muellimin odemediyi kimi
+      //  oxunan hec ne yazilmir - Bil10 muellimi oz musterisinin
+      //  qarsisinda utandiran sey olmamalidir.
+      out += "<p>Son 30 gündə <b>" + s.attempts30 + "</b> test yazıb. " +
+        "Nəticələr aşağıdadır.</p>" +
+        '<p class="muted">Ortalama və keçən ayla müqayisə abunə ilə açılır.</p>';
     } else {
       out += '<p class="muted">Son 30 gündə test yazılmayıb.</p>';
     }

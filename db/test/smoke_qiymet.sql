@@ -274,3 +274,16 @@ begin
 end $$;
 reset request.jwt.claim.sub;
 \echo 'OK  9 · (173) admin lövhəsində bu günün sayları'
+
+-- 10 · (174) pulsuz hədd 5-dir — ekranda da bu rəqəm yazılır
+--  muellim/app.js → ferqSiyahi() susmada 5 yazir (esas sehifede server
+--  bu reqemi vermir).  Burada deyisse, ORADA da deyismelidir - bu
+--  yoxlama onlarin ayrilmasina imkan vermir.
+do $$
+begin
+  if app.free_seat_limit() <> 5 then
+    raise exception 'app.free_seat_limit() = % — muellim/app.js-deki '
+      'ferqSiyahi() susma deyeri de yenilenmelidir', app.free_seat_limit();
+  end if;
+end $$;
+\echo 'OK 10 · pulsuz hədd 5 (ekrandakı rəqəmlə bağlıdır)'

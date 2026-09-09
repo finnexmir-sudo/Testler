@@ -115,6 +115,10 @@ begin
   assert v->0->'plan'->>'status' = 'active', 'plan statusu gorunmur';
   assert v->0 ? 'groups' and v->0 ? 'attempts' and v->0 ? 'last_active',
          'aktivlik sutunlari yoxdur';
+  --  174: sagird ve valideyn girisi AYRI olculur.  Acar itse cedvel
+  --  sessizce bos sutun gosterir, ona gore acarin OZU yoxlanilir.
+  assert v->0 ? 'student_login' and v->0 ? 'parent_login' and v->0 ? 'parents',
+         'valideyn olcu sutunlari yoxdur (174)';
   --  pullu/pulsuz suzgeci: hesabin bu anda aktiv abunesi var
   v := public.rpc_admin_accounts(null, 'pullu');
   assert jsonb_array_length(v) = 1, 'pullu suzgeci aktiv abuneni tapmir';

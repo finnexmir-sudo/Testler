@@ -2564,6 +2564,68 @@ orada `.fold` yoxdur, gözləmə oraya qoyulmamalıdır.
 daimi» qaytarır — qiymət, «hədiyyə bitir» və xatırlatma zolağı
 görünmür (`rpc_paket` bunu onsuz da edirdi, my_context geridə qalmışdı).
 
+## Valideyn ekranı — pulsuz / abunə bölgüsü (db/174, 2026-09-09)
+
+İstifadəçi ideyası: müəllimi valideynə **hesabat vermək əziyyətindən**
+qurtaran hissə abunənin içində olsun. Valideyn 1–2 ay rahatlığa öyrəşir;
+abunə bitəndə həmin hissə bağlanır və **davam etməyi valideyn istəyir**.
+Valideyn heç vaxt ödəmir — pulu müəllim verir, rahatlığı da o alır.
+
+Düzəliş (mən əlavə etdim, istifadəçi qəbul etdi): **kəsmirik, azaldırıq.**
+Qapıda qalan valideyn müəllimi günahlandırır, hekayə pis yayılır.
+
+| Həmişə pulsuz | Abunə ilə |
+|---|---|
+| «Son nəticələr» siyahısı (test-test faiz, tarix) | ortalama faiz (`avg30`) |
+| «son 30 gündə N test yazıb» sayı | keçən ayla müqayisə (`prev30`, `delta`) |
+| gözləyən tapşırıqlar, fərdi plan, mövzu məşqi | ən yaxşı nəticə (`best`) |
+| davamiyyət və ödəniş dəftəri | zəif mövzular (onsuz da belə idi) |
+
+Bölgü `rpc_parent_home` içində, `v_paid = app.has_active_subscription()`
+ilə: bağlı sahələr **`null` qaytarır, açar itmir** — frontend `undefined`
+ilə `null` arasında fərq qoymur, açar itsə səhv budaq seçilər
+(`smoke_valideyn` 13 açarın **özünü** yoxlayır).
+
+Mətn valideyn ekranında **neytraldır** — «müəllim ödəməyib» kimi oxunan
+heç nə yazılmır. Bil10 müəllimi öz müştərisinin qarşısında utandıran şey
+olmamalıdır.
+
+**Beta dövründə heç kimə heç nə olmur:** hədiyyə/sınaq abunəsi olan
+hesabda `v_paid = true`.
+
+**Ölçü birinci.** Eyni miqrasiya `rpc_admin_accounts`-da şagird və
+valideyn girişini **ayırdı**: `student_login`, `parent_login`, `parents`
+(neçə şagirdin valideyni ən azı bir dəfə girib). Cədvəldə «Son giriş»
+sütununda üçüncü sətir kimi görünür (heç bir valideyn girməyibsə sətir
+yazılmır). Səbəb: valideyn ekranı az işlənirsə, bu lever zəifdir — qərarı
+məlumatla veririk.
+
+## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
+
+İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».
+**İki yer, iki ayrı həll:**
+
+1. **Ana səhifə sayğacı** (`public.visits`) — ora **anonim** gəlinir,
+   server kimin gəldiyini bilə bilmir (IP saxlanmır, JWT yox). Həll
+   brauzerdədir: `refreshContext()` admin girişini görəndə
+   `localStorage.bil10_oz = "1"` qoyur (`ozBrauzer()`), `assets/visit.js`
+   nişanı görəndə `rpc_visit`-i **heç çağırmır**. Eyni üsul önbaxış saytı
+   (`yeni.`) üçün artıq işləyirdi. Adi müəllim həmin brauzerə girsə nişan
+   **silinir** — başqasının ziyarəti itməsin.
+2. **«Bu gün / həftə — girən müəllim»** (`rpc_admin_stats`) — bura JWT ilə
+   gəlinir, admin hesabı serverdə tanınır: `seen_today` və `seen_week`-ə
+   `not app.account_is_admin(a.id)` əlavə olundu (pullu/sınaq saylarında
+   bu qayda db/173-dən bəri var idi).
+
+**Toxunulmayan:** `accounts`, `accounts_week`, `students`, `mrr_minor`.
+Onlar **hadisə** deyil, **mövcudluq** sayır — admin hesabı bir dəfə
+yaranıb, hər gün artmır. Sabit «+1» çıxarılsa köhnə ekran şəkilləri ilə
+müqayisə pozulur.
+
+Yoxlama: `smoke_admin_giris` 5 (admin bu gün girib → `seen_today` **1**,
+yəni yalnız adi müəllim; 175 olmadan **2** olur), `e2e_paket` («girən
+müəllim» lövhəsi bu ssenaridə **0**, çünki yeganə müəllim admindir).
+
 ## Dizayn şablonu — marka zolağı (2026-09-08, v374–377)
 
 Ana səhifə Oxuyan üslubunda yenidən yığıldı (istifadəçi bəyəndi) və

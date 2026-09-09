@@ -115,3 +115,39 @@ begin
   assert ok, 'adi muellim siyahini gordu';
 end $$;
 \echo 'OK  4 · adi muellim: yalniz rpc_seen'
+
+-- =====================================================================
+--  5. OZ GIRISIMIZ SAYILMIR (db/175)
+--
+--  Istifadeci hesabi her gun acir.  Admin sahibli hesab "bu gun giris
+--  eden muellim" sayina dusse, reqem HEC VAXT sifir olmur ve artimi
+--  gostermir - saygac oz-ozunu doldurur.  Pullu/sinaq saylarinda bu
+--  qayda artiq var idi (db/173), indi GIRIS saylarina da sirayet edir.
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+insert into public.accounts (id, type, name, owner_id) values
+  ('aaaa0000-0000-0000-0000-0000000000b1','tutor','Admin hesabi',
+   '11110000-0000-0000-0000-0000000000b1');
+insert into public.account_members values
+  ('aaaa0000-0000-0000-0000-0000000000b1','11110000-0000-0000-0000-0000000000b1',true);
+--  admin bu gun girib (auth.users.last_sign_in_at = now, hazirliqda)
+update public.profiles set last_seen_at = now()
+ where id = '11110000-0000-0000-0000-0000000000b1';
+
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000b1';
+do $$
+declare st jsonb;
+begin
+  st := public.rpc_admin_stats();
+  --  bu gun giren YEGANE hesab «Yeni hesab»dir.  Admin hesabi da bu gun
+  --  girib - o sayilsaydi reqem 2 olardi.
+  assert (st->>'seen_today')::int = 1,
+    'oz girisimiz "bu gun giren" sayina dusdu: ' || (st->>'seen_today');
+  assert (st->>'seen_week')::int = 1,
+    'oz girisimiz heftelik saya dusdu: ' || (st->>'seen_week');
+  --  hesabin OZU sayilmaqda davam edir - o, HADISE deyil, movcudluqdur
+  assert (st->>'accounts')::int = 3,
+    'hesab sayi deyisdi: ' || (st->>'accounts');
+end $$;
+\echo 'OK  5 · adminin oz girisi «bu gun / hefte» sayina dusmur'

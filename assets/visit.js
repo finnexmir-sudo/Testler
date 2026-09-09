@@ -7,6 +7,10 @@
   if (!C || !C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) return;
   /* Onbaxis sayti (yeni.bil10.az) sayilmir - orada yalniz biz baxiriq. */
   if (location.hostname.indexOf("yeni.") === 0) return;
+  /* OZ ziyaretimiz sayilmir.  Nisani panel qoyur (admin girende) -
+     ana sehife anonimdir, server orada kimin geldiyini bile bilmir.
+     Adi muellim eyni brauzere girse panel nisani silir. */
+  try { if (localStorage.getItem("bil10_oz")) return; } catch (e) {}
   var page = (document.body && document.body.getAttribute("data-page")) || "home";
   function send(ev) {
     try {

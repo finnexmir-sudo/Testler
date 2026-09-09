@@ -66,6 +66,17 @@ with sync_playwright() as pw:
     pg.fill("#aname", "Paket hesabi"); pg.click("#btnSetup")
     pg.wait_for_selector("#gForm", timeout=8000)
 
+    #  174: PULSUZ HEDDE olan hesab «nə dəyişir» siyahisini DAIMI gorur -
+    #  «niyə hazır suallar bağlandı?» sualinin cavabi ekranda olmalidir.
+    ok(pg.locator("#freeCard").count() == 1, "pulsuz hedd karti gorunur")
+    fc = pg.inner_text("#freeCard").replace("\n", " ")
+    ok("pulsuz həddədir" in fc, "kart veziyyeti deyir", fc[:70])
+    ok("Şagirdləriniz işləməyə davam edir" in fc, "sagirdlerin qalacagi yazilir")
+    ok(pg.locator("#freeCard .fold.ferq").evaluate("e => e.open"),
+       "siyahi ACIQ gelir (artiq onun realligidir)")
+    ok("Hazır suallar" in fc and "Diaqnostika" in fc and "5 şagird yeri" in fc,
+       "siyahida esas bendler var", fc[-120:])
+
     print("A · Abunə səhifəsi (abunəsiz)")
     ok(pg.locator("#btnPkt").count() == 1, "esas sehifede Paket bendi var")
     ok(pg.locator("#btnAdm").count() == 0, "adi muellimde Idareetme bendi YOXDUR")
@@ -79,7 +90,11 @@ with sync_playwright() as pw:
     ok("Şagird başına" in mt, "tek qayda gorunur")
     ok("1,50 ₼" in mt or "1.50 ₼" in mt, "tarif manatladir",
        mt[:80].replace("\n", " "))
-    ok("Valideyn" not in mt, "ozge auditoriya plani gorunmur")
+    #  174: «Valideyn» sozu artiq siyahida da kecir (valideyn girisi
+    #  pulsuzdur).  Ozge auditoriya PLANININ gelmediyini serverde
+    #  yoxlayiriq - smoke_paket 1: rpc_paket tek plan qaytarir
+    #  (slug 'sagird-basi').  Burada plan KARTI olmadigi kifayetdir.
+    ok(pg.locator(".pkt").count() == 0, "ozge auditoriya plan karti yoxdur")
     #  qaydanin oz setirleri
     ok(pg.locator("#qayda li").count() == 6, "qayda 6 setirdir",
        pg.locator("#qayda li").count())
@@ -91,7 +106,7 @@ with sync_playwright() as pw:
     ok(pg.locator(".cmp .cc").count() == 2, "pulsuz hedd / abune muqayisesi var",
        pg.locator(".cmp .cc").count())
     cmp_t = pg.inner_text(".cmp")
-    for soz in ("Platforma sual bankı", "Diaqnostika", "Zəif mövzu analizi",
+    for soz in ("Hazır suallar", "Diaqnostika", "Zəif mövzu analizi",
                 "Dərs planı", "Cavab vərəqi", "gündə 20 sual"):
         ok(soz in cmp_t, "muqayisede «" + soz + "» yazilir")
     #  abunesiz hesabda hele sagird yoxdur -> 0 x 1,50 = 0 ₼
@@ -180,8 +195,17 @@ with sync_playwright() as pw:
     #  sagirdi olan hesabda menalidir (bos hesabda yanlis siqnal olardi).
     ok("şagird yoxdur" in row, "sagirdsiz hesabda xeberdarliq yoxdur", row[-60:])
     #  173: lovheler iki setre bolundu - "Bu gün" ve "Ümumi".
-    ok(pg.inner_text("#tBugun .tile.b").startswith("1"),
-       "bu gun giren muellim 1", pg.inner_text("#tBugun .tile.b").replace("\n", " "))
+    #  Bu ssenaride hesablar BU GUN yaranib - «yeni qeydiyyat» lovhesi
+    #  sifir olmamalidir (lovhe setrinin ozu isleyir).
+    ok(not pg.inner_text("#tBugun .tile.a").startswith("0"),
+       "bu gun yeni qeydiyyat sayilir",
+       pg.inner_text("#tBugun .tile.a").replace("\n", " "))
+    #  175: OZ girisimiz sayilmir.  Bu ssenaride yeganə muellim ADMIN-dir,
+    #  ona gore «giren müəllim» SIFIR olmalidir - reqem 1 gorunurse, saygac
+    #  oz-ozunu doldurur ve artimi gostermir.
+    ok(pg.inner_text("#tBugun .tile.b").startswith("0"),
+       "adminin oz girisi sayilmir (175)",
+       pg.inner_text("#tBugun .tile.b").replace("\n", " "))
     ok("girib (7 gün)" in pg.inner_text("#tUmumi .tile.e"),
        "umumi setrinde sagird + heftelik giris",
        pg.inner_text("#tUmumi .tile.e").replace("\n", " "))
@@ -371,21 +395,23 @@ with sync_playwright() as pw:
        " where account_id = %s", (acc,))
     pg.goto(PANEL + "#/"); pg.reload(); pg.wait_for_selector("#band .bseat", timeout=15000)
     bs = pg.inner_text("#band .bseat").replace("\n", " ")
-    #  172: mebleg SERTI dilde durur - "bu ay" yox, "beta bitendən sonra"
-    ok("Beta bitəndən sonra aylıq" in bs,
-       "hediyye ayinda mebleg serti dilde yazilir", bs[:80])
+    #  174: mebleg AYRI SETIRDE deyil, alt qeydin icindedir - «Sınaq
+    #  bitir 3 okt» ile «1,50 ₼» yanasi durmasin (yanlis netice verirdi).
+    ok("Beta bitənə qədər ödəniş yoxdur" in bs and "Sonra: şagird başına" in bs,
+       "kartda odenisin NE VAXT baslayacagi aydin yazilir", bs[-90:])
     #  172: kartda qalan gun ve "indi odenis yoxdur" qeydi
     ok("Hədiyyə bitir" in bs and "gün" in bs,
        "kartda hediyyenin bitme tarixi ve qalan gun", bs[:110])
-    ok("İndi ödəniş yoxdur" in bs, "kartda 'indi odenis yoxdur' qeydi", bs[:140])
+    ok("Hədiyyə bitir" in bs and "gün" in bs,
+       "kartda hediyyenin bitme tarixi ve qalan gun", bs[:110])
     #  hediyye karti (yalniz ESAS sehifede olur) paketin sertini yazir
     gc = pg.inner_text("#giftCard").replace("\n", " ")
-    ok("şagird başına" in gc and "Beta bitəndən sonra" in gc
-       and "İndi heç nə tutulmur" in gc,
-       "hediyye kartinda paket serti + beta qeydi", gc[-130:])
-    #  konkret hesab: N aktiv sagird -> M ₼ / ay "ederdi"
-    ok("aktiv şagird" in gc and gozlenen in gc and "edərdi" in gc,
-       "hediyye kartinda konkret hesab (serti dilde)", gc[-170:])
+    #  174: EN VACIB SETIR - o gun NE ITIRECEYI yazilir.  Evvel yalniz
+    #  «bitmə: 3 okt» yazilirdi, muellim neyin baglandigini bilmirdi.
+    ok("pulsuz həddə düşür" in gc and "hazır suallar və diaqnostika bağlanır" in gc,
+       "hediyye kartinda «sonra ne olacaq» yazilir", gc[-150:])
+    ok("mövcud şagirdləriniz işləməyə davam edir" in gc,
+       "sagirdlerin qalacagi yazilir")
     pg.goto(PANEL + "#/p"); pg.reload()
     pg.wait_for_selector(".abn", timeout=15000)
     mt = pg.inner_text("#main")
@@ -403,8 +429,8 @@ with sync_playwright() as pw:
        " where account_id = %s", (acc,))
     pg.goto(PANEL + "#/"); pg.reload(); pg.wait_for_selector("#band .bseat", timeout=15000)
     bs = pg.inner_text("#band .bseat").replace("\n", " ")
-    ok("Beta bitəndən sonra aylıq" in bs,
-       "el ile verilmis sinaqda da serti dil", bs[:80])
+    ok("Beta bitənə qədər ödəniş yoxdur" in bs,
+       "el ile verilmis sinaqda da eyni qeyd", bs[-90:])
     pg.goto(PANEL + "#/p"); pg.reload()
     pg.wait_for_selector(".abn", timeout=15000)
     mt = pg.inner_text("#main")

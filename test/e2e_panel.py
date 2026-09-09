@@ -181,16 +181,19 @@ with sync_playwright() as pw:
     print("A1 · (160) Hədiyyə paket kartı")
     ok(pg.locator("#giftCard").count() == 1 and "hədiyyədir" in pg.inner_text("#giftCard"),
        "qeydiyyatdan sonra hediyye karti", pg.inner_text("#giftCard")[:60].replace("\n", " "))
-    ok("Bitmə:" in pg.inner_text("#giftCard") and "gün)" in pg.inner_text("#giftCard"), "kartda bitme tarixi ve gun sayi")
+    #  174: «Bitmə: 3 okt (24 gün)» -> «3 okt-dək (24 gün) hər şey açıqdır»
+    gc0 = pg.inner_text("#giftCard").replace("\n", " ")
+    ok("qədər" in gc0 and "gün)" in gc0, "kartda bitme tarixi ve gun sayi", gc0[:80])
+    ok("pulsuz həddə düşür" in gc0, "kartda «sonra ne olacaq» yazilir", gc0[-120:])
     #  169: hediyye = odenisli mehsulun ozu - LIMITSIZ.  Evvel 'repetitor-25'
     #  verilirdi ("0 / 25"), yeni pulsuz ay odenislinin eynisidir, ona gore
     #  kart doluluq xetti yox, aktiv sagird sayini ve tarifi gosterir.
     bseat = pg.inner_text("#band .bseat").replace("\n", " ")
     ok("aktiv şagird" in bseat and "Şagird başına" in bseat,
        "hediyye ile limitsiz plan, pill plan adi", bseat[:70])
-    #  172: mebleg SERTI dilde durur - "bu ay" yox, "beta bitendən sonra"
-    ok("Beta bitəndən sonra aylıq" in bseat,
-       "hediyye ayinda mebleg serti dilde yazilir", bseat[:80])
+    #  174: odenisin NE VAXT baslayacagi kartin alt qeydindedir
+    ok("Beta bitənə qədər ödəniş yoxdur" in bseat,
+       "kartda odenisin ne vaxt baslayacagi yazilir", bseat[-90:])
     ok(pg.locator("#giftCard a[href*='wa.me/994501234567']").count() == 1, "kartda WhatsApp duymesi")
     #  ilk qrup formasi kartin ALTINDADIR (h1 -> kart -> forma); qruplar
     #  asinxron gelir - forma kocurulene qeder gozle

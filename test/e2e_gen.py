@@ -169,7 +169,7 @@ with sync_playwright() as pw:
        "onizleme durust: hovuzda yalniz 12 sual", pg.inner_text("#gPrev")[:70])
 
     print("C · Abunəsiz platforma hovuzu")
-    pg.locator("#gPool .seg", has_text="Hazır bank").click()
+    pg.locator("#gPool .seg", has_text="Hazır suallar").click()
     pg.wait_for_selector("#gPool .seg.on", timeout=4000)
     ok("abunə paketinə daxildir" in pg.inner_text("#main"),
        "platforma secilende abune xeberdarligi cixir")
@@ -281,7 +281,7 @@ with sync_playwright() as pw:
     pg.goto(PANEL); pg.wait_for_timeout(300)
     pg.reload(); pg.wait_for_selector("#gForm", timeout=8000)
     pg.click("#bnav a[href='#/gen']"); pg.wait_for_selector("#gPool", timeout=8000)
-    pg.locator("#gPool .seg", has_text="Hazır bank").click()
+    pg.locator("#gPool .seg", has_text="Hazır suallar").click()
     pg.wait_for_timeout(500)
     ok("abunə paketinə daxildir" not in pg.inner_text("#main"),
        "abune ile xeberdarliq itir")

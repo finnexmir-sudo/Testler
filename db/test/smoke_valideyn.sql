@@ -289,4 +289,84 @@ begin
 end $$;
 \echo 'OK 12 · huquqlar duzgun bolusdurulub'
 
+-- =====================================================================
+-- 13. ABUNE BOLGUSU (174): «ne bas verib» pulsuz, «necedir» abune ile
+--
+--  Bu, PUL isidir: eger abune bitenden sonra da tehlil gorunurse,
+--  muellimin odemek ucun sebebi azalir.  Eksi daha pisdir - neticeler
+--  de baglansa, valideyn qapida qalir ve hekaye pis yayilir.  Ona gore
+--  HER IKI TEREF ayrica yoxlanilir.
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+delete from public.subscriptions
+ where account_id = 'aaaa0000-0000-0000-0000-0000000000fa';
+insert into public.tests (id, owner_type, owner_id, title, program_id,
+                          subject_id, pass_percent, is_free, status)
+select 'ffff0000-0000-0000-0000-0000000000fa','educator',
+       '11110000-0000-0000-0000-0000000000fa','V testi', p.id, sub.id,
+       50, false, 'published'
+  from public.programs p, public.subjects sub limit 1;
+insert into public.attempts (student_id, test_id, status, score, max_score,
+                             percent, started_at, finished_at, duration_sec)
+select s.id, 'ffff0000-0000-0000-0000-0000000000fa', 'submitted', 8, 10, 80,
+       now() - interval '3 days', now() - interval '3 days', 600
+  from public.students s where s.full_name = 'Ayan Qasimova';
+insert into public.attempts (student_id, test_id, status, score, max_score,
+                             percent, started_at, finished_at, duration_sec)
+select s.id, 'ffff0000-0000-0000-0000-0000000000fa', 'submitted', 6, 10, 60,
+       now() - interval '45 days', now() - interval '45 days', 600
+  from public.students s where s.full_name = 'Ayan Qasimova';
+
+do $$
+declare code text; tok text; v jsonb; sm jsonb;
+begin
+  select parent_code into code from public.students where full_name = 'Ayan Qasimova';
+
+  -- ---- PULSUZ hedd: abune yoxdur
+  tok := public.rpc_parent_login(code)->>'token';
+  v  := public.rpc_parent_home(tok);
+  sm := v->'summary';
+  assert not (v->>'paid')::boolean, 'abune yoxdur, amma paid=true';
+  --  acarin OZU qalmalidir - frontend 'sm.avg30 === undefined' ile
+  --  'null' arasinda ferq qoymur, amma acar itse sehv budaq secile biler
+  assert sm ? 'avg30' and sm ? 'delta' and sm ? 'best' and sm ? 'prev30',
+    'xulase acarlari itib - kohne funksiya qalib?';
+  assert sm->>'avg30' is null,  'pulsuz hedde ORTALAMA sizir';
+  assert sm->>'delta' is null,  'pulsuz hedde MEYL sizir';
+  assert sm->>'best'  is null,  'pulsuz hedde EN YAXSI NETICE sizir';
+  assert v->>'weak'   is null,  'pulsuz hedde zeif movzular sizir';
+  --  ne bas verib - HEMISE acaqdir
+  assert (sm->>'attempts30')::int = 1, 'pulsuz hedde test sayi itdi';
+  assert jsonb_array_length(v->'results') = 2,
+    'pulsuz hedde «Son nəticələr» siyahisi baglandi - valideyn qapida qalir';
+  assert v->'results'->0->>'percent' is not null,
+    'pulsuz hedde netice faizi itdi';
+end $$;
+\echo 'OK 13 · pulsuz hedd: neticeler acaq, tehlil bagli'
+
+-- =====================================================================
+-- 14. Abune varsa - tehlil geri qayidir (beta dovrunde de bu yoldur)
+-- =====================================================================
+insert into public.subscriptions (account_id, plan_id, status, seats,
+                                  started_at, current_period_end, provider)
+select 'aaaa0000-0000-0000-0000-0000000000fa', pl.id, 'trialing', 1,
+       now(), now() + interval '30 days', 'gift'
+  from public.plans pl where pl.slug = 'sagird-basi';
+
+do $$
+declare code text; tok text; v jsonb; sm jsonb;
+begin
+  select parent_code into code from public.students where full_name = 'Ayan Qasimova';
+  tok := public.rpc_parent_login(code)->>'token';
+  v  := public.rpc_parent_home(tok);
+  sm := v->'summary';
+  assert (v->>'paid')::boolean, 'abune var, amma paid=false';
+  assert (sm->>'avg30')::int = 80,  'abune ile ortalama gelmir: ' || coalesce(sm->>'avg30','null');
+  assert (sm->>'prev30')::int = 60, 'abune ile kecen ay gelmir';
+  assert (sm->>'delta')::int = 20,  'meyl yanlisdir: ' || coalesce(sm->>'delta','null');
+  assert (sm->>'best')::int = 80,   'en yaxsi netice gelmir';
+  assert v->>'weak' is not null,    'abune ile zeif movzular hele de baglidir';
+end $$;
+\echo 'OK 14 · abune ile tehlil acilir'
+
 \echo 'VALIDEYN: BUTUN YOXLAMALAR KECDI'

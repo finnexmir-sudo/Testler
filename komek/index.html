@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light">
 <title>Bil10 — necə işləyir</title>
 <meta name="description" content="Bil10 bələdçisi: müəllim qrup yaradır, şagird kodla girir, valideyn nəticəni izləyir. Addım-addım, real ekran şəkilləri ilə.">
-<link rel="stylesheet" href="../assets/base.css?v=398">
+<link rel="stylesheet" href="../assets/base.css?v=400">
 <link rel="manifest" href="../manifest.json">
 <meta name="theme-color" content="#0e9384">
 <meta name="mobile-web-app-capable" content="yes">
@@ -117,9 +117,11 @@
         <p><a href="../muellim/">Panelə keçin</a>, «Qeydiyyat»ı seçin, ad, e-poçt və parol yazın.
            Sonra hesab növünü («Repetitor» və ya «Məktəb») və hesabın adını yazın —
            bu ad üst zolaqda görünəcək.</p>
-        <p>Hesab yaranan kimi ana səhifədə <b>«Tam paket sizə hədiyyədir»</b> kartı çıxır: 25 şagird yeri,
-           hazır sual bankı, avtomatik test, diaqnostika, dərs planı — bitmə tarixi kartda yazılır.
-           Bitməyə bir həftə qalanda kart narıncı olur, oradakı düymə ilə bizə WhatsApp-la yaza bilərsiniz.</p>
+        <p>Hesab yaranan kimi ana səhifədə <b>hədiyyə kartı</b> çıxır: bir ay hər şey açıqdır —
+           şagird sayında limit yoxdur, hazır suallar, avtomatik test, diaqnostika, dərs planı.
+           Bitmə tarixi kartda yazılır; bitməyə bir həftə qalanda kart narıncı olur, oradakı düymə ilə
+           bizə WhatsApp-la yaza bilərsiniz. Bitəndən sonra hesab bağlanmır — pulsuz həddə düşür:
+           mövcud şagirdləriniz işləməyə davam edir, hazır suallar və diaqnostika bağlanır.</p>
         <div class="tip">Parolu unutsanız giriş ekranındakı «Parolu unutmusunuz?» keçidi ilə bərpa edilir.</div>
       </div>
       <figure class="ph"><img src="img/m2_hesab.png" alt="Hesab quraşdırma ekranı" loading="lazy"><figcaption>Hesab növü və adı — bir dəfəlik</figcaption></figure>
@@ -129,7 +131,7 @@
       <div>
         <span class="n">2</span>
         <h3>Qrup yaradın</h3>
-        <p>İcmal ekranında qrupun adını yazın və sinfi seçin. Sinif vacibdir: sual bankı,
+        <p>İcmal ekranında qrupun adını yazın və sinfi seçin. Sinif vacibdir: hazır suallar,
            test yığma və dərs planı ona görə daralır.</p>
         <ul>
           <li>Bir hesabda istənilən sayda qrup ola bilər.</li>
@@ -165,7 +167,7 @@
         <ul>
           <li>Testlər səhifənin içində siyahı kimidir: sətrə toxunun — seçilir. Siyahı uzundursa üstdəki fənn düymələri ilə süzün, «Test axtar» xanasına adın bir hissəsini yazın. Hər sətrin altında sual sayı, sinif və «başqa qrupa da verilib» qeydi var.</li>
           <li>Tapşırığı tək bir şagirdə də vermək olar («yalnız ona» — şagird ekranında «sənə» nişanı).</li>
-          <li>«Sərbəst məşq» açıqdırsa şagird hazır bankın testlərini özü də işləyə bilər; bağlasanız yalnız verdiyiniz tapşırıqları görər.</li>
+          <li>«Sərbəst məşq» açıqdırsa şagird hazır testləri özü də işləyə bilər; bağlasanız yalnız verdiyiniz tapşırıqları görər.</li>
           <li>Hansı test nə vaxt? Hazır test və öz testiniz — bu ekran. Ev tapşırığı — dərs planında «Keçildi». Diaqnostik test və səhvlərdən təkrar — şagirdin hesabatında.</li>
           <li>Vaxtı bitmiş tapşırıq «Bağlı» sekmesinə keçir — nəticələr itmir.</li>
           <li>Tapşırıq verilən kimi hazır WhatsApp mətni çıxır: «WhatsApp-a göndər» — qrupa bir toxunuşla xəbər gedir.</li>
@@ -178,10 +180,10 @@
       <div>
         <span class="n">5</span>
         <h3>Öz testinizi yığın</h3>
-        <p>«Test yığ» — fənn, sinif, mövzu və çətinliyi seçin, sistem sual bankından test yığır.
-           «Sual bankı»nda öz suallarınızı da yaza bilərsiniz; onlar yalnız sizindir.</p>
+        <p>«Test yığ» — fənn, sinif, mövzu və çətinliyi seçin, sistem hazır suallardan test yığır.
+           «Suallar» bölməsində öz suallarınızı da yaza bilərsiniz; onlar yalnız sizindir.</p>
         <ul>
-          <li>Hazır bankın («Hazır bank» hovuzu) düz cavabı şagird tərəfinə heç vaxt getmir — bal serverdə hesablanır.</li>
+          <li>Hazır sualların düz cavabı şagird tərəfinə heç vaxt getmir — bal serverdə hesablanır.</li>
           <li>Testi kağıza çap etmək üçün «Test vərəqi» var.</li>
           <li>Öz sualınız 10-dan çox cavablanıbsa redaktorda statistika sətri çıxır: neçə faiz düz, ayırdetmə (güclü şagirdlər fərqlənirmi), heç seçilməyən variant. Mənfi ayırdetmə — açarı yoxlayın.</li>
           <li>Dərs planı olan qruplar üçün üstdə «Tövsiyə olunan» çıxır: son keçilən fəsildən 10 sual — «Yığ» basırsınız, test yığılır və tapşırıq ekranına keçir.</li>
@@ -290,7 +292,7 @@
       <div>
         <span class="n">11</span>
         <h3>Şablon sual: hər şagirdə fərqli rəqəmlər</h3>
-        <p>Sual bankında «Yeni sual» yazanda «Şablon» bölməsini açın. Sualda rəqəmin yerinə
+        <p>«Suallar» bölməsində «Yeni sual» yazanda «Şablon» bölməsini açın. Sualda rəqəmin yerinə
            <b>{a}</b>, <b>{b}</b>, variantlarda <b>{a+b}</b> kimi ifadə yazın və dəyişənlərin aralığını göstərin:
            «a = 100..999, b = 100..999; şərt: a > b». Hər şagird testi açanda öz rəqəmlərini görür,
            ikinci cəhddə yenə başqa rəqəmlər çıxır — cavab əzbərlənmir, bir sual yüzlərlə sual olur.</p>
@@ -316,7 +318,7 @@
           <li>Təcrübəsiz repetitor üçün: e-dərslik sırası ilə plan + hər dərsə hazır test — il əvvəlcədən hazırdır, dərsə hazırlıq 1 dəqiqədir.</li>
           <li>«Bu günün dərsi» kartında növbəti mövzunun yanında da «isinmə 5 sual» var.</li>
           <li>Sınaq bir dəfə yığılan mövzunu bir də götürmür; «Hamısından» — bütün keçilmiş mövzulardan (məsələn, il sonu).</li>
-          <li>Hazır bankdan yığmaq abunə paketi ilədir.</li>
+          <li>Hazır suallardan yığmaq abunə paketi ilədir.</li>
         </ul>
       </div>
       <figure class="ph"><img src="img/m14_paket.png" alt="Dərs paketi cədvəli" loading="lazy"><figcaption>Mövzu · isinmə · ev tapşırığı · rüb sınağı</figcaption></figure>
@@ -454,6 +456,9 @@
            Uşaq özü «Mövzu məşqi» işləyirsə «3 mövzu mənimsənilib · 2 davam edir» sətri çıxır.</p>
         <p>İki uşağınız varsa: ekranın altında «uşaq əlavə et» — ikinci uşağın kodunu yazın, üstdə ad çipləri çıxır,
            toxunub keçirsiniz. Hər uşağın kodu ayrıdır.</p>
+        <p>Valideyn heç vaxt ödəmir. Nəticələr siyahısı, gözləyən tapşırıqlar, davamiyyət və
+           ödəniş dəftəri <b>həmişə açıqdır</b>. Ortalama faiz, keçən ayla müqayisə və zəif mövzular
+           müəllimin abunəsi ilə görünür — abunə yoxdursa o sətirlərin yerində «abunə ilə açılır» yazır.</p>
         <p>Sualınız olsa müəllimə yazın — ekran əməliyyat üçün deyil, baxmaq üçündür.</p>
       </div>
       <figure class="ph"><img src="img/v2_usagim.png" alt="Valideyn ekranı" loading="lazy"><figcaption>Uşağın gedişatı</figcaption></figure>
@@ -477,7 +482,7 @@
          yenidən yazmaq üçün müəllim cəhd sayını artırmalı və ya yeni tapşırıq verməlidir.</p></details>
     <details><summary>Düz cavab niyə göstərilmir?</summary>
       <p>Nəticədə hər sualda nə yazdığınız, düz/səhv olduğu və izah görünür. Düz cavabın özü
-         açılsa, sual bankı bir gündə paylaşılıb mənasız olar — ona görə izah var, açar yoxdur.</p></details>
+         açılsa, hazır suallar bir gündə paylaşılıb mənasız olar — ona görə izah var, açar yoxdur.</p></details>
     <details><summary>İnternet kəsildi, cavablar itdi?</summary>
       <p>Yox. Seçdiyiniz cavablar telefonda saxlanır; eyni testi yenidən açanda geri qayıdır.
          «Testi bitir» yalnız internet olanda göndərilir.</p></details>
@@ -521,8 +526,8 @@
   <p class="foot">Bələdçi tətbiqlə birlikdə yenilənir. Sual qaldı? Müəlliminizə yazın —
      müəllimsinizsə <a href="../muellim/">paneldə</a> «Profil» bölməsindən bizə çatın.</p>
 </div>
-  <script src="../assets/pwa.js?v=398"></script>
-  <script src="../muellim/config.js?v=398"></script>
-  <script src="../assets/visit.js?v=398"></script>
+  <script src="../assets/pwa.js?v=400"></script>
+  <script src="../muellim/config.js?v=400"></script>
+  <script src="../assets/visit.js?v=400"></script>
 </body>
 </html>
