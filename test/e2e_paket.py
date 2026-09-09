@@ -81,8 +81,10 @@ with sync_playwright() as pw:
        mt[:80].replace("\n", " "))
     ok("Valideyn" not in mt, "ozge auditoriya plani gorunmur")
     #  qaydanin oz setirleri
-    ok(pg.locator("#qayda li").count() == 5, "qayda 5 setirdir",
+    ok(pg.locator("#qayda li").count() == 6, "qayda 6 setirdir",
        pg.locator("#qayda li").count())
+    #  172: mebleg gorunur - yaninda "hele odenis yoxdur" ACIQ durmalidir
+    ok("beta dövrü bitəndən sonra" in mt, "beta qeydi qaydada var")
     ok("həmişə pulsuz" in mt, "sagird/valideyn pulsuzdur yazilir")
     ok("ilk ay hədiyyədir" in mt, "hediyye ayi yazilir")
     #  Muellim neyi ITIRECEYINI evvelceden gormelidir (istifadeci teleb etdi)
@@ -352,14 +354,29 @@ with sync_playwright() as pw:
     db("delete from public.user_roles where user_id = %s and role = 'admin'", (UID,))
     pg.goto(PANEL + "#/"); pg.reload(); pg.wait_for_selector("#band .bseat", timeout=15000)
     bs = pg.inner_text("#band .bseat").replace("\n", " ")
-    ok("Növbəti ay" in bs, "hediyye ayinda kart 'Novbeti ay' yazir", bs[:70])
+    #  172: mebleg SERTI dilde durur - "bu ay" yox, "beta bitendən sonra"
+    ok("Beta bitəndən sonra aylıq" in bs,
+       "hediyye ayinda mebleg serti dilde yazilir", bs[:80])
+    #  172: kartda qalan gun ve "indi odenis yoxdur" qeydi
+    ok("Hədiyyə bitir" in bs and "gün" in bs,
+       "kartda hediyyenin bitme tarixi ve qalan gun", bs[:110])
+    ok("İndi ödəniş yoxdur" in bs, "kartda 'indi odenis yoxdur' qeydi", bs[:140])
+    #  hediyye karti (yalniz ESAS sehifede olur) paketin sertini yazir
+    gc = pg.inner_text("#giftCard").replace("\n", " ")
+    ok("şagird başına" in gc and "Beta bitəndən sonra" in gc
+       and "İndi heç nə tutulmur" in gc,
+       "hediyye kartinda paket serti + beta qeydi", gc[-130:])
+    #  konkret hesab: N aktiv sagird -> M ₼ / ay "ederdi"
+    ok("aktiv şagird" in gc and gozlenen in gc and "edərdi" in gc,
+       "hediyye kartinda konkret hesab (serti dilde)", gc[-170:])
     pg.goto(PANEL + "#/p"); pg.reload()
     pg.wait_for_selector(".abn", timeout=15000)
     mt = pg.inner_text("#main")
     ok("Hədiyyə ay" in mt, "hediyye veziyyeti yazilir", mt[:90].replace("\n", " "))
+    ok("beta dövrü bitəndən sonra" in mt, "abune sehifesinde beta qeydi")
     ab = pg.inner_text(".abn").replace("\n", " ")
-    ok("növbəti ay" in ab and gozlenen in ab,
-       "hediyye ayinda qutu novbeti ayin meblegini yazir", ab[:80])
+    ok("beta bitəndən sonra aylıq" in ab and gozlenen in ab,
+       "hediyye ayinda qutu serti dilde mebleg yazir", ab[:90])
 
     #  g) adminin EL ILE verdiyi sinaq da pulsuzdur - eyni davranis.
     #  Evvel ekran yalniz provider='gift'-e baxirdi: el ile verilmis
@@ -369,15 +386,16 @@ with sync_playwright() as pw:
        " where account_id = %s", (acc,))
     pg.goto(PANEL + "#/"); pg.reload(); pg.wait_for_selector("#band .bseat", timeout=15000)
     bs = pg.inner_text("#band .bseat").replace("\n", " ")
-    ok("Növbəti ay" in bs, "el ile verilmis sinaqda da 'Novbeti ay'", bs[:70])
+    ok("Beta bitəndən sonra aylıq" in bs,
+       "el ile verilmis sinaqda da serti dil", bs[:80])
     pg.goto(PANEL + "#/p"); pg.reload()
     pg.wait_for_selector(".abn", timeout=15000)
     mt = pg.inner_text("#main")
     ok("Sınaq ayı" in mt and "0 ₼" in mt, "sinaq ayi veziyyeti yazilir",
        mt[:90].replace("\n", " "))
     ab = pg.inner_text(".abn").replace("\n", " ")
-    ok("növbəti ay" in ab and gozlenen in ab,
-       "sinaq ayinda qutu novbeti ayin meblegini yazir", ab[:80])
+    ok("beta bitəndən sonra aylıq" in ab and gozlenen in ab,
+       "sinaq ayinda qutu serti dilde mebleg yazir", ab[:90])
 
     db("insert into public.user_roles (user_id, role) values (%s, 'admin')"
        " on conflict do nothing", (UID,))

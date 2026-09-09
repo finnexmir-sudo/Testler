@@ -188,7 +188,9 @@ with sync_playwright() as pw:
     bseat = pg.inner_text("#band .bseat").replace("\n", " ")
     ok("aktiv şagird" in bseat and "Şagird başına" in bseat,
        "hediyye ile limitsiz plan, pill plan adi", bseat[:70])
-    ok("Növbəti ay" in bseat, "hediyye ayinda kart novbeti ayi yazir", bseat[:70])
+    #  172: mebleg SERTI dilde durur - "bu ay" yox, "beta bitendən sonra"
+    ok("Beta bitəndən sonra aylıq" in bseat,
+       "hediyye ayinda mebleg serti dilde yazilir", bseat[:80])
     ok(pg.locator("#giftCard a[href*='wa.me/994501234567']").count() == 1, "kartda WhatsApp duymesi")
     #  ilk qrup formasi kartin ALTINDADIR (h1 -> kart -> forma); qruplar
     #  asinxron gelir - forma kocurulene qeder gozle

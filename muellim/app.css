@@ -946,6 +946,11 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   box-shadow:0 18px 44px rgba(9,20,60,.14)}
 .card.gift>b{font-size:15.5px;letter-spacing:-.01em}
 .card.gift p{margin:6px 0 12px;color:var(--fg-2);line-height:1.5}
+/*  Paketin serti - hediyye kartinin altinda, ayrica xetle  */
+.card.gift .gterms{margin:10px 0 0;padding-top:10px;
+  border-top:1px solid var(--line);font-size:12.5px;line-height:1.5;
+  color:var(--fg-2)}
+.card.gift .gterms b{color:var(--fg)}
 .card.gift.soon{background:var(--warn-tint);border-color:var(--warn-line);border-left-color:var(--warn)}
 
 .hedbox{margin-top:14px;padding-top:12px;border-top:1px solid var(--n-100);font-size:13.5px}
@@ -1350,6 +1355,11 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .band .gseat .grow{display:flex;align-items:baseline;justify-content:space-between;
   gap:12px;font-size:12.5px;color:rgba(255,255,255,.78)}
 .band .gseat .grow b{font-size:13.5px;font-weight:640;color:#fff;white-space:nowrap}
+.band .gseat .grow + .grow{margin-top:7px}
+/*  Mebleg gosterilir - yaninda "indi odenis yoxdur" ACIQ durmalidir  */
+.band .gseat .gnote{margin-top:10px;padding-top:9px;
+  border-top:1px solid rgba(255,255,255,.18);
+  font-size:11.5px;line-height:1.45;color:rgba(255,255,255,.74)}
 .band .gseat .bar{margin-top:8px}
 .band .gseat .pill{font-size:11.5px}
 /*  «Adi deyis» duymesi kartla yanasidir - kart boyu uzanmasin  */

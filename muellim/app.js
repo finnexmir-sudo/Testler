@@ -570,12 +570,43 @@
         ? "Davam etmək istəsəniz bizə yazın, paketi uzadaq."
         : "Bil10-a qoşulduğunuz üçün: şagird limiti yoxdur, hazır sual bankı, " +
           "avtomatik test, diaqnostika, dərs planı.") +
-        " Bitmə: <b>" + dateAz(pl.ends) + "</b>" + (soon ? "" : " (" + days + " gün)") + ".</p></div>" +
+        " Bitmə: <b>" + dateAz(pl.ends) + "</b>" + (soon ? "" : " (" + days + " gün)") + ".</p>" +
+      //  Paketin serti + "hele odenis yoxdur" - istifadeci teleb etdi:
+      //  muellim indiden bilsin, amma indi pul istenildiyini dusunmesin.
+      //  Baslangicda onsuz da "beta bitendən sonra" deyilir - sonunda
+      //  tekrar etmirik, yalniz "indi tutulmur" qalir.
+      (Number(pl.per_seat_minor) > 0
+        ? '<p class="gterms">' + esc(betaAdi(pl)) + " ödəniş: <b>şagird başına " +
+          azn(pl.per_seat_minor) + "</b>, şagird sayına limit yoxdur. " +
+          "Sizdə indi <b>" + (ACC.students_used || 0) + " aktiv şagird</b> var — " +
+          "bu, <b>" + azn(pl.due_minor) + " / ay</b> edərdi. " +
+          "İndi heç nə tutulmur, vaxtı gələndə əvvəlcədən xəbər verəcəyik.</p>"
+        : "") +
+      "</div>" +
       (href
         ? '<a class="glink" target="_blank" rel="noopener" href="' +
           esc(href) + '">WhatsApp-la yazın ' + ic("right") + "</a>"
         : "") +
       "</div>";
+  }
+
+  /*  ODENIS VAXTI (db/172).  Ayarda tarix varsa onu yazir, yoxsa
+      tarixsiz vede verir - tarix vermek VEDEDIR, ona gore susma hali
+      tarixsizdir.
+
+      Meblegi indiden gostermeyin serti (istifadeci qerari): reqem
+      SERTI dilde durmalidir - "bu ay 6 ₼" yox, "beta bitendən sonra
+      6 ₼ olacaq".  Yoxsa muellim indi pul istenildiyini dusunur.  */
+  function betaAdi(pl) {
+    var t = pl && pl.odenis_start ? dateAz(pl.odenis_start) : "";
+    return t ? t + "-dən sonra aylıq" : "Beta bitəndən sonra aylıq";
+  }
+  function betaQeyd(pl) {
+    var t = pl && pl.odenis_start ? dateAz(pl.odenis_start) : "";
+    return t
+      ? "Ödəniş " + t + "-dən başlayır — o vaxta qədər heç nə tutulmur."
+      : "Bu qiymət layihənin beta dövrü bitəndən sonra qüvvəyə minəcək — " +
+        "indi heç nə tutulmur, vaxtı gələndə əvvəlcədən xəbər verəcəyik.";
   }
 
   /*  Bolme basligi + sagda kecid ("Hamisina bax") - uzun siyahi
@@ -599,15 +630,28 @@
       '">' + esc(plan) + "</span>";
 
     if (pl && Number(pl.per_seat_minor) > 0) {
-      //  Hediyye ayinda pul tutulmur - onda meblegi NOVBETI ay kimi
-      //  yazirig: muellim indiden gorsun, sonra suprize dusmesin.
+      //  Pulsuz dovrde (hediyye VE ya adminin verdiyi sinaq) pul
+      //  tutulmur - mebleg NOVBETI ay kimi yazilir: muellim indiden
+      //  gorsun, sonra suprize dusmesin (istifadeci qerari).
       var hd = pl.status === "trialing";
+      var dl = pl.days_left == null ? null : Number(pl.days_left);
+      var son = pl.ends ? dateAz(pl.ends) : "";
       return '<div class="bseat gseat">' +
         '<div class="seat"><div><div class="num">' + used + "</div>" +
           '<div class="lbl">aktiv şagird</div></div>' + pill + "</div>" +
         '<div class="gsep"></div>' +
-        '<div class="grow"><span>' + (hd ? "Növbəti ay" : "Bu ay") + "</span><b>" +
+        '<div class="grow"><span>' + (hd ? betaAdi(pl) : "Bu ay") + "</span><b>" +
           azn(pl.due_minor) + "</b></div>" +
+        (son
+          ? '<div class="grow"><span>' +
+              (hd ? (pl.provider === "gift" ? "Hədiyyə bitir" : "Sınaq bitir")
+                  : "Növbəti ödəniş") + "</span><b>" + son +
+              (dl != null && dl >= 0 ? " · " + dl + " gün" : "") + "</b></div>"
+          : "") +
+        //  Meblegi gostermeyin serti: yaninda ACIQ yazilsin ki, INDI
+        //  odenis yoxdur - yoxsa muellim pul istenildiyini dusunur.
+        (hd ? '<div class="gnote">İndi ödəniş yoxdur — məbləğ məlumat üçündür.</div>'
+            : "") +
       "</div>";
     }
     var pct = lim > 0 ? Math.min(100, Math.round(used * 100 / lim)) : 0;
@@ -4275,15 +4319,17 @@
           //  yazilir ki, muellim indiden bilsin.  "0 ₼" veziyyet
           //  setrinde onsuz da yazilib.
           '<div class="c sum"><b>' + azn(due) + "</b><span>" +
-            (trial ? "növbəti ay" : "ayda") + "</span></div>" +
+            (trial ? "beta bitəndən sonra aylıq" : "ayda") + "</span></div>" +
         "</div>" +
         '<p class="muted" style="margin:14px 0 0">Məbləği server hesablayır. ' +
           "Ödəniş günündəki aktiv şagird sayı əsas götürülür — ay ərzində " +
           "əlavə etdiyiniz şagird növbəti ayın hesabında görünür. " +
           "Dayandırılmış şagird pul tutmur." +
-          (trial ? " " + (gift ? "Hədiyyə" : "Sınaq") +
-                   " ayı bitəndən sonra bu məbləğ qüvvəyə minir." : "") +
         "</p>" +
+        //  172: mebleg gorunur - yaninda "hele odenis yoxdur" durmalidir
+        (trial
+          ? msg("info", betaQeyd({ odenis_start: v.odenis_start }))
+          : "") +
       "</div>" +
       '<div class="spacer"></div>' +
 
@@ -4298,6 +4344,7 @@
           "limitsiz şagird, 0 ₼.</li>" +
         "<li>Vaxt bitəndə <b>" + gr + " gün güzəşt</b> verilir, ekranda " +
           "xatırlatma görünür.</li>" +
+        "<li>" + esc(betaQeyd({ odenis_start: v.odenis_start })) + "</li>" +
         "<li>Güzəşt bitəndə hesab <b>pulsuz " + free + " şagird yerinə</b> " +
           "düşür: mövcud şagirdlər işləməkdə davam edir, yenisi əlavə " +
           "olunmur. Heç bir məlumat silinmir.</li>" +

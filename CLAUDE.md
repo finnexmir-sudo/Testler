@@ -2280,6 +2280,30 @@ Gəlir göstəricisi (`rpc_admin_stats.mrr_minor` → `app.mrr_minor()`)
 də **anbaan aktiv şagird sayından** hesablanır — `subscriptions.seats`
 sütunu şagird başına modeldə doldurulmur (db/169).
 
+### Ödəniş nə vaxtdan başlayır (db/172)
+
+Məbləğ müəllimə **indidən** göstərilir ki, sonra sürpriz olmasın —
+amma **şərti dildə**: «Beta bitəndən sonra aylıq **6 ₼**», altında
+«İndi ödəniş yoxdur — məbləğ məlumat üçündür». Hədiyyə kartında
+konkret hesab da var: «Sizdə indi 4 aktiv şagird var — bu, 6 ₼ / ay
+edərdi».
+
+Tarix `app_state.qiymet.odenis_start`-dədir və **hazırda boşdur** —
+tarixsiz vəd verilir, çünki **tarix vermək vəddir**. Hazır olanda:
+
+```sql
+update public.app_state
+   set val = val || jsonb_build_object('odenis_start','2027-01-01')
+ where key = 'qiymet';
+```
+
+Onda ekran «Ödəniş 1 yan-dən başlayır» yazır. Geri qaytarmaq:
+`jsonb_build_object('odenis_start', null)`.
+
+Bu ayar **heç bir hesabın davranışını dəyişmir** — nə abunə, nə hədd,
+nə məbləğ. Yalnız ekrandakı cümlədir. Kodda `betaAdi()` (məbləğ
+sətrinin başlığı) və `betaQeyd()` (uzun cümlə) funksiyalarıdır.
+
 **Qərar (istifadəçi ilə müzakirə):**
 
 - **Şagird və valideyn həmişə pulsuzdur.** Bazadakı `valideyn-aylik`
