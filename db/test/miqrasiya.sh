@@ -83,6 +83,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          202_bank_hey4_alt_movzu_temizlik.sql \
          203_bank_tarix_cetin_norma.sql \
          204_bank_riy1_cetin_norma.sql \
+         205_bank_riy5_10_cetin_norma.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \

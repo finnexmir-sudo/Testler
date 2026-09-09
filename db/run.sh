@@ -202,6 +202,7 @@ bank 201_bank_cog8_hidrosfer_biosfer.sql
 bank 202_bank_hey4_alt_movzu_temizlik.sql
 bank 203_bank_tarix_cetin_norma.sql
 bank 204_bank_riy1_cetin_norma.sql
+bank 205_bank_riy5_10_cetin_norma.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
