@@ -163,6 +163,27 @@ with sync_playwright() as p:
     # ---------------- MUELLIM: hesabat
     t.goto(PANEL + "#/r/" + gid); t.wait_for_timeout(1500); shot(t, "m9_hesabat")
 
+    # ---------------- MUELLIM: Icmal bolmeleri (tehluke zonasi, son
+    # neticeler, liderler).  Liderler ucun sagird basina 3+ cehd lazimdir
+    # ("en azi 3 test" qaydasi) - onlari burada yaradiriq.
+    if not ONLY or "m15_icmal" in ONLY:
+        db("""insert into public.attempts (student_id, test_id, status, percent, finished_at)
+              select s.id, (select id from public.tests order by created_at limit 1),
+                     'submitted',
+                     --  62..95 arasi: faiz 100-u asmasin (beledci sekli)
+                     62 + ((row_number() over (order by s.full_name) * 7 + g * 11) %% 34),
+                     now() - (g || ' days')::interval
+                from public.students s cross join generate_series(1, 3) g
+               where s.is_active""")
+        t.goto(PANEL + "#/"); t.reload()
+        t.wait_for_selector("#hTop5 .lrow", timeout=20000); t.wait_for_timeout(900)
+        #  alt menyu (.bnav) fixed-dir ve element sekline dusur -
+        #  sekil ucun muveqqeti gizledilir
+        t.evaluate("document.body.classList.remove('bnav-on')")
+        t.wait_for_timeout(300)
+        t.locator("#hTop5").screenshot(path=f"{OUT}/m15_icmal.png"); print("   m15_icmal")
+        t.evaluate("document.body.classList.add('bnav-on')")
+
     # ---------------- DIAQNOSTIKA: muellim abune ile yaradir, sagird yazir
     # (xerite ucun 3 reng lazimdir: 1-ci fesil 0/3 zeif, 3-cu 1/3 zeif, 5-ci 2/3 orta, qalani yaxsi)
     db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)

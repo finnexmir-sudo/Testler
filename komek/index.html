@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light">
 <title>Bil10 — necə işləyir</title>
 <meta name="description" content="Bil10 bələdçisi: müəllim qrup yaradır, şagird kodla girir, valideyn nəticəni izləyir. Addım-addım, real ekran şəkilləri ilə.">
-<link rel="stylesheet" href="../assets/base.css?v=387">
+<link rel="stylesheet" href="../assets/base.css?v=388">
 <link rel="manifest" href="../manifest.json">
 <meta name="theme-color" content="#0e9384">
 <meta name="mobile-web-app-capable" content="yes">
@@ -147,7 +147,7 @@
            Kodu «Göndər» ilə WhatsApp-a atın və ya kopyalayın — şagird bu kodla girir,
            parol yoxdur.</p>
         <ul>
-          <li>Şagird parolu itirə bilməz; kod sızsa qələmdən «Kodu yenilə» — köhnəsi dərhal ölür.</li>
+          <li>Şagird parolu itirə bilməz; kod sızsa qələmdən «Giriş kodunu yenilə» — köhnəsi dərhal ölür.</li>
           <li>Qələm altında «Dayandır» — şagirdi silmədən girişini bağlayır, nəticələri qalır.</li>
           <li>Qələmin altında <b>Valideyn girişi</b> var: açanda «V» ilə başlayan ayrıca kod yaranır (bax <a href="#valideyn">Valideyn</a>).</li>
         </ul>
@@ -213,6 +213,26 @@
     <div class="step">
       <div>
         <span class="n">7</span>
+        <h3>İcmal: günün mənzərəsi</h3>
+        <p>İcmal — panelin ana ekranıdır. Bütün qruplar bir yerdədir, üstündə üç bölmə
+           sizin əvəzinizə baxır: kim geriləyir, kim nə yazdı, kim öndədir.</p>
+        <ul>
+          <li><b>Təhlükə zonası</b> — geriləyən və zəif mövzuda ilişən şagirdlər. Hesabatlardan
+              özü yığılır, siz axtarmırsınız. Sətirə toxunsanız şagirdin hesabatı açılır.</li>
+          <li><b>Son nəticələr</b> — kim, nə vaxt, hansı testi yazdı və neçə bal aldı.
+              Bir neçə qrupunuz varsa qrup çipi ilə süzülür; «Daha N nəticə göstər» qalanını açır.</li>
+          <li><b>Ən yaxşı şagirdlər</b> — ən azı 3 test yazmış şagirdlərdən hər qrupun öz ilk beşliyi.
+              Sıralama <b>qrupun içindədir</b>: fərqli qrupların balı yan-yana qoyulmur, çünki onlar
+              fərqli test yazır. Qrupu çiplə dəyişirsiniz. Adına toxunsanız hesabatı açılır.</li>
+        </ul>
+        <div class="tip">Təhlükə zonası abunə paketi ilədir. «Son nəticələr» və «Ən yaxşı şagirdlər»
+          həmişə açıqdır — onlar sizin öz şagirdinizin öz balıdır.</div>
+      </div>
+      <figure class="ph"><img src="img/m15_icmal.png" alt="Ən yaxşı şagirdlər lövhəsi: qrup çipi və ilk beşlik" loading="lazy"><figcaption>Ən yaxşı şagirdlər — qrup üzrə</figcaption></figure>
+    </div>
+    <div class="step">
+      <div>
+        <span class="n">8</span>
         <h3>Diaqnostika: bu uşaq nəyi bilmir?</h3>
         <p>Yeni şagird gəldi — hardan başlamalı? Şagirdin ekranında «Diaqnostik test ver»:
            fənni seçirsiniz, sistem sinfin <b>hər mövzusundan 3 sual</b> (asan · orta · çətin) yığıb
@@ -232,7 +252,7 @@
 
     <div class="step">
       <div>
-        <span class="n">8</span>
+        <span class="n">9</span>
         <h3>Dərsdən əvvəl: «Bu günün dərsi»</h3>
         <p>Qrupu açın — ən üstdə bir kart dərsə hazırlığı bir baxışa yığır:
            <b>növbəti mövzu</b> (dərs planı üzrə), <b>son keçilən</b> (tarixi və yoxlama testinin
@@ -252,7 +272,7 @@
 
     <div class="step">
       <div>
-        <span class="n">9</span>
+        <span class="n">10</span>
         <h3>Dəftər: davamiyyət və ödəniş</h3>
         <p>Qrup ekranında «Dəftər» sekməsi — kağız dəftərçənin yerinə. Dərs olanda «Dərs oldu» basın,
            gəlməyənin adını söndürün, «Yadda saxla». Ay sonunda hər şagirdin yanında «5/6 dərs» və
@@ -268,7 +288,7 @@
 
     <div class="step">
       <div>
-        <span class="n">10</span>
+        <span class="n">11</span>
         <h3>Şablon sual: hər şagirdə fərqli rəqəmlər</h3>
         <p>Sual bankında «Yeni sual» yazanda «Şablon» bölməsini açın. Sualda rəqəmin yerinə
            <b>{a}</b>, <b>{b}</b>, variantlarda <b>{a+b}</b> kimi ifadə yazın və dəyişənlərin aralığını göstərin:
@@ -286,7 +306,7 @@
 
     <div class="step">
       <div>
-        <span class="n">11</span>
+        <span class="n">12</span>
         <h3>Dərs paketi: hazır il</h3>
         <p>Dərs planı qurulan kimi plan kartında «Dərs paketi» linki çıxır. Hər mövzu üçün üç hazır parça var:
            <b>isinmə</b> — dərsdən əvvəl 5 asan sual (1 gün, 1 cəhd), <b>ev tapşırığı</b> — «Keçildi»dən sonra 10 sual (7 gün),
@@ -452,7 +472,7 @@
     <details><summary>Test kilidlidir / «abunə lazımdır»</summary>
       <p>Pulsuz hesabda platformanın pulsuz testləri açıqdır, ödənişli testlər və mövzu analizi
          paketlədir. Müəllimin öz yığdığı testlər həmişə açıqdır.</p></details>
-    <details><summary>«Bu testi artıq işləmisən — yenidən işləmək olmaz»</summary>
+    <details><summary>«Bu test artıq işlənib — yenidən işləmək olmaz»</summary>
       <p>Müəllim tapşırıqda cəhd sayı qoyub (susmaya görə 1). Nəticəyə və səhvlərə baxa bilərsiniz;
          yenidən yazmaq üçün müəllim cəhd sayını artırmalı və ya yeni tapşırıq verməlidir.</p></details>
     <details><summary>Düz cavab niyə göstərilmir?</summary>
@@ -501,8 +521,8 @@
   <p class="foot">Bələdçi tətbiqlə birlikdə yenilənir. Sual qaldı? Müəlliminizə yazın —
      müəllimsinizsə <a href="../muellim/">paneldə</a> «Profil» bölməsindən bizə çatın.</p>
 </div>
-  <script src="../assets/pwa.js?v=387"></script>
-  <script src="../muellim/config.js?v=387"></script>
-  <script src="../assets/visit.js?v=387"></script>
+  <script src="../assets/pwa.js?v=388"></script>
+  <script src="../muellim/config.js?v=388"></script>
+  <script src="../assets/visit.js?v=388"></script>
 </body>
 </html>
