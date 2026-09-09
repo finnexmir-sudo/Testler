@@ -2304,6 +2304,22 @@ Bu ayar **heç bir hesabın davranışını dəyişmir** — nə abunə, nə hə
 nə məbləğ. Yalnız ekrandakı cümlədir. Kodda `betaAdi()` (məbləğ
 sətrinin başlığı) və `betaQeyd()` (uzun cümlə) funksiyalarıdır.
 
+### DİQQƏT — 2026-12-31 (təklifin son günü)
+
+`app_state.hediyye.beta_until` = **2026-12-31**. Bu tarixdən sonra
+`hediyye_grant` **heç nə vermir** (db/168 qaydası) — yeni müəllim
+birbaşa pulsuz 5 yerə düşür. Amma `index.html`-də hələ də yazılıb:
+«Bu dövrdə bütün imkanlar müəllimlər üçün pulsuzdur».
+
+**O tarixə qədər ikisindən biri edilməlidir:**
+1. `beta_until` uzadılsın (İdarəetmə → Hədiyyə paket → tarix), **və ya**
+2. `index.html`-dəki «beta-note» vədi dəyişdirilsin.
+
+Bu, **səssiz sınan** növ problemdir: heç bir xəta verilmir, sadəcə
+yeni müəllim vəd ediləni almır və bunu heç kim görmür. Yoxlamaq
+üçün: İdarəetmədə yeni hesabın «PAKET» sütunu «paketsiz» yazırsa,
+təklif bitib.
+
 ### Limitsiz test bizə ziyan verirmi? (2026-09-09 hesablaması)
 
 Sual: şagird başına 1,50 ₼ ödəyib **istənilən qədər** test etmək bizi
