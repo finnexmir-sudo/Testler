@@ -106,6 +106,9 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          225_bank_ingilis6_cetin_norma.sql \
          226_bank_ingilis7_cetin_norma.sql \
          227_bank_ingilis8_cetin_norma.sql \
+         228_bank_ingilis9_cetin_norma.sql \
+         229_bank_ingilis10_cetin_norma.sql \
+         230_bank_ingilis11_cetin_norma.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
