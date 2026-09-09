@@ -1019,7 +1019,7 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 /*  Lovheler AYRI-AYRI kartlardir (Bolt eskizi): ust kenarinda incə
     rengli xett, sol ust kuncde ikon cipi, altda boyuk reqem.  Evvel
     hamisi bir kartda idi - "yasti" gorunurdu (istifadeci).  */
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:10px;
   background:none;border:0;padding:0;box-shadow:none}
 @media (max-width:520px){ .tiles{grid-template-columns:1fr 1fr;gap:10px} }
 .tile{position:relative;overflow:hidden;border-radius:14px;padding:16px 14px 14px;
@@ -1512,3 +1512,12 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   .lrow .lbar{display:none}
   .lrow .g{flex:1;max-width:none}
 }
+
+
+/*  Zolagin altindaki ILK basliq (#main.over -56px yuxari cekir) -
+    basliq zolagin kenarina dirsenmesin deye asagi salinir.  Kartlar
+    ucun o kesmə QESDENDIR, basliq ucun yox.  */
+#main.over > h2.t1{margin-top:74px}
+@media (max-width:600px){ #main.over > h2.t1{margin-top:64px} }
+/*  Lovhe qruplari: basliq ile oz sirasi arasinda daha yigcam ara  */
+#main h2 + .tiles{margin-top:2px}

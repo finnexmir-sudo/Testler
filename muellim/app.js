@@ -4498,7 +4498,7 @@
       //  ---------------------------------------------------- BU GUN
       //  Admin sehifeni HER GUN acir - birinci gorduyu sey bugunku
       //  hereket olmalidir, ayarlar qutusu yox.
-      "<h2>Bu gün</h2>" +
+      '<h2 class="t1">Bu gün</h2>' +
       '<div class="tiles three" id="tBugun">' +
         '<div class="tile a"><b>' + (st.accounts_today || 0) +
           "</b><span>yeni qeydiyyat</span></div>" +
@@ -4507,7 +4507,6 @@
         '<div class="tile d"><b>' + (st.attempts_today || 0) +
           "</b><span>cəhd</span></div>" +
       "</div>" +
-      '<div class="spacer"></div>' +
 
       //  ----------------------------------------------------- UMUMI
       "<h2>Ümumi</h2>" +
@@ -4527,7 +4526,6 @@
         '<div class="tile e"><b>' + (st.students || 0) +
           "</b><span>şagird · " + (st.seen_week || 0) + " girib (7 gün)</span></div>" +
       "</div>" +
-      '<div class="spacer"></div>' +
 
       //  ---------------------------------------------------- ZIYARET
       //  Qrafik yuxaridadir: buyume gormek ucun acilan sehifedir.

@@ -1182,6 +1182,25 @@ mərhələsi (`#btnSetup`) tapılmır. Lazım olan **yalnız mock-u yenidən
 qaldırmaqdır** — bazanı hər test özü təmizləyir. Bazanı da yenidən
 qurmaq 3-4 dəqiqə aparırdı; `tek.sh` ilə 14 saniyədir.
 
+**Postgres-i qaldırmazdan əvvəl `status` yoxla — `postmaster.pid`-i
+kor-koranə SİLMƏ.** Səhv resept (2026-09-09-da test dəstini üç dəfə
+yarımçıq kəsdi):
+```bash
+rm -f postmaster.pid && pg_ctl start      # PİS
+```
+İşləyən server varkən pid faylını silsən, yeni server qalxmır
+(«pre-existing shared memory block is still in use»), **köhnə server
+isə** lock faylını yararsız görüb **özünü dayandırır** («immediate
+shutdown because data directory lock file is invalid»). Nəticə: sağlam
+baza sönür, 44 suite «XETA» verir və səbəb konteyner kimi görünür.
+Düzgünü:
+```bash
+pg_ctl -D /var/lib/postgresql/tdata status || \
+  { rm -f /var/lib/postgresql/tdata/postmaster.pid; \
+    pg_ctl -D /var/lib/postgresql/tdata -o '-p 55432 -k /tmp' -l /tmp/pg.log start; }
+```
+pid faylı yalnız **status «no server running»** deyəndə silinir.
+
 **`pkill` naxışını həmişə lövbərlə (`^`).** `pkill -f "yoxla.sh"` və
 `pkill -f "http.server 8010"` **öz bash sarmalayıcımızı da tapıb
 öldürür** — test səssizcə boş qayıdır və ya sessiya kəsilir (iki dəfə
