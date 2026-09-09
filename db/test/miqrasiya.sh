@@ -93,6 +93,11 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          212_bank_azdili4_cetin_norma.sql \
          213_bank_azdili5_cetin_norma.sql \
          214_bank_azdili6_cetin_norma.sql \
+         215_bank_azdili7_cetin_norma.sql \
+         216_bank_azdili8_cetin_norma.sql \
+         217_bank_azdili9_cetin_norma.sql \
+         218_bank_azdili10_cetin_norma.sql \
+         219_bank_azdili11_cetin_norma.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
