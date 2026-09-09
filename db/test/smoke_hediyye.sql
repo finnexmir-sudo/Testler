@@ -176,3 +176,57 @@ begin
     'tekrar isletme tarixi pozdu';
 end $$;
 \echo 'OK  6 · (170) uzun hediyye qeydiyyat + 30 gune salinir, odenisliye toxunmur'
+
+-- =====================================================================
+--  7. (171) Kohne sinaq/hediyye abuneleri yeni qaydaya kecir
+--  169 yalniz YENI hediyyeni deyisdi; artiq verilmis setirler
+--  'repetitor-25'-de qalirdi - "7 / 25 sagird yeri" gorunurdu.
+--  Pullu abuneye TOXUNMAMALIDIR, muddet DEYISMEMELIDIR.
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+delete from public.subscriptions;
+
+--  a) hediyye/sinaq setri kohne paketde
+insert into public.subscriptions (account_id, plan_id, status, seats,
+                                  started_at, current_period_end, provider)
+select (select id from public.accounts order by created_at limit 1), p.id,
+       'trialing', 25, now() - interval '1 day', now() + interval '20 days', 'gift'
+  from public.plans p where p.slug = 'repetitor-25';
+--  b) ODENISLI setr kohne paketde - toxunulmamalidir
+insert into public.subscriptions (account_id, plan_id, status, seats,
+                                  started_at, current_period_end, provider)
+select (select id from public.accounts order by created_at offset 1 limit 1), p.id,
+       'active', 25, now() - interval '1 day', now() + interval '40 days', 'manual'
+  from public.plans p where p.slug = 'repetitor-25';
+
+do $$
+declare n int; v_acc uuid; e0 timestamptz; e1 timestamptz;
+begin
+  select account_id, current_period_end into v_acc, e0
+    from public.subscriptions where provider = 'gift';
+
+  n := app.sinaqlari_sagird_basina_kecir();
+  assert n = 1, 'kecirilen setir sayi 1 deyil: ' || n;
+
+  --  sinaq setri artiq 'sagird-basi'-dedir ve LIMITSIZDIR
+  assert (select pl.slug from public.subscriptions s
+            join public.plans pl on pl.id = s.plan_id
+           where s.provider = 'gift') = 'sagird-basi',
+    'sinaq setri sagird-basina kecmedi';
+  assert app.account_seat_limit(v_acc) = 2147483647,
+    'sagird limiti hele qalir: ' || app.account_seat_limit(v_acc);
+  --  muddete toxunulmayib
+  select current_period_end into e1 from public.subscriptions where provider = 'gift';
+  assert e1 = e0, 'muddet deyisdi';
+
+  --  ODENISLI setr kohne paketde qalir (169 qaydasi)
+  assert (select pl.slug from public.subscriptions s
+            join public.plans pl on pl.id = s.plan_id
+           where s.provider = 'manual') = 'repetitor-25',
+    'odenisli abune de kocuruldu - buna icaze yoxdur';
+
+  --  idempotent
+  n := app.sinaqlari_sagird_basina_kecir();
+  assert n = 0, 'tekrar isletmede yene deyisdi: ' || n;
+end $$;
+\echo 'OK  7 · (171) kohne sinaqlar sagird-basina kecir, odenisli toxunulmur'

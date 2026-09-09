@@ -4745,7 +4745,8 @@
       if (!$("hedBox")) return;
       $("hedBox").innerHTML =
         "<b>Hədiyyə paket</b> <span class=\"muted\">— qeydiyyatdan keçən repetitor/məktəbə " +
-        "Repetitor-25 sınaq kimi açılır (gəlirə düşmür).</span>" +
+        "«Şagird başına» paketi sınaq kimi açılır: şagird limiti yoxdur, " +
+        "gəlirə düşmür.</span>" +
         '<div class="hedrow">' +
           '<label><select id="hedOn"><option value="1"' + (v.on ? " selected" : "") + ">açıq</option>" +
             '<option value="0"' + (!v.on ? " selected" : "") + ">bağlı</option></select></label>" +
