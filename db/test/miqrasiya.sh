@@ -98,6 +98,14 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          217_bank_azdili9_cetin_norma.sql \
          218_bank_azdili10_cetin_norma.sql \
          219_bank_azdili11_cetin_norma.sql \
+         220_bank_ingilis1_cetin_norma.sql \
+         221_bank_ingilis2_cetin_norma.sql \
+         222_bank_ingilis3_cetin_norma.sql \
+         223_bank_ingilis4_cetin_norma.sql \
+         224_bank_ingilis5_cetin_norma.sql \
+         225_bank_ingilis6_cetin_norma.sql \
+         226_bank_ingilis7_cetin_norma.sql \
+         227_bank_ingilis8_cetin_norma.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \

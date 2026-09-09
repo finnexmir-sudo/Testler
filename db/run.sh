@@ -217,6 +217,14 @@ bank 216_bank_azdili8_cetin_norma.sql
 bank 217_bank_azdili9_cetin_norma.sql
 bank 218_bank_azdili10_cetin_norma.sql
 bank 219_bank_azdili11_cetin_norma.sql
+bank 220_bank_ingilis1_cetin_norma.sql
+bank 221_bank_ingilis2_cetin_norma.sql
+bank 222_bank_ingilis3_cetin_norma.sql
+bank 223_bank_ingilis4_cetin_norma.sql
+bank 224_bank_ingilis5_cetin_norma.sql
+bank 225_bank_ingilis6_cetin_norma.sql
+bank 226_bank_ingilis7_cetin_norma.sql
+bank 227_bank_ingilis8_cetin_norma.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
