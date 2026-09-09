@@ -77,6 +77,8 @@
   var BAND_KEEP = false;
   function show(html) {
     busy = false; main.innerHTML = html; main.scrollTop = 0;
+    //  genis sutun yalniz idareetme ekranindadir - qalanlarinda sonur
+    main.classList.remove("wideadm");
     //  yeni ekran hemise yuxaridan baslasin - zolaq (basliq) gorunsun
     try { window.scrollTo(0, 0); } catch (e) {}
     //  bandHead() show()-dan EVVEL cagirilibsa zolaq qalir
@@ -4314,6 +4316,9 @@
       back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Admin",
       title: "İdarəetmə", sub: "Hesablar, abunələr, hesabatlar, rəylər, ziyarətlər."
     });
+    //  Hesablar cedveli 8 sutunludur - susmadaki 920px-de ad kesilirdi.
+    //  show() sinfi silir, ona gore render-den SONRA elave olunur.
+    setTimeout(function () { main.classList.add("wideadm"); }, 0);
     show(
       '<div class="tiles five">' +
         '<div class="tile a"><b>' + (st.accounts || 0) + "</b><span>hesab" +
@@ -4525,21 +4530,38 @@
       return '<div class="empty"><div class="ic">' + ic("group") + "</div>" +
         "<b>Hesab tapılmadı</b></div>";
     }
-    return rows.map(function (a) {
-      var pl = a.plan, badge;
+    /*  Cedvel: siyahi boyudukce setirler bir-birine qarismasin
+        (istifadeci).  Telefonda EYNI markup CSS ile karta cevrilir -
+        ayri kod yoxdur; her xanaya data-l basligi yazilir, CSS onu
+        ::before ile gosterir.  .admr, data-em, data-stop, .lg-* qalir -
+        e2e onlari oxuyur.  */
+    var bas = "<thead><tr>" +
+      '<th class="c">#</th><th>Müəllim</th><th>Paket</th>' +
+      '<th class="c">Bitir</th><th class="c">Qalan</th>' +
+      '<th class="c">İstifadə</th><th>Aktivlik</th><th></th></tr></thead>';
+    return '<table class="admt"><colgroup>' +
+      //  Yalniz «Müəllim» sutunu sərbəstdir - qalanlarin eni sabitdir,
+      //  ona gore ad ve e-poct kesilmir
+      '<col style="width:34px"><col><col style="width:196px">' +
+      '<col style="width:78px">' +
+      '<col style="width:74px"><col style="width:104px"><col style="width:186px">' +
+      '<col style="width:44px"></colgroup>' + bas + "<tbody>" +
+      rows.map(function (a, ix) {
+      var pl = a.plan, badge, bitir = "—", qalan = "—", gq = null;
       //  138: admin sahibli hesab daimidir - plan ve duyme lazim deyil;
       //  numune nusxesi anonimdir (e-poct yox), ona abune acilmaz
       if (a.admin) {
         badge = '<span class="pb y">admin · daimi</span>';
+        bitir = "daimi";
       } else if (a.demo) {
-        badge = '<span class="pb s">nümunə · özü silinir</span>';
+        badge = '<span class="pb s">nümunə</span>';
+        bitir = "özü silinir";
       } else if (pl) {
         //  bitmesine 7 gunden az qalibsa narinci - uzatmaq vaxtidir
-        var gq = pl.ends
+        gq = pl.ends
           ? Math.max(0, Math.ceil((new Date(pl.ends).getTime() - Date.now()) / 86400000))
           : null;
-        //  basqa ilin tarixine il de yazilir - "25 avq · 365 gun"
-        //  cashdirmasin (novbeti ilin 25 avqustudur)
+        //  basqa ilin tarixine il de yazilir - "25 avq 2027" cashdirmasin
         var yr = "";
         if (pl.ends) {
           var ed = new Date(pl.ends);
@@ -4549,37 +4571,44 @@
         }
         //  sinaq (pulsuz verilen paket) goy nisanla - odenisliden secilsin
         var trial = pl.status === "trialing";
-        badge = '<span class="pb ' + (gq !== null && gq < 7 ? "z" : (trial ? "s" : "y")) + '">' +
-          (trial ? "sınaq · " : "") + esc(pl.name) +
-          (pl.ends ? " → " + dateAz(pl.ends) + yr + " · " + gq + " gün" : "") +
-          "</span>";
+        badge = '<span class="pb ' + (trial ? "s" : "y") + '">' +
+          (trial ? "sınaq · " : "") + esc(pl.name) + "</span>";
+        if (pl.ends) {
+          bitir = dateAz(pl.ends) + yr;
+          qalan = '<b class="qg' + (gq < 7 ? " az" : "") + '">' + gq + "</b> gün";
+        }
       } else {
         badge = '<span class="pb n">paketsiz</span>';
       }
-      return '<div class="admr" data-em="' + esc(a.email || "") + '">' +
-        av(a.name) +
-        '<div class="g"><b>' + esc(a.name) + "</b>" + badge +
-        "<i>" +
-          "<span>" + esc(a.email || "") + "</span><span>·</span>" +
-          "<span>" + (a.students || 0) + " şagird</span><span>·</span>" +
-          "<span>" + (a.tests || 0) + " test</span><span>·</span>" +
-          "<span>" + (a.attempts || 0) + " cəhd</span><span>·</span>" +
-          "<span>aktivlik: " + whenAz(a.last_active) + "</span>" +
-        "</i>" +
-        //  Girisler: muellim paneli ne vaxt acib, sagird/valideyn kodla ne vaxt girib.
-        //  7 gundur girmeyen muellim narinci - pilotda zeng etmek vaxtidir.
-        '<i class="lg">' +
-          '<span class="' + (seenCls(a.last_login)) + '">müəllim girişi: ' + whenAz(a.last_login) + "</span>" +
-          "<span>·</span><span>şagird girişi: " + whenAz(a.student_login) + "</span>" +
-        "</i></div>" +
-        '<div class="btns">' +
-          ((a.admin || a.demo) ? "" :
-            '<button class="btn sm" data-m="1">+1 ay</button>' +
-            '<button class="btn sm" data-m="6">+6 ay</button>' +
-            '<button class="btn sm ghost" data-m="1" data-trial="1">Sınaq 1 ay</button>' +
-            (pl ? '<button class="btn sm ghost" data-stop="1">Dayandır</button>' : "")) +
-        "</div></div>";
-    }).join("");
+      var ops = (a.admin || a.demo) ? "" :
+        '<button class="btn sm" data-m="1">+1 ay</button>' +
+        '<button class="btn sm" data-m="6">+6 ay</button>' +
+        '<button class="btn sm ghost" data-m="1" data-trial="1">Sınaq 1 ay</button>' +
+        (pl ? '<button class="btn sm ghost arch" data-stop="1">Dayandır</button>' : "");
+      return '<tr class="admr" data-em="' + esc(a.email || "") + '">' +
+        '<td class="c num">' + (ix + 1) + "</td>" +
+        '<td data-l="Müəllim"><div class="who">' + av(a.name) +
+          "<div><b>" + esc(a.name) + "</b>" +
+          "<i>" + esc(a.email || "") + "</i></div></div></td>" +
+        '<td data-l="Paket">' + badge + "</td>" +
+        '<td class="c" data-l="Bitir">' + bitir + "</td>" +
+        '<td class="c" data-l="Qalan">' + qalan + "</td>" +
+        '<td class="c nums" data-l="İstifadə">' +
+          (a.students || 0) + " <s>ş</s> · " + (a.tests || 0) + " <s>t</s> · " +
+          (a.attempts || 0) + " <s>c</s></td>" +
+        //  Uc AYRI siqnal: muellim paneli ne vaxt acib · sagird/valideyn
+        //  kodla ne vaxt girib · hesabda son is ne vaxt olub.
+        //  7 gundur girmeyen muellim narinci - zeng etmek vaxtidir.
+        '<td data-l="Aktivlik"><i class="lg">' +
+          '<span class="' + seenCls(a.last_login) + '">müəllim girişi: ' +
+            whenAz(a.last_login) + "</span>" +
+          "<s>şagird girişi: " + whenAz(a.student_login) + "</s>" +
+          "<s>aktivlik: " + whenAz(a.last_active) + "</s></i></td>" +
+        '<td class="c">' + (ops
+          ? '<details class="rmenu"><summary aria-label="Əməliyyatlar">···</summary>' +
+            '<div class="rm">' + ops + "</div></details>"
+          : "") + "</td></tr>";
+    }).join("") + "</tbody></table>";
   }
 
   /* Giris vaxti saatla: "bu gun 14:32", "dunen 09:10"; 2 gunden kohne
@@ -4613,11 +4642,18 @@
           '<label><select id="hedOn"><option value="1"' + (v.on ? " selected" : "") + ">açıq</option>" +
             '<option value="0"' + (!v.on ? " selected" : "") + ">bağlı</option></select></label>" +
           '<label><input id="hedDays" type="number" min="1" max="365" value="' + (Number(v.days) || 30) + '"> gün</label>' +
-          '<label>beta bitmə <input id="hedBeta" type="date" value="' + esc(v.beta_until || "") + '"></label>' +
+          '<label>təklif bitir <input id="hedBeta" type="date" value="' + esc(v.beta_until || "") + '"></label>' +
           '<button class="btn sm" id="hedSave">Saxla</button>' +
         "</div>" +
-        '<p class="muted" style="margin:6px 0 0">Beta bitənə qədər hədiyyə həmin tarixə qədərdir; ' +
-          "beta tarixi boşdursa və ya keçibsə, qeydiyyatdan N gün.</p>";
+        //  168: tarix TEKLIFIN son gunudur, abunenin bitme tarixi DEYIL.
+        //  Evvel eksi idi ve caşdiricı olurdu: sentyabrda qosulan
+        //  muellim 30 gun evezine yanvara qeder alirdi.
+        '<p class="muted" style="margin:6px 0 0">Hər yeni müəllim <b>' +
+          (Number(v.days) || 30) + " gün</b> alır. Tarix — <b>təklifin son günü</b>: " +
+          (v.beta_until
+            ? esc(v.beta_until) + "-dən sonra qeydiyyatdan keçənə hədiyyə verilmir."
+            : "boşdursa təklif müddətsizdir.") +
+          " Lazım olsa ayrıca «+1 ay» ilə özünüz uzada bilərsiniz.</p>";
       on("hedSave", "click", function () {
         if (busy) return;
         var beta = ($("hedBeta") || {}).value || "";

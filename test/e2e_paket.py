@@ -97,6 +97,14 @@ with sync_playwright() as pw:
           insert into public.account_members values
             ('aaaa2222-0000-0000-0000-0000000000a2', '22220000-0000-0000-0000-0000000000a2', true)""")
     ROW = ".admr[data-em='iki@t.az']"
+    #  Emeliyyat duymeleri setirdeki «···» menyusundadir (cedvel
+    #  qurulusu).  Menyu <details>-dir; testde onu birbasa aciriq -
+    #  bu, klik yarisindan asili deyil.  Menyunun ELE KLIKLE
+    #  acildigi asagida bir defe ayrica yoxlanilir.
+    def menu_bas(setir, sec):
+        pg.eval_on_selector_all(setir + " .rmenu", "els => els.forEach(e => e.open = true)")
+        pg.wait_for_timeout(120)
+        pg.locator(setir + " " + sec).click()
     ADM = ".admr[data-em='pkt@t.az']"
     pg.goto(PANEL); pg.reload()
     pg.wait_for_selector("#btnAdm", timeout=8000)
@@ -130,7 +138,8 @@ with sync_playwright() as pw:
     ok(pg.locator(".admr").count() == 2, "iki hesab siyahida", pg.locator(".admr").count())
     arow = pg.inner_text(ADM).replace("\n", " ")
     ok("admin · daimi" in arow, "admin hesabi 'admin · daimi' nisani ile", arow[:60])
-    ok(pg.locator(ADM + " button").count() == 0, "admin setrinde duyme yoxdur")
+    ok(pg.locator(ADM + " .rmenu").count() == 0 and pg.locator(ADM + " button").count() == 0,
+       "admin setrinde emeliyyat menyusu yoxdur")
     row = pg.inner_text(ROW).replace("\n", " ")
     ok("iki@t.az" in row, "hesab siyahida e-poctla gorunur", row[:60])
     ok("paketsiz" in row, "paketsiz nisani gorunur")
@@ -154,7 +163,12 @@ with sync_playwright() as pw:
     print("D0 · (138) Sınaq — pulsuz paket: tam imkan, gəlirə düşmür")
     pg.on("dialog", lambda d: d.accept())
     ok(pg.locator(".admr [data-trial]").count() == 1, "adi setirde 'Sinaq 1 ay' duymesi var (adminde yox)")
-    pg.locator(ROW + " [data-trial]").click()
+    #  «···» menyusu bagli gelir ve KLIKLE acilir (bir defe yoxlanilir)
+    ok(not pg.locator(ROW + " .rmenu").evaluate("e => e.open"), "menyu bagli gelir")
+    ok(not pg.locator(ROW + " [data-trial]").is_visible(), "menyu bagli ikən duyme gizlidir")
+    pg.locator(ROW + " .rmenu summary").click(); pg.wait_for_timeout(200)
+    ok(pg.locator(ROW + " [data-trial]").is_visible(), "«···» kliki menyunu acir")
+    menu_bas(ROW, "[data-trial]")
     pg.wait_for_selector(ROW + " .pb.s", timeout=8000)
     ok("sınaq" in pg.inner_text(ROW + " .pb.s") and "Repetitor" in pg.inner_text(ROW + " .pb.s"),
        "goy sinaq nisani setirde", pg.inner_text(ROW + " .pb.s")[:40])
@@ -175,7 +189,7 @@ with sync_playwright() as pw:
     pg.locator("#admF .chip[data-f='']").click(); pg.wait_for_selector(".admr", timeout=8000)
 
     print("D · Bir kliklə abunə açmaq (sınaq → ödənişli)")
-    pg.locator(ROW + " [data-m='6']").click()
+    menu_bas(ROW, "[data-m='6']")
     pg.wait_for_selector(ROW + " .pb.y", timeout=8000)
     ok("Repetitor" in pg.inner_text(ROW + " .pb.y"), "abune nisani setirde gorunur",
        pg.inner_text(ROW + " .pb.y")[:40])
@@ -209,7 +223,7 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/adm"); pg.reload()
     pg.wait_for_selector(".admr", timeout=8000)
     ok(pg.locator(".admr [data-stop]").count() == 1, "Dayandir yalniz abuneli adi setirde")
-    pg.locator(ROW + " [data-stop]").click()
+    menu_bas(ROW, "[data-stop]")
     pg.wait_for_timeout(900)
     pg.wait_for_selector(".admr", timeout=8000)
     ok(not db("select 1 ok from public.subscriptions where status='active'", one=True),
