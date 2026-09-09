@@ -4471,6 +4471,19 @@
     on("ulCode", "keydown", function (e) { if (e.key === "Enter") go(); });
   }
 
+  /*  Idareetmede bolme: dolu olanda aciq, BOS olanda bir setire yigilir.
+      Sebeb: uc bos kart dolu kart qeder yer tutur, admin her gun onlarin
+      yanindan kecir.  Icine girmek yene mumkundur - kohne bildirislere
+      baxmaq lazim ola biler.  */
+  function admFold(basliq, say, ic, hid) {
+    var n = Number(say) || 0;
+    return '<details class="fold big"' + (n ? " open" : "") + ">" +
+      "<summary" + (hid ? ' id="' + hid + '"' : "") + ">" + esc(basliq) +
+        (n ? ' <span class="rcnt">' + n + "</span>"
+           : ' <em class="ftik">təmizdir</em>') + "</summary>" +
+      ic + "</details>";
+  }
+
   function drawAdmin(st, rows, reps, fbs, qs, vs) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "sagird-basi", name: "Şagird başına" }];
@@ -4482,7 +4495,23 @@
     //  show() sinfi silir, ona gore render-den SONRA elave olunur.
     setTimeout(function () { main.classList.add("wideadm"); }, 0);
     show(
-      '<div class="tiles five">' +
+      //  ---------------------------------------------------- BU GUN
+      //  Admin sehifeni HER GUN acir - birinci gorduyu sey bugunku
+      //  hereket olmalidir, ayarlar qutusu yox.
+      "<h2>Bu gün</h2>" +
+      '<div class="tiles three" id="tBugun">' +
+        '<div class="tile a"><b>' + (st.accounts_today || 0) +
+          "</b><span>yeni qeydiyyat</span></div>" +
+        '<div class="tile b"><b>' + (st.seen_today || 0) +
+          "</b><span>giren müəllim</span></div>" +
+        '<div class="tile d"><b>' + (st.attempts_today || 0) +
+          "</b><span>cəhd</span></div>" +
+      "</div>" +
+      '<div class="spacer"></div>' +
+
+      //  ----------------------------------------------------- UMUMI
+      "<h2>Ümumi</h2>" +
+      '<div class="tiles" id="tUmumi">' +
         '<div class="tile a"><b>' + (st.accounts || 0) + "</b><span>hesab" +
           ((st.accounts_week || 0) > 0 ? " · +" + st.accounts_week + " bu həftə" : "") +
           "</span></div>" +
@@ -4493,26 +4522,34 @@
           (st.trial_accounts || 0) + " sınaq · " +
           Math.max(0, (st.accounts || 0) - (st.paid_accounts || 0) - (st.trial_accounts || 0)) +
           " pulsuz</span></div>" +
-        '<div class="tile c"><b>' + azn(st.mrr_minor || 0) + "</b><span>aylıq gəlir · yalnız ödənişli</span></div>" +
-        '<div class="tile d"><b>' + (st.attempts_week || 0) + "</b><span>cəhd · son 7 gün</span></div>" +
-        '<div class="tile e"><b>' + (st.seen_week || 0) + "</b><span>girib · son 7 gün</span></div>" +
+        '<div class="tile c"><b>' + azn(st.mrr_minor || 0) +
+          "</b><span>aylıq gəlir · yalnız ödənişli</span></div>" +
+        '<div class="tile e"><b>' + (st.students || 0) +
+          "</b><span>şagird · " + (st.seen_week || 0) + " girib (7 gün)</span></div>" +
       "</div>" +
+      '<div class="spacer"></div>' +
+
+      //  ---------------------------------------------------- ZIYARET
+      //  Qrafik yuxaridadir: buyume gormek ucun acilan sehifedir.
+      (vs ? visitsSection(vs) : "") +
+
+      //  --------------------------------------------------- HESABLAR
       '<div class="card tight">' +
         '<h2 class="ch">Hesablar</h2>' +
-        '<p class="muted" style="margin:8px 0 0">«+1 ay / +6 ay» seçilmiş planı ' +
-          "həmin hesaba <b>ödənişli</b> açır, «Sınaq» eyni paketi pulsuz verir " +
-          "(gəlirə düşmür; sonra ödəyəndə «+1 ay» ödənişliyə çevirir). " +
-          "Eyni plan aktivdirsə, müddət üstünə əlavə olunur." +
-          ((st.demo_accounts || 0) > 0
-            ? " Nümunə nüsxələri (" + st.demo_accounts + ") saylarda yoxdur, " +
-              "«Nümunə» süzgəcindədir; 24 saat sonra özü silinir."
-            : "") +
-          "</p>" +
-        '<div class="fieldrow" style="margin-top:12px">' +
+        //  Uzun izah bir defe oxunur, sonra hemise mane olur - yigilir.
+        '<details class="fold"><summary>Necə işləyir?</summary>' +
+          '<p class="muted">«+1 ay / +6 ay» seçilmiş planı həmin hesaba ' +
+          "<b>ödənişli</b> açır, «Sınaq» eyni paketi pulsuz verir (gəlirə " +
+          "düşmür; sonra ödəyəndə «+1 ay» ödənişliyə çevirir). Eyni plan " +
+          "aktivdirsə, müddət üstünə əlavə olunur. Nümunə nüsxələri " +
+          "saylarda yoxdur, «Nümunə» süzgəcindədir; 24 saat sonra özü " +
+          "silinir.</p>" +
+        "</details>" +
+        '<div class="fieldrow" style="margin:10px 0">' +
           '<div><input id="admQ" placeholder="Ad və ya e-poçtla axtar…"></div>' +
           '<div style="flex:0 0 230px"><select id="admPlan">' +
-            plans.map(function (pl) {
-              return '<option value="' + esc(pl.slug) + '">' + esc(pl.name) + "</option>";
+            plans.map(function (p) {
+              return '<option value="' + esc(p.slug) + '">' + esc(p.name) + "</option>";
             }).join("") +
           "</select></div>" +
         "</div>" +
@@ -4525,38 +4562,46 @@
             }).join("") +
         "</div>" +
         '<div id="admMsg">' + admFlash + "</div>" +
-        //  160: qosulana hediyye paket ayari (serverden doldurulur)
-        '<div class="hedbox" id="hedBox"><span class="muted">Hədiyyə paket: yüklənir…</span></div>' +
       "</div>" +
-      '<div class="spacer"></div>' +
       '<div id="admList" class="card pad0">' + admRows(rows) + "</div>" +
       '<div class="spacer"></div>' +
-      //  161: ziyaretler
-      (vs ? visitsSection(vs) : "") +
-      "<h2>Sual bildirişləri" + (reps.length
-        ? ' <span class="rcnt">' + reps.length + "</span>" : "") + "</h2>" +
-      '<div class="chips" id="repF">' +
-        '<button class="chip on" data-rs="new">Yeni</button>' +
-        '<button class="chip" data-rs="fixed">Düzəldilib</button>' +
-        '<button class="chip" data-rs="rejected">Rədd edilib</button>' +
-      "</div>" +
-      '<div id="repList">' + (REPS_CACHE = reps, repCards(reps, "new")) + "</div>" +
-      '<div class="spacer"></div>' +
+
+      //  ----------------------------------------------------- DIQQET
+      //  Bos bolme dolu bolme qeder yer tutmasin: sifir olanda bir
+      //  setire yigilir, icine girmek yene mumkundur (kohne siyahilara
+      //  baxmaq lazim ola biler).
+      "<h2>Diqqət</h2>" +
+      admFold("Sual bildirişləri", reps.length,
+        '<div class="chips" id="repF">' +
+          '<button class="chip on" data-rs="new">Yeni</button>' +
+          '<button class="chip" data-rs="fixed">Düzəldilib</button>' +
+          '<button class="chip" data-rs="rejected">Rədd edilib</button>' +
+        "</div>" +
+        '<div id="repList">' + (REPS_CACHE = reps, repCards(reps, "new")) + "</div>") +
       //  134: sual keyfiyyeti - cehdlerden siqnallar
-      (qs ? qsSection(qs) : "") +
-      '<h2 id="fbH">Bizə yazılanlar' + (fbs.length
-        ? ' <span class="rcnt">' + fbs.length + "</span>" : "") + "</h2>" +
-      '<div class="chips" id="fbF">' +
-        [["new", "Yeni"], ["seen", "Baxılıb"], ["planned", "Planda"],
-         ["done", "Edilib"], ["closed", "Bağlı"], ["all", "Hamısı"]].map(function (f) {
-          return '<button class="chip' + (f[0] === "new" ? " on" : "") +
-            '" data-fs="' + f[0] + '">' + f[1] + "</button>";
-        }).join("") +
-      "</div>" +
-      '<div id="fbList">' + fbCards(fbs, "new") + "</div>" +
+      (qs ? admFold("Sual keyfiyyəti", Number((qs.counts || {}).all) || 0,
+              qsSection(qs, true)) : "") +
+      admFold("Bizə yazılanlar", fbs.length,
+        '<div class="chips" id="fbF">' +
+          [["new", "Yeni"], ["seen", "Baxılıb"], ["planned", "Planda"],
+           ["done", "Edilib"], ["closed", "Bağlı"], ["all", "Hamısı"]].map(function (f) {
+            return '<button class="chip' + (f[0] === "new" ? " on" : "") +
+              '" data-fs="' + f[0] + '">' + f[1] + "</button>";
+          }).join("") +
+        "</div>" +
+        '<div id="fbList">' + fbCards(fbs, "new") + "</div>", "fbH") +
       '<div class="spacer"></div>' +
-      "<h2>Təhlükəsizlik</h2>" +
-      '<div class="card" id="secBox">' + secCard() + "</div>"
+
+      //  ---------------------------------------------------- AYARLAR
+      //  Gunde bir defe baxilan seyler en asagida, yigilmis halda.
+      "<h2>Ayarlar</h2>" +
+      '<details class="fold big"><summary>Hədiyyə paket</summary>' +
+        //  160: qosulana hediyye paket ayari (serverden doldurulur)
+        '<div class="hedbox" id="hedBox"><span class="muted">Hədiyyə paket: yüklənir…</span></div>' +
+      "</details>" +
+      '<details class="fold big"><summary>Təhlükəsizlik</summary>' +
+        '<div id="secBox">' + secCard() + "</div>" +
+      "</details>"
     );
     admFlash = "";
     //  169: satisda tek qayda var - sagird basina
@@ -4638,8 +4683,12 @@
           setTimeout(function () {
             card.remove();
             var h = $("fbH"), left = document.querySelectorAll("#fbList .fbc").length;
+            //  #fbH artiq yigilan bolmenin basligidir (admFold) -
+            //  say sifira dusende "təmizdir" nisani qayidir.
             if (h && fs === "new") {
-              h.innerHTML = "Bizə yazılanlar" + (left ? ' <span class="rcnt">' + left + "</span>" : "");
+              h.innerHTML = "Bizə yazılanlar" +
+                (left ? ' <span class="rcnt">' + left + "</span>"
+                      : ' <em class="ftik">təmizdir</em>');
             }
             if (!left) $("fbList").innerHTML = fbCards([], fs);
           }, 900);
@@ -4699,25 +4748,25 @@
         e2e onlari oxuyur.  */
     var bas = "<thead><tr>" +
       '<th class="c">#</th><th>Müəllim</th><th>Paket</th>' +
-      '<th class="c">Bitir</th><th class="c">Qalan</th>' +
-      '<th class="c">İstifadə</th><th>Aktivlik</th><th></th></tr></thead>';
+      "<th>Müddət</th>" +
+      '<th class="c">Şagird</th><th>Son giriş</th><th></th></tr></thead>';
     return '<table class="admt"><colgroup>' +
-      //  Yalniz «Müəllim» sutunu sərbəstdir - qalanlarin eni sabitdir,
-      //  ona gore ad ve e-poct kesilmir
-      '<col style="width:34px"><col><col style="width:196px">' +
-      '<col style="width:78px">' +
-      '<col style="width:74px"><col style="width:104px"><col style="width:186px">' +
-      '<col style="width:44px"></colgroup>' + bas + "<tbody>" +
+      //  Yalniz «Müəllim» serbestdir - ad ve e-poct en uzun mezmundur,
+      //  artiq en ora getsin.  Sag terefdeki sutunlar sabitdir, ona gore
+      //  aralarinda bosluq acilmir.
+      '<col style="width:34px"><col><col style="width:184px">' +
+      '<col style="width:126px"><col style="width:86px">' +
+      '<col style="width:164px"><col style="width:44px"></colgroup>' + bas + "<tbody>" +
       rows.map(function (a, ix) {
-      var pl = a.plan, badge, bitir = "—", qalan = "—", gq = null;
+      var pl = a.plan, badge, muddet = "—", gq = null;
       //  138: admin sahibli hesab daimidir - plan ve duyme lazim deyil;
       //  numune nusxesi anonimdir (e-poct yox), ona abune acilmaz
       if (a.admin) {
         badge = '<span class="pb y">admin · daimi</span>';
-        bitir = "daimi";
+        muddet = '<span class="mut">daimi</span>';
       } else if (a.demo) {
         badge = '<span class="pb s">nümunə</span>';
-        bitir = "özü silinir";
+        muddet = '<span class="mut">özü silinir</span>';
       } else if (pl) {
         //  bitmesine 7 gunden az qalibsa narinci - uzatmaq vaxtidir
         gq = pl.ends
@@ -4735,9 +4784,11 @@
         var trial = pl.status === "trialing";
         badge = '<span class="pb ' + (trial ? "s" : "y") + '">' +
           (trial ? "sınaq · " : "") + esc(pl.name) + "</span>";
+        //  «Bitir» ve «Qalan» BIR sutunda: iki reqem yanasi oxunur,
+        //  sutun sayi 8-den 7-ye dusur, setir alcalir.
         if (pl.ends) {
-          bitir = dateAz(pl.ends) + yr;
-          qalan = '<b class="qg' + (gq < 7 ? " az" : "") + '">' + gq + "</b> gün";
+          muddet = '<b class="qg' + (gq < 7 ? " az" : "") + '">' + gq + " gün</b>" +
+            '<s class="mut">' + dateAz(pl.ends) + yr + "</s>";
         }
       } else {
         badge = '<span class="pb n">paketsiz</span>';
@@ -4747,25 +4798,35 @@
         '<button class="btn sm" data-m="6">+6 ay</button>' +
         '<button class="btn sm ghost" data-m="1" data-trial="1">Sınaq 1 ay</button>' +
         (pl ? '<button class="btn sm ghost arch" data-stop="1">Dayandır</button>' : "");
+      //  «0 ş · 1 t · 0 c» oxunmurdu (istifadeci).  Indi esas reqem
+      //  SAGIRD sayidir, altinda yalniz SIFIR OLMAYAN qalanlar yazilir.
+      var ist = [];
+      if (a.tests) ist.push(a.tests + " test");
+      if (a.attempts) ist.push(a.attempts + " cəhd");
       return '<tr class="admr" data-em="' + esc(a.email || "") + '">' +
         '<td class="c num">' + (ix + 1) + "</td>" +
         '<td data-l="Müəllim"><div class="who">' + av(a.name) +
-          "<div><b>" + esc(a.name) + "</b>" +
-          "<i>" + esc(a.email || "") + "</i></div></div></td>" +
+          '<div><b title="' + esc(a.name) + '">' + esc(a.name) + "</b>" +
+          '<i title="' + esc(a.email || "") + '">' + esc(a.email || "") +
+          "</i></div></div></td>" +
         '<td data-l="Paket">' + badge + "</td>" +
-        '<td class="c" data-l="Bitir">' + bitir + "</td>" +
-        '<td class="c" data-l="Qalan">' + qalan + "</td>" +
-        '<td class="c nums" data-l="İstifadə">' +
-          (a.students || 0) + " <s>ş</s> · " + (a.tests || 0) + " <s>t</s> · " +
-          (a.attempts || 0) + " <s>c</s></td>" +
-        //  Uc AYRI siqnal: muellim paneli ne vaxt acib · sagird/valideyn
-        //  kodla ne vaxt girib · hesabda son is ne vaxt olub.
-        //  7 gundur girmeyen muellim narinci - zeng etmek vaxtidir.
-        '<td data-l="Aktivlik"><i class="lg">' +
-          '<span class="' + seenCls(a.last_login) + '">müəllim girişi: ' +
+        '<td data-l="Müddət" class="mdt">' + muddet + "</td>" +
+        '<td class="c nums" data-l="Şagird"><b>' + (a.students || 0) + "</b>" +
+          (ist.length ? '<s class="mut">' + ist.join(" · ") + "</s>" : "") + "</td>" +
+        //  Muellim girisi esas siqnaldir - 7 gundur girmeyen narinci.
+        //  Sagird girisi yalniz HEC VAXT olanda maraqlidir (hesab bos
+        //  qalib), ona gore o hal ayrica yazilir.
+        '<td data-l="Son giriş"><i class="lg">' +
+          '<span class="' + seenCls(a.last_login) + '">' +
             whenAz(a.last_login) + "</span>" +
-          "<s>şagird girişi: " + whenAz(a.student_login) + "</s>" +
-          "<s>aktivlik: " + whenAz(a.last_active) + "</s></i></td>" +
+          //  Sagird girisi yalniz SAGIRDI OLAN hesabda menalidir -
+          //  bos hesabda "şagird hələ girməyib" xeberdarligi yanlis
+          //  siqnaldir (hele qrup da qurulmayib).
+          (a.student_login
+            ? '<s class="mut">şagird: ' + whenAz(a.student_login) + "</s>"
+            : (a.students
+                ? '<s class="mut sno">şagird hələ girməyib</s>'
+                : '<s class="mut">şagird yoxdur</s>')) + "</i></td>" +
         '<td class="c">' + (ops
           ? '<details class="rmenu"><summary aria-label="Əməliyyatlar">···</summary>' +
             '<div class="rm">' + ops + "</div></details>"
@@ -4946,10 +5007,12 @@
     hidden: ["baxılıb", ""]
   };
   var QS_CACHE = [];
-  function qsSection(qs) {
+  //  ic=true olanda basliq YAZILMIR - admFold onu ozu qoyur.
+  function qsSection(qs, ic) {
     var c = qs.counts || {};
     var all = Number(c.all) || 0;
-    return "<h2>Sual keyfiyyəti" + (all ? ' <span class="rcnt">' + all + "</span>" : "") + "</h2>" +
+    return (ic ? "" : "<h2>Sual keyfiyyəti" +
+             (all ? ' <span class="rcnt">' + all + "</span>" : "") + "</h2>") +
       '<p class="muted" style="margin:-4px 0 10px" id="qsInfo">' + qsInfo(qs) + "</p>" +
       '<div class="chips" id="qsF">' +
         '<button class="chip on" data-qf="">Hamısı' + (all ? " · " + all : "") + "</button>" +

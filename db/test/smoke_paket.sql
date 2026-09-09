@@ -351,6 +351,14 @@ begin
   --  paket sehifesi: "Admin - daimi"
   p := public.rpc_paket('aaaa0000-0000-0000-0000-0000000000e1');
   assert p->'current'->>'slug' = 'admin', 'paket sehifesi admin daimi demir';
+  --  173: ESAS SEHIFE de eyni demelidir.  Evvel my_context xam abuneni
+  --  qaytarirdi: admin oz ekraninda qiymet ve "hediyye bitir" gorurdu.
+  p := public.rpc_my_context();
+  p := (select x->'plan' from jsonb_array_elements(p->'accounts') x
+         where x->>'id' = 'aaaa0000-0000-0000-0000-0000000000e1');
+  assert p->>'slug' = 'admin', 'esas sehife adminde qiymet gosterir: ' || coalesce(p::text,'-');
+  assert p->>'status' = 'active' and p->>'days_left' is null,
+    'admin planinda bitme/qalan gun olmamalidir: ' || p::text;
 end $$;
 \echo 'OK 13 · admin sahibli hesab daimidir: limitsiz, gelir/pullu sayinda yox'
 

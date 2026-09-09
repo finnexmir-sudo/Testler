@@ -134,9 +134,9 @@ with sync_playwright() as pw:
     ok(True, "admin rolunda Idareetme bendi gorunur")
     pg.click("#btnAdm")
     pg.wait_for_selector(".admr", timeout=8000)
-    ok(pg.locator(".tiles.five .tile").count() == 5, "gosterici lovheleri gorunur",
-       pg.locator(".tile").count())
-    tl = pg.inner_text(".tiles.five").replace("\n", " ")
+    ok(pg.locator("#tBugun .tile").count() + pg.locator("#tUmumi .tile").count() == 7,
+       "gosterici lovheleri gorunur", pg.locator(".tile").count())
+    tl = pg.inner_text("#tUmumi").replace("\n", " ")
     ok("hesab" in tl and "pullu" in tl and "pulsuz" in tl and "gəlir" in tl,
        "lovhelerde hesab/pullu/pulsuz/gelir var", tl[:70])
     ok(pg.locator("#admF .chip").count() == 7,
@@ -144,8 +144,14 @@ with sync_playwright() as pw:
        pg.locator("#admF .chip").count())
     ok("sınaq" in tl, "pullu lovhesinde sinaq sayi var", tl[:70])
     ok("yalnız ödənişli" in tl, "gelir lovhesi 'yalniz odenisli' deyir")
-    ok(pg.locator(".tiles.five .tile").count() == 5 and "girib" in tl, "5-ci lovhe: hesab girib · son 7 gun", tl[-60:])
+    #  173: lovheler iki setirdir - "Bu gün" 3, "Ümumi" 4
+    ok(pg.locator("#tBugun .tile").count() == 3, "bu gun setri 3 lovhe",
+       pg.locator("#tBugun .tile").count())
+    ok(pg.locator("#tUmumi .tile").count() == 4 and "girib (7 gün)" in tl,
+       "umumi setri 4 lovhe, sonuncuda heftelik giris", tl[-60:])
     print("C1 · (160) Hədiyyə paket ayarı")
+    #  173: bolmeler yigilib gelir - Playwright gizli elementi gormur
+    pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
     pg.wait_for_selector("#hedSave", timeout=8000)
     ok("Hədiyyə paket" in pg.inner_text("#hedBox"), "ayar qutusu yuklenir")
     pg.fill("#hedDays", "45"); pg.fill("#hedBeta", "2027-01-15")
@@ -165,10 +171,20 @@ with sync_playwright() as pw:
     ok("iki@t.az" in row, "hesab siyahida e-poctla gorunur", row[:60])
     ok("paketsiz" in row, "paketsiz nisani gorunur")
     row = arow
-    ok("aktivlik" in row, "son aktivlik gorunur", row[:80])
-    ok("müəllim girişi: bu gün" in row, "muellim girisi bu gun (rpc_seen)", row[-90:])
-    ok("şagird girişi: heç vaxt" in row, "sagird girisi hele yoxdur")
-    ok(pg.inner_text(".tile.e").startswith("1"), "girib lovhesi 1", pg.inner_text(".tile.e").replace("\n", " "))
+    ok("Son giriş" in pg.inner_text(".admt thead"), "son giris sutunu var")
+    #  173: uc setirlik «Aktivlik» xanasi «Son giriş»e yigildi - esas
+    #  siqnal muellimin girisidir, sagird girisi yalniz HEC VAXT olanda
+    #  ayrica yazilir (hesab qurulub, amma islenmir).
+    ok("bu gün" in row, "muellim girisi bu gun (rpc_seen)", row[-90:])
+    #  Bu hesabda sagird YOXDUR - "hələ girməyib" xeberdarligi yalniz
+    #  sagirdi olan hesabda menalidir (bos hesabda yanlis siqnal olardi).
+    ok("şagird yoxdur" in row, "sagirdsiz hesabda xeberdarliq yoxdur", row[-60:])
+    #  173: lovheler iki setre bolundu - "Bu gün" ve "Ümumi".
+    ok(pg.inner_text("#tBugun .tile.b").startswith("1"),
+       "bu gun giren muellim 1", pg.inner_text("#tBugun .tile.b").replace("\n", " "))
+    ok("girib (7 gün)" in pg.inner_text("#tUmumi .tile.e"),
+       "umumi setrinde sagird + heftelik giris",
+       pg.inner_text("#tUmumi .tile.e").replace("\n", " "))
     #  Girmeyenler: bu hesab bu gun girib - cixmir; 10 gun evvele cekende cixir
     pg.locator("#admF .chip[data-f='girmir']").click(); pg.wait_for_timeout(700)
     ok("Hesab tapılmadı" in pg.inner_text("#admList"), "girmeyenler: bu gun giren cixmir")
@@ -213,10 +229,10 @@ with sync_playwright() as pw:
     a0 = db("select s.status, s.provider from public.subscriptions s", one=True)
     ok(a0 and a0["status"] == "trialing" and a0["provider"] == "trial",
        "bazada trialing/trial abune var", a0)
-    tb = pg.inner_text(".tile.b").replace("\n", " ")
+    tb = pg.inner_text("#tUmumi .tile.b").replace("\n", " ")
     ok(tb.startswith("0") and "1 sınaq" in tb, "lovhe: 0 pullu · 1 sinaq", tb)
-    ok("0,00" in pg.inner_text(".tile.c") or "0 ₼" in pg.inner_text(".tile.c"),
-       "gelir sifirdir", pg.inner_text(".tile.c").replace("\n", " "))
+    ok("0,00" in pg.inner_text("#tUmumi .tile.c") or "0 ₼" in pg.inner_text("#tUmumi .tile.c"),
+       "gelir sifirdir", pg.inner_text("#tUmumi .tile.c").replace("\n", " "))
     pg.locator("#admF .chip[data-f='sinaq']").click()
     #  siyahi yeniden cizilene qeder gozle (kohne siyahida da .pb.s var)
     pg.wait_for_function("document.querySelectorAll('.admr').length === 1", timeout=8000)
@@ -232,12 +248,12 @@ with sync_playwright() as pw:
     ok("Şagird başına" in pg.inner_text(ROW + " .pb.y"), "abune nisani setirde gorunur",
        pg.inner_text(ROW + " .pb.y")[:40])
     ok("yerinə yetirildi" in pg.inner_text("#admMsg"), "netice mesaji gorunur")
-    ok(pg.inner_text(".tile.b").replace("\n", " ").startswith("1"), "aktiv abune lovhesi yenilenir",
-       pg.inner_text(".tile.b").replace("\n", " "))
+    ok(pg.inner_text("#tUmumi .tile.b").replace("\n", " ").startswith("1"), "aktiv abune lovhesi yenilenir",
+       pg.inner_text("#tUmumi .tile.b").replace("\n", " "))
     #  (169) 4 aktiv sagird x 1,50 = 6 ₼.  Kohne pilleli paketde bu
     #  reqem 29 ₼ idi (paketin qiymeti) - artiq sagird sayina baglidir.
-    ok("6,00" in pg.inner_text(".tile.c") or "6 ₼" in pg.inner_text(".tile.c"),
-       "gelir = 4 aktiv sagird x 1,50 = 6 ₼", pg.inner_text(".tile.c").replace("\n", " "))
+    ok("6,00" in pg.inner_text("#tUmumi .tile.c") or "6 ₼" in pg.inner_text("#tUmumi .tile.c"),
+       "gelir = 4 aktiv sagird x 1,50 = 6 ₼", pg.inner_text("#tUmumi .tile.c").replace("\n", " "))
     a = db("""select s.status, s.provider from public.subscriptions s""", one=True)
     ok(a and a["status"] == "active" and a["provider"] == "manual",
        "bazada active/manual abune var")
@@ -258,7 +274,7 @@ with sync_playwright() as pw:
     mt = pg.inner_text("#main")
     ok("Admin hesabı" in mt, "admin ucun ayrica veziyyet yazilir",
        mt[:80].replace("\n", " "))
-    ok("Admin — daimi" in mt, "plan adi 'Admin — daimi'",
+    ok("Admin · daimi" in mt, "plan adi 'Admin · daimi'",
        mt[:80].replace("\n", " "))
 
     print("F · Dayandırmaq")
@@ -272,9 +288,11 @@ with sync_playwright() as pw:
        "bazada aktiv abune qalmadi")
 
     print("G · (165) Şagird başına paket və ödəniş xatırlatması")
-    #  DIQQET: bu hesab yuxarida ADMIN olub - app.has_active_subscription
-    #  admin ucun hemise true qaytarir.  Ona gore burada YALNIZ ekran
-    #  yoxlanilir; guzestin baza mentiqi db/test/smoke_qiymet.sql-dedir.
+    #  DIQQET: bu hesab yuxarida ADMIN olub.  173-den sonra rpc_my_context
+    #  admin hesabina "Admin · daimi" qaytarir (qiymet gostermir) - ona
+    #  gore sagird basina karti gormek ucun rol MUVEQQETI goturulur.
+    #  Guzestin baza mentiqi db/test/smoke_qiymet.sql-dedir.
+    db("delete from public.user_roles where user_id = %s and role = 'admin'", (UID,))
     acc = db("select a.id from public.accounts a"
              " join auth.users u on u.id = a.owner_id"
              " where u.email = 'pkt@t.az'", one=True)["id"]
@@ -351,7 +369,6 @@ with sync_playwright() as pw:
     #  "Admin - daimi" qaytarir, hediyye veziyyeti gorunmezdi.
     db("update public.subscriptions set provider = 'gift', status = 'trialing'"
        " where account_id = %s", (acc,))
-    db("delete from public.user_roles where user_id = %s and role = 'admin'", (UID,))
     pg.goto(PANEL + "#/"); pg.reload(); pg.wait_for_selector("#band .bseat", timeout=15000)
     bs = pg.inner_text("#band .bseat").replace("\n", " ")
     #  172: mebleg SERTI dilde durur - "bu ay" yox, "beta bitendən sonra"

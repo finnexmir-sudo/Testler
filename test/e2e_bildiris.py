@@ -134,6 +134,10 @@ with sync_playwright() as pw:
     db("insert into public.user_roles (user_id, role) values (%s,'admin') on conflict do nothing",
        (UID,))
     pg.goto(PANEL + "#/adm"); pg.reload()
+    #  173: idareetmede bolmeler yigilib gelir - Playwright gizli
+    #  elementi gormur, ona gore hamisini aciriq.
+    pg.wait_for_selector(".fold", timeout=15000)
+    pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
     pg.wait_for_selector(".repc", timeout=8000)
     ok(pg.locator(".repc").count() == 2, "iki bildiris karti", pg.locator(".repc").count())
     ok(pg.locator(".repc .popt.ok").count() >= 2, "duz cavablar isarelenib")
@@ -162,6 +166,8 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(900)
     nq = db("select count(*) n from public.question_reports where status='new'", one=True)["n"]
     ok(nq == 0, "butun bildirisler baglandi", nq)
+    #  173: ekran yeniden cizildi - bolmeler yene yigildi
+    pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
     pg.wait_for_selector("#repF", timeout=8000)
     pg.locator("#repF .chip", has_text="Düzəldilib").click()
     pg.wait_for_timeout(700)
@@ -169,6 +175,8 @@ with sync_playwright() as pw:
        pg.locator("#repList .repc").count())
 
     print("E · 2FA qurulur")
+    #  173: ekran yeniden cizildi - bolmeler yene yigildi
+    pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
     pg.click("#btn2On")
     pg.wait_for_selector(".s2setup", timeout=8000)
     key = pg.inner_text(".s2key").strip()

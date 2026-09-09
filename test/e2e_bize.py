@@ -147,7 +147,12 @@ with sync_playwright() as pw:
     pg.reload(); pg.wait_for_selector("#btnAdm", timeout=15000)
     pg.wait_for_selector("#admSub:has-text('yeni müraciət')", timeout=8000)
     ok("4 yeni müraciət" in pg.inner_text("#admSub"), "Icmal: 4 yeni muraciet", pg.inner_text("#admSub"))
-    pg.click("#btnAdm"); pg.wait_for_selector("#fbList .fbc", timeout=15000)
+    pg.click("#btnAdm")
+    #  173: idareetmede bolmeler yigilib gelir - Playwright gizli
+    #  elementi gormur, ona gore hamisini aciriq.
+    pg.wait_for_selector(".fold", timeout=15000)
+    pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
+    pg.wait_for_selector("#fbList .fbc", timeout=15000)
     ok(pg.locator("#fbList .fbc").count() == 4, "admin: 4 kart")
     ok("4" in pg.inner_text("#fbH"), "basliqda say")
     txt = pg.inner_text("#fbList")
@@ -184,7 +189,12 @@ with sync_playwright() as pw:
 
     print("H · Şəkil (390 · 1280)")
     pg.screenshot(path="/tmp/bize_me.png", full_page=True)
-    pg.goto(PANEL + "#/adm"); pg.wait_for_selector("#fbList .fbc", timeout=15000)
+    pg.goto(PANEL + "#/adm")
+    #  173: idareetmede bolmeler yigilib gelir - Playwright gizli
+    #  elementi gormur, ona gore hamisini aciriq.
+    pg.wait_for_selector(".fold", timeout=15000)
+    pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
+    pg.wait_for_selector("#fbList .fbc", timeout=15000)
     pg.set_viewport_size({"width": 1280, "height": 900})
     pg.screenshot(path="/tmp/bize_adm.png", full_page=True)
     sp.screenshot(path="/tmp/bize_sag.png", full_page=True)

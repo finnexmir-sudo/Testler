@@ -255,3 +255,22 @@ begin
 end $$;
 reset request.jwt.claim.sub;
 \echo 'OK  8 · gelir aktiv sagird sayina gore hesablanir (seats sutunu yox)'
+
+-- 9 · (173) admin lövhəsi "bu gün" saylarını verir (Baki günü ilə)
+do $$
+declare st jsonb;
+begin
+  perform set_config('request.jwt.claim.sub','11110000-0000-0000-0000-0000000169a9',true);
+  st := public.rpc_admin_stats();
+  if not (st ? 'accounts_today' and st ? 'seen_today' and st ? 'attempts_today') then
+    raise exception 'bu gun saylari yoxdur: %', st::text; end if;
+  --  Hesab bu gun yaradilmayib (fikstür kohne tarixlidir deyil - default now())
+  if (st->>'accounts_today')::int < 0 then
+    raise exception 'accounts_today menfi'; end if;
+  --  Say heftelik saydan BOYUK ola bilmez
+  if (st->>'accounts_today')::int > (st->>'accounts')::int then
+    raise exception 'bugunku hesab sayi umumi saydan coxdur: % > %',
+      st->>'accounts_today', st->>'accounts'; end if;
+end $$;
+reset request.jwt.claim.sub;
+\echo 'OK  9 · (173) admin lövhəsində bu günün sayları'

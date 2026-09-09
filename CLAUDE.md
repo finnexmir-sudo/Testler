@@ -2422,6 +2422,51 @@ fiksturlara güzəşt təsir etmir. Həmçinin `app.has_active_subscription()`
 **admin üçün həmişə true**-dur — e2e-də admin hesabla güzəşt yoxlamayın
 (`smoke_qiymet.sql` düzgün hesabla yoxlayır).
 
+## İdarəetmə ekranı (db/173, 2026-09-09)
+
+Admin səhifəni **hər gün** açır və böyüməyə baxır — quruluş buna görə
+düzülüb, sıra belədir:
+
+1. **Bu gün** — yeni qeydiyyat · giren müəllim · cəhd (Bakı günü ilə,
+   `rpc_admin_stats.accounts_today / seen_today / attempts_today`)
+2. **Ümumi** — hesab · pullu/sınaq/pulsuz · aylıq gəlir · şagird
+3. **Ziyarətlər** — qrafik; yuxarıdadır, çünki səhifə bunun üçün açılır
+4. **Hesablar** — axtarış + süzgəc + cədvəl. Uzun izah «Necə işləyir?»
+   `<details>`-i altındadır: bir dəfə oxunur, sonra mane olur
+5. **Diqqət** — sual bildirişləri · keyfiyyət · müraciətlər
+6. **Ayarlar** — hədiyyə paket · təhlükəsizlik (yığılmış)
+
+**`admFold(başlıq, say, iç)`** — bölmə dolu olanda özü açılır və sayı
+göstərir, **boş olanda bir sətrə yığılır** və sağda yaşıl «təmizdir»
+yazır. Səbəb: üç boş kart dolu kart qədər yer tuturdu. İçinə girmək
+yenə mümkündür (köhnə bildirişlərə baxmaq lazım ola bilər).
+
+**Test yazanda:** yığılmış bölmədəki element Playwright üçün
+**görünmür**. Admin səhifəsini açandan sonra:
+```python
+pg.wait_for_selector(".fold", timeout=15000)
+pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
+```
+Ekran yenidən çizilirsə (məsələn bildiriş bağlananda) **təkrar** açmaq
+lazımdır. 2FA açıqdırsa `#/adm` əvvəlcə **kilid ekranını** göstərir —
+orada `.fold` yoxdur, gözləmə oraya qoyulmamalıdır.
+
+**Hesablar cədvəli** (`admRows`) — 7 sütun, sətir **2 sətirdir**:
+`# · Müəllim · Paket · Müddət · Şagird · Son giriş · ···`
+- «Bitir»+«Qalan» birləşib **Müddət**: böyük «41 gün», altında «20 okt»
+- «Şagird»: böyük rəqəm, altında **yalnız sıfır olmayanlar**
+  («3 test · 12 cəhd») — köhnə «0 ş · 1 t · 0 c» oxunmurdu
+- «Son giriş»: müəllimin girişi əsas siqnaldır; şagird girişi altda.
+  **Şagirdi olmayan** hesabda «şagird yoxdur» yazılır — «hələ
+  girməyib» xəbərdarlığı yalnız şagirdi olub heç girməyəndə çıxır
+- Yalnız «Müəllim» sütunu sərbəstdir, qalanları sabit — artıq en bir
+  yerə yığılır, sütunlar arasında boşluq açılmır. Səhifə eni
+  `.wrap.wideadm` = **1100px** (məzmuna görə ölçülüb)
+
+**Admin hesabı ödəmir:** `rpc_my_context` admin hesabına «Admin ·
+daimi» qaytarır — qiymət, «hədiyyə bitir» və xatırlatma zolağı
+görünmür (`rpc_paket` bunu onsuz da edirdi, my_context geridə qalmışdı).
+
 ## Dizayn şablonu — marka zolağı (2026-09-08, v374–377)
 
 Ana səhifə Oxuyan üslubunda yenidən yığıldı (istifadəçi bəyəndi) və

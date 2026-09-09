@@ -117,7 +117,12 @@ with sync_playwright() as pw:
     db("insert into public.user_roles (user_id, role) values (%s,'admin') on conflict do nothing", (UID,))
 
     print("B · Admin: keyfiyyət kartları, süzgəc, Baxıldı")
-    pg.goto(PANEL + "#/adm"); pg.reload(); pg.wait_for_selector(".qsc", timeout=15000)
+    pg.goto(PANEL + "#/adm"); pg.reload()
+    #  173: idareetmede bolmeler yigilib gelir - Playwright gizli
+    #  elementi gormur, ona gore hamisini aciriq.
+    pg.wait_for_selector(".fold", timeout=15000)
+    pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
+    pg.wait_for_selector(".qsc", timeout=15000)
     ok(pg.locator(".qsc").count() == 2, "iki siqnalli sual", pg.locator(".qsc").count())
     first = pg.locator(".qsc").first
     ok(first.get_attribute("data-q") == Q1, "acar subheli sual birinci")
