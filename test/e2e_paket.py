@@ -361,6 +361,24 @@ with sync_playwright() as pw:
     ok("növbəti ay" in ab and gozlenen in ab,
        "hediyye ayinda qutu novbeti ayin meblegini yazir", ab[:80])
 
+    #  g) adminin EL ILE verdiyi sinaq da pulsuzdur - eyni davranis.
+    #  Evvel ekran yalniz provider='gift'-e baxirdi: el ile verilmis
+    #  sinaqda kart "Bu ay N ₼" yazirdi, altdaki kart ise "Tam paket
+    #  sizə hədiyyədir" - ziddiyyet idi.
+    db("update public.subscriptions set provider = 'trial'"
+       " where account_id = %s", (acc,))
+    pg.goto(PANEL + "#/"); pg.reload(); pg.wait_for_selector("#band .bseat", timeout=15000)
+    bs = pg.inner_text("#band .bseat").replace("\n", " ")
+    ok("Növbəti ay" in bs, "el ile verilmis sinaqda da 'Novbeti ay'", bs[:70])
+    pg.goto(PANEL + "#/p"); pg.reload()
+    pg.wait_for_selector(".abn", timeout=15000)
+    mt = pg.inner_text("#main")
+    ok("Sınaq ayı" in mt and "0 ₼" in mt, "sinaq ayi veziyyeti yazilir",
+       mt[:90].replace("\n", " "))
+    ab = pg.inner_text(".abn").replace("\n", " ")
+    ok("növbəti ay" in ab and gozlenen in ab,
+       "sinaq ayinda qutu novbeti ayin meblegini yazir", ab[:80])
+
     db("insert into public.user_roles (user_id, role) values (%s, 'admin')"
        " on conflict do nothing", (UID,))
 

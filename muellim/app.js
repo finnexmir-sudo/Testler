@@ -601,7 +601,7 @@
     if (pl && Number(pl.per_seat_minor) > 0) {
       //  Hediyye ayinda pul tutulmur - onda meblegi NOVBETI ay kimi
       //  yazirig: muellim indiden gorsun, sonra suprize dusmesin.
-      var hd = pl.provider === "gift";
+      var hd = pl.status === "trialing";
       return '<div class="bseat gseat">' +
         '<div class="seat"><div><div class="num">' + used + "</div>" +
           '<div class="lbl">aktiv şagird</div></div>' + pill + "</div>" +
@@ -4217,7 +4217,10 @@
     var due  = Number((cur && cur.due_minor != null)
                  ? cur.due_minor : v.due_minor) || 0;
     var left = (cur && cur.days_left != null) ? Number(cur.days_left) : null;
-    var gift = !!(cur && cur.gift);
+    var gift  = !!(cur && cur.gift);            // avtomatik hediyye
+    var trial = !!(cur && cur.status === "trialing");  // pulsuz dovr
+    //  Hediyye DE, adminin el ile verdiyi sinaq DA pulsuzdur - ferq
+    //  yalniz sozdedir.  Pul hesabi ikisinde de "novbeti ay"-dir.
     var over = left != null && left < 0;             // guzest muddetinde
     var wa   = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
     var me   = (CTX && CTX.profile && CTX.profile.full_name) || "";
@@ -4233,8 +4236,9 @@
       st = msg("warn", "Müddət bitib — güzəşt: " +
         Math.max(0, gr + left) + " gün. Sonra pulsuz " + free +
         " şagird yerinə düşür, mövcud şagirdlər qalır.");
-    } else if (gift) {
-      st = msg("ok", "Hədiyyə ay — 0 ₼, şagird limiti yoxdur." +
+    } else if (trial) {
+      st = msg("ok", (gift ? "Hədiyyə ay" : "Sınaq ayı") +
+        " — 0 ₼, şagird limiti yoxdur." +
         (left != null ? " Qalıb: " + left + " gün." : "") +
         (cur.ends ? " Bitmə: " + dateAz(cur.ends) + "." : ""));
     } else {
@@ -4250,7 +4254,9 @@
           '<div class="lbl">Şagird limiti yoxdur · platforma bankı · ' +
             "avtomatik test · analitika · siqnallar</div></div>" +
         '<span class="pill' + (cur && !over ? " on" : "") + '">' +
-          (over ? "güzəşt" : (gift ? "hədiyyə" : (cur ? "aktiv" : "paketsiz"))) +
+          (over ? "güzəşt"
+                : (gift ? "hədiyyə"
+                        : (trial ? "sınaq" : (cur ? "aktiv" : "paketsiz")))) +
         "</span></div>" +
       "</div>" +
       '<div class="spacer"></div>' +
@@ -4269,13 +4275,14 @@
           //  yazilir ki, muellim indiden bilsin.  "0 ₼" veziyyet
           //  setrinde onsuz da yazilib.
           '<div class="c sum"><b>' + azn(due) + "</b><span>" +
-            (gift ? "növbəti ay" : "ayda") + "</span></div>" +
+            (trial ? "növbəti ay" : "ayda") + "</span></div>" +
         "</div>" +
         '<p class="muted" style="margin:14px 0 0">Məbləği server hesablayır. ' +
           "Ödəniş günündəki aktiv şagird sayı əsas götürülür — ay ərzində " +
           "əlavə etdiyiniz şagird növbəti ayın hesabında görünür. " +
           "Dayandırılmış şagird pul tutmur." +
-          (gift ? " Hədiyyə ayı bitəndən sonra bu məbləğ qüvvəyə minir." : "") +
+          (trial ? " " + (gift ? "Hədiyyə" : "Sınaq") +
+                   " ayı bitəndən sonra bu məbləğ qüvvəyə minir." : "") +
         "</p>" +
       "</div>" +
       '<div class="spacer"></div>' +

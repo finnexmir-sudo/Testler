@@ -1170,7 +1170,23 @@ işlətmir.
 
 # panel uçdan-uca (mock Supabase + Chromium)
 ./test/run_e2e.sh
+
+# TƏK e2e skripti (sürətli — bazanı yenidən qurmur)
+./test/tek.sh e2e_paket.py
+NEW_DB=1 ./test/tek.sh e2e_paket.py   # miqrasiyadan sonra
 ```
+
+**`tek.sh` niyə var:** `mock_supabase.py` parolları yaddaşda saxlayır
+(`PASSWORDS`), ona görə bir testi ikinci dəfə işlədəndə qeydiyyat
+mərhələsi (`#btnSetup`) tapılmır. Lazım olan **yalnız mock-u yenidən
+qaldırmaqdır** — bazanı hər test özü təmizləyir. Bazanı da yenidən
+qurmaq 3-4 dəqiqə aparırdı; `tek.sh` ilə 14 saniyədir.
+
+**`pkill` naxışını həmişə lövbərlə (`^`).** `pkill -f "yoxla.sh"` və
+`pkill -f "http.server 8010"` **öz bash sarmalayıcımızı da tapıb
+öldürür** — test səssizcə boş qayıdır və ya sessiya kəsilir (iki dəfə
+baş verib). Düzgün: `pkill -f "^bash ./test/yoxla.sh"`,
+`pkill -f "^python3 -m http.server 8010"`.
 
 Sxem və ya RLS dəyişəndə **mütləq** hamısını işlət. Bu testlər
 təhlükəsizlik iddialarıdır, yalnız «işləyir/işləmir» yoxlaması deyil.
