@@ -187,6 +187,11 @@ bank 155_bank_inf3_informasiya_bosluqlar.sql
 bank 156_bank_inf3_kompyuter_is_masasi_qovluq.sql
 bank 157_bank_inf10_informasiya_miqdari.sql
 bank 158_bank_inf11_modellesdirme_bosluqlar.sql
+# 200-299: bank sessiyasinin YENI nomre araligi (2026-09-08 razilasmasi) -
+# 141-158 bitib, kod sessiyasi ile toqqusma olmasin deye ayrica diapazon
+# verildi (kod fayllari 199-a qeder).
+bank 201_bank_cog8_hidrosfer_biosfer.sql
+bank 202_bank_hey4_alt_movzu_temizlik.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
