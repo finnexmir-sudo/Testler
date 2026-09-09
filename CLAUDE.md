@@ -2304,6 +2304,51 @@ Bu ayar **heç bir hesabın davranışını dəyişmir** — nə abunə, nə hə
 nə məbləğ. Yalnız ekrandakı cümlədir. Kodda `betaAdi()` (məbləğ
 sətrinin başlığı) və `betaQeyd()` (uzun cümlə) funksiyalarıdır.
 
+### Limitsiz test bizə ziyan verirmi? (2026-09-09 hesablaması)
+
+Sual: şagird başına 1,50 ₼ ödəyib **istənilən qədər** test etmək bizi
+zərərə salarmı? **Xeyr.** Səbəb: runtime-da **hər testin ayrıca xərci
+yoxdur** — nə AI, nə üçüncü tərəf API. Xərc yalnız baza yeri və
+trafikdir.
+
+Ölçülüb (`attempt_answers`, indekslərlə, sual mətninin surəti daxil):
+**cavablanan bir sual = 436 bayt.**
+
+| Ən aktiv şagird (ayda 30 test × 20 sual) | |
+|---|---|
+| Baza artımı | 600 × 436 B = **262 KB / ay** |
+| Trafik | ~540 KB / ay |
+| Gəlir | **1,50 ₼ / ay** |
+
+1 000 belə şagird: 262 MB/ay baza, 540 MB/ay trafik. Supabase Pro
+($25/ay) 8 GB baza + 250 GB trafik verir — trafikin **0,2%-i**.
+Gəlir 1 500 ₼. Bir şagirdin xərci 1,50 ₼-ə çatması üçün ayda **7 GB**
+yaratmalıdır (ayda 16 mln sual) — mümkün deyil.
+
+**Limit qoymaq ziyan verər:** ən çox test edən müəllim ən yaxşı
+müştəridir. Lazım olsa düzgün alət «ədalətli istifadə tavanı»dır —
+real heç kimin çatmadığı rəqəm (məs. ayda 300 test), sırf
+sui-istifadəyə qarşı. **İndi ehtiyac yoxdur.**
+
+**Əsl risklər başqa yerdədir** (buna sonra qayıdılacaq):
+
+1. **Şagird paylaşımı** — pul itkisi məhz buradadır: 1,50 ₼/şagird
+   müəllimi 4 uşağı bir kod altında yığmağa təşviq edir. Tutmaq olar:
+   bir kod, çox cihaz, üst-üstə düşən sessiyalar. Hazırda cihaz limiti
+   yoxdur, sessiya 30 gündür (db/164).
+2. **Pulsuz 5 yer × çox hesab** — bir nəfər neçə müəllim hesabı açır.
+   E-poçt/IP ilə görünür.
+3. **`attempt_answers` sonsuza qədər böyüyür** — heç vaxt təmizlənmir.
+   Hesabatlar onsuz da son 12 ayı işlədir, köhnə cəhdlər
+   arxivləşdirilə bilər. Təcili deyil, planda olsun.
+4. **Generator hesablama yükü** — `rpc_generate_test` ən ağır
+   sorğudur; təkrar test yığmaq bazanı test həll etməkdən çox yorur.
+   Problem olsa, ilk limit burada qoyulmalıdır.
+5. **Runtime-da AI əlavə etsək bu cavab DƏYİŞİR.** Hər sorğuda LLM
+   çağırılsa xərc sıfır olmayacaq və limitsizlik təhlükəli olacaq.
+   «AI yalnız oflayn/admin tərəfdə» qaydası təkcə təhlükəsizlik yox,
+   **pul qaydasıdır**.
+
 **Qərar (istifadəçi ilə müzakirə):**
 
 - **Şagird və valideyn həmişə pulsuzdur.** Bazadakı `valideyn-aylik`
