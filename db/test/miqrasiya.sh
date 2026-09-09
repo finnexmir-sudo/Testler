@@ -91,6 +91,8 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          210_bank_azdili2_cetin_norma.sql \
          211_bank_azdili3_cetin_norma.sql \
          212_bank_azdili4_cetin_norma.sql \
+         213_bank_azdili5_cetin_norma.sql \
+         214_bank_azdili6_cetin_norma.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \

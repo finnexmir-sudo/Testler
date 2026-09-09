@@ -210,6 +210,8 @@ bank 209_bank_azdili1_cetin_norma.sql
 bank 210_bank_azdili2_cetin_norma.sql
 bank 211_bank_azdili3_cetin_norma.sql
 bank 212_bank_azdili4_cetin_norma.sql
+bank 213_bank_azdili5_cetin_norma.sql
+bank 214_bank_azdili6_cetin_norma.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
