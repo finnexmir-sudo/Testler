@@ -17,14 +17,48 @@
     return c;
   }
 
+  /*  JETONUN BITME VAXTI - oz mohurumuzla.
+      Supabase cavabinda 'expires_in' (saniye) ve bezen 'expires_at'
+      (unix) gelir.  Biz OZUMUZ mohur vururuq: indi + expires_in.
+      Niye serverin 'expires_at'-ina guvenmirik: telefonun saati sehv
+      qurulubsa hemin reqem yaniltir - saat geridedirse jeton "hele
+      diridir" gorunur ve 401 yene qacilmaz olur.  Oz mohurumuz eyni
+      saatla vurulur, ona gore saat serhi ozunu yeyir.
+      Kohne sessiyada (mohursuz) sifir qayidir - hec ne deyismir,
+      kohne 401 yolu isleyir; ilk yenilemeden sonra mohur da yaranir.  */
+  var SKEW = 60000;        //  bir deqiqe ehtiyat - sorgu yolda ikeni bitmesin
+  var refreshing = null;   //  eyni anda YALNIZ bir yenileme (paralel sorgular)
+  var ended = false;       //  "sessiya bitdi" siqnali bir defe verilsin
+
+  function stamp(s) {
+    if (s && !s.sb_exp) {
+      if (s.expires_in) s.sb_exp = Date.now() + Number(s.expires_in) * 1000;
+      else if (s.expires_at) s.sb_exp = Number(s.expires_at) * 1000;
+    }
+    return s;
+  }
+  function tokenOld() {
+    return !!(S && S.sb_exp && Date.now() > S.sb_exp - SKEW);
+  }
+
   function loadSession() {
     try { S = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { S = null; }
     return S;
   }
+  /*  Yaddasdakini GOTUR, amma bosaltma.  Basqa tab jetonu yenilemis
+      ola biler - onu goturmek nahaq ikinci yenilemenin qarsisini alir.
+      loadSession() burada ISLEMIR: gizli rejimde localStorage xeta
+      atir ve S sifirlanardi - yeni is gorən sessiya ITERDI.  */
+  function adoptStored() {
+    var v = null;
+    try { v = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { return; }
+    if (v && v.access_token) S = v;
+  }
   function saveSession(s) {
-    S = s;
+    S = stamp(s);
+    if (S) ended = false;          //  teze sessiya - siqnal yeniden verile biler
     try {
-      if (s) localStorage.setItem(KEY, JSON.stringify(s));
+      if (S) localStorage.setItem(KEY, JSON.stringify(S));
       else localStorage.removeItem(KEY);
     } catch (e) {}
   }
@@ -64,8 +98,51 @@
     });
   }
 
+  /*  Sessiya bitdi - 401 yolu ile onceden yenileme yolu eyni cumleni
+      demelidir, ona gore bir yerdedir.  */
+  function sessionEnded() {
+    saveSession(null);
+    if (!ended) {
+      ended = true;
+      //  butun ekranlar ucun merkezi siqnal - app giris ekranina qaytarir.
+      //  GECIKDIRILIR (setTimeout): cagiran ekran oz "xeta" kartini elə
+      //  indi cizir; siqnal ondan SONRA gelmelidir ki, giris formasi
+      //  ustde qalsin.  Eks halda istifadeci "Sessiya bitib" yazan xeta
+      //  kartinda ilisir - giris formasi hec cixmir.
+      setTimeout(function () {
+        try { window.dispatchEvent(new Event("sb:sessionend")); } catch (e) {}
+      }, 0);
+    }
+    var e2 = new Error("Sessiya bitib. Yeniden daxil olun.");
+    e2.session = true;
+    throw e2;
+  }
+
+  /*  ONCEDEN YENILEME (olculub: ilk aciilisda 1-2 saniye).
+      Jeton bir saat yasayir.  Evvel zencir bele idi:
+        sorgu -> 401 -> yenileme -> tekrar sorgu     = 3 gedis-gelis
+      Indi jetonun vaxti kecibse:
+        yenileme -> sorgu                            = 2 gedis-gelis
+      Jeton diridirse HEC NE deyismir - elave sorgu getmir.  */
   function request(path, opt, retry) {
     opt = opt || {};
+    if (opt.auth !== false && !retry && tokenOld()) {
+      //  Basqa tab (ve ya bu sehifenin evvelki sorgusu) artiq
+      //  yenilemis ola biler - once yaddasdakini oxu, nahaq yere
+      //  ikinci yenileme gonderme (Supabase yenileme jetonunu
+      //  DEYISIR, ust-uste dusen iki yenileme sessiyani qira biler).
+      adoptStored();
+      if (tokenOld() && S && S.refresh_token) {
+        return refresh().then(function (ok) {
+          if (!ok) return sessionEnded();
+          return send(path, opt, true);
+        });
+      }
+    }
+    return send(path, opt, retry);
+  }
+
+  function send(path, opt, retry) {
     var c = cfg();
     return netFetch(c.SUPABASE_URL + path, {
       method: opt.method || "GET",
@@ -80,15 +157,8 @@
         // Token kohnelibse bir defe yenileyib tekrar cehd edirik
         if (r.status === 401 && !retry && S && S.refresh_token) {
           return refresh().then(function (ok) {
-            if (!ok) {
-              saveSession(null);
-              //  butun ekranlar ucun merkezi siqnal - app giris ekranina qaytarir
-              try { window.dispatchEvent(new Event("sb:sessionend")); } catch (e2) {}
-              var e = new Error("Sessiya bitib. Yeniden daxil olun.");
-              e.session = true;
-              throw e;
-            }
-            return request(path, opt, true);
+            if (!ok) return sessionEnded();
+            return send(path, opt, true);
           });
         }
         var err = new Error(readError(data, r.status));
@@ -99,12 +169,19 @@
     });
   }
 
+  /*  TEK UCUS: eyni anda bes sorgu 401 alsa da yenileme BIR defe
+      gedir.  Supabase yenileme jetonunu her istifadede deyisir -
+      paralel iki yenileme ikincisini "kohne jeton" sayib sessiyani
+      qirardi.  */
   function refresh() {
+    if (refreshing) return refreshing;
+    if (!S || !S.refresh_token) return Promise.resolve(false);
     var c = cfg();
-    return fetch(c.SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token", {
+    var tok = S.refresh_token;
+    refreshing = fetch(c.SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token", {
       method: "POST",
       headers: { "apikey": c.SUPABASE_ANON_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: S.refresh_token })
+      body: JSON.stringify({ refresh_token: tok })
     }).then(function (r) {
       if (!r.ok) return false;
       return r.json().then(function (d) {
@@ -112,7 +189,9 @@
         saveSession(d);
         return true;
       });
-    }).catch(function () { return false; });
+    }).catch(function () { return false; })
+      .then(function (ok) { refreshing = null; return ok; });
+    return refreshing;
   }
 
   var sb = {

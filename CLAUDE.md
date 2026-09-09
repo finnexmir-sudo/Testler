@@ -2564,6 +2564,93 @@ orada `.fold` yoxdur, gözləmə oraya qoyulmamalıdır.
 daimi» qaytarır — qiymət, «hədiyyə bitir» və xatırlatma zolağı
 görünmür (`rpc_paket` bunu onsuz da edirdi, my_context geridə qalmışdı).
 
+## İlk açılış niyə yavaş idi — ölçüldü, düzəldildi (2026-09-09)
+
+İstifadəçi: «ilk proqrama girəndə 3-4 saniyə çəkir, normaldır?»
+**Ölçdüm** (bil10.az və canlı Supabase):
+
+| Nə | Vaxt |
+|---|---|
+| HTML (şəbəkədən — `sw.js` network-first, bilərəkdən) | ~0,3 s |
+| `app.js` + `app.css` — **sıxılmış 125 KB** (xam 453 KB) | ~0,3–0,5 s |
+| Supabase-dən bir yüngül oxu | ən az 0,38 · **ortanca 0,60** · ən çox 3,4 s |
+
+Yəni **fayl ölçüsü günahkar deyil** — vaxtı ardıcıl (serial) gediş-gəlişlər
+yeyirdi. Tapılan üç yer, üçü də düzəldildi:
+
+**1. Jeton 401 gözləyirdi (`muellim/sb.js`).** Giriş jetonu **1 saat**
+yaşayır. `sb.js` bitmə vaxtını qabaqcadan yoxlamırdı — sorğunu göndərir,
+**401** alır, *sonra* yeniləyib təkrarlayırdı: `sorğu → 401 → yenilə →
+təkrar sorğu` (**3** gediş-gəliş). İndi `saveSession()` **öz möhürünü**
+vurur (`sb_exp = indi + expires_in`) və vaxtı keçibsə əvvəlcə yenilənir:
+`yenilə → sorğu` (**2**). **Bir gediş-gəliş silinir.**
+- Möhür bizim saatla vurulur → telefonun saatı səhv qurulubsa da işləyir
+  (serverin `expires_at`-ına güvənsək, geri qalmış saat jetonu «diri»
+  göstərərdi).
+- `refresh()` **tək uçuşludur**: paralel beş sorğu bir yeniləmə çağırır.
+  Supabase yeniləmə jetonunu hər istifadədə dəyişir — üst-üstə düşən iki
+  yeniləmə sessiyanı qırardı.
+- Başqa tab yeniləmiş ola bilər → əvvəlcə `adoptStored()`. **`loadSession()`
+  işlətmə**: gizli rejimdə `localStorage` xəta atır və `S` sıfırlanardı —
+  iş görən sessiya itərdi.
+- **Yan tapıntı:** yeniləmə alınmayanda `sb:sessionend` siqnalı sinxron
+  gedirdi; çağıran ekran ondan **sonra** öz «xəta» kartını çızıb giriş
+  formasını üstələyirdi. İndi siqnal `setTimeout(...,0)` ilə gedir — giriş
+  forması üstdə qalır.
+
+**2. `rpc_home` iki dəfə çağırılırdı.** `boot()` zəng nöqtəsi üçün,
+`screenHome()` lövhələr üçün — eyni anda, eyni cavab. `homeData()` **uçuşda**
+olan sorğunu paylaşır (keş deyil: sorğu bitibsə növbəti çağırış təzə məlumat
+alır — köhnə siqnal göstərmək olmaz). **Bir gediş-gəliş.**
+
+**3. Səviyyələr və qruplar zəncir idi.** `loadLevels() → loadGroups() →
+şagirdlər` = üç növbəli. İndi səviyyələr qruplarla **yanaşı** gedir;
+`loadGroups(lvReady)` sinif adını çızmazdan əvvəl gözləyir — nəticə eynidir.
+**Bir gediş-gəliş.**
+
+**Ölçüldü (A/B, `test/_olcu.py`).** Hər sorğuya **300 ms** süni gecikmə;
+gecikmə **serverdə** verilir (`X-Test-Delay`, mock `ThreadingHTTPServer`-dir),
+ona görə paralel sorğular həqiqətən paralel gedir:
+
+| Ssenari | Köhnə | Yeni |
+|---|---|---|
+| jeton diri — ekran çıxır | 0,88 s | 0,88 s |
+| jeton diri — səhifə tam | 1,69 s | **1,18 s** |
+| jeton bitib (günün ilki) — ekran | 1,17 s | **0,87 s** |
+| jeton bitib — səhifə tam | 2,49 s | **1,68 s** |
+
+Yəni günün ilk açılışında **3 növbəli gediş-gəliş** silindi (0,81 s × 300 ms).
+İstifadəçinin real gecikməsi 0,3–0,6 s olduğuna görə bu, **təxminən 1–2 saniyə**
+deməkdir — 3-4 saniyə **2-3 saniyəyə** düşür, sıfıra yox. Qalanı HTML + JS
+yüklənməsi və Supabase-in öz dəyişkənliyidir (bir yüngül oxu 0,38 s ilə 3,4 s
+arasında ölçüldü).
+
+**Ölçmədə tələ:** `route` işləyicisində `time.sleep(...)` ETMƏ. Playwright-in
+sinxron API-si marşrutları **bir-bir** işləyir — paralel sorğular süni növbəyə
+düşür və ölçmə «növbəli dərinlik» yerinə «sorğu sayı» ölçür. Gecikmə serverdə
+verilməlidir.
+
+**Yoxlama:** `test/e2e_jeton.py` (15 yoxlama). İsrafı **sayır**: vaxtı keçmiş
+jetonla serverə gedən sorğu **sıfır** olmalıdır; `rpc_home` **bir**; qruplar
+sorğusu səviyyələrin cavabından **əvvəl** başlamalıdır. Düzəliş geri alınsa
+üçü də düşür (yoxlanıldı). Əks tərəf də qorunur: jeton diridirsə **nahaq
+yeniləmə getmir**, yeniləmə alınmasa **giriş ekranı** çıxır.
+
+**Testdə tələ:** `pg.goto(PANEL); pg.reload()` — iki naviqasiya yarış yaradır,
+birinci açılış jetonu yeniləyərkən ikincisi səhifəni öldürür. **Bir** naviqasiya.
+
+**Yol boyu tapılan köhnə səhv (mənim dəyişikliyim deyil — köhnə fayllarla da
+təkrarlandı):** `#btnAdm` (İdarəetmə bəndi) `#hTop` blokunun **içində** idi.
+Qrupu olmayan hesabda `loadGroups()` «ilk qrupunuzu yaradın» düzümünə keçib
+`#hTop`-u gizlədir — **admin öz idarəetmə ekranını görmürdü**, yalnız ünvanı
+əl ilə yazmaqla aça bilirdi. Bənd indi blokdan **kənardadır**; qruplu hesabda
+görünüş dəyişmir. `e2e_paket` bunu indi açıq yoxlayır (əvvəl orada `ok(True, …)`
+dayanırdı — heç nə iddia etmirdi).
+
+**Hələ qalan:** `bump.sh` versiyanı dəyişəndə keşdəki bütün CSS/JS yeni ünvan
+olur — hər push-dan sonra ilk açılış həmişə yavaşdır. Adi müəllim bunu yalnız
+yeni versiya çıxanda bir dəfə görür, ona görə toxunulmadı.
+
 ## Valideyn ekranı — pulsuz / abunə bölgüsü (db/174, 2026-09-09)
 
 İstifadəçi ideyası: müəllimi valideynə **hesabat vermək əziyyətindən**

@@ -99,3 +99,6 @@ python3 test/e2e_kurikulum.py
 echo
 echo "27/27 numune hesab"
 python3 test/e2e_numune.py
+echo
+echo "28/28 jeton onceden yenilenir"
+python3 test/e2e_jeton.py

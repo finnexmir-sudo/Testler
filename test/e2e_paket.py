@@ -146,7 +146,19 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#btnAdm", timeout=8000)
     ok("Admin · daimi" in pg.inner_text(".seat"), "ana sehifede pill 'Admin · daimi'",
        pg.inner_text(".seat").replace("\n", " "))
-    ok(True, "admin rolunda Idareetme bendi gorunur")
+    #  Bu hesabda QRUP YOXDUR - «ilk qrupunuzu yaradın» duzumu #hTop-u
+    #  gizledir.  Admin bendi hemin blokun ICINDE olsaydi gorunmezdi
+    #  (tapilan sehv, 2026-09-09): admin oz ekranini yalniz unvani elle
+    #  yazmaqla aca bilerdi.  Bend indi blokdan KENARDADIR.
+    #  QRUPSUZ hesab.  «Ilk qrupunuzu yaradın» duzumu #hTop-u gizledir;
+    #  admin bendi hemin blokun ICINDE olsaydi gorunmezdi - admin oz
+    #  ekranini yalniz unvani elle yazmaqla aca bilerdi (tapilan sehv,
+    #  2026-09-09).  Bend indi blokdan KENARDADIR, ona gore #hTop-un
+    #  gizlenib-gizlenmemesinden ASILI DEYIL.
+    ok(pg.locator(".gcard").count() == 0, "hesabda qrup yoxdur (sertin ozu)",
+       pg.inner_text("#groups").replace("\n", " ")[:50])
+    ok(pg.locator("#btnAdm").is_visible(),
+       "qrupsuz hesabda da Idareetme bendi GORUNUR")
     pg.click("#btnAdm")
     pg.wait_for_selector(".admr", timeout=8000)
     ok(pg.locator("#tBugun .tile").count() + pg.locator("#tUmumi .tile").count() == 7,

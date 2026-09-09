@@ -359,12 +359,27 @@
     });
   }
 
+  /*  rpc_home IKI YERDEN cagirilir: boot() zeng noktesi (nisan) ucun,
+      screenHome ise lovheler ucun.  Ilk aciilisda ikisi de EYNI ANDA
+      gedirdi - eyni cavab ucun iki sorgu, bir novbeli gedis-gelis
+      ziyan.  Asagidaki komekci UCUSDA olan sorgunu paylasir: sorgu
+      bitibse novbeti cagiris TEZE melumat alir (kes deyil - kohne
+      siqnal gostermek olmaz).  */
+  var HOME_REQ = null;
+  function homeData() {
+    if (HOME_REQ) return HOME_REQ;
+    HOME_REQ = sb.rpc("rpc_home", {}).then(
+      function (v) { HOME_REQ = null; return v; },
+      function (e) { HOME_REQ = null; throw e; });
+    return HOME_REQ;
+  }
+
   /* ------------------------------------------------- bildirisler ekrani */
   function screenNotif() {
     var live = guard();
     topTitle.textContent = "Siqnallar";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
-    sb.rpc("rpc_home", {}).then(function (v) {
+    homeData().then(function (v) {
       if (!live()) return;
       v = v || {};
       var al = v.alerts || [];
@@ -861,16 +876,24 @@
             "<b>Profil</b><span>fənlər · bizə yazın</span></button>" +
         "</div>" +
       "</div>" +
+      '<div class="spacer"></div>' +
+      "</div>" +
+      /*  ADMIN BENDI #hTop-un ICINDE DEYIL.  Qrupu olmayan hesabda
+          loadGroups() «ilk qrupunuzu yaradın» duzumune kecir ve #hTop-u
+          gizledir - bend orada qalsa admin oz idareetme ekranini
+          GORMURDU (yalniz unvanla acila bilirdi).  Bu, saygac deyil,
+          giris noktesidir: her halda gorunmelidir.
+          Qruplu hesabda gorunus deyismir - bend yene «Qruplar»
+          basligindan hemen evveldedir.  */
       (isAdmin()
         ? '<div class="spacer"></div>' +
           '<div class="card pad0"><button class="item" id="btnAdm">' +
           '<div class="ic">' + ic("group") + "</div>" +
           '<div class="g"><b>İdarəetmə</b><i><span id="admSub">Hesablar və ' +
             "abunələr (admin)</span></i></div>" +
-          '<span class="arrow">' + ic("right") + "</span></button></div>"
+          '<span class="arrow">' + ic("right") + "</span></button></div>" +
+          '<div class="spacer"></div>'
         : "") +
-      '<div class="spacer"></div>' +
-      "</div>" +
       h2r("Qruplar") +
       '<div id="groups" class="gcards"><div class="skel">Yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
@@ -903,11 +926,18 @@
     on("bGen", "click", function () { nav("#/gen"); });
     on("bBank", "click", function () { nav("#/b"); });
 
-    loadLevels().then(function () {
+    /*  Suretlendirme: seviyyeler ve qruplar EYNI ANDA sorusulur.
+        Evvel zencir idi - seviyyeler bitmeden qruplar baslamirdi:
+          seviyyeler -> qruplar -> sagirdler   (uc novbeli gedis-gelis)
+        Indi seviyyeler qruplarla yanasi gedir:
+          [seviyyeler | qruplar] -> sagirdler  (iki)
+        Sinif adi (levelName) yalniz CIZILANDA lazimdir, ona gore
+        loadGroups() hemin ana qeder gozleyir - netice eynidir.  */
+    var lvReady = loadLevels().then(function () {
       var sel = $("glevel");
       if (sel) sel.innerHTML = levelOptions(null);
-      loadGroups();
     });
+    loadGroups(lvReady);
     loadHome();
 
     on("btnBank", "click", function () { nav("#/b"); });
@@ -952,7 +982,7 @@
      Yardimci melumatdir - xetasi esas ekrani pozmasin. */
   function loadHome() {
     var live = guard();
-    sb.rpc("rpc_home", {}).then(function (v) {
+    homeData().then(function (v) {
       if (!live() || !v) return;
       var st = v.stats || {};
       var t = $("hTiles");
@@ -1121,7 +1151,10 @@
     }).catch(function () {});
   }
 
-  function loadGroups() {
+  /*  lvReady - seviyyeler siyahisi hazir olanda dolan vedis.  Verilmese
+      seviyyeler onsuz da yuklenib sayilir (bu funksiya bir cox yerden
+      cagirilir).  */
+  function loadGroups(lvReady) {
     //  loadLevels() gozleyerken cixis edilibse ACC bosdur - sakit dayan
     if (!ACC) return;
     var groups = null;
@@ -1137,6 +1170,9 @@
       return sb.select("students", {
         select: "id,class_id", eq: { account_id: ACC.id, is_active: true }
       });
+    }).then(function (studs) {
+      //  Sinif adlari LEVELS-den gelir - cizmezden EVVEL hazir olsun
+      return Promise.resolve(lvReady).then(function () { return studs; });
     }).then(function (studs) {
       var cnt = {};
       (studs || []).forEach(function (s) {
@@ -7840,7 +7876,7 @@
       //  "son giris" - Idareetme ucun; server 15 deqiqede bir yazir
       sb.rpc("rpc_seen", {}).catch(function () {});
       //  zeng noktesi - hansi sehifeden acilmasindan asili olmadan
-      if (ACC) sb.rpc("rpc_home", {}).then(function (v) {
+      if (ACC) homeData().then(function (v) {
         bellDot(v && v.alerts ? v.alerts.length : 0);
       }).catch(function () {});
     }).catch(function (e) {
