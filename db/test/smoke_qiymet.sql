@@ -189,3 +189,69 @@ begin
   end if;
 end $$;
 \echo 'OK  6 · qalan gun Baki gunune goredir (saatdan asili deyil)'
+
+-- 7 · (169) kohne pilleli paketler baglidir, abune sehifesi tek qayda gorur
+do $$
+declare v jsonb; sl text[];
+begin
+  if exists (select 1 from public.plans
+              where slug in ('repetitor-25','repetitor-60','repetitor-acik')
+                and is_active) then
+    raise exception 'kohne pilleli paket hele aciqdir';
+  end if;
+  update public.subscriptions set current_period_end = now() + interval '10 days',
+         status = 'active'
+   where account_id = 'aaaa0000-0000-0000-0000-0000000165a1';
+  v := public.rpc_paket();
+  select array_agg(x->>'slug' order by x->>'slug') into sl
+    from jsonb_array_elements(v->'plans') x;
+  if sl <> array['sagird-basi'] then
+    raise exception 'abune sehifesi tek qayda gormelidir: %', sl; end if;
+  --  DIQQET: 'v->>x' catismayan acar ucun NULL verir, NULL <> 6 ise
+  --  NULL-dir - yoxlama SESSIZCE kecerdi.  Ona gore evvelce acarlarin
+  --  MOVCUDLUGU yoxlanilir.
+  if not (v ? 'students' and v ? 'free_limit' and v ? 'grace_days'
+          and v ? 'due_minor' and v ? 'per_seat_minor') then
+    raise exception 'abune sehifesi canli reqemleri qaytarmir: %', v::text; end if;
+  if not (v->'current' ? 'due_minor' and v->'current' ? 'days_left'
+          and v->'current' ? 'per_seat_minor' and v->'current' ? 'gift') then
+    raise exception 'abune sehifesi mebleg/gun vermir: %', (v->'current')::text; end if;
+  --  6 aktiv sagird (5-ci yoxlamadan) x 150 = 900 qepik; server sayir
+  if (v->>'students')::int <> 6 then
+    raise exception 'aktiv sagird sayi yanlis: %', v->>'students'; end if;
+  if (v->'current'->>'due_minor')::int <> 900 then
+    raise exception 'sehife meblegi yanlis: %', v->'current'->>'due_minor'; end if;
+  if (v->'current'->>'days_left')::int not between 9 and 10 then
+    raise exception 'sehifede qalan gun yanlis: %', v->'current'->>'days_left'; end if;
+  if (v->>'free_limit')::int <> 5 or (v->>'grace_days')::int <> 3 then
+    raise exception 'pulsuz hedd / guzest yanlis: %', v::text; end if;
+  --  ust seviyyedeki tarif: abunesi olmayan muellim de qaydani gorur
+  if (v->>'per_seat_minor')::int <> 150 or (v->>'due_minor')::int <> 900 then
+    raise exception 'satisdaki tarif yanlis: % / %',
+      v->>'per_seat_minor', v->>'due_minor'; end if;
+end $$;
+\echo 'OK  7 · abune sehifesi: tek qayda, server meblegi, qalan gun, pulsuz hedd'
+
+-- 8 · (169) gelir 'seats' sutunundan yox, aktiv sagird sayindan sayilir
+do $$
+declare st jsonb;
+begin
+  --  seats sutunu 0-dir (sagird basina modelde doldurulmur), amma
+  --  6 aktiv sagird var -> gelir 900 qepik olmalidir.
+  if (select seats from public.subscriptions
+       where account_id = 'aaaa0000-0000-0000-0000-0000000165a1') <> 0 then
+    raise exception 'yoxlama qurulusu: seats 0 olmalidir'; end if;
+  --  admin AYRI istifadecidir: hesab sahibi admin olsa, o hesab gelirden
+  --  cixarilir (rpc_admin_stats qaydasi) ve yoxlama menasiz olardi.
+  insert into auth.users (id, email) values
+    ('11110000-0000-0000-0000-0000000169a9','qm-admin@t.az') on conflict do nothing;
+  insert into public.user_roles (user_id, role)
+  values ('11110000-0000-0000-0000-0000000169a9','admin') on conflict do nothing;
+  perform set_config('request.jwt.claim.sub','11110000-0000-0000-0000-0000000169a9',true);
+  st := public.rpc_admin_stats();
+  if (st->>'mrr_minor')::int <> 900 then
+    raise exception 'gelir aktiv sagird sayina gore sayilmir: % (gozlenilen 900)',
+      st->>'mrr_minor'; end if;
+end $$;
+reset request.jwt.claim.sub;
+\echo 'OK  8 · gelir aktiv sagird sayina gore hesablanir (seats sutunu yox)'

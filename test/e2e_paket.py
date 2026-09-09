@@ -66,16 +66,35 @@ with sync_playwright() as pw:
     pg.fill("#aname", "Paket hesabi"); pg.click("#btnSetup")
     pg.wait_for_selector("#gForm", timeout=8000)
 
-    print("A · Paket səhifəsi (abunəsiz)")
+    print("A · Abunə səhifəsi (abunəsiz)")
     ok(pg.locator("#btnPkt").count() == 1, "esas sehifede Paket bendi var")
     ok(pg.locator("#btnAdm").count() == 0, "adi muellimde Idareetme bendi YOXDUR")
     pg.click("#bnav a[href='#/p']")
-    pg.wait_for_selector(".pkt", timeout=8000)
-    ok("abunəniz yoxdur" in pg.inner_text("#main"), "abunesiz hal aydin yazilir")
-    npl = pg.locator(".pkt").count()
-    ok(npl >= 2, "planlar gorunur", npl)
-    ok("₼" in pg.inner_text("#main"), "qiymetler manatladir")
-    ok("Valideyn" not in pg.inner_text("#main"), "ozge auditoriya plani gorunmur")
+    pg.wait_for_selector(".abn", timeout=8000)
+    mt = pg.inner_text("#main")
+    ok("Abunəniz yoxdur" in mt, "abunesiz hal aydin yazilir")
+    #  169: pilleli paket siyahisi YOXDUR - qayda birdir
+    ok(pg.locator(".pkt").count() == 0, "pilleli paket siyahisi qalmayib",
+       pg.locator(".pkt").count())
+    ok("Şagird başına" in mt, "tek qayda gorunur")
+    ok("1,50 ₼" in mt or "1.50 ₼" in mt, "tarif manatladir",
+       mt[:80].replace("\n", " "))
+    ok("Valideyn" not in mt, "ozge auditoriya plani gorunmur")
+    #  qaydanin oz setirleri
+    ok(pg.locator("#qayda li").count() == 5, "qayda 5 setirdir",
+       pg.locator("#qayda li").count())
+    ok("həmişə pulsuz" in mt, "sagird/valideyn pulsuzdur yazilir")
+    ok("ilk ay hədiyyədir" in mt, "hediyye ayi yazilir")
+    #  Muellim neyi ITIRECEYINI evvelceden gormelidir (istifadeci teleb etdi)
+    ok(pg.locator(".cmp .cc").count() == 2, "pulsuz hedd / abune muqayisesi var",
+       pg.locator(".cmp .cc").count())
+    cmp_t = pg.inner_text(".cmp")
+    for soz in ("Platforma sual bankı", "Diaqnostika", "Zəif mövzu analizi",
+                "Dərs planı", "Cavab vərəqi", "gündə 20 sual"):
+        ok(soz in cmp_t, "muqayisede «" + soz + "» yazilir")
+    #  abunesiz hesabda hele sagird yoxdur -> 0 x 1,50 = 0 ₼
+    abx = pg.inner_text(".abn").replace("\n", " ")
+    ok("aktiv şagird" in abx and "ayda" in abx, "hesab qutusu qurulur", abx[:70])
     href = pg.locator("#btnWa").get_attribute("href")
     ok(href and "wa.me/994501234567" in href, "WhatsApp duymesi nomreye acilir",
        (href or "")[:50])
@@ -160,6 +179,22 @@ with sync_playwright() as pw:
     ok(pg.locator(".admr .lg-old").count() == 2, "koхne giris narinci sinifle")
     pg.locator("#admF .chip[data-f='']").click(); pg.wait_for_selector(".admr", timeout=8000)
 
+    #  (169) Gelir artiq "paketin qiymeti" deyil, AKTIV SAGIRD x tarif -
+    #  ona gore yoxlamanin menali olmasi ucun hesaba sagird lazimdir.
+    #  4 sagird (pulsuz hedd 5-dir, hele paketsizdir) -> 4 x 1,50 = 6 ₼.
+    iki = db("select a.id from public.accounts a join auth.users u"
+             " on u.id = a.owner_id where u.email = 'iki@t.az'", one=True)["id"]
+    db("insert into public.classes (id, account_id, teacher_id, kind, name, join_code)"
+       " select '00000169-0000-4000-8000-000000000169', %s, a.owner_id, 'tutor_group',"
+       " 'Gelir qrupu', 'KODG169A' from public.accounts a where a.id = %s"
+       " on conflict do nothing", (iki, iki))
+    db("insert into public.students (account_id, class_id, created_by, full_name,"
+       " display_name, login_code, is_active)"
+       " select %s, '00000169-0000-4000-8000-000000000169', a.owner_id,"
+       " 'Gelir Sagird ' || g, 'G' || g, 'GLR0000' || g, true"
+       " from public.accounts a, generate_series(1,4) g where a.id = %s"
+       " on conflict do nothing", (iki, iki))
+
     print("D0 · (138) Sınaq — pulsuz paket: tam imkan, gəlirə düşmür")
     pg.on("dialog", lambda d: d.accept())
     ok(pg.locator(".admr [data-trial]").count() == 1, "adi setirde 'Sinaq 1 ay' duymesi var (adminde yox)")
@@ -170,7 +205,8 @@ with sync_playwright() as pw:
     ok(pg.locator(ROW + " [data-trial]").is_visible(), "«···» kliki menyunu acir")
     menu_bas(ROW, "[data-trial]")
     pg.wait_for_selector(ROW + " .pb.s", timeout=8000)
-    ok("sınaq" in pg.inner_text(ROW + " .pb.s") and "Repetitor" in pg.inner_text(ROW + " .pb.s"),
+    ok("sınaq" in pg.inner_text(ROW + " .pb.s")
+       and "Şagird başına" in pg.inner_text(ROW + " .pb.s"),
        "goy sinaq nisani setirde", pg.inner_text(ROW + " .pb.s")[:40])
     a0 = db("select s.status, s.provider from public.subscriptions s", one=True)
     ok(a0 and a0["status"] == "trialing" and a0["provider"] == "trial",
@@ -191,13 +227,15 @@ with sync_playwright() as pw:
     print("D · Bir kliklə abunə açmaq (sınaq → ödənişli)")
     menu_bas(ROW, "[data-m='6']")
     pg.wait_for_selector(ROW + " .pb.y", timeout=8000)
-    ok("Repetitor" in pg.inner_text(ROW + " .pb.y"), "abune nisani setirde gorunur",
+    ok("Şagird başına" in pg.inner_text(ROW + " .pb.y"), "abune nisani setirde gorunur",
        pg.inner_text(ROW + " .pb.y")[:40])
     ok("yerinə yetirildi" in pg.inner_text("#admMsg"), "netice mesaji gorunur")
     ok(pg.inner_text(".tile.b").replace("\n", " ").startswith("1"), "aktiv abune lovhesi yenilenir",
        pg.inner_text(".tile.b").replace("\n", " "))
-    ok("29,00" in pg.inner_text(".tile.c") or "29 ₼" in pg.inner_text(".tile.c"),
-       "gelir 29 AZN oldu", pg.inner_text(".tile.c").replace("\n", " "))
+    #  (169) 4 aktiv sagird x 1,50 = 6 ₼.  Kohne pilleli paketde bu
+    #  reqem 29 ₼ idi (paketin qiymeti) - artiq sagird sayina baglidir.
+    ok("6,00" in pg.inner_text(".tile.c") or "6 ₼" in pg.inner_text(".tile.c"),
+       "gelir = 4 aktiv sagird x 1,50 = 6 ₼", pg.inner_text(".tile.c").replace("\n", " "))
     a = db("""select s.status, s.provider from public.subscriptions s""", one=True)
     ok(a and a["status"] == "active" and a["provider"] == "manual",
        "bazada active/manual abune var")
@@ -212,12 +250,14 @@ with sync_playwright() as pw:
     pg.locator("#admF .chip[data-f='']").click()
     pg.wait_for_timeout(500)
 
-    print("E · Paket səhifəsi abunəni göstərir")
+    print("E · Abunə səhifəsi abunəni göstərir")
     pg.goto(PANEL + "#/p"); pg.reload()
-    pg.wait_for_selector(".pkt", timeout=8000)
-    ok("Hazırkı paket" in pg.inner_text("#main"), "hazirki paket gorunur")
-    ok("Admin — daimi" in pg.inner_text("#main"), "admin ucun 'Admin — daimi', tarix yoxdur",
-       pg.inner_text("#main")[:80].replace("\n", " "))
+    pg.wait_for_selector(".abn", timeout=8000)
+    mt = pg.inner_text("#main")
+    ok("Admin hesabı" in mt, "admin ucun ayrica veziyyet yazilir",
+       mt[:80].replace("\n", " "))
+    ok("Admin — daimi" in mt, "plan adi 'Admin — daimi'",
+       mt[:80].replace("\n", " "))
 
     print("F · Dayandırmaq")
     pg.goto(PANEL + "#/adm"); pg.reload()
@@ -294,6 +334,35 @@ with sync_playwright() as pw:
     ok("1 gün ərzində" in t, "guzestde qalan gun dogru sayilir", t[:90])
     ok("Mövcud şagirdlər işləməkdə davam edir" in t,
        "sagirdin qapida qalmadigi yazilir", t[:110])
+
+    #  e) (169) abune sehifesi eyni meblegi gosterir - reqem SERVERDEN
+    abune(30)
+    pg.goto(PANEL + "#/p"); pg.reload()
+    pg.wait_for_selector(".abn", timeout=15000)
+    ab = pg.inner_text(".abn").replace("\n", " ")
+    ok(str(n) in ab and gozlenen in ab,
+       "abune sehifesinde hesab: %d sagird -> %s ₼" % (n, gozlenen), ab[:80])
+    ok("Bu ayın hesabı" in pg.inner_text("#main"), "hesab bolmesi basligi var")
+
+    #  f) (169) hediyye ayinda mebleg tutulmur - 'Novbeti ay' yazilir
+    #  Admin rolu MUVEQQETI goturulur: rpc_paket admin hesabina hemise
+    #  "Admin - daimi" qaytarir, hediyye veziyyeti gorunmezdi.
+    db("update public.subscriptions set provider = 'gift', status = 'trialing'"
+       " where account_id = %s", (acc,))
+    db("delete from public.user_roles where user_id = %s and role = 'admin'", (UID,))
+    pg.goto(PANEL + "#/"); pg.reload(); pg.wait_for_selector("#band .bseat", timeout=15000)
+    bs = pg.inner_text("#band .bseat").replace("\n", " ")
+    ok("Növbəti ay" in bs, "hediyye ayinda kart 'Novbeti ay' yazir", bs[:70])
+    pg.goto(PANEL + "#/p"); pg.reload()
+    pg.wait_for_selector(".abn", timeout=15000)
+    mt = pg.inner_text("#main")
+    ok("Hədiyyə ay" in mt, "hediyye veziyyeti yazilir", mt[:90].replace("\n", " "))
+    ab = pg.inner_text(".abn").replace("\n", " ")
+    ok("növbəti ay" in ab and gozlenen in ab,
+       "hediyye ayinda qutu novbeti ayin meblegini yazir", ab[:80])
+
+    db("insert into public.user_roles (user_id, role) values (%s, 'admin')"
+       " on conflict do nothing", (UID,))
 
     db("delete from public.subscriptions where account_id = %s", (acc,))
     db("delete from public.students where account_id = %s", (acc,))

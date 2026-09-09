@@ -35,7 +35,13 @@ declare v jsonb;
 begin
   v := public.rpc_paket();
   assert v->'current' is null or v->'current' = 'null'::jsonb, 'abunesiz current dolu geldi';
-  assert jsonb_array_length(v->'plans') >= 2, 'tutor planlari gelmedi';
+  --  169: satisda TEK qayda var - 'sagird-basi'.  Kohne pilleli
+  --  paketler (repetitor-25/60/acik) baglanib: setirler bazada qalir
+  --  (kohne abuneler onlara istinad edir), amma satisa cixmir.
+  assert jsonb_array_length(v->'plans') = 1, 'satisda tek qayda olmalidir: '
+    || (v->'plans')::text;
+  assert v->'plans'->0->>'slug' = 'sagird-basi', 'satisdaki plan yanlis: '
+    || (v->'plans'->0)::text;
   --  pulsuz plan siyahida olmamalidir - satis sehifesidir
   assert not exists (select 1 from jsonb_array_elements(v->'plans') p
                       where p->>'slug' = 'pulsuz'), 'pulsuz plan satisdadir';
@@ -55,7 +61,7 @@ begin
     perform public.rpc_admin_accounts(null);
   exception when insufficient_privilege then ok1 := true; end;
   begin
-    perform public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1);
+    perform public.rpc_admin_grant('muellim@t.az', 'sagird-basi', 1);
   exception when insufficient_privilege then ok2 := true; end;
   begin
     perform public.rpc_admin_stop('muellim@t.az');
@@ -71,7 +77,7 @@ set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
 do $$
 declare v jsonb;
 begin
-  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1);
+  v := public.rpc_admin_grant('muellim@t.az', 'sagird-basi', 1);
   assert (v->>'ok')::boolean, 'grant alinmadi';
   assert app.has_active_subscription('aaaa0000-0000-0000-0000-0000000000e2'),
          'abune aktiv gorunmur';
@@ -86,7 +92,7 @@ declare v jsonb; n int; e1 timestamptz; e2 timestamptz;
 begin
   select current_period_end into e1 from public.subscriptions
    where account_id = 'aaaa0000-0000-0000-0000-0000000000e2' and status='active';
-  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 2);
+  v := public.rpc_admin_grant('muellim@t.az', 'sagird-basi', 2);
   select count(*) into n from public.subscriptions
    where account_id = 'aaaa0000-0000-0000-0000-0000000000e2'
      and status = 'active';
@@ -158,7 +164,7 @@ begin
     perform public.rpc_admin_grant('yoxdur@t.az', 'repetitor-25', 1);
   exception when others then ok1 := position('tapilmadi' in sqlerrm) > 0; end;
   begin
-    perform public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 99);
+    perform public.rpc_admin_grant('muellim@t.az', 'sagird-basi', 99);
   exception when others then ok2 := position('1-24' in sqlerrm) > 0; end;
   assert ok1, 'yanlis e-poctda aydin xeta yoxdur';
   assert ok2, 'ay heddi yoxlanmir';
@@ -244,17 +250,32 @@ end $$;
 -- =====================================================================
 reset role; reset request.jwt.claim.sub;
 delete from public.subscriptions;
+--  169: gelir artiq paketin qiymeti deyil, AKTIV SAGIRD x tarif.
+--  Yoxlamalar menali olsun deye hesaba 3 sagird qoyulur -> 450 qepik.
+insert into public.classes (id, account_id, teacher_id, kind, name, join_code)
+values ('cccc0000-0000-0000-0000-0000000000e2',
+        'aaaa0000-0000-0000-0000-0000000000e2',
+        '11110000-0000-0000-0000-0000000000e2', 'tutor_group',
+        'Paket qrupu', 'KODPKT01');
+insert into public.students (account_id, class_id, created_by, full_name,
+                             display_name, login_code, is_active)
+select 'aaaa0000-0000-0000-0000-0000000000e2',
+       'cccc0000-0000-0000-0000-0000000000e2',
+       '11110000-0000-0000-0000-0000000000e2', 'Paket Sagird ' || g,
+       'P' || g, 'PKTS000' || g, true
+  from generate_series(1,3) g;
 set role authenticated;
 set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
 do $$
 declare v jsonb; st jsonb;
 begin
-  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1, true);
+  v := public.rpc_admin_grant('muellim@t.az', 'sagird-basi', 1, true);
   assert (v->>'ok')::boolean and (v->>'trial')::boolean, 'sinaq grant alinmadi';
   assert app.has_active_subscription('aaaa0000-0000-0000-0000-0000000000e2'),
          'sinaq abune aktiv gorunmur - muellim imkan almir';
-  assert app.account_seat_limit('aaaa0000-0000-0000-0000-0000000000e2') = 25,
-         'sinaqda yer limiti paketinki deyil';
+  --  169: sagird basina planda yer limiti YOXDUR (hediyye/sinaq ayinda da)
+  assert app.account_seat_limit('aaaa0000-0000-0000-0000-0000000000e2') = 2147483647,
+         'sinaqda yer limiti olmamalidir';
   assert exists (select 1 from public.subscriptions
                   where status = 'trialing' and provider = 'trial'), 'status trialing deyil';
   st := public.rpc_admin_stats();
@@ -267,7 +288,7 @@ begin
   assert jsonb_array_length(public.rpc_admin_accounts(null, 'pulsuz')) = 0, 'sinaq pulsuz suzgecine dusdu';
   assert public.rpc_admin_accounts('muellim')->0->'plan'->>'status' = 'trialing', 'siyahida status trialing deyil';
   --  sinaq + sinaq = sinaq qalir, muddet uzanir
-  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1, true);
+  v := public.rpc_admin_grant('muellim@t.az', 'sagird-basi', 1, true);
   assert (v->>'trial')::boolean, 'ikinci sinaq odenisliye cevrildi';
   assert (select count(*) from public.subscriptions) = 1, 'sinaq dublikat yaratdi';
 end $$;
@@ -279,7 +300,7 @@ end $$;
 do $$
 declare v jsonb; st jsonb; e timestamptz;
 begin
-  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1, false);
+  v := public.rpc_admin_grant('muellim@t.az', 'sagird-basi', 1, false);
   assert not (v->>'trial')::boolean, 'odenisli grant sinaq qaldi';
   select current_period_end into e from public.subscriptions where status = 'active';
   assert e is not null, 'status active olmadi';
@@ -288,13 +309,14 @@ begin
   assert (select provider from public.subscriptions) = 'manual', 'provider manual deyil';
   st := public.rpc_admin_stats();
   assert (st->>'paid_accounts')::int = 1 and (st->>'trial_accounts')::int = 0, 'odenisliye kecid saylarda yoxdur';
-  assert (st->>'mrr_minor')::int = 2900, 'gelir 29 AZN deyil: ' || (st->>'mrr_minor');
+  --  169: 3 aktiv sagird x 150 = 450 qepik (kohne pilleli paketde 2900 idi)
+  assert (st->>'mrr_minor')::int = 450, 'gelir 4,50 AZN deyil: ' || (st->>'mrr_minor');
   --  odenisli + sinaq = odenisli qalir (hediyye ay), gelir deyismir
-  v := public.rpc_admin_grant('muellim@t.az', 'repetitor-25', 1, true);
+  v := public.rpc_admin_grant('muellim@t.az', 'sagird-basi', 1, true);
   assert not (v->>'trial')::boolean, 'odenisli hesab sinaga endi';
   assert (select status from public.subscriptions) = 'active', 'odenisli status pozuldu';
 end $$;
-\echo 'OK 12 · sinaq -> odenisli: bu gunden, gelir 29 AZN; odenisli sinaga enmir'
+\echo 'OK 12 · sinaq -> odenisli: bu gunden, gelir sagird sayindan; odenisli sinaga enmir'
 
 -- =====================================================================
 --  13. (138) Admin sahibli hesab DAIMIDIR: abunesiz limitsiz, saylarda yox
@@ -319,7 +341,8 @@ begin
   st := public.rpc_admin_stats();
   assert (st->>'accounts')::int = 2, 'admin hesabi hesab sayinda olmalidir';
   assert (st->>'paid_accounts')::int = 1, 'admin pullu sayildi';
-  assert (st->>'mrr_minor')::int = 2900, 'admin gelire dusdu';
+  assert (st->>'mrr_minor')::int = 450, 'admin gelire dusdu: '
+    || (st->>'mrr_minor');
   --  siyahi: admin nisani, pullu/pulsuz suzgecinde yoxdur
   v := public.rpc_admin_accounts('Admin hesabi');
   assert (v->0->>'admin')::boolean, 'siyahida admin nisani yoxdur';
@@ -350,7 +373,10 @@ begin
   st := public.rpc_admin_stats();
   assert (st->>'accounts')::int = 2, 'numune hesab sayina dusdu';
   assert (st->>'paid_accounts')::int = 1, 'numune pullu sayildi';
-  assert (st->>'mrr_minor')::int = 2900, 'numune gelire dusdu: ' || (st->>'mrr_minor');
+  --  169: numune hesabin abunesi kohne 'repetitor-25'-dedir (satisdan
+  --  cixib, amma setir qalir - kohne abuneler ucun).  Gelire dusmemelidir,
+  --  ona gore reqem adi hesabin 3 sagirdinden gelir: 450 qepik.
+  assert (st->>'mrr_minor')::int = 450, 'numune gelire dusdu: ' || (st->>'mrr_minor');
   assert (st->>'demo_accounts')::int = 1, 'numune sayi ayrica gelmir';
   v := public.rpc_admin_accounts(null, null);
   assert not exists (select 1 from jsonb_array_elements(v) x where (x->>'demo')::boolean),

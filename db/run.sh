@@ -88,6 +88,8 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 165_sagird_basi_qiymet.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 166_baki_vaxti.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 167_liderler_qrup_uzre.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 168_hediyye_bir_ay.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 169_sagird_basi_hediyye.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 170_hediyye_uzun_duzelis.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

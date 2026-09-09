@@ -43,12 +43,18 @@ begin
   --  sentyabrda qosulan muellim 30 gun evezine 114 gun alirdi.
   assert e > now() + interval '29 days' and e < now() + interval '31 days',
     'hediyye 30 gun deyil (beta tarixine uzanib?): ' || e::text;
-  assert app.account_seat_limit(acc) = 25, 'yer limiti 25 deyil';
+  --  169: hediyye = odenisli mehsulun ozu - LIMITSIZ, 'repetitor-25' yox.
+  --  Evvel pulsuz ay odenisli mehsuldan daha mehdud idi (25 yer).
+  assert (select pl.slug from public.subscriptions s2
+            join public.plans pl on pl.id = s2.plan_id
+           where s2.account_id = acc) = 'sagird-basi',
+    'hediyye plani sagird-basi deyil';
+  assert app.account_seat_limit(acc) = 2147483647, 'hediyye ayinda sagird limiti olmamalidir';
   c := public.rpc_my_context();
   pl := c->'accounts'->0->'plan';
   assert pl->>'status' = 'trialing' and pl->>'provider' = 'gift' and pl->>'ends' is not null, 'my_context.plan tam deyil: ' || pl::text;
 end $$;
-\echo 'OK  1 · repetitor qeydiyyati: hediyye abune, HEMISE 30 gun, my_context'
+\echo 'OK  1 · hediyye: sagird-basi plani, limitsiz, HEMISE 30 gun, my_context'
 
 -- =====================================================================
 --  2. Valideyn hesabina hediyye yoxdur
@@ -126,3 +132,47 @@ begin
 end $$;
 reset role; reset request.jwt.claim.sub;
 \echo 'OK  5 · admin ayari oxuyur/yazir, adi muellim yox, gelir sifir'
+
+-- =====================================================================
+--  6. (170) Sehven uzun verilmis hediyye qaydaya salinir
+--  Yalniz hediyye + sinaq setirleri, yalniz HEQIQETEN uzun olanlar;
+--  odenisli abuneye toxunmur, tekrar isledilende deyismir.
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+delete from public.subscriptions;
+update public.app_state set val = jsonb_build_object('on', true, 'days', 30,
+       'beta_until', (current_date + 90)::text) where key = 'hediyye';
+
+--  a) sehv setir: 9 sentyabrda baslayib, 1 yanvara kimi verilib
+insert into public.subscriptions (account_id, plan_id, status, seats,
+                                  started_at, current_period_end, provider)
+select (select id from public.accounts order by created_at limit 1), p.id,
+       'trialing', 1, timestamptz '2026-09-09 06:00+00',
+       timestamptz '2027-01-01 00:00+00', 'gift'
+  from public.plans p where p.slug = 'sagird-basi';
+--  b) odenisli abune - UZUN olsa da toxunulmamalidir
+insert into public.subscriptions (account_id, plan_id, status, seats,
+                                  started_at, current_period_end, provider)
+select (select id from public.accounts order by created_at limit 1), p.id,
+       'active', 1, timestamptz '2026-09-09 06:00+00',
+       timestamptz '2027-06-01 00:00+00', 'manual'
+  from public.plans p where p.slug = 'sagird-basi';
+
+do $$
+declare n int; e timestamptz; e2 timestamptz;
+begin
+  n := app.hediyye_uzun_duzelt();
+  assert n = 1, 'duzelen setir sayi 1 deyil: ' || n;
+  select current_period_end into e from public.subscriptions where provider = 'gift';
+  assert e = timestamptz '2026-09-09 06:00+00' + interval '30 days',
+    'hediyye qeydiyyat aninden +30 gun olmadi: ' || e::text;
+  select current_period_end into e2 from public.subscriptions where provider = 'manual';
+  assert e2 = timestamptz '2027-06-01 00:00+00', 'odenisli abuneye toxunuldu';
+  --  idempotent: ikinci defe hec ne deyismir
+  n := app.hediyye_uzun_duzelt();
+  assert n = 0, 'tekrar isletmede yene deyisdi: ' || n;
+  select current_period_end into e from public.subscriptions where provider = 'gift';
+  assert e = timestamptz '2026-09-09 06:00+00' + interval '30 days',
+    'tekrar isletme tarixi pozdu';
+end $$;
+\echo 'OK  6 · (170) uzun hediyye qeydiyyat + 30 gune salinir, odenisliye toxunmur'

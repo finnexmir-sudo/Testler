@@ -2227,7 +2227,42 @@ smoke testə yazılır.
 **Nə deyilmir:** «hər şey nəzərə alınıb». Nəyə əmin olduğumuzu və
 nəyi hələ bilmədiyimizi açıq yazırıq.
 
-## Qiymət modeli — şagird başına (db/165, 2026-09-08) — HƏLƏ GİZLİDİR
+## Qiymət modeli — şagird başına (db/165+169) — HƏLƏ GİZLİDİR
+
+### QAYDA (tam, 2026-09-09) — bir yerdə
+
+1. **Şagird və valideyn həmişə pulsuzdur.** Onlardan heç vaxt ödəniş
+   istənmir. Valideyn paketləri bağlanıb.
+2. **Müəllim üçün pilləli paket yoxdur** — yalnız **aktiv şagird başına
+   ayda 1,50 ₼**. Baza haqqı yoxdur, şagird sayına məhdudiyyət yoxdur.
+   «Aktiv şagird» = `students.is_active` — dayandırılmış şagird pul
+   tutmur.
+3. **Məbləğ ödəniş günündəki sayla hesablanır.** Ay ərzində əlavə
+   olunan şagird üçün ayrıca pul alınmır — növbəti ayın hesabında
+   görünür. Proporsional bölgü yoxdur (istifadəçi qərarı: «ayın
+   ortasında uşaq əlavə edəndə 1-2 manat xərcə düşür, böyük məbləğ
+   deyil»).
+4. **Yeni müəllimə ilk ay hədiyyədir — eyni məhsul, 0 ₼.**
+   Hədiyyə ayında **şagird limiti yoxdur** (db/169). Əvvəl hədiyyə
+   `repetitor-25` idi: pulsuz ay ödənişli məhsuldan **daha məhdud**
+   olurdu — tərsinə idi, düzəldildi.
+5. **Hədiyyənin uzunluğu həmişə `days` (30 gün)**, təklifin son
+   tarixinə uzanmır (db/168). `beta_until` = **təklifin** son günü;
+   keçibsə yeni müəllimə hədiyyə verilmir.
+6. **Bir hesab hədiyyəni bir dəfə alır** (aktiv abunəsi varsa
+   verilmir). Admin istənilən vaxt əl ilə ay hədiyyə edə bilər.
+7. **Vaxt bitəndə 3 gün güzəşt** — hesab tam işləyir, ekranda
+   xatırlatma zolağı görünür.
+8. **Güzəştdən sonra pulsuz həddə (5 yer) düşür**: mövcud şagirdlər
+   işləməkdə davam edir, yenisi əlavə olunmur, **heç bir məlumat
+   silinmir**.
+9. **Məbləği həmişə server hesablayır** (`rpc_paket`, `rpc_my_context`).
+   Brauzer vurma əməliyyatı aparmır — «pul işi: 100 ölç, bir biç».
+10. **Bütün tarixlər Bakı günü ilə** (db/166).
+
+Gəlir göstəricisi (`rpc_admin_stats.mrr_minor` → `app.mrr_minor()`)
+də **anbaan aktiv şagird sayından** hesablanır — `subscriptions.seats`
+sütunu şagird başına modeldə doldurulmur (db/169).
 
 **Qərar (istifadəçi ilə müzakirə):**
 
@@ -2265,7 +2300,13 @@ müddətidir, o da hamıya xeyrinədir (+3 gün).
   (aktiv şagird × tarif), `days_left` (**mənfi = güzəştdə**),
   `grace_days`. Güzəşt bitənə qədər plan qaytarılır ki, xatırlatma
   göstərmək üçün məlumat qalsın.
-- `muellim/app.js` → `seatCard()` (şagird başına planda «Bu ay N ₼»),
+- `app.hediyye_grant()` — `sagird-basi` (məktəb hesabına `mekteb`)
+- `rpc_paket()` — abunə səhifəsinin bütün rəqəmləri: `students`,
+  `free_limit`, `grace_days`, `base_minor`, `per_seat_minor`,
+  `due_minor`, `current.days_left`, `current.gift`
+- `muellim/app.js` → `drawPaket()` (Abunə səhifəsi: vəziyyət + hesab
+  qutusu `.abn` + qayda `.rul` + ödəniş), `seatCard()` (şagird başına
+  planda «Bu ay N ₼», hədiyyə ayında «Növbəti ay N ₼»),
   `payBar()` (#payBar — 7 gün qalanda sakit, vaxt keçəndə qırmızı).
   Sınaq abunəsinin xatırlatması `giftCard()`-dədir; güzəştdə susur ki,
   iki kart olmasın.

@@ -568,8 +568,8 @@
         : "Tam paket sizə hədiyyədir 🎁") + "</b>" +
       "<p>" + (soon
         ? "Davam etmək istəsəniz bizə yazın, paketi uzadaq."
-        : "Bil10-a qoşulduğunuz üçün: 25 şagird yeri, hazır sual bankı, avtomatik test, " +
-          "diaqnostika, dərs planı.") +
+        : "Bil10-a qoşulduğunuz üçün: şagird limiti yoxdur, hazır sual bankı, " +
+          "avtomatik test, diaqnostika, dərs planı.") +
         " Bitmə: <b>" + dateAz(pl.ends) + "</b>" + (soon ? "" : " (" + days + " gün)") + ".</p></div>" +
       (href
         ? '<a class="glink" target="_blank" rel="noopener" href="' +
@@ -599,11 +599,15 @@
       '">' + esc(plan) + "</span>";
 
     if (pl && Number(pl.per_seat_minor) > 0) {
+      //  Hediyye ayinda pul tutulmur - onda meblegi NOVBETI ay kimi
+      //  yazirig: muellim indiden gorsun, sonra suprize dusmesin.
+      var hd = pl.provider === "gift";
       return '<div class="bseat gseat">' +
         '<div class="seat"><div><div class="num">' + used + "</div>" +
           '<div class="lbl">aktiv şagird</div></div>' + pill + "</div>" +
         '<div class="gsep"></div>' +
-        '<div class="grow"><span>Bu ay</span><b>' + azn(pl.due_minor) + "</b></div>" +
+        '<div class="grow"><span>' + (hd ? "Növbəti ay" : "Bu ay") + "</span><b>" +
+          azn(pl.due_minor) + "</b></div>" +
       "</div>";
     }
     var pct = lim > 0 ? Math.min(100, Math.round(used * 100 / lim)) : 0;
@@ -4176,14 +4180,16 @@
       qerari).  Testin oz sual sayi ("6 sual", "36 sual") her yerde qalir.  */
   function showBankN() { return isAdmin(); }
 
+  //  Azerbaycanca onluq ayirici VERGULDUR: 1,50 ₼ (1.50 yox).
   function azn(minor) {
     var m = Number(minor) || 0;
-    return (m % 100 === 0 ? String(m / 100) : (m / 100).toFixed(2)) + " ₼";
+    return (m % 100 === 0 ? String(m / 100)
+                          : (m / 100).toFixed(2).replace(".", ",")) + " ₼";
   }
 
   function screenPaket() {
     var live = guard();
-    topTitle.textContent = "Paket";
+    topTitle.textContent = "Abunə";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_paket", {}).then(function (v) {
       if (!live()) return;
@@ -4191,57 +4197,159 @@
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
+  /*  ABUNE sehifesi (165/169).  Paket siyahisi YOXDUR - qayda birdir:
+      aktiv sagird x tarif.  Sehife uc sey gosterir:
+        1. indiki veziyyet - hediyye / odenisli / guzest / paketsiz
+        2. bu ayin hesabi - butun reqemler SERVERDEN gelir
+        3. qaydanin ozu ve odenis yolu
+      "Pul isi - 100 olc, bir bic": brauzer hec bir mebleg saymir,
+      yalniz serverin verdiyini yazir.                              */
   function drawPaket(v) {
-    var cur = v.current;
-    var wa = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
-    var mail = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    var cur  = v.current || null;
+    var n    = Number(v.students) || 0;
+    var free = Number(v.free_limit) || 0;
+    var gr   = Number(v.grace_days) || 0;
+    //  mebleg: abunesi varsa onun tarifi, yoxsa satisdaki qayda
+    var per  = Number((cur && cur.per_seat_minor != null)
+                 ? cur.per_seat_minor : v.per_seat_minor) || 0;
+    var base = Number((cur && cur.base_minor != null)
+                 ? cur.base_minor : v.base_minor) || 0;
+    var due  = Number((cur && cur.due_minor != null)
+                 ? cur.due_minor : v.due_minor) || 0;
+    var left = (cur && cur.days_left != null) ? Number(cur.days_left) : null;
+    var gift = !!(cur && cur.gift);
+    var over = left != null && left < 0;             // guzest muddetinde
+    var wa   = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
+    var me   = (CTX && CTX.profile && CTX.profile.full_name) || "";
+
+    //  1 - veziyyet
+    var st;
+    if (!cur) {
+      st = msg("warn", "Abunəniz yoxdur — pulsuz " + free + " şagird yeri. " +
+        "Mövcud şagirdləriniz işləyir, yenisi əlavə olunmur.");
+    } else if (cur.slug === "admin") {
+      st = msg("ok", "Admin hesabı — abunə tələb olunmur.");
+    } else if (over) {
+      st = msg("warn", "Müddət bitib — güzəşt: " +
+        Math.max(0, gr + left) + " gün. Sonra pulsuz " + free +
+        " şagird yerinə düşür, mövcud şagirdlər qalır.");
+    } else if (gift) {
+      st = msg("ok", "Hədiyyə ay — 0 ₼, şagird limiti yoxdur." +
+        (left != null ? " Qalıb: " + left + " gün." : "") +
+        (cur.ends ? " Bitmə: " + dateAz(cur.ends) + "." : ""));
+    } else {
+      st = msg("ok", "Abunə aktivdir." +
+        (left != null ? " Qalıb: " + left + " gün." : "") +
+        (cur.ends ? " Növbəti ödəniş: " + dateAz(cur.ends) + "." : ""));
+    }
+
     var h =
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Əsas səhifə</button>" +
-      '<div class="spacer"></div>' +
-      '<div class="card tight">' +
-        "<h1>Abunə</h1>" +
-        (cur
-          ? '<p class="muted" style="margin:8px 0 0">Hazırkı paket: <b>' +
-            esc(cur.plan) + "</b>" +
-            (cur.status === "trialing" ? " · pulsuz sınaq" : "") +
-            (cur.ends ? " · bitmə tarixi: " + dateAz(cur.ends) : "") + "</p>"
-          : '<p class="muted" style="margin:8px 0 0">Hazırda abunəniz yoxdur. ' +
-            "Öz suallarınız və əsas hesabat pulsuzdur; platforma sual bankı, " +
-            "avtomatik test, dərin analitika və siqnallar paketə daxildir.</p>") +
+      '<div class="card tight">' + st +
+        '<div class="seat" style="margin:14px 0 0"><div>' +
+          "<b>" + esc(cur ? cur.plan : "Şagird başına") + "</b>" +
+          '<div class="lbl">Şagird limiti yoxdur · platforma bankı · ' +
+            "avtomatik test · analitika · siqnallar</div></div>" +
+        '<span class="pill' + (cur && !over ? " on" : "") + '">' +
+          (over ? "güzəşt" : (gift ? "hədiyyə" : (cur ? "aktiv" : "paketsiz"))) +
+        "</span></div>" +
       "</div>" +
       '<div class="spacer"></div>' +
-      "<h2>Paketlər</h2>" +
-      (v.plans || []).map(function (p) {
-        var price = azn(p.price_minor) + (p.period === "year" ? " / il" : " / ay") +
-          (Number(p.price_per_seat_minor)
-            ? " + " + azn(p.price_per_seat_minor) + " hər şagird" : "");
-        return '<div class="card tight pkt' +
-          (cur && cur.slug === p.slug ? " on" : "") + '">' +
-          '<div class="seat"><div>' +
-            "<b>" + esc(p.name) + "</b>" +
-            '<div class="lbl">' +
-              (p.max_students ? p.max_students + " şagird yeri · " : "") +
-              "platforma bankı · generator · analitika · siqnallar</div>" +
-          "</div>" +
-          '<span class="pctv">' + esc(price) + "</span></div>" +
-        "</div>";
-      }).join("") +
+
+      //  2 - bu ayin hesabi
+      "<h2>Bu ayın hesabı</h2>" +
+      '<div class="card tight">' +
+        '<div class="abn">' +
+          '<div class="c"><b>' + n + "</b><span>aktiv şagird</span></div>" +
+          '<span class="op">×</span>' +
+          '<div class="c"><b>' + azn(per) + "</b><span>bir şagird / ay</span></div>" +
+          (base ? '<span class="op">+</span>' +
+                  '<div class="c"><b>' + azn(base) + "</b><span>baza haqqı</span></div>" : "") +
+          '<span class="op">=</span>' +
+          //  Hediyye ayinda pul tutulmur - qutuda NOVBETI ayin meblegi
+          //  yazilir ki, muellim indiden bilsin.  "0 ₼" veziyyet
+          //  setrinde onsuz da yazilib.
+          '<div class="c sum"><b>' + azn(due) + "</b><span>" +
+            (gift ? "növbəti ay" : "ayda") + "</span></div>" +
+        "</div>" +
+        '<p class="muted" style="margin:14px 0 0">Məbləği server hesablayır. ' +
+          "Ödəniş günündəki aktiv şagird sayı əsas götürülür — ay ərzində " +
+          "əlavə etdiyiniz şagird növbəti ayın hesabında görünür. " +
+          "Dayandırılmış şagird pul tutmur." +
+          (gift ? " Hədiyyə ayı bitəndən sonra bu məbləğ qüvvəyə minir." : "") +
+        "</p>" +
+      "</div>" +
       '<div class="spacer"></div>' +
+
+      //  3 - qayda
+      "<h2>Qayda</h2>" +
+      '<div class="card tight"><ul class="rul" id="qayda">' +
+        "<li><b>Şagird və valideyn — həmişə pulsuz.</b> Onlardan heç vaxt " +
+          "ödəniş istənmir.</li>" +
+        "<li>Müəllim üçün pilləli paket yoxdur — <b>yalnız şagird başına " +
+          azn(per) + " / ay</b>. Şagird sayına məhdudiyyət qoyulmur.</li>" +
+        "<li><b>Yeni müəllimə ilk ay hədiyyədir</b> — eyni məhsul, " +
+          "limitsiz şagird, 0 ₼.</li>" +
+        "<li>Vaxt bitəndə <b>" + gr + " gün güzəşt</b> verilir, ekranda " +
+          "xatırlatma görünür.</li>" +
+        "<li>Güzəşt bitəndə hesab <b>pulsuz " + free + " şagird yerinə</b> " +
+          "düşür: mövcud şagirdlər işləməkdə davam edir, yenisi əlavə " +
+          "olunmur. Heç bir məlumat silinmir.</li>" +
+      "</ul></div>" +
+      '<div class="spacer"></div>' +
+
+      //  4 - pulsuz hedd ile abunenin FERQI.  Muellim neyi itireceyini
+      //  evvelceden bilmelidir (istifadeci: "bu mutleqdir").  Siyahi
+      //  kodla uyusur: hansi RPC abunesiz imtina edir - db-de
+      //  app.has_active_subscription yoxlamalari.
+      "<h2>Pulsuz həddə düşəndə nə dəyişir</h2>" +
+      '<div class="card tight"><div class="cmp">' +
+        '<div class="cc"><div class="ch">Pulsuz hədd</div>' +
+          '<ul class="rul lim">' +
+            "<li><b>" + free + " şagird yeri</b></li>" +
+            "<li>Öz suallarınız və öz testləriniz — tam işləyir</li>" +
+            "<li>Nəticə: kim neçə faiz topladı</li>" +
+            "<li>Hesabat tarixçəsi: <b>son 7 gün</b></li>" +
+            "<li>Şagird məşqi: <b>gündə 20 sual</b></li>" +
+          "</ul></div>" +
+        '<div class="cc on"><div class="ch">Abunə ilə açılır</div>' +
+          '<ul class="rul">' +
+            "<li><b>Limitsiz şagird</b></li>" +
+            "<li>Platforma sual bankı — hazır suallardan test</li>" +
+            "<li>Avtomatik test yığımı (generator)</li>" +
+            "<li>Diaqnostika — səviyyə testi və nəticəsi</li>" +
+            "<li>Zəif mövzu analizi — qrup və şagird hesabatında</li>" +
+            "<li>Dərs planı, kurikulum paketi, «bugünkü dərs»</li>" +
+            "<li>Şagird üçün fərdi plan</li>" +
+            "<li>Təhlükə siqnalları (İcmalda)</li>" +
+            "<li>Düzəliş — təkrar-səhv testi</li>" +
+            "<li>Cavab vərəqi — sual-sual nə yazıb</li>" +
+            "<li>Bütün tarixçə və şagirdə limitsiz məşq</li>" +
+          "</ul></div>" +
+      "</div></div>" +
+      '<div class="spacer"></div>' +
+
+      //  5 - odenis
       '<div class="card">' +
-        "<b>Necə almaq olar?</b>" +
+        "<b>Necə ödəmək olar?</b>" +
         '<p class="muted" style="margin:8px 0 14px">Hələlik ödəniş əl ilə ' +
-          "qəbul olunur: bizə yazın, paketi seçin, köçürmə ilə ödəyin — " +
-          "abunəniz dərhal açılsın.</p>" +
+          "qəbul olunur: bizə yazın, köçürməni edin — abunəniz dərhal " +
+          "uzadılsın. Kart ödənişi bankın öz səhifəsində açılacaq.</p>" +
         (wa
           ? '<a class="btn go" id="btnWa" target="_blank" rel="noopener" href="' +
             esc("https://wa.me/" + wa.replace(/[^0-9]/g, "") +
                 "?text=" + encodeURIComponent(
-                  "Salam! Bil10-da paket almaq istəyirəm." +
-                  (mail ? " Hesab: " + mail : ""))) +
+                  "Salam! Bil10 abunəsini uzatmaq istəyirəm." +
+                  (me ? " Hesab: " + me : ""))) +
             '">WhatsApp-la yazın</a>'
           : '<p class="muted">Əlaqə nömrəsi hələ təyin olunmayıb ' +
             "(config.js → CONTACT_WHATSAPP).</p>") +
       "</div>";
+
+    bandHead({
+      back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Ödəniş",
+      title: "Abunə",
+      sub: "Şagird başına ödəniş — nə qədər şagird, o qədər."
+    });
     show(h);
     on("btnBack", "click", function () { nav("#/"); });
   }
@@ -4311,7 +4419,7 @@
 
   function drawAdmin(st, rows, reps, fbs, qs, vs) {
     var plans = (st.plans && st.plans.length) ? st.plans
-      : [{ slug: "repetitor-25", name: "Repetitor — 25 şagird" }];
+      : [{ slug: "sagird-basi", name: "Şagird başına" }];
     bandHead({
       back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Admin",
       title: "İdarəetmə", sub: "Hesablar, abunələr, hesabatlar, rəylər, ziyarətlər."
@@ -4397,10 +4505,10 @@
       '<div class="card" id="secBox">' + secCard() + "</div>"
     );
     admFlash = "";
-    //  standart secim - en cox satilan repetitor paketi
+    //  169: satisda tek qayda var - sagird basina
     var sel0 = $("admPlan");
-    if (sel0 && sel0.querySelector('option[value="repetitor-25"]')) {
-      sel0.value = "repetitor-25";
+    if (sel0 && sel0.querySelector('option[value="sagird-basi"]')) {
+      sel0.value = "sagird-basi";
     }
     on("btnBack", "click", function () { nav("#/"); });
     function admQuery() {
@@ -4696,7 +4804,7 @@
         if (!confirm(em + " → " + ad + " (+" + ay + " ay" +
                      (trial ? ", SINAQ — pulsuz" : ", ödənişli") + "). Açılsın?")) return;
         call = "rpc_admin_grant";
-        args = { p_email: em, p_plan: (sel || {}).value || "repetitor-25",
+        args = { p_email: em, p_plan: (sel || {}).value || "sagird-basi",
                  p_months: ay, p_trial: trial };
       }
       busy = true; b.disabled = true;

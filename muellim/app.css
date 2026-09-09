@@ -797,6 +797,49 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 
 /* paket ve admin */
 .pkt.on{border-color:var(--brand-line);background:var(--brand-tint)}
+
+/* ------------------------------------------------- abune: hesab qutusu
+   "6 aktiv sagird x 1,50 = 9 AZN" - bir baxisda oxunan setir.
+   Dar ekranda emeliyyat isareleri gizlenir, hucreler alt-alta dusur. */
+.abn{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;max-width:560px}
+.abn .c{flex:1 1 92px;min-width:92px}
+.abn .c b{display:block;font-size:26px;line-height:1.1;font-weight:680;
+  letter-spacing:-.024em;font-variant-numeric:tabular-nums;color:var(--fg)}
+.abn .c span{display:block;font-size:11.5px;color:var(--fg-3);margin-top:6px}
+.abn .op{flex:0 0 auto;font-size:16px;color:var(--fg-3);padding-bottom:22px}
+.abn .c.sum{border-left:1px solid var(--line);padding-left:14px}
+.abn .c.sum b{color:var(--brand)}
+@media (max-width:460px){
+  .abn{gap:12px}
+  .abn .c{flex:1 1 100%}
+  .abn .op{display:none}
+  .abn .c.sum{border-left:0;padding-left:0;border-top:1px solid var(--line);
+    padding-top:12px}
+}
+/* pulsuz hedd <-> abune muqayisesi: iki sutun, arada nazik xett */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.cmp .cc{padding:0 18px}
+.cmp .cc:first-child{padding-left:0;border-right:1px solid var(--line)}
+.cmp .cc:last-child{padding-right:0}
+.cmp .ch{font-size:11.5px;font-weight:640;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--fg-3);margin:0 0 12px}
+.cmp .cc.on .ch{color:var(--brand)}
+@media (max-width:720px){
+  .cmp{grid-template-columns:1fr;gap:18px}
+  .cmp .cc{padding:0}
+  .cmp .cc:first-child{border-right:0;border-bottom:1px solid var(--line);
+    padding-bottom:18px}
+}
+/* qayda siyahisi - noktali setirler */
+.rul{list-style:none;margin:0;padding:0}
+.rul li{position:relative;padding:0 0 0 20px;margin:0 0 10px;
+  font-size:13.5px;line-height:1.55;color:var(--fg-2)}
+.rul li:last-child{margin-bottom:0}
+.rul li::before{content:"";position:absolute;left:2px;top:8px;
+  width:6px;height:6px;border-radius:99px;background:var(--brand)}
+.rul li b{color:var(--fg);font-weight:600}
+/*  pulsuz hedd sutunu - solgun nokte, "az olan" hissi  */
+.rul.lim li::before{background:var(--n-300)}
 /* ---------------------------------------------- admin: hesablar cedveli
    Siyahi boyudukce setirler bir-birine qarismasin (istifadeci).
    TEK markup: masaustunde cedvel, telefonda EYNI setirler kart olur

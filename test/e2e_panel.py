@@ -182,8 +182,13 @@ with sync_playwright() as pw:
     ok(pg.locator("#giftCard").count() == 1 and "hədiyyədir" in pg.inner_text("#giftCard"),
        "qeydiyyatdan sonra hediyye karti", pg.inner_text("#giftCard")[:60].replace("\n", " "))
     ok("Bitmə:" in pg.inner_text("#giftCard") and "gün)" in pg.inner_text("#giftCard"), "kartda bitme tarixi ve gun sayi")
-    ok("0 / 25" in pg.inner_text(".seat") and "Repetitor" in pg.inner_text(".seat"),
-       "hediyye ile yer 25, pill paket adi", pg.inner_text(".seat").replace("\n"," "))
+    #  169: hediyye = odenisli mehsulun ozu - LIMITSIZ.  Evvel 'repetitor-25'
+    #  verilirdi ("0 / 25"), yeni pulsuz ay odenislinin eynisidir, ona gore
+    #  kart doluluq xetti yox, aktiv sagird sayini ve tarifi gosterir.
+    bseat = pg.inner_text("#band .bseat").replace("\n", " ")
+    ok("aktiv şagird" in bseat and "Şagird başına" in bseat,
+       "hediyye ile limitsiz plan, pill plan adi", bseat[:70])
+    ok("Növbəti ay" in bseat, "hediyye ayinda kart novbeti ayi yazir", bseat[:70])
     ok(pg.locator("#giftCard a[href*='wa.me/994501234567']").count() == 1, "kartda WhatsApp duymesi")
     #  ilk qrup formasi kartin ALTINDADIR (h1 -> kart -> forma); qruplar
     #  asinxron gelir - forma kocurulene qeder gozle
