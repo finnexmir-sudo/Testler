@@ -28,6 +28,8 @@
     send:   '<path d="M16 3 8.5 10.5"/><path d="M16 3l-4.8 13-2.7-5.5L3 7.8 16 3z"/>',
     refresh:'<path d="M15.5 8A6 6 0 0 0 4.8 5.4"/><path d="M4 3v3h3"/>' +
             '<path d="M3.5 11a6 6 0 0 0 10.7 2.6"/><path d="M15 16v-3h-3"/>',
+    cal:    '<rect x="2.8" y="4.2" width="13.4" height="11.6" rx="2.2"/>' +
+            '<path d="M2.8 8h13.4M6.5 2.4v3.4M12.5 2.4v3.4"/>',
     back:   '<path d="M11.5 4.5 6 10l5.5 5.5"/>',
     right:  '<path d="M7.5 4.5 13 10l-5.5 5.5"/>',
     warn:   '<path d="M9.5 3.2 2.8 15.2h13.4L9.5 3.2z"/><path d="M9.5 7.8v3.4"/>' +
@@ -624,6 +626,13 @@
     //  ona gore susma 5-dir.  O, app.free_seat_limit() ile EYNI olmalidir -
     //  db/test/smoke_qiymet.sql bunu yoxlayir, deyisse test dayanir.
     free = Number(free) || 5;
+    //  «Limitsiz şagird» BU SIYAHIDA DEYIL - qiymet qaydasi kimi
+    //  siyahinin USTUNDE, mebleqle birlikde yazilir (ferqBasliq).
+    //  Sebeb (istifadeci tutdu): qalan bendlerin hamisi «abune alanda
+    //  ACILAN imkandir», sagird sayi ise ODEDIYIN VAHIDDIR.  Eyni
+    //  siyahida, reqemsiz duranda goz onu da «daxildir» kimi oxuyur -
+    //  hesab gelende «limitsiz yazilmisdi» deyilir.  Pul isinde bu,
+    //  duzeldilmesi en bahali cur seydir.
     return {
       pulsuz: [
         "<b>" + free + " şagird yeri</b>",
@@ -637,20 +646,38 @@
         "Şagird məşqi: <b>gündə 20 sual</b>"
       ],
       abune: [
-        "<b>Limitsiz şagird</b>",
-        "Hazır suallar — platforma bankından test",
-        "Avtomatik test yığımı (generator)",
-        "Diaqnostika — səviyyə testi və nəticəsi",
+        "<b>Hazır suallar</b> — özünüz sual yazmadan test yığmaq",
+        //  db/106 + db/132: v_keys.  Abunesiz hesab bank siyahisinda
+        //  sualin METNINI gorur, variantlari ve duz cavabi YOX.
+        //  Siyahida yox idi - elave olundu (audit, 2026-09-09).
+        "Hazır sualların <b>variantları və düz cavabı</b> — siyahıda görünür",
+        "Avtomatik test yığımı — mövzu və çətinliyə görə",
+        "<b>Diaqnostika</b> — sinif üzrə səviyyə xəritəsi; təkrarında «əvvəl → indi» fərqi",
         "Zəif mövzu analizi — qrup, şagird və <b>valideyn</b> ekranında",
-        "Dərs planı, kurikulum paketi, «bugünkü dərs»",
+        "Dərs planı və kurikulum paketi — il əvvəlcədən hazır: " +
+          "«bugünkü dərs», isinmə sualları, ev tapşırığı, sınaq",
         "Şagird üçün fərdi plan",
-        "Təhlükə siqnalları (İcmalda)",
+        "<b>Təhlükə siqnalları</b> — kim geriləyir, kim ilişib: sistem özü deyir",
         "Düzəliş — təkrar-səhv testi",
         "Cavab vərəqi — sual-sual nə yazıb",
-        "Bütün tarixçə və şagirdə limitsiz məşq"
+        "Bütün hesabat tarixçəsi",
+        "Şagirdə limitsiz mövzu məşqi"
       ]
     };
   }
+  /*  «Abunə ilə açılır» basliginin altinda duran QIYMET QAYDASI.
+      Ayrica setirdir, siyahinin bendi deyil: nə ödəyirsən ilə nə
+      alırsan bir-birine qarismasin.  Mebleg SERVERDEN gelir
+      (rpc_my_context.qiymet.per_seat_minor, db/176) - koda reqem
+      yazilmir, yoxsa qiymet deyisende ekran kohne reqemi gosterer.
+      Mebleg bilinmirse yalniz qayda yazilir, uydurma reqem YOX.  */
+  function ferqBasliq() {
+    var per = CTX && CTX.qiymet && Number(CTX.qiymet.per_seat_minor);
+    return '<div class="fseat">Şagird sayında limit yoxdur' +
+      (per > 0 ? " — ödəniş <b>hər şagird üçün: " + azn(per) + " / ay</b>" : "") +
+      "</div>";
+  }
+
   //  Iki sutunlu muqayise (Abune sehifesi ucun - basliqli)
   function ferqCmp(free) {
     var f = ferqSiyahi(free);
@@ -660,7 +687,8 @@
     }
     return '<div class="cmp">' +
       '<div class="cc"><div class="ch">Pulsuz hədd</div>' + ul(f.pulsuz, " lim") + "</div>" +
-      '<div class="cc on"><div class="ch">Abunə ilə açılır</div>' + ul(f.abune) + "</div>" +
+      '<div class="cc on"><div class="ch">Abunə ilə açılır</div>' +
+        ferqBasliq() + ul(f.abune) + "</div>" +
     "</div>";
   }
   /*  Esas sehifede: yigilan «Pulsuz həddə nə dəyişir?».  Susmada
@@ -676,6 +704,7 @@
         f.pulsuz.map(function (x) { return "<li>" + x + "</li>"; }).join("") +
       "</ul>" +
       '<div class="fh">Abunə ilə açılır</div>' +
+      ferqBasliq() +
       '<ul class="rul">' +
         f.abune.map(function (x) { return "<li>" + x + "</li>"; }).join("") +
       "</ul></details>";
@@ -689,14 +718,22 @@
   function betaKart(pl, tarif) {
     var t = pl && pl.odenis_start ? dateAz(pl.odenis_start) : "";
     return (t ? t + "-dək ödəniş yoxdur." : "Beta bitənə qədər ödəniş yoxdur.") +
-      (tarif ? " Sonra: şagird başına " + tarif + " / ay." : "");
+      (tarif ? " Sonra: hər şagird üçün " + tarif + " / ay." : "");
   }
   function betaQeyd(pl) {
     var t = pl && pl.odenis_start ? dateAz(pl.odenis_start) : "";
     return t
       ? "Ödəniş " + t + "-dən başlayır — o vaxta qədər heç nə tutulmur."
-      : "Bu qiymət layihənin beta dövrü bitəndən sonra qüvvəyə minəcək — " +
-        "indi heç nə tutulmur, vaxtı gələndə əvvəlcədən xəbər verəcəyik.";
+      /*  «xəbər verəcəyik» -> «məlumat veriləcək».  Iki sebeb:
+          1. Ana sehife ve beledci ONSUZ DA passiv yazir («xəbər
+             veriləcək») - panel tek basina birinci sexsde danisirdi.
+          2. Pul haqqinda ved birinci sexsde deyilende «kim, ne vaxt,
+             nece?» sualini dogurur; resmi formada ohde daha aydindir.
+          MENTIQ: melumat deyisiklikden EVVEL verilir.  «bitdikdən
+          sonra əvvəlcədən məlumat veriləcək» ozunu inkar edir -
+          beta artiq bitibse, «evvelceden» gec qalir.  */
+      : "Bu qiymət layihənin beta dövrü bitdikdən sonra qüvvəyə minəcək — " +
+        "indi heç nə tutulmur; dəyişiklikdən əvvəl məlumat veriləcək.";
   }
 
   /*  Hesab PULSUZ HEDDEDIR (abunesi yoxdur, guzest de bitib).
@@ -847,6 +884,9 @@
         '<div class="tile d"><i class="ti">' + ic("chart") + "</i><b>—</b><span>orta bal</span></div>" +
       "</div>" +
       //  genis ekranda iki sutun: solda tehluke zonasi, sagda son neticeler
+      //  177: cedvel qurulubsa «bu gün dərs var» karti buraya gelir.
+      //  Qurulmayibsa qab BOS qalir - bos kart cixmir (istifadeci qaydasi).
+      '<div id="hWeek"></div>' +
       '<div class="hcols"><div id="hAlerts"></div><div id="hRecent"></div></div>' +
       '<div id="hTop5"></div>' +
       //  sagird yeri gostericisi zolagin sag terefindedir (asagida);
@@ -939,6 +979,7 @@
     });
     loadGroups(lvReady);
     loadHome();
+    loadWeek();
 
     on("btnBank", "click", function () { nav("#/b"); });
     on("btnGen", "click", function () { nav("#/gen"); });
@@ -1219,6 +1260,65 @@
     });
   }
 
+  /* ------------------------------------------------ bu gunun cedveli
+     Icmaldaki kart.  Cedvel QURULMAYIBSA hec ne cizilmir - istifadeci
+     qaydasi: qurulmayan funksiya gorunmemelidir.  Bugun dersi yoxdursa
+     NOVBETI ders bir setirle yazilir; o da yoxdursa kart cixmir.  */
+  function loadWeek() {
+    var live = guard();
+    sb.rpc("rpc_week", {}).then(function (w) {
+      if (!live()) return;
+      var box = $("hWeek");
+      if (!box) return;
+      if (!w || !w.on) { box.innerHTML = ""; return; }
+      var gun = (w.days || []).filter(function (x) { return x.hal !== "moved_out"; });
+      var bugun = gun.filter(function (x) { return x.date === w.today; });
+      var sonra = gun.filter(function (x) { return x.date > w.today && x.hal !== "cancelled"; });
+      if (!bugun.length && !sonra.length) { box.innerHTML = ""; return; }
+
+      var h = '<div class="card wk" id="wkCard"><div class="wkh">' + ic("cal") +
+        "<b>" + (bugun.length ? "Bu gün dərs var" : "Bu həftə") + "</b></div>";
+      if (bugun.length) {
+        h += '<div class="wkl">' + bugun.map(function (x) {
+          var legv = x.hal === "cancelled";
+          return '<div class="wkr' + (legv ? " off" : "") + '">' +
+            '<span class="wkt">' + esc(x.time) + "</span>" +
+            '<span class="wkn">' + esc(x.class) +
+              (x.hal === "moved_in" ? ' <s class="muted">köçürülüb</s>' : "") + "</span>" +
+            (legv
+              ? '<span class="muted">ləğv edilib</span>'
+              : (x.done
+                  ? '<span class="pok">davamiyyət alınıb ✓</span>'
+                  : '<button class="btn sm go" data-wk="' + esc(x.class_id) + '">' +
+                    ic("check") + "Dərs oldu</button>")) +
+            "</div>";
+        }).join("") + "</div>";
+      } else {
+        var n = sonra[0];
+        h += '<div class="wkl"><div class="wkr"><span class="wkt">' + esc(n.time) + "</span>" +
+          '<span class="wkn">' + esc(n.class) + "</span>" +
+          '<span class="muted">' + esc(haftaAz(n.date)) + "</span></div></div>";
+      }
+      box.innerHTML = h + "</div>";
+      on("wkCard", "click", function (e) {
+        var b = e.target.closest ? e.target.closest("[data-wk]") : null;
+        if (!b) return;
+        //  Defter sekmesi acilsin - davamiyyet orada goturulur
+        GTAB = "d";
+        nav("#/g/" + b.getAttribute("data-wk"));
+      });
+    }).catch(function () {});
+  }
+  //  «sabah», «çərşənbə», «12 sen» - yaxin gunler adla, uzaqlar tarixle
+  function haftaAz(iso) {
+    var d = new Date(iso + "T00:00:00");
+    var t = new Date(); t.setHours(0, 0, 0, 0);
+    var f = Math.round((d - t) / 86400000);
+    if (f === 1) return "sabah";
+    if (f > 1 && f < 7) return GUNTAM[d.getDay() === 0 ? 7 : d.getDay()].toLowerCase();
+    return dateAz(d.toISOString());
+  }
+
   /* ----------------------------------------------- tehluke zonasi
      Sistem OZU deyir: kim gerileyir, kim zeif movzudadir, kim
      sabitdir.  Muellim tek-tek hesabat acmaga mecbur deyil.
@@ -1234,12 +1334,169 @@
   var AYL = ["Yanvar","Fevral","Mart","Aprel","May","İyun","İyul","Avqust","Sentyabr","Oktyabr","Noyabr","Dekabr"];
   function monthKey(d) { return d.getFullYear() + "-" + (d.getMonth() < 9 ? "0" : "") + (d.getMonth() + 1) + "-01"; }
   function todayKey() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth() < 9 ? "0" : "") + (d.getMonth() + 1) + "-" + (d.getDate() < 10 ? "0" : "") + d.getDate(); }
+  /* ================================================================
+     CEDVEL (db/177) — qrupun heftelik gunu ve saati.
+     ISTEYE BAGLI: qurulmayibsa Icmalda, valideynde ve sagirdde HEC NE
+     gorunmur.  Burada, «Dəftər» sekmesinin basinda, YIGILMIS setirdir -
+     axtaran tapir, axtarmayan gormur (istifadeci qaydasi).
+     v1 SADELIYI: gunde BIR ders, qrup ucun TEK muddet.  Baza coxunu
+     saxlaya bilir (class_schedule acari gun+saatdir), ekran v1-de
+     sadəni gosterir.
+     ================================================================ */
+  var SCH   = null;    //  serverden gelen {rows, conflicts}
+  var SCHED = null;    //  redaktedeki veziyyet: {weekday: "HH:MM"}
+  var SCHM  = 60;      //  muddet (deqiqe)
+  //  Yadda saxlayandan sonra defter yeniden cizilir; bolme baglansa
+  //  «saxlanildi» tesdiqi de itir - ona gore aciq/bagli hal saxlanilir.
+  var SCHOPEN = false;
+  var SCHMSG  = "";    //  son tesdiq/xeberdarliq - yeniden cizilende itmesin
+  var GUNAD = ["", "B.e", "Ç.a", "Çərş", "C.a", "Cümə", "Şən", "Baz"];
+  var GUNTAM = ["", "Bazar ertəsi", "Çərşənbə axşamı", "Çərşənbə",
+                "Cümə axşamı", "Cümə", "Şənbə", "Bazar"];
+
+  function schOxu(d) {
+    SCH = d || { rows: [], conflicts: [] };
+    SCHED = {};
+    (SCH.rows || []).forEach(function (r) { SCHED[r.weekday] = r.starts_at; });
+    var m = (SCH.rows || [])[0];
+    SCHM = (m && Number(m.mins)) || 60;
+  }
+  //  «Çərş 16:00 · Şən 11:00» - zolaqda ve yigilmis setirde
+  function schQisa() {
+    var g = Object.keys(SCHED || {}).map(Number).sort(function (a, b) { return a - b; });
+    if (!g.length) return "";
+    return g.map(function (w) { return GUNAD[w] + " " + SCHED[w]; }).join(" · ");
+  }
+
+  function schFold() {
+    var var_ = schQisa();
+    return '<details class="fold sch" id="schFold"' + (SCHOPEN ? " open" : "") + ">" +
+      "<summary>Cədvəl" +
+        (var_ ? '<span class="schnow">' + esc(var_) + "</span>"
+              : '<em class="ftik nope">qurulmayıb</em>') + "</summary>" +
+      '<div class="schb">' +
+        '<p class="muted" style="margin:0 0 10px">Günü seçin, saatı yazın. ' +
+          "Qurulandan sonra İcmalda «bu gün dərs var» görünür və valideyn " +
+          "həftəni öz ekranında izləyir. İstəməsəniz boş buraxın.</p>" +
+        '<div class="chips schd" id="schDays">' +
+          [1,2,3,4,5,6,7].map(function (w) {
+            return '<button type="button" class="chip' +
+              (SCHED[w] ? " on" : "") + '" data-w="' + w + '">' + GUNAD[w] + "</button>";
+          }).join("") +
+        "</div>" +
+        '<div id="schTimes"></div>' +
+        '<div class="row" style="gap:8px;align-items:center;margin-top:10px">' +
+          '<label for="schMins" class="muted" style="margin:0">Dərsin müddəti</label>' +
+          '<select id="schMins" style="flex:0 0 110px">' +
+            [45, 60, 90, 120].map(function (m) {
+              return '<option value="' + m + '"' + (SCHM === m ? " selected" : "") +
+                ">" + m + " dəq</option>";
+            }).join("") +
+          "</select>" +
+        "</div>" +
+        '<div id="schWarn">' + SCHMSG + "</div>" +
+        '<div class="row" style="gap:8px;margin-top:12px">' +
+          '<button class="btn go sm" id="schSave">Yadda saxla</button>' +
+          (var_ ? '<button class="btn ghost sm arch" id="schClear">Cədvəli sil</button>' : "") +
+        "</div>" +
+      "</div></details>";
+  }
+  //  Secilmis gunlerin saat setirleri - ayrica cizilir ki, cip
+  //  basilanda butun bolme yeniden qurulmasin (fokus itmesin).
+  function schTimes() {
+    var box = $("schTimes");
+    if (!box) return;
+    var g = Object.keys(SCHED).map(Number).sort(function (a, b) { return a - b; });
+    /*  <input type="time"> ISLEDILMIR: brauzerin dili en-US olanda
+        «04:00 PM» yazir - Azerbaycanda saat 24-lukdur ve bu, muellimi
+        casdirir.  Secim siyahisi HER YERDE eynidir, ustelik telefonda
+        bir toxunusdur.  15 deqiqelik addim, 07:00-22:00.  */
+    box.innerHTML = g.length
+      ? g.map(function (w) {
+          return '<div class="schrow"><span>' + GUNTAM[w] + "</span>" +
+            '<select data-t="' + w + '">' + saatlar(SCHED[w] || "16:00") + "</select></div>";
+        }).join("")
+      : '<p class="muted" style="margin:0">Gün seçilməyib.</p>';
+    Array.prototype.forEach.call(box.querySelectorAll("[data-t]"), function (i) {
+      i.addEventListener("change", function () {
+        SCHED[i.getAttribute("data-t")] = i.value || "16:00";
+      });
+    });
+  }
+  //  07:00-22:00, 15 deqiqelik addim
+  function saatlar(sec) {
+    var o = "", h, m, v;
+    //  saxlanan deyer siyahida yoxdursa (kohne melumat) ozu elave olunur
+    var var_ = false;
+    for (h = 7; h <= 22; h++) {
+      for (m = 0; m < 60; m += 15) {
+        if (h === 22 && m > 0) break;
+        v = (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
+        if (v === sec) var_ = true;
+        o += '<option value="' + v + '"' + (v === sec ? " selected" : "") + ">" + v + "</option>";
+      }
+    }
+    if (!var_ && sec) o = '<option value="' + esc(sec) + '" selected>' + esc(sec) + "</option>" + o;
+    return o;
+  }
+
+  function schBind(g) {
+    var f = $("schFold");
+    if (f) f.addEventListener("toggle", function () { SCHOPEN = f.open; });
+    on("schDays", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-w]") : null;
+      if (!b) return;
+      var w = b.getAttribute("data-w");
+      if (SCHED[w]) { delete SCHED[w]; b.classList.remove("on"); }
+      else { SCHED[w] = "16:00"; b.classList.add("on"); }
+      schTimes();
+    });
+    on("schMins", "change", function () { SCHM = Number($("schMins").value) || 60; });
+    on("schSave", "click", function () {
+      var rows = Object.keys(SCHED).map(function (w) {
+        return { weekday: Number(w), starts_at: SCHED[w], mins: SCHM };
+      });
+      setBusy("schSave", true, "Yadda saxla");
+      SCHOPEN = true;
+      sb.rpc("rpc_schedule_set", { p_class_id: g.id, p_rows: rows }).then(function (d) {
+        setBusy("schSave", false, "Yadda saxla");
+        schOxu(d);
+        //  TOQQUSMA xetadir deyil - xeberdarliqdir.  Repetitor bezen
+        //  bunu bilerek edir (iki usaq eyni masada), qerar onundur.
+        SCHMSG = (d.conflicts || []).length
+          ? msg("warn", (d.conflicts || []).map(function (c) {
+              return GUNTAM[c.weekday] + " " + c.starts_at + " — «" + c.class + "» ilə üst-üstə düşür";
+            }).join("; "))
+          : msg("ok", rows.length ? "Cədvəl yadda saxlanıldı." : "Cədvəl silindi.");
+        loadLedger(g);
+        loadWeek();
+      }).catch(function (e2) {
+        setBusy("schSave", false, "Yadda saxla");
+        SCHMSG = msg("err", fail(e2));
+        var w = $("schWarn"); if (w) w.innerHTML = SCHMSG;
+      });
+    });
+    on("schClear", "click", function () {
+      if (!confirm("Cədvəl silinsin? Keçmiş dərslər və davamiyyət qalır.")) return;
+      SCHED = {}; SCHM = 60;
+      sb.rpc("rpc_schedule_set", { p_class_id: g.id, p_rows: [] }).then(function (d) {
+        schOxu(d); loadLedger(g); loadWeek();
+      }).catch(function () {});
+    });
+    schTimes();
+  }
+
   function loadLedger(g) {
     var live = guard();
     if (!LED_M) LED_M = monthKey(new Date());
-    sb.rpc("rpc_ledger_get", { p_class_id: g.id, p_month: LED_M }).then(function (d) {
+    //  Defter ve cedvel EYNI ANDA gedir - biri o birini gozlemir
+    Promise.all([
+      sb.rpc("rpc_ledger_get", { p_class_id: g.id, p_month: LED_M }),
+      sb.rpc("rpc_schedule_get", { p_class_id: g.id }).catch(function () { return null; })
+    ]).then(function (r) {
       if (!live()) return;
-      LED_D = d || {};
+      LED_D = r[0] || {};
+      schOxu(r[1]);
       drawLedger(g);
     }).catch(function (e) {
       var box = $("ledgerBox");
@@ -1254,7 +1511,7 @@
     var paidN = sts.filter(function (x) { return x.paid; }).length;
     var tk = todayKey();
     var today = d.today;
-    var h =
+    var h = schFold() +
       '<div class="card tight lhead">' +
         '<button class="btn sm ghost icon" id="ledPrev" aria-label="Əvvəlki ay">' + ic("back") + "</button>" +
         "<b>" + AYL[m.getMonth()] + " " + m.getFullYear() + "</b>" +
@@ -1306,6 +1563,7 @@
         }).join("") + "</div></details>";
     }
     box.innerHTML = h;
+    schBind(g);
     on("ledPrev", "click", function () { var x = new Date(LED_M); x.setMonth(x.getMonth() - 1); LED_M = monthKey(x); LED_EDIT = false; loadLedger(g); });
     on("ledNext", "click", function () { var x = new Date(LED_M); x.setMonth(x.getMonth() + 1); LED_M = monthKey(x); LED_EDIT = false; loadLedger(g); });
     on("ledOpen", "click", function () { LED_EDIT = true; drawLedger(g); });
@@ -1970,6 +2228,9 @@
   }
 
   function screenGroup(id) {
+    //  Cedvel bolmesi HER DEFE temiz acilir: kohne tesdiq mesaji ve
+    //  acıq hal basqa qrupa kecende dasinmamalidir.
+    SCHMSG = ""; SCHOPEN = false;
     var live = guard();
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     Promise.all([
@@ -4432,8 +4693,8 @@
     var h =
       '<div class="card tight">' + st +
         '<div class="seat" style="margin:14px 0 0"><div>' +
-          "<b>" + esc(cur ? cur.plan : "Şagird başına") + "</b>" +
-          '<div class="lbl">Şagird limiti yoxdur · platforma bankı · ' +
+          "<b>" + esc(cur ? cur.plan : "Hər şagird üçün") + "</b>" +
+          '<div class="lbl">Şagird limiti yoxdur · hazır suallar · ' +
             "avtomatik test · analitika · siqnallar</div></div>" +
         '<span class="pill' + (cur && !over ? " on" : "") + '">' +
           (over ? "güzəşt"
@@ -4476,7 +4737,7 @@
       '<div class="card tight"><ul class="rul" id="qayda">' +
         "<li><b>Şagird və valideyn — həmişə pulsuz.</b> Onlardan heç vaxt " +
           "ödəniş istənmir.</li>" +
-        "<li>Müəllim üçün pilləli paket yoxdur — <b>yalnız şagird başına " +
+        "<li>Müəllim üçün pilləli paket yoxdur — <b>yalnız hər şagird üçün " +
           azn(per) + " / ay</b>. Şagird sayına məhdudiyyət qoyulmur.</li>" +
         "<li><b>Yeni müəllimə ilk ay hədiyyədir</b> — eyni məhsul, " +
           "limitsiz şagird, 0 ₼.</li>" +
@@ -4517,7 +4778,7 @@
     bandHead({
       back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Ödəniş",
       title: "Abunə",
-      sub: "Şagird başına ödəniş — nə qədər şagird, o qədər."
+      sub: "Ödəniş hər şagird üçün — nə qədər şagird, o qədər."
     });
     show(h);
     on("btnBack", "click", function () { nav("#/"); });
@@ -4601,7 +4862,7 @@
 
   function drawAdmin(st, rows, reps, fbs, qs, vs) {
     var plans = (st.plans && st.plans.length) ? st.plans
-      : [{ slug: "sagird-basi", name: "Şagird başına" }];
+      : [{ slug: "sagird-basi", name: "Hər şagird üçün" }];
     bandHead({
       back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Admin",
       title: "İdarəetmə", sub: "Hesablar, abunələr, hesabatlar, rəylər, ziyarətlər."
@@ -4981,7 +5242,7 @@
       if (!$("hedBox")) return;
       $("hedBox").innerHTML =
         "<b>Hədiyyə paket</b> <span class=\"muted\">— qeydiyyatdan keçən repetitor/məktəbə " +
-        "«Şagird başına» paketi sınaq kimi açılır: şagird limiti yoxdur, " +
+        "«Hər şagird üçün» paketi sınaq kimi açılır: şagird limiti yoxdur, " +
         "gəlirə düşmür.</span>" +
         '<div class="hedrow">' +
           '<label><select id="hedOn"><option value="1"' + (v.on ? " selected" : "") + ">açıq</option>" +

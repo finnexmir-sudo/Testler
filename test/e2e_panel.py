@@ -189,7 +189,7 @@ with sync_playwright() as pw:
     #  verilirdi ("0 / 25"), yeni pulsuz ay odenislinin eynisidir, ona gore
     #  kart doluluq xetti yox, aktiv sagird sayini ve tarifi gosterir.
     bseat = pg.inner_text("#band .bseat").replace("\n", " ")
-    ok("aktiv şagird" in bseat and "Şagird başına" in bseat,
+    ok("aktiv şagird" in bseat and "Hər şagird üçün" in bseat,
        "hediyye ile limitsiz plan, pill plan adi", bseat[:70])
     #  174: odenisin NE VAXT baslayacagi kartin alt qeydindedir
     ok("Beta bitənə qədər ödəniş yoxdur" in bseat,

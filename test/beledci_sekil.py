@@ -250,9 +250,20 @@ with sync_playwright() as p:
     t.locator(".pkr").first.locator("[data-pkwarm]").click(); t.wait_for_selector("#pkMsg .ok", timeout=25000)
     shot(t, "m14_paket")
 
-    # ---------------- DEFTER: bu gun ders oldu, biri gelmeyib, biri odeyib
+    # ---------------- DEFTER: cedvel + bu gun ders oldu, biri gelmeyib, biri odeyib
+    #  177: «Dəftər» sekmesinin basinda artiq CEDVEL setri var.  Sekilde
+    #  qurulmus halda gorunsun - «qurulmayıb» yazan bos setir beledciye
+    #  hec ne oyretmir.
     t.goto(PANEL + "#/g/" + gid); t.wait_for_selector("#gTabs", timeout=15000)
-    t.click("#gTabs [data-v='d']"); t.wait_for_selector("#ledOpen", timeout=15000); t.click("#ledOpen")
+    t.click("#gTabs [data-v='d']"); t.wait_for_selector("#schFold", timeout=15000)
+    t.eval_on_selector("#schFold", "e => e.open = true"); t.wait_for_timeout(300)
+    t.locator("#schDays [data-w='3']").click(); t.wait_for_timeout(200)
+    t.select_option("#schTimes [data-t='3']", "16:00")
+    t.locator("#schDays [data-w='6']").click(); t.wait_for_timeout(200)
+    t.select_option("#schTimes [data-t='6']", "11:00")
+    t.click("#schSave"); t.wait_for_timeout(1500)
+    t.eval_on_selector("#schFold", "e => e.open = false"); t.wait_for_timeout(200)
+    t.wait_for_selector("#ledOpen", timeout=15000); t.click("#ledOpen")
     t.wait_for_selector("#ledChips [data-st]", timeout=15000)
     t.locator("#ledChips [data-st]").nth(2).click(); t.click("#ledSave")
     t.wait_for_selector("#ledEdit", timeout=15000)

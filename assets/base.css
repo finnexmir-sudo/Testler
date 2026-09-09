@@ -171,15 +171,21 @@ select{appearance:none;
 .code.key{background:var(--brand-tint);color:var(--brand);border-color:var(--brand-line)}
 
 /* -------------------------------------------------------- bildiris */
-.warn,.err,.ok{
+/*  DORD nov var: warn / err / ok / info.  «info» uzun muddet
+    SIYAHIDA YOX IDI - msg("info", ...) cagirilirdi, uslub tapilmirdi
+    ve ikon oz tebii olcusunde, kartin eni qeder cixirdi (Abunə
+    sehifesinde tapildi, 2026-09-09).  Yeni nov elave edilende
+    HER UC setirde de yazilmalidir: govde, svg, reng.  */
+.warn,.err,.ok,.info{
   display:flex;gap:9px;align-items:flex-start;
   border-radius:var(--r);padding:11px 13px;margin:0 0 14px;
   font-size:13.5px;line-height:1.5;border:1px solid;
 }
-.warn svg,.err svg,.ok svg{width:16px;height:16px;flex:0 0 16px;margin-top:1px;stroke-width:1.75}
+.warn svg,.err svg,.ok svg,.info svg{width:16px;height:16px;flex:0 0 16px;margin-top:1px;stroke-width:1.75}
 .warn{background:var(--warn-tint);border-color:var(--warn-line);color:#93370d}
 .err {background:var(--err-tint); border-color:var(--err-line); color:#912018}
 .ok  {background:var(--ok-tint);  border-color:var(--ok-line);  color:#05603a}
+.info{background:var(--brand-tint);border-color:var(--brand-line);color:#2440ad}
 
 /* --------------------------------------------------------- bos hal */
 .empty{text-align:center;padding:40px 20px;color:var(--fg-2);font-size:13.5px}

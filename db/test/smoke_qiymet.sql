@@ -287,3 +287,25 @@ begin
   end if;
 end $$;
 \echo 'OK 10 · pulsuz hədd 5 (ekrandakı rəqəmlə bağlıdır)'
+
+-- 11 · (176) Paketin görünən adı və satışdakı qayda serverdən gəlir
+--  Ekranda «hər şagird üçün N ₼ / ay» yazan setir REQEMI KODDA
+--  saxlamir - rpc_my_context.qiymet-den oxuyur.  Acar itse ekran
+--  meblegsiz qalar (yalan reqem yox, amma qayda yarimciq gorunur),
+--  ona gore acarin OZU yoxlanilir.
+do $$
+declare v jsonb;
+begin
+  if not exists (select 1 from public.plans
+                  where slug = 'sagird-basi' and name = 'Hər şagird üçün') then
+    raise exception 'paketin gorunen adi «Hər şagird üçün» deyil';
+  end if;
+  set local role authenticated;
+  set local request.jwt.claim.sub = '11110000-0000-0000-0000-0000000169a9';
+  v := public.rpc_my_context();
+  assert v ? 'qiymet', 'rpc_my_context «qiymet» qaytarmir (176)';
+  assert (v->'qiymet'->>'per_seat_minor')::int = 150,
+    'satisdaki tarif 150 deyil: ' || coalesce(v->'qiymet'->>'per_seat_minor','null');
+  reset role; reset request.jwt.claim.sub;
+end $$;
+\echo 'OK 11 · (176) paket adı və satış qaydası serverdən'

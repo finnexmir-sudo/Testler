@@ -2564,6 +2564,134 @@ orada `.fold` yoxdur, gözləmə oraya qoyulmamalıdır.
 daimi» qaytarır — qiymət, «hədiyyə bitir» və xatırlatma zolağı
 görünmür (`rpc_paket` bunu onsuz da edirdi, my_context geridə qalmışdı).
 
+## Qrupun həftəlik cədvəli (db/177, 2026-09-09)
+
+**Niyə.** Rəqib (kampus.az) cədvəli **üç pillənin hamısında** satır —
+repetitor üçün təməldir. Bizdə ümumiyyətlə yox idi. Vertikal SaaS
+araşdırması da bunu deyir: cədvəl istifadəçinin gündəlik iş axınının
+mərkəzindədir və ən güclü bağlayıcı funksiyadır.
+
+**PULSUZDUR.** Abunə qapısı yoxdur. İki səbəb: (1) gündəlik vərdiş
+yaradan hissədir, (2) **davamiyyəti özü doldurur** — «bu gün dərs var»
+kartı çıxır, müəllim tarix seçmir.
+
+### İstifadəçinin qoyduğu qayda — pozulmamalıdır
+
+**Cədvəl qurulmayıbsa heç bir ekranda görünməsin.** Nə İcmalda, nə
+valideyndə. Boş «Cədvəl» kartı istifadəçini yanıldır («deməli dərs
+yoxdur?»). `rpc_week.on = false` və `rpc_parent_home.week = null` —
+frontend bunları görəndə **heç nə çızmır**. Söndürmək = sətirləri
+silmək; keçmiş dərslər `public.lessons`-da qalır.
+
+### Quruluş
+
+| | |
+|---|---|
+| `class_schedule` | qayda: `weekday` (ISO 1–7), `starts_at`, `mins` |
+| `lesson_changes` | istisna: `new_date` null → **ləğv**, dolu → **köçürmə** |
+
+**Dərslər ÖNCƏDƏN yazılmır.** Cədvəldən `public.lessons`-a sətir
+yaradılsaydı, cədvəl dəyişəndə gələcək sətirlər köhnə qalar və **iki
+həqiqət** yaranardı. Burada qayda saxlanılır, həftə **anbaan**
+hesablanır; `lessons` yalnız **faktı** (davamiyyət alınıb) saxlayır.
+
+### Hal (state) — dörd dəyər
+
+`plan` · `cancelled` · `moved_out` (buradan köçürülüb, `other` = hara) ·
+`moved_in` (bura köçürülüb, `other` = haradan).
+
+**Ləğv edilən dərs siyahıdan SİLİNMİR.** İlk quruluşda silinirdi —
+onda müəllim üçün «Bərpa et» tutacağı qalmırdı. İndi üstündən xətt
+çəkilir. Valideyn üçün də ən vacib xəbər elə odur.
+
+### Tələlər
+
+- **Toqquşma xətadır deyil, xəbərdarlıqdır.** Repetitor bəzən iki qrupu
+  bilərəkdən eyni saata qoyur (iki uşaq eyni masada). Yazmağa mane
+  olmuruq, yalnız deyirik.
+- **`<input type="time">` İŞLƏDİLMİR.** Brauzerin dili `en-US` olanda
+  «04:00 PM» yazır — Azərbaycanda saat 24-lükdür. Seçim siyahısı
+  (07:00–22:00, 15 dəq addım) hər yerdə eynidir və telefonda bir
+  toxunuşdur.
+- **«Bu gün» BAKI günü ilədir**, brauzerin tarixi ilə yox. Saat
+  00:00–04:00 arasında başqa vaxt zonasındakı telefon səhv günü
+  işarələyərdi. Server `today` qaytarır, ekran onu müqayisə edir.
+  (Yoxlama zamanı bu özünü göstərdi: UTC 20:44 = Bakı 00:44, artıq
+  cümə axşamı — server düz, test skripti səhv idi.)
+- `app.baki_bugun()` və `app.cedvel_araliq()` **daxilidir** —
+  `authenticated`-ə də verilmir.
+
+### v1-də olmayanlar
+
+Otaq, çoxmüəllimli cədvəl, ödənişlə əlaqə, **şagird tətbiqində həftə**
+(valideyndə var). Gündə bir dərs — baza çoxunu saxlaya bilir
+(`class_schedule` açarı gün+saatdır), ekran v1-də sadəni göstərir.
+
+**Yoxlama:** `smoke_cedvel.sql` (8) · `e2e_cedvel.py` (13).
+
+## Qiymət mətni: «hər şagird üçün», qayda sətri, siyahı auditi (db/176, 2026-09-09)
+
+İstifadəçi iki şey tutdu, ikisi də haqlı idi.
+
+**1. «Limitsiz şagird» abunə siyahısında çaşdırıcı idi.** Siyahıdakı qalan
+bəndlərin hamısı «abunə alanda **açılan** imkandır»; şagird sayı isə
+**ödədiyin vahiddir**. Eyni siyahıda, rəqəmsiz duranda göz onu da
+«daxildir» kimi oxuyur. «Yuxarıda yazılıb» arqumenti işləmir: zolaqdakı
+qiymət telefonda həmin siyahı ilə **eyni ekranda deyil**. Hesab gələndə
+«limitsiz yazılmışdı» deyilir — pul işində ən bahalı növ səhv budur.
+
+→ Bənd siyahıdan çıxdı, başlığın altına **qayda sətri** kimi məbləğlə
+birlikdə qoyuldu (`ferqBasliq()`, `.fseat`). **Məbləğ serverdən gəlir**
+(`rpc_my_context.qiymet.per_seat_minor`) — koda rəqəm yazılmır, yoxsa
+qiymət dəyişəndə ekran köhnə rəqəmi göstərər. Məbləğ bilinmirsə yalnız
+qayda yazılır, **uydurma rəqəm yox**.
+
+**2. «şagird başına» kobud səslənir.** Qrammatik olaraq düzdür
+(«adambaşına» kimi), amma **uşaqlar** haqqında məhsulda «baş» sözü
+baş-say çalarını gətirir. «hər şagird üçün» eyni uzunluqda, eyni
+dəqiqlikdə, çaları təmizdir. Paketin **görünən adı** da dəyişdi;
+**slug `sagird-basi` qalır** — onu heç kim görmür, dəyişmək nahaq risqdir
+(abunələr, testlər, admin siyahısı ona bağlıdır).
+
+**Qiymət DƏYİŞMİR:** 1,50 ₼ hər şagird üçün, ayda. Yalnız mətn.
+
+### Siyahı auditi — 60-dan çox abunə qapısı yoxlandı
+
+`app.has_active_subscription` çağırılan **hər** yer oxundu. Nəticə:
+
+**Siyahıda YOX idi, əlavə olundu:** hazır sualların **variantları və düz
+cavabı** bank siyahısında (`db/106` + `db/132`, `v_keys`). Abunəsiz hesab
+sualın **mətnini** görür, variantları və düz cavabı yox.
+
+**PULSUZDUR — siyahıya YAZMA** (yoxlandı, iddia deyil):
+«Ən yaxşı şagirdlər» və «Son nəticələr» (`db/163` şərhi açıq deyir:
+abunəsiz hesabda da görünür) · irəliləyiş kartı və paylaşma şəkli
+(brauzerdə çəkilir, qapı yoxdur) · davamiyyət və ödəniş dəftəri ·
+valideyn girişi · səhv dəftəri · cavab tərzi (yalnız tarixçə pəncərəsi
+məhduddur).
+
+**Onsuz da örtülü idi:** kilidli platforma testləri (`db/03/10/11/114/115/123`)
+→ «Hazır suallar» · hesabat tarixçəsi pəncərəsi (`db/08/128/129/133`)
+→ «Bütün hesabat tarixçəsi» · generator hovuzu (`db/13/103`) → «Avtomatik
+test yığımı» · dərs planı, kurikulum, «bugünkü dərs» (`db/101/126/135`)
+→ bir bənddə birləşib.
+
+Bəndlər adlarını yox, **nə etdiklərini** deyir (təhlükə siqnalları: «kim
+geriləyir, kim ilişib»). Şişirtmə yoxdur — hər bənd koddakı qapıya
+uyğundur.
+
+### Yol boyu tapılan köhnə səhv: `msg("info", …)` üslubsuz idi
+
+`assets/base.css`-də `.warn`, `.err`, `.ok` var idi, **`.info` yox idi**.
+`msg("info", …)` iki yerdə çağırılır — ikon öz təbii ölçüsündə, **kartın
+eni qədər** açılırdı (Abunə səhifəsində nəhəng «i»). Yeni bildiriş növü
+əlavə edəndə **hər üç sətirdə** yazılmalıdır: gövdə, `svg`, rəng.
+`e2e_paket` indi ikonun ≤24px olduğunu ölçür.
+
+**Yoxlama:** `smoke_qiymet` 11 (paketin adı + `rpc_my_context.qiymet`;
+176-sız düşür) · `e2e_paket` (qayda sətri ayrıca, məbləği özü ilə daşıyır,
+«Limitsiz şagird» artıq bənd deyil, yeni bənd görünür, info ikonu 16px).
+
 ## İlk açılış niyə yavaş idi — ölçüldü, düzəldildi (2026-09-09)
 
 İstifadəçi: «ilk proqrama girəndə 3-4 saniyə çəkir, normaldır?»

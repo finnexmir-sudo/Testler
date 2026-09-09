@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light">
 <title>Bil10 — necə işləyir</title>
 <meta name="description" content="Bil10 bələdçisi: müəllim qrup yaradır, şagird kodla girir, valideyn nəticəni izləyir. Addım-addım, real ekran şəkilləri ilə.">
-<link rel="stylesheet" href="../assets/base.css?v=402">
+<link rel="stylesheet" href="../assets/base.css?v=404">
 <link rel="manifest" href="../manifest.json">
 <meta name="theme-color" content="#0e9384">
 <meta name="mobile-web-app-capable" content="yes">
@@ -275,7 +275,7 @@
     <div class="step">
       <div>
         <span class="n">10</span>
-        <h3>Dəftər: davamiyyət və ödəniş</h3>
+        <h3>Dəftər: cədvəl, davamiyyət və ödəniş</h3>
         <p>Qrup ekranında «Dəftər» sekməsi — kağız dəftərçənin yerinə. Dərs olanda «Dərs oldu» basın,
            gəlməyənin adını söndürün, «Yadda saxla». Ay sonunda hər şagirdin yanında «5/6 dərs» və
            ödəniş nişanı: bir toxunuşla «Ödənilib ✓».</p>
@@ -283,6 +283,21 @@
           <li>Valideyn öz ekranında bu ayın iştirak sayını və ödənişin edilib-edilmədiyini görür — mübahisə qalmır.</li>
           <li>Ay oxla dəyişir; köhnə aylar da saxlanır. Səhv qeyd olunan dərsi «Dərslər» siyahısından silmək olar.</li>
           <li>Pulsuzdur — abunə tələb etmir.</li>
+        </ul>
+        <h3 style="margin-top:22px">Həftəlik cədvəl — istəsəniz</h3>
+        <p>Sekmənin başındakı «Cədvəl» sətrini açın: qrupun günlərini və saatını seçin
+           («Çərşənbə 16:00, Şənbə 11:00»), dərsin müddətini göstərin, «Yadda saxla».
+           Bundan sonra İcmalda <b>«Bu gün dərs var»</b> kartı çıxır — düyməyə basanda
+           birbaşa davamiyyət açılır, tarix seçmirsiniz.</p>
+        <ul>
+          <li>Valideyn öz ekranında «Bu həftə» görür: hansı gün, saat neçədə.</li>
+          <li>Bir dərsi ləğv etsəniz və ya başqa vaxta keçirsəniz, o, siyahıdan itmir —
+              üstündən xətt çəkilir və valideyn də bunu görür.</li>
+          <li>İki qrupu eyni saata qoysanız xəbərdarlıq çıxır, amma qadağan olunmur —
+              qərar sizindir.</li>
+          <li><b>İstəyə bağlıdır.</b> Cədvəl qurmasanız heç bir ekranda görünmür — nə sizdə,
+              nə valideyndə. Sonradan silsəniz keçmiş dərslər və davamiyyət yerində qalır.</li>
+          <li>Pulsuzdur.</li>
         </ul>
       </div>
       <figure class="ph"><img src="img/m12_defter.png" alt="Dəftər: davamiyyət və ödəniş" loading="lazy"><figcaption>Dərs oldu · kim gəlib · ödənilib</figcaption></figure>
@@ -456,6 +471,9 @@
            Uşaq özü «Mövzu məşqi» işləyirsə «3 mövzu mənimsənilib · 2 davam edir» sətri çıxır.</p>
         <p>İki uşağınız varsa: ekranın altında «uşaq əlavə et» — ikinci uşağın kodunu yazın, üstdə ad çipləri çıxır,
            toxunub keçirsiniz. Hər uşağın kodu ayrıdır.</p>
+        <p>Müəllim qrupun cədvəlini qurubsa üstdə <b>«Bu həftə»</b> çıxır: hansı gün, saat neçədə,
+           bugünkü dərs işıqlı. Dərs ləğv olunubsa üstündən xətt çəkilir — ayrıca xəbər gözləmirsiniz.
+           Müəllim cədvəl qurmayıbsa bu bölmə ümumiyyətlə görünmür.</p>
         <p>Valideyn heç vaxt ödəmir. Nəticələr siyahısı, gözləyən tapşırıqlar, davamiyyət və
            ödəniş dəftəri <b>həmişə açıqdır</b>. Ortalama faiz, keçən ayla müqayisə və zəif mövzular
            müəllimin abunəsi ilə görünür — abunə yoxdursa o sətirlərin yerində «abunə ilə açılır» yazır.</p>
@@ -526,8 +544,8 @@
   <p class="foot">Bələdçi tətbiqlə birlikdə yenilənir. Sual qaldı? Müəlliminizə yazın —
      müəllimsinizsə <a href="../muellim/">paneldə</a> «Profil» bölməsindən bizə çatın.</p>
 </div>
-  <script src="../assets/pwa.js?v=402"></script>
-  <script src="../muellim/config.js?v=402"></script>
-  <script src="../assets/visit.js?v=402"></script>
+  <script src="../assets/pwa.js?v=404"></script>
+  <script src="../muellim/config.js?v=404"></script>
+  <script src="../assets/visit.js?v=404"></script>
 </body>
 </html>
