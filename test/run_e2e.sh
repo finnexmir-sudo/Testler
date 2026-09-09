@@ -102,3 +102,6 @@ python3 test/e2e_numune.py
 echo
 echo "28/28 jeton onceden yenilenir"
 python3 test/e2e_jeton.py
+echo
+echo "29/29 qrupun cedveli"
+python3 test/e2e_cedvel.py

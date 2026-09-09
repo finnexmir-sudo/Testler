@@ -273,6 +273,34 @@
     }
     out += "</div>";
 
+    /* ---- bu heftenin dersleri (db/177) ----
+       Muellim cedvel qurmayibsa server NULL qaytarir ve BURADA HEC NE
+       cizilmir - bos «Cədvəl» karti valideyni yaniltirdi («demeli ders
+       yoxdur?»).  Legv edilmis ders SILINMIR, ustunden xett cekilir -
+       valideyn ucun en vacib xeber elə odur.  */
+    var wk = d.week || null;
+    if (wk && wk.length) {
+      var gunad = ["Bazar","Bazar ertəsi","Çərşənbə axşamı","Çərşənbə",
+                   "Cümə axşamı","Cümə","Şənbə"];
+      //  «bu gün» SERVERDEN gelir (Baki gunu) - brauzerin tarixi ile
+      //  hesablansaydi, gece yarisindan sonra basqa vaxt zonasindaki
+      //  telefon sehv gunu isaretleyerdi.
+      var bugun = d.today || "";
+      out += "<h2>Bu həftə</h2><div class=\"card pad0 wkp\">" +
+        wk.filter(function (x) { return x.hal !== "moved_out"; }).map(function (x) {
+          var dt = new Date(x.date + "T00:00:00");
+          var legv = x.hal === "cancelled";
+          var indi = x.date === bugun;
+          return '<div class="wkr' + (legv ? " off" : "") + (indi ? " now" : "") + '">' +
+            '<span class="wkd">' + esc(gunad[dt.getDay()]) +
+              (indi ? " · bu gün" : "") + "</span>" +
+            '<span class="wkt">' + esc(x.time) + "</span>" +
+            (legv ? '<span class="wkx">ləğv edilib</span>'
+                  : (x.hal === "moved_in" ? '<span class="wkx">köçürülüb</span>' : "")) +
+            "</div>";
+        }).join("") + "</div>";
+    }
+
     /* ---- gozleyen tapsiriq: ekranin en vacib hissesi ---- */
     var pend = d.pending || [];
     /* ---- ferdi plan (db/131): "2/5 movzu kecilib" ---- */

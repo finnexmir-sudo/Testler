@@ -87,7 +87,7 @@ with sync_playwright() as pw:
     #  169: pilleli paket siyahisi YOXDUR - qayda birdir
     ok(pg.locator(".pkt").count() == 0, "pilleli paket siyahisi qalmayib",
        pg.locator(".pkt").count())
-    ok("Şagird başına" in mt, "tek qayda gorunur")
+    ok("hər şagird üçün" in mt.lower(), "tek qayda gorunur")
     ok("1,50 ₼" in mt or "1.50 ₼" in mt, "tarif manatladir",
        mt[:80].replace("\n", " "))
     #  174: «Valideyn» sozu artiq siyahida da kecir (valideyn girisi
@@ -99,7 +99,7 @@ with sync_playwright() as pw:
     ok(pg.locator("#qayda li").count() == 6, "qayda 6 setirdir",
        pg.locator("#qayda li").count())
     #  172: mebleg gorunur - yaninda "hele odenis yoxdur" ACIQ durmalidir
-    ok("beta dövrü bitəndən sonra" in mt, "beta qeydi qaydada var")
+    ok("beta dövrü bitdikdən sonra" in mt, "beta qeydi qaydada var")
     ok("həmişə pulsuz" in mt, "sagird/valideyn pulsuzdur yazilir")
     ok("ilk ay hədiyyədir" in mt, "hediyye ayi yazilir")
     #  Muellim neyi ITIRECEYINI evvelceden gormelidir (istifadeci teleb etdi)
@@ -107,8 +107,29 @@ with sync_playwright() as pw:
        pg.locator(".cmp .cc").count())
     cmp_t = pg.inner_text(".cmp")
     for soz in ("Hazır suallar", "Diaqnostika", "Zəif mövzu analizi",
-                "Dərs planı", "Cavab vərəqi", "gündə 20 sual"):
+                "Dərs planı", "Cavab vərəqi", "gündə 20 sual",
+                #  Audit (2026-09-09): db/106 + db/132 v_keys qapisi
+                #  siyahida yox idi - abunesiz hesab bank siyahisinda
+                #  yalniz sual METNINI gorur.
+                "variantları və düz cavabı"):
         ok(soz in cmp_t, "muqayisede «" + soz + "» yazilir")
+    #  176: «Limitsiz şagird» ARTIQ SIYAHIDA DEYIL - basligin altinda
+    #  qiymet qaydasi kimi, mebleqle birlikde.  Reqemsiz «limitsiz»
+    #  «abuneye daxildir» kimi oxunurdu (istifadeci tutdu).
+    ok(pg.locator(".cmp .cc.on .fseat").count() == 1,
+       "qiymet qaydasi ayrica setirdedir")
+    fs = pg.inner_text(".cmp .cc.on .fseat").replace("\n", " ")
+    ok("Şagird sayında limit yoxdur" in fs and "hər şagird üçün" in fs and "₼" in fs,
+       "qayda setri mebleqi ozu ile dasiyir", fs)
+    ok(pg.locator(".cmp .cc.on .rul li", has_text="Limitsiz şagird").count() == 0,
+       "«Limitsiz şagird» artiq siyahi bendi deyil")
+    #  «info» bildirisi: uslub var, ikon 16px.  Uslub yoxdursa ikon oz
+    #  tebii olcusunde acilir ve kartin enini tutur (tapilan sehv,
+    #  2026-09-09 - Abunə sehifesinde nəhəng «i» cixirdi).
+    if pg.locator(".info svg").count():
+        bx = pg.locator(".info svg").first.bounding_box()
+        ok(bx and bx["width"] <= 24 and bx["height"] <= 24,
+           "«info» ikonu 16px-dir (uslubsuz qalmayib)", bx)
     #  abunesiz hesabda hele sagird yoxdur -> 0 x 1,50 = 0 ₼
     abx = pg.inner_text(".abn").replace("\n", " ")
     ok("aktiv şagird" in abx and "ayda" in abx, "hesab qutusu qurulur", abx[:70])
@@ -260,7 +281,7 @@ with sync_playwright() as pw:
     menu_bas(ROW, "[data-trial]")
     pg.wait_for_selector(ROW + " .pb.s", timeout=8000)
     ok("sınaq" in pg.inner_text(ROW + " .pb.s")
-       and "Şagird başına" in pg.inner_text(ROW + " .pb.s"),
+       and "Hər şagird üçün" in pg.inner_text(ROW + " .pb.s"),
        "goy sinaq nisani setirde", pg.inner_text(ROW + " .pb.s")[:40])
     a0 = db("select s.status, s.provider from public.subscriptions s", one=True)
     ok(a0 and a0["status"] == "trialing" and a0["provider"] == "trial",
@@ -281,7 +302,7 @@ with sync_playwright() as pw:
     print("D · Bir kliklə abunə açmaq (sınaq → ödənişli)")
     menu_bas(ROW, "[data-m='6']")
     pg.wait_for_selector(ROW + " .pb.y", timeout=8000)
-    ok("Şagird başına" in pg.inner_text(ROW + " .pb.y"), "abune nisani setirde gorunur",
+    ok("Hər şagird üçün" in pg.inner_text(ROW + " .pb.y"), "abune nisani setirde gorunur",
        pg.inner_text(ROW + " .pb.y")[:40])
     ok("yerinə yetirildi" in pg.inner_text("#admMsg"), "netice mesaji gorunur")
     ok(pg.inner_text("#tUmumi .tile.b").replace("\n", " ").startswith("1"), "aktiv abune lovhesi yenilenir",
@@ -323,7 +344,7 @@ with sync_playwright() as pw:
     ok(not db("select 1 ok from public.subscriptions where status='active'", one=True),
        "bazada aktiv abune qalmadi")
 
-    print("G · (165) Şagird başına paket və ödəniş xatırlatması")
+    print("G · (165) Hər şagird üçün paket və ödəniş xatırlatması")
     #  DIQQET: bu hesab yuxarida ADMIN olub.  173-den sonra rpc_my_context
     #  admin hesabina "Admin · daimi" qaytarir (qiymet gostermir) - ona
     #  gore sagird basina karti gormek ucun rol MUVEQQETI goturulur.
@@ -409,7 +430,7 @@ with sync_playwright() as pw:
     bs = pg.inner_text("#band .bseat").replace("\n", " ")
     #  174: mebleg AYRI SETIRDE deyil, alt qeydin icindedir - «Sınaq
     #  bitir 3 okt» ile «1,50 ₼» yanasi durmasin (yanlis netice verirdi).
-    ok("Beta bitənə qədər ödəniş yoxdur" in bs and "Sonra: şagird başına" in bs,
+    ok("Beta bitənə qədər ödəniş yoxdur" in bs and "Sonra: hər şagird üçün" in bs,
        "kartda odenisin NE VAXT baslayacagi aydin yazilir", bs[-90:])
     #  172: kartda qalan gun ve "indi odenis yoxdur" qeydi
     ok("Hədiyyə bitir" in bs and "gün" in bs,
@@ -428,7 +449,7 @@ with sync_playwright() as pw:
     pg.wait_for_selector(".abn", timeout=15000)
     mt = pg.inner_text("#main")
     ok("Hədiyyə ay" in mt, "hediyye veziyyeti yazilir", mt[:90].replace("\n", " "))
-    ok("beta dövrü bitəndən sonra" in mt, "abune sehifesinde beta qeydi")
+    ok("beta dövrü bitdikdən sonra" in mt, "abune sehifesinde beta qeydi")
     ab = pg.inner_text(".abn").replace("\n", " ")
     ok("beta bitəndən sonra aylıq" in ab and gozlenen in ab,
        "hediyye ayinda qutu serti dilde mebleg yazir", ab[:90])
