@@ -6,6 +6,8 @@
 --               yerinə dolu bir nümunə qurur: 3 qrup, 25 şagird,
 --               45 günlük nəticə, dərs planı, davamiyyət, ödəniş
 --               dəftəri, valideyn kodları və həftəlik cədvəl.
+--               Sonda admin səhifəsi təmiz qalsın deyə nümunə
+--               «Bizə yaz» və sual bildirişi sətirlərini silir.
 --
 --  TƏHLÜKƏSİZLİK
 --    · Yalnız BU hesabın məlumatına toxunur.  Başqa müəllimlərin
@@ -208,6 +210,20 @@ begin
       end if;
     end loop;
   end if;
+
+  -- -------------------------------------------------------------------
+  --  ADMİN EKRANI TƏMİZ QALSIN
+  --  app.demo_build hesaba bir «Bizə yaz» təklifi və bir sual bildirişi
+  --  yazır.  Göstərmə zamanı admin səhifəsində nümunə şikayət
+  --  görünməsin deyə ikisini də silirik.
+  --  Qeyd: «Sual keyfiyyəti» kartı buradan gəlmir — o, cavablardan
+  --  hesablanır (rpc_admin_qstats), silinən sətir yoxdur.
+  -- -------------------------------------------------------------------
+  delete from public.feedback where account_id = v_acc;
+  delete from public.question_reports qr
+   using public.students s
+   where qr.student_id = s.id and s.account_id = v_acc;
+  delete from public.question_reports where account_id = v_acc;
 
   raise notice 'Hazırdır. Nəticə: %', v_res;
 end $$;
