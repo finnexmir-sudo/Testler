@@ -7,7 +7,7 @@
 <meta name="description" content="Bil10 — repetitor və müəllimlər üçün onlayn test sistemi. Qrup yaradın, tapşırıq təyin edin, nəticələr avtomatik yığılsın.">
 <title>Bil10 — onlayn test sistemi</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20aria-hidden%3D%22true%22%3E%20%3Cdefs%3E%3ClinearGradient%20id%3D%22fvG%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232b4acb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230e9384%22%2F%3E%20%3C%2FlinearGradient%3E%3C%2Fdefs%3E%20%3Cpath%20d%3D%22M12.5%203.5%20H18%20A8.4%208.4%200%200%201%2026.4%2011.9%20A8.4%208.4%200%200%201%2018%2020.3%20H13.1%20L8.3%2024.6%20Q7.1%2025.6%207.1%2024%20V19.1%20A8.4%208.4%200%200%201%204.1%2011.9%20A8.4%208.4%200%200%201%2012.5%203.5%20Z%22%20fill%3D%22url%28%23fvG%29%22%2F%3E%20%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M10.2%2010.2%2012.5%208.4%20V16%22%2F%3E%20%3Cellipse%20cx%3D%2218.4%22%20cy%3D%2212%22%20rx%3D%223.1%22%20ry%3D%224.1%22%2F%3E%20%3C%2Fg%3E%20%3Cpath%20d%3D%22M22.5%2019.5%20h4.2%20a3.6%203.6%200%200%201%203.6%203.6%20a3.6%203.6%200%200%201-3.6%203.6%20h-1%20l2%203.4%20-4.6-3.5%20a3.6%203.6%200%200%201-4.2-3.5%20a3.6%203.6%200%200%201%203.6-3.6%20Z%22%20fill%3D%22%23ffc94d%22%2F%3E%20%3Cpath%20d%3D%22M23.4%2023.2%20l1.5%201.5%202.6-3%22%20fill%3D%22none%22%20stroke%3D%22%231a2233%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3C%2Fsvg%3E">
-<link rel="stylesheet" href="assets/base.css?v=415">
+<link rel="stylesheet" href="assets/base.css?v=416">
 <!-- Kok manifest: butun sayti (/Testler/) ehate edir - ana sehifeden
      qurasdirilanda panel, sagird, valideyn ve beledci de tetbiqin
      icinde (brauzer zolaqsiz) acilir -->
@@ -285,6 +285,42 @@
     margin-bottom:5px}
   .f p{margin:0;color:var(--fg-2);font-size:13px;line-height:1.6}
 
+  /* ------------------------------------------ ne pulsuz, ne abunede
+     Siyahinin OZU burada deyil - assets/ferq.js-dedir; panel de eyni
+     fayldan oxuyur.  Reqem (qiymet) BILEREKDEN yoxdur: odenis hele
+     acilmayib, reqem yalniz muqayiseye devet olardi. */
+  .heddwrap{max-width:820px;margin:0 auto}
+  .betabar{display:flex;gap:12px;align-items:flex-start;
+    background:var(--brand-tint);border:1px solid var(--brand-line);
+    border-radius:14px;padding:15px 17px;margin:0 0 22px}
+  .betabar .bi{flex:0 0 20px;width:20px;height:20px;margin-top:1px;color:var(--brand)}
+  .betabar .bi svg{width:20px;height:20px;stroke-width:1.7}
+  .betabar p{margin:0;font-size:13.5px;line-height:1.6;color:var(--fg-2)}
+  .betabar b{color:var(--brand);font-weight:640}
+  .hedd{display:grid;grid-template-columns:1fr 1fr;gap:0;
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:16px;padding:26px 28px}
+  .hedd .cc{padding:0 22px}
+  .hedd .cc:first-child{padding-left:0;border-right:1px solid var(--line)}
+  .hedd .cc:last-child{padding-right:0}
+  .hedd .ch{font-size:11.5px;font-weight:640;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--fg-3);margin:0 0 12px}
+  .hedd .cc.on .ch{color:var(--brand)}
+  .rul{list-style:none;margin:0;padding:0}
+  .rul li{position:relative;padding:0 0 0 20px;margin:0 0 10px;
+    font-size:13.5px;line-height:1.55;color:var(--fg-2)}
+  .rul li:last-child{margin-bottom:0}
+  .rul li::before{content:"";position:absolute;left:2px;top:8px;
+    width:6px;height:6px;border-radius:99px;background:var(--brand)}
+  .rul li b{color:var(--fg);font-weight:600}
+  .rul.lim li::before{background:var(--n-300)}
+  @media (max-width:720px){
+    .hedd{grid-template-columns:1fr;gap:20px;padding:22px}
+    .hedd .cc{padding:0}
+    .hedd .cc:first-child{border-right:0;border-bottom:1px solid var(--line);
+      padding-bottom:20px}
+  }
+
   /* sagird zolagi - hero ile eyni marka qradiyenti, altliqin ust
      kenarini kesir (hero-daki onizleme kimi - sehife simmetrik bitir) */
   .freesec{padding-bottom:0;margin-bottom:-56px;position:relative;z-index:1}
@@ -383,6 +419,7 @@
     <nav class="mnav">
       <a href="#addimlar">Necə işləyir</a>
       <a href="#imkanlar">İmkanlar</a>
+      <a href="#hedd">Nə pulsuz</a>
       <a href="komek/" data-ev="beledci">Bələdçi</a>
     </nav>
     <a class="enter" href="muellim/" data-ev="panel">Panelə keç →</a>
@@ -592,6 +629,24 @@
     </div>
 </div></section>
 
+<section id="hedd"><div class="wrap">
+    <p class="eyebrow">Hədd</p>
+    <h2 class="stitle">Nə pulsuz, nə abunədə</h2>
+    <p class="ssub">Gizli bənd yoxdur — hər ikisi burada yazılıb.</p>
+    <div class="heddwrap">
+      <div class="betabar">
+        <span class="bi" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none"
+          stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9.5" cy="9.5" r="7"/><path d="M9.5 6.2v.1M9.5 9v4"/></svg></span>
+        <p><b>Beta dövründəyik: hazırda müəllim heç nə ödəmir.</b>
+           Aşağıdakı sağ sütun da daxil olmaqla hər şey açıqdır. Ödəniş
+           mərhələsi başlayanda əvvəlcədən xəbər veriləcək və o vaxta qədər
+           açılmış müddət qalacaq.</p>
+      </div>
+      <div class="hedd" id="heddBox"></div>
+    </div>
+</div></section>
+
 <section class="freesec"><div class="wrap">
     <div class="free">
       <div class="t">
@@ -628,6 +683,7 @@
         <b>Sayt</b>
         <a href="#addimlar">Necə işləyir</a>
         <a href="#imkanlar">İmkanlar</a>
+        <a href="#hedd">Nə pulsuz</a>
         <a href="komek/" data-ev="beledci">Bələdçi</a>
         <a href="#demo">Nümunə hesab</a>
       </div>
@@ -654,8 +710,28 @@
   </div>
 </footer>
 
-  <script src="assets/pwa.js?v=415"></script>
-  <script src="muellim/config.js?v=415"></script>
-  <script src="assets/visit.js?v=415"></script>
+  <script src="assets/ferq.js?v=416"></script>
+  <script>
+  /*  Siyahi assets/ferq.js-den gelir - panel de EYNI fayldan oxuyur.
+      Burada tekrar yazilsaydi, bir imkan deyisende bir yer kohne qalar
+      ve yalan ved yaranardi.  Server sorgusu yoxdur: sagird yeri
+      susma ile 5-dir (app.free_seat_limit() ile eyni).  */
+  (function () {
+    var box = document.getElementById("heddBox");
+    if (!box || !window.FERQ) return;
+    var f = window.FERQ.siyahi();
+    function ul(a, cls) {
+      var h = "", i;
+      for (i = 0; i < a.length; i++) h += "<li>" + a[i] + "</li>";
+      return '<ul class="rul' + (cls || "") + '">' + h + "</ul>";
+    }
+    box.innerHTML =
+      '<div class="cc"><p class="ch">Pulsuz hədd</p>' + ul(f.pulsuz, " lim") + "</div>" +
+      '<div class="cc on"><p class="ch">Abunə ilə açılır</p>' + ul(f.abune) + "</div>";
+  })();
+  </script>
+  <script src="assets/pwa.js?v=416"></script>
+  <script src="muellim/config.js?v=416"></script>
+  <script src="assets/visit.js?v=416"></script>
 </body>
 </html>

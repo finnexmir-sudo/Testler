@@ -130,6 +130,28 @@ with sync_playwright() as pw:
         bx = pg.locator(".info svg").first.bounding_box()
         ok(bx and bx["width"] <= 24 and bx["height"] <= 24,
            "«info» ikonu 16px-dir (uslubsuz qalmayib)", bx)
+
+    #  TEK MENBE (assets/ferq.js).  Eyni siyahi ana sehifede de var.
+    #  Elle tekrarlansaydi, bir imkan deyisende biri kohne qalar ve
+    #  YALAN VED yaranardi - ona gore herfen tutusdurulur.
+    panel_pulsuz = pg.locator(".cmp .cc:first-child .rul li").all_inner_texts()
+    panel_abune  = pg.locator(".cmp .cc.on .rul li").all_inner_texts()
+    ana = new_page()
+    ana.goto("http://127.0.0.1:8010/index.html")
+    ana.wait_for_selector("#heddBox .rul li", timeout=15000)
+    ana_pulsuz = ana.locator("#heddBox .cc:first-child .rul li").all_inner_texts()
+    ana_abune  = ana.locator("#heddBox .cc.on .rul li").all_inner_texts()
+    ok(ana_pulsuz == panel_pulsuz and ana_abune == panel_abune,
+       "ana sehife ve panel siyahisi EYNIDIR (tek menbe)",
+       "%d/%d <-> %d/%d" % (len(ana_pulsuz), len(ana_abune),
+                            len(panel_pulsuz), len(panel_abune)))
+    #  Qiymet REQEMI ana sehifede YOXDUR - odenis hele acilmayib
+    #  (istifadeci qerari: reqem yalniz muqayiseye devet olardi).
+    hedd_t = ana.inner_text("#hedd")
+    ok("₼" not in hedd_t, "ana sehifede mebleg yazilmir")
+    ok("Beta" in hedd_t and "heç nə ödəmir" in hedd_t,
+       "beta qeydi siyahinin USTUNDE, iri yazilir")
+    ana.close()
     #  abunesiz hesabda hele sagird yoxdur -> 0 x 1,50 = 0 ₼
     abx = pg.inner_text(".abn").replace("\n", " ")
     ok("aktiv şagird" in abx and "ayda" in abx, "hesab qutusu qurulur", abx[:70])
