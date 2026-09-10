@@ -145,6 +145,23 @@ with sync_playwright() as pw:
        "ana sehife ve panel siyahisi EYNIDIR (tek menbe)",
        "%d/%d <-> %d/%d" % (len(ana_pulsuz), len(ana_abune),
                             len(panel_pulsuz), len(panel_abune)))
+    print("A3 · Sürət ölçüsü: bir açılış = bir ölçü")
+    #  db/180.  Iki tele var: (1) olcu hec gonderilmeye biler,
+    #  (2) iki defe gonderile biler - o zaman butun reqemler ikiqat
+    #  sisir ve kart YALAN danisar.  Ikisi de olculur.
+    db("delete from public.perf_days")
+    sayac = []
+    sp = new_page()
+    sp.on("request", lambda r: sayac.append(1) if "rpc_perf" in r.url else None)
+    sp.goto(PANEL); sp.wait_for_selector("#groups", timeout=15000)
+    sp.wait_for_timeout(7000)          # 6 saniyelik ehtiyat da kecsin
+    ok(len(sayac) == 1, "bir acilis = BIR rpc_perf cagirisi", len(sayac))
+    pr = db("select page, n, ms_max from public.perf_days", one=True)
+    ok(pr and pr["page"] == "muellim" and pr["n"] == 1,
+       "olcu bazaya yazildi, say ikiqat deyil", pr)
+    ok(pr and 0 < pr["ms_max"] < 120000, "olculen vaxt ag-qara deyil", pr and pr["ms_max"])
+    sp.close()
+
     #  Qiymet REQEMI ana sehifede YOXDUR - odenis hele acilmayib
     #  (istifadeci qerari: reqem yalniz muqayiseye devet olardi).
     hedd_t = ana.inner_text("#hedd")

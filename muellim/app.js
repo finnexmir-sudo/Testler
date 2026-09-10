@@ -1182,6 +1182,8 @@
       //  Sinif adlari LEVELS-den gelir - cizmezden EVVEL hazir olsun
       return Promise.resolve(lvReady).then(function () { return studs; });
     }).then(function (studs) {
+      //  Icmal ISLEK oldu - olcunun dayanacagi elə buradir
+      suretYaz();
       var cnt = {};
       (studs || []).forEach(function (s) {
         cnt[s.class_id] = (cnt[s.class_id] || 0) + 1;
@@ -4839,10 +4841,12 @@
         //  161: ziyaret saygaci (kohne bazada yoxdursa bolme cixmir)
         sb.rpc("rpc_admin_visits", { p_days: 30 }).catch(function () { return null; }),
         //  179: bazanin hecmi (kohne bazada yoxdursa kart cixmir)
-        sb.rpc("rpc_admin_baza", {}).catch(function () { return null; })
+        sb.rpc("rpc_admin_baza", {}).catch(function () { return null; }),
+        //  180: suret olcusu (kohne bazada yoxdursa kart cixmir)
+        sb.rpc("rpc_admin_suret", { p_days: 30 }).catch(function () { return null; })
       ]).then(function (r) {
         if (!live()) return;
-        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4], r[5], r[6]);
+        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4], r[5], r[6], r[7]);
       }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -4893,7 +4897,7 @@
       ic + "</details>";
   }
 
-  function drawAdmin(st, rows, reps, fbs, qs, vs, bz) {
+  function drawAdmin(st, rows, reps, fbs, qs, vs, bz, sr) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "sagird-basi", name: "Hər şagird üçün" }];
     bandHead({
@@ -4944,6 +4948,9 @@
       //  179: Supabase tarifi hecme baglidir.  Admin ayda bir defe
       //  baxir - ona gore qrafik deyil, bir zolaq ve bir cumle.
       (bz ? bazaSection(bz) : "") +
+
+      //  ------------------------------------------------------ SURET
+      (sr ? suretSection(sr) : "") +
 
       //  --------------------------------------------------- HESABLAR
       '<div class="card tight">' +
@@ -5376,6 +5383,70 @@
     if (gun < 730) return Math.round(gun / 30) + " ay";
     if (gun > 3650) return "10 ildən çox";
     return Math.round(gun / 365) + " il";
+  }
+
+  /*  SURET (db/180).  Bir reqem yetmir: ortalama bir yavas acilisi
+      gizledir.  Ona gore KOVALAR gosterilir - «neçəsi 2 saniyədən
+      uzun çəkdi».  Qerar veren reqem odur, ortalama deyil.
+      Hedler: 2 s-e qeder yaxsi, 4 s-e qeder dozulen, ondan sonra
+      muellim «yavas» deyir (Google-un LCP hedleri de bu araliqdadir). */
+  function suretSection(sr) {
+    var n = Number(sr.n) || 0;
+    if (!n) {
+      return '<div class="card sr"><h2 class="ch">Sürət</h2>' +
+        '<p class="muted" style="margin:0">Hələ ölçü yoxdur. Müəllim panelə ' +
+        "girdikcə burada ilk açılışın nə qədər çəkdiyi görünəcək.</p></div>" +
+        '<div class="spacer"></div>';
+    }
+    var k = sr.kova || [0, 0, 0, 0, 0];
+    function f(i) { return n > 0 ? (Number(k[i]) || 0) / n * 100 : 0; }
+    var yaxsi = f(0) + f(1);            // < 2 s
+    var yavas = f(3) + f(4);            // >= 4 s
+    var orta = Number(sr.orta) || 0;
+    function san(ms) {
+      ms = Number(ms) || 0;
+      return ms < 1000 ? ms + " ms"
+                       : (ms / 1000).toFixed(1).replace(".", ",") + " s";
+    }
+    var hal = yavas >= 10 ? ["pis", "yavaş"]
+            : (yaxsi >= 75 ? ["yax", "yaxşı"] : ["orta", "dözülən"]);
+    var kovalar = [
+      ["s1", "1 saniyəyə qədər", f(0)],
+      ["s2", "1–2 saniyə", f(1)],
+      ["s3", "2–4 saniyə", f(2)],
+      ["s4", "4–8 saniyə", f(3)],
+      ["s5", "8 saniyədən çox", f(4)]
+    ];
+    return '<div class="card sr"><h2 class="ch">Sürət</h2>' +
+      '<div class="srh"><b>' + san(orta) + "</b>" +
+        '<span class="srb ' + hal[0] + '">' + hal[1] + "</span>" +
+        "<span>orta ilk açılış · " + n + " ölçü · son " +
+        (Number(sr.gun) || 30) + " gün</span></div>" +
+      '<div class="bzbar">' + kovalar.map(function (x) {
+        return '<i class="' + x[0] + '" style="width:' + x[2].toFixed(2) + '%"></i>';
+      }).join("") + "</div>" +
+      '<ul class="bzleg">' + kovalar.map(function (x) {
+        return '<li><s class="' + x[0] + '"></s><span class="bl">' + x[1] +
+          "</span><b>" + Math.round(x[2]) + "%</b></li>";
+      }).join("") + "</ul>" +
+      '<p class="bznote">' +
+        (yavas >= 10
+          ? "Açılışların <b>" + Math.round(yavas) + "%-i 4 saniyədən uzun</b> çəkib — " +
+            "müəllim bunu «yavaş» kimi hiss edir."
+          : "Açılışların <b>" + Math.round(yaxsi) + "%-i 2 saniyəyə qədər</b> bitib.") +
+        (Number(sr.max) ? " Ən uzunu <b>" + san(sr.max) + "</b>." : "") +
+      "</p>" +
+      '<details class="fold"><summary>Nə ölçülür?</summary>' +
+        '<p class="muted">Səhifə açılmağa başlayandan İcmal ekranı <b>işlək</b> ' +
+        "olana qədər keçən vaxt — müəllimin gözlədiyi andır. Ölçü onun " +
+        "brauzerində götürülür, bizim serverdə yox: internetin sürəti də, " +
+        "telefonun yavaşlığı da rəqəmə daxildir. Sonrakı keçidlər ölçülmür — " +
+        "onlar onsuz da sürətlidir. Sessiya başına bir ölçü. " +
+        "<b>Sizin öz açılışlarınız da sayılır</b> (ziyarət sayğacından fərqli " +
+        "olaraq): burada sual «neçə nəfər» yox, «nə qədər çəkdi»dir.</p>" +
+      "</details>" +
+      "</div>" +
+      '<div class="spacer"></div>';
   }
 
   function bazaSection(b) {
@@ -8240,6 +8311,28 @@
     } catch (e) {}
   }
 
+  /* ================================================================
+     SURET OLCUSU (db/180) - «sayt lengdirmi?» sualinin cavabi
+     ISTIFADECININ brauzerindedir, menim serverimde yox.  Olculen sey:
+     sehife acilmaga baslayandan Icmal ISLEK olana qeder kecen vaxt.
+     Sessiya basina BIR defe gedir; xeta olsa sakitce kecir - olcu
+     ucun sehifenin isini pozmaq axmaqliqdir.
+     ================================================================ */
+  var PERF_SENT = false;
+  function suretYaz() {
+    if (PERF_SENT) return;
+    PERF_SENT = true;
+    var ms;
+    try {
+      //  performance.now() sehifenin BASLANGICINDAN sayir - bizim
+      //  skriptin yuklenmesi de daxildir, muellimin gordüyü vaxt budur.
+      ms = Math.round(performance.now());
+    } catch (e) { return; }
+    if (!ms || ms < 1 || ms > 120000) return;
+    try { sb.rpc("rpc_perf", { p_page: "muellim", p_ms: ms }).catch(function () {}); }
+    catch (e) {}
+  }
+
   function boot() {
     if (!window.CFG || !window.CFG.SUPABASE_URL || !window.CFG.SUPABASE_ANON_KEY) {
       btnOut.classList.add("hide");
@@ -8258,6 +8351,9 @@
       topWho.textContent = (CTX.profile && CTX.profile.full_name) || "";
       demoBar();
       route();
+      //  Icmal-dan basqa ekranla acilibsa (mes. #/g/... linki) olcu
+      //  yene goturulsun - 6 saniyeden sonra hele gonderilmeyibse.
+      setTimeout(suretYaz, 6000);
       //  "son giris" - Idareetme ucun; server 15 deqiqede bir yazir
       sb.rpc("rpc_seen", {}).catch(function () {});
       //  zeng noktesi - hansi sehifeden acilmasindan asili olmadan
