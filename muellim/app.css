@@ -1681,3 +1681,31 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .sr .s3{background:#fbbf24}
 .sr .s4{background:#f97316}
 .sr .s5{background:#d92d20}
+
+/*  Telefonda sagird setri (db/182-den sonra).  Valideyn girisi indi
+    susmaya gore aciqdir, ona gore setirde IKI kod xetti var: sagird
+    ve valideyn.  Melumat artdi - setir hundurluyu de artdi (120 ->
+    ~141px).  Buradaki daralma onu geri qaytarmir, sadece bosluqlari
+    yigir: her sagirde ~10px qazanir, uzun siyahida bir ekran fərqidir.
+    Kodlari gizletmirik - «Gonder» duymesi muellimin en cox basdigi
+    yerdir, bir toxunusda olmalidir.  */
+@media (max-width:520px){
+  .stu{padding:12px 14px}
+  .stu .l2,.stu .l3{margin-top:6px;gap:6px}
+  .stu .l2 .btn.icon,.stu .l3 .btn.icon{flex:0 0 28px;width:28px;min-height:28px}
+  .stu .l2 .pcap,.stu .l3 .pcap{flex:0 0 56px}
+}
+
+/*  «Bu günün dərsi» — isinmə AYRI sətirdə (istifadəçi: «çox bitişikdir,
+    sanki yeni dərs verirsən»).  Mövzunun adı ilə isinmə düyməsi yanaşı
+    duranda göz onları bir cümlə kimi oxuyurdu.  */
+.warmline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin:9px 0 0;padding:8px 11px;border-radius:10px;
+  background:var(--n-50);border:1px solid var(--n-100);font-size:13px}
+.warmline>b{color:var(--fg);font-weight:620}
+.warmline>s{text-decoration:none;color:var(--fg-3);font-size:12px}
+.warmline .wres{margin-left:auto;color:var(--fg-2);font-weight:600;white-space:nowrap}
+.warmline .plmk{margin-left:auto}
+@media (max-width:430px){
+  .warmline .wres,.warmline .plmk{margin-left:0}
+}

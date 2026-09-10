@@ -412,7 +412,13 @@ with sync_playwright() as pw:
     pg.click("#groups .gcard") if pg.locator("#groups .gcard").count() else None
     pg.wait_for_selector(".stu", timeout=8000)
     h = pg.locator(".stu").first.evaluate("e => e.getBoundingClientRect().height")
-    ok(h <= 120, "sagird setri telefonda yigcamdir", str(round(h)) + "px")
+    #  HEDD 120 -> 145 (db/182).  Valideyn girisi susmaya gore aciq
+    #  oldu, setirde artiq IKI kod xetti var: sagird ve valideyn.
+    #  Hedd «reqem uygunlassin» deye qaldirilmayib - CSS-de bosluqlar
+    #  yigildi, sonra qalan hundurluk olculdu ve gozle yoxlanildi.
+    #  Bu, informasiyanin artmasinin dogru qiymetidir; kodlari
+    #  gizletmek «Gonder»i bir toxunus uzaqlasdirardi.
+    ok(h <= 145, "sagird setri telefonda yigcamdir", str(round(h)) + "px")
     ok(pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"),
        "telefonda yana surusme yoxdur")
     pg.set_viewport_size({"width": 430, "height": 900})

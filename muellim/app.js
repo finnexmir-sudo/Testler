@@ -1660,14 +1660,23 @@
           '<span class="muted">Dərs planı yoxdur. Plan qursanız növbəti mövzu və hazır test burada olacaq. ' +
           '<a href="#" id="prepPlan">Planı qur</a></span>');
       } else if (nx) {
+        /*  ISINME AYRI SETIRDEDIR (istifadeci tutdu: «çox bitişikdir,
+            sanki yeni dərs verirsən»).  Movzunun adi ile duyme yanasi
+            duranda goz onlari BIR cumle kimi oxuyurdu.  Indi movzu
+            yuxarida, isinme altda - ne oldugu da yazilir: «dərsdən
+            əvvəl 5 sual».  */
         h += row("doc", "Növbəti mövzu", "<b>" + esc(nx.topic) + "</b>" +
           (nx.group ? ' <s class="muted">· ' + esc(nx.group) + " · " + nx.gpos + "/" + nx.gtotal + "</s>" : "") +
           //  135: isinme - dersden evvel 5 sual
           (nx.warm_test_id
-            ? ' <s class="muted">· isinmə ' + (nx.warm_takers
+            ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
+              '<span class="wres">' + (nx.warm_takers
                 ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird"
-                : "verilib") + ' · <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></s>'
-            : (d.paid ? ' <button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">isinmə 5 sual</button>' : "")));
+                : "verilib") + '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></div>'
+            : (d.paid
+                ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
+                  '<button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">Hazırla</button></div>'
+                : "")));
       } else {
         h += row("doc", "Növbəti mövzu", '<span class="muted">Plan tam keçilib. 🎉</span>');
       }
@@ -1709,7 +1718,7 @@
         busy = true; b.disabled = true; b.textContent = "Yığılır…";
         sb.rpc("rpc_pack_warm", { p_item_id: b.getAttribute("data-item"), p_count: 5 })
           .then(function () { busy = false; loadPrep(g); })
-          .catch(function (e) { busy = false; b.disabled = false; b.textContent = "isinmə 5 sual"; alert(fail(e)); });
+          .catch(function (e) { busy = false; b.disabled = false; b.textContent = "Hazırla"; alert(fail(e)); });
       });
       prepPlanLink();
       on("prepPlan", "click", function (e) {
@@ -2258,7 +2267,7 @@
     var live = guard();
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     Promise.all([
-      sb.select("classes", { select: "id,name,account_id,level_id", eq: { id: id } }),
+      sb.select("classes", { select: "id,name,account_id,level_id,parent_access", eq: { id: id } }),
       loadLevels()
     ])
       .then(function (res) {
@@ -2396,6 +2405,21 @@
         '<div style="flex:0 0 148px"><label for="gLev">Sinif</label>' +
           '<select id="gLev">' + levelOptions(g.level_id) + "</select></div>" +
       "</div>" +
+      /*  182: valideyn girisi QRUP seviyyesindedir.  Muellimlerin bir
+          hissesi boyuklere ders deyir - 25 yasliya valideyn kodu
+          yaratmaq menasizdir.  Susmaya gore ACIQDIR: repetitorun
+          musterisi valideyndir, seffafliq onun oz satis vasitesidir. */
+      //  Uslub «Serbest mesq» kecidi ile EYNIDIR (.swrap/.switch) -
+      //  yeni sinif uydurmuruq, muellim tanidigi elementi gorur.
+      '<div class="swrap"><label class="switch" for="gPar">' +
+        '<input type="checkbox" id="gPar"' +
+          (g.parent_access === false ? "" : " checked") + ">" +
+        '<span class="track"><i></i></span>' +
+        "<span><b>Valideyn girişi</b>" +
+          '<span class="muted">Qrupa əlavə olunan hər şagird üçün valideyn ' +
+          "kodu özü yaranır. Kodu valideynə siz göndərirsiniz — yaranmaqla " +
+          "heç kim heç nə görmür. Böyüklərə dərs deyirsinizsə söndürün." +
+          "</span></span></label></div>" +
       '<div id="gRenErr"></div>' +
       '<div class="row"><button class="btn go" id="gSave">Yadda saxla</button>' +
       '<button class="btn ghost" id="gCancel">Ləğv et</button></div>' +
@@ -2421,16 +2445,25 @@
       var code = $("gLev") ? $("gLev").value : "";
       var lv = (LEVELS || []).filter(function (x) { return x.code === code; })[0];
       var newLevel = lv ? lv.id : null;
-      if (nm === g.name && newLevel === g.level_id) { close(); return; }
+      var par = $("gPar") ? !!$("gPar").checked : (g.parent_access !== false);
+      var parDeyisdi = par !== (g.parent_access !== false);
+      if (nm === g.name && newLevel === g.level_id && !parDeyisdi) { close(); return; }
       $("gRenErr").innerHTML = "";
       setBusy("gSave", true, "Yadda saxla");
       //  Sinif deyisirse proqram da onunla getmelidir - yoxsa qrup
       //  "orta" sinifde, "ibtidai" proqramda qalir (uygunsuz melumat).
       var patch = { name: nm, level_id: newLevel };
       if (lv) patch.program_id = lv.program_id || null;
+      //  Bayraq AYRICA RPC ile gedir: baglayanda movcud sagirdlerin
+      //  kodu ve acilmis sessiyalari da olmelidir - «bagladim, amma
+      //  hele de baxir» olmasin.  Bunu adi update ede bilmez.
       sb.update("classes", { id: g.id }, patch)
         .then(function () {
-          g.name = nm; g.level_id = newLevel;
+          if (!parDeyisdi) return null;
+          return sb.rpc("rpc_class_parent_access", { p_class_id: g.id, p_on: par });
+        })
+        .then(function () {
+          g.name = nm; g.level_id = newLevel; g.parent_access = par;
           topTitle.textContent = nm;
           if ($("gName")) $("gName").textContent = nm;
           var meta = $("gMeta");
@@ -2662,9 +2695,9 @@
             '<button class="btn sm" data-wa="' + esc(s.id) + '">' +
               ic("send") + "Göndər</button>" +
           "</div>" +
-          /*  VALIDEYN GIRISI - susmaya gore BAGLI.
-              Bezi muellimler isinin seffaflasmasindan narahat olur;
-              mecburi etsek muellimi itiririk.
+          /*  VALIDEYN GIRISI - db/182-den sonra susmaya gore ACIQ
+              (qrup ayarindan sondurmek olur).  Kod varsa setir ozu
+              gorunur - muellim ilk baxisda bilir ki, giris aciqdir.
 
               BAGLI ikən setirde HEC NE gorunmur: acmaq nadir, birdefelik
               emeliyyatdir ve qelemin altindadir (kod yenilemek kimi).
@@ -3030,7 +3063,15 @@
               (need.length > vis.length
                 ? '<button class="morebtn" id="rMore">Daha ' + (need.length - vis.length) + " mövzu göstər</button>"
                 : "") + "</div>"
-            : '<div class="ok">' + ic("check") + "<span>Bütün mövzular yaxşıdır (≥80%).</span></div>") +
+            /*  ZIDDIYYET (istifadeci tutdu): usdeki «Nə etməli» karti
+                «bu mövzunu Fəridə təkrar verin» deyirdi, bu setir ise
+                «bütün mövzular yaxşıdır» - biri o birini yalanlayirdi.
+                Ikisi de dogru idi, amma FERQLI seyi olcur: bu setir
+                QRUPUN ortalamasidir, «Nə etməli» ise AYRI-AYRI
+                sagirddir.  Movzu qrupda 85% ola biler, amma bir
+                sagirdde 40%.  Ona gore mutleq iddia yumsaldilir. */
+            : '<div class="ok">' + ic("check") + "<span>Qrup üzrə bütün mövzular yaxşıdır (≥80%)" +
+              (todo ? " — ayrı-ayrı şagirdlərdə zəiflik ola bilər" : "") + ".</span></div>") +
           (good.length
             ? '<details class="more filt" style="margin-top:10px"><summary>Yaxşı mövzular ' +
               '<span class="fn">' + good.length + "</span></summary>" +
@@ -3264,7 +3305,7 @@
     g.fillStyle = "#fff"; g.font = "700 44px " + F; g.textBaseline = "alphabetic";
     g.fillText("Bil10", 72, 108);
     g.fillStyle = "rgba(255,255,255,.75)"; g.font = "500 30px " + F;
-    g.fillText("irəliləyiş kartı · " + d.period, 72, 156);
+    g.fillText("nəticə kartı · " + d.period, 72, 156);
     //  ad
     g.fillStyle = "#fff"; g.font = "700 88px " + F;
     g.fillText(d.name, 72, 300);
@@ -3729,8 +3770,12 @@
               '<i>5 saniyədən tez verilmiş səhv cavab — diqqətsizlikdir, bilik boşluğu deyil</i></div></div>' +
             '<div class="srow' + (gok ? " mid" : "") + '"><b>' + gok + "</b><div>Bilmədən düz" +
               "<i>«Əmin deyiləm» deyib düz cavablayıb — mövzu oturmayıb</i></div></div>" +
-            '<div class="srow' + (sw ? " bad" : "") + '"><b>' + sw + "</b><div>Əmin idi, səhv" +
-              "<i>yanlış öyrənilib — ən vacib düzəliş yeri</i></div></div>" +
+            /*  «Əmin idi» tək başına anlaşılmırdı (istifadəçi soruşdu).
+                Səhv siyahısındakı nişanla EYNİ ad işlənir - bir şeyin
+                iki adı olmasın.  */
+            '<div class="srow' + (sw ? " bad" : "") + '"><b>' + sw + "</b><div>Bildiyini sanır" +
+              "<i>cavabına əmin idi, amma səhv etdi — yanlış öyrənilib, " +
+              "ən vacib düzəliş yeri</i></div></div>" +
           "</div>";
       }
       if (r.topics !== null) {
@@ -3747,14 +3792,17 @@
             "Ayan, sentyabr: 52% -> 78%, muellim Arzu".  Muellim valideyne
             ve ya sosial sebekeye atir; sebeke sorgusu yoxdur (canvas).  */
         if ((r.attempts || []).length >= 2) {
-          hX += "<h2>İrəliləyiş kartı</h2>" +
+          /*  AD DEYISDI (istifadeci tutdu): sagird 80% -> 73% dususe
+              de kart «İrəliləyiş» yazirdi - reqem geriledikde bu, yalan
+              olur.  «Nəticə kartı» her iki halda dogrudur.  */
+          hX += "<h2>Nəticə kartı</h2>" +
             '<div class="card pcard">' +
               '<canvas id="pcv" width="1080" height="1350"></canvas>' +
               '<p class="muted" style="margin:10px 0 12px">Şəkil kimi paylaşın: valideynə WhatsApp-da, ' +
                 "ya da öz səhifənizdə. Şagirdin adı və sizin adınız üstündədir.</p>" +
               '<div class="row" style="gap:8px">' +
                 '<button class="btn go" id="pcShare">' + ic("send") + "Paylaş</button>" +
-                '<a class="btn ghost" id="pcDl" download="bil10-irelileyis.png" href="#">' + ic("doc") + "Şəkli yüklə</a>" +
+                '<a class="btn ghost" id="pcDl" download="bil10-netice.png" href="#">' + ic("doc") + "Şəkli yüklə</a>" +
               "</div><div id=\"pcMsg\"></div>" +
             "</div>";
         }
@@ -3903,7 +3951,14 @@
               esc(w.body) + "</b>" +
               (w.topic ? '<span class="wtag">' + esc(w.topic) + "</span>" : "") +
               (Number(w.hasty) > 0 ? '<span class="wtag wb-h" title="5 saniyədən tez">tələsik</span>' : "") +
-              (Number(w.sure_wrong) > 0 ? '<span class="wtag wb-s" title="Şagird əmin idi">əmin idi</span>' : "") +
+              /*  «əmin idi» tək başına heç nə demirdi (istifadəçi
+                  soruşdu).  Şagird cavabı verəndən sonra «əminsən?»
+                  sualına bəli deyib, amma səhv edib — yəni mövzunu
+                  bildiyini SANIR.  Ən təhlükəli səhv budur, ona görə
+                  nişan qalır, sadəcə adı aydınlaşır.  */
+              (Number(w.sure_wrong) > 0
+                ? '<span class="wtag wb-s" title="Şagird cavabına əmin idi, amma səhv etdi — ' +
+                  'yəni mövzunu bildiyini sanır">bildiyini sanır</span>' : "") +
               (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
               //  "1x" her setirde menasiz idi - say yalniz tekrarda
               "</div>" + (Number(w.wrong) > 1
@@ -4024,7 +4079,7 @@
             if (!cv.toBlob) { $("pcMsg").innerHTML = msg("warn", "Bu brauzer paylaşmağı dəstəkləmir — «Şəkli yüklə»."); return; }
             cv.toBlob(function (blob) {
               var file;
-              try { file = new File([blob], "bil10-irelileyis.png", { type: "image/png" }); } catch (e) {}
+              try { file = new File([blob], "bil10-netice.png", { type: "image/png" }); } catch (e) {}
               if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
                 navigator.share({ files: [file], title: "Bil10 — irəliləyiş" }).catch(function () {});
               } else {
