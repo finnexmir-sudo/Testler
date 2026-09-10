@@ -234,6 +234,7 @@ bank 229_bank_ingilis10_cetin_norma.sql
 bank 230_bank_ingilis11_cetin_norma.sql
 bank 231_bank_riy2_4_cetin_norma.sql
 bank 232_bank_cografiya_cetin_norma.sql
+bank 233_bank_biologiya_cetin_norma.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
