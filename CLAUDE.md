@@ -2564,6 +2564,40 @@ orada `.fold` yoxdur, gözləmə oraya qoyulmamalıdır.
 daimi» qaytarır — qiymət, «hədiyyə bitir» və xatırlatma zolağı
 görünmür (`rpc_paket` bunu onsuz da edirdi, my_context geridə qalmışdı).
 
+## «Sınaq» sözü — müəllim mətnlərində İŞLƏDİLMİR (2026-09-10)
+
+İstifadəçi zolaqda «**Sınaq bitir** · 3 okt» görüb soruşdu: düzdürmü?
+Yox. İki səbəb:
+
+**1. Eyni ekranda bir şeyin iki adı.** Zolağın altındakı kart hər
+`trialing` müəllimə «Tam paket sizə **hədiyyədir** 🎁» deyir. Kart
+`status`-a baxırdı, zolaq isə **`provider`**-ə — admin əl ilə sınaq
+verəndə (`provider='trial'`) sözlər ayrılırdı. Bu, **yarımçıq
+düzəldilmiş köhnə səhvdir**: `e2e_paket`-in şərhi eyni sinfi artıq
+yazır («Əvvəl ekran yalnız provider='gift'-ə baxırdı») — o vaxt
+**məbləğ** sətri `status`-a keçirilmişdi, **etiket** isə `provider`-də
+qalmışdı.
+
+**2. Bil10-da «sınaq» İMTAHAN deməkdir.** «**Sınaq** yığ və tapşır»,
+«rüb **sınağına** düşüb», «son **sınaqdan** sonra 2 mövzu keçilib».
+«Sınaq bitir 3 okt» — imtahanın bitməsi kimi oxunur. Bu, beta üçün
+qoyulmuş qaydanın (CLAUDE.md: beta yerinə «sınaq» yazma) eynisidir.
+
+**Qayda: `status === 'trialing'` → hər yerdə «hədiyyə».** `provider`
+(gift / trial) müəllimə görünən mətndə **fərq yaratmır** — onun üçün
+ikisi də pulsuz aydır. Dəyişən yerlər: zolaqdakı «Hədiyyə bitir»,
+Abunə səhifəsindəki «Hədiyyə ayı» və oradakı nişan.
+
+Yol boyu: «Hədiyyə **ay**» → «Hədiyyə **ayı**» (yiyəlik şəkilçisi
+çatmırdı).
+
+**Admin ekranlarına toxunulmur** — «0 pullu · 1 sınaq · 2 pulsuz»
+lövhəsi və cədvəldəki «sınaq» nişanı texniki mənadadır və yalnız admin
+görür.
+
+Yoxlama: `e2e_paket` — əl ilə verilmiş sınaqda da «Hədiyyə ayı» yazır
+və **`.abn` qutusunda «sınaq» sözü olmadığı** ayrıca ölçülür.
+
 ## Qrupun həftəlik cədvəli (db/177, 2026-09-09)
 
 **Niyə.** Rəqib (kampus.az) cədvəli **üç pillənin hamısında** satır —
