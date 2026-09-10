@@ -99,6 +99,81 @@ begin
     end loop;
   end loop;
 
+  -- ------------------------------- 11-ci sinif qrupunu TAM doldur
+  --  demo_build bu qrupda BİR test verir və bir şagirdi (4-cü)
+  --  qəsdən buraxır — «kim işləməyib» halını göstərmək üçün.
+  --  Kiməsə nümayiş edəndə isə boş tab pis görünür: hesabatda
+  --  «Hələ test işləməyib» yazır.  Ona görə həmin qrupa daha üç
+  --  test verilir və BÜTÜN şagirdlər hamısını işləyir.
+  declare
+    v_c3   uuid;
+    v_riy  uuid;
+    v_l11  record;
+    v_pl3  uuid;
+    v_it   uuid[];
+    v_par  record;
+    v_tad  text;
+    v_test uuid;
+    v_at   timestamptz;
+    j      int;
+  begin
+    select id into v_riy from public.subjects where slug = 'riyaziyyat';
+    select l.* into v_l11 from public.levels l where l.code = '11' order by l.sort limit 1;
+    select c.id into v_c3 from public.classes c
+      where c.account_id = v_acc and c.level_id = v_l11.id
+      order by c.created_at limit 1;
+
+    if v_c3 is not null then
+      select id into v_pl3 from public.class_plans where class_id = v_c3 limit 1;
+      select array_agg(id order by ord) into v_it
+        from public.class_plan_items where plan_id = v_pl3;
+
+      --  2-ci, 3-cü və 4-cü mövzudan ev tapşırığı
+      if v_it is not null then
+        for j in 2..least(4, cardinality(v_it)) loop
+          v_at := now() - make_interval(days => 30 - j * 6);
+          update public.class_plan_items set done_at = v_at where id = v_it[j];
+          select * into v_par from app.pack_topic(
+            (select topic_id from public.class_plan_items where id = v_it[j]));
+          --  Başlıqda FƏSLİN yox, MÖVZUNUN öz adı işlənir: pack_topic
+          --  fəsli qaytarır, ona görə üç testin adı eyni çıxırdı və
+          --  tarixçə təkrar görünürdü.  Sual hovuzu yenə fəsildəndir.
+          select t.name into v_tad
+            from public.class_plan_items it
+            join public.topics t on t.id = it.topic_id
+           where it.id = v_it[j];
+          v_test := app.demo_test(v_owner, v_riy, v_l11.id, v_l11.program_id,
+                      array[v_par.o_id], 10,
+                      coalesce(v_tad, v_par.o_name) || ' — yoxlama',
+                      jsonb_build_object('pack','hw','topics',
+                        jsonb_build_array(v_par.o_id::text)),
+                      '{1,2,3}', null, false, v_at);
+          update public.class_plan_items set test_id = v_test where id = v_it[j];
+          insert into public.assignments
+            (class_id, test_id, assigned_by, opens_at, closes_at, max_attempts, created_at)
+          values (v_c3, v_test, v_owner, v_at, v_at + interval '7 days', 1, v_at);
+        end loop;
+      end if;
+
+      --  Qrupun BÜTÜN şagirdləri, BÜTÜN tapşırıqları işləyir —
+      --  buraxılmış şagird də daxil.  Bacarıq şagirdə görə sabitdir
+      --  ki, hesabatda mənalı fərq görünsün.
+      for r in
+        select s.id as sid, a.test_id,
+               row_number() over (order by s.created_at) as sira
+          from public.students s
+          join public.assignments a on a.class_id = s.class_id
+         where s.class_id = v_c3
+           and not exists (select 1 from public.attempts att
+                            where att.student_id = s.id and att.test_id = a.test_id)
+      loop
+        perform app.demo_attempt(r.sid, r.test_id, v_c3,
+                  (array[0.90, 0.82, 0.74, 0.64, 0.55])[((r.sira - 1) % 5) + 1],
+                  '{}', now() - make_interval(days => 1 + floor(random() * 20)::int));
+      end loop;
+    end if;
+  end;
+
   -- ------------------------------------------------- həftəlik cədvəl
   --  db/177 tətbiq olunubsa: qruplara dərs saatı verilir ki, İcmalda
   --  «Bu gün dərs var» və «Bütün həftə» görünsün.
