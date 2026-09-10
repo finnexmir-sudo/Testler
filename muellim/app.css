@@ -1621,3 +1621,43 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .wkg .wgi.off b{color:var(--fg-3);font-weight:500}
 .wkg .wgn{font-style:normal;color:var(--n-300);font-size:12.5px}
 @media (max-width:520px){ .wkg .wgd{flex:0 0 74px} }
+
+/* ------------------------------------------- baza hecmi (db/179, admin)
+   Disk zolagi: bir baxisda "500 MB-in ne qederi doludur".  Renglər
+   məna dasiyir - bank SABIT xerc (solgun), pullu YAXSI (marka),
+   pulsuz IZLENILEN (teal), numune ve sistem arxa plan. */
+.card.bz{padding:18px 20px}
+.bzh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.bzh>b{font-size:26px;font-weight:660;letter-spacing:-.02em;color:var(--fg)}
+.bzh>span{font-size:12.5px;color:var(--fg-3)}
+.bzh>span b{color:var(--fg-2);font-weight:640}
+.bzbar{display:flex;height:12px;border-radius:99px;overflow:hidden;
+  background:var(--n-100);margin:0 0 14px}
+.bzbar i{display:block;height:100%}
+.bzbar i+i{box-shadow:inset 1px 0 0 rgba(255,255,255,.55)}
+/*  Rənglər zolaqda da, legenddə də EYNIDIR - göz onları tutuşdurur.
+    «Sistem» əvvəl --n-150 idi: zolağın öz fonu (--n-100) ilə demək
+    olar eyni çıxdı və 11 MB-lıq hissə GÖRÜNMÜRDÜ (şəkildə tutuldu). */
+.bz .k1{background:var(--n-300)}
+.bz .k2{background:var(--brand)}
+.bz .k3{background:var(--teal,#0e9384)}
+.bz .k4{background:#c7b8f0}
+.bz .k5{background:var(--n-400)}
+/*  Legend: hər sətir bir sətirdir.  Ad qırılmır, ölçü sağa yapışır,
+    izah nə qədər yer qalırsa o qədər görünür.  */
+.bzleg{list-style:none;margin:0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:9px 26px}
+.bzleg li{display:flex;align-items:center;gap:8px;font-size:13px;min-width:0}
+.bzleg s{flex:0 0 9px;width:9px;height:9px;border-radius:3px;
+  text-decoration:none}
+.bzleg .bl{color:var(--fg-2);white-space:nowrap}
+.bzleg b{color:var(--fg);font-weight:620;white-space:nowrap;margin-left:auto}
+.bzleg i{color:var(--fg-3);font-size:11.5px;font-style:normal;
+  flex:0 1 auto;min-width:0;text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bznote{margin:14px 0 0;font-size:13px;line-height:1.55;color:var(--fg-2)}
+.bznote b{color:var(--fg);font-weight:620}
+@media (max-width:520px){
+  .bzleg{grid-template-columns:1fr}
+  .bzh>b{font-size:22px}
+}
