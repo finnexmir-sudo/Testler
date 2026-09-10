@@ -69,9 +69,13 @@ with sync_playwright() as pw:
 
     #  Qrup ve iki sagird - SQL ile, suite qisa qalsin
     acc = db("select id, owner_id from public.accounts limit 1", one=True)
-    db("""insert into public.classes (id, account_id, teacher_id, kind, name, join_code)
+    #  182: YENI qrupda valideyn girisi susmaya gore ACIQDIR.  Bu fayl
+    #  EL ILE acma yolunu yoxlayir, ona gore qrup qesden BAGLI qurulur
+    #  (aciq halda kodlar ozu yaranir - onu e2e_valideyn_iki yoxlayir).
+    db("""insert into public.classes (id, account_id, teacher_id, kind, name, join_code,
+                                     parent_access)
           values ('c1c1c1c1-0000-0000-0000-0000000000c1', %s, %s,
-                  'tutor_group','5-A qrupu','QRUPVAL1')""",
+                  'tutor_group','5-A qrupu','QRUPVAL1', false)""",
        (acc["id"], acc["owner_id"]))
     db("""insert into public.students (id, account_id, class_id, created_by,
                                        full_name, display_name, login_code)
@@ -87,9 +91,9 @@ with sync_playwright() as pw:
     pg.locator("#groups .grp, #groups .gcard").first.click()
     pg.wait_for_selector(".stu", timeout=15000)
 
-    #  SUSMAYA GORE BAGLI - setirde HEC NE gorunmur
+    #  BAGLI QRUP - setirde HEC NE gorunmur
     ok(pg.locator(".stu .l3").count() == 0,
-       "susmaya gore BAGLI - setirde valideyn sətri yoxdur")
+       "bagli qrupda setirde valideyn sətri yoxdur")
     ok(db("""select count(*) n from public.students
               where parent_code is not null""", one=True)["n"] == 0,
        "bazada da kod yoxdur")
@@ -204,13 +208,15 @@ with sync_playwright() as pw:
     #  ANA SEHIFEYE QAYIDIS.  Evvel hec bir yol yox idi - istifadeci
     #  unvani ƏL ILE silib qayidirdi.  Giris ekraninda ust zolaq
     #  gizlidir, ona gore kecid burada ayrica olmalidir.
-    ok(vp.locator(".homelink").count() == 1,
+    #  184: kicik kecid GORUNEN duymeye cevrildi - numuneye baxan
+    #  ziyaretci onu gormurdu ve kod ekraninda ilisib qalirdi.
+    ok(vp.locator("a.btn.bak").count() == 1,
        "giris ekranindan ana sehifeye kecid var")
     #  Giris ekraninda mehsulun kimliyi gorunmelidir - evvel ne loqo,
     #  ne ad vardi, sehife "hansi sayt?" sualini dogururdu.
     ok(vp.locator(".hero .mark svg").count() == 1,
        "giris ekraninda loqo var")
-    vp.click(".homelink"); vp.wait_for_selector(".doors", timeout=15000)
+    vp.click("a.btn.bak"); vp.wait_for_selector(".doors", timeout=15000)
     ok(vp.locator(".doors").count() == 1, "kecid ANA SEHIFEYE aparir",
        vp.url.split("/Testler")[-1] or vp.url)
     vp.go_back(); vp.wait_for_selector("#code", timeout=15000)

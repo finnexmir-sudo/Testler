@@ -128,7 +128,13 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#prepWarm", timeout=15000)
     ok(pg.locator("#prepWarm").count() == 1, "novbeti movzuda «isinmə 5 sual» duymesi")
     pg.click("#prepWarm"); pg.wait_for_selector("#prep a[href^='#/t/']", timeout=20000)
-    ok("isinmə verilib" in pg.inner_text("#prep"), "isinme verildi, vereq linki", pg.inner_text("#prep")[:120].replace("\n", " "))
+    #  Metn «.warmline» blokundadir: «İsinmə · dərsdən əvvəl 5 sual ·
+    #  verilib · vərəq».  Yazan olanda «verilib» evezine faiz ve sagird
+    #  sayi cixir - ona gore ikisini de qebul edirik.
+    wl = pg.inner_text(".warmline")
+    ok(("verilib" in wl or "şagird" in wl)
+       and pg.locator(".warmline a[href^='#/t/']").count() == 1,
+       "isinme verildi, vereq linki", wl.replace("\n", " ")[:120])
 
     print("E · Şagird üç tapşırığı görür")
     sp = page(ctx, 390, 844)

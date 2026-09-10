@@ -28,13 +28,18 @@
       ekranin ustunde usaq secimi.  Serverde deyisiklik yoxdur.  */
   var KIDS = [];       // [{t, c}]
   var ADD_MODE = false;
+  /*  Numune sessiyasi (184: giris cavabinda demo=true).  "Valideyn kimi
+      bax" ile gelen ziyaretci baxdiqdan sonra sayta qayida bilmirdi -
+      «Çıxış» kod ekranini acirdi, orada yazacaq kodu yox idi.  */
+  var DEMO = false;
   function kidsSave() {
-    try { localStorage.setItem(LS, JSON.stringify({ kids: KIDS, cur: TOKEN })); } catch (e) {}
+    try { localStorage.setItem(LS, JSON.stringify({ kids: KIDS, cur: TOKEN, demo: DEMO })); } catch (e) {}
   }
   function kidsLoad() {
     var raw = null;
     try { raw = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) {}
     if (!raw) return;
+    DEMO = raw.demo === true;
     if (raw.kids && raw.kids.length) {
       KIDS = raw.kids.filter(function (k) { return k && k.t; });
       var cur = KIDS.filter(function (k) { return k.t === raw.cur; })[0] || KIDS[0];
@@ -144,8 +149,9 @@
       "</div>" +
       '<p class="note" style="text-align:center;margin-top:16px">' +
         "Kod yoxdursa müəllimdən istəyin. Giriş 30 gün açıq qalır.</p>" +
+      //  Kod ekrani dalan olmasin: sayta qayidis gorunen duymedir
+      '<a class="btn wide ghost bak" href="../">← Bil10 ana səhifəsi</a>' +
       '<p class="note" style="text-align:center;margin-top:10px">' +
-        '<a href="../" class="homelink">← Bil10 ana səhifəsi</a> · ' +
         '<a href="../komek/#valideyn" class="helplink">Necə işləyir?</a></p>'
     );
     var inp = $("code");
@@ -181,7 +187,9 @@
           $("lErr").innerHTML = msg("err", (d && d.error) || "Kod yanlışdır.");
           return;
         }
+        if (d.demo === true) DEMO = true;
         kidAdd(d.token, d.child);
+        markDemo();
         ADD_MODE = false;
         screenHome();
       }).catch(function (e) {
@@ -490,12 +498,25 @@
   /* ================================================================
      CIXIS
      ================================================================ */
+  /*  Ust zolaqdaki duymenin adi: numunede «Nümunədən çıx».  */
+  function markDemo() {
+    if (!btnOut) return;
+    btnOut.textContent = DEMO ? "Nümunədən çıx" : "Çıxış";
+    btnOut.classList.toggle("demoout", DEMO);
+  }
+
   function logout(expired) {
+    //  Numunede "cixis" = sayta qayitmaq: kod ekrani ziyaretci ucun
+    //  dalandir, orada yazacaq kodu yoxdur.  Serverdeki sessiyalar
+    //  burada da baglanir - sadece sonda ekran evezine sayt acilir.
+    var sayta = DEMO && !expired;
     var all = KIDS.map(function (k) { return k.t; });
     if (TOKEN && all.indexOf(TOKEN) < 0) all.push(TOKEN);
-    TOKEN = null; CHILD = null; KIDS = []; ADD_MODE = false;
+    TOKEN = null; CHILD = null; KIDS = []; ADD_MODE = false; DEMO = false;
     try { localStorage.removeItem(LS); } catch (e) {}
+    markDemo();
     all.forEach(function (t) { sb.rpc("rpc_parent_logout", { p_token: t }).catch(function () {}); });
+    if (sayta) { location.href = "../"; return; }
     screenLogin(expired ? msg("warn", "Giriş vaxtı bitib. Kodu yenidən yazın.") : "");
   }
 
@@ -506,6 +527,7 @@
      ================================================================ */
   function boot() {
     kidsLoad();
+    markDemo();
     if (TOKEN) screenHome(); else screenLogin("");
   }
 

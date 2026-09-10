@@ -89,8 +89,8 @@ input{min-height:52px;font-size:17px}
 
 /*  Ana səhifəyə qayıdış - giriş ekranında üst zolaq gizli olduğu üçün
     nişan görünmür; keçid burada ayrıca lazımdır. */
-.homelink,.helplink{color:var(--fg-3);text-decoration:none;font-size:12.5px}
-.homelink:hover,.helplink:hover{color:var(--brand);text-decoration:underline}
+.helplink{color:var(--fg-3);text-decoration:none;font-size:12.5px}
+.helplink:hover{color:var(--brand);text-decoration:underline}
 
 /* -------------------------------------------------- «Bizə yazın» */
 details.fbd{margin-top:8px}
@@ -168,3 +168,12 @@ details.fbd[open] summary::before{transform:rotate(45deg) translateY(-2px)}
 details.fbd summary{color:var(--brand)}
 details.fbd summary::before{border-color:var(--brand)}
 details.fbd summary:active{opacity:.7}
+
+/*  184: NUMUNEDEN CIXIS
+    Kod ekranindaki «Bil10 ana səhifəsi» kicik kecid idi - numuneye
+    baxan ziyaretci onu gormurdu ve ekranda ilisib qalirdi.  Indi
+    gorunen duymedir (<a> uzerinde .btn).
+    Ust zolaqda ise «Çıxış» numunede «Nümunədən çıx» olur - metn
+    uzundur, telefonda basligi sixmasin deye biraz kicikdir.  */
+#main a.btn.bak{margin-top:14px;text-decoration:none}
+.top .btn.demoout{font-size:13px;padding:0 10px}
