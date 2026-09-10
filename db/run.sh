@@ -99,6 +99,8 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 176_qiymet_metni.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 177_cedvel.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 178_sinif_mesaji.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 179_baza_olcusu.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 180_suret.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 181_suret_duzelis.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

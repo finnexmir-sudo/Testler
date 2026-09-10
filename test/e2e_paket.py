@@ -145,6 +145,48 @@ with sync_playwright() as pw:
        "ana sehife ve panel siyahisi EYNIDIR (tek menbe)",
        "%d/%d <-> %d/%d" % (len(ana_pulsuz), len(ana_abune),
                             len(panel_pulsuz), len(panel_abune)))
+    print("A3 · Sürət ölçüsü: bir açılış = bir ölçü")
+    #  db/180.  Iki tele var: (1) olcu hec gonderilmeye biler,
+    #  (2) iki defe gonderile biler - o zaman butun reqemler ikiqat
+    #  sisir ve kart YALAN danisar.  Ikisi de olculur.
+    db("delete from public.perf_days")
+    sayac = []
+    sp = new_page()
+    sp.on("request", lambda r: sayac.append(1) if "rpc_perf" in r.url else None)
+    sp.goto(PANEL); sp.wait_for_selector("#groups", timeout=15000)
+    sp.wait_for_timeout(7000)          # 6 saniyelik ehtiyat da kecsin
+    ok(len(sayac) == 1, "bir acilis = BIR rpc_perf cagirisi", len(sayac))
+    pr = db("select page, n, ms_max from public.perf_days", one=True)
+    ok(pr and pr["page"] == "muellim" and pr["n"] == 1,
+       "olcu bazaya yazildi, say ikiqat deyil", pr)
+    ok(pr and 0 < pr["ms_max"] < 120000, "olculen vaxt ag-qara deyil", pr and pr["ms_max"])
+    sp.close()
+
+    print("A4 · Giriş formasında keçən vaxt ölçüyə DÜŞMÜR")
+    #  CANLIDA TUTULAN SEHV (db/181): telefonda ilk giris 16 saniye
+    #  yazdi - sayt yavas deyildi, istifadeci parol YAZIRDI.  Burada
+    #  bilerekden 4 saniye gozlenilir; olcu ondan KICIK olmalidir.
+    db("delete from public.perf_days")
+    #  TEMIZ kontekst: eyni brauzerde sessiya yaddasdadir, giris ekrani
+    #  acilmazdi - ona gore ayrica kontekst goturulur.
+    gctx = br.new_context(viewport={"width": 430, "height": 900})
+    gp = gctx.new_page()
+    gp.route("**/config.js*", lambda r: r.fulfill(
+        status=200, content_type="application/javascript", body=TEST_CFG))
+    gp.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)))
+    gp.goto(PANEL); gp.wait_for_selector("#btnAuth", timeout=15000)
+    gp.fill("#email", "pkt@t.az")
+    gp.wait_for_timeout(4000)                 # «yavas yazan muellim»
+    gp.fill("#pass", "parol1234")
+    gp.click("#btnAuth")
+    gp.wait_for_selector("#groups", timeout=15000)
+    gp.wait_for_timeout(7000)
+    pg2 = db("select n, ms_max from public.perf_days", one=True)
+    ok(pg2 and pg2["n"] == 1, "girisden sonra da bir olcu yazilir", pg2)
+    ok(pg2 and pg2["ms_max"] < 4000,
+       "yazma vaxti olcuye dusmur (4 s gozlenildi)", pg2 and pg2["ms_max"])
+    gp.close(); gctx.close()
+
     #  Qiymet REQEMI ana sehifede YOXDUR - odenis hele acilmayib
     #  (istifadeci qerari: reqem yalniz muqayiseye devet olardi).
     hedd_t = ana.inner_text("#hedd")
