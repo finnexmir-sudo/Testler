@@ -81,7 +81,7 @@ begin
   assert r->'last' = 'null'::jsonb, 'hele diaqnostika olmamalidir';
   --  sinifsiz qrup: secim yox, sebeb yazilir
   v := public.rpc_diagnostic_options('5555000a-0000-0000-0000-0000000000d4');
-  assert v->'level' = 'null'::jsonb and v->>'reason' like '%sinfi secilmeyib%', 'sinifsiz qrupda sebeb yoxdur';
+  assert v->'level' = 'null'::jsonb and v->>'reason' like '%Sinif seçilməyib%' and v->>'reason' like '%sərbəst məşqi bağlıdır%', 'sinifsiz qrupda sebeb yoxdur';
 end $$;
 \echo 'OK  1 · secimler: 12 fesil x 3 = 36 sual, sinifsiz qrupda aydin sebeb'
 

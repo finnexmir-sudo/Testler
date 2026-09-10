@@ -3510,7 +3510,7 @@
 
     if (!o.level) {
       box.innerHTML = h + '<div class="card"><p class="muted" style="margin:0">' +
-        esc(o.reason || "Qrupun sinfi seçilməyib.") + "</p></div>";
+        esc(o.reason || "Sinif seçilməyib — diaqnostika və şagirdin sərbəst məşqi bağlıdır.") + "</p></div>";
       return;
     }
     if (!paid) {
