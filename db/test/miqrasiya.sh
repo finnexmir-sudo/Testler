@@ -112,6 +112,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          231_bank_riy2_4_cetin_norma.sql \
          232_bank_cografiya_cetin_norma.sql \
          233_bank_biologiya_cetin_norma.sql \
+         234_bank_fizika_cetin_norma.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
