@@ -4641,6 +4641,20 @@
   function showBankN() { return isAdmin(); }
 
   //  Azerbaycanca onluq ayirici VERGULDUR: 1,50 ₼ (1.50 yox).
+  /*  Bayti oxunan hale salir.  Verguldur, nokte deyil - Azerbaycan
+      yazisi.  1 MB-dan kicikde onluq gostermir: «120 KB» kifayetdir,
+      «120,4 KB» sadece sesdir.  */
+  function bayt(n) {
+    n = Number(n) || 0;
+    if (n < 1024) return n + " B";
+    if (n < 1048576) return Math.round(n / 1024) + " KB";
+    if (n < 1073741824) {
+      var m = n / 1048576;
+      return (m < 10 ? m.toFixed(1).replace(".", ",") : String(Math.round(m))) + " MB";
+    }
+    return (n / 1073741824).toFixed(2).replace(".", ",") + " GB";
+  }
+
   function azn(minor) {
     var m = Number(minor) || 0;
     return (m % 100 === 0 ? String(m / 100)
@@ -4823,10 +4837,12 @@
         sb.rpc("rpc_admin_qstats", { p_flag: null, p_limit: 50, p_force: false })
           .catch(function () { return null; }),
         //  161: ziyaret saygaci (kohne bazada yoxdursa bolme cixmir)
-        sb.rpc("rpc_admin_visits", { p_days: 30 }).catch(function () { return null; })
+        sb.rpc("rpc_admin_visits", { p_days: 30 }).catch(function () { return null; }),
+        //  179: bazanin hecmi (kohne bazada yoxdursa kart cixmir)
+        sb.rpc("rpc_admin_baza", {}).catch(function () { return null; })
       ]).then(function (r) {
         if (!live()) return;
-        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4], r[5]);
+        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4], r[5], r[6]);
       }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -4877,7 +4893,7 @@
       ic + "</details>";
   }
 
-  function drawAdmin(st, rows, reps, fbs, qs, vs) {
+  function drawAdmin(st, rows, reps, fbs, qs, vs, bz) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "sagird-basi", name: "Hər şagird üçün" }];
     bandHead({
@@ -4923,6 +4939,11 @@
       //  ---------------------------------------------------- ZIYARET
       //  Qrafik yuxaridadir: buyume gormek ucun acilan sehifedir.
       (vs ? visitsSection(vs) : "") +
+
+      //  ------------------------------------------------------- BAZA
+      //  179: Supabase tarifi hecme baglidir.  Admin ayda bir defe
+      //  baxir - ona gore qrafik deyil, bir zolaq ve bir cumle.
+      (bz ? bazaSection(bz) : "") +
 
       //  --------------------------------------------------- HESABLAR
       '<div class="card tight">' +
@@ -5341,6 +5362,92 @@
      demo klikleri, qeydiyyat - 30 gunluk sutun qrafiki + huni.
      Tek seriya (unikal ziyaretci) - legenda lazim deyil, basliq deyir.
      ================================================================ */
+  /*  BAZANIN HECMI (db/179) - yalniz admin ekraninda.
+      Niye zolaq: "47 MB" tek basina hec ne demir; yanindaki sual
+      "500 MB-in ne qederi?"dir.  Zolaq bunu bir baxisda deyir.
+      Niye BAYT ve SAY birlikde: bayt TEXMINIDIR (Postgres setir-setir
+      bayt saymir, cedvelin orta setir olcusu vurulur), say ise
+      deqiqdir.  Az data olanda bayt yanilda biler - o zaman sayla
+      yoxlanilir.  Bunu ekranda gizletmirik, yanina yazilir.  */
+  /*  Gunu oxunan muddete cevirir.  «111 ay» reqemdir, melumat deyil -
+      iki ildən sonra il ile yazilir.  */
+  function muddet(gun) {
+    if (gun < 60) return Math.round(gun) + " gün";
+    if (gun < 730) return Math.round(gun / 30) + " ay";
+    if (gun > 3650) return "10 ildən çox";
+    return Math.round(gun / 365) + " il";
+  }
+
+  function bazaSection(b) {
+    var LIM = 500 * 1024 * 1024;              // Supabase Free heddi
+    var db = Number(b.db) || 0;
+    //  179: az data olanda server bayt yerine null gonderir - ekran da
+    //  «—» yazir.  Yalanci reqem bu kartda en pis seydir: kart elə
+    //  plan qurmaq ucundur.
+    var olcu = b.olculur !== false;
+    function bt(x) { return (x === null || x === undefined) ? "—" : bayt(x); }
+    function pay(x) { return db > 0 ? Math.max(0, (Number(x) || 0) / db * 100) : 0; }
+    function qr(g) {                          // «12 cavab · 3 şagird»
+      g = g || {};
+      var a = [];
+      if (Number(g.cavab)) a.push(Number(g.cavab) + " cavab");
+      if (Number(g.sagird)) a.push(Number(g.sagird) + " şagird");
+      return a.length ? a.join(" · ") : "boş";
+    }
+    function bx(g) {
+      g = g || {};
+      return (g.bayt === null || g.bayt === undefined) ? null : Number(g.bayt);
+    }
+    var hisse = [
+      ["k1", "Bank", Number(b.bank) || 0, "sabit xərc — istifadəçidən asılı deyil"],
+      ["k2", "Pullu hesablar", bx(b.pullu),  qr(b.pullu)],
+      ["k3", "Pulsuz hesablar", bx(b.pulsuz), qr(b.pulsuz)],
+      ["k4", "Nümunə hesablar", bx(b.demo),   qr(b.demo)],
+      ["k5", "Sistem", Number(b.qalan) || 0, "auth, indekslər, jurnal"]
+    ];
+    var art = Number(b.artim30) || 0;
+    var gun = b.gun500 === null || b.gun500 === undefined ? null : Number(b.gun500);
+    var qeyd;
+    if (!olcu) {
+      //  Server "hele olculmur" deyib - uydurma reqem yazmiriq.
+      qeyd = "İstifadəçi datası hələ azdır: bölgü <b>ölçülmür</b>. " +
+        "Cavab sayı 1000-i keçəndə baytlar da görünəcək — o vaxta qədər " +
+        "saylara baxın.";
+    } else if (!art) {
+      qeyd = "Son 30 gündə yeni cavab yazılmayıb — artım hesablanmır.";
+    } else {
+      qeyd = "Son 30 gündə <b>+" + bayt(art) + "</b>. Bu sürətlə 500 MB-a " +
+        (gun === null ? "çatmır" : "<b>" + muddet(gun) + "</b> qalıb") + ".";
+    }
+    return '<div class="card bz" id="bazaCard">' +
+      '<h2 class="ch">Baza</h2>' +
+      '<div class="bzh"><b>' + bayt(db) + "</b>" +
+        "<span>500 MB-dan <b>" + Math.round(db / LIM * 100) + "%</b> · " +
+        "8 GB-dan " + (db / (8 * 1024 * 1024 * 1024) * 100).toFixed(1).replace(".", ",") +
+        "%</span></div>" +
+      '<div class="bzbar">' + hisse.map(function (x) {
+        return '<i class="' + x[0] + '" style="width:' + pay(x[2]).toFixed(2) + '%"></i>';
+      }).join("") + "</div>" +
+      '<ul class="bzleg">' + hisse.map(function (x) {
+        return '<li><s class="' + x[0] + '"></s><span class="bl">' + x[1] +
+          "</span><b>" + bt(x[2]) + "</b><i>" + esc(x[3]) + "</i></li>";
+      }).join("") + "</ul>" +
+      '<p class="bznote">' + qeyd + "</p>" +
+      '<details class="fold"><summary>Rəqəmlər necə hesablanır?</summary>' +
+        '<p class="muted">Baytlar <b>təxminidir</b>: Postgres hər sətrin hansı ' +
+        "hesaba aid olduğunu bayt-bayt saymır, ona görə cədvəlin orta sətir " +
+        "ölçüsü (indekslərlə birlikdə) həmin hesabın sətir sayına vurulur. " +
+        "Cavab və şagird <b>sayları dəqiqdir</b> — az data olanda ölçüyə yox, " +
+        "onlara baxın. «Sistem» bölünməyən qalıqdır: auth cədvəlləri, " +
+        "indeks boşluqları, daxili jurnallar." +
+        (Number(b.bpr) ? " Bir cavablanan sual ≈ <b>" + bayt(Number(b.bpr)) + "</b>." : "") +
+        " Cavab sayı 1000-dən azdırsa bayt <b>hesablanmır</b>: boş səhifələr " +
+        "və indekslər az sətrə bölünəndə rəqəm on dəfələrlə şişir.</p>" +
+      "</details>" +
+      "</div>" +
+      '<div class="spacer"></div>';
+  }
+
   function visitsSection(vs) {
     var t = vs.today || {}, w = vs.d7 || {}, m = vs.d30 || {};
     var days = vs.days || [];
