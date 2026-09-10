@@ -6811,9 +6811,19 @@
        on("demoUp", "click", function () { sb.signOut().then(function () { nav("#/"); screenAuth("up"); }); });
      });
   }
+  /*  Ust zolaqdaki duymenin adi: numunede «Nümunədən çıx».  Ziyaretci
+      numuneye baxib sayta qayitmaq isteyende «Çıxış» ona giris formasi
+      acirdi - hesabi olmayan adam ucun dalandir.  */
+  function markDemo(on) {
+    if (!btnOut) return;
+    btnOut.textContent = on ? "Nümunədən çıx" : "Çıxış";
+    btnOut.classList.toggle("demoout", !!on);
+  }
+
   function demoBar() {
     var old = document.getElementById("demoBar");
     if (old) old.remove();
+    markDemo(!!(ACC && ACC.is_demo));
     if (!ACC || !ACC.is_demo) return;
     var c = ACC.demo_codes || {};
     var d = document.createElement("div");
@@ -8479,9 +8489,17 @@
   })();
 
   btnOut.addEventListener("click", function () {
+    //  Numunede "cixis" = sayta qayitmaq (yuxarida markDemo-ya bax).
+    var numune = !!(ACC && ACC.is_demo);
     sb.signOut().then(function () {
       CTX = null; ACC = null;
+      //  Zolaqlar cixisdan sonra ekranda qalirdi - giris formasinin
+      //  ustunde «Nümunə hesab» yazisi asili qalmisdi.
+      var b = document.getElementById("demoBar"); if (b) b.remove();
+      var pb = document.getElementById("payBar"); if (pb) pb.remove();
+      markDemo(false);
       try { history.replaceState(null, "", location.pathname); } catch (e) {}
+      if (numune) { location.href = "../"; return; }
       screenAuth("in");
     });
   });

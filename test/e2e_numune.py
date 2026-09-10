@@ -161,6 +161,21 @@ with sync_playwright() as pw:
     vt = vp.evaluate("document.body.textContent")
     ok("Ayan" in vt and "Davamiyyət" in vt and "Mövzu məşqi" in vt, "valideyn ekrani: usaq, davamiyyet, movzu mesqi", vt[:120].replace("\n", " "))
 
+    print("G0 · (184) Nümunədən çıxış: müəllim paneli")
+    #  Ziyaretci numune panelinde «Çıxış»a basanda giris formasi acilirdi -
+    #  hesabi olmayan adam ucun dalan.  Ustelik «Nümunə hesab» zolagi
+    #  giris formasinin ustunde asili qalirdi.
+    pg3b = page(ctx, 412, 900)
+    pg3b.goto(PANEL + "#/demo")
+    pg3b.wait_for_selector("#demoBar", timeout=40000)
+    pg3b.wait_for_selector("#groups .gcard", timeout=20000)
+    ok(pg3b.inner_text("#btnOut").strip() == "Nümunədən çıx",
+       "muellim: ust zolaqda «Nümunədən çıx»", pg3b.inner_text("#btnOut"))
+    pg3b.click("#btnOut"); pg3b.wait_for_load_state("load"); pg3b.wait_for_timeout(1200)
+    ok(pg3b.url.rstrip("/").endswith("8010") or pg3b.url.endswith("/index.html"),
+       "muellim: duyme sayta qaytarir", pg3b.url)
+    pg3b.close()
+
     print("G · (184) Nümunədən çıxış: şagird və valideyn")
     #  Ziyaretci numuneye baxirdi ve sayta qayida bilmirdi: «Çıxış»
     #  kod ekranini acirdi, orada yazacaq kodu yox idi.

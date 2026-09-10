@@ -1709,3 +1709,7 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 @media (max-width:430px){
   .warmline .wres,.warmline .plmk{margin-left:0}
 }
+
+/*  184: numune sessiyasinda ust zolaqdaki duyme «Nümunədən çıx» olur -
+    metn uzundur, telefonda basligi sixmasin deye biraz kicikdir.  */
+.top .btn.demoout{font-size:13px;padding:0 10px}
