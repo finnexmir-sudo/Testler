@@ -448,7 +448,7 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/p"); pg.reload()
     pg.wait_for_selector(".abn", timeout=15000)
     mt = pg.inner_text("#main")
-    ok("Hədiyyə ay" in mt, "hediyye veziyyeti yazilir", mt[:90].replace("\n", " "))
+    ok("Hədiyyə ayı" in mt, "hediyye veziyyeti yazilir", mt[:90].replace("\n", " "))
     ok("beta dövrü bitdikdən sonra" in mt, "abune sehifesinde beta qeydi")
     ab = pg.inner_text(".abn").replace("\n", " ")
     ok("beta bitəndən sonra aylıq" in ab and gozlenen in ab,
@@ -467,8 +467,13 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/p"); pg.reload()
     pg.wait_for_selector(".abn", timeout=15000)
     mt = pg.inner_text("#main")
-    ok("Sınaq ayı" in mt and "0 ₼" in mt, "sinaq ayi veziyyeti yazilir",
+    #  «Sınaq» sozu ARTIQ ISLEDILMIR: Bil10-da o, IMTAHAN demekdir ve
+    #  altdaki kart onsuz da «hədiyyədir» yazir (istifadeci tutdu).
+    #  El ile verilmis sinaqda da eyni soz gorunmelidir.
+    ok("Hədiyyə ayı" in mt and "0 ₼" in mt, "el ile verilmisde de «hədiyyə ayı»",
        mt[:90].replace("\n", " "))
+    ok("Sınaq" not in pg.inner_text(".abn") and "sınaq" not in pg.inner_text(".abn"),
+       "abune qutusunda «sınaq» sozu yoxdur", pg.inner_text(".abn")[:60])
     ab = pg.inner_text(".abn").replace("\n", " ")
     ok("beta bitəndən sonra aylıq" in ab and gozlenen in ab,
        "sinaq ayinda qutu serti dilde mebleg yazir", ab[:90])

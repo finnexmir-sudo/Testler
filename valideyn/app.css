@@ -156,3 +156,15 @@ details.fbd[open] summary::before{transform:rotate(45deg) translateY(-2px)}
   font-variant-numeric:tabular-nums;color:var(--fg)}
 .wkp .wkx{flex:0 0 auto;font-size:12px;color:var(--fg-3)}
 .wkp .wkr.off .wkd,.wkp .wkr.off .wkt{text-decoration:line-through;color:var(--fg-3)}
+
+/* ---- klik olunan yerlər dayanarkən də bilinsin (2026-09-10) ----
+   Telefonda hover yoxdur: yalnız :hover-ə söykənən element barmaq
+   üçün adi mətndən seçilmir.  Mətn içindəki keçid altdan xətli,
+   açılan bölmə isə marka rəngində olur.  */
+#main a[href]{text-decoration:underline;text-underline-offset:3px;
+  text-decoration-thickness:1px}
+#main a[href]:hover{text-decoration-thickness:2px}
+#main a[href]:active{opacity:.7}
+details.fbd summary{color:var(--brand)}
+details.fbd summary::before{border-color:var(--brand)}
+details.fbd summary:active{opacity:.7}

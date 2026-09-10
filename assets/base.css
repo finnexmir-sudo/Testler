@@ -352,3 +352,50 @@ body.bnav-on .pwabar{bottom:76px}
 .afoot .c{grid-column:1/-1}
 @media (max-width:640px){ .afoot .in{grid-template-columns:1fr 1fr} .afoot .fb{grid-column:1/-1} }
 @media (max-width:360px){ .afoot .in{grid-template-columns:1fr} }
+
+/* =====================================================================
+   KLİK OLUNAN YERLƏR — DAYANARKƏN DƏ BİLİNSİN (2026-09-10)
+
+   İstifadəçi: «klik olunacaq yerləri bir az diri edək, klik olunan
+   olduğu bilinsin».  Əsas səbəb: TELEFONDA HOVER YOXDUR.  Yalnız
+   :hover-ə söykənən element barmaq üçün adi mətndən seçilmir —
+   affordans **istirahət halında** olmalıdır.
+
+   Üç qat: (1) dayanarkən görünən nişan, (2) hover, (3) basılanda
+   :active geri-bildirimi.  Klaviatura üçün :focus-visible.
+   ================================================================== */
+
+/*  1. «Ghost» düymələr mətn kimi görünürdü (şəffaf kənar).  İndi nazik
+    kənarı var — düymə olduğu bilinir, amma əsas düyməni üstələmir.  */
+.btn.ghost{border-color:var(--line)}
+.btn.ghost:hover{background:var(--n-100);color:var(--fg);border-color:var(--n-300)}
+
+/*  2. Açılan bölmələr (<summary>) marka rəngindədir — həmin qayda
+    hər tətbiqin öz app.css-indədir (o, base.css-dən SONRA yüklənir,
+    ona görə buradan verilən rəng əzilirdi — tapılan tələ).  */
+
+/*  3. Mətn içindəki keçidlər: dayanarkən də altdan xətli olsun.
+    Yalnız rəng kifayət etmir — rəng kor istifadəçi üçün siqnal deyil.  */
+.prow a,.foot a,.sub a,a.inl{text-decoration:underline;
+  text-underline-offset:3px;text-decoration-thickness:1px;
+  text-decoration-color:currentColor}
+.prow a:hover,a.inl:hover{text-decoration-thickness:2px}
+
+/*  4. Basılma geri-bildirimi — barmaq altında «tərpəndi» hissi.  */
+.item:active,.gcard:active,.chip:active,.seg:active,.lch:active{
+  transform:scale(.985)}
+.item,.gcard,.chip,.seg,.lch{transition:transform .1s,background .12s,
+  border-color .12s,color .12s}
+
+/*  5. Klaviatura: hər klik olunan element fokusda görünsün.  */
+.fold>summary:focus-visible,details.more>summary:focus-visible,
+.item:focus-visible,.gcard:focus-visible,.chip:focus-visible,
+.seg:focus-visible,.lch:focus-visible,.morebtn:focus-visible{
+  outline:2px solid var(--brand);outline-offset:2px;border-radius:var(--r-sm)}
+
+/*  6. Toxunma cihazında hover «ilişib qalır» (ilk toxunuş hover sayılır).
+    Ona görə hover effektləri YALNIZ həqiqi kursoru olan cihazda.  */
+@media (hover:none){
+  .item:hover{background:transparent}
+  .chip:hover{border-color:var(--n-200)}
+}

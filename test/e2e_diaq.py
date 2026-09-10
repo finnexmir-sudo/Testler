@@ -224,6 +224,35 @@ with sync_playwright() as pw:
     pg.locator("#pDiag a").click(); pg.wait_for_selector("#diagBox", timeout=15000)
     ok(("#/s/" + sid) in pg.url, "kecid sagird ekranina aparir")
 
+    print("H · Sinifsiz qrup: nəyin bağlı olduğunu deyir, əmr vermir")
+    #  Sinif MECBURI DEYIL (classes.level_id null ola biler) - meselen
+    #  1-4-u bir yerde hazirlayan repetitor.  Ekran bunu sehv kimi
+    #  oxutmamalidir: ne itdiyini demelidir (db/178).
+    pg.goto(PANEL); pg.wait_for_selector("#btnGroup", timeout=15000)
+    pg.fill("#gname", "Sinifsiz qrup")            # #glevel bos qalir
+    pg.click("#btnGroup"); pg.wait_for_timeout(600)
+    gid2 = db("select id::text i from public.classes where name = 'Sinifsiz qrup'", one=True)["i"]
+    ok(db("select level_id is null n from public.classes where id=%s", (gid2,), one=True)["n"],
+       "sinifsiz qrup yaranir - sinif mecburi deyil")
+    pg.goto(PANEL + "#/g/" + gid2); pg.wait_for_selector("#gTabs", timeout=15000)
+    try: pg.wait_for_selector("#sname", state="visible", timeout=3000)
+    except Exception: pg.click("#btnStuOpen")
+    pg.fill("#sname", "Nurə Məmmədova"); pg.click("#btnStu")
+    pg.wait_for_selector(".stu", timeout=15000)
+    sid2 = db("select id::text i from public.students where class_id=%s", (gid2,), one=True)["i"]
+    pg.goto(PANEL + "#/s/" + sid2 + "/" + gid2)
+    pg.wait_for_selector("#diagBox .card p", timeout=15000)   # «Yuklenir…» kecsin
+    t = pg.inner_text("#diagBox")
+    ok("Sinif se\u00e7ilm\u0259yib" in t, "metn 'Sinif se\u00e7ilm\u0259yib' ile baslayir", t[:90])
+    ok("diaqnostika" in t and "s\u0259rb\u0259st m\u0259\u015fqi" in t and "ba\u011fl\u0131d\u0131r" in t,
+       "NE itdiyi yazilir: diaqnostika + serbest mesq")
+    ok("ayarlar\u0131nda sinfi se\u00e7in" not in t and "ayarlarinda sinfi secin" not in t,
+       "kohne emr veren metn yoxdur")
+    ok("secilmeyib" not in t and "Sagird" not in t,
+       "diakritikler duzgundur - ASCII qaliq yoxdur")
+    ok(pg.locator("#dgGo").count() == 0, "sinifsiz qrupda diaqnostika duymesi yoxdur")
+    if os.environ.get("SHOT"): pg.screenshot(path=os.environ["SHOT"] + "/diaq_sinifsiz.png")
+
     br.close()
 
 if fails:
