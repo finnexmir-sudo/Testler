@@ -162,6 +162,31 @@ with sync_playwright() as pw:
     ok(pr and 0 < pr["ms_max"] < 120000, "olculen vaxt ag-qara deyil", pr and pr["ms_max"])
     sp.close()
 
+    print("A4 · Giriş formasında keçən vaxt ölçüyə DÜŞMÜR")
+    #  CANLIDA TUTULAN SEHV (db/181): telefonda ilk giris 16 saniye
+    #  yazdi - sayt yavas deyildi, istifadeci parol YAZIRDI.  Burada
+    #  bilerekden 4 saniye gozlenilir; olcu ondan KICIK olmalidir.
+    db("delete from public.perf_days")
+    #  TEMIZ kontekst: eyni brauzerde sessiya yaddasdadir, giris ekrani
+    #  acilmazdi - ona gore ayrica kontekst goturulur.
+    gctx = br.new_context(viewport={"width": 430, "height": 900})
+    gp = gctx.new_page()
+    gp.route("**/config.js*", lambda r: r.fulfill(
+        status=200, content_type="application/javascript", body=TEST_CFG))
+    gp.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)))
+    gp.goto(PANEL); gp.wait_for_selector("#btnAuth", timeout=15000)
+    gp.fill("#email", "pkt@t.az")
+    gp.wait_for_timeout(4000)                 # «yavas yazan muellim»
+    gp.fill("#pass", "parol1234")
+    gp.click("#btnAuth")
+    gp.wait_for_selector("#groups", timeout=15000)
+    gp.wait_for_timeout(7000)
+    pg2 = db("select n, ms_max from public.perf_days", one=True)
+    ok(pg2 and pg2["n"] == 1, "girisden sonra da bir olcu yazilir", pg2)
+    ok(pg2 and pg2["ms_max"] < 4000,
+       "yazma vaxti olcuye dusmur (4 s gozlenildi)", pg2 and pg2["ms_max"])
+    gp.close(); gctx.close()
+
     #  Qiymet REQEMI ana sehifede YOXDUR - odenis hele acilmayib
     #  (istifadeci qerari: reqem yalniz muqayiseye devet olardi).
     hedd_t = ana.inner_text("#hedd")

@@ -156,6 +156,9 @@
   /* ------------------------------------------------------ giris ekrani */
   function screenAuth(mode, note) {
     mode = mode || "in";
+    //  Giris ekrani acildi - buradan sonra olculen vaxt insanin
+    //  yazma suretidir, saytin suret deyil.  Olcu sondurulur.
+    PERF_T0 = null;
     topTitle.textContent = "Müəllim paneli";
     topWho.textContent = "";
     btnOut.classList.add("hide");
@@ -220,6 +223,9 @@
             "linkə keçdikdən sonra bura qayıdıb daxil olun."));
           return;
         }
+        //  Giris tamamlandi - olcu buradan yeniden baslayir:
+        //  «Daxil ol»-a basandan panel islek olana qeder.
+        try { PERF_T0 = performance.now(); } catch (e) { PERF_T0 = null; }
         boot();
       }).catch(function (e) {
         setBusy("btnAuth", false, isUp ? "Hesab yarat" : "Daxil ol");
@@ -5442,6 +5448,9 @@
         "brauzerində götürülür, bizim serverdə yox: internetin sürəti də, " +
         "telefonun yavaşlığı da rəqəmə daxildir. Sonrakı keçidlər ölçülmür — " +
         "onlar onsuz da sürətlidir. Sessiya başına bir ölçü. " +
+        "<b>Giriş formasında keçən vaxt sayılmır</b> — orada ölçülən şey " +
+        "insanın yazma sürəti olardı; giriş tamamlanandan sonra yenidən " +
+        "başlayır. Arxa fonda qalmış səhifənin ölçüsü də atılır. " +
         "<b>Sizin öz açılışlarınız da sayılır</b> (ziyarət sayğacından fərqli " +
         "olaraq): burada sual «neçə nəfər» yox, «nə qədər çəkdi»dir.</p>" +
       "</details>" +
@@ -8319,14 +8328,35 @@
      ucun sehifenin isini pozmaq axmaqliqdir.
      ================================================================ */
   var PERF_SENT = false;
+  //  BASLANGIC NOQTESI.  0 = sehifenin oz baslangici (adi hal: sessiya
+  //  var, panel birbasa acilir - olculesi de elə odur).
+  //
+  //  CANLIDA TUTULAN SEHV (2026-09-10): telefonda ILK giris zamani
+  //  16 saniye yazildi.  Sebeb saytin yavasligi deyildi - istifadeci
+  //  giris formasinda e-poct ve parol YAZIRDI, performance.now() ise
+  //  sayirdi.  Insanin yazma sureti olcuye qarisdi.  Ona gore giris
+  //  ekrani gorunende olcu SONDURULUR, giris ugurlu olanda ise
+  //  baslangic hemin ana kocurulur - "Daxil ol"-dan panele qeder.
+  var PERF_T0 = 0;
+  //  Arxa fonda qalan tab da olcunu sisirir (brauzer timer-i saxlamir,
+  //  amma is gorulmur): sehife bir defe de gizlenibse olcu atilir.
+  var PERF_GIZLI = false;
+  try {
+    if (document.visibilityState === "hidden") PERF_GIZLI = true;
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") PERF_GIZLI = true;
+    });
+  } catch (e) {}
+
   function suretYaz() {
     if (PERF_SENT) return;
     PERF_SENT = true;
+    if (PERF_T0 === null || PERF_GIZLI) return;   // olcu kirlidir - atilir
     var ms;
     try {
       //  performance.now() sehifenin BASLANGICINDAN sayir - bizim
       //  skriptin yuklenmesi de daxildir, muellimin gordüyü vaxt budur.
-      ms = Math.round(performance.now());
+      ms = Math.round(performance.now() - PERF_T0);
     } catch (e) { return; }
     if (!ms || ms < 1 || ms > 120000) return;
     try { sb.rpc("rpc_perf", { p_page: "muellim", p_ms: ms }).catch(function () {}); }
