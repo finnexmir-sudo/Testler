@@ -1269,6 +1269,16 @@
     });
   }
 
+  /*  «Bu günün dərsi» kartindaki «Planı qur» QISAYOLDUR: «Dərs planı»
+      sekmesine kecir ve oradaki esl duymeni basir.  Muellim ARTIQ
+      hemin sekmededirse qisayolun isi qalmir - ekranda eyni yazi iki
+      defe gorunur (istifadeci tutdu).  Onda gizlenir; cumlenin izahi
+      («Plan qursanız növbəti mövzu... burada olacaq») yerinde qalir.  */
+  function prepPlanLink() {
+    var a = $("prepPlan");
+    if (a) a.hidden = (GTAB === "p");
+  }
+
   /* ------------------------------------------------ bu gunun cedveli
      Icmaldaki kart.  Cedvel QURULMAYIBSA hec ne cizilmir - istifadeci
      qaydasi: qurulmayan funksiya gorunmemelidir.  Bugun dersi yoxdursa
@@ -1308,6 +1318,11 @@
           '<span class="wkn">' + esc(n.class) + "</span>" +
           '<span class="muted">' + esc(haftaAz(n.date)) + "</span></div></div>";
       }
+      //  BUTUN HEFTE - «hansı günlər hansı saatlar doludur» (istifadeci).
+      //  Yigilmis setirdir: gundelik lazim olan BUGUNKU dersdir, hefte
+      //  ise plan qurarkən lazim olur.  Teze sorgu getmir - rpc_week
+      //  onsuz da 7 gunun hamisini qaytarir.
+      h += hefteFold(w, gun);
       box.innerHTML = h + "</div>";
       on("wkCard", "click", function (e) {
         var b = e.target.closest ? e.target.closest("[data-wk]") : null;
@@ -1318,6 +1333,39 @@
       });
     }).catch(function () {});
   }
+  /*  Heftelik icmal: hansi gun, hansi saat, hansi qrup.
+      Bos gun de gosterilir («—») - «bos gun hansidir?» sualinin
+      cavabi elə odur; yalniz dolu gunleri yazsaq, bosluq gorunmez.
+      Eyni saatda iki qrup varsa bu, ustunde «·» ile yanasi durur -
+      «hansi saat doludur» sualina birbasa cavab.  */
+  function hefteFold(w, gun) {
+    if (!gun.length) return "";
+    var gunler = {};
+    gun.forEach(function (x) { (gunler[x.date] = gunler[x.date] || []).push(x); });
+    var bas = new Date(w.from + "T00:00:00");
+    var setir = "", i, d, iso, list;
+    for (i = 0; i < 7; i++) {
+      d = new Date(bas.getTime() + i * 86400000);
+      iso = d.getFullYear() + "-" +
+            (d.getMonth() < 9 ? "0" : "") + (d.getMonth() + 1) + "-" +
+            (d.getDate() < 10 ? "0" : "") + d.getDate();
+      list = (gunler[iso] || []).slice().sort(function (a, b) {
+        return a.time < b.time ? -1 : (a.time > b.time ? 1 : 0);
+      });
+      setir += '<div class="wkg' + (iso === w.today ? " now" : "") + '">' +
+        '<span class="wgd">' + GUNAD[d.getDay() === 0 ? 7 : d.getDay()] +
+          (iso === w.today ? " · bu gün" : "") + "</span>" +
+        '<span class="wgl">' + (list.length
+          ? list.map(function (x) {
+              return '<s class="wgi' + (x.hal === "cancelled" ? " off" : "") + '">' +
+                "<b>" + esc(x.time) + "</b> " + esc(x.class) + "</s>";
+            }).join("")
+          : '<em class="wgn">—</em>') + "</span></div>";
+    }
+    return '<details class="fold wkf"><summary>Bütün həftə</summary>' +
+      '<div class="wkgrid">' + setir + "</div></details>";
+  }
+
   //  «sabah», «çərşənbə», «12 sen» - yaxin gunler adla, uzaqlar tarixle
   function haftaAz(iso) {
     var d = new Date(iso + "T00:00:00");
@@ -1697,6 +1745,7 @@
           .then(function () { busy = false; loadPrep(g); })
           .catch(function (e) { busy = false; b.disabled = false; b.textContent = "isinmə 5 sual"; alert(fail(e)); });
       });
+      prepPlanLink();
       on("prepPlan", "click", function (e) {
         e.preventDefault();
         var b = document.querySelector('#gTabs [data-v="p"]');
@@ -2325,6 +2374,7 @@
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
       GTAB = b.getAttribute("data-v");
+      prepPlanLink();
       try { sessionStorage.setItem("gtab", GTAB); } catch (e) {}
       Array.prototype.forEach.call(document.querySelectorAll("#gTabs .seg"), function (x) {
         x.classList.toggle("on", x.getAttribute("data-v") === GTAB);

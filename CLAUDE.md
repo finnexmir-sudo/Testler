@@ -2564,6 +2564,52 @@ orada `.fold` yoxdur, gözləmə oraya qoyulmamalıdır.
 daimi» qaytarır — qiymət, «hədiyyə bitir» və xatırlatma zolağı
 görünmür (`rpc_paket` bunu onsuz da edirdi, my_context geridə qalmışdı).
 
+## Klik olunan yerlər dayanarkən də bilinsin (2026-09-10)
+
+İstifadəçi: «klik olunacaq yerləri bir az diri edək, klik olunan olduğu
+bilinsin». **Əsas səbəb: telefonda HOVER YOXDUR.** Yalnız `:hover`-ə
+söykənən element barmaq üçün adi mətndən seçilmir — affordans
+**istirahət halında** olmalıdır.
+
+| Nə idi | Nə oldu |
+|---|---|
+| `.btn.ghost` şəffaf kənarlı — mətn kimi görünürdü | nazik kənar (`--line`) |
+| `<summary>` boz mətn | **marka rəngi** + marka oxu |
+| Mətn içindəki keçid yalnız rəngli | **dayanarkən altdan xətli** |
+| Basılanda heç nə | `:active` — 0,985 kiçilir |
+| Klaviatura görünmürdü | `:focus-visible` halqası |
+| Toxunma cihazında hover «ilişirdi» | `@media (hover:none)` sıfırlayır |
+
+Rəng tək başına siqnal deyil — **rəng kor istifadəçi üçün də** xətt lazımdır.
+
+**TƏLƏ (tapıldı):** `assets/base.css` hər tətbiqin `app.css`-indən
+**ƏVVƏL** yüklənir. Ona görə base.css-dən verilən `.fold>summary{color:…}`
+kimi qaydalar app.css-dəki eyni spesifiklikli qayda ilə **əzilir**.
+Ortaq qaydanı base.css-ə yaz, amma tətbiqin öz qaydası varsa **mənbədə**
+düzəlt.
+
+Valideyn və şagird tətbiqlərində eyni qayda `#main a[href]` üzərindən
+verilir.
+
+## Bütün həftə — «hansı gün hansı saat doludur» (2026-09-10)
+
+İstifadəçi: «müəllimin bütün qrupları üzrə bir cədvəl kimi bir şey olsun».
+Məlumat **artıq var idi** — `rpc_week` bütün qrupların 7 gününü qaytarır,
+ekran isə yalnız bugünü göstərirdi. **Yeni sorğu yoxdur.**
+
+İcmaldakı kartın içində yığılmış «Bütün həftə» bölməsi: hər gün bir sətir,
+dərslər çip kimi («**16:00** Ev qrup»). **Boş gün də sətir tutur** və «—»
+yazır — «boş günüm hansıdır?» sualının cavabı elə odur; yalnız dolu günləri
+yazsaq, boşluq görünməz. Eyni gündə iki dərs yan-yana durur — «bu saat
+doludur» siqnalı budur. Ləğv edilən dərsin üstündən xətt çəkilir.
+
+Yoxlama: `e2e_cedvel` D2 — yeddi sətrin hamısı, boş günün «—»-i, bugünün
+işarəsi, eyni gündə iki dərs.
+
+**Testdə tələ:** D2 ikinci qrupa da cədvəl qurur; F bölməsi cədvəli
+silərkən **hesabın bütün** sətirlərini silməlidir, yoxsa kart haqlı olaraq
+yerində qalır və test yanlış düşür.
+
 ## «Sınaq» sözü — müəllim mətnlərində İŞLƏDİLMİR (2026-09-10)
 
 İstifadəçi zolaqda «**Sınaq bitir** · 3 okt» görüb soruşdu: düzdürmü?

@@ -114,6 +114,30 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#ledgerBox", timeout=20000); pg.wait_for_timeout(800)
     ok("Bu gün" in pg.inner_text("#ledgerBox"), "kartdan defter ekranina kecir")
 
+    print("D2 · «Bütün həftə» — hansı gün hansı saat doludur")
+    #  Ikinci qrup ve ikinci ders: hefte icmalinda ikisi de gorunmelidir
+    c2 = db("insert into public.classes (account_id, teacher_id, kind, name, join_code)"
+            " values (%s,%s,'tutor_group','11-B qrupu','KODCE002') returning id",
+            (acc["id"], acc["owner_id"]), one=True)["id"]
+    db("insert into public.class_schedule (class_id, weekday, starts_at, mins)"
+       " values (%s,%s,'18:00',60)", (c2, ISODOW))
+    db("insert into public.class_schedule (class_id, weekday, starts_at, mins)"
+       " values (%s,%s,'11:00',60)", (cls, (ISODOW % 7) + 1))
+    pg.goto(PANEL + "#/"); pg.reload()
+    pg.wait_for_selector("#hWeek .wk", timeout=20000); pg.wait_for_timeout(800)
+    ok(pg.locator(".fold.wkf").count() == 1, "«Bütün həftə» bolmesi var")
+    pg.eval_on_selector(".fold.wkf", "e => e.open = true"); pg.wait_for_timeout(400)
+    #  YEDDI gun de setir tutur - bos gun de gorunmelidir, yoxsa
+    #  «bos günüm hansıdır?» sualina cavab olmur (istifadeci teleb etdi)
+    ok(pg.locator(".wkgrid .wkg").count() == 7, "yeddi gunun hamisi setirdedir",
+       pg.locator(".wkgrid .wkg").count())
+    ok(pg.locator(".wkgrid .wgn").count() >= 1, "bos gun «—» ile gosterilir")
+    ok(pg.locator(".wkg.now").count() == 1, "bugun isaretlidir")
+    wg = pg.inner_text(".wkg.now").replace("\n", " ")
+    ok("16:00" in wg and "18:00" in wg and "bu gün" in wg,
+       "bugunku IKI ders de yanasi gorunur - «bu saat doludur»", wg[:80])
+    ok("11:00" in pg.inner_text(".wkgrid"), "basqa gunun dersi de siyahidadir")
+
     print("E · Ləğv edilən dərs siyahıda qalır")
     db("insert into public.lesson_changes (class_id, on_date) values (%s,%s)", (cls, BUGUN))
     pg.goto(PANEL + "#/"); pg.reload()
@@ -126,7 +150,10 @@ with sync_playwright() as pw:
        "valideyn de legvi gorur - onun ucun en vacib xeberdir")
 
     print("F · Cədvəl silinəndə hər şey gizlənir")
-    db("delete from public.class_schedule where class_id = %s", (cls,))
+    #  D2-de IKINCI qrupa da cedvel qurulmusdu - hamisini silmek lazimdir,
+    #  yoxsa kart haqli olaraq yerinde qalir.
+    db("delete from public.class_schedule s using public.classes c"
+       " where c.id = s.class_id and c.account_id = %s", (acc["id"],))
     pg.goto(PANEL + "#/"); pg.reload()
     pg.wait_for_selector(".gcard", timeout=20000); pg.wait_for_timeout(1200)
     ok(pg.inner_html("#hWeek").strip() == "", "Icmalda kart yeniden gizlenir")

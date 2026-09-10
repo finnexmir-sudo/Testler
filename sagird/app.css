@@ -402,3 +402,13 @@ details.fbd[open] summary{color:var(--fg-2)}
 
 /*  altliq ekranla eyni enlikde  */
 .afoot .in{max-width:600px}
+
+/* ---- klik olunan yerlər dayanarkən də bilinsin (2026-09-10) ----
+   Telefonda hover yoxdur — affordans istirahət halında olmalıdır.  */
+#main a[href]{text-decoration:underline;text-underline-offset:3px;
+  text-decoration-thickness:1px}
+#main a[href]:hover{text-decoration-thickness:2px}
+#main a[href]:active{opacity:.7}
+details.more summary{color:var(--brand)}
+details.more summary:active{opacity:.7}
+details.fbd summary{color:var(--brand)}
