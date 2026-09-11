@@ -484,7 +484,13 @@ Sıra ilə (istifadəçi ilə razılaşdırılıb):
    `not null` — bir test sətri tam imtahanı tuta bilmir. Ona görə
    buraxılış hazırlığı **imtahan şablonu** kimi qurulacaq (bax yol
    xəritəsində «Buraxılış sınaq imtahanı»). Kataloq: **2 proqram**
-   (ibtidai, orta), 11 sinif, 12 fənn.
+   (ibtidai, orta), 11 sinif, 14 fənn (2026-09-11: **Zəfər tarixi**
+   (yalnız 9-cu sinif) və **Ortaq türk tarixi** (yalnız 8-ci sinif)
+   əlavə olundu — e-derslik.edu.az kataloq auditində tapılan, əvvəllər
+   izlənməyən iki müstəqil dərslik, `bil10-bank/db/236-238`. Hər ikisi
+   «Tarix»dən ayrıdır — ayrı dərslik, ayrı qiymət, ədəbiyyat kimi eyni
+   məntiq. 9+7=16 movzu, 496 sual, hər movzuda ≥12 çətin sual (yeni
+   fənn ilk gündən norma ilə qurulub, retrofit lazım olmadı).
 3. ~~Dərs planı bölgüsü~~ — hazırdır (`db/25_ders_plani.sql`): qrupda
    fənn+sinif seçilir, mövzular dərslik ardıcıllığı ilə plana düzülür.
    Plan TARİXLƏ yox, ARDICILLIQLA yaşayır («keçildi» deyilməyincə cari
