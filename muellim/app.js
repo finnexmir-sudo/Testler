@@ -187,9 +187,33 @@
         '<div class="spacer"></div>' +
         '<button class="btn ghost wide" id="btnSwap">' +
           (isUp ? "Hesabım var — daxil ol" : "Hesabınız yoxdur? Yaradın") + "</button>" +
-      "</div>"
+      "</div>" +
+      /*  185: HUNININ EN BOYUK DELIYI BURADADIR.
+          Olcu (2026-09-11, 30 gun): 38 unikal ziyaretciden 18-i bu
+          ekrana geldi, yalniz 6-si qeydiyyata basladi.  12 nefer
+          formaya baxib geri dondu.  Numune ise onlarin artiq terk
+          etdiyi ana sehifededir - burada hec bir izi yox idi.
+          Indi qerar verilen yerde durur: hec ne istemir, bir kliklə
+          dolu panel acilir.  Sayta qayidis da burada idi - yox idi,
+          ekran dalan idi.  */
+      '<div class="card dcard">' +
+        '<b class="dch">Əvvəl baxmaq istəyirsiniz?</b>' +
+        '<p class="note">Qeydiyyatsız nümunə hesab: üç qrup, 25 şagird, ' +
+          "45 günlük nəticə. Bir kliklə açılır, sizdən heç nə istəmir.</p>" +
+        '<button class="btn wide dgo" id="btnDemoGo">Nümunəyə bax</button>' +
+      "</div>" +
+      '<p class="note authback"><a href="../">← Bil10 ana səhifəsi</a></p>'
     );
 
+    on("btnDemoGo", "click", function () {
+      ziyaret("demo_muellim");
+      /*  nav() burada islemir: hashchange yalniz SESSIYA VARSA marsrut
+          qurur, giris ekraninda ise sessiya yoxdur - unvan deyisirdi,
+          ekran olduğu kimi qalirdi.  Unvani yazib ekrani ozumuz aciriq
+          (yenileyende de numune acilsin deye unvan lazimdir).  */
+      try { location.hash = "#/demo"; } catch (e) {}
+      screenDemo();
+    });
     on("btnSwap", "click", function () { screenAuth(isUp ? "in" : "up"); });
     on("btnForgot", "click", screenForgot);
     on("btnAuth", "click", doAuth);
@@ -8425,6 +8449,16 @@
     } catch (e) { return; }
     if (!ms || ms < 1 || ms > 120000) return;
     try { sb.rpc("rpc_perf", { p_page: "muellim", p_ms: ms }).catch(function () {}); }
+    catch (e) {}
+  }
+
+  /*  185: giris ekranindaki numune klikini sayir.  Ana sehifedeki
+      visit.js ile eyni qaydalar: oz ziyaretimiz sayilmir (bil10_oz
+      nisani), xeta olsa sakitce kecir.  Sehife adi 'giris'-dir ki,
+      admin ana sehife klikinden ayira bilsin.  */
+  function ziyaret(ev) {
+    try { if (localStorage.getItem("bil10_oz")) return; } catch (e) {}
+    try { sb.rpc("rpc_visit", { p_page: "giris", p_ev: ev }).catch(function () {}); }
     catch (e) {}
   }
 

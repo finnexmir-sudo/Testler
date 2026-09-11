@@ -64,6 +64,32 @@ with sync_playwright() as pw:
     links = pg.locator("#demo a").evaluate_all("els => els.map(e => e.getAttribute('href'))")
     ok(links == ["muellim/#/demo", "sagird/?kod=DEMO0001", "valideyn/?kod=VDEMO001"], "uc link", links)
 
+    print("A2 · (185) Giriş ekranında nümunə keçidi")
+    #  Huninin en boyuk deliyi: formaya gelen 18 neferden 12-si geri
+    #  donurdu, numuneye kecid ise yalniz ana sehifede idi.
+    ap = page(ctx, 412, 915)
+    ap.goto(ROOT + "muellim/index.html")
+    ap.wait_for_selector("#btnAuth", timeout=20000)
+    ok(ap.locator("#btnDemoGo").count() == 1, "giris ekraninda «Nümunəyə bax» duymesi")
+    ok(ap.locator(".authback a[href='../']").count() == 1,
+       "giris ekraninda sayta qayidis")
+    ap.click("#btnSwap"); ap.wait_for_selector("#fname", timeout=10000)
+    ok(ap.locator("#btnDemoGo").count() == 1, "qeydiyyat ekraninda da var")
+    ap.click("#btnSwap"); ap.wait_for_selector("#btnAuth", timeout=10000)
+    #  Duyme ISLEMELIDIR: evvel nav() cagirilirdi, hashchange ise yalniz
+    #  sessiya varsa marsrut qurur - unvan deyisir, ekran qalirdi.
+    SAY = "select count(*) n from public.visits where page='giris' and ev='demo_muellim'"
+    n0 = db(SAY, one=True)["n"]
+    ap.click("#btnDemoGo")
+    ap.wait_for_selector("#demoBar", timeout=60000)
+    ap.wait_for_selector("#groups .gcard", timeout=30000)
+    ok(ap.locator("#groups .gcard").count() == 3, "duyme numuneni acir",
+       ap.locator("#groups .gcard").count())
+    #  185: klik sayilir - ana sehifedeki klikden AYRI ('giris' sehifesi)
+    n1 = db(SAY, one=True)["n"]
+    ok(n1 > n0, "klik «giris» sehifesi kimi sayilir", str(n0) + " -> " + str(n1))
+    ap.close()
+
     print("B · Müəllim kimi bax: anonim giriş, öz nüsxə, zolaq")
     pg.click("#demo a[href='muellim/#/demo']")
     pg.wait_for_selector("#demoBar", timeout=40000)
