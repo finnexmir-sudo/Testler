@@ -105,3 +105,6 @@ python3 test/e2e_jeton.py
 echo
 echo "29/29 qrupun cedveli"
 python3 test/e2e_cedvel.py
+echo
+echo "30/30 paylasim karti"
+python3 test/e2e_paylasim.py

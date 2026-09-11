@@ -64,6 +64,32 @@ with sync_playwright() as pw:
     links = pg.locator("#demo a").evaluate_all("els => els.map(e => e.getAttribute('href'))")
     ok(links == ["muellim/#/demo", "sagird/?kod=DEMO0001", "valideyn/?kod=VDEMO001"], "uc link", links)
 
+    print("A2 · (185) Giriş ekranında nümunə keçidi")
+    #  Huninin en boyuk deliyi: formaya gelen 18 neferden 12-si geri
+    #  donurdu, numuneye kecid ise yalniz ana sehifede idi.
+    ap = page(ctx, 412, 915)
+    ap.goto(ROOT + "muellim/index.html")
+    ap.wait_for_selector("#btnAuth", timeout=20000)
+    ok(ap.locator("#btnDemoGo").count() == 1, "giris ekraninda «Nümunəyə bax» duymesi")
+    ok(ap.locator(".authback a[href='../']").count() == 1,
+       "giris ekraninda sayta qayidis")
+    ap.click("#btnSwap"); ap.wait_for_selector("#fname", timeout=10000)
+    ok(ap.locator("#btnDemoGo").count() == 1, "qeydiyyat ekraninda da var")
+    ap.click("#btnSwap"); ap.wait_for_selector("#btnAuth", timeout=10000)
+    #  Duyme ISLEMELIDIR: evvel nav() cagirilirdi, hashchange ise yalniz
+    #  sessiya varsa marsrut qurur - unvan deyisir, ekran qalirdi.
+    SAY = "select count(*) n from public.visits where page='giris' and ev='demo_muellim'"
+    n0 = db(SAY, one=True)["n"]
+    ap.click("#btnDemoGo")
+    ap.wait_for_selector("#demoBar", timeout=60000)
+    ap.wait_for_selector("#groups .gcard", timeout=30000)
+    ok(ap.locator("#groups .gcard").count() == 3, "duyme numuneni acir",
+       ap.locator("#groups .gcard").count())
+    #  185: klik sayilir - ana sehifedeki klikden AYRI ('giris' sehifesi)
+    n1 = db(SAY, one=True)["n"]
+    ok(n1 > n0, "klik «giris» sehifesi kimi sayilir", str(n0) + " -> " + str(n1))
+    ap.close()
+
     print("B · Müəllim kimi bax: anonim giriş, öz nüsxə, zolaq")
     pg.click("#demo a[href='muellim/#/demo']")
     pg.wait_for_selector("#demoBar", timeout=40000)
@@ -74,6 +100,13 @@ with sync_playwright() as pw:
     ok(db("select count(*) n from public.accounts where is_demo", one=True)["n"] == 2, "paylasilan + nusxe = 2 numune hesab")
     pg.wait_for_selector("#groups .gcard", timeout=15000)
     ok(pg.locator("#groups .gcard").count() == 3, "uc qrup", pg.locator("#groups .gcard").count())
+    #  183: numune 'repetitor-25' uzerinde otururdu - 25 sagirdle limit
+    #  hemise dolu idi ve Icmalda qirmizi xeberdarliq cixirdi.
+    icmal = pg.evaluate("document.body.textContent")
+    ok("Paketin limiti dolub" not in icmal, "paket limiti xeberdarligi yoxdur (183)")
+    #  183: cedvel elave olundu - «Bu gün dərs var» / hefte karti
+    ok(len(pg.inner_text("#hWeek").strip()) > 0, "hefte cedveli karti dolu (183)",
+       pg.inner_text("#hWeek")[:60].replace("\n", " "))
     ok("Nümunə Müəllim" in pg.inner_text("#topWho"), "ad: Numune Muellim")
     pg.locator("#groups .gcard", has_text="7-ci sinif").first.click(); pg.wait_for_selector("#gTabs", timeout=15000)
     pg.wait_for_selector("#prep .prep", timeout=20000)
@@ -153,6 +186,45 @@ with sync_playwright() as pw:
     vp.goto(ROOT + "valideyn/?kod=VDEMO001"); vp.wait_for_selector(".who", timeout=20000)
     vt = vp.evaluate("document.body.textContent")
     ok("Ayan" in vt and "Davamiyyət" in vt and "Mövzu məşqi" in vt, "valideyn ekrani: usaq, davamiyyet, movzu mesqi", vt[:120].replace("\n", " "))
+
+    print("G0 · (184) Nümunədən çıxış: müəllim paneli")
+    #  Ziyaretci numune panelinde «Çıxış»a basanda giris formasi acilirdi -
+    #  hesabi olmayan adam ucun dalan.  Ustelik «Nümunə hesab» zolagi
+    #  giris formasinin ustunde asili qalirdi.
+    pg3b = page(ctx, 412, 900)
+    pg3b.goto(PANEL + "#/demo")
+    pg3b.wait_for_selector("#demoBar", timeout=40000)
+    pg3b.wait_for_selector("#groups .gcard", timeout=20000)
+    ok(pg3b.inner_text("#btnOut").strip() == "Nümunədən çıx",
+       "muellim: ust zolaqda «Nümunədən çıx»", pg3b.inner_text("#btnOut"))
+    pg3b.click("#btnOut"); pg3b.wait_for_load_state("load"); pg3b.wait_for_timeout(1200)
+    ok(pg3b.url.rstrip("/").endswith("8010") or pg3b.url.endswith("/index.html"),
+       "muellim: duyme sayta qaytarir", pg3b.url)
+    pg3b.close()
+
+    print("G · (184) Nümunədən çıxış: şagird və valideyn")
+    #  Ziyaretci numuneye baxirdi ve sayta qayida bilmirdi: «Çıxış»
+    #  kod ekranini acirdi, orada yazacaq kodu yox idi.
+    ok(sp.inner_text("#btnOut").strip() == "Nümunədən çıx",
+       "sagird: ust zolaqda «Nümunədən çıx»", sp.inner_text("#btnOut"))
+    sp.click("#btnOut"); sp.wait_for_load_state("load"); sp.wait_for_timeout(800)
+    ok(sp.url.rstrip("/").endswith("8010") or sp.url.endswith("/index.html")
+       or sp.url == ROOT, "sagird: duyme sayta qaytarir", sp.url)
+    ok(vp.inner_text("#btnOut").strip() == "Nümunədən çıx",
+       "valideyn: ust zolaqda «Nümunədən çıx»", vp.inner_text("#btnOut"))
+    vp.click("#btnOut"); vp.wait_for_load_state("load"); vp.wait_for_timeout(800)
+    ok(vp.url.rstrip("/").endswith("8010") or vp.url.endswith("/index.html")
+       or vp.url == ROOT, "valideyn: duyme sayta qaytarir", vp.url)
+    #  Kod ekrani da dalan olmamalidir: gorunen qayidis duymesi
+    for yol, ad in ((ROOT + "sagird/", "sagird"), (ROOT + "valideyn/", "valideyn")):
+        kp = page(ctx, 390, 844)
+        kp.goto(yol)
+        kp.wait_for_selector("#btnIn", timeout=20000)
+        ok(kp.locator("a.btn.bak").count() == 1,
+           ad + ": kod ekraninda gorunen «ana səhifə» duymesi")
+        ok(kp.locator("a.btn.bak").get_attribute("href") == "../",
+           ad + ": duyme sayta baglidir")
+        kp.close()
 
     print("E · Sıfırlama: paylaşılan yenidən qurulur, kodlar eyni")
     db("update public.app_state set val = jsonb_build_object('at', now() - interval '1 hour') where key='demo_reset'")

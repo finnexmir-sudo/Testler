@@ -30,9 +30,12 @@ insert into public.accounts (id, type, name, owner_id) values
 insert into public.account_members values
   ('aaaa0000-0000-0000-0000-0000000000fa','11110000-0000-0000-0000-0000000000fa',true),
   ('aaaa0000-0000-0000-0000-0000000000fb','11110000-0000-0000-0000-0000000000fb',true);
-insert into public.classes (id, account_id, teacher_id, kind, name, join_code) values
+--  182-den sonra YENI qrupda valideyn girisi susmaya gore ACIQDIR
+--  (onu smoke_valideyn_susma yoxlayir).  Bu fayl EL ILE ACMA/BAGLAMA
+--  yolunu yoxlayir, ona gore qrup qesden BAGLI qurulur.
+insert into public.classes (id, account_id, teacher_id, kind, name, join_code, parent_access) values
   ('cccc0000-0000-0000-0000-0000000000fa','aaaa0000-0000-0000-0000-0000000000fa',
-   '11110000-0000-0000-0000-0000000000fa','tutor_group','V qrupu','KODVAL01');
+   '11110000-0000-0000-0000-0000000000fa','tutor_group','V qrupu','KODVAL01', false);
 
 \echo '--- hazirliq tamam'
 
@@ -40,7 +43,7 @@ set role authenticated;
 set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000fa';
 
 -- =====================================================================
---  1. SUSMAYA GORE BAGLI - muellim acmayibsa valideyn girisi yoxdur
+--  1. BAGLI QRUP - muellim acmayibsa valideyn girisi yoxdur
 -- =====================================================================
 do $$
 declare v jsonb; sid uuid; n int;
@@ -49,9 +52,9 @@ begin
   sid := (v->>'id')::uuid;
   select count(*) into n from public.students
    where id = sid and parent_code is not null;
-  assert n = 0, 'yeni sagirde valideyn kodu OZ-OZUNE verildi';
+  assert n = 0, 'bagli qrupda yeni sagirde valideyn kodu verildi';
 end $$;
-\echo 'OK  1 · valideyn girisi susmaya gore BAGLIDIR'
+\echo 'OK  1 · bagli qrupda valideyn kodu ozu verilmir'
 
 -- =====================================================================
 --  2. Muellim acir -> kod gelir; ikinci defe basanda kod DEYISMIR

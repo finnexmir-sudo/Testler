@@ -75,9 +75,9 @@ with sync_playwright() as pw:
         pg.fill("#sname", nm); pg.click("#btnStu"); pg.wait_for_timeout(500)
     pg.wait_for_function("document.querySelectorAll('.stu').length >= 3", timeout=15000)
     GID = db("select id::text i from public.classes limit 1", one=True)["i"]
-    row = pg.locator('.stu:has-text("Ayan Bir")')
-    row.locator("[data-edit]").click(); pg.wait_for_selector(".edit .pbox [data-pon]", timeout=15000)
-    row.locator("[data-pon]").click(); pg.wait_for_selector('.stu:has-text("Ayan Bir") .l3 .code', timeout=15000)
+    #  182: panelden elave olunan sagirde valideyn kodu OZU verilir -
+    #  «Valideyn girişini aç» duymesi artiq yoxdur, kod hazir gelir.
+    pg.wait_for_selector('.stu:has-text("Ayan Bir") .l3 .code', timeout=15000)
     PKOD = db("select parent_code c from public.students where full_name='Ayan Bir'", one=True)["c"]
 
     print("B · Dəftər sekməsi: «Dərs oldu», Murad gəlməyib")

@@ -76,9 +76,8 @@ with sync_playwright() as pw:
     except Exception: pg.click("#btnStuOpen")
     pg.fill("#sname", "Leyla Həsənova"); pg.click("#btnStu")
     pg.wait_for_selector(".stu", timeout=15000)
-    pg.locator(".stu [data-edit]").first.click()
-    pg.wait_for_selector(".edit .pbox [data-pon]", timeout=15000)
-    pg.locator(".stu [data-pon]").first.click()
+    #  182: panelden elave olunan sagirde valideyn kodu OZU verilir -
+    #  «Valideyn girişini aç» duymesi artiq yoxdur, kod hazir gelir.
     pg.wait_for_selector(".stu .l3 .code", timeout=15000)
     UID  = db("select id::text i from auth.users where email=%s", (EMAIL,), one=True)["i"]
     code = db("select login_code c from public.students limit 1", one=True)["c"]

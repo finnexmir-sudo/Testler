@@ -90,10 +90,8 @@ with sync_playwright() as p:
         except Exception: t.click("#btnStuOpen")
         t.fill("#sname", nm); t.click("#btnStu"); t.wait_for_timeout(700)
     t.wait_for_selector(".stu", timeout=15000)
-    # valideyn girisini ilk sagird ucun ac
-    row = t.locator(".stu").first
-    row.locator("[data-edit]").click(); t.wait_for_selector(".edit .pbox [data-pon]", timeout=15000)
-    row.locator("[data-pon]").click(); t.wait_for_selector(".stu .l3 .code", timeout=15000)
+    #  182: valideyn kodu sagird elave olunanda OZU yaranir
+    t.wait_for_selector(".stu .l3 .code", timeout=15000)
     t.wait_for_timeout(400); shot(t, "m4_qrup_sagirdler")
     gid = db("select id::text i from public.classes limit 1", one=True)["i"]
     code = db("select login_code c from public.students where full_name='Aysu Məmmədova'", one=True)["c"]

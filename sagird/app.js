@@ -21,6 +21,11 @@
   var S = null;         // aktiv cehd
   var ON_HOME = true;   // brauzerin "geri" duymesi tetbiqden CIXMASIN
   var busy = false;
+  /*  Numune sessiyasi (184: giris cavabinda demo=true).  Ziyaretci
+      "Şagird kimi bax" ile gelir, baxir - sonra sayta qayitmaq ucun
+      ACIQ bir duyme lazimdir.  Evvel «Çıxış» kod ekranini acirdi ve
+      ziyaretci orada ilisib qalirdi.  */
+  var DEMO = false;
 
   var LS = "sagird_ses";
 
@@ -216,8 +221,10 @@
       "</div>" +
       '<p class="note" style="text-align:center;margin-top:16px">' +
         "Kodu itirmisənsə müəllimindən yenisini istə.</p>" +
+      //  Kod ekrani dalan olmasin: sayta qayidis KICIK KECID deyil,
+      //  gorunen duymedir (numuneden cixan ziyaretci burada qalirdi).
+      '<a class="btn wide ghost bak" href="../">← Bil10 ana səhifəsi</a>' +
       '<p class="note" style="text-align:center;margin-top:10px">' +
-        '<a href="../" class="homelink">← Bil10 ana səhifəsi</a> · ' +
         '<a href="../komek/#sagird" class="helplink">Necə işləyir?</a></p>'
     );
     var inp = $("code");
@@ -252,8 +259,9 @@
           $("lErr").innerHTML = msg("err", (d && d.error) || "Kod yanlışdır.");
           return;
         }
-        TOKEN = d.token; ME = d.student; CLS = d.class;
-        try { localStorage.setItem(LS, JSON.stringify({ t: TOKEN, m: ME, c: CLS })); } catch (e) {}
+        TOKEN = d.token; ME = d.student; CLS = d.class; DEMO = d.demo === true;
+        try { localStorage.setItem(LS, JSON.stringify({ t: TOKEN, m: ME, c: CLS, d: DEMO })); } catch (e) {}
+        markDemo();
         screenTests();
       }).catch(function (e) {
         setBusy("btnIn", false, "Daxil ol");
@@ -1298,9 +1306,27 @@
 
   /* ----------------------------------------------------------- boot */
   function logout(note) {
-    TOKEN = null; ME = null; CLS = null; S = null;
+    //  Numuneye baxan ziyaretci ucun "cixis" = sayta qayitmaq.  Kod
+    //  ekrani ona hec ne vermir - orada yazacaq kodu yoxdur.
+    if (DEMO && !note) {
+      //  Sessiya da bitir: ziyaretci sonra sagird/ unvanini acsa
+      //  yeniden numunenin icinde tapilmasin.
+      try { localStorage.removeItem(LS); } catch (e) {}
+      location.href = "../";
+      return;
+    }
+    TOKEN = null; ME = null; CLS = null; S = null; DEMO = false;
     try { localStorage.removeItem(LS); } catch (e) {}
+    markDemo();
     screenLogin(note ? msg("warn", note) : "");
+  }
+
+  /*  Ust zolaqdaki duymenin adi: numunede «Nümunədən çıx» - basanda
+      bil10.az-a qayidir.  Real sagirdde «Çıxış» olduğu kimi qalir.  */
+  function markDemo() {
+    if (!btnOut) return;
+    btnOut.textContent = DEMO ? "Nümunədən çıx" : "Çıxış";
+    btnOut.classList.toggle("demoout", DEMO);
   }
 
   /* Test yarimciq qalibsa cixis/senifelenme xeberdarliq verir.
@@ -1374,7 +1400,8 @@
     var saved = null;
     try { saved = JSON.parse(localStorage.getItem(LS) || "null"); } catch (e) {}
     if (saved && saved.t) {
-      TOKEN = saved.t; ME = saved.m; CLS = saved.c;
+      TOKEN = saved.t; ME = saved.m; CLS = saved.c; DEMO = saved.d === true;
+      markDemo();
       screenTests();
     } else {
       screenLogin();
@@ -1384,9 +1411,15 @@
   /* Loqo klik = testler siyahisi (girissizse giris ekrani) */
   (function () {
     var mk = document.querySelector(".mark");
-    function goHome() {
-      if (S && S.attempt) return;   // imtahan zamani tesadufi cixis olmasin
-      if (TOKEN) screenTests(); else screenLogin();
+    /*  Loqo <a href="../">-dir.  Girisdeyken tetbiqin OZ evine (Testler)
+        qaytarir - ona gore kecid legv olunur.  Evvel legv olunmurdu ve
+        iki is eyni anda gedirdi: ekran deyisirdi, brauzer de sehifeni
+        atmaga calisirdi.  Girissizse kecid oz isini gorur (sayta).  */
+    function goHome(e) {
+      if (S && S.attempt) { if (e) e.preventDefault(); return; }
+      if (!TOKEN) return;             // kod ekrani: href sayta aparsin
+      if (e) e.preventDefault();
+      screenTests();
     }
     if (mk) { mk.style.cursor = "pointer"; mk.addEventListener("click", goHome); }
     if (topTitle) {

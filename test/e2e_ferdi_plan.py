@@ -73,9 +73,9 @@ with sync_playwright() as pw:
     try: pg.wait_for_selector("#sname", state="visible", timeout=3000)
     except Exception: pg.click("#btnStuOpen")
     pg.fill("#sname", "Kənan Əliyev"); pg.click("#btnStu"); pg.wait_for_selector(".stu", timeout=15000)
-    row = pg.locator(".stu").first
-    row.locator("[data-edit]").click(); pg.wait_for_selector(".edit .pbox [data-pon]", timeout=15000)
-    row.locator("[data-pon]").click(); pg.wait_for_selector(".stu .l3 .code", timeout=15000)
+    #  182: panelden elave olunan sagirde valideyn kodu OZU verilir -
+    #  «Valideyn girişini aç» duymesi artiq yoxdur, kod hazir gelir.
+    pg.wait_for_selector(".stu .l3 .code", timeout=15000)
     GID = db("select id::text i from public.classes limit 1", one=True)["i"]
     AID = db("select id::text i from public.accounts limit 1", one=True)["i"]
     SID = db("select id::text i from public.students limit 1", one=True)["i"]
