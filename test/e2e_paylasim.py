@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Paylasim karti (Open Graph) - butun sehifelerde.
+"""Paylasim karti (Open Graph) + axtaris gigiyenasi.
 
 Niye test lazimdir: bu teqler GORUNMUR.  Biri silinse ve ya sekil
 yolu qirilsa sayt normal isleyir, yalniz WhatsApp-da link quru gedir -
@@ -60,6 +60,48 @@ with sync_playwright() as pw:
     #  Sekil saytdan ACILIR (yol duzgundur)
     r = pg.request.get(ROOT + "assets/og.png")
     ok(r.status == 200, "sekil saytdan acilir", r.status)
+
+    print("C · Kanonik ünvan və noindex")
+    for yol in YOLLAR:
+        pg.goto(ROOT + yol)
+        d = pg.evaluate("""() => ({
+            c: (document.querySelector('link[rel=canonical]') || {}).href || '',
+            r: (document.querySelector('meta[name=robots]') || {}).content || ''
+        })""")
+        ad = yol.rstrip("/") or "ana"
+        ok(d["c"].startswith("https://bil10.az/"), ad + ": canonical var", d["c"])
+        #  Muellim paneli giris formasidir - indeksde yeri yoxdur.
+        #  Qalanlari ACIQ qalmalidir: birini sehven baglasaq saytin
+        #  yarisi axtarisdan itər və bunu aylarla bilmərik.
+        if ad == "muellim":
+            ok("noindex" in d["r"], "muellim: noindex", d["r"])
+        else:
+            ok("noindex" not in d["r"], ad + ": indekslenir", d["r"] or "(teq yoxdur)")
+
+    print("D · robots.txt və sitemap.xml")
+    r = pg.request.get(ROOT + "robots.txt")
+    ok(r.status == 200, "robots.txt acilir", r.status)
+    rob = r.text()
+    ok("Sitemap: https://bil10.az/sitemap.xml" in rob, "robots.txt sitemap-i gosterir")
+    ok("Disallow: /db/" in rob and "Disallow: /test/" in rob,
+       "db/ ve test/ axtarisdan baglanib")
+    #  Muellim paneli robots.txt-de OLMAMALIDIR - orada baglamaq onu
+    #  indeksden cixarmir, yalniz «noindex» teqini gormeye mane olur.
+    ok("Disallow: /muellim/" not in rob, "muellim robots.txt ile baglanmayib")
+
+    r = pg.request.get(ROOT + "sitemap.xml")
+    ok(r.status == 200, "sitemap.xml acilir", r.status)
+    sm = r.text()
+    import xml.etree.ElementTree as ET
+    try:
+        kok = ET.fromstring(sm)
+        unv = [e.text for e in kok.iter("{http://www.sitemaps.org/schemas/sitemap/0.9}loc")]
+    except Exception as e:
+        unv = []
+        ok(False, "sitemap duzgun XML-dir", str(e)[:60])
+    ok(len(unv) >= 4, "sitemap-de sehifeler var", len(unv))
+    ok("https://bil10.az/" in unv, "ana sehife sitemap-dedir")
+    ok(all("muellim" not in u for u in unv), "noindex sehife sitemap-de YOXDUR")
     br.close()
 
 print()

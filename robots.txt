@@ -1,0 +1,21 @@
+#  Bil10 — axtarış robotları üçün.
+#
+#  Sayt GitHub Pages-dədir: deponun BÜTÜN faylları yayımlanır (db/,
+#  test/, CLAUDE.md və s.).  Depo ictimaidir, yəni orada gizli heç nə
+#  yoxdur — sadəcə axtarış nəticələrində SQL və skript fayllarının
+#  görünməsi mənasızdır.  Ona görə onlar bağlanır.
+#
+#  DİQQƏT: müəllim panelini bura YAZMIRIQ.  Robots ilə bağlamaq
+#  səhifəni indeksdən çıxarmır — Google ünvanı məzmunsuz göstərə bilər,
+#  bu isə daha pisdir.  Onun öz səhifəsində «noindex» teqi var.
+User-agent: *
+Allow: /
+Disallow: /db/
+Disallow: /test/
+Disallow: /CLAUDE.md
+Disallow: /README.md
+Disallow: /bump.sh
+Disallow: /yeni.sh
+Disallow: /sw.js
+
+Sitemap: https://bil10.az/sitemap.xml
