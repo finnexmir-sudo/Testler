@@ -187,12 +187,25 @@ with sync_playwright() as pw:
        "yazma vaxti olcuye dusmur (4 s gozlenildi)", pg2 and pg2["ms_max"])
     gp.close(); gctx.close()
 
-    #  Qiymet REQEMI ana sehifede YOXDUR - odenis hele acilmayib
-    #  (istifadeci qerari: reqem yalniz muqayiseye devet olardi).
+    #  Qiymet REQEMI ana sehifede YAZILIR.
+    #  Evvel eksi qerar verilmisdi - «reqem yalniz muqayiseye devet
+    #  olardi».  2026-09-11-de istifadeci onu deyisdi: muellim qiymeti
+    #  onsuz da sorusur, gizletmek supheni artirir ve qeydiyyati lengidir.
+    #  «Nezerde tutulan tarif» ifadesi qesden secilib - reqemi deyirik,
+    #  amma ozumuzu baglamiriq.
     hedd_t = ana.inner_text("#hedd")
-    ok("₼" not in hedd_t, "ana sehifede mebleg yazilmir")
-    ok("Beta" in hedd_t and "heç nə ödəmir" in hedd_t,
-       "beta qeydi siyahinin USTUNDE, iri yazilir")
+    ok("1,50 ₼" in hedd_t, "ana sehifede tarif yazilir")
+    ok("nəzərdə tutulan" in hedd_t,
+       "tarif «nəzərdə tutulan» kimi verilir - qeti ved deyil")
+    ok("Beta mərhələsi" in hedd_t and "ödənişsizdir" in hedd_t,
+       "beta qeydi var")
+    #  Yer de yoxlanilir: evvel yalniz METN axtarilirdi, «ustundedir»
+    #  sozu yoxlanmirdi - siyahi yuxari kocse test yene kecerdi.
+    bq = ana.locator("#hedd .betabar").bounding_box()
+    sy = ana.locator("#hedd #heddBox").bounding_box()
+    ok(bq and sy and bq["y"] < sy["y"],
+       "beta qeydi siyahinin USTUNDEdir",
+       bq and sy and str(round(bq["y"])) + " < " + str(round(sy["y"])))
     ana.close()
     #  abunesiz hesabda hele sagird yoxdur -> 0 x 1,50 = 0 ₼
     abx = pg.inner_text(".abn").replace("\n", " ")

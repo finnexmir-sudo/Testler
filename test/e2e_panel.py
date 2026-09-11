@@ -66,8 +66,17 @@ def signup(pg, email, name, pw="parol1234"):
 
 with sync_playwright() as pw:
     br = pw.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
+    #  Ziyaret saygaci robotlari saymir (assets/visit.js).  Playwright
+    #  hem "HeadlessChrome" adi ilə gəlir, hem de navigator.webdriver
+    #  qoyur - yəni suzgec bizi de kesir.  Sayğacı yoxlaya bilmək üçün
+    #  burada ADI insan brauzeri kimi gosteririk; "robot sayilmir"
+    #  qaydasi asagida AYRICA yoxlanilir.
+    INSAN_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
     ctx = br.new_context(viewport={"width": 430, "height": 900},
+                         user_agent=INSAN_UA,
                          permissions=["clipboard-read", "clipboard-write"])
+    ctx.add_init_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined})")
     pg = new_page(ctx)
 
     print("0 · İlk səhifə")
@@ -130,6 +139,20 @@ with sync_playwright() as pw:
                 "a.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));})()")
     pg.wait_for_timeout(600)
     ok(db("select count(*) c from public.visits where ev='demo_muellim'", one=True)["c"] >= 1, "demo kliki sayildi")
+
+    #  ROBOT SAYILMIR.  Olcu (2026-09-11): Search Console-da sitemap
+    #  verdiyimiz DEQIQEDE panelde dord teze "ziyaretci" cixdi - Googlebot
+    #  sehifeni acib JavaScript-i islətmisdi.  Rəqəm real adam rəqəmi
+    #  olmalidir, yoxsa oz hərəkətimizi böyümə kimi oxuyuruq.
+    bot = br.new_context(viewport={"width": 1280, "height": 900},
+                         user_agent="Mozilla/5.0 (compatible; Googlebot/2.1; "
+                                    "+http://www.google.com/bot.html)")
+    bp = new_page(bot)
+    evvel = db("select count(*) c from public.visits", one=True)["c"]
+    bp.goto("http://127.0.0.1:8010/index.html"); bp.wait_for_timeout(900)
+    sonra = db("select count(*) c from public.visits", one=True)["c"]
+    ok(sonra == evvel, "robot sayilmir", str(evvel) + " -> " + str(sonra))
+    bot.close()
 
     #  0b · (164) Qurulmus tetbiq tanitim sehifesini acmir
     #  Ana sehifeden qurulan tetbiqin start_url-i kokdur; acilanda
