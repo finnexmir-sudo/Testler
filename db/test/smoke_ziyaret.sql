@@ -5,7 +5,7 @@
 --  ferqli IP ferqli vid · basliq yoxdursa vid null (say yene islenir) ·
 --  yanlis sehife/hadise redd · gunde 200 hedd · anon cedveli oxuya
 --  bilmir · admin cemi/gunler/hadiseler; adi muellim yox · 90 gunden
---  kohne setir silinir.
+--  kohne setir silinir · «wa»/«mail» klikleri de sayilir (186).
 -- =====================================================================
 \set ON_ERROR_STOP on
 set client_min_messages = warning;
@@ -32,6 +32,10 @@ begin
   assert (v->>'ok')::boolean, 'anon baxis yazmadi';
   v := public.rpc_visit('home', 'demo_muellim');
   v := public.rpc_visit('komek', 'view');
+  --  186: altliqdaki «WhatsApp» ve «e-poct» klikleri.  Evvel bunlar
+  --  sakitce redd olunurdu - sehifede data-ev var idi, serverde yox.
+  assert (public.rpc_visit('home', 'wa')->>'ok')::boolean, 'wa kliki sayilmadi';
+  assert (public.rpc_visit('home', 'mail')->>'ok')::boolean, 'mail kliki sayilmadi';
   perform set_config('request.headers', '{"x-forwarded-for":"5.6.7.8","user-agent":"UA-1"}', true);
   v := public.rpc_visit('home', 'view');
   perform set_config('request.headers', '', true);
@@ -45,7 +49,7 @@ reset role;
 do $$
 declare n int; d int; z int;
 begin
-  select count(*) into n from public.visits; assert n = 5, 'setir sayi: ' || n;
+  select count(*) into n from public.visits; assert n = 7, 'setir sayi: ' || n;
   select count(distinct vid) into d from public.visits where vid is not null; assert d = 2, 'unikal vid: ' || d;
   select count(*) into z from public.visits where vid is null; assert z = 1, 'basliqsiz vid null deyil';
   assert not exists (select 1 from public.visits where vid like '%1.2.3.4%'), 'IP acıq saxlanib!';
@@ -96,6 +100,8 @@ begin
   assert jsonb_array_length(v->'days') = 30, 'gun sayi 30 deyil';
   assert (v->'d30'->>'signup')::int = 1, '30 gun qeydiyyat (kohne hesab dusdu?): ' || (v->'d30'->>'signup');
   assert (v->'events'->>'demo_muellim')::int = 1, 'hadise sayi';
+  assert (v->'events'->>'wa')::int = 1, 'wa hadisesi: ' || coalesce(v->'events'->>'wa','yox');
+  assert (v->'events'->>'mail')::int = 1, 'mail hadisesi: ' || coalesce(v->'events'->>'mail','yox');
 end $$;
 reset role; reset request.jwt.claim.sub;
 do $$

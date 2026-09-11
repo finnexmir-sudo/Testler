@@ -105,6 +105,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 182_valideyn_susma.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 183_numune_dolu.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 184_numune_cixis.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 185_giris_ziyaret.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 186_elaqe_kliki.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

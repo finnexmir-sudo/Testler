@@ -5304,7 +5304,15 @@
         (pl ? '<button class="btn sm ghost arch" data-stop="1">Dayandır</button>' : "");
       //  «0 ş · 1 t · 0 c» oxunmurdu (istifadeci).  Indi esas reqem
       //  SAGIRD sayidir, altinda yalniz SIFIR OLMAYAN qalanlar yazilir.
+      //  QRUP SAYI (istifadeci, 2026-09-11): «qeydiyyatdan kecib, amma
+      //  qrup qurub?» sualina cavab hemise bazadan sorusulurdu.  Reqem
+      //  serverden onsuz da gelirdi (rpc_admin_accounts -> groups),
+      //  sadece cekilmirdi.  Bos hesabda «qrup yoxdur» ACIQ yazilir:
+      //  «0 şagird» iki ayri hal ola biler - qrupu qurub sagird elave
+      //  etmeyib, ya da hec ne etmeyib.  Bunlar eyni sey deyil.
       var ist = [];
+      if (a.groups) ist.push(a.groups + " qrup");
+      else if (!a.students) ist.push("qrup yoxdur");
       if (a.tests) ist.push(a.tests + " test");
       if (a.attempts) ist.push(a.attempts + " cəhd");
       return '<tr class="admr" data-em="' + esc(a.email || "") + '">' +
@@ -5647,7 +5655,10 @@
           "</b> demo kliki → <b>" + sign30 + "</b> qeydiyyat" + (conv >= 0 ? " (" + conv + "%)" : "") +
           ". Klik bölgüsü: müəllim " + (ev.demo_muellim || 0) + " · şagird " + (ev.demo_sagird || 0) +
           " · valideyn " + (ev.demo_valideyn || 0) + " · panelə keç " + (ev.panel || 0) +
-          " · bələdçi " + (ev.beledci || 0) + ".</p>" +
+          " · bələdçi " + (ev.beledci || 0) +
+          //  186: altliqdaki elaqe klikleri.  «Bizə yazmağa cəhd etdi»
+          //  ayrica siqnaldir - baxib gedenle eyni sey deyil.
+          " · WhatsApp " + (ev.wa || 0) + " · e-poçt " + (ev.mail || 0) + ".</p>" +
         '<p class="muted" style="margin:6px 0 0">IP saxlanmır; unikal = günlük duzla hash. Reklam bağlantıları, botlar da sayılır — meylə bax, rəqəmə yox.</p>' +
       "</div>" +
       '<div class="spacer"></div>';

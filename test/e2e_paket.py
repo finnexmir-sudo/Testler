@@ -295,6 +295,24 @@ with sync_playwright() as pw:
     row = pg.inner_text(ROW).replace("\n", " ")
     ok("iki@t.az" in row, "hesab siyahida e-poctla gorunur", row[:60])
     ok("paketsiz" in row, "paketsiz nisani gorunur")
+    #  Qrup sayi (2026-09-11).  «0 şagird» iki ayri hal ola biler:
+    #  qrup qurulub, amma sagird elave edilmeyib - ve ya hec ne
+    #  edilmeyib.  Admin bunlari bir-birinden ayira bilmelidir, yoxsa
+    #  her defe bazadan sorusur.
+    ok("qrup yoxdur" in row, "bos hesabda 'qrup yoxdur' yazilir", row[:80])
+    db("""insert into public.classes (account_id, teacher_id, kind, name, join_code)
+          values ('aaaa2222-0000-0000-0000-0000000000a2',
+                  '22220000-0000-0000-0000-0000000000a2',
+                  'tutor_group', 'Qrup sayi testi', 'KODQRP01')""")
+    #  Sehife ARTIQ idareetmededir (#/adm) - reload eyni ekrani acir,
+    #  «#btnAdm» burada yoxdur (o, Profil bendidir).
+    pg.reload(); pg.wait_for_selector(".admr", timeout=8000)
+    row = pg.inner_text(ROW).replace("\n", " ")
+    ok("1 qrup" in row and "qrup yoxdur" not in row,
+       "qrup qurulanda sayi yazilir", row[:80])
+    db("delete from public.classes where join_code = 'KODQRP01'")
+    pg.reload(); pg.wait_for_selector(".admr", timeout=8000)
+    row = pg.inner_text(ROW).replace("\n", " ")
     row = arow
     ok("Son giriş" in pg.inner_text(".admt thead"), "son giris sutunu var")
     #  173: uc setirlik «Aktivlik» xanasi «Son giriş»e yigildi - esas
