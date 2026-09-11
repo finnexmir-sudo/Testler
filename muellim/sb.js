@@ -242,9 +242,14 @@
       });
     },
 
-    /* Berpa linkinden gelen tokenlerle sessiya qurulur */
-    setSession: function (accessToken, refreshToken) {
-      saveSession({ access_token: accessToken, refresh_token: refreshToken });
+    /*  Poct linkinden (tesdiq, berpa, devet) gelen tokenlerle sessiya
+        qurulur.  'expiresIn' hash-de gelir - verilse mohur vurulur ve
+        jeton bitmezden EVVEL yenilenir; verilmese kohne 401 yolu
+        isleyir (stamp() bax).  */
+    setSession: function (accessToken, refreshToken, expiresIn) {
+      var o = { access_token: accessToken, refresh_token: refreshToken };
+      if (expiresIn) o.expires_in = Number(expiresIn);
+      saveSession(o);
     },
 
     /* Yeni parol - aktiv sessiya ile */

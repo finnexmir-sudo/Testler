@@ -8538,22 +8538,59 @@
     });
   });
 
-  /* Berpa linkinden qayidanda Supabase tokenleri hash-de gonderir:
-     #access_token=...&refresh_token=...&type=recovery
-     Bu, bizim #/ marsrutlarimiz deyil - evvel tutub sessiya qururuq. */
+  /*  SUPABASE-DEN QAYIDIS.  Poct linkleri tokenleri UNVANIN HASH-inde
+      gonderir:  #access_token=...&refresh_token=...&type=...
+      Bunlar bizim #/ marsrutlarimiz deyil - evvel tutulur.
+
+      OLCU (2026-09-11): burada yalniz «recovery» tutulurdu.  Qeydiyyat
+      tesdiqi ise «signup» ile gelir - onu GORMEZDEN gelirdik.  Netice:
+      muellim mektubdaki linke basirdi, Supabase sessiyani acirdi, biz
+      onu tullayirdiq ve qarsisina YENIDEN giris formasi cixirdi.  Hemin
+      gun bir muellim qeydiyyatdan kecdi, tesdiqledi, sessiyasi acildi
+      (bazada gorunur) - hesabi ise yaranmadi.
+
+      Indi HER tokenli qayidis tutulur:
+        recovery  -> yeni parol ekrani
+        qalanlari (signup, magiclink, invite) -> sessiya qurulur ve
+                     adam birbasa ICERI dusur; hesabi yoxdursa
+                     route() onu qurasdirma ekranina aparir.
+      Link kohnelibse Supabase hash-de «error» qaytarir - sakitce
+      udmaq evezine oxunan mesaj gosteririk.  */
   (function () {
     var h = location.hash || "";
-    if (h.indexOf("type=recovery") < 0 || h.indexOf("access_token=") < 0) return;
+    if (!/(^|[#&])access_token=/.test(h) &&
+        !/(^|[#&])error(_code|_description)?=/.test(h)) return;
     var q = {};
     h.replace(/^#/, "").split("&").forEach(function (kv) {
       var i = kv.indexOf("=");
-      if (i > 0) q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1));
+      if (i > 0) q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, " "));
     });
-    if (!q.access_token) return;
-    sb.setSession(q.access_token, q.refresh_token || "");
-    try { history.replaceState(null, "", location.pathname); } catch (e) {}
-    screenNewPass();
-    RECOVERY = true;
+    //  Tokenler unvanda qalmasin - paylasilan linkde sizmasin, geri
+    //  duymesi ile tekrar islenmesin.
+    function temizle() {
+      try { history.replaceState(null, "", location.pathname); } catch (e) {}
+    }
+
+    if (!q.access_token) {
+      //  Vaxti kecmis, artiq islenmis ve ya legv edilmis link
+      temizle();
+      var t = /expired|invalid/i.test(q.error_code || q.error_description || "")
+        ? "Linkin vaxtı keçib və ya artıq istifadə olunub. Aşağıda daxil olun — parolu unutmusunuzsa «Parolu unutmusunuz?» ilə yenisini qurun."
+        : "Link işləmədi. Aşağıda daxil olun.";
+      RECOVERY = true;          //  ekran artiq cizildi - boot() tekrar cizmesin
+      screenAuth("in", msg("warn", t));
+      return;
+    }
+
+    sb.setSession(q.access_token, q.refresh_token || "", q.expires_in);
+    temizle();
+    if (q.type === "recovery") {
+      RECOVERY = true;
+      screenNewPass();
+      return;
+    }
+    //  signup / magiclink / invite: sessiya var.  RECOVERY qoyulmur -
+    //  asagidaki boot() sessiyani goturur ve adami iceri salir.
   })();
 
   if (!RECOVERY) boot();
