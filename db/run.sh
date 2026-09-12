@@ -250,6 +250,7 @@ bank 236_movzular_zefer_ortaq_turk.sql
 bank 237_bank_zefer_tarixi.sql
 bank 238_bank_ortaq_turk_tarixi.sql
 bank 239_bank_sekil_bosluq_duzelis.sql
+bank 240_bank_sekil_pilot_riy10_triq.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
