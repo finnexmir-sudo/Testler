@@ -181,12 +181,21 @@ class H(BaseHTTPRequestHandler):
 
     # -------------------------------------------------------- rpc / select
     def run(self, fn, *a):
-        """Sorgunu duzgun rol ve JWT iddiasi ile isledir."""
+        """Sorgunu duzgun rol, JWT iddiasi VE istek basliqlari ile isledir."""
         uid = self.uid()
         with db() as c, c.cursor() as cur:
             cur.execute("set local role " + ("authenticated" if uid else "anon"))
             if uid:
                 cur.execute("select set_config('request.jwt.claim.sub', %s, true)", (uid,))
+            #  PostgREST 'request.headers'-i her sorguda qoyur; ziyaret
+            #  nisani (app.vid_now) mehz oradan oxuyur.  Mock bunu
+            #  qoymurdu - db/189 testde HEC VAXT islemezdi, canlida ise
+            #  islerdi.  Yalan yasil.  Indi eyni basliqlar verilir.
+            cur.execute("select set_config('request.headers', %s, true)",
+                        (json.dumps({
+                            "x-forwarded-for": self.client_address[0],
+                            "user-agent": self.headers.get("User-Agent", "")
+                        }),))
             return fn(cur, *a)
 
     _ARGT = {}
