@@ -111,3 +111,6 @@ python3 test/e2e_paylasim.py
 echo
 echo "31/31 poct linkinden qayidis"
 python3 test/e2e_tesdiq.py
+echo
+echo "32/32 sualin sekli"
+python3 test/e2e_sekil.py

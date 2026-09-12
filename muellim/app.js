@@ -74,6 +74,22 @@
     });
   }
   function $(id) { return document.getElementById(id); }
+
+  /*  188: SUALIN SEKLI.  Bank sualina hendese cizgisi, elektrik
+      dovresi, blok-sxem qosula bilir - o, 'media_url' sutununda SVG
+      data-URI kimi gelir (baxin: db/188_sual_sekli.sql).
+
+      NIYE <img>?  SVG-ni birbasa sehifeye yapisdirsaq (innerHTML),
+      icindeki skript ISLEYERDI.  <img>-in icindeki SVG-de brauzer
+      skript islETMIR - standart davranisdir.  Ona gore burada
+      innerHTML yolu QESDLE secilmeyib.  Unvan suzgeci de var: yalniz
+      data:image/svg+xml ve ya https - bazadaki CHECK-in eynisi
+      (iki qat: server yazmaga qoymur, ekran cizmir).  */
+  function fig(u) {
+    if (!u) return "";
+    if (!/^data:image\/svg\+xml[,;]/.test(u) && !/^https:\/\//.test(u)) return "";
+    return '<div class="qfig"><img src="' + esc(u) + '" alt="Sualın şəkli"></div>';
+  }
   /* Yeni ekran cizilende "gozleyin" veziyyeti hemise sifirlanir -
      eks halda kecid ugurlu olanda duymeler olu qalir. */
   var BAND_KEEP = false;
@@ -4157,7 +4173,7 @@
             box.dataset.done = "1";
             box.innerHTML = (s.items || []).map(function (q) {
               return '<div class="shq">' +
-                "<b>" + q.ord + ". " + esc(q.body) + "</b>" +
+                "<b>" + q.ord + ". " + esc(q.body) + "</b>" + fig(q.media_url) +
                 '<div class="sa">' +
                   '<span class="' + (q.ok ? "sc" : "sw") + '">Cavabı: ' +
                     esc(q.chosen) + "</span>" +
@@ -5729,6 +5745,7 @@
       return '<div class="card repc qsc" data-q="' + esc(qid) + '">' +
         '<div class="rhead"><b>' + esc(r.body) + "</b>" +
           '<span class="rcnt" title="cavab sayı">' + r.n + "</span></div>" +
+        fig(r.media_url) +
         '<div class="qm">' +
           (r.subject ? "<span>" + esc(r.subject) + "</span>" : "") +
           (r.level ? "<span>·</span><span>" + esc(r.level) + "</span>" : "") +
@@ -5868,6 +5885,7 @@
       return '<div class="card repc" data-q="' + esc(qid) + '">' +
         '<div class="rhead"><b>' + esc(r.body) + "</b>" +
           '<span class="rcnt">' + r.n + "</span></div>" +
+        fig(r.media_url) +
         '<div class="qm">' +
           (r.subject ? "<span>" + esc(r.subject) + "</span>" : "") +
           (r.level ? "<span>·</span><span>" + esc(r.level) + "</span>" : "") +
@@ -6945,7 +6963,8 @@
       qs.map(function (q) {
         var b = '<div class="ppq"><div class="ppb">' + q.ord + ". " + esc(q.body) +
           (q.kind === "multi"
-            ? ' <i class="ppmu">(bir neçə düzgün cavab)</i>' : "") + "</div>";
+            ? ' <i class="ppmu">(bir neçə düzgün cavab)</i>' : "") + "</div>" +
+          fig(q.media_url);
         if (q.kind === "text") {
           b += '<div class="ppl">Cavab: _______________________________</div>';
         } else {
@@ -7119,6 +7138,7 @@
         qs.map(function (q) {
           return '<div class="pq">' +
             '<div class="qh"><b>' + q.ord + ". " + esc(q.body) + "</b></div>" +
+            fig(q.media_url) +
             '<div class="qm">' +
               (q.topic ? "<span>" + esc(q.topic) + "</span><span>·</span>" : "") +
               '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
@@ -7601,7 +7621,7 @@
         list = list || [];
         if (!list.length) { box.innerHTML = ""; return; }
         box.innerHTML = list.map(function (q) {
-          return '<div class="sq"><b>' + esc(q.body) + "</b>" +
+          return '<div class="sq"><b>' + esc(q.body) + "</b>" + fig(q.media_url) +
             ((q.options || []).length
               ? "<ul>" + q.options.map(function (o) {
                   return '<li' + (o.correct ? ' class="c"' : "") + ">" +
@@ -7701,7 +7721,7 @@
           return '<div class="qitem">' +
             '<button class="qrow" data-q="' + esc(q.id) + '"' +
               (mine ? "" : " disabled") + ">" +
-              '<div class="g"><b>' + esc(q.body) + "</b><i>" +
+              '<div class="g"><b>' + esc(q.body) + "</b>" + fig(q.media_url) + "<i>" +
                 meta.map(function (m, i) {
                   return (i ? "<span>·</span>" : "") + "<span>" + m + "</span>";
                 }).join("") +

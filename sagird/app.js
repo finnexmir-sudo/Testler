@@ -116,6 +116,22 @@
     });
   }
   function $(id) { return document.getElementById(id); }
+
+  /*  188: SUALIN SEKLI.  Bank sualina hendese cizgisi, elektrik
+      dovresi, blok-sxem qosula bilir - o, 'media_url' sutununda SVG
+      data-URI kimi gelir (baxin: db/188_sual_sekli.sql).
+
+      NIYE <img>?  SVG-ni birbasa sehifeye yapisdirsaq (innerHTML),
+      icindeki skript ISLEYERDI.  <img>-in icindeki SVG-de brauzer
+      skript islETMIR - standart davranisdir.  Ona gore burada
+      innerHTML yolu QESDLE secilmeyib.  Unvan suzgeci de var: yalniz
+      data:image/svg+xml ve ya https - bazadaki CHECK-in eynisi
+      (iki qat: server yazmaga qoymur, ekran cizmir).  */
+  function fig(u) {
+    if (!u) return "";
+    if (!/^data:image\/svg\+xml[,;]/.test(u) && !/^https:\/\//.test(u)) return "";
+    return '<div class="qfig"><img src="' + esc(u) + '" alt="Sualın şəkli"></div>';
+  }
   function show(html) {
     busy = false; stopSay(); main.innerHTML = html; window.scrollTo(0, 0);
     if (BAND_KEEP) BAND_KEEP = false; else setBand("");
@@ -672,6 +688,7 @@
         '<button class="spk' + (VOICE ? "" : " hide") + '" id="spk" ' +
           'title="Sualı dinlə" aria-label="Sualı dinlə">' + ic("sound") + "</button>" +
       "</div>" +
+      fig(q.media_url) +
       (q.kind === "text"
         ? '<div class="opts"><input id="ans" class="tans" maxlength="120" ' +
             'autocomplete="off" placeholder="Cavabı yaz" value="' +
@@ -880,6 +897,7 @@
               '<div class="qh"><b>' + esc(w.body) + "</b>" +
                 '<span class="qmark ' + (right ? "y" : "n") + '">' +
                   ic(right ? "check" : "x") + "</span></div>" +
+              fig(w.media_url) +
               (w.picked && w.picked.length
                 ? '<p class="picked">Sən yazdın: ' + w.picked.map(esc).join(", ") + "</p>"
                 : "") +
@@ -1071,6 +1089,7 @@
     show(
       pracHead(Number(d.score) || 0, Number(d.level) || 2, Number(d.streak) || 0, !!d.mastered) +
       '<div class="q"><div class="body">' + esc(q.body || "") + "</div></div>" +
+      fig(q.media_url) +
       (q.kind === "text"
         ? '<div class="opts"><input id="pans" class="tans" maxlength="120" autocomplete="off" placeholder="Cavabı yaz"></div>'
         : '<div class="opts" id="popts">' + (q.options || []).map(function (o, k) {
@@ -1172,6 +1191,7 @@
       (q.topic ? '<p class="note" style="margin:0 0 6px">' + esc(q.topic) +
         (q.status === "review" ? " · təkrar" : "") + "</p>" : "") +
       '<div class="q"><div class="body">' + esc(q.body) + "</div></div>" +
+      fig(q.media_url) +
       '<div class="opts" id="opts">' +
         (q.options || []).map(function (o, k) {
           return '<button class="opt" data-o="' + esc(o.id) + '">' +

@@ -1113,6 +1113,9 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   #printBox .ppf{display:flex;gap:20px;flex-wrap:wrap;font-size:12px}
   #printBox .ppq{break-inside:avoid;page-break-inside:avoid;margin:0 0 12px}
   #printBox .ppb{font-weight:700;margin:0 0 4px}
+  #printBox .qfig{margin:6px 0;text-align:center}
+  #printBox .qfig img{max-width:82%;max-height:74mm;height:auto;border:0;padding:0;
+    break-inside:avoid;page-break-inside:avoid}
   #printBox .ppmu{font-weight:400;font-style:italic;font-size:11px}
   #printBox .ppo{margin:2px 0 2px 16px}
   #printBox .ppl{margin:8px 0 2px 16px}
@@ -1728,3 +1731,13 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .authback{text-align:center;margin-top:14px}
 .authback a{text-decoration:none}
 .authback a:hover{text-decoration:underline;text-underline-offset:3px}
+
+/*  188: SUALIN SEKLI - bank sualina qosulan cizgi (SVG data-URI).
+    Ekranda kicik saxlanir (siyahida sual setrini sismesin), cap
+    ekraninda ise tam gorunur.  <img> ile cizilir: brauzer onun
+    icindeki skripti islETMIR (bax: app.js -> fig()).  */
+.qfig{margin:8px 0 4px;text-align:center}
+.qfig img{max-width:100%;max-height:220px;height:auto;background:#fff;
+  border:1px solid var(--line);border-radius:var(--r);padding:8px}
+.sq .qfig img,.qrow .qfig img{max-height:130px}
+.paper .qfig img{max-height:300px}

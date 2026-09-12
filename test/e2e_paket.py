@@ -314,6 +314,9 @@ with sync_playwright() as pw:
     #  187: «Ziyarətlər» - NUMUNEYE NECE NEFER GIRDI.  Kohne reqem KLIK
     #  sayi idi: bir nefer muellim+sagird numunesini acsa 2 gorunurdu.
     #  Asagida mehz o hal qurulur - iki klik, BIR adam (eyni vid).
+    #  Evvelki merhelelerin klikleri sayima qarismasin - reqem MUTLEQ
+    #  yoxlanir (1 nefer / 2 klik), ona gore saygac sifirlanir.
+    db("delete from public.visits")
     db("""insert into public.visits (at, page, ev, vid) values
             (now(), 'home', 'view', 'nv1'),
             (now(), 'home', 'demo_muellim', 'nv1'),

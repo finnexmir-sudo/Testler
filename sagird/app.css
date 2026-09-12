@@ -421,3 +421,12 @@ details.fbd summary{color:var(--brand)}
     uzundur, telefonda basligi sixmasin deye biraz kicikdir.  */
 #main a.btn.bak{margin-top:14px;text-decoration:none}
 .top .btn.demoout{font-size:13px;padding:0 10px}
+
+/*  188: SUALIN SEKLI.  Hendese cizgisi / dovre / blok-sxem <img> ile
+    gelir (SVG data-URI).  Olcu SUALA gore verilir, sekle gore yox:
+    telefonda eni asmasin, masaustunde de nahaq boyumesin.  Ag fon
+    verilir - SVG-nin oz fonu yoxdur, tund movzuda cizgi itmesin.  */
+.qfig{margin:0 0 14px;text-align:center}
+.qfig img{max-width:100%;max-height:320px;height:auto;background:#fff;
+  border:1px solid var(--line);border-radius:var(--r);padding:10px}
+@media (max-width:520px){ .qfig img{max-height:250px} }
