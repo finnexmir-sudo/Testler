@@ -280,6 +280,11 @@ yoxlanandan sonra. Yoxsa:
   əvvəl bir neçə sualı `[düz]` formasında oxu; faylın son DO blokuna
   «düz cavab gözlənilən sırada/dəyərdədir» iddiasını yaz (242-də
   `o.ord <> 1 → raise`), «tam 1 düz variant var» kifayət DEYİL.
+  **Bütün bank üzrə:** `db/test/bayraq_yoxla.sql` (yalnız oxuyur, canlı
+  SQL Editor-da da işləyir) — 242 imzası + izah↔bayraq tutuşdurması.
+  2026-09-12-də 22 255 sual üzrə 170 siqnalın hamısı oxundu: 0 həqiqi
+  səhv (hamısı «hansı SƏHVDİR» qəlibi və ya izahın son rəqəminin
+  distraktor olması). Siqnal sayı özü heç nə demir — sual mətnini oxu.
 
 Ortaq kök birdir: **qurduğumu yoxlamaq, istənəni yoxlamaq deyil.**
 
