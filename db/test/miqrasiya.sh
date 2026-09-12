@@ -119,6 +119,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          238_bank_ortaq_turk_tarixi.sql \
          239_bank_sekil_bosluq_duzelis.sql \
          240_bank_sekil_pilot_riy10_triq.sql \
+         241_bank_sekil_fiz7_dovre.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
