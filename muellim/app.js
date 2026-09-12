@@ -5275,8 +5275,10 @@
       //  artiq en ora getsin.  Sag terefdeki sutunlar sabitdir, ona gore
       //  aralarinda bosluq acilmir.
       '<col style="width:34px"><col><col style="width:184px">' +
-      '<col style="width:126px"><col style="width:86px">' +
-      '<col style="width:164px"><col style="width:44px"></colgroup>' + bas + "<tbody>" +
+      //  «Şagird» sutunu genislendirildi (86 -> 112): alt setre «N qrup»
+      //  da elave olundu, 86px-de soz-soz qirilirdi.
+      '<col style="width:120px"><col style="width:112px">' +
+      '<col style="width:158px"><col style="width:44px"></colgroup>' + bas + "<tbody>" +
       rows.map(function (a, ix) {
       var pl = a.plan, badge, muddet = "—", gq = null;
       //  138: admin sahibli hesab daimidir - plan ve duyme lazim deyil;

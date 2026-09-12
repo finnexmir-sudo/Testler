@@ -923,8 +923,13 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .admt .mut{display:block;text-decoration:none;color:var(--fg-3);
   font-size:11.5px;line-height:1.4;margin-top:2px;font-weight:450}
 .admt .mdt{white-space:nowrap}
-.admt .nums{white-space:nowrap;color:var(--fg-2)}
-.admt .nums b{font-size:14.5px;font-weight:640;color:var(--fg)}
+.admt .nums{color:var(--fg-2)}
+.admt .nums b{font-size:14.5px;font-weight:640;color:var(--fg);white-space:nowrap}
+/*  Alt setir SARILIR.  Evvel butun xana 'nowrap' idi: «3 qrup · 37 test ·
+    25 cəhd» 86px-lik sutuna sigmirdi ve QONSU sutunun ustune cixirdi -
+    «Son giriş» yazilari ust-uste dusurdu (istifadeci gordu).  Esas reqem
+    yene bir setirde qalir, yalniz solgun alt setir sarilir.  */
+.admt .nums .mut{white-space:normal;overflow-wrap:anywhere}
 /*  Sagird hec vaxt girmeyib - hesab qurulub, amma islenmir  */
 .admt .sno{color:#b54708}
 .admt .lg{display:block;font-style:normal;font-size:12.5px;line-height:1.35}
