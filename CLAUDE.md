@@ -122,6 +122,93 @@ onları satır, çünki satacaq başqa şeyi yoxdur; biz qoysaq məhsul
 deyəcək. Yadda saxla: ölçü hələ də göstərir ki, problem imkan azlığı
 deyil — 24 ziyarətçidən 1-i qeydiyyatdan keçir.
 
+### 7. Gələcək layihə fikirləri — qeyd, hələ başlanmayıb (2026-09-12)
+
+**İstifadəçi: «sadəcə gələcək planlardı, yaddaşa yazaq.»** Heç biri
+başlanmayıb, heç biri təsdiqlənməyib.
+
+**Bizim iki gücümüz:** 21 min hazır sual bazası, və ucuz məhsul
+buraxa bilmək (İngilis memarlığı — tək fayl, oflayn PWA, sıfır server
+xərci). **Zəif yerimiz distribusiyadır** — 52 ziyarətçidən 2 qeydiyyat.
+Yeni layihə bunu həll etmir, sadəcə köçürür. Ona görə seçim meyarı:
+*pulu kim ödəyir və neçə günə ödəyir?*
+
+Sıralama:
+
+1. **Şagird üçün pulsuz oflayn məşq PWA** — biznes deyil, **huni**.
+   Bazamızdan qidalanır, məzmun xərci sıfır, kod tərəfi İngilis-dən
+   gəlir. Şagird yükləyir → valideyn görür → məktəbdən Bil10-u
+   soruşur. 52→2 problemini birbaşa hədəfləyir.
+2. **Sürücülük vəsiqəsi testləri (DYP)** — ən böyük yeni bazar,
+   ən ucuz məzmun (rəsmi suallar açıqdır), sürətli pul. Aşağıda
+   ayrıca.
+3. **Müəllim sertifikasiyası / MİQ** — istifadəçilərimiz artıq
+   müəllimdir, Bil10-un içindən satılır, yeni auditoriya lazım deyil.
+   Müəllim öz cibindən ödəyir — məktəb büdcəsi gözləmirsən. Kod
+   demək olar hazırdır (məşq, səhv dəftəri, statistika); xərc məzmundur.
+4. **Abituriyent / buraxılış** — ən böyük pul, amma ən böyük rəqabət
+   (Hədəf, Araz) və nəhəng məzmun xərci. Yalnız 1–3-dən sonra.
+
+**ETMƏYƏK**: elektron jurnal (dövlətin öz sistemi var), ümumi «AI
+müəllim» (xarici şəbəkə + aylıq xərc + fərqlənmə yoxdur), rus sektoru
+(yeni layihə deyil, mövcudun ikiqat məzmun xərcidir — az sektorunda
+hələ 2 qeydiyyatımız var).
+
+**Qayda: paralel iki layihə aparmayaq.** Bil10 hələ pul gətirmir
+(0 pullu hesab). Yeni məhsul Bil10-u tərk etmək bəhanəsinə çevrilməsin.
+
+#### DYP layihəsini necə satarıq (müzakirə edildi, 2026-09-12)
+
+Cavab **app store deyil** — bu ölçüdə tətbiq Azərbaycanda mağazadan
+yox, **avtomobil məktəbindən** satılır.
+
+- **Əsas model — avtomobil məktəbi (B2B2C).** Bir kursanta 4 manata
+  satmaq üçün onu tapmalısan; məktəb isə hər ay 30–50 yeni kursantı
+  özü toplayır. Bir direktorla danışırsan, 40 istifadəçi alırsan.
+  Məktəbə tətbiq yox, **üstünlük** satılır: öz loqosu ilə tətbiq +
+  panel («kim neçə test həll edib, kim heç açmayıb»). Bu, Bil10-un
+  eyni modelidir — məktəb/qrup/hesabat; kodun ~70 %-i hazırdır.
+  Onların dəyəri: rəqibdə yoxdur (reklam materialı) və imtahan uğur
+  faizini artırır (onların əsas satış arqumenti). ~40 manat/ay.
+- **Əlavə model — kursanta birbaşa.** Pulsuz + kilid: pulsuz 2 bilet,
+  nəzəri bölmə, səhv dəftəri; 4 manata bütün biletlər, imtahan
+  simulyasiyası, statistika.
+- **Reklam modeli ATILIR** — reklam SDK-sı xarici şəbəkə müraciəti
+  deməkdir, bütün memarlığımıza ziddir; Azərbaycanda CPM gülməlidir.
+
+**Pulu necə alırıq** (bu, Bil10-da da həll olunmayıb — bir dəfə qurulur,
+hər iki layihədə işlədilir):
+
+1. Başlanğıc, 0 inteqrasiya: m10 / kart köçürməsi → əl ilə aktivasiya
+   kodu. Çirkin, amma ilk 20 müştəri üçün kifayətdir, bu gün satmaq olar.
+2. Sonra: yerli şlüz (epoint.az / PayRiff / Kapital Bank), ~2–3 %
+   komissiya, Azərbaycan hüquqi şəxsi tələb olunur. Bax: bölmə 4.
+3. **Birinci gün mağazaya çıxmırıq** — PWA olaraq öz domenimizdən
+   paylayırıq: komissiya yox, moderasiya yox, qayda yox. Mağaza sonra,
+   yalnız tapılmaq üçün. Google rəqəmsal satışda öz billing-ini tələb
+   edir (15–30 %), Azərbaycandan tərtibatçı ödəniş qəbulunun
+   mümkünlüyü isə **yoxlanmayıb — iddia edilmir**.
+
+**Marketinq:** DYP sualları qısa video üçün mükəmməl məzmundur —
+çətin yol nişanı sualı, «cavabı şərhlərdə». TikTok/Instagram-da
+Azərbaycanda pulsuz və güclü işləyir; büdcə yox, vaxt tələb edir.
+
+**Başlamazdan əvvəl mütləq:**
+
+- **Sual hovuzunun hüququ.** Rəsmi DYP sualları açıq dərc olunur, amma
+  «açıq dərc olunub» ≠ «kommersiya məqsədilə istifadə oluna bilər».
+  Aydınlaşmadan bir sətir kod yazılmasın — e-dərslik qaydası ilə eynidir.
+- **Fərqimiz nədir?** Play Store-da onlarla belə tətbiq var. Cavab:
+  oflayn işləyir, reklamsızdır, səliqəli azərbaycancadır, **məktəbə
+  panel verir**. Sonuncu heç kimdə yoxdur — və məhz o, pul gətirəndir.
+
+**İlk addım kod deyil, telefon zəngidir:** 5 avtomobil məktəbinə zəng,
+«ayda 40 manat, sizin adınızla, maraqlıdırmı?». Ən azı 2 «hə» olsa —
+qururuq (~2–3 həftə, İngilis memarlığı olduğu kimi işləyir). Sıfır «hə»
+olsa — 4 həftə xilas edildi. Bil10-da etmədiyimiz addım budur: 21 min
+sual var, 0 pullu hesab; səbəb kod deyil, alıcını əvvəlcədən
+tapmamağımızdır.
+
 ---
 
 ## Struktur
