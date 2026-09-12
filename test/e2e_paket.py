@@ -311,8 +311,24 @@ with sync_playwright() as pw:
     ok("1 qrup" in row and "qrup yoxdur" not in row,
        "qrup qurulanda sayi yazilir", row[:80])
     db("delete from public.classes where join_code = 'KODQRP01'")
+    #  187: «Ziyarətlər» - NUMUNEYE NECE NEFER GIRDI.  Kohne reqem KLIK
+    #  sayi idi: bir nefer muellim+sagird numunesini acsa 2 gorunurdu.
+    #  Asagida mehz o hal qurulur - iki klik, BIR adam (eyni vid).
+    db("""insert into public.visits (at, page, ev, vid) values
+            (now(), 'home', 'view', 'nv1'),
+            (now(), 'home', 'demo_muellim', 'nv1'),
+            (now(), 'home', 'demo_sagird',  'nv1'),
+            (now(), 'home', 'view', 'nv2')""")
     pg.reload(); pg.wait_for_selector(".admr", timeout=8000)
-    row = pg.inner_text(ROW).replace("\n", " ")
+    vt = pg.inner_text("#vsTiles").replace("\n", " ")
+    ok("nümunəyə girib" in vt, "lovhe nefer sayir (klik yox)", vt[-70:])
+    ok(pg.inner_text("#vsTiles .tile.d b").strip() == "1",
+       "iki klik BIR adam kimi sayilir", pg.inner_text("#vsTiles .tile.d b"))
+    ok("2 klik" in vt, "klik sayi da yazilir", vt[-70:])
+    fun = pg.inner_text(".vfun").replace("\n", " ")
+    ok("1 nəfər nümunəyə girib" in fun, "hunide nefer yazilir", fun[:110])
+    db("delete from public.visits where vid in ('nv1','nv2')")
+    pg.reload(); pg.wait_for_selector(".admr", timeout=8000)
     row = arow
     ok("Son giriş" in pg.inner_text(".admt thead"), "son giris sutunu var")
     #  173: uc setirlik «Aktivlik» xanasi «Son giriş»e yigildi - esas

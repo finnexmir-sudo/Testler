@@ -5620,6 +5620,9 @@
     var days = vs.days || [];
     var ev = vs.events || {};
     var demo = (Number(ev.demo_muellim) || 0) + (Number(ev.demo_sagird) || 0) + (Number(ev.demo_valideyn) || 0);
+    //  187: NEFER ve KLIK ayri seylerdir.  Bir nefer ucunu de acirsa
+    //  klik 3-dur, adam 1.  Hunide adam sayilir.
+    var dnef = Number((vs.d30 || {}).demo_uniq) || 0;
     var mx = 0;
     days.forEach(function (d) { if ((Number(d.uniq) || 0) > mx) mx = Number(d.uniq) || 0; });
     var imax = -1;
@@ -5643,16 +5646,22 @@
     //  faiz yalniz menali olanda (qeydiyyat <= unikal); 162: qeydiyyat
     //  saygac baslayandan sayilir - evvelki hesablar huniye dusmur
     var conv = (uniq30 && sign30 <= uniq30) ? Math.round(sign30 * 100 / uniq30) : -1;
+    //  numuneye giren neferin ziyaretcilere nisbeti - huninin BIRINCI
+    //  deliyi buradadir: giren coxdursa problem numunede yox, formada;
+    //  girmirse problem ana sehifededir.
+    var dkon = (uniq30 && dnef <= uniq30) ? Math.round(dnef * 100 / uniq30) : -1;
     return "<h2>Ziyarətlər</h2>" +
       '<div class="tiles" id="vsTiles">' +
         tile("a", t, "bu gün") + tile("b", w, "7 gün") + tile("c", m, "30 gün") +
-        '<div class="tile d"><b>' + demo + "</b><span>demo kliki · 30 gün</span></div>" +
+        '<div class="tile d"><b>' + dnef + "</b><span>nümunəyə girib · 30 gün" +
+          (demo ? " · " + demo + " klik" : "") + "</span></div>" +
       "</div>" +
       '<div class="card" id="vsCard">' +
         '<div class="vhead"><b>Unikal ziyarətçi, gün üzrə</b><span class="muted">ana səhifə + bələdçi · son ' + days.length + " gün</span></div>" +
         '<div class="vchart">' + bars + "</div>" +
-        '<p class="muted vfun">Son 30 gün: <b>' + uniq30 + "</b> unikal ziyarətçi → <b>" + demo +
-          "</b> demo kliki → <b>" + sign30 + "</b> qeydiyyat" + (conv >= 0 ? " (" + conv + "%)" : "") +
+        '<p class="muted vfun">Son 30 gün: <b>' + uniq30 + "</b> unikal ziyarətçi → <b>" + dnef +
+          "</b> nəfər nümunəyə girib" + (dkon >= 0 ? " (" + dkon + "%)" : "") +
+          " → <b>" + sign30 + "</b> qeydiyyat" + (conv >= 0 ? " (" + conv + "%)" : "") +
           ". Klik bölgüsü: müəllim " + (ev.demo_muellim || 0) + " · şagird " + (ev.demo_sagird || 0) +
           " · valideyn " + (ev.demo_valideyn || 0) + " · panelə keç " + (ev.panel || 0) +
           " · bələdçi " + (ev.beledci || 0) +

@@ -102,6 +102,12 @@ begin
   assert (v->'events'->>'demo_muellim')::int = 1, 'hadise sayi';
   assert (v->'events'->>'wa')::int = 1, 'wa hadisesi: ' || coalesce(v->'events'->>'wa','yox');
   assert (v->'events'->>'mail')::int = 1, 'mail hadisesi: ' || coalesce(v->'events'->>'mail','yox');
+  --  187: numuneye NECE NEFER girdi.  Blok 1-de demo_muellim BIR
+  --  defe, tek bir vid (UA-1 + 1.2.3.4) altinda basilib - yeni
+  --  klik de 1, nefer de 1.  Reqem NEFER oldugunu gostermek ucun
+  --  ayrica yoxlanir: vid null olan setir nefer sayilmir.
+  assert (v->'d30'->>'demo')::int = 1, 'demo kliki: ' || (v->'d30'->>'demo');
+  assert (v->'d30'->>'demo_uniq')::int = 1, 'numuneye giren nefer: ' || (v->'d30'->>'demo_uniq');
 end $$;
 reset role; reset request.jwt.claim.sub;
 do $$
