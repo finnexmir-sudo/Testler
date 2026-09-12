@@ -5686,7 +5686,15 @@
           //  186: altliqdaki elaqe klikleri.  «Bizə yazmağa cəhd etdi»
           //  ayrica siqnaldir - baxib gedenle eyni sey deyil.
           " · WhatsApp " + (ev.wa || 0) + " · e-poçt " + (ev.mail || 0) + ".</p>" +
-        '<p class="muted" style="margin:6px 0 0">IP saxlanmır; unikal = günlük duzla hash. Reklam bağlantıları, botlar da sayılır — meylə bax, rəqəmə yox.</p>' +
+        '<p class="muted" style="margin:6px 0 0">IP saxlanmır; unikal = günlük duzla hash. ' +
+          'Reklam bağlantıları, botlar da sayılır — meylə bax, rəqəmə yox.' +
+          //  189: oz baxislarimiz sayilmir - reqemin niye kicik oldugu
+          //  aydin olsun deye ACIQ yazilir (yoxsa «saygac islemir?»
+          //  suali yaranir).
+          (Number(vs.own_today) > 0
+            ? " <b>Bu gün sizin " + Number(vs.own_today) +
+              " baxışınız sayılmadı</b> — admin girişi kənarda qalır."
+            : "") + "</p>" +
       "</div>" +
       '<div class="spacer"></div>';
   }
