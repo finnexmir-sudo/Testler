@@ -108,3 +108,6 @@ python3 test/e2e_cedvel.py
 echo
 echo "30/30 paylasim karti"
 python3 test/e2e_paylasim.py
+echo
+echo "31/31 poct linkinden qayidis"
+python3 test/e2e_tesdiq.py

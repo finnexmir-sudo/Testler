@@ -5304,7 +5304,15 @@
         (pl ? '<button class="btn sm ghost arch" data-stop="1">Dayandır</button>' : "");
       //  «0 ş · 1 t · 0 c» oxunmurdu (istifadeci).  Indi esas reqem
       //  SAGIRD sayidir, altinda yalniz SIFIR OLMAYAN qalanlar yazilir.
+      //  QRUP SAYI (istifadeci, 2026-09-11): «qeydiyyatdan kecib, amma
+      //  qrup qurub?» sualina cavab hemise bazadan sorusulurdu.  Reqem
+      //  serverden onsuz da gelirdi (rpc_admin_accounts -> groups),
+      //  sadece cekilmirdi.  Bos hesabda «qrup yoxdur» ACIQ yazilir:
+      //  «0 şagird» iki ayri hal ola biler - qrupu qurub sagird elave
+      //  etmeyib, ya da hec ne etmeyib.  Bunlar eyni sey deyil.
       var ist = [];
+      if (a.groups) ist.push(a.groups + " qrup");
+      else if (!a.students) ist.push("qrup yoxdur");
       if (a.tests) ist.push(a.tests + " test");
       if (a.attempts) ist.push(a.attempts + " cəhd");
       return '<tr class="admr" data-em="' + esc(a.email || "") + '">' +
@@ -5612,6 +5620,9 @@
     var days = vs.days || [];
     var ev = vs.events || {};
     var demo = (Number(ev.demo_muellim) || 0) + (Number(ev.demo_sagird) || 0) + (Number(ev.demo_valideyn) || 0);
+    //  187: NEFER ve KLIK ayri seylerdir.  Bir nefer ucunu de acirsa
+    //  klik 3-dur, adam 1.  Hunide adam sayilir.
+    var dnef = Number((vs.d30 || {}).demo_uniq) || 0;
     var mx = 0;
     days.forEach(function (d) { if ((Number(d.uniq) || 0) > mx) mx = Number(d.uniq) || 0; });
     var imax = -1;
@@ -5635,19 +5646,28 @@
     //  faiz yalniz menali olanda (qeydiyyat <= unikal); 162: qeydiyyat
     //  saygac baslayandan sayilir - evvelki hesablar huniye dusmur
     var conv = (uniq30 && sign30 <= uniq30) ? Math.round(sign30 * 100 / uniq30) : -1;
+    //  numuneye giren neferin ziyaretcilere nisbeti - huninin BIRINCI
+    //  deliyi buradadir: giren coxdursa problem numunede yox, formada;
+    //  girmirse problem ana sehifededir.
+    var dkon = (uniq30 && dnef <= uniq30) ? Math.round(dnef * 100 / uniq30) : -1;
     return "<h2>Ziyarətlər</h2>" +
       '<div class="tiles" id="vsTiles">' +
         tile("a", t, "bu gün") + tile("b", w, "7 gün") + tile("c", m, "30 gün") +
-        '<div class="tile d"><b>' + demo + "</b><span>demo kliki · 30 gün</span></div>" +
+        '<div class="tile d"><b>' + dnef + "</b><span>nümunəyə girib · 30 gün" +
+          (demo ? " · " + demo + " klik" : "") + "</span></div>" +
       "</div>" +
       '<div class="card" id="vsCard">' +
         '<div class="vhead"><b>Unikal ziyarətçi, gün üzrə</b><span class="muted">ana səhifə + bələdçi · son ' + days.length + " gün</span></div>" +
         '<div class="vchart">' + bars + "</div>" +
-        '<p class="muted vfun">Son 30 gün: <b>' + uniq30 + "</b> unikal ziyarətçi → <b>" + demo +
-          "</b> demo kliki → <b>" + sign30 + "</b> qeydiyyat" + (conv >= 0 ? " (" + conv + "%)" : "") +
+        '<p class="muted vfun">Son 30 gün: <b>' + uniq30 + "</b> unikal ziyarətçi → <b>" + dnef +
+          "</b> nəfər nümunəyə girib" + (dkon >= 0 ? " (" + dkon + "%)" : "") +
+          " → <b>" + sign30 + "</b> qeydiyyat" + (conv >= 0 ? " (" + conv + "%)" : "") +
           ". Klik bölgüsü: müəllim " + (ev.demo_muellim || 0) + " · şagird " + (ev.demo_sagird || 0) +
           " · valideyn " + (ev.demo_valideyn || 0) + " · panelə keç " + (ev.panel || 0) +
-          " · bələdçi " + (ev.beledci || 0) + ".</p>" +
+          " · bələdçi " + (ev.beledci || 0) +
+          //  186: altliqdaki elaqe klikleri.  «Bizə yazmağa cəhd etdi»
+          //  ayrica siqnaldir - baxib gedenle eyni sey deyil.
+          " · WhatsApp " + (ev.wa || 0) + " · e-poçt " + (ev.mail || 0) + ".</p>" +
         '<p class="muted" style="margin:6px 0 0">IP saxlanmır; unikal = günlük duzla hash. Reklam bağlantıları, botlar da sayılır — meylə bax, rəqəmə yox.</p>' +
       "</div>" +
       '<div class="spacer"></div>';
@@ -8538,22 +8558,59 @@
     });
   });
 
-  /* Berpa linkinden qayidanda Supabase tokenleri hash-de gonderir:
-     #access_token=...&refresh_token=...&type=recovery
-     Bu, bizim #/ marsrutlarimiz deyil - evvel tutub sessiya qururuq. */
+  /*  SUPABASE-DEN QAYIDIS.  Poct linkleri tokenleri UNVANIN HASH-inde
+      gonderir:  #access_token=...&refresh_token=...&type=...
+      Bunlar bizim #/ marsrutlarimiz deyil - evvel tutulur.
+
+      OLCU (2026-09-11): burada yalniz «recovery» tutulurdu.  Qeydiyyat
+      tesdiqi ise «signup» ile gelir - onu GORMEZDEN gelirdik.  Netice:
+      muellim mektubdaki linke basirdi, Supabase sessiyani acirdi, biz
+      onu tullayirdiq ve qarsisina YENIDEN giris formasi cixirdi.  Hemin
+      gun bir muellim qeydiyyatdan kecdi, tesdiqledi, sessiyasi acildi
+      (bazada gorunur) - hesabi ise yaranmadi.
+
+      Indi HER tokenli qayidis tutulur:
+        recovery  -> yeni parol ekrani
+        qalanlari (signup, magiclink, invite) -> sessiya qurulur ve
+                     adam birbasa ICERI dusur; hesabi yoxdursa
+                     route() onu qurasdirma ekranina aparir.
+      Link kohnelibse Supabase hash-de «error» qaytarir - sakitce
+      udmaq evezine oxunan mesaj gosteririk.  */
   (function () {
     var h = location.hash || "";
-    if (h.indexOf("type=recovery") < 0 || h.indexOf("access_token=") < 0) return;
+    if (!/(^|[#&])access_token=/.test(h) &&
+        !/(^|[#&])error(_code|_description)?=/.test(h)) return;
     var q = {};
     h.replace(/^#/, "").split("&").forEach(function (kv) {
       var i = kv.indexOf("=");
-      if (i > 0) q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1));
+      if (i > 0) q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, " "));
     });
-    if (!q.access_token) return;
-    sb.setSession(q.access_token, q.refresh_token || "");
-    try { history.replaceState(null, "", location.pathname); } catch (e) {}
-    screenNewPass();
-    RECOVERY = true;
+    //  Tokenler unvanda qalmasin - paylasilan linkde sizmasin, geri
+    //  duymesi ile tekrar islenmesin.
+    function temizle() {
+      try { history.replaceState(null, "", location.pathname); } catch (e) {}
+    }
+
+    if (!q.access_token) {
+      //  Vaxti kecmis, artiq islenmis ve ya legv edilmis link
+      temizle();
+      var t = /expired|invalid/i.test(q.error_code || q.error_description || "")
+        ? "Linkin vaxtı keçib və ya artıq istifadə olunub. Aşağıda daxil olun — parolu unutmusunuzsa «Parolu unutmusunuz?» ilə yenisini qurun."
+        : "Link işləmədi. Aşağıda daxil olun.";
+      RECOVERY = true;          //  ekran artiq cizildi - boot() tekrar cizmesin
+      screenAuth("in", msg("warn", t));
+      return;
+    }
+
+    sb.setSession(q.access_token, q.refresh_token || "", q.expires_in);
+    temizle();
+    if (q.type === "recovery") {
+      RECOVERY = true;
+      screenNewPass();
+      return;
+    }
+    //  signup / magiclink / invite: sessiya var.  RECOVERY qoyulmur -
+    //  asagidaki boot() sessiyani goturur ve adami iceri salir.
   })();
 
   if (!RECOVERY) boot();
