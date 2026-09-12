@@ -84,6 +84,44 @@ olunmalıdır.
 - Yan menyu — istifadəçi bəyəndiyi dizayn tapanda (2026-09-09-da
   sınandı, «pis deyil, amma o deyil», geri qaytarıldı)
 
+### 6. Rüb sonu işləri — qeyd, hələ lazım deyil (2026-09-12)
+
+Rəqib afişası («Tarix summativ qrupu», 15 AZN/ay) rüb sənədlərini
+satır: 2 variantlı KSQ/BSQ, DQ təhlili cədvəli, illik icmal, formativ
+jurnal, şagird xasiyyətnaməsi. Deməli müəllimin ən çox əziyyət çəkdiyi
+yer oradadır. **İstifadəçi: «sadəcə qeyd et, hələ lazım deyil.»**
+
+Bizdə **var**: «Rüb sınağı» — kurikulum paketində düymə, son sınaqdan
+bəri keçilmiş mövzulardan 5–50 suallıq imtahan yığıb qrupa təyin edir.
+Sualların rüb etiketi (1–4) bankda süzgəcdir.
+
+Bizdə **yoxdur** və ucuz olardı, çünki məlumat onsuz da bazadadır —
+yalnız vərəqə çıxarmaq lazımdır:
+
+1. **A/B variant çapı** (~yarım gün) — eyni testin iki vərəqi, sual və
+   variant sırası qarışıq. Kağız vərəq, çap CSS-i və şablon (db/132)
+   hazırdır: şablon sual onsuz da hər çapda başqa rəqəm verir, yəni
+   bizdə iki yox, **sonsuz** variant var — sadəcə göstərmirik.
+   Rəqibin ən böyük vədini bir düymə ilə bağlayır.
+2. **Rüb cədvəli** (~1–2 gün) — şagird × summativ → bal, çap üçün.
+   Cəhdlər, ballar, tarixlər bazadadır; rüb sərhədləri ayar olmalıdır.
+3. **Şagird kartı** (~1 gün) — valideyn görüşünə bir səhifə: bal
+   dinamikası, zəif mövzular, davamiyyət, gözləyən tapşırıqlar.
+   «Xasiyyətnamə» sözü İŞLƏNMƏSİN — o, rəsmi sənəddir; bizimki faktdır.
+4. **İş vərəqi rejimi** (~saatlar) — variantsız, yazmaq üçün boş yerlə.
+5. **Formativ qeyd** (~1–2 gün) — dərsdə tez bal/qeyd; davamiyyət
+   ekranının qurluşu təkrarlanır.
+
+**ETMƏYƏK**: metodbirləşmə sənədləri, sinif rəhbərinin fəaliyyət planı,
+təlim strategiyaları — bunlar proqram deyil, Word şablonlarıdır. Rəqib
+onları satır, çünki satacaq başqa şeyi yoxdur; biz qoysaq məhsul
+«sənəd arxivi»nə çevrilir və heç bir üstünlük yaranmır.
+
+**Başlamazdan əvvəl**: Arzu və Samir müəllimə bir sual — «rüb sonunda
+ən çox vaxtınızı nə aparır?» İki cavab bu siyahını sıralamaqdan çox şey
+deyəcək. Yadda saxla: ölçü hələ də göstərir ki, problem imkan azlığı
+deyil — 24 ziyarətçidən 1-i qeydiyyatdan keçir.
+
 ---
 
 ## Struktur
