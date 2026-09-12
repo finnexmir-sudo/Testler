@@ -352,6 +352,27 @@ yoxlanandan sonra. Yoxsa:
   ilə 141-158-ə köçürüldü, `_bank` şəkilçisi əlavə olundu, fayllar
   `bil10-bank/db/`-yə daşındı (bax yuxarı «db/ fayl nömrələri»).
 
+- **db/242 — düz cavab bayrağı 2-ci variantda (2026-09-12).** 11 riyaziyyat
+  mövzusuna 108 cəbri sintez sualı yazdım. Generator düz cavabı həmişə
+  1-ci variant kimi qoyur və `correct=1` (1-əsaslı) göndərirdi; SQL
+  emit-də isə `correct_idx+1` yazmışdım (0-əsaslı sandım) → **108 sualın
+  hamısında ilk YANLIŞ variant düz kimi işarələndi.** Faylın özünüyoxlaması
+  («hər sualda düz 1 variant var»), pg_trgm dublikat, cavab balansı,
+  idempotentlik, tam smoke suite — **HAMISI YAŞIL idi.** Heç biri
+  «bayraq düz variantdadırmı?» soruşmurdu, çünki quruluşu ölçürdülər,
+  məzmunu yox. Tutan yeganə şey push-dan əvvəl 3 sualı insanın gördüyü
+  formada (`4 | [6] | 5 | 9`) oxumaq oldu — mötərizə səhv yerdə idi.
+  Push olsaydı, düz cavab verən şagird səhv sayılacaqdı — məzmun
+  qüsurlarının ən pisi. **Qayda:** hər yeni bank faylı üçün push-dan
+  əvvəl bir neçə sualı `[düz]` formasında oxu; faylın son DO blokuna
+  «düz cavab gözlənilən sırada/dəyərdədir» iddiasını yaz (242-də
+  `o.ord <> 1 → raise`), «tam 1 düz variant var» kifayət DEYİL.
+  **Bütün bank üzrə:** `db/test/bayraq_yoxla.sql` (yalnız oxuyur, canlı
+  SQL Editor-da da işləyir) — 242 imzası + izah↔bayraq tutuşdurması.
+  2026-09-12-də 22 255 sual üzrə 170 siqnalın hamısı oxundu: 0 həqiqi
+  səhv (hamısı «hansı SƏHVDİR» qəlibi və ya izahın son rəqəminin
+  distraktor olması). Siqnal sayı özü heç nə demir — sual mətnini oxu.
+
 Ortaq kök birdir: **qurduğumu yoxlamaq, istənəni yoxlamaq deyil.**
 
 ---
