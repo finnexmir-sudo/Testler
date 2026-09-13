@@ -3137,6 +3137,24 @@ məlumatla veririk.
    gəlinir, admin hesabı serverdə tanınır: `seen_today` və `seen_week`-ə
    `not app.account_is_admin(a.id)` əlavə olundu (pullu/sınaq saylarında
    bu qayda db/173-dən bəri var idi).
+3. **Serverdə (db/189, 2026-09-12)** — brauzer nişanı IP dəyişəndə,
+   başqa brauzerdə, önbelleksiz açılışda itirdi; istifadəçi: «mən özümü
+   aldadıram». İndi `public.own_vids(vid, day)`: admin panelə girəndə
+   (`rpc_seen`) cihazının `vid`-i o Bakı günü üçün nişanlanır, bütün
+   hesablamalar `app.visits_pub` görünüşündən oxuyur (nişanlı sətirlər
+   yoxdur — **geriyə də** işləyir). Sətirlər silinmir, `own_today`
+   neçəsinin sayılmadığını deyir («Bu gün sizin N baxışınız sayılmadı»).
+4. **2FA dəliyi (db/190, 2026-09-13)** — canlı ölçü: «7 baxış · 1 unikal»,
+   14 sətir `view → panel` hər 3 dəqiqədən bir, saat 22:03–22:16 — admin
+   özü. Səbəb: 189 nişanı `admin_ok()` ilə qoyurdu, o isə 2FA kilidinin
+   açıq olmasını tələb edir; `rpc_seen` panel yüklənəndə **kod yazılmazdan
+   əvvəl** bir dəfə çağırılır → kilid bağlı → nişan yox → «kənar
+   ziyarətçi». Düzəliş: `app.own_mark()` nişanı `is_admin()` ilə qoyur
+   (öz baxışını gizlətmək həssas oxunuş deyil), `rpc_admin_visits` isə
+   **rəqəmlərə baxan anda** cari cihazı nişanlayır — IP dəyişsə də
+   baxdığın rəqəm səni saymır. Serverin düzəldə **bilmədiyi**: sessiyasız
+   brauzer (WhatsApp/Telegram içindəki) — linki öz brauzerindən yoxla.
+   `smoke_oz_ziyaret` 7–9.
 
 **Toxunulmayan:** `accounts`, `accounts_week`, `students`, `mrr_minor`.
 Onlar **hadisə** deyil, **mövcudluq** sayır — admin hesabı bir dəfə

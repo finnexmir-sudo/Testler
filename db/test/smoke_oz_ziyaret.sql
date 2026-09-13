@@ -125,3 +125,87 @@ begin
 end $$;
 
 \echo 'OK  1 · admin nisani qoyulur, oz setirleri sayilmir (geriye de), adi muellime toxunulmur'
+
+--  7. (190) 2FA KILIDI BAGLI - nisan YENE qoyulmalidir.
+--  Canli olcu 2026-09-13: admin_ok() kilid teleb edirdi, rpc_seen kod
+--  yazilmazdan evvel cagirilir - adminin oz telefonu qonaq sayildi.
+insert into public.admin_totp (user_id, secret, enabled)
+  values ('11110000-0000-0000-0000-0000000000a1', '\x00'::bytea, true);
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000a1';
+do $$
+declare kilid boolean;
+begin
+  perform set_config('request.headers',
+    '{"x-forwarded-for":"6.6.6.6","user-agent":"ADMIN-UA2"}', true);
+  --  kilid heqiqeten baglidir?
+  begin
+    perform public.rpc_admin_visits(30); kilid := false;
+  exception when insufficient_privilege then kilid := true;
+  end;
+  assert kilid, '2FA kilidi bagli deyil - test menasizdir';
+  perform public.rpc_seen();
+end $$;
+reset role; reset request.jwt.claim.sub;
+do $$
+declare n int;
+begin
+  select count(*) into n from public.own_vids;
+  assert n = 2, 'kilid bagli olanda nisan qoyulmadi: ' || n;
+end $$;
+
+--  8. (190) REQEMLERE BAXAN ANDA nisan: ucuncu brauzer (IP deyisib)
+--  evvel sayta baxir, sonra kilidi acib panele girir - oz baxislari
+--  hemin sorguda artiq sayilmir.
+set role anon;
+do $$
+begin
+  perform set_config('request.headers',
+    '{"x-forwarded-for":"7.7.7.7","user-agent":"ADMIN-UA3"}', true);
+  perform public.rpc_visit('home', 'view');
+  perform public.rpc_visit('home', 'view');
+end $$;
+reset role;
+insert into public.admin_unlocks (user_id, unlocked_until)
+  values ('11110000-0000-0000-0000-0000000000a1', now() + interval '1 hour');
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000a1';
+do $$
+declare v jsonb;
+begin
+  perform set_config('request.headers',
+    '{"x-forwarded-for":"7.7.7.7","user-agent":"ADMIN-UA3"}', true);
+  v := public.rpc_admin_visits(30);
+  assert (v->'today'->>'views')::int = 1,
+    'ucuncu brauzerin baxislari sayildi: ' || (v->'today'->>'views');
+  assert (v->'today'->>'uniq')::int = 1,
+    'bu gun unikal (yalniz qonaq): ' || (v->'today'->>'uniq');
+  assert (v->>'own_today')::int = 5,
+    'sayilmayan oz setirlerimiz (3+2): ' || (v->>'own_today');
+end $$;
+reset role; reset request.jwt.claim.sub;
+do $$
+declare n int;
+begin
+  select count(*) into n from public.own_vids;
+  assert n = 3, 'baxan anda nisan qoyulmadi: ' || n;
+end $$;
+
+--  9. Adi muellim 190-dan sonra da nisanlanmir
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000a2';
+do $$
+begin
+  perform set_config('request.headers',
+    '{"x-forwarded-for":"8.8.8.8","user-agent":"MUELLIM-UA"}', true);
+  perform public.rpc_seen();
+end $$;
+reset role; reset request.jwt.claim.sub;
+do $$
+declare n int;
+begin
+  select count(*) into n from public.own_vids;
+  assert n = 3, 'adi muellim nisanlandi: ' || n;
+end $$;
+
+\echo 'OK  2 · 190: nisan 2FA kilidinden asili deyil, reqemlere baxan anda cari cihaz nisanlanir, adi muellim yene toxunulmur'
