@@ -173,10 +173,10 @@ CARD_CSS = """
   border-bottom:34px solid transparent;margin-left:12px}
 """
 
-BEN = [("1", "Test 1 dəqiqəyə yığılır", "hazır sual bankından, sinif və mövzuya görə"),
-       ("2", "Nəticə özü toplanır", "şagird kodla girir, bal serverdə hesablanır"),
-       ("3", "Hansı mövzu axsayır — görünür", "hesabat, səhv dəftəri, siqnallar"),
-       ("4", "Valideyn də görür", "ev tapşırığı, nəticə, davamiyyət")]
+BEN = [("✓", "Test 1 dəqiqəyə yığılır", "hazır sual bankından, sinif və mövzuya görə"),
+       ("✓", "Nəticə özü toplanır", "şagird kodla girir, bal serverdə hesablanır"),
+       ("✓", "Hansı mövzu axsayır — görünür", "hesabat, səhv dəftəri, siqnallar"),
+       ("✓", "Valideyn də görür", "ev tapşırığı, nəticə, davamiyyət")]
 
 def intro(pg, poster_path=None):
     """Reklam carxi kimi giris: 'muellim ne qazanir' - setirler bir-bir
@@ -188,7 +188,13 @@ def intro(pg, poster_path=None):
     #  setirler 0.7 s-den bir acilir.
     R = 1.0 / SPEED
     card(pg, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
-             '<h2>Repetitor və müəllim üçün<br><span class="y">onlayn test sistemi</span></h2>', 1.1 * R)
+             '<h2>Repetitor və müəllim üçün<br><span class="y">onlayn test sistemi</span></h2>', 1.0 * R)
+    #  qarmaq: problem -> cavab (istifadeci: «faydalı çarx kimi başlasın»)
+    card(pg, '<div class="k">Hər həftə eyni iş</div>'
+             '<h1 style="font-size:44px;line-height:1.15">Test yaz.<br>Yoxla.<br>Nəticəni say.<br>Valideynə de.</h1>', 1.4 * R)
+    card(pg, '<div class="k">Hər həftə eyni iş</div>'
+             '<h1 style="font-size:44px;line-height:1.15;color:#64748b">Test yaz.<br>Yoxla.<br>Nəticəni say.<br>Valideynə de.</h1>'
+             '<h2 style="margin-top:26px;font-size:30px;color:#fff">Bil10 bunu <span class="y">sizin yerinizə</span> edir.</h2>', 1.3 * R)
     for i in range(len(BEN)):
         on = "".join('<li class="on"><i>%s</i><span>%s<s>%s</s></span></li>' % (n, t, d) for n, t, d in BEN[:i + 1])
         off = "".join('<li><i>%s</i><span>%s<s>%s</s></span></li>' % (n, t, d) for n, t, d in BEN[i + 1:])
