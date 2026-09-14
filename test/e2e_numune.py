@@ -60,9 +60,12 @@ with sync_playwright() as pw:
     pg = page(ctx, 430, 1000)
 
     print("A · Ana səhifədə üç nümunə düyməsi")
-    pg.goto(ROOT + "index.html"); pg.wait_for_selector("#demo", timeout=15000)
-    links = pg.locator("#demo a").evaluate_all("els => els.map(e => e.getAttribute('href'))")
+    #  qapilar ILK EKRANDADIR (14.09): asagidaki tekrar blok cixarilib
+    pg.goto(ROOT + "index.html"); pg.wait_for_selector(".doors", timeout=15000)
+    links = pg.locator(".doors a, a.pdoor").evaluate_all("els => els.map(e => e.getAttribute('href'))")
     ok(links == ["muellim/#/demo", "sagird/?kod=DEMO0001", "valideyn/?kod=VDEMO001"], "uc link", links)
+    ok(pg.locator("#demo").count() == 0 and pg.locator("#cta a[href='muellim/']").count() == 1,
+       "tekrar numune bloku yoxdur, yerinde «Hesab yarat»")
 
     print("A2 · (185) Giriş ekranında nümunə keçidi")
     #  Huninin en boyuk deliyi: formaya gelen 18 neferden 12-si geri
@@ -91,7 +94,7 @@ with sync_playwright() as pw:
     ap.close()
 
     print("B · Müəllim kimi bax: anonim giriş, öz nüsxə, zolaq")
-    pg.click("#demo a[href='muellim/#/demo']")
+    pg.click(".doors a[href='muellim/#/demo']")
     pg.wait_for_selector("#demoBar", timeout=40000)
     bar = pg.inner_text("#demoBar")
     ok("Nümunə hesab" in bar and "24 saat" in bar, "numune zolagi", bar[:80])

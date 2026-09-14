@@ -183,15 +183,18 @@ def intro(pg, poster_path=None):
     acilir (hereket var, sekil kimi durmur), sonra 'indi baxaq'.
     Istifadeci: «5 saniyə sonra göstərməyə başlayır, ilk baxışdan sadəcə
     şəkil hissi verir».  Poster (uz sekli) ayrica kadrdir: boyuk ▶."""
+    #  Girisin vaxti DEQIQ saniyedir (SPEED-e bolunur): istifadeci «ilk 5
+    #  saniyə şəkil kimi görünür» dedi - hec bir kadr 1.2 s-den cox durmur,
+    #  setirler 0.7 s-den bir acilir.
+    R = 1.0 / SPEED
     card(pg, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
-             '<h2>Repetitor və müəllim üçün<br><span class="y">onlayn test sistemi</span></h2>', 1.3)
-    rows = "".join('<li id="ben%d"><i>%s</i><span>%s<s>%s</s></span></li>' % (i, n, t, d) for i, (n, t, d) in enumerate(BEN))
-    html = '<div class="k">Müəllim nə qazanır?</div><ul class="ben">' + rows + '</ul>'
+             '<h2>Repetitor və müəllim üçün<br><span class="y">onlayn test sistemi</span></h2>', 1.1 * R)
     for i in range(len(BEN)):
         on = "".join('<li class="on"><i>%s</i><span>%s<s>%s</s></span></li>' % (n, t, d) for n, t, d in BEN[:i + 1])
         off = "".join('<li><i>%s</i><span>%s<s>%s</s></span></li>' % (n, t, d) for n, t, d in BEN[i + 1:])
-        card(pg, '<div class="k">Müəllim nə qazanır?</div><ul class="ben">' + on + off + '</ul>', 0.9 if i < len(BEN) - 1 else 1.6)
-    card(pg, '<h1>Necə işləyir?</h1><h2>5 dəqiqəyə, addım-addım</h2><div class="pill">İndi baxaq →</div>', 1.2)
+        card(pg, '<div class="k">Müəllim nə qazanır?</div><ul class="ben">' + on + off + '</ul>',
+             (0.7 if i < len(BEN) - 1 else 1.2) * R)
+    card(pg, '<h1>Necə işləyir?</h1><h2>5 dəqiqəyə, addım-addım</h2><div class="pill">İndi baxaq →</div>', 1.0 * R)
     if poster_path:
         pg.evaluate("""([css, html]) => {
           if (!document.getElementById('vcardcss')) {

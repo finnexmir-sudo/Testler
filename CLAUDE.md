@@ -3282,8 +3282,11 @@ amma sayt «qeydiyyatdan keç» deyirdi.
   `muellim/#/demo`, «Şagird kimi bax» → `sagird/?kod=DEMO0001`, «Valideyn
   kimi bax» → `valideyn/?kod=VDEMO001`); «Panelə keç / Daxil ol / Valideyn
   girişi» altda kiçik `.hlinks` sətrində. Başlıqdakı «Panelə keç» qalır.
-  Aşağıdakı `#demo` bloku toxunulmayıb (e2e_numune linklərin sırasını
-  yoxlayır). Qayda: **adam nə alacağını görməmiş ondan heç nə istəmə.**
+  Aşağıdakı `#demo` bloku (nümunə linkləri) **çıxarıldı** — istifadəçi:
+  «bu təkrar qalıb»; yerində `#cta` «Bəyəndiniz? Hesab yaradın» (videodan
+  sonra növbəti addım). `.hlinks` ağ çərçivəli düymələrdir («sönük qalıb»
+  deyildi). Qayda: **adam nə alacağını görməmiş ondan heç nə istəmə;
+  eyni düymə səhifədə iki dəfə olmasın.**
 - **Mənbə:** linkdə `?src=wa` (yalnız `[a-z0-9_-]{1,20}`, uzun/pis dəyər
   atılır, kəsilmir); `assets/visit.js` onu `sessionStorage.bil10_src`-də
   saxlayır, panelin giriş ekranı da oradan oxuyur. `visits.src`,

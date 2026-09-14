@@ -134,7 +134,7 @@ with sync_playwright() as pw:
     vz = db("select count(*) c from public.visits where page='home' and ev='view'", one=True)["c"]
     ok(vz >= 1, "ana sehife baxisi sayildi", vz)
     #  klik saygaca getsin, amma sehife kecmesin (link muellim/#/demo-ya aparir)
-    pg.evaluate("(function(){var a=document.querySelector('#demo a[data-ev=demo_muellim]');"
+    pg.evaluate("(function(){var a=document.querySelector('.doors a[data-ev=demo_muellim]');"
                 "a.addEventListener('click', function(e){e.preventDefault();}, {once:true});"
                 "a.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));})()")
     pg.wait_for_timeout(600)
