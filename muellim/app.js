@@ -430,23 +430,30 @@
     homeData().then(function (v) {
       if (!live()) return;
       v = v || {};
-      var al = v.alerts || [];
-      bellDot(al.length);
+      var al = v.alerts || [], hwA = v.hw_alerts || [];
+      bellDot(al.length + hwA.length);
       bandHead({
         back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Bildirişlər",
         title: "Siqnallar",
-        sub: "Geriləyən və zəif mövzuda ilişən şagirdlər — hesabatdan avtomatik."
+        sub: "Vaxtı çatmış ev tapşırığı; geriləyən və zəif mövzuda ilişən şagirdlər — avtomatik."
       });
       var h = "";
+      //  194: son tarixi bu gun / kecmis, hele etmeyen olan ev tapsiriqlari.
+      //  Abuneden asili deyil - ev tapsirigi pulsuzdur.
+      if (hwA.length) {
+        h += '<div class="card pad0" id="nHw"><div class="alh">' + ic("pen") +
+          "Ev tapşırığı — vaxtı çatıb, hələ etməyən var</div>" +
+          hwA.map(hwAlertRow).join("") + "</div>";
+      }
       if (v.alerts === null) {
         h += '<div class="card"><p class="muted" style="margin:0">Geriləyən və ' +
           "zəif mövzuda ilişən şagird siqnalları abunə paketi ilə açılır." +
           (plansOn() ? ' <a href="#/p">Paketlərə bax</a>' : "") + "</p></div>";
-      } else if (!al.length) {
+      } else if (!al.length && !hwA.length) {
         h += '<div class="card pad0"><div class="empty"><div class="ic">' +
           ic("bell") + "</div><b>Yeni siqnal yoxdur</b>" +
           "Geriləyən və ya zəif mövzuda ilişən şagird olanda burada görünəcək.</div></div>";
-      } else {
+      } else if (al.length) {
         h += '<div class="card pad0" id="nAl">' + al.map(alertRow).join("") + "</div>";
       }
       //  "Son neticeler" burada tekrar idi (Icmalda var) - cixarildi
@@ -1052,7 +1059,7 @@
             (st.attempts ? pct(st.avg) + "%" : "—") + "</b><span>orta bal</span></div>";
       }
 
-      bellDot(v.alerts ? v.alerts.length : 0);
+      bellDot((v.alerts ? v.alerts.length : 0) + (v.hw_alerts ? v.hw_alerts.length : 0));
       var ab = $("hAlerts");
       if (ab && v.alerts && v.alerts.length) {
         //  ilk 5 siqnal; qalani "Hamısına bax" -> siqnallar ekrani
@@ -1685,19 +1692,25 @@
       var box = $("prep");
       if (!box || !d) return;
       var nx = d.next, ls = d.last, pend = d.pending || [];
-      gStat("gHw", !d.open ? "yoxdur"
-        : (!pend.length ? "hamı edib" : pend.length + " nəfər qalıb"));
+      //  test (plandan) + yazili (194) birlikde: kartla eyni seyi desin
+      var hwUnd = d.hw && d.hw.undone ? d.hw.undone.length : 0;
+      gStat("gHw", !d.open && !d.hw ? "yoxdur"
+        : ((d.open && pend.length) || hwUnd ? "etməyən var" : "hamı edib"));
       function row(icon, label, body, cls) {
         return '<div class="prow' + (cls ? " " + cls : "") + '">' + ic(icon) +
           '<div><span class="pl">' + label + "</span>" + body + "</div></div>";
       }
+      /*  Ad «Dərsdən əvvəl»dir: evvel «Bu günün dərsi» idi - istifadeci
+          «bu günün dərsi nədir, harada yazılıb?» dedi.  Kartda tarix yoxdur,
+          hamisi DERS PLANINDAN cixir; her sey bir adla cagirilir:
+          «Növbəti dərs» (plan sekmesindeki qutu ile eyni ad).  */
       var h = '<div class="spacer"></div><div class="card prep">' +
-        '<div class="pt"><b>Bu günün dərsi</b>' +
-          '<span class="muted">dərsdən əvvəl bir baxış</span></div>';
+        '<div class="pt"><b>Dərsdən əvvəl</b>' +
+          '<span class="muted">növbəti dərs · son keçilən · ev tapşırığı</span></div>';
       //  1. novbeti movzu
       if (!d.has_plan) {
-        h += row("doc", "Növbəti mövzu",
-          '<span class="muted">Dərs planı yoxdur. Plan qursanız növbəti mövzu və hazır test burada olacaq. ' +
+        h += row("doc", "Növbəti dərs",
+          '<span class="muted">Dərs planı yoxdur. Plan qursanız növbəti dərs və hazır test burada olacaq. ' +
           '<a href="#" id="prepPlan">Planı qur</a></span>');
       } else if (nx) {
         /*  ISINME AYRI SETIRDEDIR (istifadeci tutdu: «çox bitişikdir,
@@ -1705,8 +1718,9 @@
             duranda goz onlari BIR cumle kimi oxuyurdu.  Indi movzu
             yuxarida, isinme altda - ne oldugu da yazilir: «dərsdən
             əvvəl 5 sual».  */
-        h += row("doc", "Növbəti mövzu", "<b>" + esc(nx.topic) + "</b>" +
-          (nx.group ? ' <s class="muted">· ' + esc(nx.group) + " · " + nx.gpos + "/" + nx.gtotal + "</s>" : "") +
+        h += row("doc", "Növbəti dərs", "<b>" + esc(nx.topic) + "</b>" +
+          //  «3/7» neyin 3-u idi, bilinmirdi - indi «fəsli · dərs 3/7»
+          (nx.group ? ' <s class="muted">· «' + esc(nx.group) + "» fəsli · dərs&nbsp;" + nx.gpos + "/" + nx.gtotal + "</s>" : "") +
           //  135: isinme - dersden evvel 5 sual
           (nx.warm_test_id
             ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
@@ -1718,7 +1732,7 @@
                   '<button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">Hazırla</button></div>'
                 : "")));
       } else {
-        h += row("doc", "Növbəti mövzu", '<span class="muted">Plan tam keçilib. 🎉</span>');
+        h += row("doc", "Növbəti dərs", '<span class="muted">Plan tam keçilib. 🎉</span>');
       }
       //  2. son kecilen
       if (ls) {
@@ -1729,19 +1743,42 @@
                                : " · test verilib, hələ yazan yoxdur")
             : "") + "</s>");
       }
-      //  3. tapsirigi etmeyenler
+      //  3. ev tapsirigi - TEST (plandan) ve YAZILI (194) bir setirde,
+      //     her biri oz sozu ile: evvel iki ayri setir idi («Ev tapşırığı»
+      //     + «Yazılı tapşırıq»), istifadeci «çox dolaşıqdır» dedi.
+      var tl;
       if (!d.open) {
-        h += row("clip", "Ev tapşırığı", '<span class="muted">Açıq tapşırıq yoxdur.</span>');
+        tl = '<span class="muted">Açıq tapşırıq yoxdur.</span>';
       } else if (!pend.length) {
-        h += row("clip", "Ev tapşırığı", '<span class="pok">Hamı edib ✓</span>');
+        tl = '<span class="pok">Hamı edib ✓</span>';
       } else {
-        h += row("clip", "Etməyənlər", pend.slice(0, 8).map(function (x) {
+        tl = "Etməyənlər: " + pend.slice(0, 8).map(function (x) {
           //  yalniz ad: tam adlar telefonda uc setir tuturdu (istifadeci)
           return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '" title="' + esc(x.name) + '">' +
             esc(firstName(x.name) || x.name) + "</a>" + (x.n > 1 ? " (" + x.n + ")" : "");
         }).join(", ") + (pend.length > 8 ? " və daha " + (pend.length - 8) : "") +
-          ' <s class="muted">· ' + pend.length + "/" + d.students + " şagird</s>", "pwarn");
+          ' <s class="muted">· ' + pend.length + "/" + d.students + " şagird</s>";
       }
+      var hw = d.hw, und = hw ? (hw.undone || []) : [], yl;
+      if (!hw) {
+        yl = '<span class="muted">Yazılmayıb.</span> <a href="#/a/' + esc(g.id) + '">Yaz</a>';
+      } else {
+        var hd = Number(hw.done) || 0, ht = Number(hw.total) || 0;
+        var who = hw.personal ? "yalnız " + esc(firstName(hw.student || "") || hw.student || "") : "bütün qrup";
+        var st;
+        if (!ht) st = '<span class="muted">şagird yoxdur</span>';
+        else if (!und.length) st = '<span class="pok">Hamı edib ✓</span>';
+        else st = "etməyən: " + und.slice(0, 8).map(function (n) { return esc(firstName(n) || n); }).join(", ") +
+          (und.length > 8 ? " və daha " + (und.length - 8) : "") +
+          ' <s class="muted">· ' + hd + "/" + ht + " etdi</s>";
+        yl = "<b>" + esc(hw.body) + "</b>" +
+          ' <s class="muted">· ' + who + (hw.due ? " · son tarix " + hwDay(hw.due) : "") + "</s>" +
+          "<br>" + st + ' <a href="#/a/' + esc(g.id) + '">hamısı</a>';
+      }
+      h += row("clip", "Ev tapşırığı",
+        '<div class="hwl"><i>Test</i>' + tl + "</div>" +
+        '<div class="hwl"><i>Yazılı</i>' + yl + "</div>",
+        (d.open && pend.length) || (hw && und.length) ? "pwarn" : "");
       //  4. addimlar
       h += '<div class="pbtns">' +
         (ls && d.paid
@@ -2944,6 +2981,13 @@
   /* ------------------------------------------------------- hesabatlar */
   function pct(v) { return Math.round(Number(v) || 0); }
 
+  /*  Tarix suutunu (YYYY-MM-DD) saat qurşağına toxunmadan «17.09» yazir -
+      new Date(«2026-09-17») UTC sayilir, menfi qursaqda bir gun geri gedirdi. */
+  function hwDay(d) {
+    if (!d) return "";
+    var p = String(d).split("-");
+    return p.length === 3 ? p[2] + "." + p[1] : String(d);
+  }
   function dateAz(iso) {
     if (!iso) return "—";
     var d = new Date(iso);
@@ -3492,6 +3536,16 @@
       "<span><b>" + esc(a.name) + "</b> <span class=\"muted\">(" +
         esc(a["class"] || "") + ")</span> " + tx + "</span>" +
       '<span class="arrow">' + ic("right") + "</span></button>";
+  }
+  /*  194: ev tapsirigi siqnali - qrup, son tarix, metn, nece nefer
+      etmeyib.  Toxununca Tapsiriqlar ekranina (orada siyahi + kim etdi). */
+  function hwAlertRow(x) {
+    var und = Number(x.undone) || 0, tot = Number(x.total) || 0;
+    return '<a class="al hw" href="#/a/' + esc(x.class_id) + '" data-hwa="' + esc(x.id) + '">' + ic("clip") +
+      "<span><b>" + esc(x["class"] || "") + "</b> <span class=\"muted\">(" +
+        (x.personal ? "fərdi · " : "") + "son tarix " + esc(hwDay(x.due)) + ")</span><br>" +
+        esc(x.body || "") + " — <b>" + und + "/" + tot + " etməyib</b></span>" +
+      '<span class="arrow">' + ic("right") + "</span></a>";
   }
   function bindAlerts(box) {
     if (!box) return;
@@ -8753,7 +8807,7 @@
       sb.rpc("rpc_seen", {}).catch(function () {});
       //  zeng noktesi - hansi sehifeden acilmasindan asili olmadan
       if (ACC) homeData().then(function (v) {
-        bellDot(v && v.alerts ? v.alerts.length : 0);
+        bellDot(v ? (v.alerts ? v.alerts.length : 0) + (v.hw_alerts ? v.hw_alerts.length : 0) : 0);
       }).catch(function () {});
     }).catch(function (e) {
       if (e && e.status === 401) { sb.signOut().then(function () { screenAuth("in"); }); return; }

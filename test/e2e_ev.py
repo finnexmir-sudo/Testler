@@ -138,6 +138,53 @@ with sync_playwright() as p:
     t.locator("[data-hwdel]").last.click()
     t.wait_for_function("document.querySelectorAll('#hwList .hwrow').length === 1", timeout=15000)
     ok(db("select count(*) n from public.homework", one=True)["n"] == 1, "silindi")
+
+    print("E · Bu günün dərsi və siqnal (194)")
+    #  bu gun son tarixli qrup tapsirigi -> kartda «etməyən» adbaad, zengde
+    #  noqte, Siqnallarda setir.  Sabahki (+3 gun) tapsiriq siqnal DEYIL.
+    t.fill("#hwText", "Səh. 40-dakı 4 məsələni həll et")
+    t.fill("#hwDue", datetime.date.today().isoformat())
+    t.click("#btnHwAdd"); t.wait_for_function("document.querySelectorAll('#hwList .hwrow').length === 2", timeout=15000)
+    def prow(pg, label):
+        return pg.evaluate("l => ([...document.querySelectorAll('.prep .prow')].map(e => e.textContent).find(x => x.includes(l)) || '')", label)
+    t.evaluate("location.hash = '#/g/%s'" % gid)
+    t.wait_for_function("[...document.querySelectorAll('.prep .prow')].some(e => e.textContent.includes('Yazılı'))", timeout=15000)
+    pt = prow(t, "Yazılı")
+    ok("Səh. 40" in pt and "etməyən: Aysu, Kənan" in pt and "0/2 etdi" in pt,
+       "kartda son yazili tapsiriq + etmeyenler adbaad", pt.replace("\n", " ")[:120])
+    ok("bütün qrup" in pt and "son tarix" in pt and "hamısı" in pt, "kime, son tarix, «hamısı» kecidi")
+    t.evaluate("document.querySelector('.prep').scrollIntoView({block:'center'})"); t.wait_for_timeout(300)
+    t.screenshot(path=SHOT + "/m_bugun_hw.png")
+    #  zeng noqtesi acilisda (boot) ve Icmalda hesablanir - siqnallarla eyni qayda
+    t.reload()
+    try: t.wait_for_function("!document.getElementById('bellDot').classList.contains('hide')", timeout=15000); lit = True
+    except Exception: lit = False
+    ok(lit, "zengde noqte yanir (acilisdan sonra)")
+    t.evaluate("location.hash = '#/n'"); t.wait_for_selector("#nHw", timeout=15000)
+    nt = t.inner_text("#nHw")
+    ok("3-cü sinif" in nt and "Səh. 40" in nt and "2/2 etməyib" in nt,
+       "Siqnallar: qrup, metn, nece nefer etmeyib", nt.replace("\n", " ")[:120])
+    ok(t.locator("#nHw .al.hw").count() == 1, "sabahki tapsiriq siqnal deyil - 1 setir", t.locator("#nHw .al.hw").count())
+    t.screenshot(path=SHOT + "/m_siqnal_hw.png")
+    #  masaustu sekilleri (eyni sessiya)
+    dk = page(ctx, 1280, 900)
+    dk.goto(PANEL + "#/g/" + gid)
+    dk.wait_for_function("[...document.querySelectorAll('.prep .prow')].some(e => e.textContent.includes('Yazılı'))", timeout=15000)
+    dk.wait_for_timeout(400); dk.screenshot(path=SHOT + "/d_bugun_hw.png")
+    dk.evaluate("location.hash = '#/n'"); dk.wait_for_selector("#nHw", timeout=15000); dk.wait_for_timeout(300)
+    dk.screenshot(path=SHOT + "/d_siqnal_hw.png"); dk.close()
+    t.click("#nHw .al.hw"); t.wait_for_selector("#hwText", timeout=15000)
+    ok(t.url.endswith("#/a/" + gid), "siqnal setri Tapsiriqlar ekranina aparir", t.url[-48:])
+    #  hami edib -> siqnal itir, noqte sonur, kartda «Hamı edib»
+    hid = db("select id::text i from public.homework where body like 'Səh. 40%%'", one=True)["i"]
+    db("insert into public.homework_done(homework_id, student_id) select %s::uuid, id from public.students", (hid,))
+    t.evaluate("location.hash = '#/n'"); t.wait_for_selector("#main .card", timeout=15000); t.wait_for_timeout(800)
+    ok(t.locator("#nHw").count() == 0, "hami edib - siqnal itir")
+    ok(t.locator("#bellDot").evaluate("e => e.classList.contains('hide')"), "zeng noqtesi sonur")
+    t.evaluate("location.hash = '#/g/%s'" % gid)
+    t.wait_for_function("[...document.querySelectorAll('.prep .prow')].some(e => e.textContent.includes('Yazılı'))", timeout=15000)
+    pt = prow(t, "Yazılı")
+    ok("Hamı edib" in pt and "etməyən" not in pt, "kartda «Hamı edib ✓»", pt.replace("\n", " ")[:80])
     br.close()
 
 print()

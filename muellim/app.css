@@ -563,6 +563,18 @@ details.more.filt .fn{
 .al.weak{color:#9a6700}
 .al.weak b{color:#9a6700}
 .al.star{color:var(--ok)}
+/* 194: ev tapsirigi siqnali - kehraba, keçid kimi */
+.al.hw{color:#9a6700;text-decoration:none}
+.al.hw b{color:#9a6700}
+.al.hw span span.muted{color:var(--fg-3)}
+.alh{display:flex;align-items:center;gap:8px;padding:10px 16px 6px;font-size:12px;font-weight:600;
+  letter-spacing:.03em;text-transform:uppercase;color:var(--fg-3)}
+.alh svg{width:14px;height:14px}
+/* Ev tapsirigi setri: «Test» / «Yazılı» iki alt-setir, on soz kicik etiket */
+.prow .hwl{margin-top:2px}
+.prow .hwl i{display:inline-block;font-style:normal;font-size:11px;font-weight:640;letter-spacing:.03em;
+  text-transform:uppercase;color:var(--fg-3);min-width:46px;margin-right:6px}
+.prow .hwl a{margin-left:4px}
 .al.star b{color:var(--ok)}
 
 /* veraqda "sehve benzer" nisani */

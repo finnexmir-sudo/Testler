@@ -3227,8 +3227,31 @@ var?» Yox idi: «tapşırıq» həmişə **test** idi. İndi var — **müəlli
 - Hər iki mövcud RPC-nin gövdəsi `pg_get_functiondef` ilə götürülüb, yalnız
   bir açar əlavə olunub (188-dəki dərs: əl ilə köçürmə sonrakı miqrasiyada
   itirdi).
-- **Hələ yox:** nümunə hesabda nümunə tapşırıq (`app.demo_build`-ə
-  toxunulmayıb — ayrı iş), «Bu günün dərsi» kartında son tapşırıq, bildiriş.
+- Nümunə hesabda nümunə tapşırıq: `app.demo_homework` (eyni commit).
+- **«Bu günün dərsi» kartı + bildiriş (db/194, 2026-09-14).** İstifadəçi:
+  «bu da yaxşı fikirdir». `rpc_lesson_prep → 'hw'` — qrupun **son** yazılı
+  tapşırığı (45 gün içində): mətn, kimə, son tarix, `done/total`, `undone`
+  adlar. Kartda «Yazılı tapşırıq» sətri («etməyən: Aysu, Kənan · 0/2 etdi»
+  / «Hamı edib ✓», «hamısı» → `#/a/qrup`). Test tapşırığı sətri («Etməyənlər»)
+  olduğu kimi qalıb — ikisi ayrı şeydir. `rpc_home → 'hw_alerts'` — son
+  tarixi **bu gün və ya keçmiş** (14 günədək), hələ etməyən olan
+  tapşırıqlar (≤ 8) — **abunədən asılı deyil**. Siqnallar ekranında
+  «Ev tapşırığı — vaxtı çatıb» kartı (`#nHw`, sətir `#/a/qrup`-a aparır),
+  zəng nöqtəsi = siqnal + ev tapşırığı (üç yerdə: İcmal, Siqnallar, boot).
+  Sıra `created_at desc, id desc` — eyni tranzaksiyada yazılan iki
+  tapşırığın `now()`-u eynidir (smoke bunu tutdu). Canlıda: `db/194`
+  (grants dəyişmir).
+- **Kart sadələşdi (eyni gün).** İstifadəçi canlı ekranı göstərdi: «bu
+  günün dərsi nədir? harada yazılıb? çox dolaşıqdır». Səbəb: eyni şeyə üç
+  ad («Bu günün dərsi» / «Növbəti mövzu» / plan qutusunda «Növbəti dərs»),
+  «3/7» nəyin 3-ü olduğu yazılmırdı, «Ev tapşırığı» sözü iki fərqli şeyə
+  (test + yazılı) iki ayrı sətirdə. İndi: kart **«Dərsdən əvvəl»**, sətir
+  **«Növbəti dərs»** («… fəsli · dərs 3/7» — plan qutusu ilə eyni ad),
+  **«Ev tapşırığı»** bir sətir, içində «TEST · …» və «YAZILI · …»
+  alt-sətirləri; başlıq statistikası (`gHw`) ikisini birlikdə deyir
+  («etməyən var» / «hamı edib» / «yoxdur»). Plan sekməsindəki «Növbəti
+  dərs» qutusu qalır — «Keçildi» düyməsi oradadır. Qayda: **bir şeyə bir
+  ad**; «bu gün» sözü tarix olmayan yerdə yalan vəddir.
 - Yoxlama: `smoke_ev_tapsirigi` (yad müəllim girmir, şagird başqasının
   fərdi tapşırığını görmür/işarələmir), `e2e_ev` (33-cü mərhələ: üç tətbiq,
   ayrı brauzer kontekstləri — eyni kontekstdə şagird sessiyası qalır).

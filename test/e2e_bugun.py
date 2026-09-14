@@ -84,7 +84,7 @@ with sync_playwright() as pw:
 
     print("B · Plansız, tapşırıqsız: sakit kart")
     t = prep(pg)
-    ok("Bu günün dərsi" in t, "kart basligi")
+    ok("Dərsdən əvvəl" in t, "kart basligi")
     ok("Dərs planı yoxdur" in t and pg.locator("#prepPlan").count() == 1, "plan yoxdur + «Planı qur» linki")
     ok("Açıq tapşırıq yoxdur" in t, "acıq tapsiriq yoxdur")
     ok(pg.locator("#prepGen").count() == 0 and pg.locator("#prepAsg").count() == 1, "yalniz «Tapşırıq ver» duymesi")
@@ -134,7 +134,7 @@ with sync_playwright() as pw:
     pg.reload(); t = prep(pg)
     first = db("""select t.name n from public.class_plan_items i join public.topics t on t.id=i.topic_id
                   order by i.ord limit 1""", one=True)["n"]
-    ok("Növbəti mövzu" in t and first in t, "novbeti movzu = planin 1-ci dersi", first)
+    ok("Növbəti dərs" in t and first in t, "novbeti ders = planin 1-ci dersi", first)
     ok("Son keçilən" not in t, "hele kecilen yoxdur")
     pg.click("#gTabs [data-v='p']"); pg.locator("[data-pldone]").first.click()
     pg.wait_for_selector(".ploffer", timeout=8000)
