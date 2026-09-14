@@ -114,3 +114,6 @@ python3 test/e2e_tesdiq.py
 echo
 echo "32/32 sualin sekli"
 python3 test/e2e_sekil.py
+echo
+echo "33/33 metnle ev tapsirigi"
+python3 test/e2e_ev.py

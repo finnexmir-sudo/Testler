@@ -101,6 +101,8 @@ declare
         --  «Bize yaz» (db/122): sagird ve valideyn tokenle yazir
         'rpc_student_feedback','rpc_parent_feedback',
         'rpc_student_mistakes','rpc_student_mistake_answer',
+        --  Ev tapsirigi (db/191): sagird «etdim» deyir
+        'rpc_student_homework_done',
         --  Adaptiv movzu mesqi (db/133)
         'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer',
         --  Numune hesabin gece sifirlanmasi (db/136) - is axini anon acarla cagirir
@@ -151,6 +153,8 @@ declare
         --  «Bize yaz» (db/122): sagird ve valideyn tokenle yazir
         'rpc_student_feedback','rpc_parent_feedback',
         'rpc_student_mistakes','rpc_student_mistake_answer',
+        --  Ev tapsirigi (db/191): sagird «etdim» deyir
+        'rpc_student_homework_done',
         --  Adaptiv movzu mesqi (db/133)
         'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer',
         --  Numune hesabin gece sifirlanmasi (db/136) - is axini anon acarla cagirir

@@ -46,7 +46,7 @@
 <meta name="twitter:description" content="Repetitor və müəllimlər üçün: qrup yaradın, tapşırıq təyin edin, nəticə özü yığılsın. Şagird və valideyn üçün pulsuz.">
 <meta name="twitter:image" content="https://bil10.az/assets/og.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20aria-hidden%3D%22true%22%3E%20%3Cdefs%3E%3ClinearGradient%20id%3D%22fvG%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232b4acb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230e9384%22%2F%3E%20%3C%2FlinearGradient%3E%3C%2Fdefs%3E%20%3Cpath%20d%3D%22M12.5%203.5%20H18%20A8.4%208.4%200%200%201%2026.4%2011.9%20A8.4%208.4%200%200%201%2018%2020.3%20H13.1%20L8.3%2024.6%20Q7.1%2025.6%207.1%2024%20V19.1%20A8.4%208.4%200%200%201%204.1%2011.9%20A8.4%208.4%200%200%201%2012.5%203.5%20Z%22%20fill%3D%22url%28%23fvG%29%22%2F%3E%20%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M10.2%2010.2%2012.5%208.4%20V16%22%2F%3E%20%3Cellipse%20cx%3D%2218.4%22%20cy%3D%2212%22%20rx%3D%223.1%22%20ry%3D%224.1%22%2F%3E%20%3C%2Fg%3E%20%3Cpath%20d%3D%22M22.5%2019.5%20h4.2%20a3.6%203.6%200%200%201%203.6%203.6%20a3.6%203.6%200%200%201-3.6%203.6%20h-1%20l2%203.4%20-4.6-3.5%20a3.6%203.6%200%200%201-4.2-3.5%20a3.6%203.6%200%200%201%203.6-3.6%20Z%22%20fill%3D%22%23ffc94d%22%2F%3E%20%3Cpath%20d%3D%22M23.4%2023.2%20l1.5%201.5%202.6-3%22%20fill%3D%22none%22%20stroke%3D%22%231a2233%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3C%2Fsvg%3E">
-<link rel="stylesheet" href="assets/base.css?v=460">
+<link rel="stylesheet" href="assets/base.css?v=470">
 <!-- Kok manifest: butun sayti (/Testler/) ehate edir - ana sehifeden
      qurasdirilanda panel, sagird, valideyn ve beledci de tetbiqin
      icinde (brauzer zolaqsiz) acilir -->
@@ -308,6 +308,35 @@
   .step b{display:block;font-size:15.5px;font-weight:590;letter-spacing:-.012em;
     margin-bottom:6px}
   .step p{margin:0;color:var(--fg-2);font-size:13.5px;line-height:1.6}
+
+  /* video teqdimat - addimlarin altinda.  Telefon formatidir (9:16),
+     ona gore masaustunde dar sutunda durur, yaninda fesil siyahisi.
+     Video BASILANA QEDER yuklenmir (preload=none) - 5 MB zorla getmir. */
+  .vid{display:grid;grid-template-columns:300px 1fr;gap:32px;align-items:start;
+    margin-top:40px;padding:24px;border:1px solid var(--line);border-radius:var(--r-lg);
+    background:var(--surface);box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.08)}
+  @media (max-width:760px){ .vid{grid-template-columns:1fr;gap:20px;padding:16px} }
+  .vid video{display:block;width:100%;aspect-ratio:9/16;border-radius:16px;background:#0f172a;
+    box-shadow:0 12px 32px rgba(21,26,36,.18)}
+  @media (max-width:760px){ .vid video{max-width:320px;margin:0 auto} }
+  .vtx b{display:block;font-size:17px;font-weight:600;letter-spacing:-.012em;margin-bottom:6px}
+  .vtx > p{margin:0 0 14px;color:var(--fg-2);font-size:13.5px;line-height:1.6}
+  .vspeed{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 14px;font-size:13px;color:var(--fg-2)}
+  .vspeed span{margin-right:4px}
+  .vspeed button,.vchap button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;
+    color:var(--fg);border-radius:999px;padding:6px 12px;font-size:13px;line-height:1.2}
+  .vspeed button.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+  .vhint{font-size:12.5px;color:var(--fg-2);margin:-8px 0 14px}
+  .vmore{display:block;margin-top:8px}
+  .vmore a{color:var(--brand);font-weight:600;text-decoration:none}
+  .vmore a:hover{text-decoration:underline}
+  .vchap{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  @media (max-width:520px){ .vchap{grid-template-columns:1fr} }
+  .vchap button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border-radius:10px;padding:7px 10px}
+  .vchap button:hover{border-color:var(--brand)}
+  .vchap .n{flex:0 0 22px;width:22px;height:22px;border-radius:6px;background:var(--brand-tint);
+    color:var(--brand);font-size:11.5px;font-weight:650;display:flex;align-items:center;justify-content:center}
+  .vchap em{margin-left:auto;font-style:normal;color:var(--fg-2);font-size:12px;font-variant-numeric:tabular-nums}
 
   /* xususiyyetler */
   .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
@@ -596,6 +625,43 @@
         <p>Kim işlədi, kim işləmədi, orta bal nədir, hansı mövzu
            axsayır — hamısı hazır.</p></div>
     </div>
+
+    <div class="vid" id="video">
+      <div class="vwrap">
+        <video id="tqVid" controls playsinline preload="none"
+               poster="assets/teqdimat_uz.jpg">
+          <source src="assets/teqdimat.mp4" type="video/mp4">
+          Brauzeriniz videonu göstərmir.
+        </video>
+      </div>
+      <div class="vtx">
+        <p class="eyebrow">Video təqdimat</p>
+        <b>Bütün bölmələr — <span id="tqLen">5 dəqiqəyə</span></b>
+        <p>Qrupdan hesabata, dərs planından valideyn tətbiqinə — real ekranlardan,
+           yazılı. Səs yoxdur, telefonda səssiz də baxılır.
+           <span class="vmore">Videoda əsas axın göstərilir — fərdi plan, təkrar-səhv
+           testi, çap və PDF, yazılı sual, cavab vərəqi və başqaları
+           <a href="komek/">bələdçidədir →</a></span></p>
+        <div class="vspeed" role="group" aria-label="Sürət"><span>Sürət:</span>
+          <button type="button" data-r="0.5">0,5×</button>
+          <button type="button" data-r="0.75">0,75×</button>
+          <button type="button" data-r="1" class="on">Normal</button>
+        </div>
+        <p class="vhint">Tez gəlirsə yavaşladın — seçim yadda qalır.</p>
+        <ol class="vchap" id="tqChap">
+          <li><button type="button" data-s="5.4"><span class="n">1</span>Qrup və şagirdlər<em>0:05</em></button></li>
+          <li><button type="button" data-s="29.3"><span class="n">2</span>Sual bankı<em>0:29</em></button></li>
+          <li><button type="button" data-s="64.2"><span class="n">3</span>Test və ev tapşırığı<em>1:04</em></button></li>
+          <li><button type="button" data-s="114.3"><span class="n">4</span>Dərs planı<em>1:54</em></button></li>
+          <li><button type="button" data-s="147.6"><span class="n">5</span>Dəftər<em>2:28</em></button></li>
+          <li><button type="button" data-s="174.3"><span class="n">6</span>Şagird tətbiqi<em>2:54</em></button></li>
+          <li><button type="button" data-s="224.5"><span class="n">7</span>Diaqnostika<em>3:44</em></button></li>
+          <li><button type="button" data-s="254.4"><span class="n">8</span>Hesabat<em>4:14</em></button></li>
+          <li><button type="button" data-s="281.4"><span class="n">9</span>İcmal — hər açılışda<em>4:41</em></button></li>
+          <li><button type="button" data-s="296.9"><span class="n">10</span>Valideyn tətbiqi<em>4:57</em></button></li>
+        </ol>
+      </div>
+    </div>
 </div></section>
 
 <section id="imkanlar" class="tint"><div class="wrap">
@@ -756,7 +822,7 @@
   </div>
 </footer>
 
-  <script src="assets/ferq.js?v=460"></script>
+  <script src="assets/ferq.js?v=470"></script>
   <script>
   /*  Siyahi assets/ferq.js-den gelir - panel de EYNI fayldan oxuyur.
       Burada tekrar yazilsaydi, bir imkan deyisende bir yer kohne qalar
@@ -775,9 +841,43 @@
       '<div class="cc"><p class="ch">Pulsuz hədd</p>' + ul(f.pulsuz, " lim") + "</div>" +
       '<div class="cc on"><p class="ch">Abunə ilə açılır</p>' + ul(f.abune) + "</div>";
   })();
+
+  /*  Video teqdimat: suret duymeleri ve fesil kecidleri.  Brauzerin oz
+      suret menyusu telefonda cetin tapilir - muellim burada bir toxunusla
+      yavasladir.  Secim localStorage-da qalir (yalniz bu cihaz).
+      playbackRate bezi brauzerlerde menbe yuklenende sifirlanir - ona gore
+      loadedmetadata ve play-de yeniden qoyulur.  */
+  (function () {
+    var v = document.getElementById("tqVid");
+    if (!v) return;
+    var btns = document.querySelectorAll(".vspeed button"), i, rate = 1;
+    function setR(r) {
+      rate = r;
+      try { v.playbackRate = r; v.defaultPlaybackRate = r; } catch (e) {}
+      for (var k = 0; k < btns.length; k++)
+        btns[k].classList.toggle("on", Number(btns[k].getAttribute("data-r")) === r);
+      try { localStorage.setItem("bil10_vid_r", String(r)); } catch (e) {}
+    }
+    for (i = 0; i < btns.length; i++) btns[i].addEventListener("click", function () {
+      setR(Number(this.getAttribute("data-r")));
+    });
+    var saved = 0;
+    try { saved = Number(localStorage.getItem("bil10_vid_r")) || 0; } catch (e) {}
+    if (saved) setR(saved);
+    v.addEventListener("loadedmetadata", function () { try { v.playbackRate = rate; } catch (e) {} });
+    v.addEventListener("play", function () { try { v.playbackRate = rate; } catch (e) {} });
+    var ch = document.querySelectorAll("#tqChap button");
+    for (i = 0; i < ch.length; i++) ch[i].addEventListener("click", function () {
+      var s = Number(this.getAttribute("data-s")) || 0;
+      function go() { try { v.currentTime = s; } catch (e) {} v.play(); }
+      if (v.readyState >= 1) go();
+      else { v.addEventListener("loadedmetadata", go, { once: true }); v.load(); }
+      if (window.innerWidth <= 760) v.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+  })();
   </script>
-  <script src="assets/pwa.js?v=460"></script>
-  <script src="muellim/config.js?v=460"></script>
-  <script src="assets/visit.js?v=460"></script>
+  <script src="assets/pwa.js?v=470"></script>
+  <script src="muellim/config.js?v=470"></script>
+  <script src="assets/visit.js?v=470"></script>
 </body>
 </html>

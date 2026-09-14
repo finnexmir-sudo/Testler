@@ -4225,12 +4225,14 @@
         select: "id,full_name",
         eq: { class_id: gid, is_active: true },
         order: "full_name"
-      }).catch(function () { return []; })
+      }).catch(function () { return []; }),
+      //  191: metnle ev tapsirigi (kohne bazada yoxdursa bolme bos gelir)
+      sb.rpc("rpc_homework_list", { p_class_id: gid }).catch(function () { return null; })
     ]).then(function (res) {
       if (!live()) return;
       var rows = res[0];
       if (!rows || !rows.length) throw new Error("Qrup tapılmadı.");
-      drawAssign(rows[0], res[1] || {}, res[3] || []);
+      drawAssign(rows[0], res[1] || {}, res[3] || [], res[4]);
       if (ASG_PRE) {
         var pk = $("pick");
         if (pk && pk.scrollIntoView) pk.scrollIntoView({ block: "start" });
@@ -4238,10 +4240,13 @@
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
-  function drawAssign(g, d, students) {
+  function drawAssign(g, d, students, hw) {
     topTitle.textContent = g.name;
     var items = d.items || [];
     var free  = d.free_practice !== false;
+    //  191: metnle ev tapsirigi.  hw === null -> server bilmir (kohne baza),
+    //  bolme cixmir; [] -> hele yazilmayib.
+    var hwOn = hw !== null && hw !== undefined;
 
     bandHead({
       back: { id: "btnBack", label: ASG_PRE ? "Şagird hesabatı" : g.name },
@@ -4265,6 +4270,33 @@
       '<div class="segs asgf" id="asgTabs"></div>' +
       '<div id="asgList" class="card pad0"></div>' +
       '<div class="spacer"></div>' +
+      /*  191: metnle ev tapsirigi.  Repetitor her dersden sonra «bunu oxu,
+          bunu tekrarla» deyir - bura yazir, sagird siyahisinda gorur,
+          «etdim» deyir, valideyn de gorur.  Test deyil - sadece metn.  */
+      (hwOn
+        ? "<h2>Ev tapşırığı — mətnlə</h2>" +
+          '<p class="muted" style="margin:-6px 0 10px">«12-ci paraqrafı oxu», «vurma cədvəlini ' +
+            "təkrarla» — şagird siyahısında görür, «etdim» deyir; valideyn də görür.</p>" +
+          '<div class="card tight" id="hwForm">' +
+            '<label for="hwText">Tapşırıq</label>' +
+            '<textarea id="hwText" rows="2" maxlength="500" ' +
+              'placeholder="Məs.: 12-ci paraqrafı oxu, çalışma 3–5-i dəftərdə həll et"></textarea>' +
+            '<div class="fieldrow" style="margin-top:10px">' +
+              '<div><label for="hwWho">Kimə</label><select id="hwWho">' +
+                '<option value="">Bütün qrup</option>' +
+                students.map(function (st) {
+                  return '<option value="' + esc(st.id) + '">' + esc(st.full_name) + "</option>";
+                }).join("") + "</select></div>" +
+              '<div style="flex:0 0 150px"><label for="hwDue">Son tarix</label>' +
+                '<input type="date" id="hwDue"></div>' +
+            "</div>" +
+            '<div id="hwErr"></div>' +
+            '<button class="btn go" id="btnHwAdd" style="margin-top:10px">' + ic("plus") +
+              "Tapşırıq yaz</button>" +
+          "</div>" +
+          '<div id="hwList" class="card pad0" style="margin-top:10px"></div>' +
+          '<div class="spacer"></div>'
+        : "") +
       /*  "Yeni tapsiriq" yeni test yaratmaq kimi oxunurdu (canli sual).
           Burada hazir test secilib qrupa verilir - basliq ve bir cumle
           bunu deyir.  */
@@ -4295,6 +4327,63 @@
     bindWaCopy($("asgFlash"));
     on("btnBack", "click", function () {
       nav(ASG_PRE ? "#/s/" + ASG_PRE + "/" + g.id : "#/g/" + g.id);
+    });
+
+    //  191: ev tapsirigi siyahisi ve yazma
+    function hwDate(d) {
+      if (!d) return "";
+      var p = String(d).split("-");
+      return p.length === 3 ? p[2] + "." + p[1] : String(d);
+    }
+    function drawHw(list) {
+      var box = $("hwList");
+      if (!box) return;
+      list = list || [];
+      if (!list.length) {
+        box.innerHTML = '<div class="empty"><b>Hələ tapşırıq yazılmayıb</b>' +
+          "Yuxarıda yazın — şagird dərhal görür.</div>";
+        return;
+      }
+      box.innerHTML = list.map(function (x) {
+        var done = Number(x.done) || 0, tot = Number(x.total) || 0;
+        var names = (x.done_names || []).slice(0, 4).map(esc).join(", ");
+        return '<div class="hwrow" data-hwid="' + esc(x.id) + '">' +
+          '<div class="b"><b>' + esc(x.body) + "</b><i>" +
+            [x.student ? "yalnız " + esc(x.student) : "bütün qrup",
+             x.due ? "son tarix " + esc(hwDate(x.due)) : "",
+             tot ? (done + " / " + tot + " etdi" + (names ? " — " + names : "")) : ""]
+              .filter(Boolean).join(" · ") + "</i></div>" +
+          '<button class="btn sm ghost icon" data-hwdel="' + esc(x.id) +
+            '" title="Sil" aria-label="Tapşırığı sil">' + ic("x") + "</button>" +
+        "</div>";
+      }).join("");
+      Array.prototype.forEach.call(box.querySelectorAll("[data-hwdel]"), function (b) {
+        b.addEventListener("click", function () {
+          if (!confirm("Bu tapşırıq silinsin? Şagirdin siyahısından da çıxacaq.")) return;
+          b.disabled = true;
+          sb.rpc("rpc_homework_del", { p_id: b.getAttribute("data-hwdel") })
+            .then(function () { return sb.rpc("rpc_homework_list", { p_class_id: g.id }); })
+            .then(drawHw)
+            .catch(function (e) { b.disabled = false; $("hwErr").innerHTML = msg("err", fail(e)); });
+        });
+      });
+    }
+    if (hwOn) drawHw(hw);
+    on("btnHwAdd", "click", function () {
+      var t = ($("hwText").value || "").trim();
+      $("hwErr").innerHTML = "";
+      if (!t) { $("hwErr").innerHTML = msg("err", "Tapşırığın mətnini yazın."); return; }
+      var btn = $("btnHwAdd"); btn.disabled = true;
+      sb.rpc("rpc_homework_add", {
+        p_class_id: g.id, p_text: t,
+        p_due: $("hwDue").value || null,
+        p_student_id: $("hwWho").value || null
+      }).then(function () {
+        $("hwText").value = ""; $("hwDue").value = ""; $("hwWho").value = "";
+        $("hwErr").innerHTML = msg("ok", "Yazıldı — şagird siyahısında görür.");
+        return sb.rpc("rpc_homework_list", { p_class_id: g.id });
+      }).then(function (l) { btn.disabled = false; drawHw(l); })
+        .catch(function (e) { btn.disabled = false; $("hwErr").innerHTML = msg("err", fail(e)); });
     });
     on("btnGenHere", "click", function () { genForClass(g); });
     on("fp", "change", function () {

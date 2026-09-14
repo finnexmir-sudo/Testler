@@ -436,6 +436,26 @@
          tapsiriq il boyu siyahida qalirdi, 40-60 "islenib" karti
          yigilirdi.  3-den coxdursa yigilmis gelir. */
       h += "<h2>Tapşırıqlar</h2>";
+      /* 191: muellimin METNLE yazdigi ev tapsirigi - testlerin ustunde.
+         «Etdim» serverde yazilir, valideyn de gorur.  Edilenler yigilir. */
+      var hw = d.homework || [];
+      function hwDate(x) { var p = String(x || "").split("-"); return p.length === 3 ? p[2] + "." + p[1] : ""; }
+      function hwRow(x) {
+        return '<div class="hwr' + (x.done ? " done" : "") + '"><div><b>' + esc(x.body) + "</b><i>" +
+          [x.personal ? "yalnız sənə" : "", x.due ? "son tarix " + hwDate(x.due) : ""]
+            .filter(Boolean).join(" · ") + "</i></div>" +
+          '<button class="btn sm' + (x.done ? " ghost" : "") + '" data-hw="' + esc(x.id) +
+            '" data-done="' + (x.done ? "1" : "0") + '">' + (x.done ? "Geri al" : "Etdim ✓") + "</button></div>";
+      }
+      if (hw.length) {
+        var hwOpen = hw.filter(function (x) { return !x.done; });
+        var hwDone = hw.filter(function (x) { return x.done; });
+        h += '<div class="card pad0 hwbox">' + hwOpen.map(hwRow).join("") +
+          (hwDone.length
+            ? '<details class="more hwdone"' + (hwOpen.length ? "" : " open") + '><summary>Edilib <span class="fn">' +
+              hwDone.length + "</span></summary>" + hwDone.map(hwRow).join("") + "</details>"
+            : "") + "</div>";
+      }
       function isOver(t) {
         var done = Number(t.done) || 0, lim = Number(t.max_attempts) || 0;
         return !t.locked && done > 0 && lim > 0 && done >= lim;
@@ -443,8 +463,9 @@
       var asgOpen = asg.filter(function (t) { return !isOver(t); });
       var asgDone = asg.filter(isOver);
       if (!asg.length) {
+        //  191: ev tapsirigi varsa «tapsiriq yoxdur» yalan olardi - «test» deyirik
         h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
-             "</div><b>Tapşırıq yoxdur</b>" +
+             "</div><b>" + (hw.length ? "Test tapşırığı yoxdur" : "Tapşırıq yoxdur") + "</b>" +
              (prac.length ? "Aşağıdakı testlərlə məşq edə bilərsən."
                           : "Müəllimin tapşırıq verməsini gözlə.") + "</div></div>";
       } else {
@@ -532,6 +553,17 @@
         "</div></details>";
 
       show(h);
+      //  191: «etdim» / «geri al» - serverde yazilir, ekran yenilenir
+      Array.prototype.forEach.call(document.querySelectorAll("[data-hw]"), function (b) {
+        b.addEventListener("click", function () {
+          b.disabled = true;
+          sb.rpc("rpc_student_homework_done", {
+            p_token: TOKEN, p_id: b.getAttribute("data-hw"),
+            p_done: b.getAttribute("data-done") !== "1"
+          }).then(function () { screenTests(); })
+            .catch(function () { b.disabled = false; });
+        });
+      });
       on("fbK", "click", function (e) {
         var b = e.target.closest ? e.target.closest(".chip") : null;
         if (!b) return;

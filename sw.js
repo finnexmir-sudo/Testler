@@ -54,6 +54,10 @@ self.addEventListener("fetch", function (e) {
   try { url = new URL(req.url); } catch (err) { return; }
   if (url.origin !== self.location.origin) return;
 
+  //  Video: Range sorgusu ile gelir (iOS bunsuz oynatmir), 5 MB-dir -
+  //  kese qoyulmur, birbasa sebekeden gedir.
+  if (/\.(mp4|webm)$/i.test(url.pathname) || req.headers.get("range")) return;
+
   if (isHtml(req)) {
     //  Sebeke birinci: yeni versiya derhal catsin.
     //  Internet yoxdursa kesdeki karkas acilir (sonra "baglanti yoxdur"

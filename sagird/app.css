@@ -430,3 +430,15 @@ details.fbd summary{color:var(--brand)}
 .qfig img{max-width:100%;max-height:320px;height:auto;background:#fff;
   border:1px solid var(--line);border-radius:var(--r);padding:10px}
 @media (max-width:520px){ .qfig img{max-height:250px} }
+
+/* 191: metnle ev tapsirigi */
+.hwr{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.hwbox > .hwr:last-child{border-bottom:0}
+.hwr > div{flex:1;min-width:0}
+.hwr b{display:block;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere}
+.hwr i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-2);margin-top:2px}
+.hwr.done b{text-decoration:line-through;color:var(--fg-2);font-weight:500}
+.hwr .btn{flex:0 0 auto;min-height:36px;padding:0 12px}
+.hwdone{margin:0;padding:0 14px 8px}
+.hwdone summary{padding:10px 0;cursor:pointer;color:var(--fg-2);font-size:13.5px}
+.hwdone .hwr{padding-left:0;padding-right:0}

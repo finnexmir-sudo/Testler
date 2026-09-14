@@ -3121,6 +3121,36 @@ sütununda üçüncü sətir kimi görünür (heç bir valideyn girməyibsə sə
 yazılmır). Səbəb: valideyn ekranı az işlənirsə, bu lever zəifdir — qərarı
 məlumatla veririk.
 
+## Mətnlə ev tapşırığı (db/191, 2026-09-14)
+
+İstifadəçi: «repetitor uşağa “filan dərsi oxu, təkrarla” deyir — bizdə
+var?» Yox idi: «tapşırıq» həmişə **test** idi. İndi var — **müəllim,
+şagird, valideyn üçü də görür.**
+
+- `public.homework(class_id, student_id NULL=bütün qrup, body ≤ 500, due)`,
+  `public.homework_done(homework_id, student_id)` — şagirdin «etdim»i.
+- Müəllim (authenticated): `rpc_homework_add / _list / _del` — Tapşırıqlar
+  ekranında «Ev tapşırığı — mətnlə» bölməsi: mətn, kimə (qrup/şagird),
+  son tarix; siyahıda «N / M etdi — adlar». Girişi `app.homework_class_ok`
+  (rpc_assign_test ilə eyni qayda). Gündə qrupa 50 limit.
+- Şagird: `rpc_student_tests → 'homework'` (mövcud çağırış, yeni açar) —
+  «Tapşırıqlar» başlığının altında, testlərin **üstündə**; «Etdim ✓» →
+  `rpc_student_homework_done(p_token, p_id, p_done)` — **yeni anon RPC,
+  siyahı 20 → 21** (05_grants iki massiv, smoke_huquq). Edilənlər «Edilib»
+  altına qatlanır, «Geri al» var. Test tapşırığı yoxdursa boş mətn «Test
+  tapşırığı yoxdur» deyir (ev tapşırığı varkən «tapşırıq yoxdur» yalan idi).
+- Valideyn: `rpc_parent_home → 'homework'` — «Gözləyən tapşırıq»da
+  testlərlə bir siyahıda, üstdə; «müəllimin tapşırığı · yalnız ona».
+- Hər iki mövcud RPC-nin gövdəsi `pg_get_functiondef` ilə götürülüb, yalnız
+  bir açar əlavə olunub (188-dəki dərs: əl ilə köçürmə sonrakı miqrasiyada
+  itirdi).
+- **Hələ yox:** nümunə hesabda nümunə tapşırıq (`app.demo_build`-ə
+  toxunulmayıb — ayrı iş), «Bu günün dərsi» kartında son tapşırıq, bildiriş.
+- Yoxlama: `smoke_ev_tapsirigi` (yad müəllim girmir, şagird başqasının
+  fərdi tapşırığını görmür/işarələmir), `e2e_ev` (33-cü mərhələ: üç tətbiq,
+  ayrı brauzer kontekstləri — eyni kontekstdə şagird sessiyası qalır).
+- Canlıda: `db/191` → sonra **`db/05_grants.sql` yenidən**.
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

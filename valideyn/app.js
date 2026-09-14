@@ -341,10 +341,24 @@
     }
 
     out += '<h2>Gözləyən tapşırıq</h2>';
-    if (!pend.length) {
-      out += '<div class="card ok-box">Gözləyən tapşırıq yoxdur.</div>';
+    /* 191: muellimin METNLE yazdigi ev tapsirigi - testlerle bir siyahida,
+       ustde.  «Etdim» sagirdin oz isaresidir - valideyn gorur. */
+    var hw = d.homework || [];
+    var hwOpen = hw.filter(function (x) { return !x.done; });
+    var hwDone = hw.filter(function (x) { return x.done; });
+    function hwDate(x) { var p = String(x || "").split("-"); return p.length === 3 ? p[2] + "." + p[1] : ""; }
+    if (!pend.length && !hwOpen.length) {
+      out += '<div class="card ok-box">Gözləyən tapşırıq yoxdur.' +
+        (hwDone.length ? " Edilib ✓ " + hwDone.length + " ev tapşırığı." : "") + "</div>";
     } else {
-      out += '<div class="card pad0">' + pend.map(function (p) {
+      out += '<div class="card pad0">' + hwOpen.map(function (x) {
+        return '<div class="row hwr">' +
+          "<div><b>" + esc(x.body) + "</b>" +
+            "<i>" + [ "müəllimin tapşırığı", x.personal ? "yalnız ona" : "" ]
+              .filter(Boolean).map(esc).join(" · ") + "</i></div>" +
+          (x.due ? '<span class="due">' + esc(hwDate(x.due)) + "</span>" : "") +
+        "</div>";
+      }).join("") + pend.map(function (p) {
         return '<div class="row">' +
           "<div><b>" + esc(p.title) + "</b>" +
             (p.fix ? '<em class="tag">düzəliş</em>' : "") +
