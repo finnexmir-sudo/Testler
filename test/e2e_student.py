@@ -121,6 +121,9 @@ with sync_playwright() as pw:
     pg.evaluate("window.__tid = " + json.dumps(db("select id::text i from public.tests where slug=\'riy-3-vurma-1\'", one=True)["i"]))
     pg.locator(".test:not(.lock)", has_text="Vurma cədvəli").first.click()
     pg.wait_for_selector(".opt", timeout=8000)
+    #  cox setirli sual (kod izleme) setir sonlarini qorumalidir - CSS
+    ok(pg.evaluate("getComputedStyle(document.querySelector('.q .body')).whiteSpace") == "pre-wrap",
+       "sual metni setir sonlarini qoruyur (pre-wrap)")
     ok("1 / " + str(NQ) in pg.inner_text(".prog"), "irelileyis gostericisi",
        pg.inner_text(".prog").replace("\n", " "))
     # Cavabsiz da kecmek olar - usaq bilmediyi sualda ilisib qalmasin.

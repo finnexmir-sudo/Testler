@@ -442,3 +442,9 @@ details.fbd summary{color:var(--brand)}
 .hwdone{margin:0;padding:0 14px 8px}
 .hwdone summary{padding:10px 0;cursor:pointer;color:var(--fg-2);font-size:13.5px}
 .hwdone .hwr{padding-left:0;padding-right:0}
+
+/* Cox setirli sual metni (kod izleme, HTML parcasi - bank yazacaq):
+   setir sonlari qorunur.  Tek setirli suallara tesir etmir - bazada
+   kenar bosluq / ikiqat bosluq yoxdur (olculdu: 0 / 19 671).  Uzun
+   kod setri kenardan cixmasin deye overflow-wrap. */
+.q .body,.qh b{white-space:pre-wrap;overflow-wrap:anywhere}

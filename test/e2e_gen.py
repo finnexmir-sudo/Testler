@@ -187,6 +187,8 @@ with sync_playwright() as pw:
     pg.fill("#gTitle", "Sınaq — öz suallarım")
     pg.click("#btnMake")
     pg.wait_for_selector(".paper", timeout=8000)
+    ok(pg.evaluate("getComputedStyle(document.querySelector('.paper .qh b')).whiteSpace") == "pre-wrap",
+       "vereqde sual metni setir sonlarini qoruyur (pre-wrap)")
     ok("/t/" in pg.url, "veraq ekranina kecid", pg.url.split("#")[-1][:20])
     n = pg.locator(".paper .pq").count()
     ok(n == 8, "veraqda 8 sual var", n)

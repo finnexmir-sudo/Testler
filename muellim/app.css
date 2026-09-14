@@ -1753,3 +1753,10 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .hwrow .b{flex:1;min-width:0}
 .hwrow b{display:block;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere}
 .hwrow i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-2);margin-top:3px}
+
+/* Cox setirli sual metni - BUTUN ekranlarda eyni (sagird tetbiqi ile bir):
+   test onizleme/kagiz (.paper .qh), cap (#printBox .ppb), sagird hesabati
+   cavab vereqi (.shq), keyfiyyet/siqnal kartlari (.repc .rhead),
+   generator numuneleri (.smp .sq), bank siyahisi (.qrow .g), sikayet (.fbb). */
+.paper .qh b,#printBox .ppb,.shq > b,.repc .rhead b,.smp .sq b,.qrow .g b,.fbb{
+  white-space:pre-wrap;overflow-wrap:anywhere}
