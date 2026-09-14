@@ -261,6 +261,8 @@ bank 242_bank_riy_movzu_zenginlesdirme.sql
 bank 243_bank_inf_derinlik_metn.sql
 bank 244_bank_inf_plan_partiya1.sql
 bank 245_bank_inf_plan_partiya3_kod.sql
+bank 246_bank_inf_plan_partiya2_ibtidai.sql
+bank 247_bank_inf_plan_partiya2_orta.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
