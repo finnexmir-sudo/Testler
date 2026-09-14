@@ -33,6 +33,9 @@ if "--mp4" in sys.argv:
         print("hazir:", OUT + "/" + name)
     #  uz sekli - ilk kadr
     first = io.open(LIST, encoding="utf-8").readline().split("'")[1]
+    #  poster: ayrica ▶ kadri varsa o, yoxsa ilk kadr
+    pst = OUT + ("/poster_tam.png" if TAM else "/poster.png")
+    if os.path.exists(pst): first = pst
     subprocess.run([FF, "-y", "-v", "error", "-i", first, "-vf", "scale=720:1280", "-q:v", "4", OUT + "/" + NAME.replace(".mp4", "_uz.jpg")], check=True)
     sys.exit(0)
 
@@ -155,7 +158,55 @@ CARD_CSS = """
   padding:14px 26px;border-radius:999px}
 #vcard .site{font-size:40px;font-weight:800;margin-top:8px;color:#fff}
 #vcard .sm{font-size:17px;color:#94a3b8;margin-top:22px;line-height:1.5}
+#vcard .k{font-size:15px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#5eead4;margin-bottom:14px}
+#vcard .ben{list-style:none;margin:30px 0 0;padding:0;width:100%;max-width:560px;text-align:left}
+#vcard .ben li{display:flex;align-items:center;gap:18px;padding:16px 20px;margin-bottom:12px;border-radius:18px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:24px;font-weight:600;line-height:1.3;
+  opacity:0;transform:translateY(10px)}
+#vcard .ben li.on{opacity:1;transform:none}
+#vcard .ben li i{flex:0 0 52px;width:52px;height:52px;border-radius:14px;background:#ffc94d;color:#0f172a;
+  display:flex;align-items:center;justify-content:center;font-style:normal;font-size:26px;font-weight:800}
+#vcard .ben li s{display:block;text-decoration:none;font-size:16px;font-weight:500;color:#94a3b8;margin-top:2px}
+#vcard .play{width:150px;height:150px;border-radius:50%;background:#ffc94d;margin:34px auto 0;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+#vcard .play i{display:block;width:0;height:0;border-left:56px solid #0f172a;border-top:34px solid transparent;
+  border-bottom:34px solid transparent;margin-left:12px}
 """
+
+BEN = [("1", "Test 1 dəqiqəyə yığılır", "hazır sual bankından, sinif və mövzuya görə"),
+       ("2", "Nəticə özü toplanır", "şagird kodla girir, bal serverdə hesablanır"),
+       ("3", "Hansı mövzu axsayır — görünür", "hesabat, səhv dəftəri, siqnallar"),
+       ("4", "Valideyn də görür", "ev tapşırığı, nəticə, davamiyyət")]
+
+def intro(pg, poster_path=None):
+    """Reklam carxi kimi giris: 'muellim ne qazanir' - setirler bir-bir
+    acilir (hereket var, sekil kimi durmur), sonra 'indi baxaq'.
+    Istifadeci: «5 saniyə sonra göstərməyə başlayır, ilk baxışdan sadəcə
+    şəkil hissi verir».  Poster (uz sekli) ayrica kadrdir: boyuk ▶."""
+    card(pg, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
+             '<h2>Repetitor və müəllim üçün<br><span class="y">onlayn test sistemi</span></h2>', 1.3)
+    rows = "".join('<li id="ben%d"><i>%s</i><span>%s<s>%s</s></span></li>' % (i, n, t, d) for i, (n, t, d) in enumerate(BEN))
+    html = '<div class="k">Müəllim nə qazanır?</div><ul class="ben">' + rows + '</ul>'
+    for i in range(len(BEN)):
+        on = "".join('<li class="on"><i>%s</i><span>%s<s>%s</s></span></li>' % (n, t, d) for n, t, d in BEN[:i + 1])
+        off = "".join('<li><i>%s</i><span>%s<s>%s</s></span></li>' % (n, t, d) for n, t, d in BEN[i + 1:])
+        card(pg, '<div class="k">Müəllim nə qazanır?</div><ul class="ben">' + on + off + '</ul>', 0.9 if i < len(BEN) - 1 else 1.6)
+    card(pg, '<h1>Necə işləyir?</h1><h2>5 dəqiqəyə, addım-addım</h2><div class="pill">İndi baxaq →</div>', 1.2)
+    if poster_path:
+        pg.evaluate("""([css, html]) => {
+          if (!document.getElementById('vcardcss')) {
+            const s = document.createElement('style'); s.id = 'vcardcss'; s.textContent = css;
+            (document.head || document.documentElement).appendChild(s);
+          }
+          let d = document.getElementById('vcard');
+          if (!d) { d = document.createElement('div'); d.id = 'vcard'; (document.body || document.documentElement).appendChild(d); }
+          d.innerHTML = '<div class="w">' + html + '</div>';
+        }""", [CARD_CSS, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
+               '<h2>Müəllim nə qazanır?<br><span class="y">5 dəqiqəlik təqdimat</span></h2>'
+               '<div class="play"><i></i></div><div class="sm">səssiz · addım-addım · bil10.az</div>'])
+        pg.wait_for_timeout(250); pg.screenshot(path=poster_path)
+        pg.evaluate("() => { const d = document.getElementById('vcard'); if (d) d.remove(); }")
+
 
 def card(pg, html, sec):
     """Kart - sehifenin USTUNE qoyulur (set_content sessiyani pozurdu)."""
@@ -310,8 +361,7 @@ def tam(pg):
     (sagird / valideyn).  Yazinin ust setri YOL-dur: harada oldugunu deyir."""
     PARENT = BASE + "valideyn/index.html"
     NAV = {"b": "#bnav a[href='#/b']", "gen": "#bnav a[href='#/gen']", "home": "#bnav a[href='#/']"}
-    card(pg, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
-             '<h2>Müəllim üçün test platforması<br><span class="y">tam təqdimat</span></h2>', 3.0)
+    intro(pg, OUT + "/poster_tam.png")
 
     # hazirliq (kadrsiz)
     pg.goto(PANEL); pg.wait_for_selector("#btnAuth", timeout=15000)

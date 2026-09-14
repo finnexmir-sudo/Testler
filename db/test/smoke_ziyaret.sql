@@ -116,3 +116,40 @@ begin
   assert exists (select 1 from public.visits where vid = 'w1'), 'teze setir silindi';
 end $$;
 \echo 'OK  3 · admin cemi/gunler/hadiseler; adi muellim yox; 90 gun temizlik'
+
+-- 4. (195) menbe: ?src=wa -> admin bolgude gorunur; pis deyer bos olur;
+--    kohne 2-parametrli imza yoxdur
+delete from public.visits;
+set role anon;
+do $$
+begin
+  perform set_config('request.headers', '{"x-forwarded-for":"1.1.1.1","user-agent":"UA-S"}', true);
+  perform public.rpc_visit('home', 'view', 'wa');
+  perform public.rpc_visit('home', 'view', 'WA');
+  perform public.rpc_visit('home', 'panel', 'wa');
+  perform set_config('request.headers', '{"x-forwarded-for":"2.2.2.2","user-agent":"UA-S"}', true);
+  perform public.rpc_visit('home', 'view');
+  perform public.rpc_visit('home', 'view', '<script>alert(1)</script>');
+  perform public.rpc_visit('home', 'view', 'cox-uzun-menbe-adi-hedden-artiq-uzun');
+end $$;
+reset role;
+do $$
+declare v jsonb; w jsonb; b jsonb;
+begin
+  assert (select count(*) from public.visits where src = 'wa') = 3, 'wa menbe sayi';
+  assert (select count(*) from public.visits where src is null) = 3, 'pis/bos menbe null deyil';
+  assert to_regprocedure('public.rpc_visit(text, text)') is null, 'kohne 2-parametrli imza qalib (PostgREST qarisdirir)';
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-00000000f1a1';
+do $$
+declare v jsonb; w jsonb; b jsonb;
+begin
+  v := public.rpc_admin_visits(30);
+  select x into w from jsonb_array_elements(v->'src') x where x->>'src' = 'wa';
+  select x into b from jsonb_array_elements(v->'src') x where x->>'src' = '';
+  assert w is not null and (w->>'views')::int = 2 and (w->>'uniq')::int = 1, 'wa: 2 baxis, 1 nefer: ' || coalesce(w::text, 'yox');
+  assert b is not null and (b->>'views')::int = 3, 'birbasa: 3 baxis: ' || coalesce(b::text, 'yox');
+end $$;
+reset role; reset request.jwt.claim.sub;
+\echo 'OK  4 · 195: menbe (?src) yazilir, pis deyer bos, admin bolgusu; kohne imza yoxdur'

@@ -116,7 +116,7 @@ with sync_playwright() as pw:
     #  Valideyn zolagi: kecid olmalidir (evvel cilpaq <p> idi) ve
     #  kartlarla eyni enle durmalidir - iki seliqeli kartin altinda
     #  yarimciq gorunmesin.
-    ok(pg.locator("a.pdoor[href='valideyn/']").count() == 1,
+    ok(pg.locator("a.pdoor[href^='valideyn/']").count() == 1,
        "valideyn zolagi kecidddir")
     en = pg.evaluate("""() => {
         const d = document.querySelector('.doors').getBoundingClientRect();
@@ -139,6 +139,17 @@ with sync_playwright() as pw:
                 "a.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));})()")
     pg.wait_for_timeout(600)
     ok(db("select count(*) c from public.visits where ev='demo_muellim'", one=True)["c"] >= 1, "demo kliki sayildi")
+    #  195: menbe - ?src=wa ile gelen baxis src ile yazilir; pis deyer
+    #  atilir (sessiyada evvelki 'wa' qalir, yeni pis deyer yazilmir)
+    pg.goto("http://127.0.0.1:8010/index.html?src=wa"); pg.wait_for_timeout(700)
+    ok(db("select count(*) c from public.visits where src='wa' and ev='view'", one=True)["c"] >= 1, "menbe ?src=wa yazildi")
+    pg.goto("http://127.0.0.1:8010/index.html?src=%3Cb%3Ex"); pg.wait_for_timeout(700)
+    ok(db("select count(*) c from public.visits where src is not null and src <> 'wa'", one=True)["c"] == 0, "pis menbe atilir")
+    #  ilk ekran (14.09): uc qapi numuneye aparir, hesab kecidleri kicikdir
+    ok(pg.locator(".doors a[href='muellim/#/demo']").count() == 1 and
+       pg.locator(".doors a[href^='sagird/?kod=']").count() == 1 and
+       pg.locator("a.pdoor[href^='valideyn/?kod=']").count() == 1, "ilk ekranda uc qapi numuneye aparir")
+    ok(pg.locator(".hlinks a[href='muellim/']").count() == 1, "«Panelə keç» kicik kecid kimi qalir")
 
     #  ROBOT SAYILMIR.  Olcu (2026-09-11): Search Console-da sitemap
     #  verdiyimiz DEQIQEDE panelde dord teze "ziyaretci" cixdi - Googlebot

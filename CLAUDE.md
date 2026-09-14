@@ -3269,6 +3269,38 @@ var?» Yox idi: «tapşırıq» həmişə **test** idi. İndi var — **müəlli
   ayrı brauzer kontekstləri — eyni kontekstdə şagird sessiyası qalır).
 - Canlıda: `db/191` → sonra **`db/05_grants.sql` yenidən**.
 
+## Ana səhifə: əvvəl bax, sonra qeydiyyat; mənbə (db/195, 2026-09-14)
+
+Ölçü (bu gün, `visits` üzrə yol): 7 ziyarətçi — 4-ü `home:view` ilə
+bitdi (ilk ekranda getdi), 2-si `home:panel` (formanı görüb qaçdı), 1-i
+şagird nümunəsi; heç kim müəllim nümunəsinə girmədi, heç kim qeydiyyatdan
+keçmədi. Mənbə: istifadəçi **reklam şəklini** WhatsApp qruplarında
+paylaşıb, adamlar ünvanı əl ilə yazıb gəlib — linksiz, deməli maraq var,
+amma sayt «qeydiyyatdan keç» deyirdi.
+
+- **İlk ekran:** üç qapı nümunəyə aparır («Müəllim kimi bax» →
+  `muellim/#/demo`, «Şagird kimi bax» → `sagird/?kod=DEMO0001`, «Valideyn
+  kimi bax» → `valideyn/?kod=VDEMO001`); «Panelə keç / Daxil ol / Valideyn
+  girişi» altda kiçik `.hlinks` sətrində. Başlıqdakı «Panelə keç» qalır.
+  Aşağıdakı `#demo` bloku toxunulmayıb (e2e_numune linklərin sırasını
+  yoxlayır). Qayda: **adam nə alacağını görməmiş ondan heç nə istəmə.**
+- **Mənbə:** linkdə `?src=wa` (yalnız `[a-z0-9_-]{1,20}`, uzun/pis dəyər
+  atılır, kəsilmir); `assets/visit.js` onu `sessionStorage.bil10_src`-də
+  saxlayır, panelin giriş ekranı da oradan oxuyur. `visits.src`,
+  `rpc_visit(p_page, p_ev, p_src)` — **köhnə 2-parametrli imza silinib**
+  (PostgREST iki imzanı qarışdırır), `app.visits_pub` görünüşünə sütun,
+  `rpc_admin_visits → 'src'` (30 gün: baxış · nəfər). Admin Ziyarətlər
+  kartında «Mənbə» sətri. `smoke_ziyaret` §4, `e2e_panel`.
+- Canlıda: `db/195` → **`db/05_grants.sql` yenidən** (imza dəyişib).
+  Paylaşımlarda link: `https://bil10.az/?src=wa` (Facebook üçün `fb`).
+- **Video ilk ekranın altındadır** (istifadəçi: «videonu da birinci
+  görünənlərdən et»). Əvvəl «Necə işləyir» bölməsinin sonunda idi, 7
+  nəfərdən 4-ü ora çatmırdı. Panel mokapı (`.preview`) çıxarıldı — video
+  elə canlı mokapdır. Videonun əvvəlinə reklam çarxı kimi giriş («Müəllim
+  nə qazanır?» — 4 sətir bir-bir açılır, sonra «İndi baxaq»), üz şəklində
+  böyük ▶ (`test/_video.py: intro()`, `poster_tam.png`); istifadəçi: «5
+  saniyə sonra göstərməyə başlayır, ilk baxışdan şəkil hissi verir».
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

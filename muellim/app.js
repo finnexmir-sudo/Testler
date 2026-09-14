@@ -5840,6 +5840,18 @@
           //  186: altliqdaki elaqe klikleri.  «Bizə yazmağa cəhd etdi»
           //  ayrica siqnaldir - baxib gedenle eyni sey deyil.
           " · WhatsApp " + (ev.wa || 0) + " · e-poçt " + (ev.mail || 0) + ".</p>" +
+        //  195: menbe bolgusu - linkdeki ?src=... ; bos = birbasa/bilinmir
+        (function () {
+          var srcs = vs.src || [];
+          if (!srcs.length) return "";
+          var SRC_LBL = { wa: "WhatsApp", fb: "Facebook", ig: "Instagram", tg: "Telegram", yt: "YouTube", g: "Google" };
+          return '<p class="muted vsrc" style="margin:6px 0 0">Mənbə (30 gün, baxış · nəfər): ' +
+            srcs.map(function (x) {
+              var k = String(x.src || "");
+              return "<b>" + (k ? esc(SRC_LBL[k] || k) : "birbaşa / bilinmir") + "</b> " +
+                (x.views || 0) + " · " + (x.uniq || 0);
+            }).join(" — ") + '. Paylaşdığınız linkə <code>?src=wa</code> əlavə edin.</p>';
+        })() +
         '<p class="muted" style="margin:6px 0 0">IP saxlanmır; unikal = günlük duzla hash. ' +
           'Reklam bağlantıları, botlar da sayılır — meylə bax, rəqəmə yox.' +
           //  189: oz baxislarimiz sayilmir - reqemin niye kicik oldugu
@@ -8782,7 +8794,10 @@
       admin ana sehife klikinden ayira bilsin.  */
   function ziyaret(ev) {
     try { if (localStorage.getItem("bil10_oz")) return; } catch (e) {}
-    try { sb.rpc("rpc_visit", { p_page: "giris", p_ev: ev }).catch(function () {}); }
+    //  195: menbe nisani ana sehifeden sessiyada gelir (assets/visit.js)
+    var src = null;
+    try { src = sessionStorage.getItem("bil10_src") || null; } catch (e) {}
+    try { sb.rpc("rpc_visit", { p_page: "giris", p_ev: ev, p_src: src }).catch(function () {}); }
     catch (e) {}
   }
 

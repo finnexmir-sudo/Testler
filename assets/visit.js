@@ -28,13 +28,23 @@
     if (navigator.webdriver) return;
   } catch (e) {}
   var page = (document.body && document.body.getAttribute("data-page")) || "home";
+  /*  MENBE (195): linkde ?src=wa kimi nisan - reklam sekli WhatsApp
+      qruplarinda paylasilir, kimin haradan geldiyi bilinmirdi.  Nisan
+      sessiyada saxlanir ki, ana sehifeden panele kecende de qalsin.
+      Yalniz qisa, tehlukesiz deyer (server de yoxlayir).  */
+  var src = "";
+  try {
+    var m = /[?&]src=([a-z0-9_-]{1,20})(?:&|$)/i.exec(location.search || "");
+    if (m) { src = m[1].toLowerCase(); sessionStorage.setItem("bil10_src", src); }
+    else src = sessionStorage.getItem("bil10_src") || "";
+  } catch (e) {}
   function send(ev) {
     try {
       fetch(C.SUPABASE_URL + "/rest/v1/rpc/rpc_visit", {
         method: "POST", keepalive: true,
         headers: { "Content-Type": "application/json", "apikey": C.SUPABASE_ANON_KEY,
                    "Authorization": "Bearer " + C.SUPABASE_ANON_KEY },
-        body: JSON.stringify({ p_page: page, p_ev: ev })
+        body: JSON.stringify({ p_page: page, p_ev: ev, p_src: src || null })
       }).catch(function () {});
     } catch (e) {}
   }
