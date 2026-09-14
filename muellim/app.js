@@ -7154,13 +7154,17 @@
               aiddir.  Sagird geri sayan saat gorur, vaxt bitende cavablar
               ozu gonderilir; qerar serverdedir (limit + 60 s guzest).  */
           (diag ? "" :
-            '<label class="plim" title="Vaxt limiti">' + ic("clock") +
-              '<select id="pLim">' +
-              [0, 5, 10, 15, 20, 30, 45, 60, 90].map(function (m) {
-                return '<option value="' + m + '"' +
-                  (Math.round((t.time_limit_sec || 0) / 60) === m ? " selected" : "") + ">" +
-                  (m ? m + " dəq" : "vaxtsız") + "</option>";
-              }).join("") + "</select></label>") +
+            '<details class="plim" id="pLim" data-min="' + Math.round((t.time_limit_sec || 0) / 60) + '">' +
+              '<summary title="Vaxt limiti">' + ic("clock") + "<span>" +
+                (t.time_limit_sec ? Math.round(t.time_limit_sec / 60) + " dəq" : "vaxtsız") +
+                "</span>" + ic("right") + "</summary>" +
+              '<div class="plimm">' +
+                [0, 5, 10, 15, 20, 30, 45, 60, 90].map(function (m) {
+                  return '<button type="button" data-min="' + m + '"' +
+                    (Math.round((t.time_limit_sec || 0) / 60) === m ? ' class="on"' : "") + ">" +
+                    (m ? m + " dəq" : "vaxtsız") + "</button>";
+                }).join("") +
+              "</div></details>") +
           (t.gen_rule && !done && !diag
             ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
               "Yenidən yığ</button>"
@@ -7314,11 +7318,21 @@
         });
     });
 
-    on("pLim", "change", function () {
-      var el = $("pLim"); el.disabled = true;
-      sb.rpc("rpc_test_time_limit", { p_test_id: t.id, p_min: Number(el.value) || 0 })
+    //  192: vaxt limiti menyusu (details) - secim serverde yazilir, vereq yenilenir
+    on("pLim", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-min]") : null;
+      if (!b || b.id === "pLim") return;
+      ev.preventDefault();
+      var d = $("pLim"); d.open = false;
+      var m = Number(b.getAttribute("data-min")) || 0;
+      if (m === Number(d.getAttribute("data-min"))) return;
+      sb.rpc("rpc_test_time_limit", { p_test_id: t.id, p_min: m })
         .then(function () { screenPaper(t.id); })
-        .catch(function (e) { el.disabled = false; show(msg("err", fail(e))); });
+        .catch(function (e) { show(msg("err", fail(e))); });
+    });
+    document.addEventListener("click", function (ev) {
+      var d = $("pLim");
+      if (d && d.open && !d.contains(ev.target)) d.open = false;
     });
 
     on("btnPAsg", "click", function () {
