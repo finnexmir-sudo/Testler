@@ -2995,7 +2995,7 @@
       topTitle.textContent = (r.class && r.class.name) || "Hesabat";
       var sm = r.summary || {};
       bandHead({
-        back: { id: "btnB", label: "Qrup" }, eye: "Hesabat",
+        back: { id: "btnB", label: backLabel("Qrup") }, eye: "Hesabat",
         title: (r.class && r.class.name) || "Hesabat",
         sub: r.paid ? "" : "Son 7 günün məlumatı göstərilir.",
         right: '<button class="btn sm ghost" id="btnRef" title="Yenilə">' +
@@ -3176,7 +3176,7 @@
         });
         $("rRecMore").remove();
       });
-      on("btnB", "click", function () { nav("#/g/" + gid); });
+      on("btnB", "click", function () { goBack("#/g/" + gid); });
       on("btnTodo", "click", function () { remedialGen(gid, [todo]); });
       on("btnRef", "click", function () { screenReport(gid); });
       on("btnRem", "click", function () { remedialGen(gid, weakAll); });
@@ -3770,7 +3770,7 @@
       if (!live()) return;
       var s = r.student || {}, sm = r.summary || {};
       bandHead({
-        back: { id: "btnB", label: "Geri" }, eye: "Şagird hesabatı",
+        back: { id: "btnB", label: backLabel("Geri") }, eye: "Şagird hesabatı",
         av: av(s.full_name), title: s.full_name,
         sub: "<span>" + esc(s.display_name) + "</span> " +
           '<span class="code key">' + esc(s.login_code) + "</span>",
@@ -4131,9 +4131,7 @@
       }
       //  Qrup ekranindan gelibse ora, yoxsa qrup hesabatina (canli sual:
       //  "Geri" qrupa yox, hesabata atirdi)
-      on("btnB", "click", function () {
-        nav(PREV_HASH === "#/g/" + classId ? PREV_HASH : "#/r/" + classId);
-      });
+      on("btnB", "click", function () { goBack("#/r/" + classId); });
       on("btnAsgStu", "click", function () { nav("#/a/" + classId + "/" + id); });
       on("btnRem", "click", function () { remedialGen(classId, sweakAll); });
 
@@ -4249,7 +4247,7 @@
     var hwOn = hw !== null && hw !== undefined;
 
     bandHead({
-      back: { id: "btnBack", label: ASG_PRE ? "Şagird hesabatı" : g.name },
+      back: { id: "btnBack", label: ASG_PRE ? "Şagird hesabatı" : backLabel(g.name) },
       eye: g.name, title: "Tapşırıqlar",
       sub: "Şagird tapşırığı öz siyahısında görür; son tarix keçəndə bağlanır."
     });
@@ -4326,7 +4324,10 @@
     ASG_FLASH = null;
     bindWaCopy($("asgFlash"));
     on("btnBack", "click", function () {
-      nav(ASG_PRE ? "#/s/" + ASG_PRE + "/" + g.id : "#/g/" + g.id);
+      //  sagird kartindan gelmisikse ora - amma yigindan cixaraq, yoxsa
+      //  kartin oz «geri»si yeniden bura qaytarar (dovr)
+      if (ASG_PRE) { goTo("#/s/" + ASG_PRE + "/" + g.id); return; }
+      goBack("#/g/" + g.id);
     });
 
     //  191: ev tapsirigi siyahisi ve yazma
@@ -6544,7 +6545,7 @@
 
     on("btnBack", "click", function () {
       //  imtina: geri qayidis niyyetini de temizleyirik
-      if (f.back) { var gid = f.back; f.back = ""; f.backName = ""; nav("#/a/" + gid); return; }
+      if (f.back) { var gid = f.back; f.back = ""; f.backName = ""; goTo("#/a/" + gid); return; }
       nav("#/");
     });
     on("gRemOff", "click", function (e) {
@@ -6747,7 +6748,7 @@
           var gid = f.back;
           f.back = ""; f.backName = "";
           PICKNEW = v.test_id;
-          nav("#/a/" + gid);
+          goTo("#/a/" + gid);
           return;
         }
         nav("#/t/" + v.test_id);
@@ -6851,7 +6852,7 @@
   function drawPack(planId) {
     var d = PKD, pl = d.plan || {}, items = d.items || [], exams = d.exams || [];
     var pend = Number(d.exam_pending) || 0;
-    var h = '<button class="btn sm ghost" id="btnBack">' + ic("back") + esc(pl.class || "Qrup") + "</button>" +
+    var h = '<button class="btn sm ghost" id="btnBack">' + ic("back") + esc(backLabel(pl.class || "Qrup")) + "</button>" +
       '<div class="spacer"></div>' +
       '<div class="card">' +
         "<h1>" + esc(pl.subject || "") + " · " + esc(pl.level || "") + "</h1>" +
@@ -6900,7 +6901,7 @@
         })() +
       "</div>";
     show(h);
-    on("btnBack", "click", function () { nav("#/g/" + pl.class_id); });
+    on("btnBack", "click", function () { goBack("#/g/" + pl.class_id); });
     //  yeniden yuklenende mesaj itmesin: bir defelik flash
     PK_FLASH = "";
     function done(msgTxt) {
@@ -7139,7 +7140,7 @@
     topTitle.textContent = t.title || "Test vərəqi";
 
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Test yığ</button>" +
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") + esc(backLabel("Test yığ")) + "</button>" +
       '<div class="spacer"></div>' +
       '<div class="card">' +
         "<h1>" + esc(t.title || "") + "</h1>" +
@@ -7291,7 +7292,7 @@
       "</div>"
     );
 
-    on("btnBack", "click", function () { nav("#/gen"); });
+    on("btnBack", "click", function () { goBack("#/gen"); });
     bindReportLinks();
 
     on("btnPrn",  "click", function () { paperPrint(t, false); });
@@ -8003,7 +8004,7 @@
     var isNew = !q.id;
 
     show(
-      '<button class="btn sm ghost" id="btnBack">' + ic("back") + "Sual bankı</button>" +
+      '<button class="btn sm ghost" id="btnBack">' + ic("back") + esc(backLabel("Sual bankı")) + "</button>" +
       '<div class="spacer"></div>' +
 
       '<div class="card">' +
@@ -8125,7 +8126,7 @@
         "</span></div></div>")
     );
 
-    on("btnBack", "click", function () { nav("#/b"); });
+    on("btnBack", "click", function () { goBack("#/b"); });
     on("qparTry", "click", paramsPreview);
     drawOptions();
     bindOptions();
@@ -8504,6 +8505,37 @@
     else location.hash = h;
   }
 
+  /*  Geri duymesi HARADAN GELIBSE ora qaytarir.  Evvel her ekranin geri
+      duymesi sabit yere gedirdi (vereq -> hemise Test yig): Tapsiriqlar
+      siyahisindan vereqe kecen muellim geri basanda basqa yere dusurdu.
+      HIST - tetbiq icindeki kecidlerin yigini (route() doldurur); goBack
+      sonuncunu cixarir, yoxdursa ekranin oz susma unvanina gedir.
+      Alt menyu bolmeleri (Icmal, Suallar, Test yig, Profil) buna toxunmur -
+      onlarin geri duymesi hemise Esas sehifedir.  */
+  var HIST = [], BACKING = false, CUR_I = 0;
+  function routeTitle(h) {
+    var k = (h || "#/").replace(/^#/, "").split("/").filter(Boolean)[0] || "";
+    return { g: "Qrup", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ",
+             t: "Vərəq", pk: "Dərs paketi", adm: "İdarəetmə", me: "Profil", n: "Bildirişlər",
+             q: "Sual", s: "Şagird", p: "Paket", demo: "Nümunə" }[k] || "Əsas səhifə";
+  }
+  function goBack(fallback) {
+    var prev = HIST.pop();
+    while (prev && prev === CUR_HASH) prev = HIST.pop();
+    if (prev) { BACKING = true; nav(prev); }
+    else nav(fallback || "#/");
+  }
+  //  Niyyetli qayidis (Test yig -> Tapsiriqlar, Tapsiriqlar -> sagird karti):
+  //  hedef yigindaki sonuncudursa geri gedis kimi (cixarilir), deyilse adi
+  //  kecid.  Yoxsa ya dovr yaranir (nav), ya da yanlis yere dusur (goBack).
+  function goTo(h) {
+    if (HIST.length && HIST[HIST.length - 1] === h) goBack(h); else nav(h);
+  }
+  function backLabel(fallback) {
+    var prev = HIST[HIST.length - 1];
+    return prev && prev !== CUR_HASH ? routeTitle(prev) : fallback;
+  }
+
   /* ------------------------------------------ alt naviqasiya (mobil)
      Telefonda bes esas bolme bir toxunusdadir; masaustunde gorunmur.
      Panel yalniz daxil olmus ve hesabi qurulmus istifadecide cixir. */
@@ -8560,7 +8592,26 @@
     if (GF && m[0] !== "gen") { GF.back = ""; GF.backName = ""; }
     if (m[0] !== "me" && m[0] !== "adm") FB_FROM = FB_PAGE[m[0] || ""] || (m[0] || "İcmal");
     //  "Geri" geldiyi yere qaytarsin deye evvelki unvan yadda saxlanir
-    if ((location.hash || "#/") !== CUR_HASH) { PREV_HASH = CUR_HASH; CUR_HASH = location.hash || "#/"; }
+    if ((location.hash || "#/") !== CUR_HASH) {
+      /*  Brauzerin oz «geri»si ile tetbiqin kecidini ayirmaq: her yeni
+          kecide history.state-de sira nomresi vurulur.  location.hash=
+          ile yaranan teze yazi state-siz gelir (yeni kecid - yigina
+          yazilir); brauzer geri/ireli edende kohne yazi oz nomresi ile
+          qayidir - nomre kicikdirse geri gedisdir, yigindan cixarilir.
+          (Evvelki cehd «eyni ekrana qayidis = geri» idi - sagird karti ->
+          qrup -> sagird karti kimi ireli kecidleri de geri sayirdi.)  */
+      var st = null;
+      try { st = history.state; } catch (e) {}
+      var trav = !!(st && typeof st.i === "number");
+      if (BACKING) BACKING = false;
+      else if (trav && st.i < CUR_I) HIST.pop();
+      else if (CUR_HASH) { HIST.push(CUR_HASH); if (HIST.length > 30) HIST.shift(); }
+      //  nomre = vaxt (ms): sehife yenilenende de artan qalir - sayac
+      //  sifirlansaydi kohne yazilar «ireli» kimi oxunardi
+      if (trav) CUR_I = st.i;
+      else { CUR_I = Date.now(); try { history.replaceState({ i: CUR_I }, ""); } catch (e) {} }
+      PREV_HASH = CUR_HASH; CUR_HASH = location.hash || "#/";
+    }
     bnavShow({ b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "g" && m[1]) return screenGroup(m[1]);
     if (m[0] === "r" && m[1]) return screenReport(m[1]);

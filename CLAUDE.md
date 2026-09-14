@@ -3121,6 +3121,43 @@ sütununda üçüncü sətir kimi görünür (heç bir valideyn girməyibsə sə
 yazılmır). Səbəb: valideyn ekranı az işlənirsə, bu lever zəifdir — qərarı
 məlumatla veririk.
 
+## Geri düyməsi — haradan gəlibsə ora (2026-09-14)
+
+İstifadəçi: «yuxarıdakı düymələr bəzi yerlərə qaytarır, çaşdırıcıdır».
+Hər ekranın geri düyməsi **sabit** yerə gedirdi: vərəq → həmişə «Test yığ»,
+hesabat → həmişə qrup. Tapşırıqlar siyahısından qələmlə vərəqə keçən müəllim
+geri basanda Test yığ-a düşürdü.
+
+- `HIST` — tətbiq içindəki keçidlərin yığını, `route()` doldurur (`BACKING`
+  bayrağı geri gedişi yığına yazmır). `goBack(susma)` sonuncunu çıxarıb ora
+  gedir, yoxdursa (səhifə yenilənib) susma ünvanına. `backLabel(susma)` düymə
+  yazısını əvvəlki ekranın adından götürür (`routeTitle`: g→Qrup, a→Tapşırıqlar,
+  r→Hesabat, t→Vərəq, gen→Test yığ …).
+- Tətbiq olunan ekranlar: hesabat, şagird kartı, tapşırıqlar, dərs paketi,
+  vərəq, sual redaktoru. **Toxunulmayan:** qrup ekranı (hub-dır — geri həmişə
+  İcmal; öz alt ekranına «geri» getmək çaşdırır, `e2e_panel` bunu yoxlayır),
+  alt menyu bölmələri
+  (İcmal, Suallar, Test yığ, Profil, İdarəetmə, Bildirişlər) — onların geri
+  düyməsi həmişə «Əsas səhifə»; Test yığ-ın «tapşırığa qayıt» niyyəti
+  (`GF.back`) və Tapşırıqların `ASG_PRE` (şagird kartından) öz məntiqini
+  saxlayır — niyyət yığından üstündür.
+- Eyni ekranın öz-özünə yenilənməsi (`screenPaper(t.id)` ad dəyişəndən sonra)
+  hash dəyişmir → yığına düşmür.
+- **Brauzerin öz «geri»si** tətbiq keçidindən necə ayrılır: hər yeni keçidə
+  `history.replaceState({i: Date.now()})` vurulur. `location.hash=` ilə
+  yaranan təzə yazı state-siz gəlir (yeni keçid → yığına yazılır); brauzer
+  geri/irəli edəndə köhnə yazı öz nömrəsi ilə qayıdır — nömrə kiçikdirsə geri
+  gedişdir, yığından çıxarılır. İki səhv cəhd: «eyni ekrana qayıdış = geri»
+  (şagird kartı → qrup → şagird kartı irəli keçidini də geri sayırdı) və
+  sayaçla nömrələmə (səhifə yenilənəndə sıfırlanır, köhnə yazılar «irəli»
+  oxunurdu) — vaxt möhürü ikisini də həll edir.
+- Niyyətli qayıdışlar da yığından çıxarır (`goBack`): Tapşırıqlar → şagird
+  kartı (`ASG_PRE`), Test yığ → Tapşırıqlar (`GF.back`) — `nav` ilə olsaydı
+  irəli keçid kimi yazılır, sonra kartın öz «geri»si yenidən ora qaytarırdı
+  (dövr; `e2e_assign` 324 tutdu).
+- Yoxlama: `e2e_testsil` — Tapşırıqlar → qələm → vərəq → geri «Tapşırıqlar»
+  → geri qrup → hesabat → geri «Qrup» → İcmal; birbaşa vərəq → «Əsas səhifə».
+
 ## Öz testini silmək / adını dəyişmək (db/193, 2026-09-14)
 
 İstifadəçi «Hazır testi tapşır» siyahısında «Samir 1» ×4 gördü — eyni adla
