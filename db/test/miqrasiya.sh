@@ -126,6 +126,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          245_bank_inf_plan_partiya3_kod.sql \
          246_bank_inf_plan_partiya2_ibtidai.sql \
          247_bank_inf_plan_partiya2_orta.sql \
+         248_bank_inf_plan_partiya4_sekil.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
