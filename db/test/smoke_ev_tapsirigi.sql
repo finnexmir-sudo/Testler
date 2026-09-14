@@ -12,6 +12,11 @@ set client_min_messages = warning;
 delete from public.homework_done; delete from public.homework;
 delete from public.parent_sessions; delete from public.student_sessions;
 delete from public.students; delete from public.classes;
+delete from public.attempt_answers; delete from public.attempts; delete from public.assignments;
+delete from public.test_questions tq using public.tests t where t.id = tq.test_id and t.owner_type = 'educator';
+delete from public.tests where owner_type = 'educator';
+delete from public.question_options o using public.questions q where q.id = o.question_id and q.owner_type = 'educator';
+delete from public.questions where owner_type = 'educator';
 delete from public.subscriptions;
 delete from public.account_members; delete from public.accounts;
 delete from public.user_roles; delete from public.profiles; delete from auth.users;
@@ -164,3 +169,48 @@ begin
                   where c.account_id = app.demo_account() and h.student_id is not null), 'numune ferdi tapsiriq yoxdur';
 end $$;
 \echo 'OK  2 · numune hesab ev tapsiriqlari ile qurulur (qrup + ferdi + «etdim»)'
+
+--  7. (194) «Bu gunun dersi» -> hw; Icmal -> hw_alerts (son tarix bu gun, etmeyen var)
+delete from public.homework_done; delete from public.homework;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
+--  iki ayri emr = iki ayri created_at (eyni tranzaksiyada now() eynidir)
+select public.rpc_homework_add('cccc0000-0000-0000-0000-0000000000e1', 'Bu gün üçün tapşırıq', (now() at time zone 'Asia/Baku')::date, null) \g /dev/null
+select pg_sleep(0.01) \g /dev/null
+select public.rpc_homework_add('cccc0000-0000-0000-0000-0000000000e1', 'Sabah üçün tapşırıq', (now() at time zone 'Asia/Baku')::date + 1, null) \g /dev/null
+do $$
+declare r jsonb; h jsonb; d jsonb;
+begin
+  r := public.rpc_lesson_prep('cccc0000-0000-0000-0000-0000000000e1');
+  h := r->'hw';
+  assert h is not null and h->>'body' = 'Sabah üçün tapşırıq', 'hw sonuncu tapsiriq olmalidir: ' || coalesce(h::text, 'null');
+  assert (h->>'done')::int = 0 and (h->>'total')::int = 2, 'hw done/total: ' || h->>'done' || '/' || h->>'total';
+  assert jsonb_array_length(h->'undone') = 2, 'etmeyenler 2 olmalidir';
+  d := public.rpc_home(null);
+  assert jsonb_array_length(d->'hw_alerts') = 1, 'siqnal: yalniz bu gunku (1), gelen: ' || jsonb_array_length(d->'hw_alerts');
+  assert d->'hw_alerts'->0->>'body' = 'Bu gün üçün tapşırıq', 'siqnal metni';
+  assert (d->'hw_alerts'->0->>'undone')::int = 2, 'siqnalda etmeyen sayi';
+end $$;
+reset role; reset request.jwt.claim.sub;
+--  hamisi edende siqnal itir
+select set_config('smoke.hid', (select id::text from public.homework where body = 'Bu gün üçün tapşırıq'), false) \g /dev/null
+set role anon;
+do $$
+declare tok text; d jsonb; hid uuid := current_setting('smoke.hid')::uuid;
+begin
+  tok := (public.rpc_student_login('EVAYSU01'))->>'token';
+  perform public.rpc_student_homework_done(tok, hid, true);
+  tok := (public.rpc_student_login('EVKENAN1'))->>'token';
+  perform public.rpc_student_homework_done(tok, hid, true);
+end $$;
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
+do $$
+declare d jsonb;
+begin
+  d := public.rpc_home(null);
+  assert jsonb_array_length(d->'hw_alerts') = 0, 'hami edib - siqnal qalmali deyil';
+end $$;
+reset role; reset request.jwt.claim.sub;
+\echo 'OK  3 · 194: Bu gunun dersi son tapsirigi kim etdi/etmedi ile verir; siqnal yalniz son tarixi catmis ve etmeyen olanda'
