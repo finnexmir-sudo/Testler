@@ -310,6 +310,7 @@
           ? '<span class="solo diag">diaqnostika</span>' : "") + "</b><i>" +
         "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
         "<span>" + (t.questions || 0) + " sual</span>" +
+        (t.time_limit_sec ? "<span>·</span><span>⏱ " + Math.round(t.time_limit_sec / 60) + " dəq</span>" : "") +
         //  cehdi bitmis testde "son tarix · N gun qaldi" menasizdir
         (isAsg && t.closes_at && !over ? dueSpan(t.closes_at) : "") +
         (left > 0 ? "<span>·</span><span>" + left + " cəhd qalıb</span>" : "") +
@@ -380,6 +381,7 @@
   var PSUB = "", PEXP = false;   // serbest mesq: fenn suzgeci, "daha" acildi
   function screenTests() {
     markScreen(true);
+    stopTimer();
     topBar.classList.remove("hide");
     topTitle.textContent = ME ? ME.display_name : "Testlər";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
@@ -640,14 +642,41 @@
   }
 
   /* ---------------------------------------------------------- test */
+  /*  192: vaxtli test.  Qalan saniye SERVERDEN gelir (remaining_sec) -
+      telefonun saati sehv olsa da duz.  Burada yalniz geri sayilir ve
+      0-da cavablar ozu gonderilir; qerar serverdedir.  */
+  var TMR = null;
+  function stopTimer() { if (TMR) { clearInterval(TMR); TMR = null; } }
+  function timerText() {
+    var sec = Math.max(0, Math.round((S.deadline - Date.now()) / 1000));
+    return Math.floor(sec / 60) + ":" + ("0" + (sec % 60)).slice(-2);
+  }
+  function tickTimer() {
+    if (!S || !S.deadline || S.done) { stopTimer(); return; }
+    var left = S.deadline - Date.now();
+    var el = $("tmr");
+    if (el) { el.textContent = "⏱ " + timerText(); el.classList.toggle("soon", left <= 60000); }
+    //  0-dan 1 s SONRA gonderilir (ekranda 0:00 gorunur): remaining_sec
+    //  tam ededdir, birbasa 0-da gondersek server hele limite catmamis
+    //  ola biler ve «vaxt bitdi» isaresi dusmezdi.  Guzest 60 s-dir.
+    if (left <= -1000) {
+      stopTimer();
+      if (!S.submitting) { S.auto = true; finish(); }
+    }
+  }
+  function startTimer() { stopTimer(); if (S && S.deadline) { tickTimer(); TMR = setInterval(tickTimer, 1000); } }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && TMR) tickTimer(); });
+
   function startTest(testId) {
     markScreen(false);
+    stopTimer();
     show('<div class="card"><div class="skel">Test hazırlanır…</div></div>');
     sb.rpc("rpc_start_attempt", { p_token: TOKEN, p_test_id: testId })
       .then(function (d) {
         S = {
           attempt: d.attempt_id, test: d.test,
-          qs: d.questions || [], i: 0, answers: {}
+          qs: d.questions || [], i: 0, answers: {},
+          deadline: d.remaining_sec != null ? Date.now() + Number(d.remaining_sec) * 1000 : null
         };
         if (!S.qs.length) { show(msg("warn", "Bu testdə hələ sual yoxdur.")); return; }
         //  Yarimciq qalmis eyni cehd varsa cavablar geri qaytarilir.
@@ -668,6 +697,7 @@
           }
         }
         drawQuestion();
+        startTimer();
       })
       .catch(function (e) { errScreen(e, function () { startTest(testId); }); });
   }
@@ -715,6 +745,7 @@
 
     show(
       '<div class="prog"><div class="bar"><i style="width:' + pct + '%"></i></div>' +
+        (S.deadline ? '<span class="tmr" id="tmr">⏱ ' + timerText() + "</span>" : "") +
         '<span class="cnt">' + (S.i + 1) + " / " + n + "</span></div>" + rest +
       '<div class="q"><div class="body">' + esc(q.body) + "</div>" +
         '<button class="spk' + (VOICE ? "" : " hide") + '" id="spk" ' +
@@ -836,6 +867,8 @@
   }
 
   function finish() {
+    stopTimer();
+    S.submitting = true;
     setBusy("btnFinish", true, "Testi bitir");
     tick();
     var payload = S.qs.map(function (q) {
@@ -856,6 +889,7 @@
       draftClear(S.attempt);      //  gonderildi - qaralama lazim deyil
       screenResult(r);
     }).catch(function (e) {
+      S.submitting = false;
       setBusy("btnFinish", false, "Testi bitir");
       /* Cavablar hele gonderilmeyib - tekrar cehd eyni cehdi bitirir */
       errScreen(e, finish);
@@ -865,6 +899,8 @@
   /* --------------------------------------------------------- netice */
   function screenResult(r, review) {
     markScreen(false);
+    stopTimer();
+    if (S) S.done = true;
     var pct = Math.round(Number(r.percent) || 0);
     var C = 2 * Math.PI * 58;
     var dash = (C * pct / 100).toFixed(1) + " " + C.toFixed(1);
@@ -890,6 +926,15 @@
                 ? "Bir də cəhd edə bilərsən"
                 : "Səhvlərinə bax və mövzunu təkrarla")) + "</div>" +
       "</div></div>" +
+
+      //  192: vaxt bitdi - guzestde bal hesablanib; guzest de kecibse yox
+      (r.late
+        ? '<div class="warn" style="margin-bottom:12px">' + ic("info") +
+          "<span>⏱ Vaxt bitdi — cavablar vaxtında çatmadı, bal hesablanmadı.</span></div>"
+        : (r.timed_out
+            ? '<div class="warn" style="margin-bottom:12px">' + ic("info") +
+              "<span>⏱ Vaxt bitdi — cavablar avtomatik göndərildi.</span></div>"
+            : "")) +
 
       (review
         ? '<div class="warn" style="margin-bottom:12px">' + ic("info") +

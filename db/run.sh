@@ -111,6 +111,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 188_sual_sekli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 189_oz_ziyaretim.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 190_oz_nisan_2fa.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 191_ev_tapsirigi.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 192_vaxtli_test.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

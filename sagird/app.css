@@ -448,3 +448,8 @@ details.fbd summary{color:var(--brand)}
    kenar bosluq / ikiqat bosluq yoxdur (olculdu: 0 / 19 671).  Uzun
    kod setri kenardan cixmasin deye overflow-wrap. */
 .q .body,.qh b{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* 192: vaxtli test - geri sayan saat */
+.prog .tmr{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--fg-2);
+  padding:3px 9px;border-radius:999px;background:var(--n-150);white-space:nowrap}
+.prog .tmr.soon{color:#fff;background:var(--err)}

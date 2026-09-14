@@ -3121,6 +3121,35 @@ sütununda üçüncü sətir kimi görünür (heç bir valideyn girməyibsə sə
 yazılmır). Səbəb: valideyn ekranı az işlənirsə, bu lever zəifdir — qərarı
 məlumatla veririk.
 
+## Vaxtlı test (db/192, 2026-09-14)
+
+`tests.time_limit_sec` 01-dən bəri var idi, heç yerdə işləmirdi. İndi:
+
+- **Müəllim** — vərəqdə (`#/t/`) çap düymələrinin yanında «⏱ vaxtsız / 5…90
+  dəq» seçimi → `rpc_test_time_limit(test, dəq)` (sahib, ≤ 180). Vərəq
+  başlığında və çapda «vaxt: N dəq»; «Hazır testi tapşır» siyahısında ⏱.
+  Limit **testin özündədir**, bütün təyinatlara aiddir.
+- **Şagird** — siyahıda «⏱ N dəq»; test ekranında geri sayan saat
+  (`#tmr`, son dəqiqə qırmızı); 0-da cavablar **özü göndərilir**
+  (təsdiq soruşulmur). Qalan vaxt `rpc_start_attempt → remaining_sec` ilə
+  **serverdən** gəlir — telefonun saatı dəyişdirilsə də düz; yarımçıq
+  cəhd davam edəndə də doğru qalır. `visibilitychange`-də saat yenilənir.
+- **Server** (`rpc_submit_attempt`) — qərar buradadır: limit keçibsə
+  `attempts.timed_out = true`; **limit + 60 s güzəşt** də keçibsə cavablar
+  **sayılmır** (`late`, 0 bal). Güzəşt şəbəkə gecikməsi üçündür.
+  `rpc_test_result` və submit `timed_out`/`late` qaytarır → şagird ekranında
+  «Vaxt bitdi — avtomatik göndərildi» / «bal hesablanmadı» qeydi.
+- Hər üç RPC-nin gövdəsi `pg_get_functiondef`-dən götürülüb, yalnız
+  göstərilən sətirlər əlavə olunub; `rpc_test_preview` `time_limit_sec`
+  qaytarmırdı — əlavə olundu.
+- **Hələ yox:** müəllim hesabatında «⏱ vaxt bitdi» nişanı (cəhd siyahısı);
+  bir cəhd üçün fərqli limit (təyinata bağlı); şagird tapşırıq siyahısında
+  qalan vaxt.
+- Yoxlama: `smoke_vaxtli_test` (sahib/yad, qalan saniyə, güzəştdə bal,
+  gec cavab 0, limitsiz toxunulmur), `e2e_vaxt` (34-cü mərhələ: seçim →
+  vərəq → şagird saatı → 0-da avtomatik → güzəşt → gec).
+- Canlıda: `db/192` (anon siyahısı dəyişmir).
+
 ## Mətnlə ev tapşırığı (db/191, 2026-09-14)
 
 İstifadəçi: «repetitor uşağa “filan dərsi oxu, təkrarla” deyir — bizdə

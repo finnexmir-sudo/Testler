@@ -4657,6 +4657,7 @@
         if (sub && !hideSub && ttl.indexOf(sub) !== 0) bits.push(sub);
         if (t.level && String(t.level) !== gl) bits.push(String(t.level));
         bits.push((Number(t.questions) || 0) + " sual");
+        if (t.time_limit_sec) bits.push("⏱ " + Math.round(t.time_limit_sec / 60) + " dəq");
         if (!t.is_free) bits.push("abunə");
         if (elsew[t.id]) bits.push("başqa qrupa da verilib");
         return bits.join(" · ");
@@ -7055,7 +7056,8 @@
       "<h1>" + esc(t.title || "") + "</h1>" +
       '<div class="ppm">' + esc(t.subject || "") +
         (t.level ? " · " + esc(t.level) : "") + " · " + qs.length +
-        " sual · Bil10</div>" +
+        " sual" + (t.time_limit_sec ? " · vaxt: " + Math.round(t.time_limit_sec / 60) + " dəq" : "") +
+        " · Bil10</div>" +
       '<div class="ppf"><span>Ad, soyad: ________________________</span>' +
         "<span>Tarix: ____________</span><span>Bal: ______</span></div>" +
       "</div>" +
@@ -7139,6 +7141,7 @@
         '<p class="muted" style="margin:8px 0 0">' +
           esc(t.subject || "") + (t.level ? " · " + esc(t.level) : "") +
           " · " + qs.length + " sual" +
+          (t.time_limit_sec ? " · ⏱ " + Math.round(t.time_limit_sec / 60) + " dəq" : "") +
           (done ? " · " + done + " şagird işləyib" : "") + "</p>" +
         '<div class="spacer"></div>' +
         '<div class="prnrow">' +
@@ -7147,6 +7150,16 @@
           '<button class="btn sm ghost" id="btnPrnK">' + ic("key") +
             "Cavab açarı ilə</button>" +
           '<label class="prnc"><input type="checkbox" id="prnC"> Yığcam</label>' +
+          /*  192: vaxt limiti - testin ozunde saxlanir, butun teyinatlara
+              aiddir.  Sagird geri sayan saat gorur, vaxt bitende cavablar
+              ozu gonderilir; qerar serverdedir (limit + 60 s guzest).  */
+          (diag ? "" :
+            '<label class="plim" title="Vaxt limiti">⏱ <select id="pLim">' +
+              [0, 5, 10, 15, 20, 30, 45, 60, 90].map(function (m) {
+                return '<option value="' + m + '"' +
+                  (Math.round((t.time_limit_sec || 0) / 60) === m ? " selected" : "") + ">" +
+                  (m ? m + " dəq" : "vaxtsız") + "</option>";
+              }).join("") + "</select></label>") +
           (t.gen_rule && !done && !diag
             ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
               "Yenidən yığ</button>"
@@ -7298,6 +7311,13 @@
           var el = $("pErr");
           if (el) el.innerHTML = msg("err", fail(e));
         });
+    });
+
+    on("pLim", "change", function () {
+      var el = $("pLim"); el.disabled = true;
+      sb.rpc("rpc_test_time_limit", { p_test_id: t.id, p_min: Number(el.value) || 0 })
+        .then(function () { screenPaper(t.id); })
+        .catch(function (e) { el.disabled = false; show(msg("err", fail(e))); });
     });
 
     on("btnPAsg", "click", function () {

@@ -1760,3 +1760,7 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
    generator numuneleri (.smp .sq), bank siyahisi (.qrow .g), sikayet (.fbb). */
 .paper .qh b,#printBox .ppb,.shq > b,.repc .rhead b,.smp .sq b,.qrow .g b,.fbb{
   white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* 192: vereqde vaxt limiti secimi */
+.plim{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--fg-2)}
+.plim select{font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--fg)}
