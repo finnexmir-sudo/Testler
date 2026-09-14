@@ -134,7 +134,7 @@ with sync_playwright() as pw:
     pg.reload(); t = prep(pg)
     first = db("""select t.name n from public.class_plan_items i join public.topics t on t.id=i.topic_id
                   order by i.ord limit 1""", one=True)["n"]
-    ok("Növbəti dərs" in t and first in t, "novbeti ders = planin 1-ci dersi", first)
+    ok("Bu günün dərsi" in t and first in t, "bu gunun dersi = planin 1-ci kecilmemis dersi", first)
     ok("Son keçilən" not in t, "hele kecilen yoxdur")
     pg.click("#gTabs [data-v='p']"); pg.locator("[data-pldone]").first.click()
     pg.wait_for_selector(".ploffer", timeout=8000)

@@ -3252,6 +3252,18 @@ var?» Yox idi: «tapşırıq» həmişə **test** idi. İndi var — **müəlli
   («etməyən var» / «hamı edib» / «yoxdur»). Plan sekməsindəki «Növbəti
   dərs» qutusu qalır — «Keçildi» düyməsi oradadır. Qayda: **bir şeyə bir
   ad**; «bu gün» sözü tarix olmayan yerdə yalan vəddir.
+- **Plan siyahısında növbəti dərs seçilmirdi** (istifadəçi: «dərs planına
+  bax, bugünün dərsi açıq-aydın bilinmir» — 3-cü sətir 4–7 ilə eyni
+  görünürdü). İndi `.plrow.cur`: marka rəngli fon, sol zolaq, ad marka
+  rəngində, yanında «NÖVBƏTİ» nişanı (`.plnext`); qutuda «‹fəsil› fəsli ·
+  dərs 3/7» (kartla eyni ifadə). Qayda: **cari element siyahıda gözlə
+  tapılmalıdır, oxumaqla yox.**
+- **Ad: «Bu günün dərsi» (istifadəçi israr etdi).** Mən «Növbəti dərs»
+  yazmışdım («tarix yoxdur, ‹bu gün› yalan vəddir»); istifadəçi: «hamısı
+  növbəti, hanı bugünün dərsi?». Müəllimin dilində planın ilk keçilməmiş
+  dərsi elə bu gün keçəcəyi dərsdir. İndi kartda sətir, plan qutusunun
+  etiketi və siyahı nişanı («BU GÜN») — hamısı «Bu günün dərsi». Qayda:
+  **termini müəllimin dili seçir, mənim dəqiqliyim yox.**
 - Yoxlama: `smoke_ev_tapsirigi` (yad müəllim girmir, şagird başqasının
   fərdi tapşırığını görmür/işarələmir), `e2e_ev` (33-cü mərhələ: üç tətbiq,
   ayrı brauzer kontekstləri — eyni kontekstdə şagird sessiyası qalır).

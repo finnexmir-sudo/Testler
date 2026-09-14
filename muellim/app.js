@@ -1703,14 +1703,16 @@
       /*  Ad «Dərsdən əvvəl»dir: evvel «Bu günün dərsi» idi - istifadeci
           «bu günün dərsi nədir, harada yazılıb?» dedi.  Kartda tarix yoxdur,
           hamisi DERS PLANINDAN cixir; her sey bir adla cagirilir:
-          «Növbəti dərs» (plan sekmesindeki qutu ile eyni ad).  */
+          «Bu günün dərsi» - istifadecinin sozu («hamısı növbəti, hanı
+          bugünün dərsi?»): muellim ucun planin ilk kecilmemis dersi ELE
+          bu gun kececeyi dersdir.  Plan qutusu ve siyahi nisani da eyni.  */
       var h = '<div class="spacer"></div><div class="card prep">' +
         '<div class="pt"><b>Dərsdən əvvəl</b>' +
-          '<span class="muted">növbəti dərs · son keçilən · ev tapşırığı</span></div>';
+          '<span class="muted">bu günün dərsi · son keçilən · ev tapşırığı</span></div>';
       //  1. novbeti movzu
       if (!d.has_plan) {
-        h += row("doc", "Növbəti dərs",
-          '<span class="muted">Dərs planı yoxdur. Plan qursanız növbəti dərs və hazır test burada olacaq. ' +
+        h += row("doc", "Bu günün dərsi",
+          '<span class="muted">Dərs planı yoxdur. Plan qursanız bu günün dərsi və hazır test burada olacaq. ' +
           '<a href="#" id="prepPlan">Planı qur</a></span>');
       } else if (nx) {
         /*  ISINME AYRI SETIRDEDIR (istifadeci tutdu: «çox bitişikdir,
@@ -1718,7 +1720,7 @@
             duranda goz onlari BIR cumle kimi oxuyurdu.  Indi movzu
             yuxarida, isinme altda - ne oldugu da yazilir: «dərsdən
             əvvəl 5 sual».  */
-        h += row("doc", "Növbəti dərs", "<b>" + esc(nx.topic) + "</b>" +
+        h += row("doc", "Bu günün dərsi", "<b>" + esc(nx.topic) + "</b>" +
           //  «3/7» neyin 3-u idi, bilinmirdi - indi «fəsli · dərs 3/7»
           (nx.group ? ' <s class="muted">· «' + esc(nx.group) + "» fəsli · dərs&nbsp;" + nx.gpos + "/" + nx.gtotal + "</s>" : "") +
           //  135: isinme - dersden evvel 5 sual
@@ -1732,7 +1734,7 @@
                   '<button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">Hazırla</button></div>'
                 : "")));
       } else {
-        h += row("doc", "Növbəti dərs", '<span class="muted">Plan tam keçilib. 🎉</span>');
+        h += row("doc", "Bu günün dərsi", '<span class="muted">Plan tam keçilib. 🎉</span>');
       }
       //  2. son kecilen
       if (ls) {
@@ -2008,11 +2010,10 @@
         '<a href="#/pk/' + esc(p.id) + '" class="plpack">' + ic("doc") + "Dərs paketi: isinmə · ev tapşırığı · rüb sınağı</a>" +
         '<div class="plbar"><i style="width:' + pct + '%"></i></div>' +
         (cur
-          ? '<div class="plcur"><span class="pltag">Növbəti ' +
-              (cur.group ? "dərs" : "mövzu") + "</span>" +
+          ? '<div class="plcur"><span class="pltag">Bu günün dərsi</span>' +
             (cur.group
-              ? '<span class="plgn">' + esc(cur.group) +
-                (cur.gtotal ? " · " + cur.gpos + "/" + cur.gtotal : "") + "</span>"
+              ? '<span class="plgn">«' + esc(cur.group) + "» fəsli" +
+                (cur.gtotal ? " · dərs&nbsp;" + cur.gpos + "/" + cur.gtotal : "") + "</span>"
               : "") +
             "<b>" + cur.ord + ". " + esc(cur.topic) + "</b>" +
             '<div class="plbtns">' +
@@ -2093,6 +2094,9 @@
               "<span>" + esc(it.topic) +
                 (it.done && it.done_at
                   ? ' <s class="pldate">· ' + dateAz(it.done_at) + "</s>" : "") +
+                //  siyahida novbeti ders secilmirdi (istifadeci: «bugünün
+                //  dərsi açıq-aydın bilinmir») - nisan + fon
+                (cur && it.id === cur.id ? ' <em class="plnext">bu gün</em>' : "") +
               "</span>" +
               avgChip +
               (it.done && d.paid
