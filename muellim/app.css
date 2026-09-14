@@ -1761,6 +1761,33 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .paper .qh b,#printBox .ppb,.shq > b,.repc .rhead b,.smp .sq b,.qrow .g b,.fbb{
   white-space:pre-wrap;overflow-wrap:anywhere}
 
-/* 192: vereqde vaxt limiti secimi */
-.plim{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--fg-2)}
-.plim select{font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--fg)}
+/* 192: vereqde vaxt limiti secimi - .btn.sm ile eyni boy, eyni kenar;
+   select icerdedir, oz kenari yoxdur.  Butun sahe basilandir (cursor). */
+.plim{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 6px 0 10px;
+  border:1px solid var(--n-300);border-radius:var(--r-sm);background:var(--surface);
+  color:var(--n-800);font-size:13px;font-weight:500;cursor:pointer;
+  transition:background .12s,border-color .12s}
+.plim:hover{background:var(--n-50);border-color:var(--n-400)}
+.plim:focus-within{border-color:var(--brand);box-shadow:var(--ring)}
+.plim svg{width:14px;height:14px;stroke-width:1.9;color:var(--fg-2)}
+.plim select{width:auto;min-height:0;margin:0;padding:0 18px 0 0;border:0;border-radius:0;
+  background-color:transparent;background-position:right 0 center;background-size:14px 14px;
+  color:inherit;font:inherit;font-size:13px;font-weight:500;cursor:pointer;box-shadow:none}
+.plim select:focus{outline:none;box-shadow:none;border:0}
+
+/* 192: vereq duymeleri - hamisi boz idi, secilmirdi.  Her birinin oz rengi:
+   cap = marka, cavab acari = kehreba, vaxt = yasil, yigcam/yeniden = neytral. */
+.prnrow .btn.sm,.prnrow .plim,.prnrow .prnc{min-height:34px;border-radius:999px;font-weight:560}
+.prnrow .btn.sm svg,.prnrow .plim svg{width:15px;height:15px}
+#btnPrn{background:var(--brand-tint);border-color:var(--brand-line);color:var(--brand)}
+#btnPrn:hover{background:var(--brand-line);border-color:var(--brand)}
+#btnPrnK{background:var(--warn-tint);border-color:var(--warn-line);color:var(--warn)}
+#btnPrnK:hover{background:var(--warn-line);border-color:var(--warn)}
+.prnrow .plim{background:var(--teal-tint);border-color:var(--teal-line);color:var(--teal);padding:0 8px 0 12px}
+.prnrow .plim:hover{background:var(--teal-line);border-color:var(--teal)}
+.prnrow .plim svg{color:var(--teal)}
+.prnrow .plim select{color:var(--teal);font-weight:560}
+.prnrow .prnc{padding:0 12px;border:1px solid var(--n-300);background:var(--surface);color:var(--n-800)}
+.prnrow .prnc:hover{background:var(--n-50);border-color:var(--n-400)}
+#btnRegen{background:var(--surface);border-color:var(--n-300);color:var(--n-800)}
+#btnRegen:hover{background:var(--n-50);border-color:var(--n-400)}

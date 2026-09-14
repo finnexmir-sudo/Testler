@@ -7154,7 +7154,8 @@
               aiddir.  Sagird geri sayan saat gorur, vaxt bitende cavablar
               ozu gonderilir; qerar serverdedir (limit + 60 s guzest).  */
           (diag ? "" :
-            '<label class="plim" title="Vaxt limiti">⏱ <select id="pLim">' +
+            '<label class="plim" title="Vaxt limiti">' + ic("clock") +
+              '<select id="pLim">' +
               [0, 5, 10, 15, 20, 30, 45, 60, 90].map(function (m) {
                 return '<option value="' + m + '"' +
                   (Math.round((t.time_limit_sec || 0) / 60) === m ? " selected" : "") + ">" +
