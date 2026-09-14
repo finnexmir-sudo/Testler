@@ -3121,6 +3121,23 @@ sütununda üçüncü sətir kimi görünür (heç bir valideyn girməyibsə sə
 yazılmır). Səbəb: valideyn ekranı az işlənirsə, bu lever zəifdir — qərarı
 məlumatla veririk.
 
+## Öz testini silmək / adını dəyişmək (db/193, 2026-09-14)
+
+İstifadəçi «Hazır testi tapşır» siyahısında «Samir 1» ×4 gördü — eyni adla
+dəfələrlə yığılmış testlər, silmək yeri yox idi.
+
+- `rpc_test_rename(test, ad)` (sahib, 1–120), `rpc_test_delete(test)` — sahib,
+  yalnız educator testi, **heç bir cəhd yoxdursa** (şagird işləyibsə nəticə
+  itməsin — server rədd edir, düymə də bağlıdır). Silinəndə test_questions /
+  assignments cascade, plan bəndlərində test_id null olur; **suallar qalır**.
+- Vərəqdə (`#/t/`) düymə sırasının sonunda «Adı dəyiş» (başlıq yerində giriş
+  qutusu, Enter/Saxla) və «Sil» (təsdiq → `#/gen`).
+- «Hazır testi tapşır» siyahısında öz testinin yanında qələm keçidi →
+  vərəq (`.trw .tgo`); hazır bank testlərində yoxdur.
+- Yoxlama: `smoke_test_sil`, `e2e_testsil` (35-ci mərhələ). Testdə tələ:
+  eyni ünvana `goto` naviqasiya yaratmır — tam yüklənmə + hash.
+- Canlıda: `db/193` (anon siyahısı dəyişmir).
+
 ## Vaxtlı test (db/192, 2026-09-14)
 
 `tests.time_limit_sec` 01-dən bəri var idi, heç yerdə işləmirdi. İndi:

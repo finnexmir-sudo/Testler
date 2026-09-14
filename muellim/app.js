@@ -4669,10 +4669,15 @@
           var l = g3[x[0]];
           if (!l.length) return "";
           return '<div class="tgh">' + esc(x[1]) + "</div>" + l.map(function (t) {
-            return '<button type="button" class="trow' + (t.id === cur ? " on" : "") +
+            //  193: oz testinde vereq kecidi - orada adi deyismek / silmek olur
+            return '<div class="trw">' +
+              '<button type="button" class="trow' + (t.id === cur ? " on" : "") +
               '" data-t="' + esc(t.id) + '">' + ic("check") +
               "<span><b>" + esc(String(t.title || "")) + "</b><small>" +
-              esc(metaOf(t, hideSub)) + "</small></span></button>";
+              esc(metaOf(t, hideSub)) + "</small></span></button>" +
+              (t.mine ? '<a class="tgo" href="#/t/' + esc(t.id) + '" title="Vərəqi aç — adı dəyiş, sil">' +
+                          ic("pen") + "</a>" : "") +
+            "</div>";
           }).join("");
         }).join("");
       }
@@ -7169,6 +7174,13 @@
             ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
               "Yenidən yığ</button>"
             : "") +
+          /*  193: oz testinin adini deyismek / silmek.  Sagird isleyibse
+              silme bagli - netice itmesin (server de redd edir).  */
+          (diag ? "" :
+            '<button class="btn sm ghost" id="btnTRen">' + ic("pen") + "Adı dəyiş</button>" +
+            '<button class="btn sm ghost tdel" id="btnTDel"' +
+              (done ? ' disabled title="Şagird işləyib — silinmir"' : ' title="Testi sil"') + ">" +
+              ic("x") + "Sil</button>") +
         "</div>" +
         '<p class="muted" style="margin:10px 0 0">Çap pəncərəsində printer ' +
           "əvəzinə «PDF olaraq saxla» seçsəniz, vərəq fayl kimi yüklənəcək. " +
@@ -7319,6 +7331,35 @@
     });
 
     //  192: vaxt limiti menyusu (details) - secim serverde yazilir, vereq yenilenir
+    //  193: adi deyis - basliq yerinde giris qutusu
+    on("btnTRen", "click", function () {
+      var h = main.querySelector("h1");
+      if (!h || $("tTitle")) return;
+      var cur = t.title || "";
+      h.outerHTML = '<div class="tren"><input id="tTitle" maxlength="120" value="' + esc(cur) + '">' +
+        '<button class="btn sm go" id="btnTSave">Saxla</button>' +
+        '<button class="btn sm ghost" id="btnTCancel">Ləğv</button></div>';
+      $("tTitle").focus(); $("tTitle").select();
+      on("btnTCancel", "click", function () { screenPaper(t.id); });
+      function save() {
+        var v = ($("tTitle").value || "").trim();
+        if (!v) { $("tTitle").focus(); return; }
+        $("btnTSave").disabled = true;
+        sb.rpc("rpc_test_rename", { p_test_id: t.id, p_title: v })
+          .then(function () { screenPaper(t.id); })
+          .catch(function (e) { $("btnTSave").disabled = false; show(msg("err", fail(e))); });
+      }
+      on("btnTSave", "click", save);
+      on("tTitle", "keydown", function (ev) { if (ev.key === "Enter") { ev.preventDefault(); save(); } });
+    });
+    on("btnTDel", "click", function () {
+      if (!confirm("«" + (t.title || "Test") + "» silinsin?\n\nTəyinatlar da gedəcək; suallar bankda qalır.")) return;
+      $("btnTDel").disabled = true;
+      sb.rpc("rpc_test_delete", { p_test_id: t.id })
+        .then(function () { nav("#/gen"); })
+        .catch(function (e) { $("btnTDel").disabled = false; show(msg("err", fail(e))); });
+    });
+
     on("pLim", "click", function (ev) {
       var b = ev.target.closest ? ev.target.closest("[data-min]") : null;
       if (!b || b.id === "pLim") return;

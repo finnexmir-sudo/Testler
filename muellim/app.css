@@ -1793,3 +1793,16 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .prnrow .prnc:hover{background:var(--n-50);border-color:var(--n-400)}
 #btnRegen{background:var(--surface);border-color:var(--n-300);color:var(--n-800)}
 #btnRegen:hover{background:var(--n-50);border-color:var(--n-400)}
+
+/* 193: oz testi - ad deyis / sil (vereq), pick siyahisinda vereq kecidi */
+.tren{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.tren input{margin:0;flex:1;min-width:0;font-size:18px;font-weight:600}
+.prnrow .tdel:not([disabled]):hover{color:var(--err);border-color:var(--err-line);background:var(--err-tint)}
+.prnrow .btn[disabled]{opacity:.45;cursor:not-allowed}
+.trw{display:flex;align-items:stretch}
+.trw .trow{flex:1;min-width:0}
+.trw .tgo{flex:0 0 40px;display:flex;align-items:center;justify-content:center;color:var(--fg-3);
+  border-bottom:1px solid var(--n-100)}
+.trw:last-child .tgo{border-bottom:0}
+.trw .tgo:hover{color:var(--brand);background:var(--brand-tint)}
+.trw .tgo svg{width:15px;height:15px}
