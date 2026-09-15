@@ -43,7 +43,7 @@ function siyahi(free) {
       //  Bu, pulsuz heddin en guclu tereflerinden biridir.
       "<b>Valideyn girişi</b> — uşağın nəticəsi, meyli, gözləyən tapşırıqlar",
       "Hesabat tarixçəsi: <b>son 7 gün</b>",
-      "Şagird məşqi: <b>gündə 20 sual</b>"
+      "Şagird məşqi: <b>gündə 5 sual</b>"
     ],
     abune: [
       "<b>Hazır suallar</b> — özünüz sual yazmadan test yığmaq",

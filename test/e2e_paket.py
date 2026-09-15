@@ -107,7 +107,7 @@ with sync_playwright() as pw:
        pg.locator(".cmp .cc").count())
     cmp_t = pg.inner_text(".cmp")
     for soz in ("Hazır suallar", "Diaqnostika", "Zəif mövzu analizi",
-                "Dərs planı", "Cavab vərəqi", "gündə 20 sual",
+                "Dərs planı", "Cavab vərəqi", "gündə 5 sual",
                 #  Audit (2026-09-09): db/106 + db/132 v_keys qapisi
                 #  siyahida yox idi - abunesiz hesab bank siyahisinda
                 #  yalniz sual METNINI gorur.

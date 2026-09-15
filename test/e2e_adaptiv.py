@@ -127,6 +127,13 @@ with sync_playwright() as pw:
        "ev ekraninda bal ve cavab sayi", sp.locator("#adBox .arow").first.inner_text().replace("\n", " "))
 
     print("D · 100-ə qədər: mənimsənildi")
+    #  196: pulsuzda gunde 5 sual - menimsemeye 14-e qeder cavab lazimdir,
+    #  ona gore bu merhele ABUNE ile gedir; sonda abune silinib pulsuz
+    #  sayğac yoxlanir.
+    db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)
+          select s.account_id, p.id, 'active', now() + interval '30 days'
+            from public.students s, public.plans p where s.id = %s and p.slug = 'repetitor-25'""", (SID,))
+    sp.reload(); sp.wait_for_selector("#adBox .arow", timeout=15000)
     sp.locator("#adBox .arow").first.click(); sp.wait_for_selector(".adprog", timeout=15000)
     got = False; seen = set()
     for i in range(14):
@@ -141,10 +148,12 @@ with sync_playwright() as pw:
     ok("çətin" in sp.inner_text("body"), "sonda cetin seviyye")
     ok(db("select mastered_at is not null m from public.practice where student_id=%s and topic_id=%s", (SID, TOPIC), one=True)["m"], "bazada mastered_at")
     ok(sp.locator("#btnPHome").inner_text().strip() == "Mövzulara qayıt", "menimsenilende duyme")
+    #  abune gedir, bu gunun sayğaci 3-e endirilir - pulsuz gorunus
+    db("delete from public.subscriptions"); db("update public.practice_days set n = 3 where student_id = %s", (SID,))
     sp.click("#btnPHome"); sp.wait_for_selector("#adBox", timeout=15000)
     ok("1 mövzu mənimsənilib" in sp.inner_text("#adBox"), "ev ekraninda menimsenilib sayı")
     #  137: abunesiz hesab - gundelik sayğac gorunur
-    ok("/ 20" in sp.inner_text("#adBox") and "limitsiz" in sp.inner_text("#adBox"), "gundelik limit sayğaci", sp.locator("#adBox .adq").inner_text() if sp.locator("#adBox .adq").count() else "yoxdur")
+    ok("/ 5" in sp.inner_text("#adBox") and "limitsiz" in sp.inner_text("#adBox"), "gundelik limit sayğaci", sp.locator("#adBox .adq").inner_text() if sp.locator("#adBox .adq").count() else "yoxdur")
 
     print("E · Müəllim hesabatı və valideyn")
     pg.goto(PANEL + "#/s/" + SID + "/" + GID); pg.reload(); pg.wait_for_selector("#sTabs", timeout=15000)

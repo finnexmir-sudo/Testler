@@ -1,7 +1,7 @@
 -- =====================================================================
 --  smoke_mesq_limit.sql : movzu mesqinde abunesiz gundelik limit (db/137)
 --
---  Iddialar: abunesiz hesabda 20 cavabdan sonra "novbeti" reddedilir,
+--  Iddialar: abunesiz hesabda 5 cavabdan sonra (196; evvel 20) "novbeti" reddedilir,
 --  verilmis sual yene cavablanir · quota siyahida ve cavabda gelir ·
 --  abune ile limit yoxdur · sehv defteri limitden asili deyil.
 -- =====================================================================
@@ -37,7 +37,7 @@ create or replace function pg_temp.duz(p_q uuid) returns uuid[] language sql as 
 \echo '--- hazirliq tamam'
 
 -- =====================================================================
---  1. Abunesiz: 20 cavab olur, 21-ci "novbeti" reddedilir; quota gelir
+--  1. Abunesiz: 5 cavab olur, 6-ci "novbeti" reddedilir; quota gelir
 -- =====================================================================
 do $$
 declare tok text; v jsonb; t1 uuid; a jsonb; r jsonb; q uuid; ok uuid[]; i int; bad boolean := false;
@@ -46,9 +46,9 @@ begin
   set local role anon;
   v := public.rpc_student_practice_topics(tok);
   reset role;
-  assert not (v->'quota'->>'paid')::boolean and (v->'quota'->>'used')::int = 0 and (v->'quota'->>'max')::int = 20, 'quota basda: ' || (v->'quota')::text;
+  assert not (v->'quota'->>'paid')::boolean and (v->'quota'->>'used')::int = 0 and (v->'quota'->>'max')::int = 5, 'quota basda: ' || (v->'quota')::text;
   t1 := (v->'subjects'->0->'topics'->0->>'id')::uuid;
-  for i in 1..20 loop
+  for i in 1..5 loop
     a := public.rpc_student_practice_next(tok, t1);
     q := (a->'question'->>'id')::uuid; ok := pg_temp.duz(q);
     set local role anon;
@@ -56,7 +56,7 @@ begin
     reset role;
     assert (r->'quota'->>'used')::int = i, 'sayğac ' || i;
   end loop;
-  --  21-ci: novbeti reddedilir
+  --  6-ci: novbeti reddedilir
   begin
     set local role anon;
     perform public.rpc_student_practice_next(tok, t1);
@@ -66,14 +66,14 @@ begin
   set local role anon;
   v := public.rpc_student_practice_topics(tok);
   reset role;
-  assert (v->'quota'->>'used')::int = 20, 'siyahida 20/20';
+  assert (v->'quota'->>'used')::int = 5, 'siyahida 5/5';
   --  sehv defteri limitden asili deyil: cavab sehv olubsa deftere dusub, mesq acılır
   set local role anon;
   v := public.rpc_student_mistakes(tok);
   reset role;
   assert v ? 'items', 'defter cavab verir';
 end $$;
-\echo 'OK  1 · abunesiz 20 cavab, 21-ci reddedilir, quota gelir'
+\echo 'OK  1 · abunesiz 5 cavab, 6-ci reddedilir, quota gelir'
 
 -- =====================================================================
 --  2. Verilmis sual limitden sonra da cavablanir; abune ile limit yoxdur
@@ -82,20 +82,20 @@ do $$
 declare tok text; v jsonb; t2 uuid; a jsonb; r jsonb; q uuid; ok uuid[]; bad boolean := false;
 begin
   tok := public.rpc_student_login('LMFT0001')->>'token';
-  --  limitden evvel verilmis (cavabsiz) sual: 19-a endirib bir sual alaq, sonra 20-ye qaldiraq
-  update public.practice_days set n = 19 where student_id = '5555000a-0000-0000-0000-0000000000a6';
+  --  limitden evvel verilmis (cavabsiz) sual: 4-e endirib bir sual alaq, sonra 5-e qaldiraq
+  update public.practice_days set n = 4 where student_id = '5555000a-0000-0000-0000-0000000000a6';
   v := public.rpc_student_practice_topics(tok);
   t2 := (v->'subjects'->0->'topics'->1->>'id')::uuid;
   a := public.rpc_student_practice_next(tok, t2);
   q := (a->'question'->>'id')::uuid; ok := pg_temp.duz(q);
-  update public.practice_days set n = 20 where student_id = '5555000a-0000-0000-0000-0000000000a6';
+  update public.practice_days set n = 5 where student_id = '5555000a-0000-0000-0000-0000000000a6';
   --  eyni sual yeniden istenende (sehife yenilenib) - verilir, cunki cavabsizdir
   a := public.rpc_student_practice_next(tok, t2);
   assert (a->'question'->>'id')::uuid = q, 'verilmis sual limitde de qayitmali';
   set local role anon;
   r := public.rpc_student_practice_answer(tok, t2, q, ok, null);
   reset role;
-  assert (r->>'correct')::boolean and (r->'quota'->>'used')::int = 21, 'verilmis sual cavablandi: ' || (r->'quota')::text;
+  assert (r->>'correct')::boolean and (r->'quota'->>'used')::int = 6, 'verilmis sual cavablandi: ' || (r->'quota')::text;
   --  abune
   insert into public.subscriptions (account_id, plan_id, status, current_period_end)
   select 'aaaa0000-0000-0000-0000-0000000000a6', p.id, 'active', now() + interval '30 days'

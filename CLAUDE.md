@@ -3269,6 +3269,18 @@ var?» Yox idi: «tapşırıq» həmişə **test** idi. İndi var — **müəlli
   ayrı brauzer kontekstləri — eyni kontekstdə şagird sessiyası qalır).
 - Canlıda: `db/191` → sonra **`db/05_grants.sql` yenidən**.
 
+## Pulsuzda şagird məşqi: gündə 5 sual (db/196, 2026-09-15)
+
+İstifadəçi: «pulsuzda şagird məşqi gündə 20 sual çoxdur, 5 edək». Mən 20
+(ən azı 10) qalmasını məsləhət gördüm — məşq şagirdin dəyəridir, pulu
+müəllim verir, 5 sual nə vərdiş yaradır, nə nəticə göstərir; istifadəçi
+5 dedi, 5 oldu. Hədd bir yerdədir: `app.practice_daily_limit()` (db/137
+→ 196), `practice_quota / next / answer` oradan oxuyur; şagird kartı
+«Bu gün 3 / 5» serverdən gələn `quota.max` ilə yazır. Mətnlər:
+`assets/ferq.js` («Şagird məşqi: gündə 5 sual»), `komek`. Yoxlama:
+`smoke_mesq_limit` (5/6), `e2e_adaptiv` («/ 5»), `e2e_paket`. Canlıda:
+`db/196` (grants dəyişmir).
+
 ## Ana səhifə: əvvəl bax, sonra qeydiyyat; mənbə (db/195, 2026-09-14)
 
 Ölçü (bu gün, `visits` üzrə yol): 7 ziyarətçi — 4-ü `home:view` ilə
@@ -3303,6 +3315,18 @@ amma sayt «qeydiyyatdan keç» deyirdi.
   nə qazanır?» — 4 sətir bir-bir açılır, sonra «İndi baxaq»), üz şəklində
   böyük ▶ (`test/_video.py: intro()`, `poster_tam.png`); istifadəçi: «5
   saniyə sonra göstərməyə başlayır, ilk baxışdan şəkil hissi verir».
+  İkinci dövrə (istifadəçi: «çarx çox sürətlidir, sürəti aşağı salıram,
+  proqram lap ləngiyir; zövqsüz və faydasız»): giriş vaxtı dəqiq saniyə
+  ilə (kartlar 1,8–3 s, SPEED-ə bölünür), hər qazanc kartında **real
+  ekran** (nümunə hesabdan: generator, «Dərsdən əvvəl», hesabat, valideyn
+  tətbiqi — `test/_demo_shots.py` → `/tmp/claude-0/video/shots/*.png`,
+  video onları fayldan götürür: eyni gedişdə çəkəndə sonra hesabat
+  ekranı açılmırdı, iki yığım boşa getdi), proqram hissəsi sakit
+  (`SPEED` 1.8 → 2.3, `SHORT` 1.5 → 1.8; 5:26 → 7:04). Kart ölçüləri
+  CSS px-dir (kadr 432×768, DPR 2.5) — 1020px «telefon» ekrandan böyük
+  çıxmışdı. Sıra: `NEW_DB=1 test/tek.sh _demo_shots.py` → `VIDEO_TAM=1
+  NEW_DB=1 test/tek.sh _video.py` → `python3 test/_video.py --tam --mp4`
+  → `assets/teqdimat*.{mp4,jpg}` + `index.html` fəsil saniyələri.
 
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
