@@ -3307,6 +3307,19 @@ amma sayt «qeydiyyatdan keç» deyirdi.
   valideynsiniz? Kodla daxil olun: şagird / valideyn»); nişan «Beta
   dövründə müəllimlər üçün pulsuz». Qayda: **ana səhifə alıcıya
   danışır; istifadəçilər (şagird, valideyn) alıcıdan gəlir.**
+- **Diaqnostika-mərkəzli ilk ekran (15.09, GPT təklifi + istifadəçi).**
+  Başlıq «Şagirdinizin nəyi bilmədiyini görün»; sağda illüstrasiya
+  əvəzinə **real ekran** (`assets/hero_diag.png` — nümunə şagird kartının
+  diaqnostika hissəsi, `test/_demo_shots.py`-dən kəsilib), telefonda da
+  görünür; «Necə işləyir» dörd addımlı dövrə: diaqnostika → zəif mövzu →
+  məşq → yenidən ölç. «Qrupu biz quraq» CTA-sı **qəbul edilmədi**
+  (istifadəçi: «bir müəllim qrup yarada bilmirsə proqramı necə işlədəcək»).
+  Rəqiblər (araşdırıldı): Kampus.az (idarəetmə: cədvəl, davamiyyət,
+  imtahan, valideyn; 7 gün sınaq, «24 saata qururuq»), TestUp.az (imtahan
+  aləti), oxuyan.az, e-sual.az, otk.az, teorem.az. Bizim fərq: kurikulum
+  planı + diaqnostika + «bundan başla» + səhv dəftəri + şagirdin məşqi —
+  satış mesajı bunun üstündədir. Sinif adları: `.ok` və `.free` səhifədə
+  başqa mənada var — yeni sinif `hfree`.
 - **Mənbə:** linkdə `?src=wa` (yalnız `[a-z0-9_-]{1,20}`, uzun/pis dəyər
   atılır, kəsilmir); `assets/visit.js` onu `sessionStorage.bil10_src`-də
   saxlayır, panelin giriş ekranı da oradan oxuyur. `visits.src`,
