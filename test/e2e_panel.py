@@ -116,15 +116,11 @@ with sync_playwright() as pw:
     #  Valideyn zolagi: kecid olmalidir (evvel cilpaq <p> idi) ve
     #  kartlarla eyni enle durmalidir - iki seliqeli kartin altinda
     #  yarimciq gorunmesin.
-    ok(pg.locator("a.pdoor[href^='valideyn/']").count() == 1,
-       "valideyn zolagi kecidddir")
-    en = pg.evaluate("""() => {
-        const d = document.querySelector('.doors').getBoundingClientRect();
-        const p = document.querySelector('.pdoor').getBoundingClientRect();
-        return Math.round(Math.abs(p.width - d.width));
-      }""")
-    ok(en <= 2, "valideyn zolagi kartlarla eyni endedir", "%dpx ferq" % en)
-    ok(pg.locator(".pdoor .ic svg").count() == 1, "zolaqda ikon var")
+    #  15.09: bir alici - muellim.  Sagird/valideyn qapilari yoxdur,
+    #  kodu olanlara kicik setir var.
+    ok(pg.locator("a.pdoor").count() == 0, "sagird/valideyn qapilari yoxdur")
+    ok(pg.locator(".hlinks a[href='sagird/']").count() == 1 and pg.locator(".hlinks a[href='valideyn/']").count() == 1,
+       "kodla giris kicik setirdedir")
 
     ok(pg.locator('a[href="muellim/"]').count() >= 1, "muellim kecidi var")
     ok(pg.locator('a[href="sagird/"]').count() >= 1, "sagird kecidi var")
@@ -147,9 +143,9 @@ with sync_playwright() as pw:
     ok(db("select count(*) c from public.visits where src is not null and src <> 'wa'", one=True)["c"] == 0, "pis menbe atilir")
     #  ilk ekran (14.09): uc qapi numuneye aparir, hesab kecidleri kicikdir
     ok(pg.locator(".doors a[href='muellim/#/demo']").count() == 1 and
-       pg.locator(".doors a[href^='sagird/?kod=']").count() == 1 and
-       pg.locator("a.pdoor[href^='valideyn/?kod=']").count() == 1, "ilk ekranda uc qapi numuneye aparir")
-    ok(pg.locator(".hlinks a[href='muellim/']").count() == 1, "«Panelə keç» kicik kecid kimi qalir")
+       pg.locator(".doors a[href='muellim/']").count() == 1 and pg.locator(".doors a").count() == 2,
+       "ilk ekranda iki qapi: numune + hesab yarat")
+    ok(pg.locator(".hlinks a[href='muellim/']").count() == 1, "«Hesabınıza keçin» kicik kecid kimi qalir")
 
     #  ROBOT SAYILMIR.  Olcu (2026-09-11): Search Console-da sitemap
     #  verdiyimiz DEQIQEDE panelde dord teze "ziyaretci" cixdi - Googlebot

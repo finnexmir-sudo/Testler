@@ -62,8 +62,8 @@ with sync_playwright() as pw:
     print("A · Ana səhifədə üç nümunə düyməsi")
     #  qapilar ILK EKRANDADIR (14.09): asagidaki tekrar blok cixarilib
     pg.goto(ROOT + "index.html"); pg.wait_for_selector(".doors", timeout=15000)
-    links = pg.locator(".doors a, a.pdoor").evaluate_all("els => els.map(e => e.getAttribute('href'))")
-    ok(links == ["muellim/#/demo", "sagird/?kod=DEMO0001", "valideyn/?kod=VDEMO001"], "uc link", links)
+    links = pg.locator(".doors a").evaluate_all("els => els.map(e => e.getAttribute('href'))")
+    ok(links == ["muellim/#/demo", "muellim/"], "iki qapi: numune + hesab yarat (sagird/valideyn qapisi yoxdur - alici muellimdir)", links)
     ok(pg.locator("#demo").count() == 0 and pg.locator("#cta a[href='muellim/']").count() == 1,
        "tekrar numune bloku yoxdur, yerinde «Hesab yarat»")
 

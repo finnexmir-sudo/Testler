@@ -3299,6 +3299,14 @@ amma sayt «qeydiyyatdan keç» deyirdi.
   sonra növbəti addım). `.hlinks` ağ çərçivəli düymələrdir («sönük qalıb»
   deyildi). Qayda: **adam nə alacağını görməmiş ondan heç nə istəmə;
   eyni düymə səhifədə iki dəfə olmasın.**
+- **Bir alıcı — müəllim (15.09).** İstifadəçi: «biz bunu müəllimlərə
+  satırıq; ‹şagird kimi bax›, ‹valideyn kimi bax› lazım deyil, əvvəlki
+  dizaynı korladı». Şagird və valideyn saytdan yox, müəllimin verdiyi
+  kodla gəlir. İndi ilk ekranda iki qapı: **«Müəllim kimi bax»** (nümunə)
+  + **«Hesab yarat»**; kodu olanlara kiçik sətir («Şagird və ya
+  valideynsiniz? Kodla daxil olun: şagird / valideyn»); nişan «Beta
+  dövründə müəllimlər üçün pulsuz». Qayda: **ana səhifə alıcıya
+  danışır; istifadəçilər (şagird, valideyn) alıcıdan gəlir.**
 - **Mənbə:** linkdə `?src=wa` (yalnız `[a-z0-9_-]{1,20}`, uzun/pis dəyər
   atılır, kəsilmir); `assets/visit.js` onu `sessionStorage.bil10_src`-də
   saxlayır, panelin giriş ekranı da oradan oxuyur. `visits.src`,
