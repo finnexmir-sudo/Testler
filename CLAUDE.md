@@ -3327,6 +3327,19 @@ amma sayt «qeydiyyatdan keç» deyirdi.
   çıxmışdı. Sıra: `NEW_DB=1 test/tek.sh _demo_shots.py` → `VIDEO_TAM=1
   NEW_DB=1 test/tek.sh _video.py` → `python3 test/_video.py --tam --mp4`
   → `assets/teqdimat*.{mp4,jpg}` + `index.html` fəsil saniyələri.
+- **Üçüncü dövrə — format dəyişdi (2026-09-15).** İstifadəçi: «7 dəq çox
+  uzun və yorucudur, çarx fikri yaxşıdır; 2–3 dəq bəs edər, detallı izahla,
+  şəkillə». Gəzinti (`tam`) saytdan çıxdı; indi **çarx** (`VIDEO_CARX=1`,
+  `carx()`, `SCENES`): qarmaq → 10 səhnə (qrup, test yığ, tapşırıq, şagird,
+  hesabat, şagird kartı, dərs planı, ev tapşırığı, valideyn, icmal), hər
+  biri kicker + başlıq + 2 cümlə + nümunə hesabdan real ekran, 7–9 s →
+  «Nümunəyə baxın · bil10.az». 1:31, 0,9 MB. Ekranlar `test/_demo_shots.py`
+  (12 şəkil: müəllim 9, şagird 2, valideyn 1). Sıra: `NEW_DB=1 test/tek.sh
+  _demo_shots.py` → `VIDEO_CARX=1 python3 test/_video.py` (server lazım
+  deyil) → `python3 test/_video.py --carx --mp4` → `assets/teqdimat.mp4`,
+  `teqdimat_uz.jpg`, `index.html` səhnə saniyələri. Uzun gəzinti
+  generatoru (`tam`) qalır, istifadə olunmur. Qayda: **çarx sata bilər,
+  gəzinti öyrədir — sayta çarx, bələdçiyə gəzinti.**
 
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 

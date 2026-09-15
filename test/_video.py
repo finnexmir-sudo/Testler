@@ -17,12 +17,14 @@ import io, os, sys, time, datetime, subprocess
 import psycopg2, psycopg2.extras
 
 OUT = "/tmp/claude-0/video"
-FR = OUT + ("/frames_tam" if ("--tam" in sys.argv or os.environ.get("VIDEO_TAM") == "1") else "/frames")
+FR = OUT + ("/frames_carx" if ("--carx" in sys.argv or os.environ.get("VIDEO_CARX") == "1")
+            else ("/frames_tam" if ("--tam" in sys.argv or os.environ.get("VIDEO_TAM") == "1") else "/frames"))
 FF = "/tmp/claude-0/pylib/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2"
 
 TAM = "--tam" in sys.argv or os.environ.get("VIDEO_TAM") == "1"
-NAME = "bil10_teqdimat_tam.mp4" if TAM else "bil10_teqdimat_9x16.mp4"
-LIST = OUT + ("/list_tam.txt" if TAM else "/list.txt")
+CARX = "--carx" in sys.argv or os.environ.get("VIDEO_CARX") == "1"
+NAME = "bil10_carx.mp4" if CARX else ("bil10_teqdimat_tam.mp4" if TAM else "bil10_teqdimat_9x16.mp4")
+LIST = OUT + ("/list_carx.txt" if CARX else ("/list_tam.txt" if TAM else "/list.txt"))
 if "--mp4" in sys.argv:
     for name, vf, crf in ((NAME, "format=yuv420p", "20"),
                           (NAME.replace(".mp4", "_720.mp4"), "scale=720:1280,format=yuv420p", "24")):
@@ -34,7 +36,7 @@ if "--mp4" in sys.argv:
     #  uz sekli - ilk kadr
     first = io.open(LIST, encoding="utf-8").readline().split("'")[1]
     #  poster: ayrica ▶ kadri varsa o, yoxsa ilk kadr
-    pst = OUT + ("/poster_tam.png" if TAM else "/poster.png")
+    pst = OUT + ("/poster_carx.png" if CARX else ("/poster_tam.png" if TAM else "/poster.png"))
     if os.path.exists(pst): first = pst
     subprocess.run([FF, "-y", "-v", "error", "-i", first, "-vf", "scale=720:1280", "-q:v", "4", OUT + "/" + NAME.replace(".mp4", "_uz.jpg")], check=True)
     sys.exit(0)
@@ -100,8 +102,8 @@ def ensure_cap(pg):
       c.innerHTML = (k ? '<small>' + k + '</small>' : '') + v;
     }""", [CAP_CSS, CAP["t"]])
 
-SPEED = float(os.environ.get("VIDEO_SPEED", "1.8"))   # >= 0.3 s dayanmalar bu qeder uzanir
-SHORT = float(os.environ.get("VIDEO_SHORT", "1.5"))   # toxunus / yazma kadrlari
+SPEED = float(os.environ.get("VIDEO_SPEED", "2.3"))   # >= 0.3 s dayanmalar bu qeder uzanir
+SHORT = float(os.environ.get("VIDEO_SHORT", "1.8"))   # toxunus / yazma kadrlari
 
 def cap(pg, sec):
     sec = sec * SPEED if sec >= 0.3 else sec * SHORT
@@ -147,6 +149,7 @@ CARD_CSS = """
 #vcard{position:fixed;inset:0;z-index:2147483100;background:#0f172a;color:#fff;
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 #vcard .w{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding-top:26px;padding-bottom:26px;
   text-align:center;padding:0 36px;box-sizing:border-box;
   background:radial-gradient(120% 80% at 50% 0%,#134e4a 0%,#0f172a 60%)}
 #vcard .logo{width:132px;height:132px;margin-bottom:26px}
@@ -167,40 +170,83 @@ CARD_CSS = """
 #vcard .ben li i{flex:0 0 52px;width:52px;height:52px;border-radius:14px;background:#ffc94d;color:#0f172a;
   display:flex;align-items:center;justify-content:center;font-style:normal;font-size:26px;font-weight:800}
 #vcard .ben li s{display:block;text-decoration:none;font-size:16px;font-weight:500;color:#94a3b8;margin-top:2px}
+/*  Olculer CSS px-dir: kadr 432x768 (DPR 2.5 -> 1080x1920)  */
+#vcard .top{width:100%;text-align:left;padding:0 4px}
+#vcard .top .k{margin-bottom:8px}
+#vcard .top h1{font-size:25px;line-height:1.15;margin:0 0 6px}
+#vcard .top .sm{margin-top:4px;font-size:14px;line-height:1.45}
+#vcard .phone{width:80%;height:430px;margin:18px auto 0;border-radius:22px;overflow:hidden;
+  border:3px solid #334155;box-shadow:0 18px 40px rgba(0,0,0,.55);background:#fff;flex:0 0 auto}
+#vcard .phone img{width:100%;display:block}
 #vcard .play{width:150px;height:150px;border-radius:50%;background:#ffc94d;margin:34px auto 0;
   display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(0,0,0,.45)}
 #vcard .play i{display:block;width:0;height:0;border-left:56px solid #0f172a;border-top:34px solid transparent;
   border-bottom:34px solid transparent;margin-left:12px}
 """
 
-BEN = [("✓", "Test 1 dəqiqəyə yığılır", "hazır sual bankından, sinif və mövzuya görə"),
-       ("✓", "Nəticə özü toplanır", "şagird kodla girir, bal serverdə hesablanır"),
-       ("✓", "Hansı mövzu axsayır — görünür", "hesabat, səhv dəftəri, siqnallar"),
-       ("✓", "Valideyn də görür", "ev tapşırığı, nəticə, davamiyyət")]
+BEN = [("Test 1 dəqiqəyə yığılır", "hazır sual bankından — sinif, fənn, mövzu seçirsiniz", "gen"),
+       ("Nəticə özü toplanır", "şagird kodla girir, bal serverdə hesablanır, siz yalnız baxırsınız", "prep"),
+       ("Hansı mövzu axsayır — görünür", "hesabat, səhv dəftəri, zəif şagird siqnalı", "rep"),
+       ("Valideyn də görür", "uşağının nəticəsi, ev tapşırığı, davamiyyəti — öz telefonunda", "par")]
+
+SHOTS_DIR = OUT + "/shots"
+
+def demo_shots(ctx):
+    """Numune hesabin (dolu melumat) real ekranlari - giris kartlarinda
+    subut kimi.  EVVELCEDEN cekilibse (test/_demo_shots.py -> OUT/shots)
+    fayldan goturulur: video ile eyni gedisde cekende hesabat ekrani
+    sonra acilmirdi (iki yigim bosa getdi)."""
+    import base64
+    keys = ("gen", "prep", "rep", "par")
+    if all(os.path.exists("%s/%s.png" % (SHOTS_DIR, k)) for k in keys):
+        names = [f[:-4] for f in os.listdir(SHOTS_DIR) if f.endswith(".png")]
+        return {k: "data:image/png;base64," + base64.b64encode(open("%s/%s.png" % (SHOTS_DIR, k), "rb").read()).decode("ascii") for k in names}
+    db("delete from public.app_state where key='demo_reset'"); db("select public.rpc_demo_reset()")
+    #  AYRI kontekst: numune girisi esas sehifenin sessiyasina qarismasin
+    #  (eyni kontekstde girisden sonra panel acilir, qeydiyyat ekrani cixmir)
+    ctx = ctx.browser.new_context(viewport={"width": 432, "height": 768}, device_scale_factor=2.5)
+    p = ctx.new_page()
+    p.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
+    p.route("**://*.supabase.co/**", lambda r: r.abort())
+    p.goto(PANEL + "#/demo"); p.wait_for_selector("#demoBar", timeout=60000)
+    p.wait_for_selector("#groups .gcard", timeout=30000)
+    p.add_style_tag(content="#demoBar{display:none!important}")
+    p.locator("#groups .gcard", has_text="7-ci sinif").first.click(); p.wait_for_selector("#gTabs", timeout=15000)
+    p.wait_for_function("document.querySelector('#prep .prow')", timeout=20000); p.wait_for_timeout(900)
+    gid = p.evaluate("location.hash").split("/")[-1]
+    out = {}
+    p.evaluate("document.getElementById('prep').scrollIntoView({block:'start'}); window.scrollBy(0,-60)"); p.wait_for_timeout(300)
+    out["prep"] = p.screenshot()
+    p.evaluate("location.hash = '#/gen'"); p.wait_for_selector("#gsub", timeout=15000); p.wait_for_timeout(900)
+    out["gen"] = p.screenshot()
+    p.evaluate("location.hash = '#/r/" + gid + "'"); p.wait_for_selector("#rTabs", timeout=15000); p.wait_for_timeout(1200)
+    out["rep"] = p.screenshot()
+    p.goto(BASE + "valideyn/index.html?kod=VDEMO001"); p.wait_for_selector(".who", timeout=30000); p.wait_for_timeout(900)
+    out["par"] = p.screenshot()
+    ctx.close()
+    import base64
+    return {k: "data:image/png;base64," + base64.b64encode(v).decode("ascii") for k, v in out.items()}
 
 def intro(pg, poster_path=None):
-    """Reklam carxi kimi giris: 'muellim ne qazanir' - setirler bir-bir
-    acilir (hereket var, sekil kimi durmur), sonra 'indi baxaq'.
-    Istifadeci: «5 saniyə sonra göstərməyə başlayır, ilk baxışdan sadəcə
-    şəkil hissi verir».  Poster (uz sekli) ayrica kadrdir: boyuk ▶."""
-    #  Girisin vaxti DEQIQ saniyedir (SPEED-e bolunur): istifadeci «ilk 5
-    #  saniyə şəkil kimi görünür» dedi - hec bir kadr 1.2 s-den cox durmur,
-    #  setirler 0.7 s-den bir acilir.
+    """Reklam carxi kimi giris - her qazanc REAL EKRANLA (numune hesab).
+    Vaxt DEQIQ saniyedir (SPEED-e bolunur): kartlar 1x suretde rahat
+    oxunur, yavaslatmaga ehtiyac yoxdur (istifadeci: «çarx çox sürətlidir,
+    sürəti aşağı salıram, sonra proqram lap çox ləngiyir»)."""
     R = 1.0 / SPEED
+    shots = demo_shots(pg.context)
     card(pg, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
-             '<h2>Repetitor və müəllim üçün<br><span class="y">onlayn test sistemi</span></h2>', 1.0 * R)
-    #  qarmaq: problem -> cavab (istifadeci: «faydalı çarx kimi başlasın»)
+             '<h2>Repetitor və müəllim üçün<br><span class="y">onlayn test sistemi</span></h2>', 1.8 * R)
     card(pg, '<div class="k">Hər həftə eyni iş</div>'
-             '<h1 style="font-size:44px;line-height:1.15">Test yaz.<br>Yoxla.<br>Nəticəni say.<br>Valideynə de.</h1>', 1.4 * R)
-    card(pg, '<div class="k">Hər həftə eyni iş</div>'
-             '<h1 style="font-size:44px;line-height:1.15;color:#64748b">Test yaz.<br>Yoxla.<br>Nəticəni say.<br>Valideynə de.</h1>'
-             '<h2 style="margin-top:26px;font-size:30px;color:#fff">Bil10 bunu <span class="y">sizin yerinizə</span> edir.</h2>', 1.3 * R)
-    for i in range(len(BEN)):
-        on = "".join('<li class="on"><i>%s</i><span>%s<s>%s</s></span></li>' % (n, t, d) for n, t, d in BEN[:i + 1])
-        off = "".join('<li><i>%s</i><span>%s<s>%s</s></span></li>' % (n, t, d) for n, t, d in BEN[i + 1:])
-        card(pg, '<div class="k">Müəllim nə qazanır?</div><ul class="ben">' + on + off + '</ul>',
-             (0.7 if i < len(BEN) - 1 else 1.2) * R)
-    card(pg, '<h1>Necə işləyir?</h1><h2>5 dəqiqəyə, addım-addım</h2><div class="pill">İndi baxaq →</div>', 1.0 * R)
+             '<h1 style="font-size:46px;line-height:1.15">Test yaz.<br>Yoxla.<br>Nəticəni say.<br>Valideynə de.</h1>', 3.0 * R)
+    #  tekrar YOX (istifadeci: «iki dəfə eyni şeyi yazmısan») - yalniz cavab
+    card(pg, '<div class="logo">' + LOGO + '</div>'
+             '<h1 style="font-size:40px;line-height:1.2">Bil10 bunu<br><span class="y">sizin yerinizə</span> edir.</h1>', 2.6 * R)
+    for i, (t, d, key) in enumerate(BEN):
+        card(pg, '<div class="top"><div class="k">Müəllim nə qazanır · ' + str(i + 1) + '/4</div>'
+                 '<h1>' + t + '</h1>'
+                 '<div class="sm">' + d + '</div></div>'
+                 '<div class="phone"><img src="' + shots[key] + '" alt=""></div>', 3.0 * R)
+    card(pg, '<h1>Necə işləyir?</h1><h2>addım-addım, real ekranlarda</h2><div class="pill">İndi baxaq →</div>', 1.8 * R)
     if poster_path:
         pg.evaluate("""([css, html]) => {
           if (!document.getElementById('vcardcss')) {
@@ -211,11 +257,10 @@ def intro(pg, poster_path=None):
           if (!d) { d = document.createElement('div'); d.id = 'vcard'; (document.body || document.documentElement).appendChild(d); }
           d.innerHTML = '<div class="w">' + html + '</div>';
         }""", [CARD_CSS, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
-               '<h2>Müəllim nə qazanır?<br><span class="y">5 dəqiqəlik təqdimat</span></h2>'
-               '<div class="play"><i></i></div><div class="sm">səssiz · addım-addım · bil10.az</div>'])
+               '<h2>Müəllim nə qazanır?<br><span class="y">addım-addım təqdimat</span></h2>'
+               '<div class="play"><i></i></div><div class="sm">səssiz · real ekranlar · bil10.az</div>'])
         pg.wait_for_timeout(250); pg.screenshot(path=poster_path)
         pg.evaluate("() => { const d = document.getElementById('vcard'); if (d) d.remove(); }")
-
 
 def card(pg, html, sec):
     """Kart - sehifenin USTUNE qoyulur (set_content sessiyani pozurdu)."""
@@ -687,7 +732,12 @@ def tam(pg):
     chap(pg, 8, "Hesabat")
     say(pg, "ŞAGİRD KARTI|«Geri» — qrupun hesabatına", 0.9)
     tap(pg, "#btnB")
-    pg.wait_for_selector("#rTabs", timeout=15000); pg.wait_for_timeout(900)
+    #  «Geri» tarixce ile gedir (geri duymesi, 14.09); bos tarixcede
+    #  ehtiyat unvan hesabatdir - yene de acilmasa birbasa acilir
+    try: pg.wait_for_selector("#rTabs", timeout=30000)
+    except Exception:
+        pg.goto(PANEL + "#/r/" + gid); pg.wait_for_selector("#rTabs", timeout=30000)
+    pg.wait_for_timeout(900)
     pg.evaluate("window.scrollTo(0,0)"); pg.wait_for_timeout(150)
     say(pg, "QRUP › HESABAT|Özü yığılır: kim işləyib, neçə faiz, «nə etməli bu həftə»", 2.6)
     tap(pg, "#rTabs .seg:has-text('Mövzular')"); pg.wait_for_timeout(700)
@@ -737,6 +787,66 @@ def tam(pg):
              '<div class="sm">Bu, əsas axındır — daha çox imkan bələdçidə: <b style="color:#fff">bil10.az/komek</b><br>'
              'Nümunəyə baxın — qeydiyyatsız · info@bil10.az</div>', 4.5)
 
+# ------------------------------------------------------------ CARX
+#  Istifadeci: «7 dəq çox uzun və yorucudur, çarx fikri yaxşıdır - 2-3 dəq,
+#  detallı izahla, şəkillə».  Her sehne: kicker + basliq + 2 cumle izah +
+#  numune hesabdan REAL EKRAN.  Vaxt deqiq saniyedir (SPEED-e bolunur).
+SCENES = [
+ ("Qrup", "Qrup yaradın, şagirdə kod verin",
+  "Şagird qeydiyyatdan keçmir — 8 simvollu kodla girir. Kodu «Göndər» ilə WhatsApp-a atırsınız; valideyn kodu da yanındadır.", "grp", 8),
+ ("Test yığ", "Test 1 dəqiqəyə yığılır",
+  "Fənn, sinif, mövzu seçirsiniz — sistem hazır bankdan balanslı 10 sual yığır. Öz suallarınızı da əlavə edə bilərsiniz.", "gen", 8),
+ ("Tapşırıq", "Son tarix, cəhd sayı — bir toxunuşla",
+  "Bütün qrupa və ya bir şagirdə. WhatsApp mətni hazır çıxır: «Kodunla gir, testi həll et».", "asg", 7),
+ ("Şagird", "Şagird telefonda həll edir",
+  "Kodla girir, həll edir — nəticə dərhal: neçə faiz, hansı sual səhv, izahı ilə. Bal serverdə hesablanır, düz cavab telefona getmir.", "s_q", 8),
+ ("Hesabat", "Nəticə özü yığılır",
+  "Kim işləyib, neçə faiz, hansı mövzu axsayır. «Nə etməli bu həftə» — adbaad, bir toxunuşla təkrar testi.", "rep", 9),
+ ("Şagird kartı", "Hər şagirdin öz xəritəsi",
+  "Diaqnostika mövzu-mövzu səviyyəni göstərir: «bundan başla». Səhv dəftəri səhv etdiyi sualları yenidən gətirir.", "card", 8),
+ ("Dərs planı", "Dərsdən əvvəl bir baxış",
+  "Kurikulum üzrə hazır plan: bu günün dərsi, isinmə 5 sual, son keçilən, tapşırığı etməyənlər — bir kartda.", "prep", 8),
+ ("Ev tapşırığı", "«Bunu oxu, bunu təkrarla»",
+  "Test olmayan tapşırığı da yazırsınız. Şagird «Etdim» deyir — siz və valideyn dərhal görürsünüz.", "hw", 7),
+ ("Valideyn", "Valideyn də görür",
+  "Öz kodu ilə: uşağının nəticəsi, meyli, gözləyən tapşırıqlar, davamiyyət. Sizə zəng etmir — özü baxır.", "par", 8),
+ ("İcmal", "Hər açılışda bir baxış",
+  "Bu günün dərsi, təhlükə zonası — geriləyən şagird, son nəticələr, liderlər. Hamısı bir ekranda.", "home", 7),
+]
+
+def carx(pg):
+    R = 1.0 / SPEED
+    pg.goto("about:blank")
+    shots = demo_shots(pg.context)
+    card(pg, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
+             '<h2>Repetitor və müəllim üçün<br><span class="y">onlayn test sistemi</span></h2>', 2.0 * R)
+    card(pg, '<div class="k">Hər həftə eyni iş</div>'
+             '<h1 style="font-size:46px;line-height:1.15">Test yaz.<br>Yoxla.<br>Nəticəni say.<br>Valideynə de.</h1>', 3.2 * R)
+    card(pg, '<div class="logo">' + LOGO + '</div>'
+             '<h1 style="font-size:40px;line-height:1.2">Bil10 bunu<br><span class="y">sizin yerinizə</span> edir.</h1>', 2.6 * R)
+    for i, (k, t, d, key, sec) in enumerate(SCENES):
+        CHAPS.append({"n": i + 1, "t": k, "s": round(sum(x for _, x in FRAMES), 1)})
+        card(pg, '<div class="top"><div class="k">' + str(i + 1) + '/' + str(len(SCENES)) + ' · ' + k + '</div>'
+                 '<h1>' + t + '</h1><div class="sm">' + d + '</div></div>'
+                 '<div class="phone"><img src="' + shots[key] + '" alt=""></div>', sec * R)
+    card(pg, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
+             '<h2>Şagird və valideyn üçün <span class="y">pulsuz</span></h2>'
+             '<div class="pill">Nümunəyə baxın — qeydiyyatsız</div>'
+             '<div class="site">bil10.az</div>', 5.0 * R)
+    #  uz sekli
+    pg.evaluate("""([css, html]) => {
+      if (!document.getElementById('vcardcss')) {
+        const s = document.createElement('style'); s.id = 'vcardcss'; s.textContent = css;
+        (document.head || document.documentElement).appendChild(s);
+      }
+      let d = document.getElementById('vcard');
+      if (!d) { d = document.createElement('div'); d.id = 'vcard'; (document.body || document.documentElement).appendChild(d); }
+      d.innerHTML = '<div class="w">' + html + '</div>';
+    }""", [CARD_CSS, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
+           '<h2>Müəllim nə qazanır?<br><span class="y">2 dəqiqəlik çarx</span></h2>'
+           '<div class="play"><i></i></div><div class="sm">səssiz · real ekranlar · bil10.az</div>'])
+    pg.wait_for_timeout(250); pg.screenshot(path=OUT + "/poster_carx.png")
+
 with sync_playwright() as p:
     br = p.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
     ctx = br.new_context(viewport={"width": 432, "height": 768}, device_scale_factor=2.5,
@@ -744,7 +854,7 @@ with sync_playwright() as p:
     pg = ctx.new_page()
     pg.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
     pg.route("**://*.supabase.co/**", lambda r: r.abort())
-    (tam if TAM else qisa)(pg)
+    (carx if CARX else (tam if TAM else qisa))(pg)
     br.close()
 
 with io.open(LIST, "w", encoding="utf-8") as f:
