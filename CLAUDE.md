@@ -3539,6 +3539,24 @@ app.css-lərdən təmizlənib. Şrift `"PJS"` (`assets/fonts/`, base.css
 - Dizayn alətinə şəkil atanda mətn: «keep all text, change only visual
   design, tokens …, output static HTML, no React/Tailwind/external fonts».
 
+## Alt zolaq: Suallar → Qruplar; notranslate; e-poçt yoxlaması (2026-09-16, v507)
+
+- **BNAV** `İcmal · Qruplar (#/gs) · Test yığ · Profil` (istifadəçi: gündəlik
+  dövr qrup→test→nəticədir, sual bankı arabir). `screenGroups()`: zolaq +
+  `#groups` kartları + eyni forma (`groupFormHtml()` / `bindGroupForm()` —
+  Icmalla ORTAQ, id-lər `#gForm #gname #glevel #btnGroup` qalır). `g/r/a/s`
+  ekranlarında da «Qruplar» bəndi «on». Sual bankı: Profildə `#btnMeBank`
+  sətri + masaüstü sol menyuda ayrıca bənd. Boş hesabda Qruplar ekranı
+  `.empty` kart + forma (orada `#onb` yoxdur). Testlər: e2e_bank Profildən
+  gedir, e2e_panel «Qruplar var, Suallar yoxdur» + ekran yoxlayır.
+- **`<meta name="google" content="notranslate">`** altı səhifədə: telefonu
+  ingilis dilində olan adamda Chrome paneli özü ingilisləşdirirdi («Teacher
+  panel», «See example» — 16.09 ekran şəkli).
+- **Giriş/qeydiyyat e-poçtu** (`doAuth`): boşluqlar silinir, kiçik hərf,
+  format yoxlanır («ad@gmail.com» nümunəsi), `gamil.com/gmial.com/…`
+  səhvində düzəldilmiş ünvan sahəyə yazılır. Səbəb: `imani terane1982@.com`,
+  `…@gamil.com` — adam «parol yanlışdır» görüb gedirdi.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

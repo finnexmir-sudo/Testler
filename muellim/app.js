@@ -247,6 +247,24 @@
         $("authErr").innerHTML = msg("err", "E-poçt və parol lazımdır.");
         return;
       }
+      /*  E-poct temizlenir ve yoxlanir (16.09): telefonda «imani terane1982@.com»
+          (bosluq, domen yox), «…@gamil.com» kimi yazilir, sonra «parol
+          yanlisdir» xetasi cixir ve adam gedir.  Bosluqlar silinir, kicik
+          herfe cevrilir; acıq sehvde ne olmali oldugu deyilir.  */
+      email = email.replace(/\s+/g, "").toLowerCase();
+      $("email").value = email;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        $("authErr").innerHTML = msg("err", "E-poçt düzgün deyil. Belə olmalıdır: ad@gmail.com");
+        return;
+      }
+      var dm = email.split("@")[1], TYPO = { "gamil.com": "gmail.com", "gmial.com": "gmail.com",
+        "gmal.com": "gmail.com", "gmail.ru": "gmail.com", "gmail.co": "gmail.com", "mail.tu": "mail.ru" };
+      if (TYPO[dm]) {
+        $("authErr").innerHTML = msg("err", "E-poçtda səhv var: «" + dm + "» yox, «" + TYPO[dm] +
+          "» olmalıdır. Düzəldib yenidən basın.");
+        $("email").value = email.split("@")[0] + "@" + TYPO[dm];
+        return;
+      }
       if (isUp && pass.length < 8) {
         $("authErr").innerHTML = msg("err", "Parol ən azı 8 simvol olmalıdır.");
         return;
@@ -583,6 +601,12 @@
       "</div>" +
       '<div id="fbMine"></div>' +
       '<div class="spacer"></div>' +
+      //  16.09: alt zolaqdan cixan «Suallar» buradan da acilir
+      '<div class="card pad0"><button class="item" id="btnMeBank">' +
+        '<div class="ic">' + ic("doc") + "</div>" +
+        '<div class="g"><b>Sual bankı</b><i>öz suallarınız və hazır suallar</i></div>' +
+        '<span class="arrow">' + ic("right") + "</span></button></div>" +
+      '<div class="spacer"></div>' +
       '<div class="card tight">' +
         "<b>Necə işləyir?</b>" +
         '<p class="note" style="margin:4px 0 0">Qrup, şagird kodu, tapşırıq, hesabat — ' +
@@ -590,6 +614,7 @@
           '<a href="../komek/#muellim" target="_blank" rel="noopener">Bələdçini aç →</a></p>' +
       "</div>");
     on("btnBack", "click", function () { nav("#/"); });
+    on("btnMeBank", "click", function () { nav("#/b"); });
     subChips("meSubs", mySubs());
     fbBind("fb", function (kind, body) {
       return sb.rpc("rpc_feedback_send", { p_kind: kind, p_body: body, p_page: FB_FROM });
@@ -961,17 +986,7 @@
       h2r("Qruplar") +
       '<div id="groups" class="gcards"><div class="skel">Yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
-      '<div class="card" id="gForm">' +
-        '<label for="gname">Qrup adı</label>' +
-        '<div class="fieldrow">' +
-          '<div><input id="gname" placeholder="məsələn: Cümə qrupu"></div>' +
-          '<div style="flex:0 0 148px"><select id="glevel">' +
-            '<option value="">Sinif seçilməyib</option>' +
-          "</select></div>" +
-        "</div>" +
-        '<div id="gErr"></div>' +
-        '<button class="btn go" id="btnGroup">' + ic("plus") + "Qrup yarat</button>" +
-      "</div>";
+      groupFormHtml();
     show(html);
     /*  Marka zolagi: salam + hesab adi + paket.  Ilk kart (hediyye ve ya
         lovheler) zolagin alt kenarini kesir.  */
@@ -1017,6 +1032,26 @@
       }).catch(function () {});
     }
 
+    bindGroupForm();
+  }
+
+  /*  Qrup formasi: Icmalda (basliqdan sonra / baslangic kartinda) ve
+      «Qruplar» ekraninda EYNI - id-ler qalir (#gForm, #gname, #glevel,
+      #btnGroup: 15 test basir).  */
+  function groupFormHtml() {
+    return '<div class="card" id="gForm">' +
+        '<label for="gname">Qrup adı</label>' +
+        '<div class="fieldrow">' +
+          '<div><input id="gname" placeholder="məsələn: Cümə qrupu"></div>' +
+          '<div style="flex:0 0 148px"><select id="glevel">' +
+            '<option value="">Sinif seçilməyib</option>' +
+          "</select></div>" +
+        "</div>" +
+        '<div id="gErr"></div>' +
+        '<button class="btn go" id="btnGroup">' + ic("plus") + "Qrup yarat</button>" +
+      "</div>";
+  }
+  function bindGroupForm() {
     on("btnGroup", "click", function () {
       if (busy) return;
       var name = ($("gname").value || "").trim();
@@ -1041,6 +1076,31 @@
         $("gErr").innerHTML = msg("err", fail(e));
       });
     });
+  }
+
+  /* ------------------------------------------------ QRUPLAR ekrani (16.09)
+     Alt zolaqda «Suallar» yerine «Qruplar» (istifadeci): muellimin gundelik
+     dovru qrup -> test -> neticedir; sual banki arabir lazimdir ve «Test
+     yığ» icinden («Öz suallarım») ve Profildən acilir.  Ekran: qrup
+     kartlari + eyni qrup formasi.  */
+  function screenGroups() {
+    topTitle.textContent = "Qruplar";
+    bandHead({
+      back: { id: "btnBack", label: "Əsas səhifə" }, eye: "Qruplar",
+      title: "Qruplarınız",
+      sub: "Şagirdlər, dərs planı və tapşırıqlar qrupun içindədir."
+    });
+    show(
+      '<div id="groups" class="gcards"><div class="skel">Yüklənir…</div></div>' +
+      '<div class="spacer"></div>' +
+      groupFormHtml());
+    on("btnBack", "click", function () { nav("#/"); });
+    bindGroupForm();
+    var lvReady = loadLevels().then(function () {
+      var sel = $("glevel");
+      if (sel) sel.innerHTML = levelOptions(null);
+    });
+    loadGroups(lvReady);
   }
 
   /* Fealiyyet merkezi: reqemler, hesab-boyu siqnallar, son neticeler.
@@ -1249,6 +1309,12 @@
       var box = $("groups");
       if (!box) return;
       if (!rows || !rows.length) {
+        //  «Qruplar» ekraninda (baslangic karti yoxdur) sade bos kart + forma
+        if (!$("onb")) {
+          box.innerHTML = '<div class="empty"><div class="ic">' + ic("group") + "</div>" +
+            "<b>Hələ qrup yoxdur</b>Aşağıdakı formadan ilk qrupu yaradın.</div>";
+          return;
+        }
         //  Bos hesab: «Hələ qrup yoxdur» karti yox - UC ADDIM karti, qrup
         //  formasi onun 1-ci addiminin icindedir (#gForm, #btnGroup qalir -
         //  testler onlari basir).  Reqemler ve «Qruplar» basligi gizli.
@@ -8659,12 +8725,12 @@
       siyahisindan vereqe kecen muellim geri basanda basqa yere dusurdu.
       HIST - tetbiq icindeki kecidlerin yigini (route() doldurur); goBack
       sonuncunu cixarir, yoxdursa ekranin oz susma unvanina gedir.
-      Alt menyu bolmeleri (Icmal, Suallar, Test yig, Profil) buna toxunmur -
+      Alt menyu bolmeleri (Icmal, Qruplar, Test yig, Profil) buna toxunmur -
       onlarin geri duymesi hemise Esas sehifedir.  */
   var HIST = [], BACKING = false, CUR_I = 0;
   function routeTitle(h) {
     var k = (h || "#/").replace(/^#/, "").split("/").filter(Boolean)[0] || "";
-    return { g: "Qrup", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ",
+    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ",
              t: "Vərəq", pk: "Dərs paketi", adm: "İdarəetmə", me: "Profil", n: "Bildirişlər",
              q: "Sual", s: "Şagird", p: "Paket", demo: "Nümunə" }[k] || "Əsas səhifə";
   }
@@ -8716,7 +8782,7 @@
   var SNAV_LOGO = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="#fff"/><g fill="none" stroke="#087f75" stroke-width="2.5" stroke-linecap="round"><path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/></g><path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#f4c94f"/><path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#173b50" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var BNAV = [
     ["",    "home",   "İcmal"],
-    ["b",   "doc",    "Suallar"],
+    ["gs",  "group",  "Qruplar"],
     ["gen", "gen",    "Test yığ"],
     ["p",   "star",   "Paket"],
     ["me",  "person", "Profil"]
@@ -8738,6 +8804,8 @@
         return '<a href="#/' + it[0] + '"' + (cur === it[0] ? ' class="on"' : "") + ">" +
           ic(it[1]) + it[2] + "</a>";
       }).join("") +
+      //  masaustunde yer var - sual banki ayrica bend
+      '<a href="#/b"' + (cur === "b" ? ' class="on"' : "") + ">" + ic("doc") + "Sual bankı</a>" +
       '<span class="sbl">Hesab</span>' +
       '<a href="#/n">' + ic("bell") + "Siqnallar</a>" +
       '<a href="#/me"' + (isMe ? ' class="on"' : "") + ">" + ic("person") + "Profil</a>" +
@@ -8784,7 +8852,9 @@
       else { CUR_I = Date.now(); try { history.replaceState({ i: CUR_I }, ""); } catch (e) {} }
       PREV_HASH = CUR_HASH; CUR_HASH = location.hash || "#/";
     }
-    bnavShow({ b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
+    //  qrup, hesabat, tapsiriq ekranlari da «Qruplar» bendinin altindadir
+    bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
+    if (m[0] === "gs") return screenGroups();
     if (m[0] === "g" && m[1]) return screenGroup(m[1]);
     if (m[0] === "r" && m[1]) return screenReport(m[1]);
     if (m[0] === "a" && m[1]) return screenAssign(m[1], m[2]);

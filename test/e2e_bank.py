@@ -96,8 +96,10 @@ with sync_playwright() as pw:
     ok(pg.locator("#btnBank").evaluate(
         "e => getComputedStyle(e).backgroundColor") != "rgba(0, 0, 0, 0)",
        "bank kecidi kartdir")
-    #  telefonda suretli emeliyyatlar gizlidir - alt menyudan gedirik
-    pg.click("#bnav a[href='#/b']"); pg.wait_for_selector("#btnNewQ", timeout=8000)
+    #  16.09: alt zolaqda «Suallar» yoxdur (yerinde «Qruplar») - Profildeki
+    #  setirden gedirik
+    pg.click("#bnav a[href='#/me']"); pg.wait_for_selector("#btnMeBank", timeout=8000)
+    pg.click("#btnMeBank"); pg.wait_for_selector("#btnNewQ", timeout=8000)
     ok("/b" in pg.url, "bankin oz unvani var", pg.url.split("#")[-1])
     ok("0" in pg.inner_text(".seat .num"), "istifade gostericisi 0-dan baslayir",
        pg.inner_text(".seat .num").replace("\n", " "))

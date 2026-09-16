@@ -282,6 +282,13 @@ with sync_playwright() as pw:
 
     nvt = " | ".join(pg.locator("#bnav a").all_inner_texts())
     ok("Paket" not in nvt, "alt menyuda Paket yoxdur", nvt)
+    #  16.09: Suallar -> Qruplar
+    ok("Qruplar" in nvt and "Suallar" not in nvt, "alt menyuda Qruplar var, Suallar yoxdur", nvt)
+    #  bu hesabda hele qrup yoxdur - ekranda bos kart + forma
+    pg.click("#bnav a[href='#/gs']"); pg.wait_for_selector("#groups .empty", timeout=8000)
+    ok(pg.locator("#gForm").count() == 1 and "Qruplarınız" in pg.inner_text("#band"),
+       "Qruplar ekrani: bos kart + forma")
+    pg.click("#btnBack"); pg.wait_for_selector("#onb #gForm", timeout=8000)
     ok(pg.locator("#btnPkt").count() == 0, "suretli emeliyyatlarda Paket yoxdur")
     #  unvanla da acilmir - ana sehifeye qaytarir
     pg.goto(PANEL + "#/p"); pg.wait_for_timeout(700)
