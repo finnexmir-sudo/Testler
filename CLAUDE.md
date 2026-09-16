@@ -3319,7 +3319,11 @@ amma sayt «qeydiyyatdan keç» deyirdi.
   aləti), oxuyan.az, e-sual.az, otk.az, teorem.az. Bizim fərq: kurikulum
   planı + diaqnostika + «bundan başla» + səhv dəftəri + şagirdin məşqi —
   satış mesajı bunun üstündədir. Sinif adları: `.ok` və `.free` səhifədə
-  başqa mənada var — yeni sinif `hfree`.
+  başqa mənada var — yeni sinif `hfree`. **Sağ tərəf (16.09):** real ekran şəkli
+  («yaraşmır»), çəkilmiş diaqnostika kartı və illüstrasiya + nəticə nişanı
+  sınandı; istifadəçi **təmiz illüstrasiyanı** seçdi (`assets/hero.png`,
+  telefonda gizli). Videonun yanında fəsil siyahısı əvəzinə beş fakt
+  (`.vfacts`).
 - **Mənbə:** linkdə `?src=wa` (yalnız `[a-z0-9_-]{1,20}`, uzun/pis dəyər
   atılır, kəsilmir); `assets/visit.js` onu `sessionStorage.bil10_src`-də
   saxlayır, panelin giriş ekranı da oradan oxuyur. `visits.src`,
