@@ -3371,6 +3371,13 @@ amma sayt «qeydiyyatdan keç» deyirdi.
   generatoru (`tam`) qalır, istifadə olunmur. Qayda: **çarx sata bilər,
   gəzinti öyrədir — sayta çarx, bələdçiyə gəzinti.**
 
+- **Dördüncü dövrə — v2 dizaynla təkrar çəkiliş (2026-09-16).** İstifadəçi:
+  «videodakı ekranlar indikinə uyğun deyil». Məzmun dəyişmədi, yalnız
+  ekranlar (eyni 3 addım), `/tmp/claude-0/shot/logo.svg` rəngləri yeni
+  loqoya (#087f75→#42bcae, sarı #f4c94f), üz şəklində «1,5 dəqiqəlik çarx»
+  (əvvəl «2 dəqiqəlik» yazılırdı, çarx 1:31-dir). Qayda: **dizayn
+  dəyişəndə çarx yenidən yığılır** — 3 əmr, 3 dəqiqə.
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

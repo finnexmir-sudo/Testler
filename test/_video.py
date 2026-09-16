@@ -843,7 +843,7 @@ def carx(pg):
       if (!d) { d = document.createElement('div'); d.id = 'vcard'; (document.body || document.documentElement).appendChild(d); }
       d.innerHTML = '<div class="w">' + html + '</div>';
     }""", [CARD_CSS, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
-           '<h2>Müəllim nə qazanır?<br><span class="y">2 dəqiqəlik çarx</span></h2>'
+           '<h2>Müəllim nə qazanır?<br><span class="y">1,5 dəqiqəlik çarx</span></h2>'
            '<div class="play"><i></i></div><div class="sm">səssiz · real ekranlar · bil10.az</div>'])
     pg.wait_for_timeout(250); pg.screenshot(path=OUT + "/poster_carx.png")
 
