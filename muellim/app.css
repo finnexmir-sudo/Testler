@@ -504,7 +504,7 @@ details.more.filt .fn{
 
 /* ---------------------------------------- irelileyis karti (canvas) */
 .pcard canvas{display:block;width:100%;max-width:360px;height:auto;border-radius:14px;
-  border:1px solid var(--n-100);box-shadow:0 8px 24px -12px rgba(43,74,203,.4)}
+  border:1px solid var(--n-100);box-shadow:0 8px 24px -12px rgba(8,127,117,.35)}
 .pcard a.btn{text-decoration:none}
 /* sehv defteri sayğaclari (129) */
 .mkbox{margin-bottom:10px}
@@ -1020,7 +1020,7 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 /* 160: hediyye paket karti (ana sehife) ve admin ayari */
 /*  Hediyye karti ag kartdir, sol kenari sari (logo rengi) - zolagin
     ustunden cixanda oxunaqli qalir.  Bitmeye az qalanda kehreba.  */
-.card.gift{background:var(--surface);border:1px solid var(--line);border-left:4px solid #ffc94d;
+.card.gift{background:var(--surface);border:1px solid var(--line);border-left:4px solid #f4c94f;
   box-shadow:0 18px 44px rgba(9,20,60,.14)}
 .card.gift>b{font-size:15.5px;letter-spacing:-.01em}
 .card.gift p{margin:6px 0 12px;color:var(--fg-2);line-height:1.5}
@@ -1065,9 +1065,9 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .tile::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
   background:var(--brand)}
 .tile.b::before{background:var(--teal)}
-.tile.c::before{background:#175d97}
-.tile.d::before{background:#1c2a52}
-.tile.e::before{background:#5b3fb8}
+.tile.c::before{background:var(--navy)}
+.tile.d::before{background:var(--purple,#5459a8)}
+.tile.e::before{background:var(--coral)}
 .tile .ti{display:flex;width:32px;height:32px;border-radius:9px;align-items:center;
   justify-content:center;margin-bottom:12px;background:var(--brand-tint);color:var(--brand)}
 .tile .ti svg{width:16px;height:16px;stroke-width:1.7}
@@ -1075,9 +1075,9 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   color:var(--fg)}
 .tile span{font-size:11.5px;color:var(--fg-3)}
 .tile.b .ti{background:var(--teal-tint);color:var(--teal)}
-.tile.c .ti{background:#e8f2fb;color:#175d97}
-.tile.d .ti{background:#e9ecf5;color:#1c2a52}
-.tile.e .ti{background:#efeafc;color:#5b3fb8}
+.tile.c .ti{background:#e6eef3;color:var(--navy)}
+.tile.d .ti{background:#e5e5fa;color:#5459a8}
+.tile.e .ti{background:#fdece6;color:#c05b4c}
 .tiles.five{grid-template-columns:repeat(5,1fr);padding:0;gap:12px}
 @media (max-width:760px){ .tiles.five{grid-template-columns:repeat(3,1fr)} }
 @media (max-width:520px){ .tiles.five{grid-template-columns:1fr 1fr} .tiles.five .tile.e{grid-column:1/-1} }
@@ -1089,8 +1089,8 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .stat::before{content:"";position:absolute;inset:0 auto 0 0;width:3px}
 .stat:nth-child(1)::before{background:var(--brand)}
 .stat:nth-child(2)::before{background:var(--teal)}
-.stat:nth-child(3)::before{background:#175d97}
-.meter.m-ok  i{background:linear-gradient(90deg,#0e9384,#18b8a6)}
+.stat:nth-child(3)::before{background:var(--navy)}
+.meter.m-ok  i{background:linear-gradient(90deg,#087f75,#42bcae)}
 .meter.m-mid i{background:linear-gradient(90deg,#b54708,#e08a2e)}
 .meter.m-low i{background:linear-gradient(90deg,#b42318,#e05b51)}
 .qrow{transition:background .12s}
@@ -1103,9 +1103,9 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .stu .l1 .av{width:30px;height:30px;flex:0 0 30px;font-size:13px;margin-right:2px}
 
 /* hesabat stat kartlari - ev lovheleri ile eyni dil */
-.stat.g1{background:linear-gradient(135deg,#2b4acb,#4a63e0);border:0;color:#fff}
-.stat.g2{background:linear-gradient(135deg,#0e9384,#18b8a6);border:0;color:#fff}
-.stat.g3{background:linear-gradient(135deg,#1c2a52,#31437a);border:0;color:#fff}
+.stat.g1{background:linear-gradient(135deg,#123a51,#23465a);border:0;color:#fff}
+.stat.g2{background:linear-gradient(135deg,#087f75,#42bcae);border:0;color:#fff}
+.stat.g3{background:linear-gradient(135deg,#5459a8,#7a7fc9);border:0;color:#fff}
 .stat.g1::before,.stat.g2::before,.stat.g3::before{display:none}
 .stat.g1 span,.stat.g2 span,.stat.g3 span{color:rgba(255,255,255,.85)}
 
@@ -1342,7 +1342,7 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 }
 
 /* ---- yumsaq derinlik (istifadeci secimi): rengli kartlar, sekmeler, setirler ---- */
-.stat{box-shadow:0 2px 4px rgba(16,24,40,.08),0 10px 22px -10px rgba(43,74,203,.45)}
+.stat{box-shadow:0 2px 4px rgba(16,24,40,.08),0 10px 22px -10px rgba(8,127,117,.28)}
 .segs{box-shadow:inset 0 1px 3px rgba(16,24,40,.08)}
 .seg.on{box-shadow:0 1px 3px rgba(16,24,40,.14),0 4px 10px -4px rgba(16,24,40,.18)}
 /* masaustunde siyahi setri ustune gelende yungulce qalxir - klik olundugu hiss olunsun */
@@ -1403,12 +1403,12 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .stat.g1,.stat.g2,.stat.g3{background:none;color:var(--fg)}
 .stat.g1 b{color:var(--brand)}
 .stat.g2 b{color:var(--teal)}
-.stat.g3 b{color:#1c2a52}
+.stat.g3 b{color:#5459a8}
 .stat.g1 span,.stat.g2 span,.stat.g3 span{color:var(--fg-3)}
 
 /* -------------------------- genis ekran: sutun 920px (zolaq, altliq da) */
 /*  1366+ ekranda 760px sutun zolagin ve altligin yanlarini bos qoyurdu  */
-@media (min-width:1100px){ .wrap,.bandin,.afoot .in{max-width:920px} }
+@media (min-width:1100px){ .wrap,.afoot .in{max-width:920px} .bandin{max-width:880px} }
 
 /*  Zolagin sag terefi: Icmalda sagird yeri (suse kart), qrupda sagird
     sayi cipi.  Bos sag teref dolur.  */
@@ -1468,7 +1468,7 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 
 /*  Hediyye karti UFUQI zolaqdir: solda ikon, ortada metn, sagda kecid.  */
 .card.gift{display:flex;align-items:center;gap:16px;padding:16px 18px;
-  background:var(--surface);border:1px solid var(--line);border-left:4px solid #ffc94d;
+  background:var(--surface);border:1px solid var(--line);border-left:4px solid #f4c94f;
   box-shadow:0 18px 44px rgba(9,20,60,.14)}
 .card.gift .gi{flex:0 0 40px;width:40px;height:40px;border-radius:12px;display:flex;
   align-items:center;justify-content:center;background:#fff6e0;color:#b8860b}
@@ -1665,7 +1665,7 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
     olar eyni çıxdı və 11 MB-lıq hissə GÖRÜNMÜRDÜ (şəkildə tutuldu). */
 .bz .k1{background:var(--n-300)}
 .bz .k2{background:var(--brand)}
-.bz .k3{background:var(--teal,#0e9384)}
+.bz .k3{background:var(--teal,#0b8a80)}
 .bz .k4{background:#c7b8f0}
 .bz .k5{background:var(--n-400)}
 /*  Legend: hər sətir bir sətirdir.  Ad qırılmır, ölçü sağa yapışır,
@@ -1749,7 +1749,7 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .dcard .dch{display:block;font-size:15.5px;letter-spacing:-.012em;margin-bottom:4px}
 .dcard .note{margin:0 0 12px}
 .dcard .btn.dgo{background:#fff;border-color:var(--brand-line);color:var(--brand);font-weight:600}
-.dcard .btn.dgo:hover{background:#fff;border-color:var(--brand);box-shadow:0 1px 2px rgba(43,74,203,.18)}
+.dcard .btn.dgo:hover{background:#fff;border-color:var(--brand);box-shadow:0 1px 2px rgba(8,127,117,.18)}
 .authback{text-align:center;margin-top:14px}
 .authback a{text-decoration:none}
 .authback a:hover{text-decoration:underline;text-underline-offset:3px}
@@ -1823,3 +1823,48 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .trw:last-child .tgo{border-bottom:0}
 .trw .tgo:hover{color:var(--brand);background:var(--brand-tint)}
 .trw .tgo svg{width:15px;height:15px}
+
+
+/* =====================================================================
+   DIZAYN DILI v2 (2026-09-16): naviqasiya.
+   Telefon: alt zolaq (#bnav, ag, teal "on").  Masaustu (>=900px): SOL
+   MENYU (#snav, lacivərd) - istifadeci qebul edib (16.09).  Ikisi eyni
+   bendleri gosterir (bnavShow doldurur); #bnav masaustunde GIZLI qalir
+   (testler bunu olcur), #snav telefonda gizli.
+   ===================================================================== */
+@media (max-width:720px){
+  body.bnav-on .bnav{background:rgba(255,255,255,.96);border-top:1px solid var(--line);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    box-shadow:0 -8px 24px rgba(23,59,80,.06)}
+  .bnav a{font-weight:700;color:var(--fg-3);gap:4px;padding:6px 0 4px}
+  .bnav a svg{stroke-width:1.9}
+  .bnav a.on{color:var(--brand)}
+  .bnav a.on svg{background:var(--brand-tint);border-radius:10px;padding:3px;width:26px;height:26px;margin:-3px 0}
+}
+.snav{display:none}
+@media (min-width:900px){
+  body.bnav-on{padding-left:232px}
+  body.bnav-on .snav{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;
+    width:232px;z-index:45;background:var(--navy);color:#a9c7c3;padding:18px 14px 16px;
+    overflow-y:auto}
+  .snav .sbb{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;color:#fff;text-decoration:none}
+  .snav .sbb svg{width:34px;height:34px;flex:0 0 34px}
+  .snav .sbb b{font-size:19px;font-weight:800;letter-spacing:-.05em}
+  .snav .sbb b em{font-style:normal;color:var(--mint-bright)}
+  .snav .sbl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    color:#6f9490;padding:14px 10px 6px}
+  .snav a{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:12px;
+    color:#cfe3df;font-size:13.5px;font-weight:700;text-decoration:none;
+    transition:background .12s,color .12s}
+  .snav a svg{width:18px;height:18px;flex:0 0 18px;stroke-width:1.9}
+  .snav a:hover{background:rgba(255,255,255,.07);color:#fff}
+  .snav a.on{background:var(--brand);color:#fff;box-shadow:0 6px 16px rgba(8,127,117,.35)}
+  .snav .sbtip{margin-top:auto;padding:14px 14px 12px;border-radius:14px;background:#19465b;
+    border:1px solid #2b5564;font-size:12px;line-height:1.5;color:#a9c7c3}
+  .snav .sbtip b{display:block;color:var(--mint-bright);font-size:10.5px;font-weight:800;
+    letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+  /*  sol menyu varken ust zolaqdaki loqo/ad artiqdir - gizlenmir (testler
+      olcur), yalniz "Bil10" yazisi solur  */
+  body.bnav-on .top{padding-left:24px}
+  body.bnav-on .pwabar{left:244px}
+}

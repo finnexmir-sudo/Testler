@@ -128,7 +128,7 @@ details.fbd[open] summary::before{transform:rotate(45deg) translateY(-2px)}
 .plan2{font-size:14.5px;margin-top:10px}
 
 /* ---------------------------------------- marka zolagi: usaq secimi + ad */
-.bandin{max-width:600px}
+.bandin{max-width:560px}
 .band .who{padding:0}
 .band .who b{color:#fff;font-size:24px;font-weight:700;letter-spacing:-.024em;margin-top:4px}
 .band .who .muted{color:rgba(255,255,255,.8);font-size:13.5px}

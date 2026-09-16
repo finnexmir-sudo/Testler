@@ -3483,6 +3483,34 @@ QƏBUL edilib (16.09), telefonda alt zolaq.
   HTML, inline CSS, no React/Tailwind, no external fonts» — TSX lazım
   deyil, ekran şəkli + statik HTML bəsdir.
 
+## Dizayn dili v2 — panel, şagird, valideyn karkası (2026-09-16, v503)
+
+Ana səhifədən sonra üç tətbiq də v2-yə keçdi. Tokenlər indi
+`assets/base.css` `:root`-dadır (indigo `--brand` → teal `#087f75`,
+`--bg` nanə, `--line` `#dcebe6`, `--navy`, `--yellow`, `--coral`,
+`--purple`…); köhnə `#2b4acb/#0e9384/#ffc94d` heks dəyərləri
+app.css-lərdən təmizlənib. Şrift `"PJS"` (`assets/fonts/`, base.css
+`@font-face`, url `fonts/…` — base.css-ə görə nisbi).
+
+- **Üst zolaq `.top`** ağ-bulanıq, tünd yazı, 60px. `.top .mark` 32/24
+  ölçüsü QALIR (e2e_bank H ölçür), `.top .wm` «Bil10» qalır.
+- **Zolaq `#band`** tam enli deyil: `.bandin` yuvarlaq teal KARTDIR
+  (`--grad` 120°), `#main.over{margin-top:0}` — ilk kart artıq zolağı
+  kəsmir. `.bandin` max-width = `.wrap` − 40 (720 / panel ≥1100: 880 /
+  şagird-valideyn: 560), yoxsa kart altdakı kartlardan enli çıxır.
+- **Sol menyu `#snav`** (panel, ≥900px, `body.bnav-on`): lacivərd sütun
+  232px, «İş masası» (BNAV bəndləri) + «Hesab» (Siqnallar, Profil) + ipucu
+  qutusu; `body.bnav-on{padding-left:232px}`. AYRI elementdir — `#bnav`
+  masaüstündə gizli qalmalıdır (e2e_panel «masaüstündə alt panel gizlidir»,
+  `#bnav a` sayı 4). `bnavShow()` ikisini də doldurur. Telefonda `#bnav`
+  ağ, «on» bəndi teal çiplə.
+- Loqolar (3 index.html + afoot + snav): gradient teal→firuzəyi, çip
+  `#f4c94f`. `theme-color` `#087f75`.
+- Yoxlama şəkilləri: `test/_v2_shots.py` (panel, masaüstü+telefon),
+  `test/_v2_sv.py` (şagird, valideyn) → `/tmp/claude-0/v2/`.
+- Növbəti: boş hesab ekranı (girişdən sonra 3 addım), sonra Qrup və
+  Hesabat ekranlarının məzmun səviyyəsində v2-yə uyğunlaşdırılması.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

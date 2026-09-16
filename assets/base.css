@@ -3,53 +3,53 @@
    Uslub: sakit, sıx, peşekar. Kolge deyil, kenar xetti. Emoji deyil, SVG.
    ===================================================================== */
 :root{
-  /* ---- neytral sirasi (soyuq boz, bir az goy calarli) ---- */
-  --n-0:#ffffff;  --n-25:#fcfcfd; --n-50:#f8f9fb; --n-100:#f1f3f7;
-  --n-150:#e8ebf1; --n-200:#dfe3eb; --n-300:#c3c9d6; --n-400:#98a1b3;
-  --n-500:#6b7488; --n-600:#4d566b; --n-700:#353d4f; --n-800:#232a38;
-  --n-900:#151a24; --n-950:#0d1117;
+  /* ---- neytral sirasi (soyuq boz, yungul yasil calarli - v2) ---- */
+  --n-0:#ffffff;  --n-25:#fbfdfc; --n-50:#f6faf8; --n-100:#eef4f2;
+  --n-150:#e4ede9; --n-200:#dcebe6; --n-300:#c2d4d0; --n-400:#98aeaa;
+  --n-500:#67817f; --n-600:#527176; --n-700:#3a5a62; --n-800:#23465a;
+  --n-900:#173b50; --n-950:#123a51;
 
-  /* ---- vurgu: tund goy (esas) + tirkiz (ikinci) ---- */
-  --brand:#2b4acb;      --brand-hover:#2440ad;  --brand-press:#1d3590;
-  --brand-tint:#eef2ff; --brand-line:#c7d2fe;
-  --teal:#0e9384;       --teal-tint:#ecfdf5;    --teal-line:#a7f3d0;
+  /* ---- v2 (2026-09-16): teal esas, sari CTA, lacivərd tund ---- */
+  --brand:#087f75;      --brand-hover:#096e68;  --brand-press:#05625d;
+  --brand-tint:#e2f5f0; --brand-line:#b8e0d8;
+  --teal:#0b8a80;       --teal-tint:#e2f5f0;    --teal-line:#b8e0d8;
+  --navy:#123a51; --ink:#173b50;
+  --yellow:#f4c94f; --yellow-dark:#d7a931; --yellow-soft:#fff1c6;
+  --mint:#d9f5ef; --mint-bright:#64d2c3; --coral:#e98773; --green:#42bcae;
 
-  --ok:#0e9384;   --ok-tint:#ecfdf5;   --ok-line:#a7f3d0;
-  --warn:#b54708; --warn-tint:#fffaeb; --warn-line:#fedf89;
+  --ok:#0e9384;   --ok-tint:#e2f5f0;   --ok-line:#b8e0d8;
+  --warn:#b54708; --warn-tint:#fff8de; --warn-line:#f0dfaa;
   --err:#b42318;  --err-tint:#fef3f2;  --err-line:#fecdca;
 
-  --fg:var(--n-900); --fg-2:var(--n-600); --fg-3:var(--n-400);
-  /*  Fon kartdan SECILEN tonda olmalidir: #f8f9fb ag kartlarla
-      qaynayirdi, sehife "zeif" gorunurdu (istifadeci).  */
-  --bg:#eceff5;      --surface:var(--n-0); --line:var(--n-200);
+  --fg:#173b50; --fg-2:#527176; --fg-3:#76918f;
+  --bg:#f7fbf9;      --surface:var(--n-0); --line:#dcebe6;
 
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
-  --r-sm:6px; --r:8px; --r-lg:12px;
-  --ring:0 0 0 3px rgba(43,74,203,.14);
+  --r-sm:8px; --r:11px; --r-lg:16px;
+  --ring:0 0 0 3px rgba(8,127,117,.16);
 
-  /*  Marka qradiyenti (istifadeci secimi): tund teal -> markanin teal-i
-      -> firuzeyi.  Sol teref MAVIYE calir (okean) - markanin indiqo
-      kimliyi ile korpudur; orta markanin oz teal-i; sag acıq firuzeyi.
-      Deyerler OKLCH-den cevrilib; ISIQLILIQ v0 eskizindeki kimi qaldirilib
-      (L .52 -> .62 -> .72), yoxsa zolaq tund ve agir gorunurdu.
-      HEKS yazilir - kohne brauzerlerde oklch() destelenmir.
-      BUCAQ 120deg DEYIL, "to right"dir: ust zolaq (56px) ve onun altindaki
-      zolaq AYRI elementlerdir; meyilli bucaqda hər biri qradiyentin ayri
-      dilimini gosterir ve aralarinda TIKIS gorunur.  Ufuqi qradiyentde
-      ikisi eyni rengi eyni x-de verir - bir butov seth kimi oxunur.
-      Ust zolaq, ekran zolagi (#band) ve ana sehifenin hero-su bunu isledir.  */
-  --grad:linear-gradient(to right,#007a91 0%,#009c9e 50%,#3abbb1 100%);
-  /*  Altliq: eyni cerge, yalniz tund - ust zolaqla eyni aileden.  */
-  --grad-dark:linear-gradient(to right,#002f3d 0%,#003c3f 50%,#104642 100%);
+  /*  Marka qradiyenti v2: teal -> firuzeyi.  Zolaq (#band) artiq
+      yuvarlaq KARTDIR (ust zolaq ag), ona gore bucaq serbestdir.  */
+  --grad:linear-gradient(120deg,#087f75 0%,#149a8e 55%,#42bcae 100%);
+  /*  Altliq: lacivərd.  */
+  --grad-dark:linear-gradient(to right,#123a51 0%,#173b50 100%);
 }
 
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+/*  Srift v2: Plus Jakarta Sans (OFL), ozumuzde - kenar yukleme YOXDUR.
+    Iki fayl, deyisken ceki 200-800: latin + latin-ext (ə ş ğ ı ö ü ç).
+    Ana sehife de eyni faylları isledir.  */
+@font-face{font-family:"PJS";font-style:normal;font-weight:200 800;font-display:swap;
+  src:url(fonts/pjs-latin-ext.woff2) format("woff2");
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"PJS";font-style:normal;font-weight:200 800;font-display:swap;
+  src:url(fonts/pjs-latin.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 body{
   margin:0;background:var(--bg);color:var(--fg);
-  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,
+  font:15px/1.5 "PJS",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
        "Helvetica Neue",Arial,sans-serif;
-  font-feature-settings:"cv05","ss01";
   -webkit-font-smoothing:antialiased;
 }
 .wrap{max-width:760px;margin:0 auto;padding:24px 20px 72px}
@@ -399,3 +399,101 @@ body.bnav-on .pwabar{bottom:76px}
   .item:hover{background:transparent}
   .chip:hover{border-color:var(--n-200)}
 }
+
+
+/* =====================================================================
+   DIZAYN DILI v2 (2026-09-16) - ana sehife ile eyni aile.
+   Asagidaki qaydalar yuxaridakilari EZIR: ag ust zolaq, yuvarlaq teal
+   zolaq-kart, lacivərd altliq, teal duymeler, sari CTA.  Tokenler :root-da.
+   ===================================================================== */
+
+/* ---- ust zolaq: ag, seffaf-bulanıq, tund yazi (ana sehifenin basligi) */
+.top{background:rgba(247,251,249,.92);color:var(--fg);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);box-shadow:none;height:60px}
+.top .wm{color:var(--fg);font-weight:800;letter-spacing:-.05em;font-size:17px}
+.top .wm::after{color:var(--n-300);opacity:1}
+.top .beta{color:var(--teal);background:var(--teal-tint);border-color:var(--teal-line);font-weight:800}
+.top .mark{background:transparent;box-shadow:none}
+.top .mark svg{filter:drop-shadow(0 2px 0 rgba(8,127,117,.16))}
+.top b{color:var(--fg);font-weight:700}
+.top .who{color:var(--fg-2);font-weight:600}
+.top .who:hover{color:var(--brand)}
+.top .btn.ghost{color:var(--fg-2);border-color:var(--line);background:transparent}
+.top .btn.ghost:hover{background:var(--n-100);border-color:var(--n-300);color:var(--fg)}
+.top .bellbtn{color:var(--fg-2)}
+.top .bellbtn:hover{color:var(--brand);background:var(--n-100)}
+.top .bellbtn i{border-color:#fff;background:var(--coral)}
+.top a.mark:focus-visible{outline-color:var(--brand)}
+
+/* ---- basliqlar */
+h1{font-weight:800;letter-spacing:-.035em}
+#main h2{font-weight:800;letter-spacing:-.03em;font-size:16px}
+#main h2::after{background:linear-gradient(90deg,var(--brand),var(--mint-bright))}
+
+/* ---- kart: daha yuvarlaq, nazik yasil-boz kenar, yumsaq kolge */
+.card{border-radius:18px;border:1px solid #e5ece7;
+  box-shadow:0 1px 2px rgba(23,59,80,.04),0 12px 30px rgba(32,75,72,.06)}
+
+/* ---- duymeler: teal esas (alt kolge), kontur ikinci, sari CTA */
+.btn{border-radius:11px;border-color:var(--line);color:var(--fg);font-weight:700;letter-spacing:-.01em}
+.btn:hover{background:var(--n-50);border-color:var(--n-300)}
+.btn.go{background:var(--brand);border-color:var(--brand);color:#fff;
+  box-shadow:0 3px 0 var(--brand-press)}
+.btn.go:hover{background:var(--brand-hover);border-color:var(--brand-hover);filter:none;transform:translateY(-1px)}
+.btn.go:active{transform:translateY(1px);box-shadow:0 1px 0 var(--brand-press)}
+.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.btn.sasg,.btn.cta{background:var(--yellow);border-color:var(--yellow);color:var(--ink);
+  box-shadow:0 3px 0 #c89e2d}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:var(--ring)}
+input,select{border-radius:11px;border-color:#cde2dc}
+label{color:var(--fg-2);font-weight:700;font-size:12.5px}
+.code{background:var(--n-100);color:var(--fg);border-color:var(--line)}
+.code.key{background:var(--brand-tint);color:var(--brand);border-color:var(--brand-line)}
+.info{background:var(--brand-tint);border-color:var(--brand-line);color:#05625d}
+.warn{color:#735c19}
+.ok{color:#05625d}
+
+/* ---- avatar rengleri: v2 paletinden */
+.av.c0{background:#087f75}.av.c1{background:#5459a8}
+.av.c2{background:#d7a931}.av.c3{background:#123a51}
+.av.c4{background:#42bcae}.av.c5{background:#e98773}
+
+/* ---- marka zolagi: tam enli deyil, yuvarlaq teal KART (Replit eskizi:
+        «Xoş gəlmisiniz» banneri).  Ilk kart artiq zolagi KESMIR.  */
+.band{background:transparent;color:#fff;padding:18px 20px 0}
+.bandin{padding:22px 24px 24px;border-radius:22px;background:var(--grad);
+  box-shadow:0 18px 40px rgba(8,127,117,.22);position:relative;overflow:hidden}
+.bandin::after{content:"";position:absolute;right:-60px;top:-70px;width:240px;height:240px;
+  border-radius:50%;border:34px solid rgba(255,255,255,.08);pointer-events:none}
+.band .beye{color:rgba(255,255,255,.82);font-weight:800;letter-spacing:.14em}
+.band h1{font-size:26px;font-weight:800;letter-spacing:-.04em}
+.band p{color:rgba(255,255,255,.88);font-weight:500}
+#main.over{margin-top:0}
+/*  Zolaq-kart .wrap-in KARTLARI ile eyni ende olsun: .wrap 760 (padding 20)
+    -> kart 720; bandin de 720.  Genis ekran/tetbiq oz app.css-inde uygunlasdirir.  */
+.bandin{max-width:720px}
+@media (max-width:600px){
+  .band{padding:12px 14px 0}
+  .bandin{padding:18px 18px 20px;border-radius:18px}
+  .band h1{font-size:22px}
+  #main.over{margin-top:0}
+}
+.band .bback{margin-bottom:12px}
+.band .br .btn.sasg{background:var(--yellow);border-color:var(--yellow);color:var(--ink);
+  box-shadow:0 3px 0 #c89e2d}
+.band .br .btn.sasg:hover{background:#f7d36a;border-color:#f7d36a;color:var(--ink)}
+
+/* ---- altliq: lacivərd */
+.afoot{background:var(--navy)}
+.afoot .brand b{font-weight:800;letter-spacing:-.04em}
+.afoot nav a,.afoot .fc a{color:#cfe3df;font-weight:600}
+.afoot .fc b{color:#6f9490;font-weight:800;letter-spacing:.12em}
+.afoot .fb p,.afoot .fc p{color:#a9c7c3}
+.afoot .c{color:#6f9490;font-weight:600}
+.afoot .c a{color:#cfe3df}
+
+/* ---- bos hal, iskelet */
+.empty b{font-weight:800}
+.empty .ic{background:var(--mint);color:var(--teal);border-radius:14px}
+.pwabar{border-radius:18px}

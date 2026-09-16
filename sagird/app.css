@@ -250,8 +250,8 @@ body{background:
 .st b{display:block;font-size:20px;font-weight:680;line-height:1.2}
 .st b svg{width:20px;height:20px}
 .st span{display:block;font-size:11px;opacity:.85;margin-top:2px}
-.st.a{background:linear-gradient(135deg,#2b4acb,#4a63e0)}
-.st.b{background:linear-gradient(135deg,#0e9384,#18b8a6)}
+.st.a{background:linear-gradient(135deg,#123a51,#23465a)}
+.st.b{background:linear-gradient(135deg,#087f75,#42bcae)}
 .st.c{background:linear-gradient(135deg,#232a38,#3a4358);cursor:pointer;font:inherit}
 .st.c:active{transform:scale(.97)}
 
@@ -383,7 +383,7 @@ details.fbd[open] summary{color:var(--fg-2)}
 .band .shero i{color:rgba(255,255,255,.8)}
 .band .shero .av{width:50px;height:50px;flex:0 0 50px;border-radius:15px;font-size:19px;
   box-shadow:0 8px 20px rgba(9,20,60,.28);border:2px solid rgba(255,255,255,.55)}
-.bandin{max-width:600px}
+.bandin{max-width:560px}
 .stiles{background:var(--surface);border:1px solid var(--line);border-radius:14px;
   padding:4px;gap:0;margin:0 0 14px;box-shadow:0 18px 44px rgba(9,20,60,.14)}
 .st{background:none;border:0;border-radius:10px;color:var(--fg);box-shadow:none}

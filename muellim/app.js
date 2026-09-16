@@ -8627,6 +8627,14 @@
   bnav.id = "bnav";
   bnav.className = "bnav";
   document.body.appendChild(bnav);
+  /*  v2 (16.09): masaustunde SOL MENYU - eyni bendler, lacivərd sutun.
+      Ayrica element: #bnav masaustunde gizli qalmalidir (e2e_panel olcur).  */
+  var snav = document.createElement("nav");
+  snav.id = "snav";
+  snav.className = "snav";
+  snav.setAttribute("aria-label", "Bölmələr");
+  document.body.appendChild(snav);
+  var SNAV_LOGO = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="#fff"/><g fill="none" stroke="#087f75" stroke-width="2.5" stroke-linecap="round"><path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/></g><path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#f4c94f"/><path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#173b50" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var BNAV = [
     ["",    "home",   "İcmal"],
     ["b",   "doc",    "Suallar"],
@@ -8642,11 +8650,26 @@
         (cur === it[0] ? ' class="on"' : "") + ">" +
         ic(it[1]) + "<span>" + it[2] + "</span></a>";
     }).join("");
+    //  sol menyu: is masasi (eyni bendler) + hesab (siqnallar)
+    var isMe = cur === "me";
+    snav.innerHTML =
+      '<a class="sbb" href="../" title="Ana səhifə">' + SNAV_LOGO + "<b>Bil<em>10</em></b></a>" +
+      '<span class="sbl">İş masası</span>' +
+      BNAV.filter(function (it) { return it[0] !== "me"; }).map(function (it) {
+        return '<a href="#/' + it[0] + '"' + (cur === it[0] ? ' class="on"' : "") + ">" +
+          ic(it[1]) + it[2] + "</a>";
+      }).join("") +
+      '<span class="sbl">Hesab</span>' +
+      '<a href="#/n">' + ic("bell") + "Siqnallar</a>" +
+      '<a href="#/me"' + (isMe ? ' class="on"' : "") + ">" + ic("person") + "Profil</a>" +
+      '<div class="sbtip"><b>Bil10 ipucu</b>Diaqnostikadan sonra «Bundan başla» sətrinə baxın — ' +
+      "zəif mövzunun isinmə testi bir toxunuşla gedir.</div>";
     document.body.classList.add("bnav-on");
     btnBell.classList.remove("hide");
   }
   function bnavHide() {
     bnav.innerHTML = "";
+    snav.innerHTML = "";
     document.body.classList.remove("bnav-on");
     btnBell.classList.add("hide");
   }
