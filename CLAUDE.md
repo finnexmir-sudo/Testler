@@ -3378,6 +3378,23 @@ amma sayt «qeydiyyatdan keç» deyirdi.
   (əvvəl «2 dəqiqəlik» yazılırdı, çarx 1:31-dir). Qayda: **dizayn
   dəyişəndə çarx yenidən yığılır** — 3 əmr, 3 dəqiqə.
 
+## Dərs planı və Dəftər — telefon düzəlişləri (2026-09-16)
+
+İstifadəçi (Ev qrup, telefon): (1) «birini seçəndə test yığ çıxmır, ikisini
+seçəndə çıxır» — düymə qəsdən 2+ idi (server `rpc_plan_test_multi` ≥2
+istəyir); indi 1 seçimdə də çıxır, tək mövzu `rpc_plan_test` yolu ilə
+(vergülsüz id → `planTest` özü ayırır). Düymə (`.plmbar`) siyahının
+bilavasitə altında, «Növbətilərə bax»dan əvvəl. (2) «Planı sil» test
+düyməsinin dibində idi — indi `.pldelrow`: ayrı sətir, sağ kənar, boz
+`.lnk.del`. (3) Cədvəl qatlananı telefonda açılan kimi görünmürdü —
+`.schedit` nişanı sağda («Dəyiş»/«Qur», açıqda «Bağla»), «▸» gizli.
+(4) «Dərs oldu» → «Davamiyyət al» (Dəftər + İcmal həftə kartı), izah
+«şagird siyahısı açılır». (5) «geri» → «⟲ geri al» (`title`: Keçildi
+işarəsini geri al). Telefonda (`≤520px`) `.plrow` `flex-wrap`: ad tam en,
+faiz · vərəq · geri al · ☐ ikinci sətirdə — əvvəl ad söz-söz qırılırdı.
+`e2e_plan` tək seçim iddiası dəyişdi; şəkil skripti `test/_v2_plan.py`.
+Bələdçidəki m12_defter.png hələ «Dərs oldu» göstərir.
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

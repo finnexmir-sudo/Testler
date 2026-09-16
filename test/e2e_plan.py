@@ -190,7 +190,9 @@ with sync_playwright() as pw:
        pg.locator(".plck").count())
     pg.locator(".plck").nth(0).check()
     pg.wait_for_timeout(200)
-    ok(pg.locator("[data-plmulti]").count() == 0, "tek secimde duyme cixmir")
+    pg.wait_for_selector("[data-plmulti]", timeout=4000)
+    ok("Seçilən mövzudan test yığ" == pg.inner_text("[data-plmulti]").strip(), "tek secimde de duyme cixir (16.09)",
+       pg.inner_text("[data-plmulti]"))
     pg.locator(".plck").nth(1).check()
     pg.wait_for_selector("[data-plmulti]", timeout=4000)
     ok("2 mövzudan" in pg.inner_text("[data-plmulti]"), "birge duyme cixir")

@@ -1955,3 +1955,35 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .rmenu .rm .rmsg textarea{width:100%;resize:vertical;font:inherit;font-size:13px;padding:8px 10px;
   border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg)}
 .rmenu .rm .rmsg textarea:focus{outline:none;border-color:var(--brand)}
+
+/*  16.09: cedvel qatlanani telefonda «acilan» kimi gorunsun - sag kenarda
+    nisan: bagli ikən «Dəyiş» (ve ya «Qur»), aciq ikən «Bağla».  */
+.fold.sch>summary::before{display:none}
+.fold.sch>summary .schedit{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:600;color:var(--brand);background:var(--brand-tint);
+  border:1px solid var(--brand-line);border-radius:999px;padding:4px 11px;font-style:normal}
+.fold.sch>summary .schedit i{font-style:normal}
+.fold.sch>summary .schedit b{display:none;font-weight:600}
+.fold.sch[open]>summary .schedit i{display:none}
+.fold.sch[open]>summary .schedit b{display:inline}
+.fold.sch>summary .schedit::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;
+  border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin-top:-3px;transition:transform .15s}
+.fold.sch[open]>summary .schedit::after{transform:rotate(-135deg);margin-top:3px}
+/*  «Planı sil» - ayri setir, sag kenar, kicik link; test duymelerinden uzaq  */
+.pldelrow{display:flex;justify-content:flex-end;margin-top:18px;padding-top:10px;border-top:1px dashed var(--n-150)}
+.lnk.del{color:var(--fg-3)}
+.lnk.del:hover{color:var(--danger,#b42318)}
+/*  16.09: «geri» → «⟲ geri al» - nisanla, keçildi isaresini geri alir  */
+.plrow .plundo{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.plrow .plundo svg{width:12px;height:12px;stroke-width:2}
+/*  Telefonda plan setri: movzu adi tam en alir, «vərəq · geri al · ☐»
+    ikinci setire kecir - ad soz-soz qirilmasin (16.09).  */
+@media (max-width:520px){
+  .plrow{flex-wrap:wrap;row-gap:4px}
+  .plrow>span{flex:1 1 calc(100% - 40px);min-width:0}
+  .plrow .plavg{margin-left:31px}
+  .plrow .plavg~*{margin-left:0}
+  .plrow .plavg+.pltest,.plrow .plavg+.plmk,.plrow>span+.pltest,.plrow>span+.plmk,.plrow>span+.plundo,.plrow>span+.plck{margin-left:31px}
+  .plrow .pltest,.plrow .plmk,.plrow .plundo{margin-left:0}
+  .plrow .plck,.plrow .plavg ~ .plck,.plrow>span+.plck{margin-left:auto}
+}

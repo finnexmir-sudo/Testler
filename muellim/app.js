@@ -1564,8 +1564,10 @@
               ? '<span class="muted">ləğv edilib</span>'
               : (x.done
                   ? '<span class="pok">davamiyyət alınıb ✓</span>'
+                  //  16.09 (istifadeci): «Dərs oldu» basanda siyahi acilacagi
+                  //  bilinmirdi - duyme ne edeceyini deyir
                   : '<button class="btn sm go" data-wk="' + esc(x.class_id) + '">' +
-                    ic("check") + "Dərs oldu</button>")) +
+                    ic("group") + "Davamiyyət al</button>")) +
             "</div>";
         }).join("") + "</div>";
       } else {
@@ -1686,7 +1688,11 @@
     return '<details class="fold sch" id="schFold"' + (SCHOPEN ? " open" : "") + ">" +
       "<summary>Cədvəl" +
         (var_ ? '<span class="schnow">' + esc(var_) + "</span>"
-              : '<em class="ftik nope">qurulmayıb</em>') + "</summary>" +
+              : '<em class="ftik nope">qurulmayıb</em>') +
+        //  16.09 (istifadeci): «açılan olduğu telefonda bilinmir» -
+        //  sag kenarda «Dəyiş» / «Bağla» nisani
+        '<span class="schedit"><i>' + (var_ ? "Dəyiş" : "Qur") + "</i><b>Bağla</b></span>" +
+      "</summary>" +
       '<div class="schb">' +
         '<p class="muted" style="margin:0 0 10px">Günü seçin, saatı yazın. ' +
           "Qurulandan sonra İcmalda «bu gün dərs var» görünür və valideyn " +
@@ -1840,8 +1846,8 @@
           '<button class="btn sm ghost" id="ledEdit">Düzəlt</button></div>';
       } else if (!LED_EDIT) {
         h += '<div class="lt1"><b>Bu gün</b><span class="muted">' + dateAz(new Date().toISOString()) +
-          "</span>" + '<button class="btn sm go" id="ledOpen">' + ic("check") + "Dərs oldu</button></div>" +
-          '<p class="muted" style="margin:6px 0 0">Bir toxunuşla kimin gəldiyini qeyd edin — valideyn öz ekranında iştirak sayını görür.</p>';
+          "</span>" + '<button class="btn sm go" id="ledOpen">' + ic("group") + "Davamiyyət al</button></div>" +
+          '<p class="muted" style="margin:6px 0 0">Dərs olanda basın: şagird siyahısı açılır, gəlməyəni bir toxunuşla işarələyin. Valideyn öz ekranında iştirak sayını görür.</p>';
       } else {
         var pres = today ? (today.present || []) : sts.map(function (x) { return x.id; });
         h += '<div class="lt1"><b>Bu gün kim gəlib?</b><span class="muted">toxunub dəyişin</span></div>' +
@@ -2300,6 +2306,9 @@
                 next = [{ items: it.slice(k + 1), flat: true }];
               }
             }
+            //  secim duymesi ("Seçilən mövzudan test yığ") siyahinin
+            //  bilavasite altinda - secilen setirlerin yaninda
+            h += '<div class="plmbar" id="plmb-' + esc(p.id) + '"></div>';
             if (next.length) {
               var nn = next.reduce(function (a, b) { return a + b.items.length; }, 0);
               h += '<details class="plnext"><summary>Növbətilərə bax ' +
@@ -2311,9 +2320,10 @@
             }
             return h;
           })() + "</div>" +
-          '<div class="plmbar" id="plmb-' + esc(p.id) + '"></div>' +
-          '<button class="btn sm ghost" data-pldel="' + esc(p.id) +
-            '" style="margin-top:10px">Planı sil</button>' +
+          //  16.09 (istifadeci): «Planı sil» test duymesinin dibinde idi -
+          //  el deye bilerdi.  Indi ayri setirde, sag kenarda, kicik link.
+          '<div class="pldelrow"><button class="lnk del" data-pldel="' + esc(p.id) +
+            '">Planı sil</button></div>' +
         "</details>" +
         '<div id="plm-' + esc(p.id) + '"></div>' +
       "</div>";
@@ -2363,8 +2373,9 @@
                   "təkrar yığ</button>"
                 : "") +
               (lastDone && it.id === lastDone.id
+                //  16.09 (istifadeci): «geri» ne etdiyini demirdi
                 ? '<button class="plundo" data-plundo="' + esc(it.id) +
-                  '" title="Geri qaytar">geri</button>' : "") +
+                  '" title="Keçildi işarəsini geri al">' + ic("refresh") + "geri al</button>" : "") +
             "</div>";
       }
     }).join("");
@@ -2402,12 +2413,13 @@
         Array.prototype.forEach.call(
           box.querySelectorAll('[data-plck="' + id + '"]:checked'),
           function (c) { ids.push(c.value); });
-        if (ids.length < 2) return;
+        if (ids.length < 1) return;
         var s3 = $("pls-" + id); if (s3) s3.innerHTML = "";
         var m3 = $("plm-" + id);
         if (m3) {
           m3.innerHTML = offerHtml(
-            "Seçilən " + ids.length + " mövzudan qarışıq test yığılsınmı?",
+            ids.length === 1 ? "Seçilən mövzudan test yığılsınmı?"
+                             : "Seçilən " + ids.length + " mövzudan qarışıq test yığılsınmı?",
             ids.join(","), id);
           m3.scrollIntoView({ block: "nearest" });
         }
@@ -2427,9 +2439,13 @@
       if (!pid) return;
       var n = box.querySelectorAll('[data-plck="' + pid + '"]:checked').length;
       var bar = $("plmb-" + pid);
-      if (bar) bar.innerHTML = n >= 2
+      //  16.09 (istifadeci): «birini secende test yig cixmir, ikisini
+      //  secende cixir».  Tek secim de duyme verir - tek movzu oz yolu
+      //  ile (rpc_plan_test), 2+ movzu qarisiq (rpc_plan_test_multi).
+      if (bar) bar.innerHTML = n >= 1
         ? '<button class="btn sm" data-plmulti="' + esc(pid) + '">' +
-          "Seçilən " + n + " mövzudan birgə test yığ</button>"
+          (n === 1 ? "Seçilən mövzudan test yığ"
+                   : "Seçilən " + n + " mövzudan birgə test yığ") + "</button>"
         : "";
     });
     function rebindOnly() {}
