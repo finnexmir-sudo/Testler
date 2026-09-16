@@ -3323,7 +3323,12 @@ amma sayt «qeydiyyatdan keç» deyirdi.
   («yaraşmır»), çəkilmiş diaqnostika kartı və illüstrasiya + nəticə nişanı
   sınandı; istifadəçi **təmiz illüstrasiyanı** seçdi (`assets/hero.png`,
   telefonda gizli). Videonun yanında fəsil siyahısı əvəzinə beş fakt
-  (`.vfacts`).
+  (`.vfacts`). **Quruluş (16.09):** «başlıq → üstünə minmiş
+  video kartı» silueti Oxuyan.az-a oxşayırdı (rəng də firuzə); istifadəçi
+  rəngi saxladı, quruluşu dəyişdik: baş zolaq təmiz bitir (`.topband`
+  padding 150→64, `.under` mənfi margin yoxdur), sonra dörd addım, video
+  ayrı `#video-sec.tint` bölməsində. Qayda: **rəqiblə eyni siluet — eyni
+  məhsul hissi; fərq məzmunda yox, ilk baxışda da olmalıdır.**
 - **Mənbə:** linkdə `?src=wa` (yalnız `[a-z0-9_-]{1,20}`, uzun/pis dəyər
   atılır, kəsilmir); `assets/visit.js` onu `sessionStorage.bil10_src`-də
   saxlayır, panelin giriş ekranı da oradan oxuyur. `visits.src`,
