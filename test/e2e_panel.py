@@ -225,11 +225,15 @@ with sync_playwright() as pw:
     ok("Beta bitənə qədər ödəniş yoxdur" in bseat,
        "kartda odenisin ne vaxt baslayacagi yazilir", bseat[-90:])
     ok(pg.locator("#giftCard a[href*='wa.me/994501234567']").count() == 1, "kartda WhatsApp duymesi")
-    #  ilk qrup formasi kartin ALTINDADIR (h1 -> kart -> forma); qruplar
-    #  asinxron gelir - forma kocurulene qeder gozle
-    pg.wait_for_function("(function(){var g=document.querySelector('#giftCard');"
-                         "return g && g.nextElementSibling && g.nextElementSibling.id==='gForm';})()", timeout=8000)
-    ok(True, "ilk qrup formasi kartin altinda")
+    #  16.09: ilk qrup formasi BASLANGIC kartinin 1-ci addimindadir
+    #  (#onb), hediyye karti onun USTUNDE qalir; qruplar asinxron gelir -
+    #  forma kocurulene qeder gozle
+    pg.wait_for_selector("#onb #gForm", timeout=8000)
+    ok(pg.evaluate("(function(){var g=document.querySelector('#giftCard'),o=document.querySelector('#onb');"
+                   "return !!(g&&o)&&(g.compareDocumentPosition(o)&Node.DOCUMENT_POSITION_FOLLOWING)>0;})()"),
+       "ilk qrup formasi baslangic kartinda, hediyye karti ustundedir")
+    ok(pg.locator("#onb .ost.cur").count() == 1 and "Qrupunuzu yaradın" in pg.inner_text("#onb .ost.cur"),
+       "baslangic: 1-ci addim aktivdir")
     #  qalan yoxlamalar pulsuz hedd ucundur - hediyye silinir, ayar baglanir
     db("update public.app_state set val = val || jsonb_build_object('on', false) where key = 'hediyye'; delete from public.subscriptions")
     pg.reload(); pg.wait_for_selector("#btnGroup", timeout=8000)
@@ -619,10 +623,11 @@ with sync_playwright() as pw:
     pg2.click("#btnSetup")
     pg2.wait_for_selector("#btnGroup", timeout=8000)
     ok("0 / 5" in pg2.inner_text(".seat"), "yeni muellimde 0 sagird")
-    pg2.wait_for_function(
-        "!/Yüklənir/.test(document.getElementById('groups').textContent)", timeout=8000)
-    ok("qrup yoxdur" in pg2.inner_text("#groups"), "yeni muellim basqasinin qrupunu gormur",
-       pg2.inner_text("#groups").replace("\n", " ")[:60])
+    #  16.09: bos hesabda #groups bosdur - BASLANGIC karti (1-ci addim) cixir
+    pg2.wait_for_selector("#onb #gForm", timeout=8000)
+    ok(pg2.locator("#groups .gcard").count() == 0 and pg2.locator("#onb .ost.cur").count() == 1,
+       "yeni muellim basqasinin qrupunu gormur",
+       pg2.inner_text("#onb .ost.cur")[:60])
 
     print("K · Yanlış parol")
     pg3 = new_page(ctx)

@@ -301,9 +301,9 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 .qact .qi svg{width:17px;height:17px;stroke-width:1.75}
 .qact b{font-size:13.5px}
 .qact span{font-size:11px;color:var(--fg-3)}
-.qact.qb .qi{background:var(--teal-tint);color:var(--teal)}
+.qact.qb .qi{background:var(--yellow-soft);color:#806000}
 .qact.qc .qi{background:var(--warn-tint);color:var(--warn)}
-.qact.qd .qi{background:var(--n-100);color:var(--n-600)}
+.qact.qd .qi{background:var(--purple-soft);color:var(--purple,#5459a8)}
 
 /* alt naviqasiya - yalniz telefonda gorunur */
 .bnav{display:none}
@@ -1462,8 +1462,10 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   transition:background .12s,border-color .12s,transform .06s}
 .bcta:hover{background:rgba(255,255,255,.24);border-color:#fff}
 .bcta:active{transform:scale(.98)}
-.bcta.pri{background:#fff;border-color:#fff;color:var(--teal)}
-.bcta.pri:hover{background:#eefaf6}
+/*  esas emeliyyat SARI (ana sehifedeki CTA kimi) - ag duyme zolaqda solgun qalirdi  */
+.bcta.pri{background:var(--yellow);border-color:var(--yellow);color:var(--ink);
+  box-shadow:0 3px 0 #c89e2d}
+.bcta.pri:hover{background:#f7d36a;border-color:#f7d36a}
 .bcta svg{width:16px;height:16px;stroke-width:1.9}
 
 /*  Hediyye karti UFUQI zolaqdir: solda ikon, ortada metn, sagda kecid.  */
@@ -1868,3 +1870,62 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   body.bnav-on .top{padding-left:24px}
   body.bnav-on .pwabar{left:244px}
 }
+
+
+/* ------------------------------------------------ BASLANGIC karti (16.09)
+   Uc addim: qrup -> sagird -> ilk test.  Cari addim nane fonda, kecmis
+   addim teal isareli, gelecek addim solgun.  Qrup formasi (#gForm)
+   1-ci addimin icine kocurulur (.inonb).  */
+.card.onb{padding:22px 22px 8px;border-color:#c5e4db;
+  background:linear-gradient(180deg,#f8fffc 0%,#fff 100%)}
+.onbh .eye{display:block;color:var(--brand);font-size:11px;font-weight:800;
+  letter-spacing:.14em;text-transform:uppercase}
+.onbh b{display:block;margin-top:6px;font-size:21px;font-weight:800;letter-spacing:-.035em;line-height:1.15}
+.onbh p{margin:5px 0 0;color:var(--fg-2);font-size:13.5px;line-height:1.5}
+.osts{list-style:none;margin:16px 0 0;padding:0}
+.ost{display:flex;gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.ost .on{flex:0 0 32px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:13.5px;background:var(--n-100);color:var(--fg-3)}
+.ost .on svg{width:16px;height:16px;stroke-width:2.6}
+.ost.done .on{background:var(--brand-tint);color:var(--brand)}
+.ost.cur .on{background:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(8,127,117,.3)}
+.ost .ot{flex:1;min-width:0}
+.ost .ot b{display:block;font-size:15px;font-weight:800;letter-spacing:-.02em}
+.ost .ot p{margin:3px 0 0;color:var(--fg-2);font-size:13px;line-height:1.55}
+.ost.todo .ot b,.ost.todo .ot p{color:var(--fg-3)}
+.ost.done .ot p{display:none}
+.ost.cur{background:var(--brand-tint);margin:0 -22px;padding:16px 22px;
+  border-top-color:transparent;border-radius:16px}
+.ost.cur + .ost{border-top-color:transparent}
+.ost .ot .btn{margin-top:12px}
+#gForm.inonb{padding:0;border:0;box-shadow:none;margin:12px 0 0;background:transparent}
+#gForm.inonb input,#gForm.inonb select{margin-bottom:10px;background:#fff}
+#gForm.inonb .fieldrow{gap:10px}
+@media (max-width:600px){
+  .card.onb{padding:18px 16px 6px}
+  .ost.cur{margin:0 -16px;padding:14px 16px}
+  .onbh b{font-size:19px}
+}
+
+/* ------------------------------------------- Icmal bloklari KART kimi (16.09)
+   Istifadeci: «Təhlükə zonası və Son nəticələr — Replit-də daha səliqəlidir».
+   Orada her blok basligi ICINDE olan bir kartdir.  Burada da: qab (#hAlerts,
+   #hRecent, #hTop5) ag kart olur, basliq kartin basinda nazik xettle,
+   siyahi kartin icinde kenarsiz.  HTML deyismir.  */
+#hAlerts:not(:empty),#hRecent:not(:empty),#hTop5:not(:empty){
+  background:var(--surface);border:1px solid #cfe0da;border-radius:18px;
+  padding:16px 18px 6px;margin-top:14px;
+  box-shadow:0 1px 2px rgba(23,59,80,.04),0 12px 30px rgba(32,75,72,.06)}
+#hAlerts .spacer,#hRecent .spacer,#hTop5 .spacer{display:none}
+#hAlerts .h2row,#hRecent .h2row,#hTop5 .h2row{align-items:center;
+  padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:4px}
+#hAlerts .h2row h2,#hRecent .h2row h2,#hTop5 .h2row h2{margin:0;font-size:16px}
+#hAlerts .h2row h2::after,#hRecent .h2row h2::after,#hTop5 .h2row h2::after{display:none}
+#hAlerts .h2l,#hRecent .h2l,#hTop5 .h2l{padding:0}
+#hAlerts .card,#hRecent .card,#hTop5 .card{border:0;box-shadow:none;margin:0;border-radius:0;background:transparent}
+#hRecent .chips,#hTop5 .chips{margin:10px 0 4px}
+#hAlerts .al,#hRecent .trow,#hTop5 .lrow{padding-left:4px;padding-right:4px}
+#hAlerts .al{border-left:0}
+#hAlerts .card.pad0{border-left:0}
+.hcols{gap:0 16px}
+@media (min-width:1100px){ .hcols{align-items:stretch} .hcols>div:not(:empty){margin-top:14px} }

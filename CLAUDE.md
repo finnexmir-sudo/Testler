@@ -3511,6 +3511,32 @@ app.css-lərdən təmizlənib. Şrift `"PJS"` (`assets/fonts/`, base.css
 - Növbəti: boş hesab ekranı (girişdən sonra 3 addım), sonra Qrup və
   Hesabat ekranlarının məzmun səviyyəsində v2-yə uyğunlaşdırılması.
 
+## Başlanğıc kartı + İcmal kart-blokları + rəng pilləsi (2026-09-16, v504)
+
+- **Başlanğıc (`#onb`, `onbDraw/onbPaint/onbOff`, app.js):** ölçü — 6
+  qeydiyyatdan 3-ü panelə girib qrup yaratmadı. Üç addım: 1 qrup (forma
+  `#gForm` kartın içinə köçür, `.inonb`; `#btnGroup` yerində — 15 test
+  basır) → 2 şagird (`#onbStu` → `#/g/<id>`, orada forma özü açılır) →
+  3 ilk test (`#onbGen` → `#/gen`). Hansı addım: qrup sayı / şagird sayı /
+  `rpc_home.stats.tests`. İlk test gedəndə kart yox olur. Kart görünərkən
+  zolağın `.bacts` düymələri və `#freeCard` («pulsuz hədd», uzun
+  siyahı) gizlənir — `style.display`, çünki `hidden` atributu
+  `display:flex`-i əzmir (`.h2row`, `.bacts`, `.card.gift` — hamısı belə).
+  `#giftCard` QALIR (e2e_panel A1 oxuyur). Boş hesabda `#groups` boşdur,
+  «Hələ qrup yoxdur» yazısı YOXDUR — testlər `#onb .ost.cur`-a baxır.
+- **İcmal blokları kart kimi** (`#hAlerts/#hRecent/#hTop5:not(:empty)`):
+  başlıq kartın içində, nazik xətt, siyahı kənarsız. HTML dəyişməyib.
+- **Rəng pilləsi (istifadəçi seçdi, «bu vəziyyətdə push et»):** fon
+  nanə `#dfeee8`, xətt `#c9ddd6`, kart kənarı `#cfe0da`; yazı 500 çəki,
+  `--fg-2 #3f5f66`, `--fg-3 #5d7876`; zolaq qradiyenti doyğun
+  (`#05897c→#2cc9b5`), üstündə 4px sarı, `.beye` sarı, `.bcta.pri` sarı.
+  SINANIB VƏ QAYTARILIB: neytral boz fon (`#e9eef2`) və İcmalda «rəng
+  ritmi» (sarı «bu gün», mərcan «təhlükə», lacivərd «sürətli
+  əməliyyatlar») — Lovable eyni nəticəni verdi, istifadəçi nanə halı
+  seçdi. Tünd mövzu hələ sınanmayıb (variant kimi qalır).
+- Dizayn alətinə şəkil atanda mətn: «keep all text, change only visual
+  design, tokens …, output static HTML, no React/Tailwind/external fonts».
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

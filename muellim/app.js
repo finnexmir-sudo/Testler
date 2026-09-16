@@ -895,6 +895,10 @@
       /*  Bos hesabda (qrup yoxdur) bu blok gizlenir ve "Qrup yarat"
           formasi basliğin altina qalxir - yeni muellim ilk isi
           sehifenin dibinde axtarmasin (loadGroups).  */
+      /*  BASLANGIC (16.09): uc addimli kart - bos hesab (qrup yoxdur),
+          sagirdsiz qrup, testsiz qrup.  Olcu: 6 qeydiyyatdan 3-u panele
+          girib qrup yaratmadi - «Qrup yarat» duymesi bes etmirdi.  */
+      '<div id="onb" hidden></div>' +
       '<div id="hTop">' +
       /* Reqemler bir baxisda - her biri ayrica kart (Bolt eskizi) */
       '<div class="tiles" id="hTiles">' +
@@ -1245,24 +1249,22 @@
       var box = $("groups");
       if (!box) return;
       if (!rows || !rows.length) {
-        box.innerHTML = '<div class="empty"><div class="ic">' + ic("group") + "</div>" +
-          "<b>Hələ qrup yoxdur</b>Şagirdlər və tapşırıqlar qrupun içindədir.</div>";
-        //  ilk addim ustde: forma basliğin altina, reqemler gizli
-        //  salamlama zolaqdadir (#band) - forma main-in en ustune, hediyye
-        //  karti varsa onun altina (160)
-        var top = $("hTop"), gf = $("gForm");
+        //  Bos hesab: «Hələ qrup yoxdur» karti yox - UC ADDIM karti, qrup
+        //  formasi onun 1-ci addiminin icindedir (#gForm, #btnGroup qalir -
+        //  testler onlari basir).  Reqemler ve «Qruplar» basligi gizli.
+        box.innerHTML = "";
+        box.hidden = true;
+        var h2 = box.previousElementSibling;
+        if (h2 && h2.classList && h2.classList.contains("h2row")) h2.style.display = "none";   //  .h2row display:flex - hidden islemir
+        var top = $("hTop");
         if (top) top.hidden = true;
-        if (gf && !gf.classList.contains("first")) {
-          gf.classList.add("first");
-          gf.insertAdjacentHTML("afterbegin", '<div class="fttl">İlk qrupunuzu yaradın</div>');
-          var gc = $("giftCard");
-          if (gc) gc.insertAdjacentElement("afterend", gf);
-          else main.insertAdjacentElement("afterbegin", gf);
-        }
+        onbDraw(1, null);
         return;
       }
       //  ilk qrup indi yarandi - ekran adi qurulusuna qayidir
       if ($("hTop") && $("hTop").hidden) { screenHome(); return; }
+      //  qrup var: sagird yoxdursa 2-ci addim, test yoxdursa 3-cu
+      onbDraw((studs || []).length ? 3 : 2, rows[0]);
       //  qruplar kart torusu - siyahi setri deyil (Bolt eskizi)
       box.innerHTML = rows.map(function (g) {
         var n = cnt[g.id] || 0;
@@ -1280,6 +1282,83 @@
       var box = $("groups");
       if (box) box.innerHTML = '<div class="skel">' + esc(fail(e)) + "</div>";
     });
+  }
+
+  /* ------------------------------------------------ BASLANGIC (16.09)
+     Uc addimli kart: 1 qrup -> 2 sagird -> 3 ilk test.  Hansi addimda
+     oldugu bazadan cixir (qrup sayi, sagird sayi, test sayi); birinci
+     test gedenden sonra kart bir daha gorunmur.  Zolaqdaki «Yeni test
+     yığ / Sual bankı» duymeleri kart gorunerken gizlenir - adam bir
+     seye baxsin.  */
+  var ONB_STEPS = [
+    ["Qrupunuzu yaradın",
+     "Ad yazın, sinfi seçin. Şagirdlər və testlər qrupun içindədir."],
+    ["Şagirdləri əlavə edin",
+     "Yalnız ad-soyad. Hər şagirdə giriş kodu özü yaranır — e-poçt, parol yoxdur."],
+    ["İlk testi göndərin",
+     "Hazır bankdan yığın, qrupa verin. Şagird kodla girib telefonda həll edir, nəticə özü gəlir."]
+  ];
+  function onbDraw(step, g) {
+    var o = $("onb");
+    if (!o) return;
+    if (step === 3) {
+      //  test sayi rpc_home-dan (paylasilan sorgu) - 0-dirsa 3-cu addim
+      homeData().then(function (v) {
+        if (!$("onb")) return;
+        var st = (v && v.stats) || {};
+        if ((Number(st.tests) || 0) > 0) { onbOff(); return; }
+        onbPaint(3, g);
+      }).catch(function () { onbOff(); });
+      return;
+    }
+    onbPaint(step, g);
+  }
+  function onbOff() {
+    var o = $("onb");
+    if (o) { o.innerHTML = ""; o.hidden = true; }
+    var ba = document.querySelector("#band .bacts");
+    if (ba) ba.style.display = "";
+    var fc = $("freeCard");
+    if (fc) fc.style.display = "";
+  }
+  function onbPaint(cur, g) {
+    var o = $("onb");
+    if (!o) return;
+    o.innerHTML =
+      '<div class="card onb">' +
+        '<div class="onbh"><span class="eye">Başlanğıc</span>' +
+          "<b>Üç addım — beş dəqiqə</b>" +
+          "<p>Sonra panel sizindir: nəticə, zəif mövzu, növbəti addım.</p></div>" +
+        '<ol class="osts">' +
+        ONB_STEPS.map(function (s, i) {
+          var n = i + 1, cls = n < cur ? "done" : (n === cur ? "cur" : "todo");
+          var body = "";
+          if (n === cur) {
+            body = cur === 1 ? '<div id="onbForm"></div>' :
+              cur === 2 ? '<button class="btn go" id="onbStu">' + ic("plus") + "Şagird əlavə et</button>" :
+              '<button class="btn go" id="onbGen">' + ic("gen") + "Test yığ və göndər</button>";
+          }
+          return '<li class="ost ' + cls + '"><span class="on">' + (n < cur ? ic("check") : n) + "</span>" +
+            '<div class="ot"><b>' + s[0] + "</b><p>" + s[1] + "</p>" + body + "</div></li>";
+        }).join("") +
+        "</ol></div>";
+    o.hidden = false;
+    if (cur === 1) {
+      var gf = $("gForm"), slot = $("onbForm");
+      if (gf && slot) { slot.appendChild(gf); gf.classList.add("inonb"); }
+    }
+    if (cur === 2 && g) on("onbStu", "click", function () { nav("#/g/" + g.id); });
+    if (cur === 3) on("onbGen", "click", function () { nav("#/gen"); });
+    //  .bacts display:flex-dir - hidden atributu islemir, style ile
+    var ba = document.querySelector("#band .bacts");
+    if (ba) ba.style.display = "none";
+    //  «Pulsuz hədd» karti (#freeCard) addimlarin ustunu tutmasin: ilk
+    //  ekranda tam siyahi ile acilirdi, addimlar asagida qalirdi (16.09).
+    //  Melumat Profil ekranindadir; ilk test gedenden sonra kart qayidir.
+    //  Hediyye karti (#giftCard) QALIR - qisa «xos geldin» mesajidir
+    //  (e2e_panel A1 onu oxuyur).
+    var fc = $("freeCard");
+    if (fc) fc.style.display = "none";
   }
 
   /*  «Bu günün dərsi» kartindaki «Planı qur» QISAYOLDUR: «Dərs planı»
