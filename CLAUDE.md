@@ -3587,6 +3587,23 @@ olunmalıdır**, 05_grants lazım deyil. Qayda: nümunə quruluşuna yeni cədv�
 əlavə edəndə FK-nın SET NULL olub-olmadığına bax — SET NULL-dursa silinmə
 yolunda ayrıca təmizlə.
 
+## db/199 — admin → müəllim mesajı (2026-09-16)
+
+E-poçta bizdə baxan yoxdur (istifadəçi), ona görə yeni müəllimə «kömək
+edim?» demək yolu panelin içindədir. Eyni `feedback` cədvəli, yeni
+`author_type='admin'`, `kind='mesaj'`, `status='closed'` (yeni müraciət
+sayına düşmür), `seen_at`, `reply_to`. RPC: `rpc_admin_message(email, body)`
+(nümunə hesaba yox), `rpc_my_messages()`, `rpc_message_seen(id)`,
+`rpc_feedback_send(+p_reply_to)` (köhnə 3-parametrli imza drop edilir).
+Panel: İdarəetmə → sətir «···» → textarea + «Mesaj göndər»; müəllim İcmalın
+üstündə `.card.gift.amsg` kartı («Cavab yaz» → Profil, `REPLY_TO` +
+`#fbReply` nişanı; «Oxudum» → seen); Profil → «Bil10-dan mesajlar» siyahısı;
+İdarəetmə → Bizə yazılanlarda cavab `.fbctx` ilə sənin mətnin üstündə,
+`oxuyub / hələ oxumayıb`. `smoke_bize_yaz.sql` §8. Şəkil skripti
+`test/_v2_msg.py` (#/demo hər ziyarətçiyə nüsxə açır — mesaj nüsxəyə
+yazılır). **Canlıya əl ilə tətbiq olunmalıdır**, 05_grants lazım deyil.
+Məhdudiyyət: müəllim mesajı yalnız girəndə görür.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

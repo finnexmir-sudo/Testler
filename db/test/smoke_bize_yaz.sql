@@ -217,3 +217,100 @@ begin
   assert ok, 'anon cedveli oxudu!';
 end $$;
 \echo 'OK  7 · cedvele birbasa giris yoxdur'
+
+-- =====================================================================
+--  8. (199) Admin -> muellim mesaji: admin yazir, muellim Icmalda gorur,
+--     oxudu isaresi, cavab reply_to ile, admin siyahida cavabi taniyir;
+--     adi muellim gondere bilmir; numune hesaba gonderilmir; adminin
+--     mesaji «yeni» sayina ve muellimin «Yazdiqlariniz»a dusmur.
+-- =====================================================================
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d2';
+do $$
+begin
+  begin
+    perform public.rpc_admin_message('mlm@t.az', 'Adi muellim gondere bilmez.');
+    raise exception 'adi muellim admin mesaji gonderdi';
+  exception when insufficient_privilege then null; end;
+  assert public.rpc_my_messages() = '[]'::jsonb, 'bos siyahi gozlenirdi';
+end $$;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d1';
+do $$
+declare v jsonb; n0 int;
+begin
+  n0 := public.rpc_admin_feedback_count();
+  begin
+    perform public.rpc_admin_message('mlm@t.az', 'qisa');
+    raise exception 'qisa mesaj kecdi';
+  exception when invalid_parameter_value then null; end;
+  begin
+    perform public.rpc_admin_message('yox@t.az', 'Bele hesab yoxdur, sehv olmalidir.');
+    raise exception 'tapilmayan e-poct kecdi';
+  exception when invalid_parameter_value then null; end;
+  v := public.rpc_admin_message('MLM@t.az', 'Salam! Qrup qurmusunuz, sagirdleri men elave edim?');
+  assert (v->>'id') is not null, 'mesaj id yox';
+  assert public.rpc_admin_feedback_count() = n0, 'admin mesaji yeni sayina dusdu';
+  assert jsonb_array_length(public.rpc_admin_feedback('new')) = n0, 'admin mesaji yeni siyahida';
+  select x into v from jsonb_array_elements(public.rpc_admin_feedback('closed')) x
+   where x->>'author_type' = 'admin';
+  assert v->>'who' = 'Siz' and v->>'email' = 'mlm@t.az' and v->>'kind' = 'mesaj',
+         'admin setri siyahida sehv: ' || v::text;
+end $$;
+--  numune hesaba gonderilmir
+reset role; reset request.jwt.claim.sub;
+update public.accounts set is_demo = true where id = 'aaaa0000-0000-0000-0000-0000000000d2';
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d1';
+do $$
+begin
+  begin
+    perform public.rpc_admin_message('mlm@t.az', 'Numune hesaba getmemelidir.');
+    raise exception 'numune hesaba mesaj getdi';
+  exception when invalid_parameter_value then null; end;
+end $$;
+reset role; reset request.jwt.claim.sub;
+update public.accounts set is_demo = false where id = 'aaaa0000-0000-0000-0000-0000000000d2';
+set role authenticated;
+--  muellim gorur, oxuyur, cavab yazir  (2-ci bolmede gunluk hedd dolub -
+--  kohne yazilari dunene cekirik)
+reset role; reset request.jwt.claim.sub;
+update public.feedback set created_at = created_at - interval '2 days'
+ where user_id = '11110000-0000-0000-0000-0000000000d2' and author_type = 'teacher';
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d2';
+do $$
+declare m jsonb; mid uuid; r jsonb;
+begin
+  m := public.rpc_my_messages();
+  assert jsonb_array_length(m) = 1, 'muellim mesaji gormur';
+  assert (m->0->>'seen_at') is null and (m->0->>'replied') = 'false', 'ilk hal sehv';
+  assert m->0->>'body' like 'Salam! Qrup%', 'metn sehv';
+  mid := (m->0->>'id')::uuid;
+  assert (public.rpc_message_seen(mid)->>'ok') = 'true', 'seen olmadi';
+  assert (public.rpc_my_messages()->0->>'seen_at') is not null, 'seen_at yazilmadi';
+  --  yad id - ok:false, sehv yox
+  assert (public.rpc_message_seen(gen_random_uuid())->>'ok') = 'false', 'yad id ok verdi';
+  begin
+    perform public.rpc_feedback_send('sual', 'Yad mesaja cavab olmaz, yoxlanis.', 'Profil', gen_random_uuid());
+    raise exception 'yad reply_to kecdi';
+  exception when invalid_parameter_value then null; end;
+  r := public.rpc_feedback_send('sual', 'Beli, siyahini gonderirem, sag olun!', 'Profil', mid);
+  assert (r->>'id') is not null, 'cavab yazilmadi';
+  assert (public.rpc_my_messages()->0->>'replied') = 'true', 'replied false qaldi';
+  --  Yazdiqlarinizda cavab reply_to ile, admin mesaji yoxdur
+  select x into r from jsonb_array_elements(public.rpc_feedback_mine()) x
+   where x->>'reply_to' = mid::text;
+  assert r is not null, 'cavab Yazdiqlarinizda yoxdur';
+  assert not exists (select 1 from jsonb_array_elements(public.rpc_feedback_mine()) x
+                      where x->>'kind' = 'mesaj'), 'admin mesaji Yazdiqlarinizda cixdi';
+end $$;
+--  admin cavabi taniyir
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d1';
+do $$
+declare f jsonb;
+begin
+  select x into f from jsonb_array_elements(public.rpc_admin_feedback('new')) x
+   where x->>'reply_to' is not null;
+  assert f is not null, 'cavab admin siyahisinda yoxdur';
+  assert f->>'reply_body' like 'Salam! Qrup%' and f->>'who' = 'Mlm Muellim', 'cavab konteksti sehv';
+end $$;
+\echo 'OK  8 · (199) admin -> muellim mesaji, oxudu, cavab, siyahi'

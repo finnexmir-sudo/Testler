@@ -1929,3 +1929,29 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 #hAlerts .card.pad0{border-left:0}
 .hcols{gap:0 16px}
 @media (min-width:1100px){ .hcols{align-items:stretch} .hcols>div:not(:empty){margin-top:14px} }
+
+/*  199: Bil10-dan mesaj - Icmalin ustunde kart (hediyye kartinin
+    qurulusu, sol zolaq brend rengi), Profilde siyahi + cavab nisani,
+    Idareetmede setir menyusunda gonderme qutusu.  */
+.card.gift.amsg{border-left-color:var(--brand);align-items:flex-start}
+.card.gift.amsg .gi{background:var(--brand-tint);color:var(--brand)}
+.card.gift.amsg .gt s{display:block;text-decoration:none;font-size:12.5px;color:var(--fg-3);margin-top:2px}
+.card.gift.amsg .gt p.amb{margin-top:8px;color:var(--fg);font-size:14.5px}
+.card.gift.amsg .acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.fbi.unread{background:var(--brand-tint)}
+.fbi .fbrow{margin-top:8px}
+.fbctx{display:flex;gap:8px;align-items:flex-start;margin:0 0 10px;padding:10px 12px;border-radius:10px;
+  background:var(--n-50);border:1px solid var(--n-150);color:var(--fg-2);font-size:13.5px;line-height:1.45}
+.fbctx svg{width:16px;height:16px;flex:0 0 auto;color:var(--brand);margin-top:2px}
+.fbctx b{display:block;font-size:12px;color:var(--brand);margin-bottom:2px}
+.fbctx>div{flex:1;min-width:0}
+.fbctx .xbtn{flex:0 0 auto;width:26px;height:26px;border:none;background:none;border-radius:8px;
+  color:var(--fg-3);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.fbctx .xbtn:hover{background:var(--n-150);color:var(--fg)}
+.fbctx .xbtn svg{width:14px;height:14px;margin:0;color:inherit}
+.fbc .fbctx{margin-top:8px}
+.rmenu .rm .rmsg{display:flex;flex-direction:column;gap:6px;width:250px;padding-top:6px;
+  border-top:1px solid var(--n-100)}
+.rmenu .rm .rmsg textarea{width:100%;resize:vertical;font:inherit;font-size:13px;padding:8px 10px;
+  border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg)}
+.rmenu .rm .rmsg textarea:focus{outline:none;border-color:var(--brand)}

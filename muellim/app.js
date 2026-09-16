@@ -486,6 +486,10 @@
      Idareetmede oxuyur, status ve qeyd qoyur - muellim qeydi burada
      gorur.  FB_FROM: profile hansi ekrandan gelib (admin ucun kontekst). */
   var FB_FROM = "İcmal";
+  /*  199: admin -> muellim mesaji.  Icmalda kart, Profilde cavab.
+      REPLY_TO = {id, body}: «Cavab yaz» basilanda dolur, gonderilende
+      ve ya ✕ ile bosalir.  */
+  var REPLY_TO = null;
   var FB_KIND = [["teklif", "Təklif"], ["problem", "Problem"],
                  ["sual", "Sual"], ["tesekkur", "Təşəkkür"]];
   var FB_ST = { "new": "Yeni", seen: "Baxılıb", planned: "Planda",
@@ -495,7 +499,7 @@
                   adm: "İdarəetmə", n: "Siqnallar", q: "Sual", s: "Şagird hesabatı" };
   function fbKind(k) {
     for (var i = 0; i < FB_KIND.length; i++) if (FB_KIND[i][0] === k) return FB_KIND[i][1];
-    return k;
+    return k === "mesaj" ? "Mesaj" : k;
   }
   function fbForm(id) {
     return '<div class="chips fbk" id="' + id + 'K">' +
@@ -541,38 +545,128 @@
       });
     });
   }
+  /*  199: Bil10-dan gelen mesajlar - Icmalin en ustunde kart (yalniz
+      oxunmamis), Profilde tam siyahi + «Cavab yaz».  Mesajlar
+      «Yazdiqlariniz»dan ayridir: biri bize gelen, biri bizden geden.  */
+  function amsgBody(b) {
+    return esc(b || "").replace(/\n/g, "<br>");
+  }
+  function amsgReply(m) {
+    REPLY_TO = { id: m.id, body: m.body };
+    sb.rpc("rpc_message_seen", { p_id: m.id }).catch(function () {});
+    if (location.hash === "#/me") { fbReplyPaint(); return; }
+    nav("#/me");
+  }
+  function loadAdminMsg() {
+    var live = guard();
+    var box = $("adminMsg");
+    if (!box) return;
+    sb.rpc("rpc_my_messages", {}).then(function (rows) {
+      if (!live()) return;
+      box = $("adminMsg");
+      if (!box) return;
+      var un = (rows || []).filter(function (r) { return !r.seen_at; });
+      if (!un.length) { box.innerHTML = ""; return; }
+      var m = un[0];
+      box.innerHTML = '<div class="card gift amsg" id="amsgCard">' +
+          '<span class="gi">' + ic("bell") + "</span>" +
+          '<div class="gt"><b>Bil10-dan mesaj</b>' +
+            '<s class="mut">' + dateAz(m.at) +
+              (un.length > 1 ? " · daha " + (un.length - 1) + " mesaj Profildə" : "") + "</s>" +
+            '<p class="amb">' + amsgBody(m.body) + "</p>" +
+            '<div class="acts">' +
+              '<button class="btn go sm" id="amsgReply">Cavab yaz</button>' +
+              '<button class="btn sm ghost" id="amsgOk">Oxudum</button>' +
+            "</div></div></div>" +
+        '<div class="spacer"></div>';
+      on("amsgReply", "click", function () { amsgReply(m); });
+      on("amsgOk", "click", function () {
+        var c = $("amsgCard"); if (c) c.parentNode.innerHTML = "";
+        sb.rpc("rpc_message_seen", { p_id: m.id }).then(function () {
+          loadAdminMsg();
+        }).catch(function () {});
+      });
+    }).catch(function () {});
+  }
+  /*  Profil: forma ustunde «Cavab: «…»» nisani - hansi mesaja cavab
+      yazildigi gorunsun; ✕ adi mesaja qaytarir.  */
+  function fbReplyPaint() {
+    var box = $("fbReply"), ta = $("fbT");
+    if (!box) return;
+    if (!REPLY_TO) {
+      box.innerHTML = "";
+      if (ta) ta.placeholder = "Nə təklif edirsiniz, nə işləmir, nə maraqlıdır? Konkret yazın — belə daha tez kömək edə bilirik.";
+      return;
+    }
+    var short = REPLY_TO.body.length > 120 ? REPLY_TO.body.slice(0, 118) + "…" : REPLY_TO.body;
+    box.innerHTML = '<div class="fbctx">' + ic("back") + "<div><b>Cavab yazırsınız</b>" +
+      esc(short) + "</div>" +
+      '<button type="button" class="xbtn" id="fbReplyX" aria-label="Ləğv et">' + ic("x") + "</button></div>";
+    if (ta) { ta.placeholder = "Cavabınızı yazın…"; ta.focus(); }
+    on("fbReplyX", "click", function () { REPLY_TO = null; fbReplyPaint(); });
+    var card = $("fbCard");
+    if (card && card.scrollIntoView) card.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
   function fbMineLoad() {
     var live = guard();
-    sb.rpc("rpc_feedback_mine", {}).then(function (rows) {
+    Promise.all([
+      sb.rpc("rpc_feedback_mine", {}).catch(function () { return []; }),
+      sb.rpc("rpc_my_messages", {}).catch(function () { return []; })
+    ]).then(function (res) {
       if (!live()) return;
       var box = $("fbMine");
       if (!box) return;
-      rows = rows || [];
-      if (!rows.length) { box.innerHTML = ""; return; }
-      var CAP = 5;
-      box.innerHTML = '<div class="spacer"></div><h2>Yazdıqlarınız</h2>' +
-        '<div class="card pad0" id="fbList">' + rows.map(function (r, i) {
-          return '<div class="fbi' + (i >= CAP ? " hide" : "") + '">' +
-            '<div class="fbh"><span class="pill">' + esc(fbKind(r.kind)) + "</span>" +
-              '<span class="fbst st-' + esc(r.status) + '">' + (FB_ST[r.status] || r.status) + "</span>" +
-              '<span class="fbat">' + dateAz(r.at) + "</span></div>" +
-            '<p class="fbb">' + esc(r.body) + "</p>" +
-            (r.note
-              ? '<div class="fbre">' + ic("check") + "<div><b>Cavabımız</b>" +
-                esc(r.note) + "</div></div>"
-              : "") +
-          "</div>";
-        }).join("") +
-        (rows.length > CAP
-          ? '<button class="morebtn" id="fbMore">Daha ' + (rows.length - CAP) + " mesaj</button>"
-          : "") + "</div>";
+      var rows = res[0] || [], msgs = res[1] || [];
+      var html = "";
+      if (msgs.length) {
+        html += '<div class="spacer"></div><h2>Bil10-dan mesajlar</h2>' +
+          '<div class="card pad0" id="amList">' + msgs.map(function (m) {
+            return '<div class="fbi' + (m.seen_at ? "" : " unread") + '">' +
+              '<div class="fbh"><span class="pill on">Bil10</span>' +
+                (m.seen_at ? "" : '<span class="fbst st-new">Yeni</span>') +
+                '<span class="fbat">' + dateAz(m.at) + "</span></div>" +
+              '<p class="fbb">' + amsgBody(m.body) + "</p>" +
+              '<div class="fbrow"><span class="fbn">' +
+                (m.replied ? "cavab yazmısınız" : "") + "</span>" +
+                '<button type="button" class="btn sm' + (m.replied ? " ghost" : "") +
+                  '" data-reply="' + esc(m.id) + '">Cavab yaz</button></div>' +
+            "</div>";
+          }).join("") + "</div>";
+      }
+      if (rows.length) {
+        var CAP = 5;
+        html += '<div class="spacer"></div><h2>Yazdıqlarınız</h2>' +
+          '<div class="card pad0" id="fbList">' + rows.map(function (r, i) {
+            return '<div class="fbi' + (i >= CAP ? " hide" : "") + '">' +
+              '<div class="fbh"><span class="pill">' + esc(fbKind(r.kind)) + "</span>" +
+                (r.reply_to ? '<span class="fbst st-seen">cavab</span>' : "") +
+                '<span class="fbst st-' + esc(r.status) + '">' + (FB_ST[r.status] || r.status) + "</span>" +
+                '<span class="fbat">' + dateAz(r.at) + "</span></div>" +
+              '<p class="fbb">' + esc(r.body) + "</p>" +
+              (r.note
+                ? '<div class="fbre">' + ic("check") + "<div><b>Cavabımız</b>" +
+                  esc(r.note) + "</div></div>"
+                : "") +
+            "</div>";
+          }).join("") +
+          (rows.length > CAP
+            ? '<button class="morebtn" id="fbMore">Daha ' + (rows.length - CAP) + " mesaj</button>"
+            : "") + "</div>";
+      }
+      box.innerHTML = html;
       on("fbMore", "click", function () {
         Array.prototype.forEach.call(document.querySelectorAll("#fbList .fbi.hide"), function (x) {
           x.classList.remove("hide");
         });
         $("fbMore").remove();
       });
-    }).catch(function () {});
+      on("amList", "click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest("[data-reply]") : null;
+        if (!b) return;
+        var id = b.getAttribute("data-reply");
+        for (var k = 0; k < msgs.length; k++) if (msgs[k].id === id) amsgReply(msgs[k]);
+      });
+    });
   }
 
   /* ----------------------------------------------------------- profil */
@@ -597,6 +691,7 @@
         '<h2 class="ch">Bizə yazın</h2>' +
         '<p class="note">Təklifiniz, rastlaşdığınız problem və ya sualınız — ' +
           "birbaşa bizə çatır. Cavabımızı burada, mesajın altında görəcəksiniz.</p>" +
+        '<div id="fbReply"></div>' +
         fbForm("fb") +
       "</div>" +
       '<div id="fbMine"></div>' +
@@ -617,9 +712,11 @@
     on("btnMeBank", "click", function () { nav("#/b"); });
     subChips("meSubs", mySubs());
     fbBind("fb", function (kind, body) {
-      return sb.rpc("rpc_feedback_send", { p_kind: kind, p_body: body, p_page: FB_FROM });
-    }, function () { fbMineLoad(); });
+      return sb.rpc("rpc_feedback_send", { p_kind: kind, p_body: body, p_page: FB_FROM,
+                                           p_reply_to: REPLY_TO ? REPLY_TO.id : null });
+    }, function () { REPLY_TO = null; fbReplyPaint(); fbMineLoad(); });
     fbMineLoad();
+    fbReplyPaint();
     on("btnMeSave", "click", function () {
       if (busy) return;
       setBusy("btnMeSave", true, "Yadda saxla");
@@ -916,7 +1013,7 @@
 
     var html =
       //  160: qosulana hediyye paket karti (sinaq abunesi varsa)
-      giftCard() + pulsuzKart() +
+      '<div id="adminMsg"></div>' + giftCard() + pulsuzKart() +
       /*  Bos hesabda (qrup yoxdur) bu blok gizlenir ve "Qrup yarat"
           formasi basliğin altina qalxir - yeni muellim ilk isi
           sehifenin dibinde axtarmasin (loadGroups).  */
@@ -1019,6 +1116,7 @@
     loadGroups(lvReady);
     loadHome();
     loadWeek();
+    loadAdminMsg();
 
     on("btnBank", "click", function () { nav("#/b"); });
     on("btnGen", "click", function () { nav("#/gen"); });
@@ -5526,9 +5624,15 @@
       return '<div class="card"><p class="muted" style="margin:0">' +
         (st === "new" ? "Yeni müraciət yoxdur. 👌" : "Bu siyahı boşdur.") + "</p></div>";
     }
-    var AT = { teacher: "müəllim", student: "şagird", parent: "valideyn" };
+    var AT = { teacher: "müəllim", student: "şagird", parent: "valideyn",
+               admin: "sizin mesajınız" };
     return rows.map(function (r) {
       var meta = [AT[r.author_type] || r.author_type];
+      if (r.author_type === "admin") {
+        if (r.account) meta.push("→ " + r.account);
+        if (r.email) meta.push(r.email);
+        meta.push(r.seen_at ? "oxuyub · " + dateAz(r.seen_at) : "hələ oxumayıb");
+      }
       if (r.author_type === "teacher" && r.account) meta.push(r.account);
       if (r.author_type === "teacher" && r.email) meta.push(r.email);
       if (r.author_type !== "teacher" && r.account) meta.push(r.account);
@@ -5540,6 +5644,10 @@
           '<span class="fbat">' + dateAz(r.at) + "</span></div>" +
         '<div class="qm">' + meta.map(function (x) { return "<span>" + esc(x) + "</span>"; })
           .join("<span>·</span>") + "</div>" +
+        (r.reply_body
+          ? '<div class="fbctx">' + ic("back") + "<div><b>Sizin mesajınıza cavab</b>" +
+            esc(r.reply_body) + "</div></div>"
+          : "") +
         '<p class="fbb">' + esc(r.body) + "</p>" +
         '<div class="fbact">' +
           "<select>" + Object.keys(FB_ST).map(function (k) {
@@ -5618,7 +5726,11 @@
         '<button class="btn sm" data-m="1">+1 ay</button>' +
         '<button class="btn sm" data-m="6">+6 ay</button>' +
         '<button class="btn sm ghost" data-m="1" data-trial="1">Sınaq 1 ay</button>' +
-        (pl ? '<button class="btn sm ghost arch" data-stop="1">Dayandır</button>' : "");
+        (pl ? '<button class="btn sm ghost arch" data-stop="1">Dayandır</button>' : "") +
+        //  199: muellime mesaj - Icmalinin ustunde kart kimi cixir
+        '<div class="rmsg"><textarea rows="3" maxlength="2000" ' +
+          'placeholder="Müəllimə mesaj — İcmalında görəcək"></textarea>' +
+          '<button class="btn sm go" data-msg="1">Mesaj göndər</button></div>';
       //  «0 ş · 1 t · 0 c» oxunmurdu (istifadeci).  Indi esas reqem
       //  SAGIRD sayidir, altinda yalniz SIFIR OLMAYAN qalanlar yazilir.
       //  QRUP SAYI (istifadeci, 2026-09-11): «qeydiyyatdan kecib, amma
@@ -5745,7 +5857,16 @@
       if (!row) return;
       var em = row.getAttribute("data-em");
       var call, args;
-      if (b.getAttribute("data-stop")) {
+      if (b.getAttribute("data-msg")) {
+        var ta = b.parentNode.querySelector("textarea");
+        var body = ((ta && ta.value) || "").trim();
+        if (body.length < 10) {
+          $("admMsg").innerHTML = msg("warn", "Mesaj çox qısadır — ən azı 10 simvol.");
+          if (ta) ta.focus();
+          return;
+        }
+        call = "rpc_admin_message"; args = { p_email: em, p_body: body };
+      } else if (b.getAttribute("data-stop")) {
         if (!confirm(em + " — abunəni dayandırmaq?")) return;
         call = "rpc_admin_stop"; args = { p_email: em };
       } else {
@@ -5763,8 +5884,10 @@
       busy = true; b.disabled = true;
       sb.rpc(call, args).then(function (res) {
         busy = false;
-        admFlash = msg("ok", em + " — yerinə yetirildi" +
-          (res && res.ends ? ". Qüvvədədir: " + dateAz(res.ends) : "") + ".");
+        admFlash = msg("ok", em + (call === "rpc_admin_message"
+          ? " — mesaj göndərildi, müəllim İcmalında görəcək."
+          : " — yerinə yetirildi" +
+            (res && res.ends ? ". Qüvvədədir: " + dateAz(res.ends) : "") + "."));
         screenAdmin();
       }).catch(function (e) {
         busy = false; b.disabled = false;
