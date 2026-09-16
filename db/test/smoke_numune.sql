@@ -239,3 +239,28 @@ end $$;
 \echo 'OK  6 · hedd: saatda 20 nusxe, 10 deq tekrar qurulmur, hesabsiz anonim temizlenir'
 
 \echo 'NUMUNE: BUTUN YOXLAMALAR KECDI'
+
+-- =====================================================================
+--  9. (197) rpc_demo_reset-de WHERE-siz DELETE yoxdur - canlida
+--     safeupdate onu «DELETE requires a WHERE clause» ile dayandirirdi,
+--     gundelik temizleme bes gun islemedi.
+-- =====================================================================
+do $$
+declare v_src text; r record;
+begin
+  v_src := pg_get_functiondef('public.rpc_demo_reset()'::regprocedure);
+  if v_src !~* 'delete from demo_old where true' then
+    raise exception 'rpc_demo_reset: 197 tetbiq olunmayib';
+  end if;
+  --  butun anon/authenticated rpc-lerde: WHERE-siz DELETE/UPDATE qadagandir
+  for r in
+    select p.proname, pg_get_functiondef(p.oid) src
+      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public' and p.proname like 'rpc\_%'
+  loop
+    if r.src ~* '(delete from|update) [a-z_."]+\s*;' then
+      raise exception '%: WHERE-siz DELETE/UPDATE var (safeupdate canlida dayandirir)', r.proname;
+    end if;
+  end loop;
+end $$;
+\echo 'smoke_numune: 9 (197) WHERE-siz DELETE yoxdur - OK'

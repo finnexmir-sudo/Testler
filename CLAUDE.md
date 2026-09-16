@@ -3557,6 +3557,21 @@ app.css-lərdən təmizlənib. Şrift `"PJS"` (`assets/fonts/`, base.css
   səhvində düzəldilmiş ünvan sahəyə yazılır. Səbəb: `imani terane1982@.com`,
   `…@gamil.com` — adam «parol yanlışdır» görüb gedirdi.
 
+## db/197 — canlıda nümunə nüsxələri silinmirdi (safeupdate, 2026-09-16)
+
+İdarəetmədə «Nümunə hesablar 21 MB · 52 427 cavab · 745 şagird» (≈30
+nüsxə). Səbəb: GitHub Actions «oyaq-saxla» işi 12–16 sentyabr hər gün
+`rpc_demo_reset`-də **HTTP 400 «DELETE requires a WHERE clause»** ilə
+uğursuz bitirdi — Supabase PostgREST sessiyasında `safeupdate` var,
+funksiyadakı `delete from demo_old;` (müvəqqəti cədvəl) qadağandır. Yerli
+Postgres-də safeupdate yoxdur, smoke keçirdi. **Qayda: RPC gövdəsində
+WHERE-siz DELETE/UPDATE yazma** — `where true` yaz; `smoke_numune.sql` §9
+bütün `public.rpc_%` funksiyalarını bu naxışa yoxlayır. `db/197` yalnız
+funksiyanı yenidən yaradır (imza eyni, grant içindədir, 05_grants lazım
+deyil). **Canlıya əl ilə tətbiq olunmalıdır**; sonra Actions → «Supabase-i
+oyaq saxla» → Run workflow ilə yoxlanır (HTTP 200 + `deleted_copies`).
+Actions uğursuzluğu heç kimə görünmürdü — nəticələrə arabir bax.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
