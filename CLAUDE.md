@@ -3473,7 +3473,9 @@ QƏBUL edilib (16.09), telefonda alt zolaq.
   Kartın dili bizim realdır: faiz, «zəif · orta · yaxşı», «Bundan başla»;
   bal («7,8/10») YOXDUR, paneldə də yoxdur. Altında «nümunə məlumat».
 - **Düymələr:** `.btn.teal` (5px tünd alt kölgə), `.btn.yellow`,
-  `.btn.navy`, `.btn.line`. Qapılar `.door` (teal) / `.door.b` (kontur).
+  `.btn.navy`, `.btn.line`. Qapılar `.door` **SARI** (16.09, variant A —
+  səhifədə tək sarı düymə) / `.door.b` (kontur); başlıqdakı `.enter`
+  konturdur. Sınanıb-qaytarılıb: teal qapı, lacivərd/sarı başlıq düyməsi.
 - **Testlərin baxdığı seçicilər saxlanıb:** `.doors a` (tam 2:
   `muellim/#/demo` + `muellim/`), `.hlinks a[href=muellim/]` tək,
   `#cta a[href=muellim/]` tək, `#demo` yox, `a.pdoor` yox, `#tqVid`,
