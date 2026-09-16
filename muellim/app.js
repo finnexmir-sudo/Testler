@@ -1956,8 +1956,9 @@
           bugünün dərsi?»): muellim ucun planin ilk kecilmemis dersi ELE
           bu gun kececeyi dersdir.  Plan qutusu ve siyahi nisani da eyni.  */
       var h = '<div class="spacer"></div><div class="card prep">' +
-        '<div class="pt"><b>Dərsdən əvvəl</b>' +
-          '<span class="muted">bu günün dərsi · son keçilən · ev tapşırığı</span></div>';
+        //  16.09 (istifadeci: «dağınıq»): alt yazi cixdi - asagidaki
+        //  etiketlerin tekrari idi; fesil ve tarix oz setrinde (.sub)
+        '<div class="pt"><b>Dərsdən əvvəl</b></div>';
       //  1. novbeti movzu
       if (!d.has_plan) {
         h += row("doc", "Bu günün dərsi",
@@ -1971,7 +1972,7 @@
             əvvəl 5 sual».  */
         h += row("doc", "Bu günün dərsi", "<b>" + esc(nx.topic) + "</b>" +
           //  «3/7» neyin 3-u idi, bilinmirdi - indi «fəsli · dərs 3/7»
-          (nx.group ? ' <s class="muted">· «' + esc(nx.group) + "» fəsli · dərs&nbsp;" + nx.gpos + "/" + nx.gtotal + "</s>" : "") +
+          (nx.group ? '<s class="muted sub">«' + esc(nx.group) + "» fəsli · dərs&nbsp;" + nx.gpos + "/" + nx.gtotal + "</s>" : "") +
           //  135: isinme - dersden evvel 5 sual
           (nx.warm_test_id
             ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
@@ -1988,7 +1989,7 @@
       //  2. son kecilen
       if (ls) {
         h += row("check", "Son keçilən", "<b>" + esc(ls.topic) + "</b>" +
-          ' <s class="muted">· ' + dateAz(ls.done_at) +
+          '<s class="muted sub">' + dateAz(ls.done_at) +
           (ls.test_id
             ? (ls.avg != null ? " · test " + Math.round(ls.avg) + "% · " + (ls.takers || 0) + " şagird"
                                : " · test verilib, hələ yazan yoxdur")
@@ -1997,38 +1998,49 @@
       //  3. ev tapsirigi - TEST (plandan) ve YAZILI (194) bir setirde,
       //     her biri oz sozu ile: evvel iki ayri setir idi («Ev tapşırığı»
       //     + «Yazılı tapşırıq»), istifadeci «çox dolaşıqdır» dedi.
+      /*  16.09 (istifadeci: «dağınıq, tam oxunaqlı olsun»): TEST ve
+          YAZILI iki ayri qutu.  Her qutu: bas setir (etiket · kim/son
+          tarix · sagda veziyyet), altda metn, altda adlar, sagda kecid.
+          Metnler testlerde iddia olunur: «Açıq tapşırıq yoxdur»,
+          «Etməyənlər», «4/12», «etməyən: …», «0/2 etdi», «Hamı edib»,
+          «bütün qrup», «son tarix», «hamısı».  */
+      function hwBox(label, sub, status, body) {
+        return '<div class="hwl"><div class="hwh"><i>' + label + "</i>" +
+          (sub ? '<s class="muted">' + sub + "</s>" : "") + status + "</div>" + (body || "") + "</div>";
+      }
       var tl;
       if (!d.open) {
-        tl = '<span class="muted">Açıq tapşırıq yoxdur.</span>';
+        tl = hwBox("Test", "", '<span class="hwst m">Açıq tapşırıq yoxdur</span>');
       } else if (!pend.length) {
-        tl = '<span class="pok">Hamı edib ✓</span>';
+        tl = hwBox("Test", "", '<span class="hwst k">Hamı edib ✓</span>');
       } else {
-        tl = "Etməyənlər: " + pend.slice(0, 8).map(function (x) {
-          //  yalniz ad: tam adlar telefonda uc setir tuturdu (istifadeci)
-          return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '" title="' + esc(x.name) + '">' +
-            esc(firstName(x.name) || x.name) + "</a>" + (x.n > 1 ? " (" + x.n + ")" : "");
-        }).join(", ") + (pend.length > 8 ? " və daha " + (pend.length - 8) : "") +
-          ' <s class="muted">· ' + pend.length + "/" + d.students + " şagird</s>";
+        tl = hwBox("Test", "", '<span class="hwst w">Etməyənlər · ' + pend.length + "/" + d.students + " şagird</span>",
+          '<div class="hwn">' + pend.slice(0, 8).map(function (x) {
+            //  yalniz ad: tam adlar telefonda uc setir tuturdu (istifadeci)
+            return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '" title="' + esc(x.name) + '">' +
+              esc(firstName(x.name) || x.name) + "</a>" + (x.n > 1 ? " (" + x.n + ")" : "");
+          }).join(", ") + (pend.length > 8 ? " və daha " + (pend.length - 8) : "") + "</div>");
       }
       var hw = d.hw, und = hw ? (hw.undone || []) : [], yl;
       if (!hw) {
-        yl = '<span class="muted">Yazılmayıb.</span> <a href="#/a/' + esc(g.id) + '">Yaz</a>';
+        yl = hwBox("Yazılı", "", '<span class="hwst m">Yazılmayıb</span>',
+          '<div class="hwf"><a href="#/a/' + esc(g.id) + '">Yaz →</a></div>');
       } else {
         var hd = Number(hw.done) || 0, ht = Number(hw.total) || 0;
         var who = hw.personal ? "yalnız " + esc(firstName(hw.student || "") || hw.student || "") : "bütün qrup";
-        var st;
-        if (!ht) st = '<span class="muted">şagird yoxdur</span>';
-        else if (!und.length) st = '<span class="pok">Hamı edib ✓</span>';
-        else st = "etməyən: " + und.slice(0, 8).map(function (n) { return esc(firstName(n) || n); }).join(", ") +
-          (und.length > 8 ? " və daha " + (und.length - 8) : "") +
-          ' <s class="muted">· ' + hd + "/" + ht + " etdi</s>";
-        yl = "<b>" + esc(hw.body) + "</b>" +
-          ' <s class="muted">· ' + who + (hw.due ? " · son tarix " + hwDay(hw.due) : "") + "</s>" +
-          "<br>" + st + ' <a href="#/a/' + esc(g.id) + '">hamısı</a>';
+        var st, names = "";
+        if (!ht) st = '<span class="hwst m">şagird yoxdur</span>';
+        else if (!und.length) st = '<span class="hwst k">Hamı edib ✓</span>';
+        else {
+          st = '<span class="hwst w">' + hd + "/" + ht + " etdi</span>";
+          names = '<div class="hwn">etməyən: ' + und.slice(0, 8).map(function (n) { return esc(firstName(n) || n); }).join(", ") +
+            (und.length > 8 ? " və daha " + (und.length - 8) : "") + "</div>";
+        }
+        yl = hwBox("Yazılı", who + (hw.due ? " · son tarix " + hwDay(hw.due) : ""), st,
+          '<div class="hwb">' + esc(hw.body) + "</div>" + names +
+          '<div class="hwf"><a href="#/a/' + esc(g.id) + '">hamısı →</a></div>');
       }
-      h += row("clip", "Ev tapşırığı",
-        '<div class="hwl"><i>Test</i>' + tl + "</div>" +
-        '<div class="hwl"><i>Yazılı</i>' + yl + "</div>",
+      h += row("clip", "Ev tapşırığı", tl + yl,
         (d.open && pend.length) || (hw && und.length) ? "pwarn" : "");
       //  4. addimlar
       h += '<div class="pbtns">' +
@@ -2341,8 +2353,11 @@
             }
             var weak = it.done && it.test_id && avgN != null && avgN < 60;
             //  "ok" YOX: base.css-de .ok yasil netice qutusudur - setir sisirdi
+            //  .acts: faiz / vərəq / test yığ olan setir - telefonda bunlar
+            //  ikinci setre kecir; yalniz qutu + «geri al» olan setir kecmir
             return '<div class="plrow' + (it.done ? " done" : "") +
-              (cur && it.id === cur.id ? " cur" : "") + '">' +
+              (cur && it.id === cur.id ? " cur" : "") +
+              (avgChip || it.test_id || (it.done && it.can_test) ? " acts" : "") + '">' +
               "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
               "<span>" + esc(it.topic) +
                 (it.done && it.done_at

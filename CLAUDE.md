@@ -3395,6 +3395,18 @@ faiz · vərəq · geri al · ☐ ikinci sətirdə — əvvəl ad söz-söz qır
 `e2e_plan` tək seçim iddiası dəyişdi; şəkil skripti `test/_v2_plan.py`.
 Bələdçidəki m12_defter.png hələ «Dərs oldu» göstərir.
 
+**«Dərsdən əvvəl» kartı səliqə (16.09, istifadəçi: «dağınıq»):** başlıq
+altındakı «bu günün dərsi · son keçilən · ev tapşırığı» çıxdı; fəsil və tarix
+`.sub` ilə öz sətrində («· » prefiksi yoxdur); `.prep .warmline` tək sətir
+(ad solda, `Hazırla` sağda, pill); `.prep .pbtns` 2 sütun grid, tək düymə
+tam en. **Ev tapşırığı** iki qutu (`hwBox`: `.hwl > .hwh(i, s, .hwst) +
+.hwb + .hwn + .hwf`); vəziyyət sinifləri `.hwst.w / .k / .m` — `.warn`/
+`.ok` adları QLOBAL qutu stilləri ilə toqquşurdu (sarı pill çıxırdı).
+Test mətnləri saxlanıb: «Açıq tapşırıq yoxdur», «Etməyənlər · 4/12 şagird»,
+«etməyən: …», «0/2 etdi», «Hamı edib ✓», «bütün qrup», «son tarix», «hamısı».
+Plan sətrində `.acts` sinfi (faiz/vərəq/test yığ olanda) — telefonda yalnız
+o sətirlər iki sətrə qatlanır; yalnız ☐ + «geri al» olan sətir bir sətirdə.
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

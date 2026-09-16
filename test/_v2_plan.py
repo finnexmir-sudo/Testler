@@ -17,6 +17,9 @@ with sync_playwright() as pw:
     p.goto(PANEL + "#/demo"); p.wait_for_selector("#demoBar", timeout=60000); p.wait_for_selector("#groups .gcard", timeout=30000)
     p.add_style_tag(content=HIDE)
     p.locator("#groups .gcard", has_text="7-ci sinif").first.click(); p.wait_for_selector("#gTabs", timeout=15000)
+    p.wait_for_function("document.querySelector('#prep .prow')", timeout=20000); p.wait_for_timeout(500)
+    p.evaluate("document.querySelector('#prep .card').scrollIntoView({block:'start'})"); p.wait_for_timeout(300)
+    p.screenshot(path=OUT + "/prep_m.png"); print("prep")
     p.click("#gTabs [data-v='p']"); p.wait_for_selector(".plcur", timeout=15000); p.wait_for_timeout(500)
     det = p.locator(".card.plan details").first
     if not det.evaluate("d => d.open"): det.locator("summary").first.click(); p.wait_for_timeout(400)
