@@ -344,7 +344,7 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
 .trow small{font-size:12px;color:var(--fg-3)}
 .tnone{padding:14px}
 .top .who{cursor:pointer}
-.top .who:hover{color:#fff;text-decoration:underline}
+.top .who:hover{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
 .chip{
   min-height:30px;padding:0 11px;border:1px solid var(--n-200);
   background:var(--surface);border-radius:999px;font:inherit;font-size:12.5px;
