@@ -46,576 +46,559 @@
 <meta name="twitter:description" content="Repetitor və müəllimlər üçün: qrup yaradın, tapşırıq təyin edin, nəticə özü yığılsın. Şagird və valideyn üçün pulsuz.">
 <meta name="twitter:image" content="https://bil10.az/assets/og.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20aria-hidden%3D%22true%22%3E%20%3Cdefs%3E%3ClinearGradient%20id%3D%22fvG%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232b4acb%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%230e9384%22%2F%3E%20%3C%2FlinearGradient%3E%3C%2Fdefs%3E%20%3Cpath%20d%3D%22M12.5%203.5%20H18%20A8.4%208.4%200%200%201%2026.4%2011.9%20A8.4%208.4%200%200%201%2018%2020.3%20H13.1%20L8.3%2024.6%20Q7.1%2025.6%207.1%2024%20V19.1%20A8.4%208.4%200%200%201%204.1%2011.9%20A8.4%208.4%200%200%201%2012.5%203.5%20Z%22%20fill%3D%22url%28%23fvG%29%22%2F%3E%20%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%3E%20%3Cpath%20d%3D%22M10.2%2010.2%2012.5%208.4%20V16%22%2F%3E%20%3Cellipse%20cx%3D%2218.4%22%20cy%3D%2212%22%20rx%3D%223.1%22%20ry%3D%224.1%22%2F%3E%20%3C%2Fg%3E%20%3Cpath%20d%3D%22M22.5%2019.5%20h4.2%20a3.6%203.6%200%200%201%203.6%203.6%20a3.6%203.6%200%200%201-3.6%203.6%20h-1%20l2%203.4%20-4.6-3.5%20a3.6%203.6%200%200%201-4.2-3.5%20a3.6%203.6%200%200%201%203.6-3.6%20Z%22%20fill%3D%22%23ffc94d%22%2F%3E%20%3Cpath%20d%3D%22M23.4%2023.2%20l1.5%201.5%202.6-3%22%20fill%3D%22none%22%20stroke%3D%22%231a2233%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3C%2Fsvg%3E">
-<link rel="stylesheet" href="assets/base.css?v=501">
+<link rel="stylesheet" href="assets/base.css?v=502">
 <!-- Kok manifest: butun sayti (/Testler/) ehate edir - ana sehifeden
      qurasdirilanda panel, sagird, valideyn ve beledci de tetbiqin
      icinde (brauzer zolaqsiz) acilir -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0e9384">
+<meta name="theme-color" content="#087f75">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Bil10">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <style>
-  /* ---------------------------------------------------------- karkas */
-  /*  Sehife AG.  Ust zolaq (.topband = ag basliq + hero) marka
-      qradiyentidir (indigo -> teal), yazilar ag.  Onizleme karti zolagin
-      alt kenarini kesir (Oxuyan uslubu - istifadeci beyendi).  Bolmeler
-      ag / acıq mavi novbelenir.  Noqte naxisi, uzen daire YOXDUR. */
-  body{position:relative;min-height:100vh;background:#fff}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-  @media (max-width:600px){ .wrap{padding:0 18px} }
+  /* ============================================================ şrift
+     Plus Jakarta Sans (SIL OFL), ozumuzde saxlanir - kenar muraciet yoxdur.
+     Iki fayl, deyisken ceki (200-800): latin + latin-ext (ə, ş, ğ, ı, ö, ü, ç). */
+  @font-face{font-family:"PJS";font-style:normal;font-weight:200 800;font-display:swap;
+    src:url(assets/fonts/pjs-latin-ext.woff2) format("woff2");
+    unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+  @font-face{font-family:"PJS";font-style:normal;font-weight:200 800;font-display:swap;
+    src:url(assets/fonts/pjs-latin.woff2) format("woff2");
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 
-  /* --------------------------------------------------------- ustluk */
-  .site{
-    display:flex;align-items:center;justify-content:space-between;
-    height:68px;
+  /* ============================================================ tokenlər
+     Reng ailesi (16.09, Replit eskizi - istifadeci beyendi): acıq nane fon,
+     tund lacivərd yazi, teal vurgu, sari CTA.  Dord reng, her bolmede eyni rol.
+     Bolme ritmi: acıq → krem → tund → acıq → krem → sari → tund altliq. */
+  :root{
+    --bg:#f7fbf9; --ink:#173b50; --navy:#123a51;
+    --teal:#087f75; --teal-dark:#05625d; --teal-soft:#eaf7f3;
+    --mint:#d9f5ef; --mint-bright:#64d2c3;
+    --yellow:#f4c94f; --yellow-dark:#d7a931; --yellow-soft:#fff1c6;
+    --coral:#e98773; --green:#42bcae; --purple-soft:#e5e5fa; --purple:#5459a8;
+    --line:#dcebe6; --muted:#67817f; --soft:#70908d; --white:#fff;
+    --shadow:0 25px 70px rgba(12,71,86,.14);
+    /* base.css deyisenlerini bu sehifede ailemize uygunlasdiririq */
+    --fg:#173b50; --fg-2:#527176; --fg-3:#76918f; --surface:#fff; --brand:#087f75;
   }
-  .logo{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}
-  /*  Nisan qabarciq formasindadir - kvadrat fon YOXDUR.
-      Qradiyent SVG-nin icindedir (lgG). */
-  .logo .m{width:38px;height:38px;flex:0 0 38px;
-    display:flex;align-items:center;justify-content:center}
-  .logo .m svg{width:38px;height:38px}
-  .logo b{font-size:18px;font-weight:640;letter-spacing:-.026em}
-  .logo b em{font-style:normal;
-    background:linear-gradient(96deg,var(--brand) 10%,var(--teal) 95%);
-    -webkit-background-clip:text;background-clip:text;color:transparent}
-  .logo s{text-decoration:none;color:var(--fg-3);font-size:12.5px;font-weight:500;
-    letter-spacing:0;display:block;margin-top:-2px}
-  /* beta nisani */
-  .logo .beta{font-style:normal;font-size:10px;font-weight:650;letter-spacing:.04em;
-    text-transform:uppercase;color:var(--brand);background:var(--brand-tint);
-    border:1px solid var(--brand-line);border-radius:999px;padding:1px 7px;
-    margin-left:7px;vertical-align:3px}
-  .site .enter{font-size:14px;font-weight:560;color:#fff;text-decoration:none;
-    background:var(--brand);border-radius:9px;padding:9px 16px}
-  .site .enter:hover{filter:brightness(1.08)}
-  /*  telefonda uzun yazi basligi sixirdi - qisa «Giriş» (istifadeci sekli)  */
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"PJS",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,p{margin:0}
+  a{color:inherit;text-decoration:none}
+  .ic{width:1em;height:1em;flex:0 0 auto;fill:none;stroke:currentColor;
+    stroke-linecap:round;stroke-linejoin:round;stroke-width:2}
+  .ctn{width:min(1180px,calc(100% - 40px));margin:0 auto}
+  .ctn.n{width:min(1080px,calc(100% - 40px))}
+  @media (max-width:720px){ .ctn,.ctn.n{width:min(100% - 32px,680px)} }
+
+  /* ============================================================ üstlük */
+  .site-header{position:sticky;top:0;z-index:30;
+    border-bottom:1px solid rgba(220,235,230,.8);
+    background:rgba(247,251,249,.92);backdrop-filter:blur(14px)}
+  .nav{display:flex;align-items:center;justify-content:space-between;min-height:72px;gap:16px}
+  .logo{display:inline-flex;align-items:center;gap:10px;color:var(--ink)}
+  .logo .m{width:40px;height:40px;flex:0 0 40px;display:flex;align-items:center;justify-content:center}
+  .logo .m svg{width:40px;height:40px;filter:drop-shadow(0 3px 0 rgba(8,127,117,.18))}
+  .logo b{font-size:22px;font-weight:800;letter-spacing:-.06em;line-height:1}
+  .logo b em{font-style:normal;color:var(--teal)}
+  .logo .beta{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--teal);background:#e2f5f0;
+    border:1px solid #b8e0d8;border-radius:999px;padding:2px 8px;margin-left:8px;vertical-align:4px}
+  .mnav{display:flex;align-items:center;gap:28px;margin-left:auto;margin-right:24px}
+  .mnav a{font-size:13px;font-weight:800;color:#557376}
+  .mnav a:hover{color:var(--teal)}
+  @media (max-width:900px){ .mnav{display:none} }
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;
+    border-radius:13px;padding:14px 20px;font-size:13.5px;font-weight:800;cursor:pointer;
+    transition:transform .18s ease,background .18s ease,box-shadow .18s ease;white-space:nowrap}
+  .btn:hover{transform:translateY(-2px)}
+  .btn:active{transform:translateY(1px)}
+  .btn .ic{width:16px;height:16px}
+  .btn.teal{background:var(--teal);box-shadow:0 5px 0 var(--teal-dark);color:#fff}
+  .btn.teal:hover{background:#096e68}
+  .btn.yellow{background:var(--yellow);box-shadow:0 4px 0 #c89e2d;color:var(--ink)}
+  .btn.navy{background:var(--ink);box-shadow:0 5px 0 #0c2a3c;color:#fff}
+  .btn.line{border:1px solid #b6d8d2;background:#f5fffc;color:var(--teal)}
+  .btn.line:hover{border-color:var(--teal);background:#fff}
+  .site .enter{padding:11px 16px}
   .site .enter .sm{display:none}
-  @media (max-width:520px){ .site .enter .lg{display:none} .site .enter .sm{display:inline} }
-  .mnav{display:flex;gap:22px;margin-left:auto;margin-right:22px}
-  .mnav a{font-size:13.5px;font-weight:530;color:var(--fg-2);text-decoration:none}
-  .mnav a:hover{color:var(--brand)}
-  @media (max-width:720px){ .mnav{display:none} }
+  @media (max-width:520px){ .site .enter .lg{display:none} .site .enter .sm{display:inline} .nav{min-height:60px} }
 
-  /* ----------------------------------------------------------- hero */
-  /*  Ad "top" OLA BILMEZ: base.css-de tetbiqin basliq zolagidir
-      (display:flex) ve seedeni yan-yana duzurdu. */
-  .topband{color:#fff;padding-bottom:64px;
-    background:var(--grad)}
-  /*  Ag basliq zolagi - qradiyentin ustunde ag qalir (istifadeci istedi) */
-  .sitebar{background:var(--surface);color:var(--fg);border-bottom:1px solid var(--line);
-    box-shadow:0 1px 0 rgba(21,26,36,.03),0 6px 18px rgba(21,26,36,.05)}
-  .hero{position:relative;padding:54px 0 0}
-  .kicker{
-    display:inline-flex;align-items:center;gap:7px;margin:0 0 20px;
-    padding:5px 12px 5px 8px;border-radius:999px;
-    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.30);
-    color:#fff;font-size:12.5px;font-weight:550;
-  }
-  .kicker svg{width:14px;height:14px;stroke-width:2}
-  h1{
-    font-size:clamp(30px,5.2vw,54px);line-height:1.08;letter-spacing:-.036em;
-    font-weight:700;margin:0 0 18px;max-width:16ch;color:#fff;
-  }
-  /*  Vurgu sari - qradiyent yazi qradiyent fonda itir  */
-  h1 em{font-style:normal;color:#ffd970}
-  .lead{font-size:clamp(15px,1.9vw,17.5px);line-height:1.6;color:rgba(255,255,255,.86);
-    margin:0 0 30px;max-width:50ch}
-
-  /* -------------------------------------------- hero iki sutun + duymeler */
-  .hgrid{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center}
-  @media (max-width:920px){ .hgrid{grid-template-columns:1fr} }
-
-  /*  Iki boyuk duyme: kim ucun oldugu altinda yazilib (Oxuyan kimi).
-      Muellim sari (logo rengi), sagird ag.  */
-  .doors{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px}
-  @media (max-width:640px){ .doors{grid-template-columns:1fr} }
-  .door{
-    display:flex;align-items:center;gap:12px;text-decoration:none;
-    padding:14px 18px;border-radius:14px;color:#1a2233;background:#ffc94d;
-    box-shadow:0 10px 26px rgba(9,20,60,.22);
-    transition:transform .14s,filter .14s,box-shadow .14s;
-  }
-  .door:hover{transform:translateY(-2px);filter:brightness(1.03);
-    box-shadow:0 14px 30px rgba(9,20,60,.26)}
-  .door.b{background:#fff;color:var(--teal)}
-  .door .ic{width:40px;height:40px;flex:0 0 40px;border-radius:11px;
-    background:rgba(26,34,51,.10);color:#1a2233;
-    display:flex;align-items:center;justify-content:center}
-  .door.b .ic{background:var(--teal-tint);color:var(--teal)}
-  .door .ic svg{width:20px;height:20px;stroke-width:1.7}
+  /* ============================================================ hero */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:var(--teal-soft)}
+  .hero::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:var(--yellow)}
+  .hgrid{display:grid;grid-template-columns:.95fr 1.05fr;align-items:center;gap:48px;padding:72px 0 88px}
+  @media (max-width:900px){ .hgrid{grid-template-columns:1fr;gap:36px;padding:48px 0 60px} }
+  .rise{animation:rise .7s both cubic-bezier(.22,1,.36,1)}
+  .rise2{animation-delay:.12s}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .kicker{display:inline-flex;align-items:center;gap:8px;border:1px solid #b8e0d8;border-radius:999px;
+    background:#f5fffc;padding:9px 12px;color:var(--teal);font-size:11.5px;font-weight:800}
+  .kicker .ic{width:14px;height:14px}
+  .hero h1{max-width:12ch;margin-top:22px;color:var(--navy);
+    font-size:clamp(40px,5vw,66px);font-weight:800;letter-spacing:-.06em;line-height:1.04}
+  .hl{position:relative;display:inline-block;color:var(--teal)}
+  .hl::after{content:"";position:absolute;right:0;bottom:-4px;left:0;height:8px;border-radius:999px;
+    background:rgba(244,201,79,.7)}
+  .lead{max-width:520px;margin-top:22px;color:#527176;font-size:17px;line-height:1.7}
+  .lead b{color:var(--ink);font-weight:800}
+  /*  Iki qapi: numune (teal, esas) ve hesab (kontur).  Kim ucun oldugu
+      altinda yazilib.  Sagird/valideyn qapisi YOXDUR - bir alici var. */
+  .doors{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px;margin-top:30px}
+  @media (max-width:560px){ .doors{grid-template-columns:1fr} }
+  .door{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:14px;
+    background:var(--teal);color:#fff;box-shadow:0 5px 0 var(--teal-dark);
+    transition:transform .16s,background .16s}
+  .door:hover{transform:translateY(-2px);background:#096e68}
+  .door:active{transform:translateY(1px)}
+  .door.b{background:#f5fffc;color:var(--teal);border:1px solid #b6d8d2;box-shadow:none}
+  .door.b:hover{background:#fff;border-color:var(--teal)}
+  .door .di{width:38px;height:38px;flex:0 0 38px;border-radius:11px;display:flex;align-items:center;
+    justify-content:center;background:rgba(255,255,255,.16)}
+  .door.b .di{background:var(--mint)}
+  .door .di .ic{width:19px;height:19px;stroke-width:1.8}
   .door .tx{min-width:0}
-  .door .tx b{display:block;font-size:15.5px;font-weight:650;letter-spacing:-.012em;line-height:1.2}
-  .door .tx s{text-decoration:none;display:block;font-size:12px;opacity:.72;margin-top:2px}
-  .door .ar{margin-left:auto;flex:0 0 auto;display:flex;opacity:.55}
-  .door .ar svg{width:16px;height:16px;stroke-width:2.2}
+  .door .tx b{display:block;font-size:15px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+  .door .tx s{text-decoration:none;display:block;font-size:11.5px;opacity:.78;margin-top:2px;font-weight:600}
+  .door .ar{margin-left:auto;display:flex;opacity:.6}
+  .door .ar .ic{width:16px;height:16px;stroke-width:2.4}
   .door:hover .ar{opacity:1}
+  .hlinks{display:flex;flex-wrap:wrap;gap:6px 18px;margin:18px 0 0;max-width:560px;
+    color:var(--soft);font-size:12px;font-weight:700;line-height:1.6}
+  .hlinks span{display:inline-flex;align-items:center;gap:6px}
+  .hlinks .ic{width:14px;height:14px;color:#0b8a80}
+  .hlinks a{color:var(--teal);text-decoration:underline;text-underline-offset:3px;text-decoration-color:#b6d8d2}
+  .hlinks a:hover{text-decoration-color:var(--teal)}
+  .hlinks .hfree{color:#0b8a80}
 
-  /*  Valideyn: ucuncu boyuk duyme deyil - suse kimi alcaq setir, ayni
-      enle (max-width duymelerle eyni).  */
-  .pdoor{
-    display:flex;align-items:center;gap:12px;max-width:560px;
-    margin:12px 0 0;padding:11px 16px;text-decoration:none;color:#fff;
-    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);
-    border-radius:14px;transition:background .14s;
-  }
-  .pdoor:hover{background:rgba(255,255,255,.20)}
-  .pdoor .ic{
-    width:32px;height:32px;flex:0 0 32px;border-radius:9px;
-    background:rgba(255,255,255,.18);color:#fff;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .pdoor .ic svg{width:17px;height:17px;stroke-width:1.7}
-  .pdoor .tx{flex:1;min-width:0;font-size:12.5px;color:rgba(255,255,255,.80);
-    line-height:1.4}
-  .pdoor .tx b{display:block;font-size:14px;font-weight:600;
-    color:#fff;letter-spacing:-.01em;margin-bottom:1px}
-  .pdoor .ar{flex:0 0 auto;color:rgba(255,255,255,.7);display:flex}
-  .pdoor .ar svg{width:16px;height:16px;stroke-width:2.2}
-  @media (max-width:640px){
-    .pdoor .tx b{font-size:13.5px}
-    .pdoor .tx{font-size:12px}
+  /* ----- hero: hesabat karti (panelin real ekraninin sadələşdirilmiş şəkli) */
+  .rwrap{position:relative;width:100%;max-width:584px;margin:0 auto;animation:float 5s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .rwrap::before,.rwrap::after{content:"";position:absolute;border-radius:999px;filter:blur(28px);z-index:0}
+  .rwrap::before{top:56px;left:-20px;width:112px;height:112px;background:rgba(244,201,79,.35)}
+  .rwrap::after{right:-32px;bottom:40px;width:160px;height:160px;background:rgba(101,207,192,.25)}
+  .rcard{position:relative;z-index:1;border:1px solid #d6e5e3;border-radius:26px;background:#fbfdfc;
+    padding:16px;box-shadow:var(--shadow)}
+  .rin{overflow:hidden;border:1px solid #e4efed;border-radius:19px;background:#f3f9f7}
+  .rtop{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e1ece9;
+    background:rgba(255,255,255,.8);padding:14px 18px}
+  .pb{display:flex;align-items:center;gap:10px}
+  .pm{display:grid;width:32px;height:32px;place-items:center;border-radius:10px;background:#0b8a80;
+    color:#fff;font-size:13px;font-weight:800}
+  .kk{color:#76918f;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+  .pt{margin-top:2px;color:var(--ink);font-size:13px;font-weight:800}
+  .stl{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:#e1f6f0;
+    padding:6px 10px;color:#087b72;font-size:10.5px;font-weight:800}
+  .stl .ic{width:13px;height:13px}
+  .rgrid{display:grid;grid-template-columns:1fr 158px;gap:16px;padding:18px}
+  .shd{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .sname{margin-top:4px;color:var(--ink);font-size:20px;font-weight:800;letter-spacing:-.04em}
+  .smeta{margin-top:3px;color:#76918f;font-size:11px;font-weight:600}
+  .score{color:#0b8a80;font-size:30px;font-weight:800;letter-spacing:-.06em;line-height:1;text-align:right}
+  .score span{font-size:15px}
+  .slab{margin-top:5px;color:#4d6c70;font-size:10px;font-weight:800;text-align:right}
+  .tlist{display:grid;gap:13px;margin-top:20px}
+  .tm{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;color:#345765;
+    font-size:11.5px;font-weight:800}
+  .tm i{font-style:normal;font-size:10.5px}
+  .st-ok{color:#087b72} .st-mid{color:#9b7511} .st-low{color:#c05b4c}
+  .trk{height:8px;overflow:hidden;border-radius:999px;background:#e0ece9}
+  .trk i{display:block;height:100%;border-radius:inherit}
+  .trk .ok{width:92%;background:var(--green)}
+  .trk .mid{width:55%;background:#edc34f}
+  .trk .low{width:30%;background:var(--coral)}
+  .side{border:1px solid #dcebe7;border-radius:16px;background:#fff;padding:14px}
+  .side .kk{display:flex;justify-content:space-between;align-items:center}
+  .side .kk .ic{width:15px;height:15px;color:var(--teal)}
+  .donut{display:grid;width:100px;height:100px;place-items:center;margin:14px auto 0;border-radius:50%;
+    background:conic-gradient(var(--teal) 0 70%,#e4f0ed 70% 100%)}
+  .donut i{display:grid;width:82px;height:82px;place-items:center;border-radius:50%;background:#fff;
+    color:var(--ink);font-style:normal;font-size:21px;font-weight:800;letter-spacing:-.06em}
+  .dlab{margin-top:6px;color:#76918f;font-size:9.5px;font-weight:800;text-align:center}
+  .stats{display:grid;gap:7px;margin-top:14px;color:#547174;font-size:10.5px;font-weight:800}
+  .stats span{display:flex;align-items:center;gap:6px}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .dot.g{background:var(--green)} .dot.y{background:#edc34f} .dot.c{background:var(--coral)}
+  .nxt{display:flex;align-items:flex-start;gap:12px;margin:0 18px 18px;border:1px solid #f0dfaa;
+    border-radius:14px;background:#fff8de;padding:13px}
+  .nxt .ni{display:grid;width:28px;height:28px;flex:0 0 auto;place-items:center;border-radius:50%;
+    background:var(--yellow);color:#634d07}
+  .nxt .ni .ic{width:15px;height:15px}
+  .nxt .kk{color:#96731b}
+  .nxt p{margin-top:4px;color:#735c19;font-size:11.5px;font-weight:700;line-height:1.45}
+  .rcap{display:flex;justify-content:space-between;gap:12px;padding:12px 8px 0;color:#789390;
+    font-size:10.5px;font-weight:700}
+  .rcap span{display:inline-flex;align-items:center;gap:5px}
+  .rcap .ic{width:12px;height:12px}
+  @media (max-width:720px){
+    .rgrid{grid-template-columns:1fr;padding:14px}
+    .rtop{padding:12px 14px}
+    .nxt{margin:0 14px 14px}
+    .stl{display:none}
+    .rcap{flex-direction:column;gap:4px}
   }
 
-  /*  Illustrasiya (assets/hero.png, seffaf) sag sutunda  */
-  /*  Movcud istifadeci ucun kicik kecidler - qapilar numuneye aparir  */
-  /*  Kodu olanlar ucun kicik setir - qapilarla yarismir  */
-  .hlinks{margin:16px 0 0;max-width:560px;font-size:13px;line-height:1.7;color:rgba(255,255,255,.80)}
-  .hlinks a{color:#fff;font-weight:650;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.5)}
-  .hlinks a:hover{color:#ffd970;text-decoration-color:#ffd970}
-  .hlinks .sep{margin:0 6px;color:rgba(255,255,255,.45)}
-  .hlinks .hfree{color:#ffd970;font-weight:600}
-  .hright{display:flex;justify-content:center;align-items:center}
-  .hart{width:100%;max-width:470px;height:auto;
-    filter:drop-shadow(0 16px 30px rgba(9,20,60,.28))}
-  /*  telefonda illustrasiya gizlidir  */
-  @media (max-width:920px){ .hright{display:none} }
+  /* ============================================================ qərar zolağı */
+  .strip{border-bottom:1px solid var(--line);background:var(--bg);padding:28px 0}
+  .strip .in{display:flex;align-items:center;justify-content:space-between;gap:18px}
+  .strip p{color:#66817f;font-size:12.5px;font-weight:800}
+  .tags{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+  .tag{border-radius:999px;background:#e2f5f0;padding:8px 12px;color:var(--teal);font-size:11.5px;font-weight:800}
+  .tag.y{background:var(--yellow-soft);color:#806000}
+  @media (max-width:720px){ .strip .in{flex-direction:column;align-items:flex-start} .tags{justify-content:flex-start} }
 
-  /* ------------------------------------------------- panel onizlemesi */
-  /*  Zolagin altindan "cixir": menfi ust bosluq zolagin padding-bottom-u
-      ile uygundur.  Sual karti sag alt kuncde ust-uste dusur.  */
-  .under{position:relative;z-index:1}
-  .preview{position:relative;max-width:820px;margin:0 auto}
-  .shot{
-    background:var(--surface);border:1px solid var(--line);
-    border-radius:16px;padding:18px 20px;
-    box-shadow:0 24px 60px rgba(9,20,60,.18);
+  /* ============================================================ bölmələr */
+  section{padding:104px 0}
+  .cream{background:#fffdf8}
+  .eyebrow{color:var(--teal);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+  .stitle{margin-top:14px;color:var(--ink);font-size:clamp(32px,4vw,48px);font-weight:800;
+    letter-spacing:-.055em;line-height:1.1;text-transform:none}
+  .stitle .ac{color:var(--teal)}
+  .ssub{max-width:560px;margin-top:18px;color:var(--muted);font-size:15px;line-height:1.7}
+  .ssub a{color:var(--teal);font-weight:800}
+  .ssub a:hover{text-decoration:underline;text-underline-offset:3px}
+  @media (max-width:720px){ section{padding:64px 0} }
+
+  /* ---- addımlar */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:52px}
+  @media (max-width:980px){ .steps{grid-template-columns:1fr 1fr} }
+  @media (max-width:560px){ .steps{grid-template-columns:1fr;margin-top:34px} }
+  .step{position:relative;border:1px solid #e5ece7;border-radius:20px;background:#fff;padding:22px;
+    box-shadow:0 12px 30px rgba(32,75,72,.05);transition:transform .18s ease}
+  .step:hover{transform:translateY(-4px)}
+  @media (min-width:981px){
+    .step:not(:last-child)::after{content:"›";position:absolute;top:44px;right:-15px;color:#a8cbc4;
+      font-size:28px;font-weight:800}
   }
-  .sdots{display:flex;align-items:center;gap:5px;margin-bottom:14px}
-  .sdots i{width:8px;height:8px;border-radius:50%;background:var(--n-200)}
-  .sdots i:first-child{background:#f6a5a0}
-  .sdots i:nth-child(2){background:#f7d08a}
-  .sdots i:nth-child(3){background:#9fd8b4}
-  .sdots span{margin-left:8px;font-size:12px;font-weight:600;color:var(--fg-2);
-    display:inline-flex;align-items:center;gap:6px}
-  .sdots span::after{content:"";width:7px;height:7px;border-radius:50%;
-    background:var(--ok);animation:puls 2s ease-in-out infinite}
-  @keyframes puls{0%,100%{opacity:1}50%{opacity:.35}}
-  /*  Kart muellimin panelinin SEKLIDIR, platformanin statistikasi
-      deyil.  Reqemler numunedir - bunu gizli saxlamayaq, acıq yazaq
-      (istifadeci ile razilasdirildi).  */
-  .snum{margin-left:auto;font-style:normal;font-size:11px;font-weight:600;
-    letter-spacing:.04em;text-transform:uppercase;color:var(--fg-3);
-    background:var(--n-50);border:1px solid var(--n-100);
-    border-radius:999px;padding:2px 9px}
-  .stiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-  .st{background:var(--n-25);border:1px solid var(--n-100);border-radius:10px;
-    padding:10px 6px;text-align:center}
-  .st i{display:flex;width:24px;height:24px;margin:0 auto 5px;border-radius:7px;align-items:center;
-    justify-content:center;background:var(--brand-tint);color:var(--brand)}
-  .st:nth-child(even) i{background:var(--teal-tint);color:var(--teal)}
-  .st i svg{width:14px;height:14px;stroke-width:1.7}
-  .st b{display:block;font-size:17px;font-weight:660;letter-spacing:-.02em}
-  .st span{font-size:10.5px;color:var(--fg-3)}
-  .srow{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:12.5px;
-    color:var(--fg-2);max-width:520px}
-  .srow>span:first-child{flex:0 0 130px;white-space:nowrap;overflow:hidden;
-    text-overflow:ellipsis}
-  .srow .sbar{flex:1;height:6px;border-radius:999px;background:var(--n-100);
-    overflow:hidden}
-  .srow .sbar i{display:block;height:100%;border-radius:999px;
-    background:linear-gradient(90deg,var(--brand),var(--teal))}
-  .srow b{flex:0 0 34px;text-align:right;font-size:12px;font-weight:620;
-    color:var(--fg)}
-  .shot.q{
-    position:absolute;right:-22px;bottom:-40px;width:248px;
-    padding:14px;border-radius:12px;
-    box-shadow:0 14px 34px rgba(21,26,36,.16);
-    transform:rotate(1.6deg);
-  }
-  @media (max-width:760px){
-    .shot.q{display:none}
-    .stiles{grid-template-columns:repeat(2,1fr)}
-    .srow>span:first-child{flex-basis:110px}
-  }
-  .sq{font-size:10.5px;font-weight:640;color:var(--fg-3);
-    letter-spacing:.05em;text-transform:uppercase;margin-bottom:7px}
-  .sqb{font-size:12.5px;font-weight:590;margin-bottom:9px;line-height:1.4}
-  .sopt{display:flex;align-items:center;justify-content:space-between;
-    border:1px solid var(--n-100);border-radius:8px;padding:6px 9px;
-    font-size:11.5px;color:var(--fg-2);margin-top:5px}
-  .sopt.ok{border-color:var(--ok-line);background:var(--ok-tint);
-    color:var(--ok);font-weight:590}
-  .sopt svg{width:13px;height:13px;stroke-width:2.4}
+  .stop{display:flex;align-items:center;justify-content:space-between}
+  .sic{display:grid;width:44px;height:44px;place-items:center;border-radius:13px}
+  .sic .ic{width:20px;height:20px;stroke-width:1.8}
+  .sic.mint{background:var(--mint);color:var(--teal)}
+  .sic.yel{background:#fff0bf;color:#806000}
+  .sic.pur{background:var(--purple-soft);color:var(--purple)}
+  .sic.tl{background:#e2f5f0;color:#0b8a80}
+  .sn{color:#c2d4d0;font-size:12px;font-weight:800;letter-spacing:.1em}
+  .step b{display:block;margin-top:24px;color:var(--ink);font-size:17px;font-weight:800;letter-spacing:-.03em}
+  .step p{margin-top:10px;color:#6c8582;font-size:13px;line-height:1.65}
 
-  /* ------------------------------------- numune hesab (136) + beta qeydi */
-  /*  Onizlemenin altinda iki kart: numune (genis) + beta qeydi.  */
-  .under2{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin-top:48px}
-  @media (max-width:760px){ .under2{grid-template-columns:1fr;margin-top:32px} }
-  .demo{margin:0;padding:16px 18px;border:1px solid var(--line);border-radius:14px;
-    background:var(--surface);font-size:14px;line-height:1.6;color:var(--fg-2);
-    display:flex;gap:14px;align-items:flex-start;
-    box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.08)}
-  .demo .dic{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:var(--brand-tint);
-    border:1px solid var(--brand-line);color:var(--brand);display:flex;align-items:center;justify-content:center}
-  .demo .dic svg{width:20px;height:20px;stroke-width:1.6}
-  .demo .dtx{flex:1 1 auto;min-width:0}
-  @media (max-width:520px){ .demo .dic{display:none} }
-  .demo b{color:var(--fg)}
-  .demo .dlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-  .demo a{display:inline-block;padding:7px 14px;border-radius:999px;
-    background:var(--surface);border:1px solid var(--brand-line);color:var(--brand);font-weight:600;text-decoration:none}
-  .demo a.pri{background:var(--brand);border-color:var(--brand);color:#fff}
-  .demo a:hover{background:var(--brand);color:#fff}
-  .beta-note{margin:0;font-size:13.5px;line-height:1.6;color:var(--fg-2);
-    padding:16px 18px;border-radius:14px;background:var(--brand-tint);
-    border:1px solid var(--brand-line)}
-  .beta-note b{color:var(--brand)}
-
-  /* -------------------------------------------------------- bolmeler */
-  /*  Her bolme tam enli blokdur (.wrap icerde) - fon novbelensin.  */
-  section{padding:64px 0}
-  section.tint{background:linear-gradient(180deg,#f7faff 0%,#eef7ff 100%)}
-  /*  video bolmesi ayrica secilsin (istifadeci): firuze cal, ustde-altda
-      ince xett - ag addimlar ve acik mavi imkanlar bolmesinden ferqlensin  */
-  #video-sec{background:linear-gradient(180deg,#daeeec 0%,#e3ecf8 100%);
-    border-top:1px solid #c6e0dd;border-bottom:1px solid #d0dcee}
-  .eyebrow{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--teal);margin:0 0 8px}
-  .stitle{font-size:clamp(22px,3vw,30px);line-height:1.2;letter-spacing:-.028em;
-    font-weight:660;margin:0 0 10px;
-    text-transform:none;color:var(--fg)}   /* base.css-de h2 boz+CAPS-dir */
-  .stitle::after{content:"";display:block;width:44px;height:3px;border-radius:3px;
-    margin-top:12px;background:linear-gradient(90deg,var(--brand),var(--teal))}
-  .ssub{color:var(--fg-2);font-size:15px;line-height:1.6;margin:0 0 36px;max-width:56ch}
-
-  /* addimlar */
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  .steps.four{grid-template-columns:repeat(4,1fr)}
-  @media (max-width:920px){ .steps.four{grid-template-columns:1fr 1fr} }
-  @media (max-width:520px){ .steps.four{grid-template-columns:1fr} }
-  @media (max-width:760px){ .steps{grid-template-columns:1fr} }
-  /* addimlar arasinda ox - yalniz genis ekranda */
-  .step{position:relative}
-  @media (min-width:761px){
-    .step:not(:last-child)::after{
-      content:"→";position:absolute;right:-15px;top:24px;
-      color:var(--n-300);font-size:15px;
-    }
-  }
-  .step{background:var(--surface);box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.08);border:1px solid var(--line);
-    border-radius:var(--r-lg);padding:22px 20px}
-  .step .n{width:28px;height:28px;border-radius:8px;background:var(--brand);
-    color:#fff;font-size:13px;font-weight:640;display:flex;
-    align-items:center;justify-content:center;margin-bottom:14px}
-  .step b{display:block;font-size:15.5px;font-weight:590;letter-spacing:-.012em;
-    margin-bottom:6px}
-  .step p{margin:0;color:var(--fg-2);font-size:13.5px;line-height:1.6}
-
-  /* video teqdimat - addimlarin altinda.  Telefon formatidir (9:16),
-     ona gore masaustunde dar sutunda durur, yaninda fesil siyahisi.
-     Basilana qeder yalniz basliq (moov) yuklenir (preload=metadata) - toxunanda derhal baslasin. */
-  .vid{display:grid;grid-template-columns:300px 1fr;gap:32px;align-items:start;
-    margin-top:40px;padding:24px;border:1px solid var(--line);border-radius:var(--r-lg);
-    background:var(--surface);box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.08)}
+  /* ---- video */
+  #video-sec{background:var(--teal-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .vid{display:grid;grid-template-columns:300px 1fr;gap:34px;align-items:start;
+    padding:26px;border:1px solid #cce4de;border-radius:24px;background:#f8fffc;
+    box-shadow:0 18px 45px rgba(35,102,96,.08)}
   @media (max-width:760px){ .vid{grid-template-columns:1fr;gap:20px;padding:16px} }
-  #video-sec .vid{margin-top:0}
   .vid video{display:block;width:100%;aspect-ratio:9/16;border-radius:16px;background:#0f172a;
     box-shadow:0 12px 32px rgba(21,26,36,.18)}
   @media (max-width:760px){ .vid video{max-width:320px;margin:0 auto} }
-  .vtx b{display:block;font-size:17px;font-weight:600;letter-spacing:-.012em;margin-bottom:6px}
-  .vtx > p{margin:0 0 14px;color:var(--fg-2);font-size:13.5px;line-height:1.6}
-  .vspeed{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 14px;font-size:13px;color:var(--fg-2)}
+  .vtx b{display:block;margin-top:10px;font-size:19px;font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+  .vtx > p{margin:8px 0 14px;color:#65817e;font-size:13.5px;line-height:1.65}
+  .vmore{display:block;margin-top:6px}
+  .vmore a{color:var(--teal);font-weight:800}
+  .vmore a:hover{text-decoration:underline;text-underline-offset:3px}
+  .vspeed{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 10px;font-size:12.5px;
+    font-weight:700;color:#65817e}
   .vspeed span{margin-right:4px}
-  .vspeed button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;
-    color:var(--fg);border-radius:999px;padding:6px 12px;font-size:13px;line-height:1.2}
-  .vspeed button.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
-  .vhint{font-size:12.5px;color:var(--fg-2);margin:-8px 0 14px}
-  .vmore{display:block;margin-top:8px}
-  .vmore a{color:var(--brand);font-weight:600;text-decoration:none}
-  .vmore a:hover{text-decoration:underline}
+  .vspeed button{font:inherit;cursor:pointer;border:1px solid #b6d8d2;background:#fff;color:var(--ink);
+    border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:700;line-height:1.2}
+  .vspeed button.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .vhint{font-size:12px;color:#8ba3a0;font-weight:700;margin:0 0 14px}
   .vfacts{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-  .vfacts li{position:relative;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:10px;
-    background:var(--surface);font-size:13.5px;line-height:1.5;color:var(--fg-2)}
-  .vfacts li b{display:inline;font-size:inherit;font-weight:600;margin:0;color:var(--fg)}
-  .vfacts li::before{content:"";position:absolute;left:12px;top:13px;width:14px;height:14px;border-radius:50%;
-    background:var(--brand-tint);border:1.5px solid var(--brand-line)}
-  .vfacts li::after{content:"";position:absolute;left:16px;top:16px;width:5px;height:8px;
-    border:solid var(--brand);border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .vfacts li{display:flex;align-items:flex-start;gap:8px;padding:9px 12px;border:1px solid var(--line);
+    border-radius:11px;background:#fff;font-size:13px;line-height:1.5;color:#4e716f;font-weight:600}
+  .vfacts li b{display:inline;font-size:inherit;margin:0;font-weight:800;color:var(--ink)}
+  .vfacts .ic{width:15px;height:15px;flex:0 0 auto;margin-top:3px;color:#0b8a80;stroke-width:2.6}
+  .under2{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin-top:22px}
+  @media (max-width:760px){ .under2{grid-template-columns:1fr} }
+  .demo{display:flex;gap:14px;align-items:flex-start;padding:18px 20px;border:1px solid #cce4de;
+    border-radius:18px;background:#fff;font-size:14px;line-height:1.6;color:#527176}
+  .demo .dic{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:var(--mint);
+    color:var(--teal);display:grid;place-items:center}
+  .demo .dic .ic{width:20px;height:20px}
+  @media (max-width:520px){ .demo .dic{display:none} }
+  .demo b{color:var(--ink);font-weight:800}
+  .dlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .dlinks a{display:inline-flex;align-items:center;padding:9px 15px;border-radius:11px;font-size:13px;
+    font-weight:800;border:1px solid #b6d8d2;background:#f5fffc;color:var(--teal)}
+  .dlinks a.pri{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:0 3px 0 var(--teal-dark)}
+  .dlinks a:hover{filter:brightness(1.05)}
+  .beta-note{margin:0;padding:18px 20px;border-radius:18px;background:var(--yellow-soft);
+    border:1px solid #f0dfaa;font-size:13.5px;line-height:1.6;color:#735c19;font-weight:600}
+  .beta-note b{color:#5a4610;font-weight:800}
 
-  /* xususiyyetler */
-  .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  @media (max-width:860px){ .feat{grid-template-columns:1fr 1fr} }
+  /* ---- imkanlar (tünd) */
+  .dark{background:var(--navy);color:var(--bg)}
+  .dgrid{display:grid;grid-template-columns:.8fr 1.2fr;align-items:center;gap:56px}
+  @media (max-width:900px){ .dgrid{grid-template-columns:1fr;gap:36px} }
+  .dark .eyebrow{color:var(--mint-bright)}
+  .dark .stitle{color:var(--bg)}
+  .dark .ssub{color:#b3ceca}
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media (max-width:560px){ .feat{grid-template-columns:1fr} }
-  .f{border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;
-    background:var(--surface);box-shadow:0 1px 2px rgba(21,26,36,.05),0 10px 28px rgba(21,26,36,.08)}
-  .f .ic{width:34px;height:34px;border-radius:9px;background:var(--brand-tint);
-    color:var(--brand);display:flex;align-items:center;justify-content:center;
-    margin-bottom:13px}
-  .f:nth-child(even) .ic{background:var(--teal-tint);color:var(--teal)}
-  .f .ic svg{width:17px;height:17px;stroke-width:1.75}
-  .f b{display:block;font-size:14.5px;font-weight:580;letter-spacing:-.01em;
-    margin-bottom:5px}
-  .f p{margin:0;color:var(--fg-2);font-size:13px;line-height:1.6}
+  .f{border:1px solid #2b5564;border-radius:17px;background:#19465b;padding:20px;
+    transition:background .18s ease,border-color .18s ease}
+  .f:hover{border-color:rgba(100,210,195,.6);background:#1b4e62}
+  .f .ic{width:20px;height:20px;color:var(--mint-bright);stroke-width:1.8}
+  .f b{display:block;margin-top:20px;color:#fff;font-size:15px;font-weight:800;letter-spacing:-.02em}
+  .f p{margin-top:8px;color:#a9c7c3;font-size:12.5px;line-height:1.6}
 
-  /* ------------------------------------------ ne pulsuz, ne abunede
-     Siyahinin OZU burada deyil - assets/ferq.js-dedir; panel de eyni
-     fayldan oxuyur.  Reqem (qiymet) BILEREKDEN yoxdur: odenis hele
-     acilmayib, reqem yalniz muqayiseye devet olardi. */
-  .heddwrap{max-width:820px;margin:0 auto}
-  .betabar{display:flex;gap:12px;align-items:flex-start;
-    background:var(--brand-tint);border:1px solid var(--brand-line);
-    border-radius:14px;padding:15px 17px;margin:0 0 22px}
-  .betabar .bi{flex:0 0 20px;width:20px;height:20px;margin-top:1px;color:var(--brand)}
-  .betabar .bi svg{width:20px;height:20px;stroke-width:1.7}
-  .betabar p{margin:0;font-size:13.5px;line-height:1.6;color:var(--fg-2)}
-  .betabar b{color:var(--brand);font-weight:640}
-  .hedd{display:grid;grid-template-columns:1fr 1fr;gap:0;
-    background:var(--surface);border:1px solid var(--line);
-    border-radius:16px;padding:26px 28px}
-  .hedd .cc{padding:0 22px}
-  .hedd .cc:first-child{padding-left:0;border-right:1px solid var(--line)}
-  .hedd .cc:last-child{padding-right:0}
-  .hedd .ch{font-size:11.5px;font-weight:640;letter-spacing:.04em;
-    text-transform:uppercase;color:var(--fg-3);margin:0 0 12px}
-  .hedd .cc.on .ch{color:var(--brand)}
-  .rul{list-style:none;margin:0;padding:0}
-  .rul li{position:relative;padding:0 0 0 20px;margin:0 0 10px;
-    font-size:13.5px;line-height:1.55;color:var(--fg-2)}
-  .rul li:last-child{margin-bottom:0}
-  .rul li::before{content:"";position:absolute;left:2px;top:8px;
-    width:6px;height:6px;border-radius:99px;background:var(--brand)}
-  .rul li b{color:var(--fg);font-weight:600}
-  .rul.lim li::before{background:var(--n-300)}
-  @media (max-width:720px){
-    .hedd{grid-template-columns:1fr;gap:20px;padding:22px}
-    .hedd .cc{padding:0}
-    .hedd .cc:first-child{border-right:0;border-bottom:1px solid var(--line);
-      padding-bottom:20px}
-  }
+  /* ---- hədd (nə pulsuz, nə abunədə) */
+  .pintro{max-width:560px;margin:0 auto;text-align:center}
+  .pintro .ssub{margin-right:auto;margin-left:auto}
+  .betabar{display:flex;gap:12px;align-items:flex-start;max-width:900px;margin:44px auto 0;
+    border-radius:14px;background:#f3eed9;padding:14px 16px;color:#75652d;font-size:13px;
+    font-weight:600;line-height:1.55}
+  .betabar .ic{width:18px;height:18px;flex:0 0 auto;margin-top:1px}
+  .betabar b{color:#5a4610;font-weight:800}
+  .hedd{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px;margin:16px auto 0}
+  @media (max-width:720px){ .hedd{grid-template-columns:1fr} }
+  .hedd .cc{border:1px solid #e6e4d8;border-radius:22px;background:#fbfaf3;padding:26px}
+  .hedd .cc.on{border-color:#c5e4db;background:var(--teal-soft)}
+  .hedd .ch{color:#95751d;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .hedd .cc.on .ch{color:var(--teal)}
+  .rul{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:11px}
+  .rul li{position:relative;padding-left:22px;color:#426967;font-size:13px;font-weight:600;line-height:1.5}
+  .rul li::before{content:"";position:absolute;left:1px;top:6px;width:6px;height:10px;
+    border:solid var(--teal);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .rul.lim li::before{width:7px;height:0;top:11px;border-width:0 0 2.5px 0;transform:none;border-color:#b9b39a}
+  .rul li b{color:var(--ink);font-weight:800}
 
-  /* sagird zolagi - hero ile eyni marka qradiyenti, altliqin ust
-     kenarini kesir (hero-daki onizleme kimi - sehife simmetrik bitir) */
-  .freesec{padding-bottom:0;margin-bottom:-56px;position:relative;z-index:1}
-  .free{
-    background:var(--grad);
-    border-radius:16px;padding:34px 32px;color:#fff;
-    display:flex;align-items:center;gap:26px;flex-wrap:wrap;
-    box-shadow:0 20px 50px rgba(9,20,60,.28);
-  }
-  .free .t{flex:1;min-width:250px}
-  .free h3{margin:0 0 8px;font-size:21px;letter-spacing:-.022em;font-weight:640}
-  .free p{margin:0;color:rgba(255,255,255,.84);font-size:14px;line-height:1.6;
-    max-width:46ch}
-  .free .badge{
-    flex:0 0 auto;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.30);
-    border-radius:999px;padding:9px 18px;font-size:13.5px;font-weight:560;
-  }
+  /* ---- etibar (şagird-valideyn pulsuz + məxfilik) */
+  .trust{background:var(--teal-soft)}
+  .tgrid{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:56px}
+  @media (max-width:900px){ .tgrid{grid-template-columns:1fr;gap:32px} }
+  .tvis{position:relative;border:1px solid #cce4de;border-radius:24px;background:#f8fffc;padding:28px;
+    box-shadow:0 18px 45px rgba(35,102,96,.08)}
+  .tbadge{position:absolute;top:-13px;right:-3px;border-radius:999px;background:var(--yellow);
+    padding:8px 12px;color:#624d09;font-size:10.5px;font-weight:800;box-shadow:0 3px 8px rgba(49,63,34,.1)}
+  .tline{display:flex;align-items:flex-start;gap:16px}
+  .shield{display:grid;width:44px;height:44px;flex:0 0 auto;place-items:center;border-radius:14px;
+    background:var(--mint);color:var(--teal)}
+  .shield .ic{width:22px;height:22px}
+  .tvis h3{color:var(--ink);font-size:17px;font-weight:800;letter-spacing:-.02em}
+  .tvis p{margin-top:8px;color:#65817e;font-size:13px;line-height:1.65}
+  .plist{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px;border-top:1px solid var(--line);
+    padding-top:18px}
+  @media (max-width:560px){ .plist{grid-template-columns:1fr} }
+  .plist span{display:flex;align-items:flex-start;gap:7px;color:#4e716f;font-size:11.5px;font-weight:700;line-height:1.4}
+  .plist .ic{width:14px;height:14px;flex:0 0 auto;margin-top:1px;color:#0b8a80}
+  @media (max-width:720px){ .tvis{padding:22px} }
 
-  /* ---------------------------------------------------------- altliq */
-  /*  Tund altliq: marka + qisa izah, uc sutun kecid, ayrica setirde
-      musteri hesabat. Kohne altliq bir setir idi - "zeif" (istifadeci). */
-  .foot{background:var(--grad-dark);color:#fff;
-    padding:104px 0 28px;margin-top:0}
-  .fgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:32px;
-    padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.10)}
+  /* ---- son çağırış (sarı) */
+  .final{background:var(--yellow);padding:76px 0}
+  .final .in{display:flex;align-items:center;justify-content:space-between;gap:32px}
+  @media (max-width:720px){ .final{padding:56px 0} .final .in{flex-direction:column;align-items:flex-start} }
+  .final .eyebrow{color:#796018}
+  .final h2{max-width:640px;margin-top:12px;color:var(--ink);font-size:clamp(30px,4vw,46px);
+    font-weight:800;letter-spacing:-.055em;line-height:1.1;text-transform:none}
+
+  /* ============================================================ altlıq */
+  .foot{background:var(--navy);color:#a9c7c3;padding:56px 0 26px}
+  .fgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:32px;padding-bottom:28px;
+    border-bottom:1px solid rgba(255,255,255,.1)}
   @media (max-width:860px){ .fgrid{grid-template-columns:1fr 1fr;gap:26px} }
   @media (max-width:480px){ .fgrid{gap:22px 16px} .fbrand,.fcol:last-child{grid-column:1/-1} }
   .fbrand .logo{color:#fff}
-  .fbrand .logo b{color:#fff}
-  .fbrand .logo s{color:rgba(255,255,255,.55)}
-  .fbrand p{margin:14px 0 12px;font-size:13.5px;line-height:1.6;
-    color:rgba(255,255,255,.66);max-width:34ch}
-  .fbeta{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:560;
-    color:#ffd970;background:rgba(255,217,112,.10);border:1px solid rgba(255,217,112,.30);
-    border-radius:999px;padding:4px 11px}
-  .fbeta::before{content:"";width:7px;height:7px;border-radius:50%;background:#ffd970}
+  .fbrand .logo b em{color:var(--mint-bright)}
+  .fbrand p{margin:14px 0 12px;font-size:13px;line-height:1.6;color:#a9c7c3;max-width:34ch}
+  .fbeta{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;color:var(--yellow);
+    background:rgba(244,201,79,.1);border:1px solid rgba(244,201,79,.3);border-radius:999px;padding:4px 11px}
+  .fbeta::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--yellow)}
   .fcol{display:flex;flex-direction:column;gap:9px}
-  .fcol b{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;
-    color:rgba(255,255,255,.5);margin-bottom:4px}
-  .fcol a{display:inline-flex;align-items:center;gap:7px;font-size:14px;
-    color:rgba(255,255,255,.82);text-decoration:none;width:fit-content}
+  .fcol b{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6f9490;margin-bottom:4px}
+  .fcol a{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:#cfe3df;width:fit-content}
+  .foot a{text-decoration:none}
   .fcol a:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
-  .fcol a svg{width:15px;height:15px;stroke-width:1.8;color:#5fd3a5}
-  .fbot{display:flex;justify-content:space-between;align-items:center;gap:12px;
-    flex-wrap:wrap;padding-top:18px;font-size:12.5px;color:rgba(255,255,255,.45)}
+  .fcol a .ic{width:15px;height:15px;color:var(--mint-bright)}
+  .fbot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+    padding-top:18px;font-size:11.5px;font-weight:700;color:#6f9490}
 
-  /* ------------------------------------------------- telefonda seliqe
-     Masaustu ucun secilmis dikine olculer telefonda oldugu kimi qalanda
-     sehife "bos" gorunur - hamisi kicilir. */
-  @media (max-width:600px){
-    .site{height:56px}
-    .topband{padding-bottom:36px}
-    .under{margin-top:0}
-    .hero{padding:28px 0 0}
-    .kicker{margin-bottom:13px}
-    h1{margin-bottom:11px;max-width:20ch}
-    .lead{margin-bottom:20px}
-    .doors{gap:10px}
-    .door{padding:12px 14px}
-    .shot{padding:14px}
-    section{padding:32px 0}
-    .stitle{margin-bottom:7px}
-    .ssub{margin-bottom:18px;font-size:14.5px}
-    .steps{gap:10px}
-    .step{padding:16px 15px}
-    .step .n{margin-bottom:11px}
-    .feat{gap:10px}
-    .f{padding:16px}
-    .f .ic{margin-bottom:10px}
-    .free{padding:24px 20px;gap:16px}
-    .freesec{margin-bottom:-40px}
-    .foot{padding:72px 0 22px}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+      transition-duration:.01ms!important;scroll-behavior:auto!important}
   }
 </style>
 </head>
 <body data-page="home">
 
-<div class="topband">
-<div class="sitebar"><div class="wrap">
-  <header class="site">
-    <a class="logo" href="./">
-      <span class="m"><svg viewBox="0 0 32 32" aria-hidden="true">
-        <defs><linearGradient id="lgG" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#2b4acb"/><stop offset="1" stop-color="#0e9384"/>
-        </linearGradient></defs>
-        <path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="url(#lgG)"/>
-        <g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
-          <path d="M10.2 10.2 12.5 8.4 V16"/>
-          <ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/>
-        </g>
-        <path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#ffc94d"/>
-        <path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#1a2233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg></span>
-      <span><b>Bil<em>10</em></b><i class="beta">beta</i><s>onlayn test sistemi</s></span>
-    </a>
-    <nav class="mnav">
-      <a href="#addimlar">Necə işləyir</a>
-      <a href="#imkanlar">İmkanlar</a>
-      <a href="#hedd">Nə pulsuz</a>
-      <a href="komek/" data-ev="beledci">Bələdçi</a>
-    </nav>
-    <a class="enter" href="muellim/" data-ev="panel"><span class="lg">Hesabınıza keçin</span><span class="sm">Giriş</span> →</a>
-  </header>
-</div></div>
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-ccheck" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 16 4-5 3 3 5-7"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="6" y="11" width="3" height="6" rx="1"/><rect x="11" y="6" width="3" height="11" rx="1"/><rect x="16" y="13" width="3" height="4" rx="1"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1"/><path d="M16 5.5a3 3 0 0 1 0 5.8"/><path d="M18 14a5 5 0 0 1 3 4.5v1"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5A6 6 0 1 1 15.5 14c-.9.8-1.5 1.8-1.5 3H10c0-1.2-.6-2.3-1.5-3.5Z"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="M8.5 10h7"/><path d="M8.5 14h5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 1 2-2h13"/><path d="M8 7h7"/><path d="M8 11h5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 4.5-2.8 8-7 10-4.2-2-7-5.5-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.2 4.8L18 9l-4.8 1.2L12 15l-1.2-4.8L6 9l4.8-1.2L12 3Z"/><path d="m19 14 .6 2.4L22 17l-2.4.6L19 20l-.6-2.4L16 17l2.4-.6L19 14Z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3Z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="m9 7 8 5-8 5V7Z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v.1"/><path d="M12 11v5"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M4 20l1.3-4.2A8 8 0 1 1 8.4 19L4 20z"/><path d="M9.3 9.2c0 2.9 2.5 5.4 5.4 5.4l1-1.5-1.9-.9-.8.8a3.8 3.8 0 0 1-2.1-2.1l.8-.8-.9-1.9-1.5 1z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6 8.5-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+</svg>
 
-<div class="wrap">
-  <div class="hero">
-    <div class="hgrid">
-    <div class="hleft">
-    <span class="kicker">
-      <svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-        stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg>
-      Beta dövründə müəllimlər üçün pulsuz
-    </span>
+<header class="site-header"><div class="ctn nav site">
+  <a class="logo" href="./">
+    <span class="m"><svg viewBox="0 0 32 32" aria-hidden="true">
+      <defs><linearGradient id="lgG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#087f75"/><stop offset="1" stop-color="#42bcae"/>
+      </linearGradient></defs>
+      <path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="url(#lgG)"/>
+      <g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+        <path d="M10.2 10.2 12.5 8.4 V16"/>
+        <ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/>
+      </g>
+      <path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#f4c94f"/>
+      <path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#173b50" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg></span>
+    <span><b>Bil<em>10</em></b><i class="beta">beta</i></span>
+  </a>
+  <nav class="mnav">
+    <a href="#addimlar">Necə işləyir</a>
+    <a href="#video-sec">Video</a>
+    <a href="#imkanlar">İmkanlar</a>
+    <a href="#hedd">Nə pulsuz</a>
+    <a href="komek/" data-ev="beledci">Bələdçi</a>
+  </nav>
+  <a class="btn teal enter" href="muellim/" data-ev="panel"><span class="lg">Hesabınıza keçin</span><span class="sm">Giriş</span>
+    <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+</div></header>
 
-    <h1>Şagirdinizin <em>nəyi bilmədiyini</em> görün</h1>
+<main>
+<section class="hero" style="padding:0"><div class="ctn hgrid">
+  <div class="rise">
+    <span class="kicker"><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg>
+      Beta dövründə müəllimlər üçün pulsuz</span>
+    <h1>Şagirdinizin nəyi bilmədiyini <span class="hl">görün.</span></h1>
+    <p class="lead">Bil10 diaqnostika, test və fərdi məşqi birləşdirir: hər şagirdin
+      zəif mövzusunu tapır və növbəti addımı göstərir. Siz testi verirsiniz,
+      qalanını sistem edir. <b>Özünüz sınayın, fərqi görün:</b></p>
 
-    <p class="lead">Bil10 diaqnostika, test və fərdi məşqi birləşdirir: hər
-      şagirdin zəif mövzusunu tapır və növbəti addımı göstərir. Siz testi
-      verirsiniz, qalanını sistem edir. <b>Özünüz sınayın, fərqi görün:</b></p>
-
-    <!--  Ilk ekranin uc qapisi NUMUNEYE aparir, qeydiyyata yox.
-          Olcu (14.09): 7 ziyaretciden 4-u ilk ekranda getdi, 2-si
-          «Panelə keç» basib formani gorub qacdi, hec kim qeydiyyatdan
-          kecmedi.  Adam ne alacagini gormemis ondan e-poct isteyirdik.
-          Indi bir klikle hazir qrup acilir; hesab yaratmaq ikinci
-          addimdir (asagidaki kicik keçidler ve paneldəki zolaq).  -->
-    <!--  Bir alici var: MUELLIM.  Sagird ve valideyn saytdan yox,
-          muellimin verdiyi kodla gelir (istifadeci, 15.09: «şagird kimi
-          bax / valideyn kimi bax bizə lazım deyil, əvvəlki dizaynı
-          korladı»).  Bir boyuk qapi - numune; yaninda «Hesab yarat»;
-          kodu olanlara altda kicik setir.  -->
+    <!--  Ilk ekranin qapilari NUMUNEYE aparir, qeydiyyata yox (14.09 olcusu).
+          Bir alici var: MUELLIM.  Sagird/valideyn kodla gelir - altda kicik setir.  -->
     <div class="doors">
       <a class="door" href="muellim/#/demo" data-ev="demo_muellim">
-        <span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M13 15.5a3.5 3.5 0 0 0-7 0"/><circle cx="9.5" cy="8" r="2.4"/>
-          <path d="M15.5 14.5a3 3 0 0 0-2.2-2.9"/><path d="M13.2 6.2a2.2 2.2 0 0 1 0 4.2"/>
-        </svg></span>
+        <span class="di"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></span>
         <span class="tx"><b>Müəllim kimi bax</b><s>hazır qrup, hesabat — qeydiyyatsız</s></span>
-        <span class="ar"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg></span>
+        <span class="ar"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span>
       </a>
-
       <a class="door b" href="muellim/" data-ev="panel">
-        <span class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9.5 4v11M4 9.5h11"/>
-        </svg></span>
+        <span class="di"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></span>
         <span class="tx"><b>Hesab yarat</b><s>1 dəqiqə · beta dövründə pulsuz</s></span>
-        <span class="ar"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg></span>
+        <span class="ar"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span>
       </a>
     </div>
 
-    <p class="hlinks"><span class="hfree">Beta dövründə pulsuz · kart tələb olunmur</span>
-      <span class="sep">·</span> Hesabınız var? <a href="muellim/" data-ev="panel">Hesabınıza keçin</a>
-      <span class="sep">·</span> Kodla giriş: <a href="sagird/">şagird</a> / <a href="valideyn/">valideyn</a></p>
-    </div>
-
-    <div class="hright" aria-hidden="true">
-      <!--  Illustrasiya qaldi: real ekran sekli ve cekilmis kart sinandi,
-            istifadeci «əvvəlki şəkil daha yaxşı idi» dedi (16.09).  -->
-      <img class="hart" src="assets/hero.png" alt="" width="1000" height="568" loading="eager">
-    </div>
-    </div>
+    <p class="hlinks">
+      <span class="hfree"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Kart tələb olunmur</span>
+      <span>Hesabınız var? <a href="muellim/" data-ev="panel">Hesabınıza keçin</a></span>
+      <span>Kodla giriş: <a href="sagird/">şagird</a>&nbsp;/&nbsp;<a href="valideyn/">valideyn</a></span>
+    </p>
   </div>
-</div>
-</div>
 
-
-<section id="addimlar"><div class="wrap">
-    <p class="eyebrow">Necə işləyir</p>
-    <h2 class="stitle">Nəticəni göstərmir — nəticədən növbəti addımı çıxarır</h2>
-    <p class="ssub">Dörd addım, hər həftə eyni dövrə. Qurmaq bir dəfəlik işdir.
-      <a href="komek/">Addım-addım bələdçi, ekran şəkilləri ilə →</a></p>
-    <div class="steps four">
-      <div class="step"><div class="n">1</div>
-        <b>Diaqnostika verin</b>
-        <p>Hazır bankdan, sinfə görə. Şagird kodla girir, telefonda həll edir —
-           qeydiyyat yoxdur.</p></div>
-      <div class="step"><div class="n">2</div>
-        <b>Zəif mövzunu tapın</b>
-        <p>Hər şagird üçün mövzu-mövzu: zəif, orta, yaxşı.
-           Bil10 «bundan başla» deyir.</p></div>
-      <div class="step"><div class="n">3</div>
-        <b>Məşq etdirin</b>
-        <p>Həmin mövzudan təkrar test bir toxunuşla; səhv etdiyi suallar
-           səhv dəftərində yenidən gəlir.</p></div>
-      <div class="step"><div class="n">4</div>
-        <b>Yenidən ölçün</b>
-        <p>Diaqnostikanı təkrar verin: «əvvəl → indi» fərqi şagirddə,
-           qrupda və valideynin ekranında.</p></div>
+  <!--  Hesabat karti: panelin diaqnostika ekraninin sadələşdirilmiş şəkli.
+        Reqemler numunedir - altda acıq yazilib.  Bizim real dil: zəif · orta · yaxşı,
+        faiz, «bundan başla».  Bal ("7,8/10") YOXDUR - paneldə də yoxdur.  -->
+  <div class="rwrap rise rise2" aria-hidden="true">
+    <div class="rcard"><div class="rin">
+      <div class="rtop">
+        <div class="pb"><span class="pm">b</span>
+          <div><div class="kk">Müəllim paneli</div><div class="pt">7-ci sinif · Riyaziyyat</div></div></div>
+        <span class="stl"><svg class="ic" aria-hidden="true"><use href="#i-ccheck"/></svg> Diaqnostika bitdi</span>
+      </div>
+      <div class="rgrid">
+        <div>
+          <div class="shd">
+            <div><div class="kk">Şagirdin nəticəsi</div><div class="sname">Aysel M.</div>
+              <div class="smeta">Diaqnostika · 20 sual · 14 düz</div></div>
+            <div><div class="score">70<span>%</span></div><div class="slab">ümumi nəticə</div></div>
+          </div>
+          <div class="tlist">
+            <div><div class="tm"><span>Kəsrlər</span><i class="st-ok">yaxşı · 92%</i></div><div class="trk"><i class="ok"></i></div></div>
+            <div><div class="tm"><span>Tənliklər</span><i class="st-mid">orta · 55%</i></div><div class="trk"><i class="mid"></i></div></div>
+            <div><div class="tm"><span>Faizlər</span><i class="st-low">zəif · 30%</i></div><div class="trk"><i class="low"></i></div></div>
+          </div>
+        </div>
+        <div class="side">
+          <div class="kk"><span>Qrup üzrə</span><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg></div>
+          <div class="donut"><i>70%</i></div>
+          <div class="dlab">orta nəticə · 12 şagird</div>
+          <div class="stats">
+            <span><i class="dot g"></i> yaxşı: 4</span>
+            <span><i class="dot y"></i> orta: 5</span>
+            <span><i class="dot c"></i> zəif: 3</span>
+          </div>
+        </div>
+      </div>
+      <div class="nxt">
+        <span class="ni"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg></span>
+        <div><div class="kk">Bundan başla</div>
+          <p>Faizlər — qrupun yarısı zəifdir. 5 suallıq isinmə testi hazırdır, bir toxunuşla göndərin.</p></div>
+      </div>
     </div>
-
+    <div class="rcap">
+      <span>Nümunə məlumat — real ekran panelin içindədir.</span>
+      <span><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg> Bal serverdə hesablanır</span>
+    </div></div>
+  </div>
 </div></section>
 
-<!--  Video ve «Hesab yarat» addimlardan SONRA, ayri bolmede (16.09):
-      «başlıq → üstünə minmiş video kartı» silueti Oxuyan-a oxsayirdi.
-      Indi baslıq → dörd addım → video.  -->
-<section id="video-sec" class="tint"><div class="wrap">
-  <!--  Video teqdimat ILK EKRANIN altindadir (istifadeci: «videonu da
-        birinci görünənlərdən et»).  Evvel «Necə işləyir» bolmesinin sonunda
-        idi - 7 ziyaretciden 4-u ora catmirdi.  Panel mokapi cixarildi: video
-        elə canli mokapdir.  Basilana qeder yuklenmir (preload=none). -->
+<div class="strip"><div class="ctn n in">
+  <p>Bir diaqnostikadan sonra üç cavab:</p>
+  <div class="tags">
+    <span class="tag">Kim hazırdır?</span>
+    <span class="tag y">Nəyi təkrar edim?</span>
+    <span class="tag">Növbəti dərs nədən başlasın?</span>
+  </div>
+</div></div>
+
+<section id="addimlar" class="cream"><div class="ctn n">
+  <p class="eyebrow">Necə işləyir</p>
+  <h2 class="stitle">Nəticəni göstərmir.<br><span class="ac">Nəticədən növbəti addımı çıxarır.</span></h2>
+  <p class="ssub">Dörd addım, hər həftə eyni dövrə. Qurmaq bir dəfəlik işdir.
+    <a href="komek/" data-ev="beledci">Addım-addım bələdçi, ekran şəkilləri ilə →</a></p>
+  <div class="steps">
+    <article class="step">
+      <div class="stop"><span class="sic mint"><svg class="ic" aria-hidden="true"><use href="#i-clip"/></svg></span><span class="sn">01</span></div>
+      <b>Diaqnostika verin</b>
+      <p>Hazır bankdan, sinfə görə. Şagird kodla girir, telefonda həll edir — qeydiyyat yoxdur.</p>
+    </article>
+    <article class="step">
+      <div class="stop"><span class="sic yel"><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg></span><span class="sn">02</span></div>
+      <b>Zəif mövzunu tapın</b>
+      <p>Hər şagird üçün mövzu-mövzu: zəif, orta, yaxşı. Bil10 «bundan başla» deyir.</p>
+    </article>
+    <article class="step">
+      <div class="stop"><span class="sic pur"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg></span><span class="sn">03</span></div>
+      <b>Məşq etdirin</b>
+      <p>Həmin mövzudan təkrar test bir toxunuşla; səhv etdiyi suallar səhv dəftərində yenidən gəlir.</p>
+    </article>
+    <article class="step">
+      <div class="stop"><span class="sic tl"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg></span><span class="sn">04</span></div>
+      <b>Yenidən ölçün</b>
+      <p>Diaqnostikanı təkrar verin: «əvvəl → indi» fərqi şagirddə, qrupda və valideynin ekranında.</p>
+    </article>
+  </div>
+</div></section>
+
+<section id="video-sec"><div class="ctn n">
+  <!--  Video: basilana qeder yalniz basliq yuklenir (preload=metadata).  -->
   <div class="vid" id="video">
     <div class="vwrap">
-      <video id="tqVid" controls playsinline preload="metadata"
-             poster="assets/teqdimat_uz.jpg">
+      <video id="tqVid" controls playsinline preload="metadata" poster="assets/teqdimat_uz.jpg">
         <source src="assets/teqdimat.mp4" type="video/mp4">
         Brauzeriniz videonu göstərmir.
       </video>
@@ -633,32 +616,26 @@
         <button type="button" data-r="1" class="on">Normal</button>
       </div>
       <p class="vhint">Tez gəlirsə yavaşladın — seçim yadda qalır.</p>
-      <!--  Fesil siyahisi cixdi (istifadeci: «1,5 dəqiqəlik videoda artıqdır»)
-            - yerinde videoda gorunenlerin qisa faktlari  -->
       <ul class="vfacts" aria-label="Videoda nə görəcəksiniz">
-        <li><b>Hazır sual bankı</b> — 1–11-ci siniflər, 12 fənn; test bir dəqiqəyə yığılır</li>
-        <li><b>Diaqnostika</b> — hər şagird üçün mövzu-mövzu: zəif · orta · yaxşı, «bundan başla»</li>
-        <li><b>Kurikulum üzrə dərs planı</b> — bu günün dərsi, isinmə 5 sual, ev tapşırığı</li>
-        <li><b>Şagird kodla girir</b> — qeydiyyat yoxdur; bal serverdə hesablanır</li>
-        <li><b>Valideyn öz kodu ilə</b> — nəticə, zəif mövzular, davamiyyət, gözləyən tapşırıq</li>
+        <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span><b>Hazır sual bankı</b> — 1–11-ci siniflər, 12 fənn; test bir dəqiqəyə yığılır</span></li>
+        <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span><b>Diaqnostika</b> — hər şagird üçün mövzu-mövzu: zəif · orta · yaxşı, «bundan başla»</span></li>
+        <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span><b>Kurikulum üzrə dərs planı</b> — bu günün dərsi, isinmə 5 sual, ev tapşırığı</span></li>
+        <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span><b>Şagird kodla girir</b> — qeydiyyat yoxdur; bal serverdə hesablanır</span></li>
+        <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span><b>Valideyn öz kodu ilə</b> — nəticə, zəif mövzular, davamiyyət, gözləyən tapşırıq</span></li>
       </ul>
     </div>
   </div>
 
   <div class="under2">
-    <!--  Evvel burada numune linkleri tekrarlanirdi (istifadeci: «bu
-          təkrar qalıb») - qapilar artiq yuxaridadir.  Videodan sonra
-          NOVBETI addim: hesab yaratmaq.  -->
     <div class="demo cta" id="cta">
-      <span class="dic" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-        stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3.6 3.6L15 5.8"/></svg></span>
+      <span class="dic" aria-hidden="true"><svg class="ic"><use href="#i-check"/></svg></span>
       <div class="dtx">
-      <b>Bəyəndiniz? Hesab yaradın.</b> Bir dəqiqə çəkir: ad, e-poçt, parol — sonra
-      ilk qrupunuzu yaradıb şagirdə kodu göndərirsiniz. Beta dövründə pulsuzdur.
-      <div class="dlinks">
-        <a class="pri" href="muellim/" data-ev="panel">Hesab yarat</a>
-        <a href="komek/" data-ev="beledci">Bələdçini oxu</a>
-      </div>
+        <b>Bəyəndiniz? Hesab yaradın.</b> Bir dəqiqə çəkir: ad, e-poçt, parol — sonra
+        ilk qrupunuzu yaradıb şagirdə kodu göndərirsiniz. Beta dövründə pulsuzdur.
+        <div class="dlinks">
+          <a class="pri" href="muellim/" data-ev="panel">Hesab yarat</a>
+          <a href="komek/" data-ev="beledci">Bələdçini oxu</a>
+        </div>
       </div>
     </div>
     <p class="beta-note"><b>Bil10 hələ hazırlanır (beta).</b> Bu dövrdə bütün
@@ -667,170 +644,145 @@
   </div>
 </div></section>
 
-<section id="imkanlar" class="tint"><div class="wrap">
+<section id="imkanlar" class="dark"><div class="ctn n dgrid">
+  <div>
     <p class="eyebrow">İmkanlar</p>
-    <h2 class="stitle">Nə edir</h2>
-    <p class="ssub">Repetitorun həftəlik vaxtını yeyən işlər.</p>
-    <div class="feat">
-
-      <div class="f">
-        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11 2.5H6a1.8 1.8 0 0 0-1.8 1.8v10.4A1.8 1.8 0 0 0 6 16.5h7a1.8 1.8 0 0 0 1.8-1.8V6.3L11 2.5z"/>
-          <path d="M11 2.5v3.8h3.8"/><path d="M7.2 10h4.6M7.2 12.8h3"/></svg></div>
-        <b>Hazır sual bankı</b>
-        <p>Sualları sıfırdan yazmırsınız: 1–11-ci siniflər, 12 məktəb fənni
-           üzrə hazır suallar var — mövzu və çətinliyi seçirsiniz, test özü
-           yığılır. Öz suallarınızı da əlavə edə bilərsiniz.</p>
-      </div>
-
-      <div class="f">
-        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 10l3.6 3.6L15 5.8"/></svg></div>
-        <b>Bal serverdə hesablanır</b>
-        <p>Doğru cavab şagirdin cihazına heç vaxt getmir. Köçürmək və
-           nəticəni dəyişmək mümkün deyil.</p>
-      </div>
-
-      <div class="f">
-        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3.5 15.5h12"/><rect x="5" y="9" width="2.6" height="4.5" rx=".7"/>
-          <rect x="9" y="5.5" width="2.6" height="8" rx=".7"/>
-          <rect x="13" y="11" width="2.6" height="2.5" rx=".7"/></svg></div>
-        <b>Zəif mövzu hesabatı</b>
-        <p>«Vurmada 92%, mətn məsələsində 41%» — dərsi hara yönəldəcəyiniz
-           özü görünür.</p>
-      </div>
-
-      <div class="f">
-        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9.5" cy="9.5" r="6.8"/><path d="M9.5 5.8v4l2.6 1.5"/></svg></div>
-        <b>Son tarix və cəhd limiti</b>
-        <p>Tapşırıq vaxtında bağlanır. Neçə dəfə işləyə biləcəyini
-           siz təyin edirsiniz.</p>
-      </div>
-
-      <div class="f">
-        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9.5 3l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6L9.5 3z"/>
-        </svg></div>
-        <b>Liderlər lövhəsi</b>
-        <p>Qrup daxilində sağlam yarış. Şagird tam soyadı görmür —
-           yalnız qısa ad.</p>
-      </div>
-
-      <div class="f">
-        <div class="ic"><svg viewBox="0 0 19 19" fill="none" stroke="currentColor"
-          stroke-linecap="round" stroke-linejoin="round">
-          <rect x="4.5" y="3.5" width="10" height="13" rx="2"/>
-          <path d="M7.5 3.5V2.6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v.9"/>
-          <path d="M7 9.5l1.6 1.6L12 7.6"/></svg></div>
-        <b>Səhvin izahı</b>
-        <p>Şagird səhv edəndə qaydanı orada görür — hər dəfə sizdən
-           soruşmur.</p>
-      </div>
-
-    </div>
+    <h2 class="stitle">Bir ekranda şagirdinizi, dərsinizi, qərarınızı görün.</h2>
+    <p class="ssub">Repetitorun həftəlik vaxtını yeyən işlər — sual yazmaq, yoxlamaq,
+      valideynə hesabat — sistemin üstündədir. Siz dərsə qalırsınız.</p>
+    <a class="btn yellow" href="muellim/#/demo" data-ev="demo_muellim" style="margin-top:30px">
+      Müəllim kimi bax <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  </div>
+  <div class="feat">
+    <article class="f"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg>
+      <b>Hazır sual bankı</b>
+      <p>1–11-ci siniflər, 12 məktəb fənni. Mövzu və çətinliyi seçirsiniz, test özü yığılır. Öz suallarınızı da əlavə edirsiniz.</p></article>
+    <article class="f"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg>
+      <b>Bal serverdə hesablanır</b>
+      <p>Doğru cavab şagirdin cihazına heç vaxt getmir. Köçürmək və nəticəni dəyişmək mümkün deyil.</p></article>
+    <article class="f"><svg class="ic" aria-hidden="true"><use href="#i-bars"/></svg>
+      <b>Zəif mövzu hesabatı</b>
+      <p>«Vurmada 92%, mətn məsələsində 41%» — dərsi hara yönəldəcəyiniz özü görünür.</p></article>
+    <article class="f"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>
+      <b>Son tarix və cəhd limiti</b>
+      <p>Tapşırıq vaxtında bağlanır. Neçə dəfə işləyə biləcəyini siz təyin edirsiniz.</p></article>
+    <article class="f"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg>
+      <b>Liderlər lövhəsi</b>
+      <p>Qrup daxilində sağlam yarış. Şagird tam soyadı görmür — yalnız qısa ad.</p></article>
+    <article class="f"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg>
+      <b>Səhvin izahı</b>
+      <p>Şagird səhv edəndə qaydanı orada görür — hər dəfə sizdən soruşmur.</p></article>
+  </div>
 </div></section>
 
-<section id="hedd"><div class="wrap">
+<section id="hedd" class="cream"><div class="ctn n">
+  <div class="pintro">
     <p class="eyebrow">Hədd</p>
-    <h2 class="stitle">Nə pulsuz, nə abunədə</h2>
+    <h2 class="stitle">Nə pulsuz, nə abunədə.</h2>
     <p class="ssub">Gizli bənd yoxdur — hər ikisi burada yazılıb.</p>
-    <div class="heddwrap">
-      <div class="betabar">
-        <span class="bi" aria-hidden="true"><svg viewBox="0 0 19 19" fill="none"
-          stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9.5" cy="9.5" r="7"/><path d="M9.5 6.2v.1M9.5 9v4"/></svg></span>
-        <p><b>Beta mərhələsi.</b> Hazırda müəllimlər üçün də ödənişsizdir —
-           aşağıdakı sağ sütun da daxil olmaqla bütün imkanlar açıqdır.
-           Ödənişli mərhələdə nəzərdə tutulan tarif: <b>hər şagird üçün
-           aylıq 1,50 ₼</b>. Keçid əvvəlcədən elan olunacaq və o vaxta qədər
-           açılmış müddət saxlanılacaq.</p>
-      </div>
-      <div class="hedd" id="heddBox"></div>
-    </div>
+  </div>
+  <div class="betabar">
+    <svg class="ic" aria-hidden="true"><use href="#i-info"/></svg>
+    <p><b>Beta mərhələsi.</b> Hazırda müəllimlər üçün də ödənişsizdir —
+       «Abunə ilə açılır» sütunu da daxil olmaqla bütün imkanlar açıqdır. Ödənişli mərhələdə
+       nəzərdə tutulan tarif: <b>hər şagird üçün aylıq 1,50 ₼</b>. Keçid
+       əvvəlcədən elan olunacaq və o vaxta qədər açılmış müddət saxlanılacaq.</p>
+  </div>
+  <div class="hedd" id="heddBox"></div>
 </div></section>
 
-<section class="freesec"><div class="wrap">
-    <div class="free">
-      <div class="t">
-        <h3>Şagird və valideyn heç nə ödəmir</h3>
-        <p>Qeydiyyat yoxdur, e-poçt yoxdur, ödəniş yoxdur. Şagird müəllimin
-           verdiyi kodu yazır, testi işləyir, nəticəsini görür; valideyn öz kodu ilə
-           uşağının gedişatına baxır. Valideyn heç vaxt ödəmir — nəticələr həmişə açıqdır; ortalama və keçən ayla müqayisə müəllimin abunəsi ilə görünür. Müəllim üçün beta dövründə bütün imkanlar pulsuzdur; pullu mərhələyə keçəndə əvvəlcədən xəbər veriləcək.</p>
-      </div>
-      <span class="badge">Şagird və valideyn — həmişə pulsuz</span>
-    </div>
-</div></section>
-
-<footer class="foot">
-  <div class="wrap">
-    <div class="fgrid">
-      <div class="fbrand">
-        <a class="logo" href="./">
-          <span class="m"><svg viewBox="0 0 32 32" aria-hidden="true">
-            <path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="#fff"/>
-            <g fill="none" stroke="#2b4acb" stroke-width="2.5" stroke-linecap="round">
-              <path d="M10.2 10.2 12.5 8.4 V16"/>
-              <ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/>
-            </g>
-            <path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#ffc94d"/>
-            <path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#1a2233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg></span>
-          <span><b>Bil10</b><s>onlayn test sistemi</s></span>
-        </a>
-        <p>Repetitor və müəllimlər üçün: qrup yaradın, test təyin edin,
-           nəticə özü yığılsın. Şagird və valideyn üçün həmişə pulsuz.</p>
-        <span class="fbeta">Beta · hazırlıq mərhələsindədir</span>
-      </div>
-      <div class="fcol">
-        <b>Sayt</b>
-        <a href="#addimlar">Necə işləyir</a>
-        <a href="#imkanlar">İmkanlar</a>
-        <a href="#hedd">Nə pulsuz</a>
-        <a href="komek/" data-ev="beledci">Bələdçi</a>
-        <a href="mexfilik/">Məxfilik</a>
-        <a href="#demo">Nümunə hesab</a>
-      </div>
-      <div class="fcol">
-        <b>Giriş</b>
-        <a href="muellim/" data-ev="panel">Müəllim paneli</a>
-        <a href="sagird/">Şagird girişi</a>
-        <a href="valideyn/">Valideyn girişi</a>
-      </div>
-      <div class="fcol">
-        <b>Əlaqə</b>
-        <a href="https://wa.me/994702023080" rel="noopener" data-ev="wa">
-          <svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3.4 15.8l1-3.3A6.3 6.3 0 1 1 6.9 15l-3.5.8z"/><path d="M7.4 7.3c0 2.3 2 4.3 4.3 4.3l.8-1.2-1.5-.7-.6.6a3 3 0 0 1-1.7-1.7l.6-.6-.7-1.5-1.2.8z"/>
-          </svg>
-          WhatsApp:&nbsp;+994&nbsp;70&nbsp;202&nbsp;30&nbsp;80</a>
-        <a href="mailto:info@bil10.az" data-ev="mail">
-          <svg viewBox="0 0 19 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="2.2" y="4.2" width="14.6" height="10.6" rx="1.6"/><path d="M2.6 5.2l6.9 4.7 6.9-4.7"/>
-          </svg>
-          info@bil10.az</a>
-        <a href="https://bil10.az">bil10.az</a>
+<section class="trust"><div class="ctn n tgrid">
+  <div class="tvis">
+    <span class="tbadge">Həmişə pulsuz</span>
+    <div class="tline">
+      <span class="shield"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></span>
+      <div>
+        <h3>Şagird və valideyn heç nə ödəmir.</h3>
+        <p>Qeydiyyat yoxdur, e-poçt yoxdur, ödəniş yoxdur. Şagird müəllimin verdiyi
+           kodu yazır, testi işləyir, nəticəsini görür; valideyn öz kodu ilə uşağının
+           gedişatına baxır.</p>
       </div>
     </div>
-    <div class="fbot">
-      <span>© 2026 Bil10 · onlayn test sistemi</span>
-      <span>Bütün hüquqlar qorunur</span>
+    <div class="plist">
+      <span><svg class="ic" aria-hidden="true"><use href="#i-ccheck"/></svg> Bal serverdə hesablanır, cavab cihaza getmir</span>
+      <span><svg class="ic" aria-hidden="true"><use href="#i-ccheck"/></svg> Şagird tam soyadla görünmür</span>
+      <span><svg class="ic" aria-hidden="true"><use href="#i-ccheck"/></svg> Məlumat reklam üçün istifadə edilmir</span>
+      <span><svg class="ic" aria-hidden="true"><use href="#i-ccheck"/></svg> Kart məlumatı tələb olunmur</span>
     </div>
   </div>
-</footer>
+  <div>
+    <p class="eyebrow">Etibar</p>
+    <h2 class="stitle">Şagird məlumatı ilə işləyərkən rahat olun.</h2>
+    <p class="ssub">Siz yalnız öz qruplarınızı və onların nəticəsini görürsünüz.
+      Nə saxlanır, nə saxlanmır — <a href="mexfilik/">məxfilik siyasətində →</a></p>
+  </div>
+</div></section>
 
-  <script src="assets/ferq.js?v=501"></script>
+<section class="final"><div class="ctn in">
+  <div>
+    <p class="eyebrow">İlk addım sizdən</p>
+    <h2>Növbəti dərsiniz üçün aydın başlanğıc yaradın.</h2>
+  </div>
+  <a class="btn navy" href="muellim/" data-ev="panel">Hesab yarat — pulsuz
+    <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+</div></section>
+</main>
+
+<footer class="foot"><div class="ctn">
+  <div class="fgrid">
+    <div class="fbrand">
+      <a class="logo" href="./">
+        <span class="m"><svg viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="#fff"/>
+          <g fill="none" stroke="#087f75" stroke-width="2.5" stroke-linecap="round">
+            <path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/>
+          </g>
+          <path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#f4c94f"/>
+          <path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#173b50" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg></span>
+        <span><b>Bil<em>10</em></b></span>
+      </a>
+      <p>Müəllimin qərarını aydınlaşdıran diaqnostika. Şagird və valideyn üçün həmişə pulsuz.</p>
+      <span class="fbeta">Beta · hazırlıq mərhələsindədir</span>
+    </div>
+    <div class="fcol">
+      <b>Sayt</b>
+      <a href="#addimlar">Necə işləyir</a>
+      <a href="#video-sec">Video</a>
+      <a href="#imkanlar">İmkanlar</a>
+      <a href="#hedd">Nə pulsuz</a>
+      <a href="komek/" data-ev="beledci">Bələdçi</a>
+      <a href="mexfilik/">Məxfilik</a>
+    </div>
+    <div class="fcol">
+      <b>Giriş</b>
+      <a href="muellim/" data-ev="panel">Müəllim paneli</a>
+      <a href="muellim/#/demo" data-ev="demo_muellim">Nümunə hesab</a>
+      <a href="sagird/">Şagird girişi</a>
+      <a href="valideyn/">Valideyn girişi</a>
+    </div>
+    <div class="fcol">
+      <b>Əlaqə</b>
+      <a href="https://wa.me/994702023080" rel="noopener" data-ev="wa">
+        <svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg>
+        WhatsApp:&nbsp;+994&nbsp;70&nbsp;202&nbsp;30&nbsp;80</a>
+      <a href="mailto:info@bil10.az" data-ev="mail">
+        <svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg>
+        info@bil10.az</a>
+      <a href="https://bil10.az">bil10.az</a>
+    </div>
+  </div>
+  <div class="fbot">
+    <span>© 2026 Bil10 · onlayn test sistemi</span>
+    <span>Bütün hüquqlar qorunur</span>
+  </div>
+</div></footer>
+
+  <script src="assets/ferq.js?v=502"></script>
   <script>
   /*  Siyahi assets/ferq.js-den gelir - panel de EYNI fayldan oxuyur.
       Burada tekrar yazilsaydi, bir imkan deyisende bir yer kohne qalar
-      ve yalan ved yaranardi.  Server sorgusu yoxdur: sagird yeri
-      susma ile 5-dir (app.free_seat_limit() ile eyni).  */
+      ve yalan ved yaranardi.  */
   (function () {
     var box = document.getElementById("heddBox");
     if (!box || !window.FERQ) return;
@@ -845,9 +797,7 @@
       '<div class="cc on"><p class="ch">Abunə ilə açılır</p>' + ul(f.abune) + "</div>";
   })();
 
-  /*  Video teqdimat: suret duymeleri ve fesil kecidleri.  Brauzerin oz
-      suret menyusu telefonda cetin tapilir - muellim burada bir toxunusla
-      yavasladir.  Secim localStorage-da qalir (yalniz bu cihaz).
+  /*  Video teqdimat: suret duymeleri.  Secim localStorage-da qalir.
       playbackRate bezi brauzerlerde menbe yuklenende sifirlanir - ona gore
       loadedmetadata ve play-de yeniden qoyulur.  */
   (function () {
@@ -879,8 +829,8 @@
     });
   })();
   </script>
-  <script src="assets/pwa.js?v=501"></script>
-  <script src="muellim/config.js?v=501"></script>
-  <script src="assets/visit.js?v=501"></script>
+  <script src="assets/pwa.js?v=502"></script>
+  <script src="muellim/config.js?v=502"></script>
+  <script src="assets/visit.js?v=502"></script>
 </body>
 </html>

@@ -3445,6 +3445,44 @@ olmalıdır**, köhnə «geri düyməsi + başlıq kartı» üslubu qalmayıb.
   böyüt, kartı qaldır» polişi sınandı və qaytarıldı (istifadəçi fərq
   görmədi) — hero-ya daha toxunulmur.
 
+## Dizayn dili v2 — «nanə + lacivərd + sarı» (2026-09-16, ana səhifə)
+
+Ana səhifə Replit Design eskizindən (istifadəçi: «çox qəşəngdir,
+xüsusilə sarı zolaq») bizim adi HTML/CSS-ə köçürüldü. **Bundan sonra hər
+yeni ekran bu ailədən olmalıdır**; panel/şagird/valideyn hələ köhnə
+zolaq şablonundadır (yuxarıdakı bölmə) — sıra: panel karkası → boş hesab
+ekranı → Qrup → Hesabat. Masaüstündə sol menyu istifadəçi tərəfindən
+QƏBUL edilib (16.09), telefonda alt zolaq.
+
+- **Tokenlər** (`index.html` `:root`, gələcəkdə `base.css`-ə):
+  fon `#f7fbf9`, yazı `#173b50`, lacivərd `#123a51`, teal `#087f75`
+  (tünd `#05625d`, yumşaq `#eaf7f3`, nanə `#d9f5ef`, parlaq `#64d2c3`),
+  sarı `#f4c94f` (tünd `#d7a931`, yumşaq `#fff1c6`), mərcan `#e98773`,
+  yaşıl `#42bcae`, xətt `#dcebe6`, boz yazı `#67817f`.
+  Dörd reng, hər bölmədə eyni rol: teal = əsas düymə/vurğu, sarı = CTA və
+  xəbərdarlıq, lacivərd = tünd bölmə/altlıq, nanə = fon çaları.
+- **Şrift** Plus Jakarta Sans (OFL), `assets/fonts/pjs-latin*.woff2`
+  (dəyişkən çəki 200–800, ~49 KB). `@font-face` adı `"PJS"`. Kənar
+  yükləmə YOXDUR — Google Fonts linki qadağandır (siyasət). Ağırlıq:
+  başlıq 800, `letter-spacing:-.06em`; mətn 400–600.
+- **Bölmə ritmi:** hero (nanə, üstdə 4px sarı xətt) → qərar zolağı →
+  krem `#fffdf8` (addımlar) → nanə (video + CTA) → lacivərd (imkanlar,
+  `.dark`) → krem (hədd) → nanə (etibar) → **sarı** son çağırış → lacivərd
+  altlıq.
+- **Hero sağ tərəf:** hesabat kartı (`.rcard`), illüstrasiya çıxdı.
+  Kartın dili bizim realdır: faiz, «zəif · orta · yaxşı», «Bundan başla»;
+  bal («7,8/10») YOXDUR, paneldə də yoxdur. Altında «nümunə məlumat».
+- **Düymələr:** `.btn.teal` (5px tünd alt kölgə), `.btn.yellow`,
+  `.btn.navy`, `.btn.line`. Qapılar `.door` (teal) / `.door.b` (kontur).
+- **Testlərin baxdığı seçicilər saxlanıb:** `.doors a` (tam 2:
+  `muellim/#/demo` + `muellim/`), `.hlinks a[href=muellim/]` tək,
+  `#cta a[href=muellim/]` tək, `#demo` yox, `a.pdoor` yox, `#tqVid`,
+  `.vspeed button`, `#heddBox`, `data-ev` düymələri, `.enter .lg/.sm`.
+- Replit-in yalan vədləri («müəllim komandası», «məlumatı silin»,
+  qeydiyyat modalı) köçürülmədi. Replit-dən kod istəyəndə: «single static
+  HTML, inline CSS, no React/Tailwind, no external fonts» — TSX lazım
+  deyil, ekran şəkli + statik HTML bəsdir.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
