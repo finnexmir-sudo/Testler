@@ -3572,6 +3572,21 @@ deyil). **Canlıya əl ilə tətbiq olunmalıdır**; sonra Actions → «Supabas
 oyaq saxla» → Run workflow ilə yoxlanır (HTTP 200 + `deleted_copies`).
 Actions uğursuzluğu heç kimə görünmürdü — nəticələrə arabir bax.
 
+## db/198 — nümunə «Bizə yaz» yazısı silinmiş hesabdan sonra real görünürdü (2026-09-16)
+
+İdarəetmədə «19 yeni müraciət» — hamısı eyni mətn («Qrup hesabatında zəif
+mövzuların yanında «təkrar dərs» üçün hazır test düyməsi…»), göndərən
+«Müəllim», ad/e-poçt boş. Bu, `app.demo_build`-in nümunə hesaba yazdığı
+nümunə yazıdır. `feedback.account_id / user_id` FK-ları ON DELETE SET NULL
+olduğu üçün nüsxə silinəndə sətir NULL-larla qalır, `feedback_is_demo(NULL,
+NULL)` false verir və sətir real müraciət kimi çıxır. `db/198`: (1)
+`accounts` BEFORE DELETE trigger-i `is_demo` hesabın feedback sətirlərini
+silir, (2) bir dəfəlik yetim təmizliyi, (3) üç açarı da NULL olan sətir
+nümunə sayılır. `smoke_numune.sql` §10. **Canlıya əl ilə tətbiq
+olunmalıdır**, 05_grants lazım deyil. Qayda: nümunə quruluşuna yeni cədvəl
+əlavə edəndə FK-nın SET NULL olub-olmadığına bax — SET NULL-dursa silinmə
+yolunda ayrıca təmizlə.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

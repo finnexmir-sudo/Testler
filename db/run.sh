@@ -117,6 +117,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 194_ev_tapsirigi_bildiris.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 195_ziyaret_menbe.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 196_mesq_hedd_5.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 197_demo_reset_where.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 198_numune_bize_yaz_yetim.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

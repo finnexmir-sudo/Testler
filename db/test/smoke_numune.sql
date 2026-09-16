@@ -264,3 +264,25 @@ begin
   end loop;
 end $$;
 \echo 'smoke_numune: 9 (197) WHERE-siz DELETE yoxdur - OK'
+
+-- =====================================================================
+--  10. (198) numune hesab silinende «Bize yaz» yazisi da silinir;
+--      yetim setir (hesab/istifadeci/sagird NULL) idareetmede gorunmur.
+-- =====================================================================
+do $$
+declare v_acc uuid; v_n int;
+begin
+  insert into public.accounts (type, name, owner_id, is_demo)
+  values ('tutor', 'smoke198', app.demo_owner(), true) returning id into v_acc;
+  insert into public.feedback (author_type, account_id, kind, page, body)
+  values ('teacher', v_acc, 'teklif', 'hesabat', 'smoke198 numune yazisi - silinmelidir');
+  delete from public.accounts where id = v_acc;
+  select count(*) into v_n from public.feedback where body like 'smoke198%';
+  if v_n <> 0 then
+    raise exception '198: numune hesab silindi, feedback setiri qaldi (%)', v_n;
+  end if;
+  if not app.feedback_is_demo(null, null) then
+    raise exception '198: yetim feedback setiri numune sayilmalidir';
+  end if;
+end $$;
+\echo 'smoke_numune: 10 (198) numune silinende Bize yaz da silinir - OK'
