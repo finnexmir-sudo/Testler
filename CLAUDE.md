@@ -3481,6 +3481,23 @@ ilk addım «ilk testini yığ» (qrupsuz), «adları yapışdır» toplu şagir
 hazırlanıb», müəllimin həftəlik nəticə kartı (şəkil), həmkarla paylaş linki.
 Ödəniş axını (kart, sınaq mesajları) istifadəçi qərarı ilə SONRAYA.
 
+## Başlanğıc kartı v2 — əvvəl test, sonra qrup (2026-09-17)
+
+Üçüncü AI turu + rəqəm (3 girişdən 0 qrup): «qrup yarat» müəllim üçün iş
+idi, dəyər sonra gəlirdi. Yeni sıra: 1 «İlk testinizi yığın» (`#onbGen` →
+`#/gen`, qrupsuz; «Necə görünür? Bələdçi» → `komek/#muellim`), 2 «Şagirdləri
+əlavə edin» (`#gForm` kartın içində + `#onbNames` textarea «hər sətirdə bir
+ad» → `onbNames()` təmizləyir, ≤60; `bindGroupForm` qrupu yaradıb `onbAddMany`
+ilə adları ardıcıl `rpc_add_student` edir; qrup varsa yalnız textarea +
+`#onbAdd`; limit dolanda «N şagird əlavə olundu, qalanı yox: …»), 3 «Testi
+göndərin» (`#onbAsg` → `#/a/<gid>`). Addımın «edilib» olması MƏLUMATDAN:
+`stats.tests>0`, şagird var, `stats.attempts>0`; `cur` = ilk edilməmiş; hamısı
+edilib → kart yox; «Bağla» (`localStorage bil10_onb_off`, yalnız 3-cü addımda).
+2-ci addımın forması 1-ci addımda da görünür (`.ost.todo .obody` gizlədilmir —
+e2e `#onb #gForm` gözləyir). Bank SAYI yazılmır (qayda). `e2e_panel` «İlk
+testinizi yığın» + `#onbGen` + `#onbNames`; şəkil `test/_v2_onb2.py`
+(qeydiyyat → quruluş → SQL ilə test → adlar yapışdır → 3-cü addım).
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

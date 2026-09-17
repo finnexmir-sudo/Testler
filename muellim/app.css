@@ -2106,3 +2106,21 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .hrow .tg.bad{background:#fdece6;color:#b42318}
 @media (max-width:640px){ .hrow{flex-wrap:wrap;row-gap:6px} .hrow .who{flex:1 1 0;min-width:0} .hrow .tags{flex:1 1 100%;flex-wrap:wrap;justify-content:flex-start;padding-left:42px} }
 @media (max-width:760px){ .hsteps{grid-template-columns:repeat(4,1fr)} }
+
+/*  17.09 Baslangic: addim govdesi, adlar sahesi, beledci kecidi, «Bağla»  */
+.ost .obody{margin-top:10px}
+.ost .obody .btn{vertical-align:middle}
+.ost .olink{display:inline-flex;align-items:center;gap:3px;margin-left:12px;font-size:13px;font-weight:600;
+  color:var(--brand);text-decoration:none;vertical-align:middle}
+.ost .olink svg{width:14px;height:14px}
+.ost .onl{display:block;margin-top:12px;font-size:13px;font-weight:600}
+.ost .onl .muted{font-weight:500}
+#onbNames{width:100%;box-sizing:border-box;min-height:96px;margin-top:6px;font:inherit;font-size:14px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);resize:vertical}
+#onbNames:focus{outline:none;border-color:var(--brand)}
+#onbErr:not(:empty){margin-top:8px}
+#onbAdd{margin-top:10px}
+.onbh{position:relative}
+.onbh .lnk{position:absolute;right:0;top:0;color:var(--fg-3)}
+/*  2-ci addimin formasi 1-ci addimda da gorunur (muellim isteyirse evvel sagird elave etsin)  */
+.ost.todo .obody{opacity:.92}

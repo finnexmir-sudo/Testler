@@ -1165,8 +1165,19 @@
         //  HEMIN proqramin icinde axtarirdi - 8-ci sinif orada
         //  olmadigi ucun qrup SINIFSIZ yaranirdi (db/31).
         p_level_code: $("glevel").value || null
-      }).then(function () {
+      }).then(function (r) {
         $("gname").value = "";
+        //  17.09: baslangic kartinda yapisdirilan adlar - qrupla birge
+        var names = onbNames();
+        if (names.length && r && r.id) {
+          return onbAddMany(r.id, names).then(function (x) {
+            setBusy("btnGroup", false, "Qrup yarat");
+            if (x.err && $("onbErr")) {
+              $("onbErr").innerHTML = msg("err", (x.ok ? x.ok + " şagird əlavə olundu, qalanı yox: " : "") + fail(x.err));
+            }
+            return refreshContext().then(function () { loadGroups(); });
+          });
+        }
         setBusy("btnGroup", false, "Qrup yarat");
         loadGroups();
       }).catch(function (e) {
@@ -1456,13 +1467,13 @@
         if (h2 && h2.classList && h2.classList.contains("h2row")) h2.style.display = "none";   //  .h2row display:flex - hidden islemir
         var top = $("hTop");
         if (top) top.hidden = true;
-        onbDraw(1, null);
+        onbDraw(null, false);
         return;
       }
       //  ilk qrup indi yarandi - ekran adi qurulusuna qayidir
       if ($("hTop") && $("hTop").hidden) { screenHome(); return; }
-      //  qrup var: sagird yoxdursa 2-ci addim, test yoxdursa 3-cu
-      onbDraw((studs || []).length ? 3 : 2, rows[0]);
+      //  qrup var: addim melumatdan cixir (test? sagird? cehd?)
+      onbDraw(rows[0], (studs || []).length > 0);
       //  qruplar kart torusu - siyahi setri deyil (Bolt eskizi)
       box.innerHTML = rows.map(function (g) {
         var n = cnt[g.id] || 0;
@@ -1488,28 +1499,37 @@
      test gedenden sonra kart bir daha gorunmur.  Zolaqdaki «Yeni test
      yığ / Sual bankı» duymeleri kart gorunerken gizlenir - adam bir
      seye baxsin.  */
+  /*  BASLANGIC (17.09, ucuncu AI turu + oz reqemlerimiz: 3 girisden 0 qrup).
+      Sira deyisdi: evvel «qrup yarat» idi - muellim ucun IS idi, deyer
+      sonra gelirdi.  Indi 1-ci addim «ilk testini yig» (qrupsuz da olur,
+      hazir bank derhal gorunur; bank SAYI muellime yazilmir - qayda), 2-ci «sagirdleri elave et» (qrup adi +
+      adlari setir-setir yapisdir - tek-tek yazmaq yorurdu), 3-cu «testi
+      gonder».  Addimin «edilib» olmasi MELUMATDAN cixir (test var? sagird
+      var? cehd var?), sira ile deyil - qrupu evvel quran da duz gorur.
+      2-ci addimin formasi hemise gorunur (muellim isteyirse evvel sagird
+      elave etsin); «Bağla» localStorage ile karti birdefelik gizledir.  */
   var ONB_STEPS = [
-    ["Qrupunuzu yaradın",
-     "Ad yazın, sinfi seçin. Şagirdlər və testlər qrupun içindədir."],
+    ["İlk testinizi yığın",
+     "Fənni və mövzunu seçin — hazır bankdan test bir dəqiqəyə yığılır. Qrup lazım deyil."],
     ["Şagirdləri əlavə edin",
-     "Yalnız ad-soyad. Hər şagirdə giriş kodu özü yaranır — e-poçt, parol yoxdur."],
-    ["İlk testi göndərin",
-     "Hazır bankdan yığın, qrupa verin. Şagird kodla girib telefonda həll edir, nəticə özü gəlir."]
+     "Qrupa ad verin, şagirdlərin adlarını sətir-sətir yapışdırın. Hər şagirdə giriş kodu özü yaranır — e-poçt, parol yoxdur."],
+    ["Testi göndərin",
+     "Testi qrupa verin. Şagird kodla girib telefonda həll edir, nəticə və zəif mövzu özü gəlir."]
   ];
-  function onbDraw(step, g) {
+  function onbDraw(g, hasStudents) {
     var o = $("onb");
     if (!o) return;
-    if (step === 3) {
-      //  test sayi rpc_home-dan (paylasilan sorgu) - 0-dirsa 3-cu addim
-      homeData().then(function (v) {
-        if (!$("onb")) return;
-        var st = (v && v.stats) || {};
-        if ((Number(st.tests) || 0) > 0) { onbOff(); return; }
-        onbPaint(3, g);
-      }).catch(function () { onbOff(); });
-      return;
-    }
-    onbPaint(step, g);
+    var off = false;
+    try { off = localStorage.getItem("bil10_onb_off") === "1"; } catch (e) {}
+    if (off) { onbOff(); return; }
+    homeData().then(function (v) {
+      if (!$("onb")) return;
+      var st = (v && v.stats) || {};
+      var done = [(Number(st.tests) || 0) > 0, !!hasStudents, (Number(st.attempts) || 0) > 0];
+      var cur = !done[0] ? 1 : (!done[1] ? 2 : (!done[2] ? 3 : 0));
+      if (!cur) { onbOff(); return; }
+      onbPaint(cur, done, g);
+    }).catch(function () { onbOff(); });
   }
   function onbOff() {
     var o = $("onb");
@@ -1519,42 +1539,106 @@
     var fc = $("freeCard");
     if (fc) fc.style.display = "";
   }
-  function onbPaint(cur, g) {
+  function onbNamesHtml(withBtn) {
+    return '<label class="onl" for="onbNames">Şagirdlərin adları <span class="muted">— hər sətirdə bir ad' +
+        (withBtn ? "" : ", istəyə görə") + "</span></label>" +
+      '<textarea id="onbNames" rows="4" placeholder="Aysel Məmmədova\nMurad Əliyev\nLeyla Hüseynova"></textarea>' +
+      '<div id="onbErr"></div>' +
+      (withBtn ? '<button class="btn go" id="onbAdd">' + ic("plus") + "Şagirdləri əlavə et</button>" : "");
+  }
+  //  textarea-dan adlar: bos setirler, tekrarlar atilir, en cox 60
+  function onbNames() {
+    var t = $("onbNames");
+    if (!t) return [];
+    var seen = {}, out = [];
+    (t.value || "").split(/\r?\n/).forEach(function (x) {
+      x = x.replace(/\s+/g, " ").trim();
+      if (x.length < 2) return;
+      var k = x.toLowerCase();
+      if (seen[k]) return;
+      seen[k] = 1; out.push(x);
+    });
+    return out.slice(0, 60);
+  }
+  //  adlari ardicil elave edir; limit dolanda dayanir, necesinin girdiyini deyir
+  function onbAddMany(classId, names) {
+    var n = 0;
+    function next() {
+      if (n >= names.length) return Promise.resolve(n);
+      return sb.rpc("rpc_add_student", { p_class_id: classId, p_full_name: names[n] })
+        .then(function () { n++; return next(); });
+    }
+    return next().then(function () { return { ok: n, err: null }; },
+                       function (e) { return { ok: n, err: e }; });
+  }
+  function onbPaint(cur, done, g) {
     var o = $("onb");
     if (!o) return;
     o.innerHTML =
       '<div class="card onb">' +
         '<div class="onbh"><span class="eye">Başlanğıc</span>' +
           "<b>Üç addım — beş dəqiqə</b>" +
-          "<p>Sonra panel sizindir: nəticə, zəif mövzu, növbəti addım.</p></div>" +
+          "<p>Sonra panel sizindir: nəticə, zəif mövzu, növbəti addım.</p>" +
+          (cur === 3 ? '<button class="lnk" id="onbClose">Bağla</button>' : "") +
+          "</div>" +
         '<ol class="osts">' +
         ONB_STEPS.map(function (s, i) {
-          var n = i + 1, cls = n < cur ? "done" : (n === cur ? "cur" : "todo");
+          var n = i + 1, cls = done[i] ? "done" : (n === cur ? "cur" : "todo");
           var body = "";
-          if (n === cur) {
-            body = cur === 1 ? '<div id="onbForm"></div>' :
-              cur === 2 ? '<button class="btn go" id="onbStu">' + ic("plus") + "Şagird əlavə et</button>" :
-              '<button class="btn go" id="onbGen">' + ic("gen") + "Test yığ və göndər</button>";
+          if (n === 1 && !done[0]) {
+            body = '<div class="obody"><button class="btn go" id="onbGen">' + ic("gen") + "Test yığ</button>" +
+              '<a class="olink" href="../komek/#muellim" target="_blank" rel="noopener">Necə görünür? Bələdçi ' + ic("right") + "</a></div>";
+          } else if (n === 2 && !done[1]) {
+            //  qrup yoxdursa: qrup formasi (#gForm buraya kocurulur) + adlar;
+            //  qrup varsa: yalniz adlar + duyme
+            body = '<div class="obody">' + (g ? onbNamesHtml(true) : '<div id="onbForm"></div>' + onbNamesHtml(false)) + "</div>";
+          } else if (n === 3 && cur === 3) {
+            body = '<div class="obody"><button class="btn go" id="onbAsg">' + ic("clip") + "Testi qrupa ver</button></div>";
           }
-          return '<li class="ost ' + cls + '"><span class="on">' + (n < cur ? ic("check") : n) + "</span>" +
+          return '<li class="ost ' + cls + '"><span class="on">' + (done[i] ? ic("check") : n) + "</span>" +
             '<div class="ot"><b>' + s[0] + "</b><p>" + s[1] + "</p>" + body + "</div></li>";
         }).join("") +
         "</ol></div>";
     o.hidden = false;
-    if (cur === 1) {
+    if (!done[1] && !g) {
       var gf = $("gForm"), slot = $("onbForm");
-      if (gf && slot) { slot.appendChild(gf); gf.classList.add("inonb"); }
+      if (gf && slot) {
+        slot.appendChild(gf); gf.classList.add("inonb");
+        //  adlar sahesi «Qrup yarat» duymesinin USTUNE - duyme sonda olsun
+        var bg = $("btnGroup");
+        ["onbErr", "onbNames"].forEach(function (id) { var e = $(id); if (e && bg) gf.insertBefore(e, bg); });
+        var lb = o.querySelector(".onl");
+        if (lb && bg) gf.insertBefore(lb, $("onbNames") || bg);
+      }
     }
-    if (cur === 2 && g) on("onbStu", "click", function () { nav("#/g/" + g.id); });
-    if (cur === 3) on("onbGen", "click", function () { nav("#/gen"); });
+    on("onbGen", "click", function () { nav("#/gen"); });
+    on("onbAsg", "click", function () { if (g) nav("#/a/" + g.id); });
+    on("onbClose", "click", function () {
+      try { localStorage.setItem("bil10_onb_off", "1"); } catch (e) {}
+      onbOff();
+    });
+    on("onbAdd", "click", function () {
+      if (busy || !g) return;
+      var names = onbNames();
+      if (!names.length) { $("onbErr").innerHTML = msg("err", "Adları yazın — hər sətirdə bir ad."); return; }
+      $("onbErr").innerHTML = "";
+      busy = true; setBusy("onbAdd", true, "Şagirdləri əlavə et");
+      onbAddMany(g.id, names).then(function (r) {
+        busy = false;
+        if (r.err) {
+          setBusy("onbAdd", false, "Şagirdləri əlavə et");
+          $("onbErr").innerHTML = msg("err", (r.ok ? r.ok + " şagird əlavə olundu, qalanı yox: " : "") + fail(r.err));
+          if (r.ok) refreshContext().then(function () { loadGroups(); });
+          return;
+        }
+        refreshContext().then(function () { loadGroups(); });
+      });
+    });
     //  .bacts display:flex-dir - hidden atributu islemir, style ile
     var ba = document.querySelector("#band .bacts");
     if (ba) ba.style.display = "none";
-    //  «Pulsuz hədd» karti (#freeCard) addimlarin ustunu tutmasin: ilk
-    //  ekranda tam siyahi ile acilirdi, addimlar asagida qalirdi (16.09).
-    //  Melumat Profil ekranindadir; ilk test gedenden sonra kart qayidir.
-    //  Hediyye karti (#giftCard) QALIR - qisa «xos geldin» mesajidir
-    //  (e2e_panel A1 onu oxuyur).
+    //  «Pulsuz hədd» karti (#freeCard) addimlarin ustunu tutmasin.
+    //  Hediyye karti (#giftCard) QALIR (e2e_panel A1 onu oxuyur).
     var fc = $("freeCard");
     if (fc) fc.style.display = "none";
   }

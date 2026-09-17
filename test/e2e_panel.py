@@ -239,8 +239,11 @@ with sync_playwright() as pw:
     ok(pg.evaluate("(function(){var g=document.querySelector('#giftCard'),o=document.querySelector('#onb');"
                    "return !!(g&&o)&&(g.compareDocumentPosition(o)&Node.DOCUMENT_POSITION_FOLLOWING)>0;})()"),
        "ilk qrup formasi baslangic kartinda, hediyye karti ustundedir")
-    ok(pg.locator("#onb .ost.cur").count() == 1 and "Qrupunuzu yaradın" in pg.inner_text("#onb .ost.cur"),
-       "baslangic: 1-ci addim aktivdir")
+    #  17.09: 1-ci addim «ilk testini yığ» (qrupsuz), qrup formasi 2-ci addimdadir
+    ok(pg.locator("#onb .ost.cur").count() == 1 and "İlk testinizi yığın" in pg.inner_text("#onb .ost.cur"),
+       "baslangic: 1-ci addim «ilk testini yığ» aktivdir")
+    ok(pg.locator("#onbGen").count() == 1 and pg.locator("#onb #onbNames").count() == 1,
+       "test duymesi + adlar sahesi kartdadir")
     #  qalan yoxlamalar pulsuz hedd ucundur - hediyye silinir, ayar baglanir
     db("update public.app_state set val = val || jsonb_build_object('on', false) where key = 'hediyye'; delete from public.subscriptions")
     pg.reload(); pg.wait_for_selector("#btnGroup", timeout=8000)
