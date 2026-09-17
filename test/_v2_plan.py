@@ -12,6 +12,15 @@ db("delete from public.app_state where key='demo_reset'"); db("select public.rpc
 HIDE = "#demoBar{display:none!important}"
 with sync_playwright() as pw:
     br = pw.chromium.launch(executable_path="/opt/pw-browsers/chromium", args=["--no-sandbox"])
+    # masaustu: yalniz «Dersden evvel» karti
+    pd = br.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1).new_page()
+    pd.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
+    pd.goto(PANEL + "#/demo"); pd.wait_for_selector("#demoBar", timeout=60000); pd.wait_for_selector("#groups .gcard", timeout=30000)
+    pd.add_style_tag(content=HIDE)
+    pd.locator("#groups .gcard", has_text="7-ci sinif").first.click(); pd.wait_for_selector("#gTabs", timeout=15000)
+    pd.wait_for_function("document.querySelector('#prep .prow')", timeout=20000); pd.wait_for_timeout(500)
+    pd.locator("#prep .card").screenshot(path=OUT + "/prep_d.png"); print("prep d")
+    pd.context.close()
     p = br.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2).new_page()
     p.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
     p.goto(PANEL + "#/demo"); p.wait_for_selector("#demoBar", timeout=60000); p.wait_for_selector("#groups .gcard", timeout=30000)
