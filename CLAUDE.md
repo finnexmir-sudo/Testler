@@ -3436,6 +3436,18 @@ sətirləri İcmalda gizlənir (Siqnallarda qalır); risk/star qalır. `sayS(n)`
 say şəkilçisi («5-i», «6-sı», «3-ü»). `smoke_icmal_hefte` §3 (abunə lazımdır —
 topics siqnallar kimi pulsuzda null). `test/_v2_topics.py`. **Canlıya əl ilə.**
 
+## Qrup ekranında «Mövzu mənzərəsi» (2026-09-17)
+
+Replit eskizindən üçüncü fikir. `#gTopics` (`#prep`-dən sonra), `loadTopicMap(g)`
+`rpc_class_report.topics`-dən (əlavə sorğu yoxdur, hesabat sorğusu; pulsuzda
+null → kart çıxmır). `topicBand`: ≥80 Möhkəm (yaşıl) · 60–79 Təkrar (sarı) ·
+<60 Dəstək (narıncı). `total < 5` mövzu sayılmır; zəif birinci, 5 sətir,
+«Bütün N mövzu → Hesabat». Başlıqda xülasə «10 mövzu · 2 dəstək · 7 təkrar ·
+1 möhkəm». Sinif adları `tm-` prefiksli — `.ok/.th/.trow` qlobal stillərlə
+toqquşurdu (zolaq görünmürdü, «1 möhkəm» qutu olurdu). Qayda: yeni kart
+yazanda sinif adlarını prefikslə ver. `test/_v2_tmap.py`. Qalan Replit fikri:
+Son nəticələr sətri (CSS, istəyə görə).
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

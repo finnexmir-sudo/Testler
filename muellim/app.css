@@ -2041,3 +2041,25 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   .al.tp>span:not(.tpi){flex:1 1 calc(100% - 40px)}
   .al.tp .btn{margin-left:28px;margin-top:0}
 }
+
+/*  Movzu menzeresi (qrup ekrani): uc reng - mohkem / tekrar / destek.
+    Sinif adlari unikaldir (tm-): .ok/.th/.trow qlobal stillerle toqqusurdu.  */
+.card.tmap .pt{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.card.tmap .pt b{font-size:15px;font-weight:650}
+.card.tmap .pt .muted{font-size:12.5px}
+.card.tmap .pt i{font-style:normal;font-weight:600}
+.card.tmap .pt i.tm-k{color:var(--ok)} .card.tmap .pt i.tm-m{color:#9a6700} .card.tmap .pt i.tm-l{color:#b54708}
+.card.tmap .tm-row{padding:9px 0;border-top:1px solid var(--n-100)}
+.card.tmap .tm-row:first-of-type{border-top:0}
+.card.tmap .tm-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13.5px;margin-bottom:6px}
+.card.tmap .tm-h>span{min-width:0;font-weight:600;color:var(--fg)}
+.card.tmap .tm-h s{display:block;text-decoration:none;font-weight:500;font-size:12px;color:var(--fg-3);margin-top:1px}
+.card.tmap .tm-h b{flex:0 0 auto;font-size:12.5px;font-weight:650;white-space:nowrap}
+.card.tmap .tm-k .tm-h b{color:var(--ok)} .card.tmap .tm-m .tm-h b{color:#9a6700} .card.tmap .tm-l .tm-h b{color:#b54708}
+.card.tmap .tm-bar{height:8px;border-radius:999px;background:var(--n-100);overflow:hidden}
+.card.tmap .tm-bar i{display:block;height:100%;border-radius:999px;background:var(--ok)}
+.card.tmap .tm-m .tm-bar i{background:#efbd3d}
+.card.tmap .tm-l .tm-bar i{background:#e98773}
+.card.tmap .tfoot{display:flex;justify-content:flex-end;margin-top:8px}
+.card.tmap .tfoot a{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--brand);text-decoration:none}
+.card.tmap .tfoot a svg{width:14px;height:14px}

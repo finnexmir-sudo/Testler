@@ -1968,6 +1968,49 @@
       tapsirigi) - hazir olan kimi yerine yazilir.  */
   function gStat(id, text) { var e = $(id); if (e) e.textContent = text; }
 
+  /*  Movzu menzeresi (17.09, Replit eskizinden): qrupun cavab verdiyi
+      movzular uc sozle - Möhkəm (>= 80) · Təkrar (60-79) · Dəstək (< 60),
+      zolaq ve faiz.  Melumat rpc_class_report.topics-dendir (odenisli;
+      pulsuzda null -> kart cizilmir).  Zeif birinci, en cox 5, qalani
+      hesabatda.  Az cavabli movzu (< 5) seslenmir - bir sual bir movzunu
+      «zəif» ede bilmez.  */
+  function topicBand(r) {
+    r = Number(r) || 0;
+    return r >= 80 ? ["k", "Möhkəm"] : (r >= 60 ? ["m", "Təkrar"] : ["l", "Dəstək"]);
+  }
+  function loadTopicMap(g) {
+    var live = guard();
+    sb.rpc("rpc_class_report", { p_class_id: g.id }).then(function (r) {
+      if (!live()) return;
+      var box = $("gTopics");
+      if (!box) return;
+      var tp = (r && r.topics) || [];
+      tp = tp.filter(function (t) { return (Number(t.total) || 0) >= 5; });
+      if (!tp.length) { box.innerHTML = ""; return; }
+      tp.sort(function (a, b) { return Number(a.ratio) - Number(b.ratio); });
+      var show = tp.slice(0, 5), cnt = { k: 0, m: 0, l: 0 };
+      tp.forEach(function (t) { cnt[topicBand(t.ratio)[0]]++; });
+      box.innerHTML = '<div class="spacer"></div><div class="card tmap">' +
+        '<div class="pt"><b>Mövzu mənzərəsi</b>' +
+          '<span class="muted">' + tp.length + " mövzu · " +
+            (cnt.l ? '<i class="tm-l">' + cnt.l + " dəstək</i> · " : "") +
+            (cnt.m ? '<i class="tm-m">' + cnt.m + " təkrar</i> · " : "") +
+            '<i class="tm-k">' + cnt.k + " möhkəm</i></span></div>" +
+        show.map(function (t) {
+          var b = topicBand(t.ratio), ws = t.weak_students || [];
+          return '<div class="tm-row tm-' + b[0] + '">' +
+            '<div class="tm-h"><span>' + esc(t.name) +
+              (ws.length ? '<s>' + ws.length + " şagird zəif</s>" : "") + "</span>" +
+              "<b>" + b[1] + " · " + pct(t.ratio) + "%</b></div>" +
+            '<div class="tm-bar"><i style="width:' + pct(t.ratio) + '%"></i></div></div>';
+        }).join("") +
+        '<div class="tfoot"><a href="#/r/' + esc(g.id) + '">' +
+          (tp.length > show.length ? "Bütün " + tp.length + " mövzu → Hesabat" : "Hesabata bax") +
+          " " + ic("right") + "</a></div>" +
+      "</div>";
+    }).catch(function () {});
+  }
+
   function loadPrep(g) {
     var live = guard();
     sb.rpc("rpc_lesson_prep", { p_class_id: g.id }).then(function (d) {
@@ -2705,6 +2748,8 @@
       /*  Adı dəyişmə forması buraya açılır - boş ikən görünmür  */
       '<div class="card tight hide" id="gCard"></div>' +
       '<div id="prep"></div>' +
+      //  17.09 (Replit fikri 3): movzu menzeresi - qrupun movzulari zolaqla
+      '<div id="gTopics"></div>' +
       '<div id="alerts"></div>' +
       /*  Iki sekme (istifadeci teklifi): plan + 30 sagird + forma alt-alta
           on ekran olurdu.  Sagirdler acıq gelir; "Yeni sagird" formasi
@@ -2755,6 +2800,7 @@
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
     loadPrep(g);
+    loadTopicMap(g);
     loadAlerts(g.id);
     loadPlan(g);
     loadLedger(g);
