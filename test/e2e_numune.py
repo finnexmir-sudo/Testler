@@ -190,6 +190,37 @@ with sync_playwright() as pw:
     vt = vp.evaluate("document.body.textContent")
     ok("Ayan" in vt and "Davamiyyət" in vt and "Mövzu məşqi" in vt, "valideyn ekrani: usaq, davamiyyet, movzu mesqi", vt[:120].replace("\n", " "))
 
+    print("H · (203) Hesabsız anonim sessiya quraşdırma ekranına düşmür")
+    #  Canlida: nusxe qurulan bir nece saniyede muellim sehifeni yenileyib
+    #  (ya paneli ikinci tabda acib) - sessiya var, hesab hele yox ->
+    #  «Hesabı quraşdırın» -> anonim ustunde e-poctsuz «real» hesab.
+    #  Yenidenqurma: nusxe var, hesabini bazadan silirik (istifadeci
+    #  qalir), paneli hash-siz aciriq.
+    pgh = page(ctx, 412, 900)
+    pgh.goto(PANEL + "#/demo")
+    pgh.wait_for_selector("#demoBar", timeout=40000)
+    pgh.wait_for_selector("#groups .gcard", timeout=20000)
+    own = db("""select a.owner_id from public.accounts a join auth.users u on u.id = a.owner_id
+                 where a.is_demo and a.id <> app.demo_account() and u.email is null
+                 order by a.created_at desc limit 1""", one=True)["owner_id"]
+    db("""delete from public.classes c using public.accounts a where a.id = c.account_id and a.owner_id = %s;
+          delete from public.tests where owner_type = 'educator' and owner_id = %s;
+          delete from public.students s using public.accounts a where a.id = s.account_id and a.owner_id = %s;
+          delete from public.accounts where owner_id = %s;""", (own, own, own, own))
+    ok(db("select count(*) n from public.accounts where owner_id = %s", (own,), one=True)["n"] == 0, "nusxenin hesabi silindi, sessiya qalir")
+    pgh.goto(PANEL); pgh.wait_for_load_state("load")
+    pgh.wait_for_selector("#demoBar", timeout=60000)
+    ok(pgh.locator("#btnSetup").count() == 0 and pgh.locator("#aname").count() == 0,
+       "qurasdirma ekrani cixmir")
+    pgh.wait_for_selector("#groups .gcard", timeout=30000)
+    ok(pgh.locator("#groups .gcard").count() == 3, "numune yeniden qurulur (3 qrup)")
+    ok(db("select count(*) n from public.accounts where owner_id = %s and is_demo", (own,), one=True)["n"] == 1,
+       "yeni nusxe is_demo")
+    ok(db("""select count(*) n from public.accounts a join auth.users u on u.id = a.owner_id
+              where u.email is null and not a.is_demo""", one=True)["n"] == 0,
+       "e-poctsuz sahibli real hesab yoxdur")
+    pgh.close()
+
     print("G0 · (184) Nümunədən çıxış: müəllim paneli")
     #  Ziyaretci numune panelinde «Çıxış»a basanda giris formasi acilirdi -
     #  hesabi olmayan adam ucun dalan.  Ustelik «Nümunə hesab» zolagi

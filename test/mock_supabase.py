@@ -352,7 +352,9 @@ class H(BaseHTTPRequestHandler):
                 return self.send(400, {"message": str(e)})
             if not r:
                 return self.send(404, {"message": "Istifadeci yoxdur"})
+            #  203: anonim istifadeci (Supabase is_anonymous) - e-pocti yoxdur
             return self.send(200, {"id": r["id"], "email": r["email"],
+                                   "is_anonymous": r["email"] is None,
                                    "email_confirmed_at": r["email_confirmed_at"].isoformat() if r["email_confirmed_at"] else None,
                                    "created_at": r["created_at"].isoformat() if r["created_at"] else None})
         if not u.path.startswith("/rest/v1/"):

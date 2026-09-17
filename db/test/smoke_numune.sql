@@ -286,3 +286,64 @@ begin
   end if;
 end $$;
 \echo 'smoke_numune: 10 (198) numune silinende Bize yaz da silinir - OK'
+
+-- =====================================================================
+--  11. (203) anonim (e-poctsuz) istifadeci real hesab aca bilmir;
+--      e-poctlu aca bilir; kohne yetim hesab numuneye cevrilib
+-- =====================================================================
+delete from public.accounts where owner_id in ('11110000-0000-0000-0000-0000000000e3','11110000-0000-0000-0000-0000000000e4');
+delete from auth.users where id in ('11110000-0000-0000-0000-0000000000e3','11110000-0000-0000-0000-0000000000e4');
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('11110000-0000-0000-0000-0000000000e3', null, '{}'),
+  ('11110000-0000-0000-0000-0000000000e4', 'real-e4@t.az', '{}');
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e3';
+do $$
+declare v jsonb; v_err text;
+begin
+  begin
+    v := public.rpc_create_account('tutor', 'Anonim ustunde hesab');
+    raise exception '203: anonim istifadeci hesab acdi: %', v::text;
+  exception when sqlstate '42501' then
+    get stacked diagnostics v_err = message_text;
+    assert v_err like 'Nümunə sessiyasında%', '203: xeta metni: ' || v_err;
+  end;
+  --  numune ise acilir (anonim istifadecinin oz yolu).  Toxum: 4-cu
+  --  bolmenin nusxesi ile eyni kod ardicilligi cixmasin (join_code unikal).
+  perform setseed(0.777);
+  v := public.rpc_demo_start();
+  assert (v->>'ok')::boolean, '203: anonim numune ala bilmelidir: ' || v::text;
+  --  numunesi varken de real hesab acilmir
+  begin
+    v := public.rpc_create_account('tutor', 'Anonim ustunde hesab 2');
+    raise exception '203: numuneli anonim hesab acdi';
+  exception when sqlstate '42501' then null;
+  end;
+end $$;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e4';
+do $$
+declare v jsonb;
+begin
+  v := public.rpc_create_account('tutor', 'E-poctlu hesab');
+  assert v->>'id' is not null, '203: e-poctlu istifadeci hesab acmalidir';
+end $$;
+reset role; reset request.jwt.claim.sub;
+--  bir defelik temizleme: yetim hesab (anonim sahib, is_demo=false) numuneye cevrilir
+delete from public.accounts where owner_id = '11110000-0000-0000-0000-0000000000e3' and is_demo;
+insert into public.accounts (type, name, owner_id, is_demo)
+values ('tutor', 'Yetim 203', '11110000-0000-0000-0000-0000000000e3', false);
+update public.accounts a set is_demo = true from auth.users u
+ where u.id = a.owner_id and u.email is null and not a.is_demo and a.id <> app.demo_account();
+do $$
+begin
+  assert (select bool_and(is_demo) from public.accounts where owner_id = '11110000-0000-0000-0000-0000000000e3'),
+    '203: yetim hesab numuneye cevrilmedi';
+  assert not (select is_demo from public.accounts where owner_id = '11110000-0000-0000-0000-0000000000e4'),
+    '203: e-poctlu hesab numune olmamalidir';
+end $$;
+delete from public.classes c using public.accounts a where a.id = c.account_id and a.owner_id in ('11110000-0000-0000-0000-0000000000e3','11110000-0000-0000-0000-0000000000e4');
+delete from public.tests where owner_type = 'educator' and owner_id in ('11110000-0000-0000-0000-0000000000e3','11110000-0000-0000-0000-0000000000e4');
+delete from public.students s using public.accounts a where a.id = s.account_id and a.owner_id in ('11110000-0000-0000-0000-0000000000e3','11110000-0000-0000-0000-0000000000e4');
+delete from public.accounts where owner_id in ('11110000-0000-0000-0000-0000000000e3','11110000-0000-0000-0000-0000000000e4');
+delete from auth.users where id in ('11110000-0000-0000-0000-0000000000e3','11110000-0000-0000-0000-0000000000e4');
+\echo 'smoke_numune: 11 (203) anonim istifadeci real hesab aca bilmir - OK'

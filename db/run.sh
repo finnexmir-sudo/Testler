@@ -122,6 +122,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 199_admin_mesaj.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 200_icmal_hefte.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 201_diqqet_movzu.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 202_huni.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 203_anonim_hesab.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

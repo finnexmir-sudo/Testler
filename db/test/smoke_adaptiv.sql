@@ -33,6 +33,11 @@ insert into public.classes (id, account_id, teacher_id, kind, name, join_code, l
 insert into public.students (id, account_id, class_id, created_by, full_name, display_name, login_code) values
   ('5555000a-0000-0000-0000-0000000000a5','aaaa0000-0000-0000-0000-0000000000a5',
    'cccc0000-0000-0000-0000-0000000000a5','11110000-0000-0000-0000-0000000000a5','Ayan Bir','Ayan B.','ADFT0001');
+--  196: abunesiz hesabda mesq gunde 5 sualdir - bu suite adaptivliyi yoxlayir,
+--  heddi yox (o, smoke_mesq_limit-dedir).  Hesaba abune verilir - limitsiz.
+insert into public.subscriptions (account_id, plan_id, status, current_period_end)
+select 'aaaa0000-0000-0000-0000-0000000000a5', p.id, 'active', now() + interval '30 days'
+  from public.plans p where p.slug = 'repetitor-25';
 
 create or replace function pg_temp.duz(p_q uuid) returns uuid[] language sql as $$
   select coalesce(array_agg(o.id), '{}') from public.question_options o where o.question_id = p_q and o.is_correct $$;

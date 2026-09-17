@@ -9256,7 +9256,7 @@
   }
 
   function route() {
-    if (!ACC) { bnavHide(); screenSetup(); return; }
+    if (!ACC) { bnavHide(); noAccount(); return; }
     var m = (location.hash || "#/").replace(/^#/, "").split("/").filter(Boolean);
     /*  "Yeni test yig" niyyeti yalniz generator ekraninda yasayir.
         Muellim oradan basqa yere kecirse niyyet de silinir - yoxsa
@@ -9439,6 +9439,20 @@
       if (e && e.status === 401) { sb.signOut().then(function () { screenAuth("in"); }); return; }
       show(msg("err", fail(e)));
     });
+  }
+
+  /*  HESABSIZ SESSIYA (203).  Canlida: muellim numuneye girib, nusxe
+      qurulan bir nece saniyede sehifeni yenileyib (ya paneli ikinci
+      tabda acib).  Sessiya var, hesab hele yox - «Hesabı quraşdırın»
+      cixib, adini yazib, anonim istifadecinin ustunde e-poctsuz «real»
+      hesab yaranib.  Indi: sessiya anonimdirse (e-poct yoxdur) qurasdirma
+      yox, numune acilir - rpc_demo_start hazir nusxeni tapib qaytarir.
+      Server de anonime hesab acmir (rpc_create_account).  */
+  function noAccount() {
+    sb.me().then(function (u) {
+      if (u && (u.is_anonymous || !u.email)) { screenDemo(); return; }
+      screenSetup();
+    }).catch(function () { screenSetup(); });
   }
 
   /* Sessiya bitende hec bir ekranda dalana diranmirik - giris ekrani

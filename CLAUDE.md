@@ -3731,6 +3731,31 @@ Panel: İdarəetmə → sətir «···» → textarea + «Mesaj göndər»; mü
 yazılır). **Canlıya əl ilə tətbiq olunmalıdır**, 05_grants lazım deyil.
 Məhdudiyyət: müəllim mesajı yalnız girəndə görür.
 
+## db/203 — anonim (nümunə) istifadəçinin üstündə real hesab (2026-09-17)
+
+Canlıda İdarəetmədə eyni adla iki hesab çıxdı: biri e-poçtlu (11 şagird,
+2 qrup), biri e-poçtsuz («qrup yoxdur · 19 test»). İkincinin sahibi
+`auth.users`-də `is_anonymous = true`. 19 test = nümunənin öz testləri
+(7-ci sinif 9 ev tapşırığı + 3 isinmə + rüb sınağı + diaqnostika = 14,
+3-cü sinif 2, 11-ci sinif 3); admin siyahısı testləri sahiblik üzrə sayır.
+
+Səbəb: müəllim «Nümunəyə bax»-a girib, nüsxə qurulan bir neçə saniyədə
+səhifəni yeniləyib (ya paneli ikinci tabda açıb). Panel anonim sessiyanı
+görüb, hesabı hələ görməyib → «Hesabı quraşdırın» → ad yazıb «Davam et»
+→ anonimin üstündə `is_demo = false` hesab.
+
+Düzəliş:
+- `rpc_create_account`: sahibin e-poçtu yoxdursa (anonim) `42501` xəta.
+- `rpc_demo_start`: `pg_advisory_xact_lock` istifadəçi üzrə — iki tab
+  eyni anda çağıranda ikincisi birincinin nüsxəsini tapır («reused»).
+- Bir dəfəlik: e-poçtsuz sahibli qeyri-nümunə hesablar `is_demo = true`
+  olur → gecə `rpc_demo_reset` 24 saatdan sonra testləri ilə silir.
+- Panel `route()` → `noAccount()`: hesab yoxdursa `sb.me()` soruşur;
+  `is_anonymous` və ya e-poçt yoxdursa `screenDemo()`, yoxsa `screenSetup()`.
+- Mock `/auth/v1/user` `is_anonymous` qaytarır (e-poçt null olanda).
+
+Testlər: `smoke_numune.sql` §11, `e2e_numune.py` H.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
