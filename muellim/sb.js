@@ -252,6 +252,20 @@
       saveSession(o);
     },
 
+    /*  202: cari istifadeci (e-poct tesdiqlenibmi?).  Supabase-de
+        «Confirm email» sondurulub - muellim tesdiqsiz panele dusur,
+        panel sari zolaqla xatirladir.  */
+    me: function () {
+      return request("/auth/v1/user", { method: "GET" });
+    },
+    /*  Tesdiq mektubunu yeniden gonder (Supabase /auth/v1/resend).  */
+    resendSignup: function (email) {
+      return request("/auth/v1/resend", {
+        method: "POST", auth: false,
+        body: { type: "signup", email: email }
+      });
+    },
+
     /* Yeni parol - aktiv sessiya ile */
     updatePassword: function (newPass) {
       return request("/auth/v1/user", {

@@ -125,6 +125,9 @@ class H(BaseHTTPRequestHandler):
             #  issue() ozu LOCK goturur - burda LOCK altina salmaq olmaz
             RECOVER["last"] = issue(rec[0]) if rec else None
             return self.send(200, {})
+        if u.path == "/auth/v1/resend":
+            #  202: tesdiq mektubu - gonderilmir, yalniz 200
+            return self.send(200, {})
         if u.path == "/auth/v1/logout":
             auth = self.headers.get("Authorization", "")
             if auth.startswith("Bearer "):
@@ -335,6 +338,23 @@ class H(BaseHTTPRequestHandler):
             if not t:
                 return self.send(404, {"message": "Berpa sorgusu yoxdur"})
             return self.send(200, t)
+        if u.path == "/auth/v1/user":
+            #  202: cari istifadeci - e-poct tesdiq vaxti ile
+            auth = self.headers.get("Authorization", "")
+            uid = TOKENS.get(auth[7:]) if auth.startswith("Bearer ") else None
+            if not uid:
+                return self.send(401, {"message": "Token yanlisdir."})
+            try:
+                with db() as c, c.cursor() as cur:
+                    cur.execute("select id::text, email, email_confirmed_at, created_at from auth.users where id = %s", (uid,))
+                    r = cur.fetchone()
+            except Exception as e:
+                return self.send(400, {"message": str(e)})
+            if not r:
+                return self.send(404, {"message": "Istifadeci yoxdur"})
+            return self.send(200, {"id": r["id"], "email": r["email"],
+                                   "email_confirmed_at": r["email_confirmed_at"].isoformat() if r["email_confirmed_at"] else None,
+                                   "created_at": r["created_at"].isoformat() if r["created_at"] else None})
         if not u.path.startswith("/rest/v1/"):
             return self.send(404, {"message": "Yoxdur"})
         table = unquote(u.path[len("/rest/v1/"):])

@@ -3448,6 +3448,37 @@ toqquşurdu (zolaq görünmürdü, «1 möhkəm» qutu olurdu). Qayda: yeni kart
 yazanda sinif adlarını prefikslə ver. `test/_v2_tmap.py`. Qalan Replit fikri:
 Son nəticələr sətri (CSS, istəyə görə).
 
+## db/202 — Təsdiqsiz giriş + İdarəetmədə huni (2026-09-17)
+
+Üç AI turu (funksiya · distribusiya · aktivləşmə) + öz rəqəmlərimiz: 6
+qeydiyyat → 3 təsdiq → 3 giriş → 0 qrup. İki iş:
+
+1. **Təsdiqsiz giriş.** Supabase → Authentication → Sign In / Providers →
+   Email → **«Confirm email» söndürülür** (istifadəçi, dashboard) — signUp
+   sessiyanı elə qeydiyyatda verir, `doAuth` onsuz da `access_token`
+   gələndə `boot()` edir. Paneldə `mailBar()` (`boot` → `demoBar`-dan
+   sonra): `sb.me()` (GET `/auth/v1/user`) → `email_confirmed_at` boşdursa
+   sarı `.demobar.mailbar` — «Məktubu yenidən göndər» (`sb.resendSignup`,
+   POST `/auth/v1/resend` type=signup) və «Sonra» (`sessionStorage
+   bil10_mailbar`, bu sessiya). Hesab hələ yoxsa da (quruluş ekranı) çıxır;
+   nümunədə yox. Eyni e-poçt → Supabase «already registered» → «Bu e-poçtla
+   hesab artıq var». Yerli stub `auth.users.email_confirmed_at` (00_supabase_stub,
+   `add column if not exists`); mock: GET `/auth/v1/user`, POST `/auth/v1/resend`.
+   Səhv yazılmış ünvan (gamil…) indi də içəri düşür — TYPO xəritəsi + zolaq.
+2. **`rpc_admin_huni(p_days)`**: qeydiyyat → e-poçt təsdiqi → panelə giriş
+   (`profiles.last_seen_at` və ya `last_sign_in_at`) → qrup → şagird → test
+   (diaqnostiksiz) → şagird cavabı (submitted) → ödəniş (`active`, trialing
+   deyil); nümunə və admin sayılmır; `p_days=0` bütün tarix; `stuck` = qrup
+   yaratmayan son 10 (email, ad, tarix, girib?, təsdiq?). Panel `huniSection`
+   «Ümumi»dən sonra, faizlər qeydiyyata görə. `smoke_huni.sql`, e2e_panel 3
+   iddia, `test/_v2_huni.py`. **Canlıya əl ilə** (05_grants lazım deyil).
+
+AI turlarından qalan növbəti işlər (razılaşdırılıb, sıra ilə): boş hesabda
+ilk addım «ilk testini yığ» (qrupsuz), «adları yapışdır» toplu şagird,
+«nümunəyə bax» keçidi; sonra distribusiya: çap vərəqində «Bil10 ilə
+hazırlanıb», müəllimin həftəlik nəticə kartı (şəkil), həmkarla paylaş linki.
+Ödəniş axını (kart, sınaq mesajları) istifadəçi qərarı ilə SONRAYA.
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

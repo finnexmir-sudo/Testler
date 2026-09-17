@@ -18,8 +18,11 @@ create table if not exists auth.users (
   encrypted_password text,
   raw_user_meta_data jsonb not null default '{}'::jsonb,
   created_at         timestamptz not null default now(),
-  last_sign_in_at    timestamptz
+  last_sign_in_at    timestamptz,
+  email_confirmed_at timestamptz
 );
+--  202: kohne yerli bazalar ucun
+alter table auth.users add column if not exists email_confirmed_at timestamptz;
 
 -- Supabase-deki auth.uid() eynisi: JWT-deki sub iddiasini oxuyur.
 create or replace function auth.uid() returns uuid

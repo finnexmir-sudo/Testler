@@ -5476,10 +5476,12 @@
         //  179: bazanin hecmi (kohne bazada yoxdursa kart cixmir)
         sb.rpc("rpc_admin_baza", {}).catch(function () { return null; }),
         //  180: suret olcusu (kohne bazada yoxdursa kart cixmir)
-        sb.rpc("rpc_admin_suret", { p_days: 30 }).catch(function () { return null; })
+        sb.rpc("rpc_admin_suret", { p_days: 30 }).catch(function () { return null; }),
+        //  202: aktivlesme hunisi (kohne bazada yoxdursa kart cixmir)
+        sb.rpc("rpc_admin_huni", { p_days: 30 }).catch(function () { return null; })
       ]).then(function (r) {
         if (!live()) return;
-        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4], r[5], r[6], r[7]);
+        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4], r[5], r[6], r[7], r[8]);
       }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -5530,7 +5532,39 @@
       ic + "</details>";
   }
 
-  function drawAdmin(st, rows, reps, fbs, qs, vs, bz, sr) {
+  /*  202: huni karti - qeydiyyat -> tesdiq -> giris -> qrup -> sagird ->
+      test -> cehd -> pullu (son 30 gun).  Her pille: say + evvelki pilleye
+      gore faiz.  Altda «qrup yaratmayanlar» - kime mesaj yazmali.  */
+  function huniSection(h) {
+    if (!h || !Number(h.registered)) return "";
+    var steps = [["registered", "qeydiyyat"], ["confirmed", "e-poçt təsdiqi"], ["entered", "panelə giriş"],
+                 ["grup", "qrup"], ["sagird", "şagird"], ["test", "test"], ["cehd", "şagird cavabı"], ["pullu", "ödəniş"]];
+    //  faiz QEYDIYYATA gore - pilleler bir-birinden asili deyil (tesdiqsiz
+    //  de girmek olur), evvelki pilleye gore faiz «—» verirdi
+    var base = Number(h.registered) || 0;
+    var cells = steps.map(function (st, i) {
+      var n = Number(h[st[0]]) || 0;
+      var p = i === 0 ? "" : Math.round(n * 100 / base) + "%";
+      return '<div class="hstep' + (n ? "" : " zero") + '"><b>' + n + "</b><span>" + st[1] + "</span>" +
+        '<i>' + p + "</i></div>";
+    }).join("");
+    var stuck = h.stuck || [];
+    return '<h2>Huni <span class="muted">· son ' + (h.days || 30) + " gün · nümunə və admin sayılmır</span></h2>" +
+      '<div class="card huni"><div class="hsteps">' + cells + "</div>" +
+      (stuck.length
+        ? '<div class="hstuck"><b>Qrup yaratmayanlar</b> <span class="muted">— kimə mesaj yazmalı</span>' +
+          stuck.map(function (x) {
+            return '<div class="hrow"><span class="who">' + esc(x.name || x.email || "") +
+              (x.name ? ' <i>' + esc(x.email || "") + "</i>" : "") + "</span>" +
+              '<span class="st">' + (x.confirmed ? "" : '<em class="no">təsdiq yox</em> ') +
+                (x.seen ? "girib " + agoAz(x.seen) : '<em class="no">girməyib</em>') +
+                " · qeydiyyat " + agoAz(x.at) + "</span></div>";
+          }).join("") + "</div>"
+        : "") +
+    "</div>";
+  }
+
+  function drawAdmin(st, rows, reps, fbs, qs, vs, bz, sr, hn) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "sagird-basi", name: "Hər şagird üçün" }];
     bandHead({
@@ -5572,6 +5606,9 @@
         '<div class="tile e"><b>' + (st.students || 0) +
           "</b><span>şagird · " + (st.seen_week || 0) + " girib (7 gün)</span></div>" +
       "</div>" +
+
+      //  ------------------------------------------------------ HUNI
+      huniSection(hn) +
 
       //  ---------------------------------------------------- ZIYARET
       //  Qrafik yuxaridadir: buyume gormek ucun acilan sehifedir.
@@ -7487,6 +7524,48 @@
     });
   }
 
+  /*  202: e-poct tesdiqi artiq qeydiyyata maneə deyil (Supabase-de
+      «Confirm email» sondurulub; 6 qeydiyyatdan 3-u tesdiqlemirdi, 2-si
+      unvani sehv yazmisdi).  Muellim panele dusur; tesdiqlenmeyibse
+      sari zolaq xatirladir - parol berpasi ucun lazimdir.  «Sonra» bu
+      sessiyada gizledir; novbeti acilisda yene cixir.  */
+  function mailBar() {
+    var old = document.getElementById("mailBar");
+    if (old) old.remove();
+    //  yeni qeydiyyatda hesab hele yoxdur (quruluş ekrani) - zolaq yene cixir
+    if (ACC && ACC.is_demo) return;
+    var hid = false;
+    try { hid = sessionStorage.getItem("bil10_mailbar") === "1"; } catch (e) {}
+    if (hid) return;
+    sb.me().then(function (u) {
+      if (!u || !u.email || u.email_confirmed_at) return;
+      if (document.getElementById("mailBar")) return;
+      var d = document.createElement("div");
+      d.id = "mailBar"; d.className = "demobar mailbar";
+      d.innerHTML = "<span>" + ic("warn") + "<b>E-poçtunuz təsdiqlənməyib.</b> Parolu unutsanız bərpa " +
+          "məktubu <b>" + esc(u.email) + "</b> ünvanına gedəcək — poçtunuzdakı linkə keçin." +
+          '<em id="mailMsg"></em></span>' +
+        '<div class="mb-acts"><button class="btn sm" id="mailResend">Məktubu yenidən göndər</button>' +
+        '<button class="btn sm ghost" id="mailLater">Sonra</button></div>';
+      var main0 = document.getElementById("band") || document.getElementById("main");
+      main0.parentNode.insertBefore(d, main0);
+      on("mailResend", "click", function () {
+        var b = $("mailResend"); if (!b) return;
+        b.disabled = true;
+        sb.resendSignup(u.email).then(function () {
+          var m = $("mailMsg"); if (m) m.textContent = " Göndərildi — spam qovluğunu da yoxlayın.";
+        }).catch(function (e) {
+          b.disabled = false;
+          var m = $("mailMsg"); if (m) m.textContent = " " + fail(e);
+        });
+      });
+      on("mailLater", "click", function () {
+        try { sessionStorage.setItem("bil10_mailbar", "1"); } catch (e) {}
+        var x = document.getElementById("mailBar"); if (x) x.remove();
+      });
+    }).catch(function () {});
+  }
+
   function screenPaper(id) {
     var live = guard();
     topTitle.textContent = "Test vərəqi";
@@ -9248,6 +9327,7 @@
       btnOut.classList.remove("hide");
       topWho.textContent = (CTX.profile && CTX.profile.full_name) || "";
       demoBar();
+      mailBar();
       route();
       //  Icmal-dan basqa ekranla acilibsa (mes. #/g/... linki) olcu
       //  yene goturulsun - 6 saniyeden sonra hele gonderilmeyibse.

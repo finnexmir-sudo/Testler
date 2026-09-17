@@ -2072,3 +2072,27 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   .prep .prow .hwb,.prep .prow .hwn{flex:1 1 100%}
   .prep .prow .hwf{flex:0 0 auto;margin:0 0 0 auto}
 }
+
+/*  202: e-poct tesdiq zolagi (demobar qurulusu, sari) + huni karti  */
+.mailbar{background:var(--warn-tint);border:1px solid var(--warn-line);color:var(--fg);align-items:center}
+.mailbar>span{flex:1 1 260px;min-width:0;display:block;font-size:13px;line-height:1.45}
+.mailbar>span svg{width:15px;height:15px;vertical-align:-3px;margin-right:6px;color:var(--warn)}
+.mailbar em{font-style:normal;font-weight:600;color:var(--ok)}
+.mailbar .mb-acts{display:flex;gap:8px;flex:0 0 auto;margin-left:auto}
+.mailbar .mb-acts .btn{margin-left:0;white-space:nowrap}
+.card.huni{padding:14px 16px}
+.hsteps{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.hstep{text-align:center;padding:8px 4px;border-radius:10px;background:var(--n-50);border:1px solid var(--n-150)}
+.hstep b{display:block;font-size:20px;font-weight:680;letter-spacing:-.02em;color:var(--fg)}
+.hstep span{display:block;font-size:11px;color:var(--fg-3);margin-top:2px;line-height:1.2}
+.hstep i{display:block;font-style:normal;font-size:11px;font-weight:600;color:var(--brand);margin-top:3px;min-height:13px}
+.hstep.zero b{color:var(--fg-3)}
+.hstuck{margin-top:12px;padding-top:10px;border-top:1px solid var(--n-100);font-size:13px}
+.hstuck>b{font-size:13.5px}
+.hrow{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--n-100);flex-wrap:wrap}
+.hrow:last-child{border-bottom:0}
+.hrow .who{font-weight:600;min-width:0}
+.hrow .who i{font-style:normal;font-weight:500;color:var(--fg-3);font-size:12px}
+.hrow .st{color:var(--fg-3);font-size:12px;white-space:nowrap}
+.hrow .st .no{font-style:normal;color:#b54708;font-weight:600}
+@media (max-width:760px){ .hsteps{grid-template-columns:repeat(4,1fr)} }

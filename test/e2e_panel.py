@@ -201,6 +201,13 @@ with sync_playwright() as pw:
     db("update public.app_state set val = val || jsonb_build_object('on', true) where key = 'hediyye'")
     signup(pg, "leyla@test.az", "Leyla Muellim")
     pg.wait_for_selector("#btnSetup", timeout=8000)
+    #  202: e-poct tesdiqsiz panele dusur, sari zolaq xatirladir
+    pg.wait_for_selector("#mailBar", timeout=8000)
+    ok("təsdiqlənməyib" in pg.inner_text("#mailBar"), "e-poct tesdiq zolagi cixir (202)")
+    pg.click("#mailResend"); pg.wait_for_function("document.querySelector('#mailMsg') && document.querySelector('#mailMsg').textContent.indexOf('Göndərildi') >= 0", timeout=6000)
+    ok(True, "tesdiq mektubu yeniden gonderildi")
+    pg.click("#mailLater"); pg.wait_for_timeout(200)
+    ok(pg.locator("#mailBar").count() == 0, "«Sonra» zolagi gizledir")
     ok(True, "qeydiyyatdan sonra quraşdirma ekrani acilir")
 
     pg.select_option("#atype", "tutor")
