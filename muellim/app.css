@@ -2128,7 +2128,13 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 /* 17.09: ust zolaqda «Bizə yaz» - zeng duymesinin yaninda; telefonda yalniz ikon */
 .top .btn.fbtop{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .top .btn.fbtop svg{width:15px;height:15px}
+/*  Telefonda yazi QALIR (istifadeci: tek qelem ne oldugunu demir - bu
+    merhelede muellim bize yazmagi rahat gormelidir).  Yer ucun «Bil10»
+    soz nisani gizlenir - logo onsuz da var; basliq sixilir.  */
 @media (max-width:560px){
-  .top .btn.fbtop{padding:0 8px}
-  .top .btn.fbtop span{display:none}
+  .top .btn.fbtop{padding:0 9px;font-size:12.5px;gap:5px;background:var(--brand);
+    color:#fff;border-color:var(--brand)}
+  .top .btn.fbtop:hover{background:var(--brand);color:#fff}
+  .top .btn.fbtop svg{width:13px;height:13px}
+  .top .wm{display:none}
 }
