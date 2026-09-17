@@ -279,6 +279,7 @@ bank 246_bank_inf_plan_partiya2_ibtidai.sql
 bank 247_bank_inf_plan_partiya2_orta.sql
 bank 248_bank_inf_plan_partiya4_sekil.sql
 bank 249_bank_inf_dublikat_yeniden.sql
+bank 250_bank_riy_qusur_duzelis.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
