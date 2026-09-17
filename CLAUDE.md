@@ -3407,6 +3407,20 @@ Test mətnləri saxlanıb: «Açıq tapşırıq yoxdur», «Etməyənlər · 4/1
 Plan sətrində `.acts` sinfi (faiz/vərəq/test yığ olanda) — telefonda yalnız
 o sətirlər iki sətrə qatlanır; yalnız ☐ + «geri al» olan sətir bir sətirdə.
 
+## db/200 — İcmal kartlarında həftəlik fərq (2026-09-17)
+
+Replit eskizindən götürülən ilk fikir: rəqəmin altında hərəkət. `rpc_home.stats`
++5 açar (`tests_w`, `students_w`, `attempts_w`, `avg_w`, `avg_pw` — son 7 gün
+və 8–14 gün əvvəl). Gövdə `pg_get_functiondef` ilə götürülüb `'stats',
+jsonb_build_object(` markeri genişləndirilir (marker 1 dəfə olmalıdır,
+təkrar tətbiq keçilir). Panel: `.tile .td` sətri — «+2 son 7 gün» (yaşıl),
+«+7% / −4% əvvəlki həftəyə görə», «əvvəlki həftə ilə eyni», «son 7 gün: 70%»;
+qrup kartında «25 cəhd son 7 gün»; sıfır olanda sətir boş (hündürlük sabit,
+«+0» yox). `smoke_icmal_hefte.sql` (yoxla.sh siyahısında), `test/_v2_tiles.py`.
+**Canlıya əl ilə**, 05_grants lazım deyil. Qalan Replit fikirləri (sırayla):
+«Diqqət tələb edir» mövzu üzrə yığım + «bu mövzudan test yığ»; qrupda «Mövzu
+mənzərəsi» zolaqları; Son nəticələr sətri (avatar · ad · mövzu · faiz).
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

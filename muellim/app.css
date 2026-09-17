@@ -2019,3 +2019,9 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .prep .prow .hwn a{text-decoration:none;font-weight:600;margin-left:0}
 .prep .prow .hwf{display:flex;justify-content:flex-end;margin-top:4px}
 .prep .prow .hwf a{text-decoration:none;font-size:12.5px}
+
+/*  200: kartda heftelik ferq setri  */
+.tile .td{display:block;margin-top:7px;min-height:15px;font-size:11.5px;font-weight:600;line-height:1.3;
+  color:var(--fg-3);text-decoration:none}
+.tile .td.up{color:var(--ok)}
+.tile .td.dn{color:#b54708}

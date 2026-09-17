@@ -1213,12 +1213,32 @@
       //  reqemler onsuz da asagida gorunur (UX auditi)
       if (t) t.classList.toggle("hide", (Number(st.groups) || 0) < 2);
       if (t) {
+        /*  200 (17.09): reqemin altinda HEREKET - «+3 son 7 gün»,
+            «+6% əvvəlki həftəyə görə».  Sifir olanda setir bos qalir
+            (hundurluk eynidir), «+0» yazilmir - sakit ekran.  */
+        function tdN(n) {
+          n = Number(n) || 0;
+          return '<s class="td' + (n > 0 ? " up" : "") + '">' +
+            (n > 0 ? "+" + n + " son 7 gün" : "") + "</s>";
+        }
+        function tdAvg() {
+          var w = st.avg_w == null ? null : Number(st.avg_w);
+          var pw = st.avg_pw == null ? null : Number(st.avg_pw);
+          if (w == null) return '<s class="td"></s>';
+          if (pw == null) return '<s class="td">son 7 gün: ' + Math.round(w) + "%</s>";
+          var d = Math.round(w - pw);
+          if (d === 0) return '<s class="td">əvvəlki həftə ilə eyni</s>';
+          return '<s class="td ' + (d > 0 ? "up" : "dn") + '">' + (d > 0 ? "+" : "−") + Math.abs(d) +
+            "% əvvəlki həftəyə görə</s>";
+        }
+        var aw = Number(st.attempts_w) || 0;
         t.innerHTML =
-          '<div class="tile a"><i class="ti">' + ic("group") + "</i><b>" + (st.groups || 0) + "</b><span>qrup</span></div>" +
-          '<div class="tile b"><i class="ti">' + ic("doc") + "</i><b>" + (st.tests || 0) + "</b><span>öz testiniz</span></div>" +
-          '<div class="tile c"><i class="ti">' + ic("person") + "</i><b>" + (st.students || 0) + "</b><span>şagird</span></div>" +
+          '<div class="tile a"><i class="ti">' + ic("group") + "</i><b>" + (st.groups || 0) + "</b><span>qrup</span>" +
+            '<s class="td">' + (aw ? aw + " cəhd son 7 gün" : "") + "</s></div>" +
+          '<div class="tile b"><i class="ti">' + ic("doc") + "</i><b>" + (st.tests || 0) + "</b><span>öz testiniz</span>" + tdN(st.tests_w) + "</div>" +
+          '<div class="tile c"><i class="ti">' + ic("person") + "</i><b>" + (st.students || 0) + "</b><span>şagird</span>" + tdN(st.students_w) + "</div>" +
           '<div class="tile d"><i class="ti">' + ic("chart") + "</i><b>" +
-            (st.attempts ? pct(st.avg) + "%" : "—") + "</b><span>orta bal</span></div>";
+            (st.attempts ? pct(st.avg) + "%" : "—") + "</b><span>orta bal</span>" + tdAvg() + "</div>";
       }
 
       bellDot((v.alerts ? v.alerts.length : 0) + (v.hw_alerts ? v.hw_alerts.length : 0));
