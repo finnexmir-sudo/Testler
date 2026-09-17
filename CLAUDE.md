@@ -3756,6 +3756,23 @@ Düzəliş:
 
 Testlər: `smoke_numune.sql` §11, `e2e_numune.py` H.
 
+## «Bizə yaz» yuxarı zolaqda, öz ekranı `#/bize` (2026-09-17)
+
+İstifadəçi: forma Profilin içində gizli qalırdı, ilk günlərdə müəllim
+çətinliyini bir toxunuşla deyə bilsin. İndi:
+- Yuxarı zolaqda `#btnFb` («Bizə yaz», `.btn.sm.ghost.fbtop`), zəngin
+  solunda; telefonda (≤560px) yalnız qələm ikonu. `bnavShow/bnavHide`
+  zənglə birlikdə göstərir/gizlədir.
+- `screenBize()` — `#/bize`: forma (`fbForm("fb")`), Bil10-dan mesajlar +
+  Yazdıqlarınız (`fbMineLoad`), altda WhatsApp + bələdçi. Geri:
+  `backLabel("Əsas səhifə")` — gəldiyi ekrana.
+- `FB_FROM` bu keçiddə dəyişmir (admin «hansı ekrandan» görür).
+- Profil: forma çıxdı, `.item` keçidi `#btnMeFb` qaldı. Sol menyu Hesab
+  altında «Bizə yazın». Altlıq linki və bələdçi mətni yeniləndi.
+- `amsgReply` → `#/bize`. `routeTitle` `bize`.
+- Testlər: `e2e_bize.py` B (düymə, Profildə forma yoxdur, Geri = Qrup).
+  Şəkil: `test/_v2_bize.py`.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

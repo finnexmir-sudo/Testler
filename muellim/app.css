@@ -2124,3 +2124,11 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .onbh .lnk{position:absolute;right:0;top:0;color:var(--fg-3)}
 /*  2-ci addimin formasi 1-ci addimda da gorunur (muellim isteyirse evvel sagird elave etsin)  */
 .ost.todo .obody{opacity:.92}
+
+/* 17.09: ust zolaqda «Bizə yaz» - zeng duymesinin yaninda; telefonda yalniz ikon */
+.top .btn.fbtop{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.top .btn.fbtop svg{width:15px;height:15px}
+@media (max-width:560px){
+  .top .btn.fbtop{padding:0 8px}
+  .top .btn.fbtop span{display:none}
+}

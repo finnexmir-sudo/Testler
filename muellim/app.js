@@ -554,8 +554,8 @@
   function amsgReply(m) {
     REPLY_TO = { id: m.id, body: m.body };
     sb.rpc("rpc_message_seen", { p_id: m.id }).catch(function () {});
-    if (location.hash === "#/me") { fbReplyPaint(); return; }
-    nav("#/me");
+    if (location.hash === "#/bize") { fbReplyPaint(); return; }
+    nav("#/bize");
   }
   function loadAdminMsg() {
     var live = guard();
@@ -669,6 +669,40 @@
     });
   }
 
+  /* ------------------------------------------------------- «Bizə yazın»
+     17.09 (istifadeci): forma Profilin icinde gizli qalirdi.  Ilk
+     gunlerde muellim cetinliyini bir toxunusla deye bilsin deye ust
+     zolaqda «Bizə yaz» duymesi var, forma oz ekranindadir.  FB_FROM
+     (hansi ekrandan gelib) bu kecidde deyismir - admin konteksti gorur. */
+  function screenBize() {
+    topTitle.textContent = "Bizə yazın";
+    bandHead({
+      back: { id: "btnBack", label: backLabel("Əsas səhifə") }, eye: "Bizə yazın",
+      title: "Nə işləmir, nə lazımdır?",
+      sub: "Birbaşa bizə çatır. Cavabı burada, mesajın altında görəcəksiniz."
+    });
+    show(
+      '<div class="card" id="fbCard">' +
+        '<div id="fbReply"></div>' +
+        fbForm("fb") +
+      "</div>" +
+      '<div id="fbMine"></div>' +
+      '<div class="spacer"></div>' +
+      '<div class="card tight">' +
+        "<b>Tez cavab lazımdır?</b>" +
+        '<p class="note" style="margin:4px 0 0">WhatsApp: ' +
+          '<a href="https://wa.me/994702023080" target="_blank" rel="noopener">+994 70 202 30 80</a>' +
+          ' · Bələdçi: <a href="../komek/#muellim" target="_blank" rel="noopener">necə işləyir →</a></p>' +
+      "</div>");
+    on("btnBack", "click", function () { goBack(); });
+    fbBind("fb", function (kind, body) {
+      return sb.rpc("rpc_feedback_send", { p_kind: kind, p_body: body, p_page: FB_FROM,
+                                           p_reply_to: REPLY_TO ? REPLY_TO.id : null });
+    }, function () { REPLY_TO = null; fbReplyPaint(); fbMineLoad(); });
+    fbMineLoad();
+    fbReplyPaint();
+  }
+
   /* ----------------------------------------------------------- profil */
   function screenMe() {
     topTitle.textContent = "Profil";
@@ -687,20 +721,18 @@
         '<button class="btn go" id="btnMeSave">Yadda saxla</button>' +
       "</div>" +
       '<div class="spacer"></div>' +
-      '<div class="card" id="fbCard">' +
-        '<h2 class="ch">Bizə yazın</h2>' +
-        '<p class="note">Təklifiniz, rastlaşdığınız problem və ya sualınız — ' +
-          "birbaşa bizə çatır. Cavabımızı burada, mesajın altında görəcəksiniz.</p>" +
-        '<div id="fbReply"></div>' +
-        fbForm("fb") +
-      "</div>" +
-      '<div id="fbMine"></div>' +
-      '<div class="spacer"></div>' +
-      //  16.09: alt zolaqdan cixan «Suallar» buradan da acilir
-      '<div class="card pad0"><button class="item" id="btnMeBank">' +
-        '<div class="ic">' + ic("doc") + "</div>" +
-        '<div class="g"><b>Sual bankı</b><i>öz suallarınız və hazır suallar</i></div>' +
-        '<span class="arrow">' + ic("right") + "</span></button></div>" +
+      //  17.09: «Bizə yazın» oz ekranina cixdi (#/bize, ust zolaqdaki
+      //  duyme) - burada yalniz kecid qalir
+      '<div class="card pad0">' +
+        '<button class="item" id="btnMeFb">' +
+          '<div class="ic">' + ic("pen") + "</div>" +
+          '<div class="g"><b>Bizə yazın</b><i>təklif, problem, sual — cavabı orada görəcəksiniz</i></div>' +
+          '<span class="arrow">' + ic("right") + "</span></button>" +
+        //  16.09: alt zolaqdan cixan «Suallar» buradan da acilir
+        '<button class="item" id="btnMeBank">' +
+          '<div class="ic">' + ic("doc") + "</div>" +
+          '<div class="g"><b>Sual bankı</b><i>öz suallarınız və hazır suallar</i></div>' +
+          '<span class="arrow">' + ic("right") + "</span></button></div>" +
       '<div class="spacer"></div>' +
       '<div class="card tight">' +
         "<b>Necə işləyir?</b>" +
@@ -710,13 +742,8 @@
       "</div>");
     on("btnBack", "click", function () { nav("#/"); });
     on("btnMeBank", "click", function () { nav("#/b"); });
+    on("btnMeFb", "click", function () { nav("#/bize"); });
     subChips("meSubs", mySubs());
-    fbBind("fb", function (kind, body) {
-      return sb.rpc("rpc_feedback_send", { p_kind: kind, p_body: body, p_page: FB_FROM,
-                                           p_reply_to: REPLY_TO ? REPLY_TO.id : null });
-    }, function () { REPLY_TO = null; fbReplyPaint(); fbMineLoad(); });
-    fbMineLoad();
-    fbReplyPaint();
     on("btnMeSave", "click", function () {
       if (busy) return;
       setBusy("btnMeSave", true, "Yadda saxla");
@@ -9165,7 +9192,7 @@
   function routeTitle(h) {
     var k = (h || "#/").replace(/^#/, "").split("/").filter(Boolean)[0] || "";
     return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ",
-             t: "Vərəq", pk: "Dərs paketi", adm: "İdarəetmə", me: "Profil", n: "Bildirişlər",
+             t: "Vərəq", pk: "Dərs paketi", adm: "İdarəetmə", me: "Profil", n: "Bildirişlər", bize: "Bizə yazın",
              q: "Sual", s: "Şagird", p: "Paket", demo: "Nümunə" }[k] || "Əsas səhifə";
   }
   function goBack(fallback) {
@@ -9197,6 +9224,15 @@
   btnBell.innerHTML = ic("bell") + '<i id="bellDot" class="hide"></i>';
   topWho.parentNode.insertBefore(btnBell, topWho);
   btnBell.addEventListener("click", function () { nav("#/n"); });
+  //  17.09: «Bizə yaz» - her ekrandan bir toxunusla (telefonda yalniz ikon)
+  var btnFb = document.createElement("button");
+  btnFb.id = "btnFb";
+  btnFb.className = "btn sm ghost fbtop hide";
+  btnFb.title = "Bizə yazın";
+  btnFb.setAttribute("aria-label", "Bizə yazın");
+  btnFb.innerHTML = ic("pen") + "<span>Bizə yaz</span>";
+  topWho.parentNode.insertBefore(btnFb, btnBell);
+  btnFb.addEventListener("click", function () { nav("#/bize"); });
   function bellDot(n) {
     var d = $("bellDot");
     if (d) d.classList.toggle("hide", !(Number(n) > 0));
@@ -9242,17 +9278,20 @@
       '<a href="#/b"' + (cur === "b" ? ' class="on"' : "") + ">" + ic("doc") + "Sual bankı</a>" +
       '<span class="sbl">Hesab</span>' +
       '<a href="#/n">' + ic("bell") + "Siqnallar</a>" +
+      '<a href="#/bize"' + (cur === "bize" ? ' class="on"' : "") + ">" + ic("pen") + "Bizə yazın</a>" +
       '<a href="#/me"' + (isMe ? ' class="on"' : "") + ">" + ic("person") + "Profil</a>" +
       '<div class="sbtip"><b>Bil10 ipucu</b>Diaqnostikadan sonra «Bundan başla» sətrinə baxın — ' +
       "zəif mövzunun isinmə testi bir toxunuşla gedir.</div>";
     document.body.classList.add("bnav-on");
     btnBell.classList.remove("hide");
+    btnFb.classList.remove("hide");
   }
   function bnavHide() {
     bnav.innerHTML = "";
     snav.innerHTML = "";
     document.body.classList.remove("bnav-on");
     btnBell.classList.add("hide");
+    btnFb.classList.add("hide");
   }
 
   function route() {
@@ -9264,7 +9303,7 @@
         ekranina atilardi.  Suzgec deyisiklikleri screenGen()-i
         birbasa cagirir, ora dusmur. */
     if (GF && m[0] !== "gen") { GF.back = ""; GF.backName = ""; }
-    if (m[0] !== "me" && m[0] !== "adm") FB_FROM = FB_PAGE[m[0] || ""] || (m[0] || "İcmal");
+    if (m[0] !== "me" && m[0] !== "adm" && m[0] !== "bize") FB_FROM = FB_PAGE[m[0] || ""] || (m[0] || "İcmal");
     //  "Geri" geldiyi yere qaytarsin deye evvelki unvan yadda saxlanir
     if ((location.hash || "#/") !== CUR_HASH) {
       /*  Brauzerin oz «geri»si ile tetbiqin kecidini ayirmaq: her yeni
@@ -9301,6 +9340,7 @@
     if (m[0] === "p") return plansOn() ? screenPaket() : nav("#/");
     if (m[0] === "adm") return screenAdmin();
     if (m[0] === "me") return screenMe();
+    if (m[0] === "bize") return screenBize();
     if (m[0] === "n") return screenNotif();
     if (m[0] === "q" && m[1]) return screenQuestion(m[1]);
     if (m[0] === "s" && m[1] && m[2]) return screenStudent(m[1], m[2]);

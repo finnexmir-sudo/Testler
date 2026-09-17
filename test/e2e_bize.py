@@ -84,8 +84,17 @@ with sync_playwright() as pw:
     pkod = db("select parent_code c from public.students limit 1", one=True)["c"]
     ok(bool(code and pkod), "sagird kodu ve valideyn kodu var")
 
-    print("B · Müəllim profildən yazır")
-    pg.goto(PANEL + "#/me"); pg.wait_for_selector("#fbCard", timeout=15000)
+    print("B · Müəllim «Bizə yaz» ekranından yazır")
+    #  17.09: forma Profilden cixdi - ust zolaqdaki duyme oz ekranini acir
+    #  (qrup ekranindayiq - «hansi ekrandan gelib» = Qrup qalmalidir)
+    pg.wait_for_selector("#btnFb:not(.hide)", timeout=15000)
+    pg.click("#btnFb"); pg.wait_for_selector("#fbCard", timeout=15000)
+    ok("#/bize" in pg.url, "ust zolaqdaki «Bizə yaz» oz ekranini acir", pg.url)
+    ok(pg.inner_text("#btnBack").strip().endswith("Qrup"), "Geri: geldiyi ekrana (Qrup)", pg.inner_text("#btnBack"))
+    pg.evaluate("location.hash = '#/me'"); pg.wait_for_selector("#btnMeFb", timeout=15000)
+    ok(pg.locator("#fbCard").count() == 0, "Profilde forma yoxdur, kecid var")
+    pg.click("#btnMeFb"); pg.wait_for_selector("#fbCard", timeout=15000)
+    ok("#/bize" in pg.url, "Profildeki kecid de ora aparir")
     ok(pg.locator("#fbK .chip").count() == 4, "4 nov cipi")
     ok(pg.locator("#fbMine").inner_text().strip() == "", "bos: 'Yazdiqlariniz' yoxdur")
     pg.fill("#fbT", "qisa"); pg.click("#fbGo"); pg.wait_for_selector("#fbM .warn", timeout=8000)
@@ -108,7 +117,7 @@ with sync_playwright() as pw:
     #  telefonda suretli emeliyyatlar gizlidir - DOM-da var, gorunmur
     pg.goto(PANEL + "#/"); pg.wait_for_selector("#btnMe", state="attached", timeout=15000)
     ok("bizə yazın" in pg.locator("#btnMe").inner_text(), "Icmalda Profil duymesi 'bize yazin' deyir")
-    pg.goto(PANEL + "#/me"); pg.wait_for_selector("#fbCard", timeout=15000)
+    pg.goto(PANEL + "#/bize"); pg.wait_for_selector("#fbCard", timeout=15000)
     pg.fill("#fbT", "Sual bankına ingilis dili fənni nə vaxt gələcək?")
     pg.click("#fbK .chip[data-k='sual']"); pg.click("#fbGo"); pg.wait_for_selector("#fbM .ok", timeout=8000)
     pg.wait_for_function("document.querySelectorAll('#fbList .fbi').length === 2", timeout=8000)
@@ -178,8 +187,8 @@ with sync_playwright() as pw:
     r = db("select status, admin_note n, answered_at a from public.feedback where kind='problem'", one=True)
     ok(r["status"] == "planned" and r["n"].startswith("Növbəti") and r["a"], "bazada status + qeyd + vaxt")
 
-    print("G · Müəllim cavabı profildə görür")
-    pg.goto(PANEL + "#/me"); pg.wait_for_selector("#fbList .fbi", timeout=15000)
+    print("G · Müəllim cavabı «Bizə yaz» ekranında görür")
+    pg.goto(PANEL + "#/bize"); pg.wait_for_selector("#fbList .fbi", timeout=15000)
     it = pg.locator("#fbList .fbi", has_text="çap düyməsi").first
     ok("Planda" in it.inner_text(), "status Planda")
     ok(it.locator(".fbre").count() == 1 and "Növbəti buraxılışda" in it.inner_text(), "Cavabimiz qutusu gorunur")
