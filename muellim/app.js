@@ -1243,15 +1243,29 @@
 
       bellDot((v.alerts ? v.alerts.length : 0) + (v.hw_alerts ? v.hw_alerts.length : 0));
       var ab = $("hAlerts");
-      if (ab && v.alerts && v.alerts.length) {
-        //  ilk 5 siqnal; qalani "Hamısına bax" -> siqnallar ekrani
-        var alAll = v.alerts, alCap = 5;
+      /*  201 (17.09): MOVZU uzre yigim ustde - «Faizlər · 7-ci sinif —
+          12 şagirddən 6-sı zəif · orta 42%» + «Test yığ».  Movzu setri
+          varsa sagird-sagird «zəif mövzu» setirleri Icmalda gizlenir
+          (eyni melumatin tekraridir; Siqnallarda qalir).  «Geriləyir»
+          (risk) ve «əla gedir» setirleri qalir.  */
+      var tps = (v.topics || []).slice(0, 4);
+      var alAll = v.alerts || [];
+      var alShow = tps.length ? alAll.filter(function (a) { return a.kind !== "weak"; }) : alAll;
+      if (ab && (tps.length || alShow.length)) {
+        var alCap = Math.max(2, 6 - tps.length);
         ab.innerHTML = '<div class="spacer"></div>' +
-          h2r("Təhlükə zonası", alAll.length > alCap ? "alMore" : "",
+          h2r("Təhlükə zonası", (alAll.length > alCap || tps.length) ? "alMore" : "",
               "Hamısına bax") +
           '<div class="card pad0">' +
-            alAll.slice(0, alCap).map(alertRow).join("") + "</div>";
+            tps.map(topicRow).join("") +
+            alShow.slice(0, alCap).map(alertRow).join("") + "</div>";
         bindAlerts(ab);
+        Array.prototype.forEach.call(ab.querySelectorAll("[data-tt]"), function (b) {
+          b.addEventListener("click", function () {
+            var t = tps[Number(b.getAttribute("data-tt"))];
+            if (t) remedialGen(t.class_id, [t]);
+          });
+        });
         on("alMore", "click", function () { nav("#/n"); });
       }
 
@@ -3834,6 +3848,30 @@
       "<span><b>" + esc(a.name) + "</b> <span class=\"muted\">(" +
         esc(a["class"] || "") + ")</span> " + tx + "</span>" +
       '<span class="arrow">' + ic("right") + "</span></button>";
+  }
+  /*  201: movzu setri - qrup + movzu, nece nefer zeif, orta, adlar,
+      «Test yığ» (remedialGen: hemin qrupa hemin movzudan duzelis testi).
+      Setrin ozu duyme deyil - adlar sagird hesabatina aparir.  */
+  function topicRow(t, i) {
+    var w = t.weak || [];
+    return '<div class="al tp"><span class="tpi">' + ic("warn") + "</span>" +
+      "<span><b>" + esc(t.name) + '</b> <span class="muted">(' + esc(t["class"] || "") + ")</span> " +
+        (Number(t.n) || 0) + " şagirddən <b>" + (Number(t.weak_n) || 0) + "-" + sayS(t.weak_n) +
+        " zəif</b> · orta " + pct(t.avg) + "%" +
+        '<s class="tpn">' + w.slice(0, 6).map(function (x) {
+          return '<a href="#/s/' + esc(x.id) + "/" + esc(t.class_id) + '">' + esc(firstName(x.name) || x.name) + "</a>";
+        }).join(", ") + (w.length > 6 ? " və daha " + (w.length - 6) : "") + "</s></span>" +
+      '<button type="button" class="btn sm go" data-tt="' + i + '">' + ic("gen") + "Test yığ</button></div>";
+  }
+  //  «3-ü», «6-sı», «1-i», «2-si», «4-ü», «5-i», «7-si», «8-i», «9-u», «10-u»
+  function sayS(n) {
+    n = Number(n) || 0;
+    var l = n % 10, s = { 1: "i", 2: "si", 3: "ü", 4: "ü", 5: "i", 6: "sı", 7: "si", 8: "i", 9: "u", 0: "u" };
+    if (n === 10 || n === 30) return "u";
+    if (n === 20 || n === 50) return "si";
+    if (n === 40 || n === 60 || n === 90) return "ı";
+    if (n === 70 || n === 80) return "i";
+    return s[l];
   }
   /*  194: ev tapsirigi siqnali - qrup, son tarix, metn, nece nefer
       etmeyib.  Toxununca Tapsiriqlar ekranina (orada siyahi + kim etdi). */

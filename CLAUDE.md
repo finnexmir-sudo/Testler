@@ -3421,6 +3421,21 @@ qrup kartında «25 cəhd son 7 gün»; sıfır olanda sətir boş (hündürlük
 «Diqqət tələb edir» mövzu üzrə yığım + «bu mövzudan test yığ»; qrupda «Mövzu
 mənzərəsi» zolaqları; Son nəticələr sətri (avatar · ad · mövzu · faiz).
 
+## db/201 — Təhlükə zonası mövzu üzrə (2026-09-17)
+
+Replit eskizindən ikinci fikir. `rpc_home` +`topics` (marker `'paid', v_paid,`,
+1 dəfə; təkrar tətbiq keçilir): qrup + mövzu üzrə zəif yığımı — şagird
+mövzuda ≥ `alert_weak_min()` cavab, düz nisbəti < `alert_weak_pct()`; sətir
+zəif ≥ 2 və ya qrupun yarısı; sıra zəif sayı ↓, orta ↑; ən çox 6; pulsuz
+hesabda null. Hər element `remedialGen` üçün `id, name, subject_slug, level`
++ `class_id, class, n, weak_n, avg, weak[{id,name}]`. Panel `topicRow`
+(`.al.tp`): «Statistika. Ehtimal (7-ci sinif) 12 şagirddən 5-i zəif · orta
+68%», adlar → `#/s/`, «Test yığ» → `remedialGen(class_id, [t])` (Test yığ
+ekranı mövzu+fənn+sinif seçilmiş). Mövzu sətri varsa `kind='weak'` şagird
+sətirləri İcmalda gizlənir (Siqnallarda qalır); risk/star qalır. `sayS(n)`
+say şəkilçisi («5-i», «6-sı», «3-ü»). `smoke_icmal_hefte` §3 (abunə lazımdır —
+topics siqnallar kimi pulsuzda null). `test/_v2_topics.py`. **Canlıya əl ilə.**
+
 ## Öz ziyarətimiz sayılmır (db/175, 2026-09-09)
 
 İstifadəçi: «mən tez-tez girib çıxıram deyə artıma təsir etməsin».

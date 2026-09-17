@@ -2025,3 +2025,19 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   color:var(--fg-3);text-decoration:none}
 .tile .td.up{color:var(--ok)}
 .tile .td.dn{color:#b54708}
+
+/*  201: Tehluke zonasinda movzu setri  */
+.al.tp{cursor:default;color:var(--fg);align-items:flex-start;gap:12px}
+.al.tp:hover{background:var(--surface)}
+.al.tp .tpi{flex:0 0 auto;display:flex;width:16px;margin-top:2px;color:#b54708}
+.al.tp .tpi svg{width:16px;height:16px}
+.al.tp>span:not(.tpi){flex:1;min-width:0}
+.al.tp b{color:var(--fg)}
+.al.tp .tpn{display:block;margin-top:2px;font-size:12.5px;color:var(--fg-3);text-decoration:none}
+.al.tp .tpn a{color:var(--brand);font-weight:600;text-decoration:none}
+.al.tp .btn{flex:0 0 auto;margin-top:2px}
+@media (max-width:520px){
+  .al.tp{flex-wrap:wrap}
+  .al.tp>span:not(.tpi){flex:1 1 calc(100% - 40px)}
+  .al.tp .btn{margin-left:28px;margin-top:0}
+}

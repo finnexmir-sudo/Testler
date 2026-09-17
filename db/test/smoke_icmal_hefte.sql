@@ -71,4 +71,35 @@ begin
 end $$;
 reset role; reset request.jwt.claim.sub;
 \echo 'OK  2 · ikinci tetbiq zerersizdir'
+
+-- =====================================================================
+--  3. (201) topics: qrup + movzu uzre zeif yigimi
+--     S Bir 1/5, S Iki 2/5 (zeif), S Uc 5/5 -> weak_n 2, n 3, orta 53
+-- =====================================================================
+--  topics yalniz abuneli hesabda (siqnallar kimi)
+insert into public.subscriptions (account_id, plan_id, status, current_period_end)
+select 'aaaa0000-0000-0000-0000-0000000000e1', p.id, 'active', now() + interval '30 days'
+  from public.plans p where p.slug = 'repetitor-25';
+insert into public.attempt_answers (attempt_id, question_id, topic_id, selected_option_ids, is_correct, points, question_body, question_explanation, answered_at)
+select a.id, q.id,
+       (select id from public.topics where parent_id is not null limit 1),
+       '{}', q.k <= x.okn, 0, 'x', '', now()
+  from (values ('5555000e-0000-0000-0000-000000000001'::uuid, 1), ('5555000e-0000-0000-0000-000000000002'::uuid, 2), ('5555000e-0000-0000-0000-000000000003'::uuid, 5)) x(sid, okn)
+  join lateral (select id from public.attempts a2 where a2.student_id = x.sid order by finished_at desc limit 1) a on true
+  cross join (select id, row_number() over (order by id) k from (select id from public.questions where owner_type = 'platform' order by id limit 5) z) q;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000e1';
+do $$
+declare v jsonb; tp jsonb;
+begin
+  v := public.rpc_home(null);
+  assert jsonb_typeof(v->'topics') = 'array', 'topics yoxdur: ' || coalesce((v->'topics')::text, 'null');
+  assert jsonb_array_length(v->'topics') = 1, 'topics sayi: ' || (v->'topics')::text;
+  tp := v->'topics'->0;
+  assert (tp->>'n') = '3' and (tp->>'weak_n') = '2' and (tp->>'avg') = '53', 'topics setri: ' || tp::text;
+  assert jsonb_array_length(tp->'weak') = 2 and tp->'weak'->0->>'name' = 'S Bir', 'zeif adlar: ' || tp::text;
+  assert (tp->>'class') = 'Qrup H' and (tp->>'subject_slug') is not null, 'qrup/fenn: ' || tp::text;
+end $$;
+reset role; reset request.jwt.claim.sub;
+\echo 'OK  3 · (201) movzu uzre yigim: 3 sagirdden 2-si zeif'
 \echo 'ICMAL HEFTE: BUTUN YOXLAMALAR KECDI'
