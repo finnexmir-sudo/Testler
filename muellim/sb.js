@@ -198,10 +198,13 @@
     session: function () { return S; },
     loadSession: loadSession,
 
-    signUp: function (email, password, fullName) {
+    signUp: function (email, password, fullName, src) {
+      //  204: src - linkdeki ?src=... nisani, profiles.src-e dusur (trigger)
+      var data = { full_name: fullName || "" };
+      if (src) data.src = String(src).slice(0, 20);
       return request("/auth/v1/signup", {
         method: "POST", auth: false,
-        body: { email: email, password: password, data: { full_name: fullName || "" } }
+        body: { email: email, password: password, data: data }
       }).then(function (d) {
         // E-poct tesdiqi acıqdirsa access_token gelmir - istifadeci postu yoxlamalidir
         if (d && d.access_token) saveSession(d);

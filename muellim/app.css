@@ -2138,3 +2138,8 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
   .top .btn.fbtop svg{width:13px;height:13px}
   .top .wm{display:none}
 }
+
+/* 204: Huni - menbe bolgusu; hemkar metni */
+.hsrc{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 0;font-size:12.5px}
+.hsrc b{margin-right:4px;color:var(--fg-2)}
+.hmtxt{width:100%;box-sizing:border-box;margin-top:8px;font-size:13px}

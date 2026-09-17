@@ -15,8 +15,9 @@ delete from auth.users;
 
 insert into auth.users (id, email, raw_user_meta_data, created_at, email_confirmed_at, last_sign_in_at) values
   ('11110000-0000-0000-0000-0000000000f0','adm@t.az','{"full_name":"Admin"}', now(), now(), now()),
-  ('11110000-0000-0000-0000-0000000000f1','a@t.az','{"full_name":"A"}', now() - interval '2 days', null, null),
-  ('11110000-0000-0000-0000-0000000000f2','b@t.az','{"full_name":"B"}', now() - interval '3 days', now(), now()),
+  --  204: menbe raw_user_meta_data.src-den profiles.src-e (A: wa, B: pis deyer -> bos)
+  ('11110000-0000-0000-0000-0000000000f1','a@t.az','{"full_name":"A","src":"wa"}', now() - interval '2 days', null, null),
+  ('11110000-0000-0000-0000-0000000000f2','b@t.az','{"full_name":"B","src":"<script>alert(1)</script>"}', now() - interval '3 days', now(), now()),
   ('11110000-0000-0000-0000-0000000000f3','c@t.az','{"full_name":"C"}', now() - interval '4 days', now(), now()),
   ('11110000-0000-0000-0000-0000000000f4','d@t.az','{"full_name":"D"}', now() - interval '5 days', now(), now()),
   ('11110000-0000-0000-0000-0000000000f5','e@t.az','{"full_name":"E kohne"}', now() - interval '60 days', now(), now());
@@ -71,6 +72,10 @@ begin
   assert jsonb_array_length(h->'stuck') = 2, 'stuck: ' || (h->'stuck')::text;
   assert h->'stuck'->0->>'email' = 'a@t.az' and (h->'stuck'->0->>'confirmed') = 'false', 'stuck sira: ' || (h->'stuck')::text;
   assert h->'stuck'->1->>'email' = 'b@t.az' and (h->'stuck'->1->>'seen') is not null, 'stuck B: ' || (h->'stuck')::text;
+  --  204: menbe uzre say + stuck setirde src
+  assert (h->'src'->>'wa') = '1' and (h->'src'->>'') = '3', 'src bolgusu: ' || (h->'src')::text;
+  assert h->'stuck'->0->>'src' = 'wa' and coalesce(h->'stuck'->1->>'src', '') = '', 'stuck src: ' || (h->'stuck')::text;
+  assert (select src from public.profiles where id = '11110000-0000-0000-0000-0000000000f2') is null, 'pis src bos olmalidir';
   h := public.rpc_admin_huni(0);
   assert (h->>'registered') = '5', 'butun tarix: ' || h::text;
 end $$;

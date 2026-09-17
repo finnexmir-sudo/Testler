@@ -272,7 +272,11 @@
       $("authErr").innerHTML = "";
       setBusy("btnAuth", true, isUp ? "Hesab yarat" : "Daxil ol");
 
-      var p = isUp ? sb.signUp(email, pass, fname) : sb.signIn(email, pass);
+      //  204: ana sehifedeki ?src=... nisani (visit.js sessiyada saxlayir)
+      //  qeydiyyatla gedir - hunide «haradan geldi» gorunur
+      var src = "";
+      try { src = sessionStorage.getItem("bil10_src") || ""; } catch (e) {}
+      var p = isUp ? sb.signUp(email, pass, fname, src) : sb.signIn(email, pass);
       p.then(function (d) {
         if (isUp && (!d || !d.access_token)) {
           setBusy("btnAuth", false, "Hesab yarat");
@@ -3891,7 +3895,8 @@
     g.fillStyle = "#6b7488"; g.font = "500 34px " + F;
     g.fillText(d.teacher ? "Müəllim: " + d.teacher : "", 72, H - 100);
     g.fillStyle = "#98a1b3"; g.font = "500 28px " + F;
-    g.fillText("bil10 · şagird və valideynə pulsuz", 72, H - 52);
+    //  204: sekil WhatsApp-da valideynler arasinda gezir - unvan gorunsun
+    g.fillText("bil10.az · şagird və valideynə pulsuz", 72, H - 52);
   }
   function fitText(g, t, maxW) {
     while (t.length > 4 && g.measureText(t).width > maxW) t = t.slice(0, -2) + "…";
@@ -5660,8 +5665,16 @@
         '<i>' + p + "</i></div>";
     }).join("");
     var stuck = h.stuck || [];
+    //  204: menbe bolgusu - linkdeki ?src=... qeydiyyata qeder gelir
+    var SRC = { "": "birbaşa", wa: "WhatsApp", hemkar: "həmkar", kurs: "kurs", ig: "Instagram", kart: "nəticə kartı" };
+    var srcs = Object.keys(h.src || {}).sort(function (a, b) { return (h.src[b] || 0) - (h.src[a] || 0); });
+    var srcHtml = srcs.length > 1 || (srcs.length === 1 && srcs[0] !== "")
+      ? '<div class="hsrc"><b>Haradan gəlib</b>' + srcs.map(function (k) {
+          return '<em class="tg">' + esc(SRC[k] || k) + " · " + (h.src[k] || 0) + "</em>";
+        }).join("") + "</div>"
+      : "";
     return '<h2>Huni <span class="muted">· son ' + (h.days || 30) + " gün · nümunə və admin sayılmır</span></h2>" +
-      '<div class="card huni"><div class="hsteps">' + cells + "</div>" +
+      '<div class="card huni"><div class="hsteps">' + cells + "</div>" + srcHtml +
       (stuck.length
         ? '<div class="hstuck"><div class="hsh"><b>Qrup yaratmayanlar</b>' +
             '<span class="muted">' + stuck.length + " nəfər · ünvanı şübhəli olana məktub çatmır, " +
@@ -5678,6 +5691,7 @@
                 (x.name ? '<i>' + esc(em) + "</i>" : "") + "</div>" +
               '<div class="tags">' +
                 (bad ? '<em class="tg bad">ünvan səhv?</em>' : "") +
+                (x.src ? '<em class="tg">' + esc(SRC[x.src] || x.src) + "</em>" : "") +
                 (x.confirmed ? '<em class="tg ok">təsdiqli</em>' : '<em class="tg no">təsdiq yox</em>') +
                 (x.seen ? '<em class="tg ok">girib ' + agoAz(x.seen) + "</em>"
                         : '<em class="tg no">girməyib</em>') +
@@ -7717,6 +7731,31 @@
      cap pencersi acilir.  Orada "PDF olaraq saxla" da var - elave
      kitabxana lazim deyil.  withKey=true olanda cavab acari AYRICA
      sehifede cixir; sagird nusxesinde duzgun cavab izi yoxdur. */
+  /*  204: «Həmkarına göndər» - hazir metn + link.  Telefonda sistem
+      paylasma penceresi (WhatsApp ordan secilir), masaustunde metn
+      buferə kopyalanir.  Sebeke sorgusu yoxdur.  */
+  function hemkarShare(t, n) {
+    var url = "https://bil10.az/?src=hemkar";
+    var txt = "«" + (t.title || "Test") + "» — " + (t.subject || "") + (t.level ? ", " + t.level : "") +
+      ", " + n + " sual. Bil10-da hazır bankdan bir dəqiqəyə yığdım, şagird telefonda işləyir, " +
+      "nəticə və zəif mövzular özü gəlir. Öz qrupunda yoxla: " + url;
+    var box = $("hemkarMsg");
+    function said(h) { if (box) box.innerHTML = h; }
+    if (navigator.share) {
+      navigator.share({ text: txt }).then(function () {
+        said(msg("ok", "Göndərildi. Həmkarınız linkə keçəndə mənbə «həmkar» kimi sayılır."));
+      }).catch(function () {});
+      return;
+    }
+    var done = function () {
+      said(msg("ok", "Mətn kopyalandı — WhatsApp-da həmkarınıza yapışdırın.") +
+        '<textarea class="hmtxt" readonly rows="4">' + esc(txt) + "</textarea>");
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done, done);
+    } else done();
+  }
+
   function paperPrint(t, withKey) {
     var qs = t.questions || [];
     var L = "ABCDEFGH";
@@ -7727,7 +7766,9 @@
     var dm = function (n) { return (n < 10 ? "0" : "") + n; };
     var stamp = dm(d.getDate()) + "." + dm(d.getMonth() + 1) + "." + d.getFullYear();
     var who = (CTX && CTX.profile && CTX.profile.full_name) || "";
-    var foot = "Bil10" + (who ? " · " + esc(who) : "") + " · " + stamp;
+    //  204: reklam - sagird veraqi eve aparir, valideyn haradan
+    //  oldugunu gorsun.  Unvan altliqda, her sehifede.
+    var foot = "Bil10 ilə hazırlanıb · bil10.az" + (who ? " · " + esc(who) : "") + " · " + stamp;
     var box = $("printBox");
     if (!box) {
       box = document.createElement("div");
@@ -7831,6 +7872,10 @@
             "Çap / PDF</button>" +
           '<button class="btn sm ghost" id="btnPrnK">' + ic("key") +
             "Cavab açarı ilə</button>" +
+          //  204: reklam - muellim hemkarina hazir metn + link gonderir
+          //  (?src=hemkar - hunide gorunur)
+          '<button class="btn sm ghost" id="btnHemkar" title="Həmkarınıza göndərin">' + ic("send") +
+            "Həmkarına göndər</button>" +
           '<label class="prnc"><input type="checkbox" id="prnC"> Yığcam</label>' +
           /*  192: vaxt limiti - testin ozunde saxlanir, butun teyinatlara
               aiddir.  Sagird geri sayan saat gorur, vaxt bitende cavablar
@@ -7866,6 +7911,7 @@
           ? '<p class="muted" style="margin:8px 0 0">Bu testi artıq şagird ' +
             "işlədiyi üçün yeniləmək olmaz — yeni test yığın.</p>"
           : "") +
+        '<div id="hemkarMsg"></div>' +
         '<div id="pErr"></div>' +
       "</div>" +
       '<div class="spacer"></div>' +
@@ -7972,6 +8018,7 @@
     bindReportLinks();
 
     on("btnPrn",  "click", function () { paperPrint(t, false); });
+    on("btnHemkar", "click", function () { hemkarShare(t, qs.length); });
     on("btnPrnK", "click", function () { paperPrint(t, true); });
 
     /* "Kime" siyahisi secilen qrupa baglidir - qrup deyisende yenilenir.

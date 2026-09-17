@@ -3773,6 +3773,20 @@ Testlər: `smoke_numune.sql` §11, `e2e_numune.py` H.
 - Testlər: `e2e_bize.py` B (düymə, Profildə forma yoxdur, Geri = Qrup).
   Şəkil: `test/_v2_bize.py`.
 
+## db/204 — reklam: çap altlığı, kart ünvanı, «Həmkarına göndər», mənbə qeydiyyata qədər (2026-09-17)
+
+- Çap vərəqi altlığı (`paperPrint` → `foot`): «Bil10 ilə hazırlanıb · bil10.az · müəllim · tarix».
+- Nəticə kartı (`drawProgCard`) altında «bil10.az · şagird və valideynə pulsuz».
+- Test vərəqi ekranında `#btnHemkar` → `hemkarShare(t, n)`: mətn + `https://bil10.az/?src=hemkar`;
+  telefonda `navigator.share`, masaüstündə buferə + `#hemkarMsg .hmtxt`.
+- Mənbə: `visit.js` `sessionStorage bil10_src` (əvvəldən) → `sb.signUp(email, pass, name, src)`
+  → `raw_user_meta_data.src` → `app.handle_new_user` → `profiles.src` (≤20, `[a-z0-9_-]`, yoxsa null).
+- `rpc_admin_huni`: `src` ({"wa":3,"":12}) + `stuck[].src`; paneldə «Haradan gəlib» sətri (`.hsrc`),
+  ad xəritəsi `SRC` (wa→WhatsApp, hemkar→həmkar, kurs, ig→Instagram, kart→nəticə kartı).
+- Testlər: `smoke_huni.sql` (src bölgüsü, pis dəyər null), `e2e_panel` (qeydiyyatda src),
+  `e2e_gen` (altlıqda bil10.az; həmkar mətni). Şəkil: `test/_v2_reklam.py`.
+- Canlıda: `db/204_menbe_qeydiyyat.sql` işə salınmalı.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

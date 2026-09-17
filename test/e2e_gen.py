@@ -229,6 +229,12 @@ with sync_playwright() as pw:
     #  cap pencersi headless-de acilmir - print() saxta funksiya ile evezlenir
     #  (setir () => {} ile sarilir - yoxsa playwright onu ozu bir defe cagirir)
     pg.evaluate("() => { window.print = function(){ window.__prn = (window.__prn||0)+1 } }")
+    #  204: «Həmkarına göndər» - hazir metn + ?src=hemkar linki (masaustunde
+    #  bufere kopyalanir, metn qutuda da gorunur)
+    ok(pg.locator("#btnHemkar").count() == 1, "«Həmkarına göndər» duymesi var (204)")
+    pg.click("#btnHemkar"); pg.wait_for_selector("#hemkarMsg .hmtxt", timeout=8000)
+    hm = pg.input_value("#hemkarMsg .hmtxt")
+    ok("bil10.az/?src=hemkar" in hm and "Öz qrupunda yoxla" in hm, "hemkar metni: link + cagiris", hm[:90])
     pg.click("#btnPrn")
     ok(pg.evaluate("window.__prn") == 1, "cap pencersi cagirilir",
        pg.evaluate("window.__prn"))
@@ -242,6 +248,8 @@ with sync_playwright() as pw:
     #  su nisani: cap eden muellimin adi + tam tarix, her sehifenin altinda
     foot = pg.evaluate("document.querySelector('#printBox .ppfoot').textContent")
     ok("Bil10" in foot, "su nisaninda brend var", foot)
+    #  204: reklam - valideyn veraqin altinda unvani gorsun
+    ok("bil10.az" in foot and "hazırlanıb" in foot, "su nisaninda sayt unvani var (204)", foot)
     ok("Gen Muellim" in foot, "su nisaninda muellimin adi var", foot)
     import datetime as _dt
     bugun = _dt.date.today().strftime("%d.%m.%Y")

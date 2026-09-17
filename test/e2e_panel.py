@@ -199,8 +199,14 @@ with sync_playwright() as pw:
 
     #  160: hediyye paket ayari yerli bazada baglidir - bu addim ucun acilir
     db("update public.app_state set val = val || jsonb_build_object('on', true) where key = 'hediyye'")
+    #  204: ana sehifedeki ?src=wa nisani (visit.js sessiyada saxlayir)
+    #  qeydiyyatla profiles.src-e dusur
+    pg.goto(PANEL); pg.wait_for_timeout(200)
+    pg.evaluate("sessionStorage.setItem('bil10_src', 'wa')")
     signup(pg, "leyla@test.az", "Leyla Muellim")
     pg.wait_for_selector("#btnSetup", timeout=8000)
+    ok(db("select src from public.profiles p join auth.users u on u.id = p.id where u.email = 'leyla@test.az'",
+          one=True)["src"] == "wa", "qeydiyyatda menbe (?src=wa) profile yazilir (204)")
     #  202: e-poct tesdiqsiz panele dusur, sari zolaq xatirladir
     pg.wait_for_selector("#mailBar", timeout=8000)
     ok("təsdiqlənməyib" in pg.inner_text("#mailBar"), "e-poct tesdiq zolagi cixir (202)")
