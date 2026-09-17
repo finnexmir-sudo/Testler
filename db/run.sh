@@ -127,6 +127,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 204_menbe_qeydiyyat.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 205_sagird_siyahi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 206_indi_saytda.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 207_keyfiyyet_kohne_setir.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 208_cavab_sagirde.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

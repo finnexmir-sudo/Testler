@@ -6022,7 +6022,16 @@
           ? '<div class="fbseen' + (r.seen_at ? " seen" : "") + '">' +
               (r.seen_at ? ic("check") + "Oxuyub · " + dateAz(r.seen_at) : ic("clock") + "Hələ oxumayıb") +
             "</div>"
-          : '<div class="fbact">' +
+          //  208: sagird/valideyn cavabimizi oxuyub?  Cavab var, amma
+          //  hele acmayibsa - «cavab gozleyir» deyil, «catdirildi»dir.
+          : (r.note && (r.author_type === "student" || r.author_type === "parent")
+              ? '<div class="fbseen' + (r.reply_seen_at ? " seen" : "") + '">' +
+                  (r.reply_seen_at
+                    ? ic("check") + "Cavabı oxudu · " + dateAz(r.reply_seen_at)
+                    : ic("clock") + "Cavab göndərildi — hələ açmayıb") +
+                "</div>"
+              : "") +
+            '<div class="fbact">' +
           "<select>" + Object.keys(FB_ST).map(function (k) {
             return '<option value="' + k + '"' + (k === r.status ? " selected" : "") + ">" +
               FB_ST[k] + "</option>";

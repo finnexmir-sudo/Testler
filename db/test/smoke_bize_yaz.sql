@@ -314,3 +314,98 @@ begin
   assert f->>'reply_body' like 'Salam! Qrup%' and f->>'who' = 'Mlm Muellim', 'cavab konteksti sehv';
 end $$;
 \echo 'OK  8 · (199) admin -> muellim mesaji, oxudu, cavab, siyahi'
+
+-- =====================================================================
+--  9. (208) Cavab SAGIRDE ve VALIDEYNE catir; status ozu «seen»-e kecir
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+delete from public.feedback where body like 'smoke208%';
+set role anon;
+do $$
+declare r jsonb; v_id uuid;
+begin
+  --  sagird yazir
+  r := public.rpc_student_feedback('sag-token', 'teklif', 'smoke208 daha asan suallar olsun zehmet olmasa', 'testler');
+  v_id := (r->>'id')::uuid;
+  perform set_config('smoke.f208', v_id::text, false);
+  --  cavabdan ONCE: siyahida var, note bosdur, fresh false
+  --  siyahi en tezeden gelir; evvelki bolmelerden de yazi var
+  r := public.rpc_student_feedback_mine('sag-token', false);
+  assert r->0->>'body' like 'smoke208%', '208 sagird siyahisi sirasi: ' || r::text;
+  assert r->0->>'note' is null and (r->0->>'fresh')::boolean = false, '208 cavabsiz fresh: ' || r::text;
+  --  valideyn de yazir
+  r := public.rpc_parent_feedback('val-token', 'sual', 'smoke208 valideyn sualidir yoxlanis ucun', 'valideyn');
+  perform set_config('smoke.p208', (r->>'id'), false);
+end $$;
+reset role;
+
+--  admin cavab yazir: status «new» idi, ozu «seen» olur
+--  (cedvel yoxlamalari reset role altindadir - authenticated cedveli gormur)
+do $$
+declare v_id uuid := current_setting('smoke.f208')::uuid;
+begin
+  assert (select status from public.feedback where id = v_id) = 'new', '208 baslangic status';
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d1';
+do $$
+declare r jsonb; v_id uuid := current_setting('smoke.f208')::uuid;
+begin
+  r := public.rpc_admin_feedback_set(v_id, 'new', 'Salam Ayse! Suallarin cetinliyini muellimin secir - ona catdirdiq.');
+  assert r->>'status' = 'seen', '208 status ozu seen olmali: ' || r::text;
+  --  valideyne de cavab
+  perform public.rpc_admin_feedback_set(current_setting('smoke.p208')::uuid, 'new', 'Salam! Suala cavab budur.');
+  --  status ELLE secilibse toxunulmur
+  r := public.rpc_admin_feedback_set(v_id, 'planned', 'Ikinci cavab - status elle secilib.');
+  assert r->>'status' = 'planned', '208 elle secilen status pozuldu: ' || r::text;
+end $$;
+reset role; reset request.jwt.claim.sub;
+do $$
+declare v_id uuid := current_setting('smoke.f208')::uuid;
+begin
+  assert (select status from public.feedback where id = v_id) = 'planned', '208 bazada status';
+  assert (select answered_at from public.feedback where id = v_id) is not null, '208 answered_at';
+  assert (select reply_seen_at from public.feedback where id = v_id) is null, '208 oxunmamis olmali';
+end $$;
+
+--  sagird cavabi gorur; p_seen=false oxunmus saymir, true saydirir
+set role anon;
+do $$
+declare r jsonb;
+begin
+  r := public.rpc_student_feedback_mine('sag-token', false);
+  assert r->0->>'note' like 'Ikinci cavab%', '208 sagird cavabi gormedi: ' || r::text;
+  assert (r->0->>'fresh')::boolean, '208 fresh true olmali (hele acmayib)';
+  --  qutu acildi: hemin cagirista da fresh false olmalidir (ele indi gorundu)
+  r := public.rpc_student_feedback_mine('sag-token', true);
+  assert (r->0->>'fresh')::boolean = false, '208 p_seen=true cagirisinda fresh false olmali: ' || r::text;
+  r := public.rpc_student_feedback_mine('sag-token', false);
+  assert (r->0->>'fresh')::boolean = false, '208 oxunandan sonra fresh false olmali';
+  --  valideyn oz cavabini gorur, SAGIRD yazisini gormur
+  r := public.rpc_parent_feedback_mine('val-token', true);
+  assert r->0->>'body' like 'smoke208%' and r->0->>'note' like 'Salam! Suala%', '208 valideyn cavabi: ' || r::text;
+  --  valideyn siyahisinda SAGIRD yazisi olmamalidir
+  assert not exists (select 1 from jsonb_array_elements(r) x where x->>'body' like 'smoke208 daha asan%'),
+    '208 valideyn sagird yazisini gordu: ' || r::text;
+  --  yanlis token
+  begin
+    perform public.rpc_student_feedback_mine('yoxdur-token', false);
+    raise exception '208 yanlis token kecdi';
+  exception when sqlstate '28000' then null; end;
+end $$;
+reset role;
+
+--  admin «oxudu» nisanini gorur
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d1';
+do $$
+declare f jsonb; v_id uuid := current_setting('smoke.f208')::uuid;
+begin
+  select x into f from jsonb_array_elements(public.rpc_admin_feedback('all')) x
+   where x->>'id' = v_id::text;
+  assert f is not null, '208 setir admin siyahisinda yoxdur';
+  assert f->>'reply_seen_at' is not null, '208 admin «oxudu» gormur: ' || f::text;
+end $$;
+reset role; reset request.jwt.claim.sub;
+delete from public.feedback where body like 'smoke208%';
+\echo 'OK  9 · (208) cavab sagirde/valideyne catir, status ozu seen, oxudu nisani'

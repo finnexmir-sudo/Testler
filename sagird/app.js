@@ -537,7 +537,11 @@
 
       /* 5. Bize yaz - yigilmis; sagird teklif/problem yazir, admin oxuyur */
       h += '<div class="spacer"></div>' +
-        '<details class="more fbd" id="fbBox"><summary>Bizə yaz</summary>' +
+        '<details class="more fbd" id="fbBox">' +
+          '<summary>Bizə yaz<span class="fbdot hide" id="fbDot">Bil10 cavab yazdı</span></summary>' +
+        /*  208: yazdiqlarin + Bil10-un cavabi.  Evvel sagird yalniz
+            YAZA bilirdi - cavab ona hec vaxt catmirdi.  */
+        '<div id="fbMine"></div>' +
         '<div class="card fbcard">' +
           '<p class="note" style="margin:0 0 10px">Təklifin var, nəsə işləmir, ' +
             "sualın var? Yaz — oxuyub nəzərə alacağıq.</p>" +
@@ -590,11 +594,44 @@
           setBusy("fbGo", false, "Göndər");
           $("fbT").value = ""; $("fbN").textContent = "0 / 2000";
           $("fbM").innerHTML = msg("ok", "Təşəkkür! Mesajın çatdı. 🙌");
+          fbMineLoad(true);
         }).catch(function (e) {
           setBusy("fbGo", false, "Göndər");
           $("fbM").innerHTML = msg("err", fail(e));
         });
       });
+      /*  208: qutu YIGILMIS gelir - cavab nisani ekran acilanda yuklenir
+          (p_seen=false, oxunmus sayilmir).  Qutu acilanda ikinci defe
+          p_seen=true ile cagirilir: cavab gorundu, nisan sonur.  */
+      fbMineLoad(false);
+      on("fbBox", "toggle", function () {
+        if ($("fbBox") && $("fbBox").open) fbMineLoad(true);
+      });
+      /*  Yazdiqlarin + Bil10-un cavabi (208).  Sebeke xetasinda sakit
+          kecir - esas ekrana tesir etmir.  */
+      function fbMineLoad(seen) {
+        sb.rpc("rpc_student_feedback_mine", { p_token: TOKEN, p_seen: !!seen })
+          .then(function (rows) {
+            var box = $("fbMine"), dot = $("fbDot");
+            if (!box) return;
+            rows = rows || [];
+            var fresh = rows.filter(function (r) { return r.fresh; }).length;
+            if (dot) dot.classList.toggle("hide", !fresh);
+            if (!rows.length) { box.innerHTML = ""; return; }
+            box.innerHTML = '<div class="card fbcard fbmine"><b class="fbmh">Yazdıqların</b>' +
+              rows.map(function (r) {
+                return '<div class="fbmi">' +
+                  '<div class="fbmt"><span>' + esc(r.body) + "</span>" +
+                    '<i>' + dateAz(r.at) + "</i></div>" +
+                  (r.note
+                    ? '<div class="fbre' + (r.fresh ? " fresh" : "") + '">' + ic("check") +
+                      "<div><b>Bil10-un cavabı</b>" + esc(r.note) + "</div></div>"
+                    : '<div class="fbwait">Oxuyuruq — cavab buraya gələcək.</div>') +
+                "</div>";
+              }).join("") + "</div>";
+          }).catch(function () {});
+      }
+
       function bindRows() {
         Array.prototype.forEach.call(main.querySelectorAll("[data-t]:not([data-bound])"), function (b) {
           b.setAttribute("data-bound", "1");

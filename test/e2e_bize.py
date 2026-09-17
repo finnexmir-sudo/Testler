@@ -136,6 +136,11 @@ with sync_playwright() as pw:
     ok("çatdı" in sp.inner_text("#fbM"), "sagird: gonderildi")
     r = db("select author_type, kind, student_id::text s, account_id::text a from public.feedback where author_type='student'", one=True)
     ok(r and r["kind"] == "tesekkur" and r["s"] and r["a"], "bazada sagird mesaji: sagird + hesab bagli")
+    #  208: yazdigi siyahida gorunur, hele cavab yoxdur
+    sp.wait_for_selector("#fbMine .fbmi", timeout=8000)
+    ok("Oxuyuruq" in sp.inner_text("#fbMine"), "sagird: cavab gozleyir yazisi",
+       sp.inner_text("#fbMine").replace("\n", " ")[:70])
+    ok(sp.locator("#fbDot").get_attribute("class").find("hide") >= 0, "cavab yoxdur - nisan gizlidir")
 
     print("D · Valideyn yazır")
     vp = page(ctx, 390, 844)
@@ -194,6 +199,54 @@ with sync_playwright() as pw:
     ok(it.locator(".fbre").count() == 1 and "Növbəti buraxılışda" in it.inner_text(), "Cavabimiz qutusu gorunur")
     other = pg.locator("#fbList .fbi", has_text="ingilis dili").first
     ok(other.locator(".fbre").count() == 0, "cavabsiz mesajda qutu yoxdur")
+
+    print("H2 · (208) Admin şagirdə cavab yazır — şagird və valideyn görür")
+    pg.goto(PANEL + "#/adm")
+    pg.wait_for_selector(".fold", timeout=15000)
+    pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
+    pg.wait_for_selector("#fbList .fbc", timeout=15000)
+    pg.click("#fbF .chip[data-fs='all']")
+    pg.wait_for_function("document.querySelectorAll('#fbList .fbc').length >= 4", timeout=8000)
+    scard = pg.locator("#fbList .fbc", has_text="Testlər çox maraqlıdır").first
+    #  status «Yeni» qalir - server ozu «Baxilib»a kecirmelidir (208)
+    scard.locator("select").select_option("new")
+    scard.locator("textarea").fill("Salam Ayşə! Sağ ol — müəllimin daha asan test yığa bilər, ona çatdırdıq.")
+    scard.locator("[data-fbsave]").click()
+    pg.wait_for_selector(".fbc .fbcm .ok", timeout=8000)
+    r = db("select status, admin_note n, reply_seen_at rs from public.feedback where author_type='student'", one=True)
+    ok(r["status"] == "seen", "cavab yazilanda status ozu «Baxilib» olur (208)", r["status"])
+    ok(r["n"].startswith("Salam Ayşə") and r["rs"] is None, "cavab yazildi, hele oxunmayib")
+    #  sagird ekrani: nisan + cavab
+    sp.reload(); sp.wait_for_selector("#fbBox", timeout=15000)
+    sp.wait_for_selector("#fbDot:not(.hide)", timeout=8000)
+    ok("Bil10 cavab yazdı" in sp.inner_text("#fbDot"), "sagird: yigilmis qutuda cavab nisani")
+    ok(db("select reply_seen_at rs from public.feedback where author_type='student'", one=True)["rs"] is None,
+       "nisan gorunende hele oxunmus sayilmir")
+    sp.click("#fbBox summary")
+    sp.wait_for_selector("#fbMine .fbre", timeout=8000)
+    ok("Salam Ayşə" in sp.inner_text("#fbMine .fbre"), "sagird Bil10-un cavabini gorur",
+       sp.inner_text("#fbMine .fbre").replace("\n", " ")[:60])
+    sp.wait_for_function(
+        "() => document.querySelector('#fbDot') && document.querySelector('#fbDot').className.indexOf('hide') >= 0",
+        timeout=8000)
+    ok(True, "qutu acilandan sonra nisan sonur")
+    #  valideyn: cavab yazmamisiqsa qutuda «gozleyir» yazisi olur
+    vp.reload(); vp.wait_for_selector("#fbBox", timeout=15000)
+    vp.click("#fbBox summary"); vp.wait_for_selector("#fbMine .fbmi", timeout=8000)
+    ok("Oxuyuruq" in vp.inner_text("#fbMine"), "valideyn: cavabsiz mesajda «gozleyir» yazisi")
+    #  admin «oxudu» nisanini gorur.  ARTIQ #/adm-deyik: goto eyni unvana
+    #  hec ne etmir (hash deyismir) - reload lazimdir.
+    pg.reload()
+    pg.wait_for_selector(".fold", timeout=15000)
+    pg.eval_on_selector_all(".fold", "els => els.forEach(e => e.open = true)")
+    pg.wait_for_selector("#fbList .fbc", timeout=15000)
+    pg.click("#fbF .chip[data-fs='all']")
+    pg.wait_for_function("document.querySelectorAll('#fbList .fbc').length >= 4", timeout=8000)
+    scard = pg.locator("#fbList .fbc", has_text="Testlər çox maraqlıdır").first
+    ok(scard.locator(".fbseen").count() == 1 and "oxudu" in scard.inner_text(),
+       "admin: «Cavabi oxudu» nisani", scard.inner_text().replace("\n", " ")[-60:])
+    ok(db("select reply_seen_at rs from public.feedback where author_type='student'", one=True)["rs"] is not None,
+       "bazada reply_seen_at yazildi")
 
     print("H · Şəkil (390 · 1280)")
     pg.screenshot(path="/tmp/bize_me.png", full_page=True)

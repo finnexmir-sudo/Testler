@@ -451,7 +451,11 @@
         '<a href="#" id="kidAdd">uşaq əlavə et</a></p>');
 
     /* ---- bize yazin: tetbiq haqqinda teklif/problem - admin oxuyur ---- */
-    out += '<details class="fbd" id="fbBox"><summary>Tətbiq haqqında bizə yazın</summary>' +
+    out += '<details class="fbd" id="fbBox">' +
+        '<summary>Tətbiq haqqında bizə yazın' +
+          '<span class="fbdot hide" id="fbDot">Bil10 cavab yazdı</span></summary>' +
+      //  208: yazdiqlariniz + Bil10-un cavabi (evvel cavab catmirdi)
+      '<div id="fbMine"></div>' +
       '<div class="card fbcard">' +
         '<p class="note" style="margin:0 0 10px">Nəsə aydın deyil, işləmir və ya ' +
           "təklifiniz var? Yazın — oxuyub nəzərə alacağıq.</p>" +
@@ -502,11 +506,42 @@
         setBusy("fbGo", false, "Göndər");
         $("fbT").value = ""; $("fbN").textContent = "0 / 2000";
         $("fbM").innerHTML = msg("ok", "Təşəkkür edirik! Mesajınız çatdı.");
+        fbMineLoad(true);
       }).catch(function (e) {
         setBusy("fbGo", false, "Göndər");
         $("fbM").innerHTML = msg("err", fail(e));
       });
     });
+
+    /*  208: qutu YIGILMIS gelir - cavab nisani ekran acilanda yuklenir
+        (p_seen=false, oxunmus sayilmir); qutu acilanda p_seen=true.  */
+    fbMineLoad(false);
+    on("fbBox", "toggle", function () {
+      if ($("fbBox") && $("fbBox").open) fbMineLoad(true);
+    });
+
+    function fbMineLoad(seen) {
+      sb.rpc("rpc_parent_feedback_mine", { p_token: TOKEN, p_seen: !!seen })
+        .then(function (rows) {
+          var box = $("fbMine"), dot = $("fbDot");
+          if (!box) return;
+          rows = rows || [];
+          var fresh = rows.filter(function (r) { return r.fresh; }).length;
+          if (dot) dot.classList.toggle("hide", !fresh);
+          if (!rows.length) { box.innerHTML = ""; return; }
+          box.innerHTML = '<div class="card fbcard fbmine"><b class="fbmh">Yazdıqlarınız</b>' +
+            rows.map(function (r) {
+              return '<div class="fbmi">' +
+                '<div class="fbmt"><span>' + esc(r.body) + "</span>" +
+                  '<i>' + dateAz(r.at) + "</i></div>" +
+                (r.note
+                  ? '<div class="fbre' + (r.fresh ? " fresh" : "") + '">' +
+                    "<div><b>Bil10-un cavabı</b>" + esc(r.note) + "</div></div>"
+                  : '<div class="fbwait">Oxuyuruq — cavab buraya gələcək.</div>') +
+              "</div>";
+            }).join("") + "</div>";
+        }).catch(function () {});
+    }
   }
 
   /* ================================================================

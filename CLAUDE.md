@@ -3930,6 +3930,33 @@ telefona enməməlidir).
 5) Lövhə/TV rejimi (+Fikrim dəyişdi, +təsadüfi seçici, +qrup missiyası sayğacı).
 Rədd/sonra: DİM geri sayımı, seriya, xəritə/Boss/jokerlər.
 
+## db/208 — «Bizə yaz» cavabı şagirdə və valideynə çatır (2026-09-17)
+
+İstifadəçi tapdı: şagird Ayşə yazdı, admin cavab yazdı, cavab **heç kimə**
+getmədi. 122-də şagird/valideyn yalnız YAZA bilirdi, oxuya bilmirdi; müəllim
+də görmürdü (`rpc_feedback_mine` `user_id = auth.uid()` süzür, şagird sətrində
+`user_id` boşdur). Üstəlik cavab yazılandan sonra status «Yeni» qalırdı, ona
+görə «Bizə yazılanlar 1» nişanı sönmürdü.
+
+- `feedback.reply_seen_at` (admin mesajının `seen_at`-ından ayrı).
+- `rpc_student_feedback_mine(p_token, p_seen)` / `rpc_parent_feedback_mine`:
+  öz yazıları + `note` (admin cavabı) + `fresh`. `p_seen=false` yalnız oxuyur
+  (nişan üçün), `p_seen=true` «oxundu» yazır və `fresh` false qaytarır —
+  yoxsa nişan öz-özünü söndürür / sönmür.
+- `rpc_admin_feedback_set`: cavab yazılıb, status hələ «new»-dirsə özü «seen»
+  olur; status əl ilə seçilibsə toxunulmur. Cavab **dəyişdirilsə**
+  `reply_seen_at` sıfırlanır (təzə cavabdır).
+- `rpc_admin_feedback`: `reply_seen_at` → panel «Cavabı oxudu · tarix» /
+  «Cavab göndərildi — hələ açmayıb» (`.fbseen`, yalnız şagird/valideyn sətrində).
+- Şagird və valideyn tətbiqi: `#fbMine` siyahısı + summary-də `.fbdot`
+  «Bil10 cavab yazdı»; qutu `toggle` olanda `p_seen=true`.
+- **Anon ağ siyahı 21 → 23** (`db/05_grants.sql` İKİ massiv, `smoke_huquq.sql`
+  üç yerdə: §1 sayı, §6 təkrar işlətmə). `db/113` bərpa faylı yalnız 11 şagird/
+  valideyn RPC-sini qaytarır, ona toxunulmadı.
+- Testlər: `smoke_bize_yaz.sql` §9, `smoke_huquq.sql`, `e2e_bize.py` H2.
+  Şəkil: `test/_v2_cavab.py`.
+- **Dərs:** yeni kanal açanda hər iki istiqaməti (yaz + oxu) eyni anda qur.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
