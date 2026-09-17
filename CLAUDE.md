@@ -3827,6 +3827,16 @@ toqquşurdu (düymə kimi görünürdü).
 - Testlər: `smoke_admin_giris.sql` §1 (2 dəq), `e2e_paket` (nişan; lövhədə admin yox).
 - Canlıda: `db/206_indi_saytda.sql`.
 
+## db/207 — Sual keyfiyyəti: keşdə qalan nümunə sətirləri (2026-09-17)
+
+Canlıda «Sual keyfiyyəti 3»: 7-ci sinif Rasional ədədlər / Statistika, 20–27
+cavab — nümunənin öz mövzuları. 139 `qstat_rows`-dan nümunəni çıxarmışdı, amma
+`question_stats` keşi yalnız upsert ilə yenilənirdi: təzə hesablamada olmayan
+sual köhnə rəqəmləri ilə qalırdı. `app.qstat_refresh` indi müvəqqəti cədvələ
+hesablayır, upsert edir, hesablamada olmayan sətirləri silir.
+Canlıda: `db/207_keyfiyyet_kohne_setir.sql`, sonra İdarəetmədə «↻ Yenilə».
+Test: `smoke_keyfiyyet.sql` §1b.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

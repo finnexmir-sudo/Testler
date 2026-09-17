@@ -113,6 +113,25 @@ end $$;
 \echo 'OK  1 · acar+menfi+cetin, olu, n<20 siqnalsiz'
 
 -- =====================================================================
+--  1b. (207) kesde qalan kohne setir: teze hesablamada olmayan sual silinir
+-- =====================================================================
+do $$
+declare v_q uuid; n int;
+begin
+  --  hesablamada olmayan bir suala suni kes setri yaziriq (numuneden qalmis kimi)
+  select q.id into v_q from public.questions q
+   where q.id not in (select question_id from public.question_stats) limit 1;
+  insert into public.question_stats (question_id, n, p, rpb, opts, flags, sev)
+  values (v_q, 27, 89.0, 0.32, '[]'::jsonb, array['olu'], 1);
+  n := app.qstat_refresh();
+  assert n = 3, '207: uc sual hesablanmali: ' || n;
+  assert not exists (select 1 from public.question_stats where question_id = v_q),
+    '207: kohne (numune) setir yenilenmede silinmedi';
+  assert (select count(*) from public.question_stats) = 3, '207: kesde 3 setir qalmali';
+end $$;
+\echo 'OK  1b · (207) yenilenmede kohne setir silinir'
+
+-- =====================================================================
 --  2. Admin siyahisi: sira, sayğaclar, suzgec, baxildi; admin olmayan gore bilmir
 -- =====================================================================
 set role authenticated;
