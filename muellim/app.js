@@ -5771,7 +5771,12 @@
         '<div class="tile a"><b>' + (st.accounts_today || 0) +
           "</b><span>yeni qeydiyyat</span></div>" +
         '<div class="tile b"><b>' + (st.seen_today || 0) +
-          "</b><span>giren müəllim</span></div>" +
+          "</b><span>giren müəllim</span>" +
+          //  206: elə indi saytda olanlar (admin sayilmir)
+          (function () {
+            var n = (rows || []).filter(function (a) { return !a.admin && isNow(a.last_login); }).length;
+            return n ? '<s class="tnow">' + n + " indi saytda</s>" : "";
+          })() + "</div>" +
         '<div class="tile d"><b>' + (st.attempts_today || 0) +
           "</b><span>cəhd</span></div>" +
       "</div>" +
@@ -6124,8 +6129,11 @@
         //  Sagird girisi yalniz HEC VAXT olanda maraqlidir (hesab bos
         //  qalib), ona gore o hal ayrica yazilir.
         '<td data-l="Son giriş"><i class="lg">' +
-          '<span class="' + seenCls(a.last_login) + '">' +
-            whenAz(a.last_login) + "</span>" +
+          //  206: 5 deqiqeden teze giris = «indi saytda» (panel 3
+          //  deqiqede bir nebz gonderir)
+          (isNow(a.last_login)
+            ? '<span class="lg-now">indi saytda</span>'
+            : '<span class="' + seenCls(a.last_login) + '">' + whenAz(a.last_login) + "</span>") +
           //  Sagird girisi yalniz SAGIRDI OLAN hesabda menalidir -
           //  bos hesabda "şagird hələ girməyib" xeberdarligi yanlis
           //  siqnaldir (hele qrup da qurulmayib).
@@ -6158,6 +6166,9 @@
     if (isNaN(d) || (Date.now() - d.getTime()) > 2 * 86400000) return t;
     var hh = d.getHours(), mm = d.getMinutes();
     return t + " " + (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm;
+  }
+  function isNow(iso) {
+    return !!iso && (Date.now() - new Date(iso).getTime()) < 5 * 60000;
   }
   function seenCls(iso) {
     if (!iso) return "lg-no";
@@ -9572,8 +9583,9 @@
       //  Icmal-dan basqa ekranla acilibsa (mes. #/g/... linki) olcu
       //  yene goturulsun - 6 saniyeden sonra hele gonderilmeyibse.
       setTimeout(suretYaz, 6000);
-      //  "son giris" - Idareetme ucun; server 15 deqiqede bir yazir
+      //  "son giris" - Idareetme ucun; server 2 deqiqede bir yazir
       sb.rpc("rpc_seen", {}).catch(function () {});
+      pulseStart();
       //  zeng noktesi - hansi sehifeden acilmasindan asili olmadan
       if (ACC) homeData().then(function (v) {
         bellDot(v ? (v.alerts ? v.alerts.length : 0) + (v.hw_alerts ? v.hw_alerts.length : 0) : 0);
@@ -9596,6 +9608,20 @@
       if (u && (u.is_anonymous || !u.email)) { screenDemo(); return; }
       screenSetup();
     }).catch(function () { screenSetup(); });
+  }
+
+  /*  NEBZ (206): tab gorunende 3 deqiqede bir rpc_seen - Idareetmede
+      «indi saytda».  Arxa planda gondermir; tab qayidanda derhal bir
+      defe.  Bir defe qurulur.  */
+  var PULSE = null;
+  function pulseStart() {
+    if (PULSE) return;
+    function beat() {
+      if (document.hidden || !sb.session() || !CTX) return;
+      sb.rpc("rpc_seen", {}).catch(function () {});
+    }
+    PULSE = setInterval(beat, 3 * 60000);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) beat(); });
   }
 
   /* Sessiya bitende hec bir ekranda dalana diranmirik - giris ekrani

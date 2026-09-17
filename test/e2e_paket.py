@@ -337,7 +337,8 @@ with sync_playwright() as pw:
     #  173: uc setirlik «Aktivlik» xanasi «Son giriş»e yigildi - esas
     #  siqnal muellimin girisidir, sagird girisi yalniz HEC VAXT olanda
     #  ayrica yazilir (hesab qurulub, amma islenmir).
-    ok("bu gün" in row, "muellim girisi bu gun (rpc_seen)", row[-90:])
+    #  206: elə indi girib - «indi saytda» yazilir (5 deq pencere), «bu gün» yox
+    ok("indi saytda" in row or "bu gün" in row, "muellim girisi bu gun / indi saytda (rpc_seen)", row[-90:])
     #  Bu hesabda sagird YOXDUR - "hələ girməyib" xeberdarligi yalniz
     #  sagirdi olan hesabda menalidir (bos hesabda yanlis siqnal olardi).
     ok("şagird yoxdur" in row, "sagirdsiz hesabda xeberdarliq yoxdur", row[-60:])
@@ -352,6 +353,12 @@ with sync_playwright() as pw:
     #  oz-ozunu doldurur ve artimi gostermir.
     ok(pg.inner_text("#tBugun .tile.b").startswith("0"),
        "adminin oz girisi sayilmir (175)",
+       pg.inner_text("#tBugun .tile.b").replace("\n", " "))
+    #  206: elə indi giren muellim - «indi saytda» nisani ve lovhede say
+    ok(pg.locator("#admList .lg-now").count() >= 1, "indi saytda nisani (206)",
+       pg.locator("#admList .lg-now").count())
+    #  lovhedeki say ADMINI saymir (175 qaydasi) - burada yegane muellim admindir
+    ok("indi saytda" not in pg.inner_text("#tBugun .tile.b"), "lovhede admin «indi saytda» sayilmir (206)",
        pg.inner_text("#tBugun .tile.b").replace("\n", " "))
     ok("girib (7 gün)" in pg.inner_text("#tUmumi .tile.e"),
        "umumi setrinde sagird + heftelik giris",

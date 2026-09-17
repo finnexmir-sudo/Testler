@@ -3814,6 +3814,19 @@ GPT-nin cədvəl dizaynı Bil10 üslubuna uyğunlaşdırıldı.
 / `.fbseen.seen` «Oxuyub · tarix». Sinif adı `.seen`-dir, qlobal `.ok` ilə
 toqquşurdu (düymə kimi görünürdü).
 
+## db/206 — «indi saytda» (2026-09-17)
+
+İstifadəçi: «hal-hazırda saytda olanı bilim?». Yeni cədvəl/RPC yoxdur:
+- `rpc_seen` yazma aralığı 15 → 2 dəq.
+- Panel `pulseStart()`: tab görünəndə 3 dəqiqədə bir `rpc_seen`; tab
+  qayıdanda dərhal bir dəfə; arxa planda göndərmir.
+- İdarəetmə sətri: `last_login` 5 dəqiqədən təzədirsə `.lg-now` «indi saytda»
+  (yaşıl nöqtə); «Bu gün» → «girən müəllim» lövhəsində `.tnow` «N indi saytda»
+  (admin sayılmır, `rows`-dan hesablanır).
+- Yük: müəllim başına 3 dəqiqədə bir xırda sorğu.
+- Testlər: `smoke_admin_giris.sql` §1 (2 dəq), `e2e_paket` (nişan; lövhədə admin yox).
+- Canlıda: `db/206_indi_saytda.sql`.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

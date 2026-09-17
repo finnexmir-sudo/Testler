@@ -39,7 +39,7 @@ insert into public.students (id, account_id, class_id, created_by, full_name, di
 \echo '--- hazirliq tamam'
 
 -- =====================================================================
---  1. rpc_seen: yazir, 15 deqiqe icinde tekrar yazmir
+--  1. rpc_seen: yazir, 2 deqiqe icinde tekrar yazmir (206; evvel 15)
 -- =====================================================================
 set role authenticated;
 set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000b3';
@@ -49,15 +49,21 @@ begin
   perform public.rpc_seen();
   select last_seen_at into t1 from public.profiles where id = '11110000-0000-0000-0000-0000000000b3';
   assert t1 is not null and t1 > now() - interval '1 minute', 'last_seen_at yazilmadi';
-  update public.profiles set last_seen_at = now() - interval '5 minutes'
+  update public.profiles set last_seen_at = now() - interval '1 minute'
    where id = '11110000-0000-0000-0000-0000000000b3';
   perform public.rpc_seen();
   select last_seen_at into t2 from public.profiles where id = '11110000-0000-0000-0000-0000000000b3';
-  assert t2 < now() - interval '4 minutes', '15 deqiqe kecmeden tekrar yazdi';
+  assert t2 < now() - interval '50 seconds', '2 deqiqe kecmeden tekrar yazdi';
+  --  206: 2 deqiqe kecibse yazir (evvel 15 deqiqe idi)
+  update public.profiles set last_seen_at = now() - interval '3 minutes'
+   where id = '11110000-0000-0000-0000-0000000000b3';
+  perform public.rpc_seen();
+  select last_seen_at into t2 from public.profiles where id = '11110000-0000-0000-0000-0000000000b3';
+  assert t2 > now() - interval '1 minute', '2 deqiqeden sonra yazmadi (206)';
   update public.profiles set last_seen_at = now() - interval '10 days'
    where id = '11110000-0000-0000-0000-0000000000b3';
 end $$;
-\echo 'OK  1 · rpc_seen yazir, 15 deqiqede bir defe'
+\echo 'OK  1 · rpc_seen yazir, 2 deqiqede bir defe (206)'
 
 -- =====================================================================
 --  2. Admin siyahisi: giris saheleri ve girmir suzgeci
