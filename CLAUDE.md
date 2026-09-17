@@ -3837,6 +3837,99 @@ hesablayır, upsert edir, hesablamada olmayan sətirləri silir.
 Canlıda: `db/207_keyfiyyet_kohne_setir.sql`, sonra İdarəetmədə «↻ Yenilə».
 Test: `smoke_keyfiyyet.sql` §1b.
 
+## Gələcək fikirlər — həvəsləndirmə və sinif rejimi (2026-09-17, hələ EDİLMİR)
+
+İstifadəçi: «hələki yadda saxlayaq, gələcəkdə edərik; iş böyüdükcə imkanları
+genişləndirək». Mənbə: öz söhbətimiz + GPT/Gemini/Perplexity rəyləri (üçü də
+bir səsdə: ümumi liderlər lövhəsi və nişan yağışı əsas mexanika olmasın,
+rəqib uşağın keçən həftəki özüdür, qrup hədəfi hər kəsin payını göstərməsin,
+seriya sıfırlanmasın). Şərtlər: sinifdə uşaqda internet çox vaxt yoxdur,
+müəllimdə telefon və bəzən TV; kənar servis, kamera ilə tanıma yoxdur; müəllim
+sual başına ≤3 toxunuş.
+
+**Əvvəl soruşulmalı (100 ölç):** otaqda TV/proyektor var? noutbuk gətirir?
+dərsdə uşaqların telefonunda internet olur? (Teranə, İlahə)
+
+Ucuzdan bahaya, sıra ilə:
+1. **«Səhvini bağla» kartı** (şagird tətbiqi): ən çox təkrarlanan 1–3 səhv,
+   hər biri 3 sual, 3/3 → «bağlandı»; alınmasa izah + 1–3 gün sonra 2 oxşar
+   sual. Səhv dəftəri + mövzu məşqi üstündə çərçivə. 1–2 gün.
+2. **«Öz rekordun»** həftəlik kart: keçən həftə → bu həftə (nəticə + çətinlik
+   + sual sayı), «keçənki özünü keçdin». 1 gün.
+3. **Qrup həftə missiyası**: «bu həftə 41/60 paket», bir şagirddən ≤2 sayılır,
+   qrupun ≥60%-i iştirak etməli; mükafat müəllimin verə bildiyi şey (cümə
+   günü seçim hüququ); TV-də yalnız qrup sayğacı. Həftədə 1 toxunuş. 2 gün.
+4. **«Sual sahibi»** (Perplexity): sistem müəllimə «bu addımı izah etməyə
+   hazırdır: Murad» təklif edir; uşaq «ilk addımı» deyir; 1 toxunuş. İnternetsiz
+   sinifdə işləyir; eyni uşağı ardıcıl seçmir; «indi yox» seçimi.
+5. **Lövhə rejimi / TV**: testi tam ekranda, bir sual bir ekran, iri şrift,
+   geri sayım, «Cavabı göstər», sonra 4 say xanası (A/B/C/D neçə nəfər) →
+   qrup diaqnostikası («lövhə cəhdi»); komanda rejimi (2–3 kapitan kart
+   qaldırır, sual başına 2–3 toxunuş). Ad-ad xal YOX (20 şagird × 15 sual =
+   300 toxunuş — müəllim etməz). Pult ox düymələri ilə idarə (TV brauzeri).
+   TV yolları: (a) TV-nin öz brauzeri, (b) ekran güzgüləmə (Smart View /
+   Chromecast / AirPlay / HDMI), (c) cütləşdirmə kodu: bil10.az/tv 4 rəqəm,
+   telefon pult, TV 1–2 s-də bir vəziyyəti oxuyur (öz Supabase, kənar yox).
+   Əvvəl (a) sınansın. 2–3 gün.
+6. **Seriya qoruma ilə** («mövsüm enerjisi»): sıfırlanmır, qoruma kartı.
+
+Sonraya (böyük, rəylərin özü də xəbərdarlıq edir): 8 həftəlik xəritə/mövsüm
+(dekorasiya olsa 2 həftəyə ölür; 7–11-ci sinif uşaqsayağı şeyi ciddiyə
+almır), Boss (zəif mövzulardan 5 mərhələ), jokerlər (50/50, +2 dəq — aylıq
+sınaqda xərclənir), «Həftənin qara dəliyi» (ən çox səhv edilən sual TV-də),
+«Səhvi tap» (müəllimin bilərəkdən səhv həlli — hər sual üçün məzmun
+yazılmalıdır), «Gizli parça» (8/1 şəkil açılır).
+
+Başqa qeydlər: bələdçiyə «müəllimin telefonundan hotspot» məsləhəti (bir
+dərs 5–10 MB); oflayn şagird tətbiqi yalnız real tələb olsa (cavab açarı
+telefona enməməlidir).
+
+**Mənim üç fikrim (istifadəçi: «qeyd et»):**
+7. **«Müəllimin gündəlik 1 dəqiqəsi»** — İcmalda səhər kartı: «Dünən 8 şagird
+   işlədi, 3-ü Kəsrlərdə ilişdi, bu axşam üçün hazır 5 sual: göndər». Bir
+   toxunuş; məlumat və isinmə testi var, çatışmayan yalnız kartdır. ~1 gün.
+8. **«Valideyn cümə mesajı»** — hər cümə valideynə hazır mətn: «Ayan bu həftə
+   3 test işlədi, 62% → 74%, zəif yer: faizlər»; müəllim kopyalayıb göndərir,
+   ya valideyn ekranında çıxır. Valideyn ödəyəndir — «uşağım irəliləyir»
+   görməsi müəllimi saxlayır. ~1 gün (velText üstündə).
+9. **«DİM-ə qədər» geri sayım** — 11-ci sinif qrupunda: «imtahana 214 gün,
+   kurikulumun 38%-i keçilib, bu tempdə 90%-ə çatırsınız». Müəllimə güzgü,
+   valideynə arqument. ~1 gün (dərs planı + tarix).
+
+**2-ci tur rəyləri (GPT/Gemini/Perplexity, eyni 9 fikir üzrə) — YEKUN SIRA:**
+- Üçü də: **Səhvini bağla** və **Müəllimin gündəlik 1 dəqiqəsi** ilk üçlükdə.
+  İkisi: **Valideyn cümə mesajı**. «Öz rekordun» ayrıca mexanika yox, Səhvini
+  bağlanın içində («bu mövzuda 1/3 → 3/3»).
+- Üçü də: **DİM geri sayımı** işləməz (bu gün nə etməli olduğunu demir, təşviş;
+  3–8-ci sinifdə uzaq, 9–11-də yanlış proqnoz etibarı sındırır). İkisi:
+  **seriya** işləməz (gündəlik giriş vərdişi yoxdur; həftədə ≥2 məşq açan
+  şagird 40%-i keçəndən sonra baxılsın). Gemini: «Sual sahibi» utancaq uşaqda
+  gərginlik.
+- Ölçü (əməliyyat ölçülür, baxış yox): Səhvini bağla — kartı görənlərin ≥35%-i
+  72 saatda 1 səhvi bağlayır; 1 dəqiqə — müəllimlərin ≥40%-i 7 gündə «Göndər»
+  basır; Valideyn — müəllimlərin ≥50%-i 30 gündə mətni kopyalayır / valideyn
+  həmin həftə ekrana girir.
+- Format qaydaları: Səhvini bağlanın ilk paketi eyni səhvin kopyası yox, eyni
+  bacarığın asandan ortaya variantları (3/3 alınmasa «uğursuz» yazılmır, izah +
+  1–3 gün sonra 2 sual). Valideyn mesajı ≤3 sətir: nəticə, bir güclü tərəf,
+  bir növbəti addım; «gerilədi» yazılmır. 1 dəqiqə kartı «3 uşaq + 5 sual» qalsın,
+  dashboard-a çevrilməsin; suallar müəllimin keçdiyi mövzuya uyğun olsun.
+- Əlavə (sübutlu, <3 gün, internetsiz):
+  * **«Dərsdən çıxış bileti»** (Perplexity; exit ticket / Plickers): dərsin son
+    2 dəqiqəsi TV/lövhədə 1 sual, uşaq dəftərə yazır, müəllim hər şagird üçün
+    1 toxunuş «Düz / Köməklə / Təkrar»; «Təkrar» alanlara evdə avtomatik 3
+    suallıq Səhvini bağla paketi. Sual sahibi məlumatı da buradan gəlir. 1–2 gün.
+  * **«Fikrim dəyişdi»** (GPT; Mazur Peer Instruction, meta-analiz): TV rejimində
+    cavab → «yanındakı ilə 30 s müzakirə» → yenidən cavab → açıqlama; yalnız ilk
+    cavabı 35–70% düz olan suallarda. Lövhə rejiminə bir düymə.
+  * **Təsadüfi şagird seçici** (Gemini; Lemov Cold Call, ClassDojo): 1 klik
+    ekranda ad. 1 gün, Lövhə rejiminə əlavə.
+
+**Yekun növbə (müəllim sorğusundan sonra):** 1) Səhvini bağla (+öz rekordun),
+2) Müəllimin 1 dəqiqəsi, 3) Valideyn cümə mesajı, 4) Çıxış bileti,
+5) Lövhə/TV rejimi (+Fikrim dəyişdi, +təsadüfi seçici, +qrup missiyası sayğacı).
+Rədd/sonra: DİM geri sayımı, seriya, xəritə/Boss/jokerlər.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
