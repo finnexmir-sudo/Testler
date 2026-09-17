@@ -336,6 +336,8 @@
     }
     on("btnFg", "click", go);
     on("fgMail", "keydown", function (e) { if (e.key === "Enter") go(); });
+    //  «Girişə qayıt» - hadise yazilmamisdi, duyme olu idi (istifadeci, 17.09)
+    on("btnFgBack", "click", function () { screenAuth("in"); });
   }
 
   /* Berpa linkinden qayidis: yeni parol ekrani */
