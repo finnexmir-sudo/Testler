@@ -2143,3 +2143,59 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .hsrc{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 0;font-size:12.5px}
 .hsrc b{margin-right:4px;color:var(--fg-2)}
 .hmtxt{width:100%;box-sizing:border-box;margin-top:8px;font-size:13px}
+
+/* ---- 205: sagird setri netice ile ------------------------------------
+   Qelib (grid):  telefon        masaustu (>=721px)
+                  ad     | acts   ad | netice | acts
+                  netice          kodlar
+                  kodlar
+   .stsum  siyahinin ustunde xulase   .stline  son netice · zolaq · giris
+   .stk    girmis sagirdin kodlari (yigilmis).  .stu.off kohne qelibdedir. */
+.stsum{display:flex;flex-wrap:wrap;gap:6px 18px;padding:10px 16px;font-size:12.5px;color:var(--fg-2);
+  border-bottom:1px solid var(--n-100);background:var(--n-25)}
+.stsum b{font-weight:700;color:var(--fg);font-size:13.5px;margin-right:3px}
+.stsum b.good{color:var(--ok)} .stsum b.mid{color:var(--warn)} .stsum b.low,.stsum b.no{color:var(--err)}
+.stu:not(.off){display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;row-gap:6px;
+  align-items:center;padding:11px 16px}
+.stu:not(.off) .l1{grid-column:1;grid-row:1;min-width:0}
+.stu:not(.off) .sacts{grid-column:2;grid-row:1;display:flex;align-items:center;gap:4px;justify-self:end}
+.stu:not(.off) .stline{grid-row:2}
+.stu:not(.off) .l2+.l3{margin-top:-2px}
+.stu:not(.off) .stline,.stu:not(.off) .l2,.stu:not(.off) .l3,.stu:not(.off) details.stk,
+.stu:not(.off) .edit,.stu:not(.off) .stuwarn{grid-column:1/-1}
+.stu:not(.off) .l2,.stu:not(.off) .l3{margin-top:0}
+.sacts .btn.icon{flex:0 0 28px;width:28px;min-height:28px}
+.sacts .btn.icon svg{width:13px;height:13px}
+.stline{display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap;row-gap:4px}
+.stline.mini{gap:10px;font-size:12px}
+.stline.mini .sst+.sst::before{content:"·";margin-right:8px;color:var(--n-300)}
+.sres{flex:0 0 auto;min-width:52px;text-align:center;padding:3px 8px;border-radius:999px;
+  font-weight:750;font-size:13px;letter-spacing:-.01em;background:var(--n-100);color:var(--fg-2)}
+.sres.good{background:var(--ok-tint);color:var(--ok)}
+.sres.mid{background:var(--warn-tint);color:var(--warn)}
+.sres.low{background:var(--err-tint);color:var(--err)}
+.sbar{flex:1 1 120px;min-width:90px;max-width:260px;display:flex;flex-direction:column;gap:4px}
+.sbar .bar{display:block;height:5px;width:100%}
+.sbar s{text-decoration:none;font-size:11.5px;color:var(--fg-3);white-space:nowrap}
+.sst{flex:0 0 auto;font-size:12px;color:var(--fg-3);white-space:nowrap}
+.sst.no{color:var(--err);font-weight:600}
+details.stk>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;color:var(--fg-3);padding:2px 0}
+details.stk>summary::-webkit-details-marker{display:none}
+details.stk>summary svg{width:12px;height:12px}
+details.stk>summary i{font-style:normal;color:var(--n-400)}
+details.stk>summary i::before{content:"— ";}
+.stu:not(.off) .l1 b[data-rep]{cursor:pointer}
+.stu:not(.off) .l1 b[data-rep]:hover{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
+details.stk>summary:hover{color:var(--brand)}
+details.stk[open]>summary{color:var(--fg-2);margin-bottom:6px}
+details.stk .l3{margin-top:8px}
+@media (min-width:721px){
+  .stu:not(.off){grid-template-columns:minmax(180px,1.1fr) minmax(280px,2fr) auto;column-gap:22px;row-gap:8px;
+    padding:12px 16px}
+  .stu:not(.off) .stline{grid-column:2;grid-row:1;flex-wrap:nowrap}
+  .stu:not(.off) .stline.mini{flex-wrap:wrap}
+  .stu:not(.off) .sacts{grid-column:3;grid-row:1}
+  .stu:not(.off) .l2,.stu:not(.off) .l3{grid-column:1/-1}
+  .stu:not(.off) .l2+.l3{margin-top:-2px}
+}

@@ -475,7 +475,10 @@ with sync_playwright() as pw:
     #  yigildi, sonra qalan hundurluk olculdu ve gozle yoxlanildi.
     #  Bu, informasiyanin artmasinin dogru qiymetidir; kodlari
     #  gizletmek «Gonder»i bir toxunus uzaqlasdirardi.
-    ok(h <= 145, "sagird setri telefonda yigcamdir", str(round(h)) + "px")
+    #  HEDD 145 -> 160 (205).  Setirde artiq NETICE xetti var («hələ
+    #  girməyib · test verilməyib»); girmeyen sagirdde iki kod xetti de
+    #  aciqdir.  Olculdu: 153px (bosluqlar 8->6, padding 12->11).
+    ok(h <= 160, "sagird setri telefonda yigcamdir", str(round(h)) + "px")
     ok(pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"),
        "telefonda yana surusme yoxdur")
     pg.set_viewport_size({"width": 430, "height": 900})
@@ -598,7 +601,7 @@ with sync_playwright() as pw:
        "dayandirilmisda «Göndər» duymesi yoxdur")
     ok(pg.locator(".stu.off .code").count() == 0, "dayandirilmisda giris kodu gosterilmir")
     ok(pg.locator(".stu.off [data-rep]").count() == 1,
-       "«Hesabat» qalir - kecmis neticeler itmeyib")
+       "«Şagirdə bax» qalir - kecmis neticeler itmeyib")
 
     row = db("select is_active from public.students where full_name = %s",
              (ad,), one=True)

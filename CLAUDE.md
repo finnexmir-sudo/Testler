@@ -3787,6 +3787,26 @@ Testlər: `smoke_numune.sql` §11, `e2e_numune.py` H.
   `e2e_gen` (altlıqda bil10.az; həmkar mətni). Şəkil: `test/_v2_reklam.py`.
 - Canlıda: `db/204_menbe_qeydiyyat.sql` işə salınmalı.
 
+## db/205 — qrup ekranında şagird siyahısı nəticə ilə (2026-09-17)
+
+İstifadəçi indiki siyahını bəyənmədi (ad + iki kod + dörd düymə, nəticə yox);
+GPT-nin cədvəl dizaynı Bil10 üslubuna uyğunlaşdırıldı.
+- `rpc_class_students(p_class_id)` → `paid, since, assigned` + hər şagird:
+  `attempts, avg, last_pct, last_at, assigned_own, seen_at, parent_seen_at`
+  (dayandırılmışlar da gəlir). Pulsuz hədddə `free_history_days` pəncərəsi.
+- `loadStudents` artıq bu RPC-ni çağırır (əvvəl `sb.select("students")`).
+- Sətir (grid): telefon `ad | Hesabat+qələm` / `nəticə xətti` / kodlar;
+  masaüstü `ad | nəticə | düymələr`. `.stline`: `.sres` (good/mid/low,
+  `pctCls`), `.sbar` («işləyib N/M»), `.sst` («girib 2 gün əvvəl» /
+  «hələ girməyib»). Cəhd yoxdursa `.stline.mini` bir qısa sətir.
+- Düymə «Şagirdə bax» (ad da `data-rep`, klik olunur). «girib» = `seen_at || last_at`. Girənə qədər `.l2` və `.l3` açıq (ilk gün
+  ikisi birdən göndərilir); girəndən sonra ikisi də `details.stk` «Kodlar»
+  altında («Giriş kodları — şagird · valideyn»). `.stu.off` köhnə qəlibdə qalır.
+- Siyahının üstündə `.stsum`: orta bal · işləyib · hələ işləməyib · hələ girməyib.
+- Test hədləri: `e2e_panel` telefon sətri 145 → 160 (ölçüldü 153px).
+  `smoke_reports.sql` §2b. Şəkil: `test/_v2_stu.py`.
+- Canlıda: `db/205_sagird_siyahi.sql` işə salınmalı — yoxsa siyahı açılmır.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

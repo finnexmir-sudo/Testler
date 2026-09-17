@@ -3152,11 +3152,14 @@
   }
 
   function loadStudents(classId) {
-    sb.select("students", {
-      select: "id,full_name,display_name,login_code,is_active,parent_code",
-      eq: { class_id: classId },
-      order: "full_name"
-    }).then(function (rows) {
+    /*  205: siyahi netice ile gelir (son netice, cehd/tapsiriq, son
+        giris).  Evvel students cedvelinden birbasa oxunurdu - ad + iki
+        kod + dord duyme, netice gorunmurdu (istifadeci: «bu siyahini
+        beyenmirem»).  */
+    var SUM = null;
+    sb.rpc("rpc_class_students", { p_class_id: classId }).then(function (d) {
+      SUM = d || {};
+      var rows = (SUM.students || []).slice();
       //  sekme basligina say; sagird yoxdursa forma avtomatik acıq
       var tn = $("gTabN");
       if (tn) {
@@ -3186,7 +3189,23 @@
       var aktiv = rows.filter(function (s) { return s.is_active !== false; });
       var dayan = rows.filter(function (s) { return s.is_active === false; });
 
-      box.innerHTML = aktiv.map(stuRow).join("") +
+      /*  205: siyahinin ustunde bir setir xulase - orta bal, isleyen /
+          islemeyen, hele girmeyen.  Boş qrupda (cehd yoxdur) yalniz
+          «girməyib» sayi menalidir.  */
+      var withRes = aktiv.filter(function (x) { return Number(x.attempts) > 0; });
+      var noIn = aktiv.filter(function (x) { return !(x.seen_at || x.last_at); }).length;
+      var avgAll = withRes.length
+        ? Math.round(withRes.reduce(function (t, x) { return t + Number(x.avg || 0); }, 0) / withRes.length) : null;
+      var sumH = aktiv.length
+        ? '<div class="stsum">' +
+            (avgAll !== null ? '<span><b class="' + pctCls(avgAll) + '">' + avgAll + "%</b> orta bal</span>" : "") +
+            (withRes.length ? "<span><b>" + withRes.length + "</b> işləyib</span>" : "") +
+            (aktiv.length - withRes.length ? "<span><b>" + (aktiv.length - withRes.length) + "</b> hələ işləməyib</span>" : "") +
+            (noIn ? '<span><b class="no">' + noIn + "</b> hələ girməyib</span>" : "") +
+          "</div>"
+        : "";
+
+      box.innerHTML = sumH + aktiv.map(stuRow).join("") +
         (dayan.length
           ? '<details class="arxiv"><summary>Dayandırılmış <span>' + dayan.length +
             "</span></summary>" + dayan.map(stuRow).join("") + "</details>"
@@ -3213,7 +3232,7 @@
           return '<div class="stu off" data-row="' + esc(s.id) + '">' +
             '<div class="l1">' + av(s.full_name) + "<b>" + esc(s.full_name) + "</b>" +
               '<button class="btn sm ghost link" data-rep="' + esc(s.id) + '">' +
-                "Hesabat" + ic("right") + "</button></div>" +
+                "Şagirdə bax" + ic("right") + "</button></div>" +
             '<div class="l2"><span class="muted">Dayandırılıb — yer tutmur</span>' +
               '<button class="btn sm" data-unarch="' + esc(s.id) + '">' +
                 "Davam etdir</button></div></div>";
@@ -3222,51 +3241,76 @@
       }
 
       function stuRowActive(s) {
-        /* Telefonda bes duymenin hamisi eyni cekide idi ve setir
-           dord sətirə dagilirdi.  Indi ierarxiya var: kodu GONDERMEK
-           esas isdir, kopyalamaq ikinci, ad ve kod ise qelemin altinda. */
-        return '<div class="stu" data-row="' + esc(s.id) + '">' +
-          /* «Hesabat» kecid oldugu ucun ADIN yanindadir - asagida yer
-             qalsin deye.  Asagida yalniz kodla bagli isler var. */
-          '<div class="l1">' + av(s.full_name) + "<b>" + esc(s.full_name) + "</b>" +
+        /*  205: setir = ad + NETICE.  Uc gosterici: son netice (rengli),
+            «işləyib N/M» zolagi, son giris.  Kod xetleri yalniz hele
+            GIRMEYEN ucun aciq qalir (ilk gunun esas isi - kodu gondermek);
+            girenden sonra «Kodlar» altina yigilir, itmir.  */
+        var n = Number(s.attempts) || 0;
+        var m = (Number(SUM && SUM.assigned) || 0) + (Number(s.assigned_own) || 0);
+        //  «girib» = sessiya VE YA cehd (kohne cehdlerin sessiyasi silinib)
+        var seen = s.seen_at || s.last_at;
+        var pct = s.last_pct === null || s.last_pct === undefined ? null : Math.round(Number(s.last_pct));
+        var ratio = m ? Math.min(100, Math.round(n * 100 / m)) : (n ? 100 : 0);
+        var stat = n
+          ? '<div class="stline">' +
+              '<span class="sres ' + pctCls(pct) + '" title="Son test">' + pct + "%</span>" +
+              '<span class="sbar" title="İşlədiyi test / verilən"><i class="bar"><i style="width:' + ratio + '%"></i></i>' +
+                "<s>işləyib " + n + (m ? "/" + m : "") + "</s></span>" +
+              '<span class="sst">girib ' + esc(agoAz(seen)) + "</span>" +
+            "</div>"
+          //  cehd yoxdur: bir qisa setir - zolaq 0/0 yer tutmasin
+          : '<div class="stline mini">' +
+              (seen
+                ? '<span class="sst">girib ' + esc(agoAz(seen)) + "</span>"
+                : '<span class="sst no">hələ girməyib</span>') +
+              '<span class="sst">' + (m ? "işləməyib 0/" + m : "test verilməyib") + "</span>" +
+            "</div>";
+        var codes = kodLines(s, seen);
+        return '<div class="stu' + (seen ? " in" : "") + '" data-row="' + esc(s.id) + '">' +
+          //  ad da sagird sehifesine aparir (istifadeci: «Hesabat» sozu
+          //  sehifeye girisi demirdi) - duyme «Şagirdə bax»
+          '<div class="l1">' + av(s.full_name) + '<b data-rep="' + esc(s.id) + '" title="Şagirdin səhifəsi">' +
+            esc(s.full_name) + "</b></div>" +
+          stat +
+          '<div class="sacts">' +
             '<button class="btn sm ghost link" data-rep="' + esc(s.id) + '">' +
-              "Hesabat" + ic("right") + "</button>" +
+              "Şagirdə bax" + ic("right") + "</button>" +
             '<button class="btn sm ghost icon" data-edit="' + esc(s.id) + '" ' +
               'title="Redaktə et" aria-label="Redaktə et">' + ic("pen") + "</button></div>" +
-          /*  Iki kod xetti EYNI qelibdedir: basliq · kod · kopyala ·
-              Gonder.  Evvel sagird xettinde basliq yox idi, valideyn
-              xettinde ise ustelik "Yenile" ve "Bagla" vardi - setir
-              daginiq gorunurdu (istifadeci).  */
-          '<div class="l2">' +
+          codes.open +
+          (codes.folded
+            ? '<details class="stk"><summary>' + ic("key") + "Giriş kodları" +
+                '<i>şagird' + (s.parent_code ? " · valideyn" : "") + "</i></summary>" + codes.folded + "</details>"
+            : "") +
+          "</div>";
+      }
+      /*  Kod xetleri: sagird xetti (.l2) girmeyibse aciq, girib-se yigilir;
+          valideyn xetti (.l3) kod varsa ve valideyn girmeyibse aciq.  */
+      function kodLines(s, seen) {
+        var l2 = '<div class="l2">' +
             '<span class="pcap">Şagird</span>' +
             '<span class="code key">' + esc(s.login_code) + "</span>" +
             '<button class="btn sm ghost icon" data-copy="' + esc(s.login_code) + '" ' +
               'title="Kodu kopyala" aria-label="Kodu kopyala">' + ic("copy") + "</button>" +
             '<button class="btn sm" data-wa="' + esc(s.id) + '">' +
               ic("send") + "Göndər</button>" +
-          "</div>" +
-          /*  VALIDEYN GIRISI - db/182-den sonra susmaya gore ACIQ
-              (qrup ayarindan sondurmek olur).  Kod varsa setir ozu
-              gorunur - muellim ilk baxisda bilir ki, giris aciqdir.
-
-              BAGLI ikən setirde HEC NE gorunmur: acmaq nadir, birdefelik
-              emeliyyatdir ve qelemin altindadir (kod yenilemek kimi).
-              Telefonda setir onsuz da uc duyme dasiyir - dorduncusu onu
-              sisirdirdi (e2e heddi 120px, olculdu: 142px).
-              Kod VARSA ise ayrica setir lazimdir: muellim onu her defe
-              kopyalayib gonderecek, qelemin altinda gizli qalmamalidir.  */
-          (s.parent_code
-            ? '<div class="l3">' +
-                '<span class="pcap">Valideyn</span>' +
-                '<span class="code key">' + esc(s.parent_code) + "</span>" +
-                '<button class="btn sm ghost icon" data-copy="' + esc(s.parent_code) +
-                  '" title="Valideyn kodunu kopyala" ' +
-                  'aria-label="Valideyn kodunu kopyala">' + ic("copy") + "</button>" +
-                '<button class="btn sm" data-pwa="' + esc(s.id) + '">' +
-                  ic("send") + "Göndər</button>" +
-              "</div>"
-            : "") +
           "</div>";
+        var l3 = s.parent_code
+          ? '<div class="l3">' +
+              '<span class="pcap">Valideyn</span>' +
+              '<span class="code key">' + esc(s.parent_code) + "</span>" +
+              '<button class="btn sm ghost icon" data-copy="' + esc(s.parent_code) +
+                '" title="Valideyn kodunu kopyala" ' +
+                'aria-label="Valideyn kodunu kopyala">' + ic("copy") + "</button>" +
+              '<button class="btn sm" data-pwa="' + esc(s.id) + '">' +
+                ic("send") + "Göndər</button>" +
+            "</div>"
+          : "";
+        //  sagird girene qeder her iki kod aciqdir (ilk gun ikisi birden
+        //  gonderilir); girenden sonra ikisi de «Kodlar» altina yigilir
+        var open = seen ? "" : l2 + l3;
+        var folded = seen ? l2 + l3 : "";
+        return { open: open, folded: folded };
       }
 
       Array.prototype.forEach.call(box.querySelectorAll("[data-copy]"), function (b) {
@@ -3470,6 +3514,12 @@
   }
 
   /* Nisbi vaxt: siyahilarda "3 gun evvel" tarixden tez oxunur */
+  /*  205: netice rengi - 80+ yaxsi, 60-79 orta, 60-dan asagi zeif  */
+  function pctCls(p) {
+    if (p === null || p === undefined || isNaN(p)) return "none";
+    return p >= 80 ? "good" : (p >= 60 ? "mid" : "low");
+  }
+
   function agoAz(iso) {
     if (!iso) return "heç vaxt";
     var d = new Date(iso);

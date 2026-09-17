@@ -112,6 +112,36 @@ end $$;
 \echo 'OK  2 · sagird uzre orta, cehd sayi ve son fealiyyet duzgun'
 
 -- =====================================================================
+--  2b. (205) rpc_class_students: siyahi netice ile
+-- =====================================================================
+do $$
+declare v jsonb; a jsonb; k jsonb;
+begin
+  v := public.rpc_class_students('cccc0000-0000-0000-0000-000000000001');
+  assert (v->>'paid')::boolean = false and v->>'since' is not null, '205 paid/since';
+  assert jsonb_array_length(v->'students') = 2, '205 sagird sayi';
+  select x into a from jsonb_array_elements(v->'students') x where x->>'display_name'='Aysu M.';
+  select x into k from jsonb_array_elements(v->'students') x where x->>'display_name'='Kenan A.';
+  assert a->>'login_code' = 'AYSU1111' and (a->>'is_active')::boolean, '205 kod/aktiv';
+  assert (a->>'attempts')::int = 1 and (a->>'last_pct')::numeric between 66 and 67, '205 Aysu son netice: ' || a::text;
+  assert (k->>'last_pct')::numeric = 100 and (k->>'avg')::numeric = 100, '205 Kenan: ' || k::text;
+  --  ikisi de rpc_student_login ile girib - seen_at var; valideyn girmeyib
+  assert a->>'seen_at' is not null and a->>'parent_seen_at' is null, '205 seen: ' || a::text;
+  assert (v->>'assigned')::int >= 0, '205 assigned';
+end $$;
+--  ozge muellim gore bilmir
+set request.jwt.claim.sub = '22220000-0000-0000-0000-000000000002';
+do $$
+begin
+  begin
+    perform public.rpc_class_students('cccc0000-0000-0000-0000-000000000001');
+    raise exception '205: ozge muellim siyahini gordu';
+  exception when insufficient_privilege then null; end;
+end $$;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-000000000001';
+\echo 'OK  2b · (205) rpc_class_students: netice, kodlar, giris, huquq'
+
+-- =====================================================================
 --  3. ODENISLI hesab: movzu analizi acilir
 -- =====================================================================
 reset role;
