@@ -6009,7 +6009,13 @@
             esc(r.reply_body) + "</div></div>"
           : "") +
         '<p class="fbb">' + esc(r.body) + "</p>" +
-        '<div class="fbact">' +
+        //  Oz mesajinizda status ve cavab qutusu menasizdir (istifadeci:
+        //  «bu nə məna verir?») - yalniz «oxuyub / hələ oxumayıb» qalir
+        (r.author_type === "admin"
+          ? '<div class="fbseen' + (r.seen_at ? " seen" : "") + '">' +
+              (r.seen_at ? ic("check") + "Oxuyub · " + dateAz(r.seen_at) : ic("clock") + "Hələ oxumayıb") +
+            "</div>"
+          : '<div class="fbact">' +
           "<select>" + Object.keys(FB_ST).map(function (k) {
             return '<option value="' + k + '"' + (k === r.status ? " selected" : "") + ">" +
               FB_ST[k] + "</option>";
@@ -6017,7 +6023,7 @@
           '<textarea rows="2" maxlength="1000" placeholder="Cavab (müəllim profilində görür)">' +
             esc(r.note || "") + "</textarea>" +
           '<button class="btn sm" data-fbsave="' + esc(r.id) + '">Yadda saxla</button>' +
-        "</div>" +
+        "</div>") +
         '<div class="fbcm"></div>' +
       "</div>";
     }).join("");

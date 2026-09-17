@@ -2199,3 +2199,8 @@ details.stk .l3{margin-top:8px}
   .stu:not(.off) .l2,.stu:not(.off) .l3{grid-column:1/-1}
   .stu:not(.off) .l2+.l3{margin-top:-2px}
 }
+
+/* admin: oz mesajinda status/cavab yoxdur - yalniz oxunma nisani */
+.fbseen{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--fg-3);margin-top:8px}
+.fbseen svg{width:13px;height:13px}
+.fbseen.seen{color:var(--ok)}

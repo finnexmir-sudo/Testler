@@ -3807,6 +3807,13 @@ GPT-nin cədvəl dizaynı Bil10 üslubuna uyğunlaşdırıldı.
   `smoke_reports.sql` §2b. Şəkil: `test/_v2_stu.py`.
 - Canlıda: `db/205_sagird_siyahi.sql` işə salınmalı — yoxsa siyahı açılmır.
 
+## İdarəetmə: öz mesajınızda status/cavab yoxdur (2026-09-17)
+
+`fbCards`: `author_type === "admin"` sətrində status siyahısı və cavab qutusu
+çıxmır (istifadəçi: «bu nə məna verir?»); yerinə `.fbseen` — «Hələ oxumayıb»
+/ `.fbseen.seen` «Oxuyub · tarix». Sinif adı `.seen`-dir, qlobal `.ok` ilə
+toqquşurdu (düymə kimi görünürdü).
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
