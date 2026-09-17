@@ -3469,8 +3469,10 @@ qeydiyyat → 3 təsdiq → 3 giriş → 0 qrup. İki iş:
    (`profiles.last_seen_at` və ya `last_sign_in_at`) → qrup → şagird → test
    (diaqnostiksiz) → şagird cavabı (submitted) → ödəniş (`active`, trialing
    deyil); nümunə və admin sayılmır; `p_days=0` bütün tarix; `stuck` = qrup
-   yaratmayan son 10 (email, ad, tarix, girib?, təsdiq?). Panel `huniSection`
-   «Ümumi»dən sonra, faizlər qeydiyyata görə. `smoke_huni.sql`, e2e_panel 3
+   yaratmayan son 50 (email, ad, tarix, girib?, təsdiq?). Panel `huniSection`
+   «Ümumi»dən sonra, faizlər qeydiyyata görə; siyahı avatar · ad · e-poçt +
+   nişanlar («ünvan səhv?» gamil/gemail/mail.tu…, təsdiq, giriş, tarix),
+   `.hlist` 320px-dən sonra öz içində sürüşür. `smoke_huni.sql`, e2e_panel 3
    iddia, `test/_v2_huni.py`. **Canlıya əl ilə** (05_grants lazım deyil).
 
 AI turlarından qalan növbəti işlər (razılaşdırılıb, sıra ilə): boş hesabda

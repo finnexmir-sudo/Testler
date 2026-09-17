@@ -4,7 +4,7 @@
 --  Reqemler SQL Editor-de el ile sayilirdi: 6 qeydiyyat -> 3 tesdiq ->
 --  3 giris -> 0 qrup.  Indi admin ekraninda kart: qeydiyyat -> tesdiq ->
 --  panele giris -> qrup -> sagird -> test -> cehd -> pullu; alti «qrup
---  yaratmayanlar» siyahisi (kime mesaj yazmali).
+--  yaratmayanlar» siyahisi (kime mesaj yazmali; son 50, panelde surusur).
 --
 --  Supabase-de «Confirm email» sondurulur (Authentication -> Sign In /
 --  Providers -> Email): muellim qeydiyyatdan dusen kimi panele girir,
@@ -67,7 +67,7 @@ begin
                  'email', x.email, 'name', x.full_name, 'at', x.created_at,
                  'seen', x.seen_at, 'confirmed', x.email_confirmed_at is not null)
                order by x.created_at desc)
-          from (select * from s where not has_group order by created_at desc limit 10) x), '[]'::jsonb)
+          from (select * from s where not has_group order by created_at desc limit 50) x), '[]'::jsonb)
     ) from s
   );
 end $$;

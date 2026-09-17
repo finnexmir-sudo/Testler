@@ -5552,14 +5552,27 @@
     return '<h2>Huni <span class="muted">· son ' + (h.days || 30) + " gün · nümunə və admin sayılmır</span></h2>" +
       '<div class="card huni"><div class="hsteps">' + cells + "</div>" +
       (stuck.length
-        ? '<div class="hstuck"><b>Qrup yaratmayanlar</b> <span class="muted">— kimə mesaj yazmalı</span>' +
+        ? '<div class="hstuck"><div class="hsh"><b>Qrup yaratmayanlar</b>' +
+            '<span class="muted">' + stuck.length + " nəfər · ünvanı şübhəli olana məktub çatmır, " +
+            "girməyənə yalnız WhatsApp qalır</span></div>" +
+          //  siyahi uzanib getmesin - 320px-den sonra oz icinde surusur
+          '<div class="hlist">' +
           stuck.map(function (x) {
-            return '<div class="hrow"><span class="who">' + esc(x.name || x.email || "") +
-              (x.name ? ' <i>' + esc(x.email || "") + "</i>" : "") + "</span>" +
-              '<span class="st">' + (x.confirmed ? "" : '<em class="no">təsdiq yox</em> ') +
-                (x.seen ? "girib " + agoAz(x.seen) : '<em class="no">girməyib</em>') +
-                " · qeydiyyat " + agoAz(x.at) + "</span></div>";
-          }).join("") + "</div>"
+            var nm = x.name || x.email || "", em = String(x.email || "");
+            var dm = em.split("@")[1] || "";
+            //  sehv yazilmis domen - tesdiq mektubu ora catmayacaq
+            var bad = /^(gamil|gmial|gmal|gemail|gmai|gmali)\.com$|^gmail\.(ru|co|con)$|^mail\.tu$|^\.com$/.test(dm);
+            return '<div class="hrow">' + av(nm) +
+              '<div class="who"><b>' + esc(nm) + "</b>" +
+                (x.name ? '<i>' + esc(em) + "</i>" : "") + "</div>" +
+              '<div class="tags">' +
+                (bad ? '<em class="tg bad">ünvan səhv?</em>' : "") +
+                (x.confirmed ? '<em class="tg ok">təsdiqli</em>' : '<em class="tg no">təsdiq yox</em>') +
+                (x.seen ? '<em class="tg ok">girib ' + agoAz(x.seen) + "</em>"
+                        : '<em class="tg no">girməyib</em>') +
+                '<em class="tg">' + agoAz(x.at) + "</em>" +
+              "</div></div>";
+          }).join("") + "</div></div>"
         : "") +
     "</div>";
   }
