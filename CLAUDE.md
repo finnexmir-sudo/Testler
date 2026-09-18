@@ -4178,6 +4178,50 @@ atlanmış miqrasiyanı sonradan tapmaq bir gün apardı.
 **Həmçinin:** hər dəfə SQL işlədəndən sonra bunu bir dəfə işlət — «hamısı
 true» görmədən «canlıya çıxdı» demə.
 
+## Qeydiyyat: e-poçt yazı səhvi ipucu (2026-09-19)
+
+Huniyə baxanda «97 ziyarətçi → 4 qeydiyyat» göründü və ilk fikir
+«məktublar çatmır» oldu. **Yanlış idi.** `auth.users`-ə baxdıq:
+təsdiqləyənlərin hamısı **0–2 dəqiqə** içində təsdiqləyib — məktub
+dərhal gəlir.
+
+Əsl səbəb başqa idi. 30 günlük 16 qeydiyyatın üçündə **ünvan səhv
+yazılmışdı**:
+
+| Yazılan | Nə olub |
+|---|---|
+| `...@ge**mail**.com` | domen səhvi — məktub heç vaxt çata bilməzdi |
+| `...@ga**mil**.com` | domen səhvi; iki gün sonra düzünü yazıb girib |
+| `huseynovasekin**12937**@` | rəqəm səhvi; 9 dəqiqə sonra düzünü yazıb girib |
+
+Üstəlik təsdiqlənməyən 9 sətrin yarısı **ayrı adam deyil** — eyni
+adamların təkrar cəhdləridir (Teranə üç dəfə qeydiyyatdan keçib).
+Gerçək itirilən adam sayı 4-5-dir.
+
+**Həll: forma mane olmur, yalnız soruşur.** Domen tanınmış siyahıdan
+2 hərfdən az fərqlənirsə: «Bunu nəzərdə tuturdunuz? ...@gmail.com» —
+bir toxunuşla düzəlir. Qərar istifadəçinindir; iş domeni ola bilər,
+biz bilmirik.
+
+- `MAIL_OK` — tanınmış domenlər (gmail, mail.ru, inbox.ru, hotmail,
+  box.az, edu.az …). `lev()` — Levenshtein, kitabxanasız.
+- Həddlər: 0 fərq → susur · >2 fərq → susur (başqa domendir) ·
+  2 fərq + qısa domen → susur (yalan xəbərdarlıq olmasın).
+- Enter ilə birbaşa göndərəndə `blur` baş vermir, ipucu heç görünmürdü —
+  ona görə şübhə varsa **bir dəfə** saxlayır; ikinci toxunuşda göndərilir.
+- Test: `test/e2e_mail_sehvi.py` — 5 bölmə. C bölməsi vacibdir: düz
+  ünvan, iş domeni, universitet domeni, protonmail, box.az — hamısında
+  ipucu **çıxmamalıdır**.
+
+**Həmçinin (ölçüdən çıxan nəticə):** «Confirm email» db/202 ilə artıq
+söndürülüb (17.09). Təsdiqlənməyən 9 hesabın hamısı ondan ƏVVƏLdir və
+onlar **bu gün öz parolları ilə daxil ola bilərlər** — sadəcə bilmirlər.
+Etibarlı ünvanı olanlara əl ilə məktub yazmaq lazımdır.
+
+**Dərs:** rəqəmə baxıb səbəb uydurma. «Məktub çatmır» ağlabatan idi,
+amma `email_confirmed_at - created_at` fərqi bir baxışda onu təkzib etdi.
+Əvvəl məlumata bax, sonra düzəlt.
+
 ## İdarəetmə — «Dayandır» mesaj qutusunun yanında idi (2026-09-19)
 
 İstifadəçi telefondan müəllimə mesaj yazarkən gördü: **«Dayandır»**

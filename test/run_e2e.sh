@@ -44,6 +44,7 @@ echo "8/9  generator"
 python3 test/e2e_gen.py
 echo
 echo "9/9  paket ve admin"
+python3 test/e2e_mail_sehvi.py
 python3 test/e2e_paket.py
 echo
 echo "10/11 bildirisler ve 2FA"

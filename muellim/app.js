@@ -170,6 +170,59 @@
   }
 
   /* ------------------------------------------------------ giris ekrani */
+  /* ================================================================
+     E-POCT YAZI SEHVI (2026-09-19)
+
+     Olcu: 16 qeydiyyatin 3-unde unvan sehv yazilmisdi -
+     «...@gemail.com», «...@gamil.com», bir de rəqəm sehvi.  Tesdiq
+     mecburi olanda bu, adami TAMAMILE kenarda qoyurdu; indi qapi
+     acıqdir, amma parol berpasi ve her cur elaqe hele de olmur -
+     hemin unvana hec ne catmir.
+
+     Ona gore forma MANE OLMUR, yalniz sorusur: «Bunu nezerde
+     tuturdunuz: ...@gmail.com?» - bir toxunusla duzelir.  Qerar
+     istifadecinindir: is unvani ola biler, biz bilmirik.
+     ================================================================ */
+  var MAIL_OK = ["gmail.com", "mail.ru", "inbox.ru", "yandex.ru", "yandex.com",
+                 "hotmail.com", "outlook.com", "yahoo.com", "icloud.com",
+                 "bk.ru", "list.ru", "rambler.ru", "box.az", "mail.az",
+                 "edu.az", "bsu.edu.az", "adpu.edu.az"];
+  function lev(a, b) {
+    //  iki setir arasinda ferq sayi (Levenshtein) - qisa unvanlar ucun
+    //  bes edir, kitabxana lazim deyil
+    var m = a.length, n = b.length, i, j, prev = [], cur = [];
+    if (!m) return n;
+    if (!n) return m;
+    for (j = 0; j <= n; j++) prev[j] = j;
+    for (i = 1; i <= m; i++) {
+      cur[0] = i;
+      for (j = 1; j <= n; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1,
+                          prev[j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+      }
+      prev = cur.slice();
+    }
+    return prev[n];
+  }
+  function mailTypo(email) {
+    var at = String(email || "").lastIndexOf("@");
+    if (at < 1) return "";
+    var user = email.slice(0, at), dom = email.slice(at + 1).toLowerCase();
+    if (!dom || MAIL_OK.indexOf(dom) >= 0) return "";
+    var best = "", bd = 99;
+    MAIL_OK.forEach(function (d) {
+      var k = lev(dom, d);
+      if (k < bd) { bd = k; best = d; }
+    });
+    //  Iki herfden cox ferq varsa el cekiriq - bu, basqa (is) domenidir.
+    //  Qisa domenlerde bir herf ferqi de cox seydir, ona gore hedd
+    //  uzunluqa gore darlasir.
+    if (bd === 0) return "";
+    if (bd > 2) return "";
+    if (bd === 2 && dom.length < 8) return "";
+    return user + "@" + best;
+  }
+
   function screenAuth(mode, note) {
     mode = mode || "in";
     //  Giris ekrani acildi - buradan sonra olculen vaxt insanin
@@ -192,6 +245,7 @@
         (isUp ? '<label for="fname">Ad, soyad</label><input id="fname" autocomplete="name">' : "") +
         '<label for="email">E-poçt</label>' +
         '<input id="email" type="email" autocomplete="email" inputmode="email">' +
+        '<div id="mailTip"></div>' +
         '<label for="pass">Parol</label>' +
         '<input id="pass" type="password" autocomplete="' +
           (isUp ? "new-password" : "current-password") + '">' +
@@ -233,12 +287,44 @@
     on("btnSwap", "click", function () { screenAuth(isUp ? "in" : "up"); });
     on("btnForgot", "click", screenForgot);
     on("btnAuth", "click", doAuth);
+
+    //  yazi sehvi ipucu: sahədən cixanda ve dəyisiklikde
+    var tipSeen = false;
+    function tipDraw() {
+      var box = $("mailTip");
+      if (!box) return "";
+      var v = ($("email").value || "").trim();
+      var sug = mailTypo(v);
+      box.innerHTML = sug
+        ? '<p class="mtip">' + ic("info") + "<span>Bunu nəzərdə tuturdunuz? " +
+            '<button type="button" class="lnk" id="mtipGo">' + esc(sug) + "</button></span></p>"
+        : "";
+      if (sug) {
+        on("mtipGo", "click", function () {
+          $("email").value = sug;
+          box.innerHTML = "";
+          tipSeen = false;
+          var pw = $("pass"); if (pw) pw.focus();
+        });
+      }
+      return sug;
+    }
+    on("email", "blur", tipDraw);
+    on("email", "change", tipDraw);
     ["email", "pass", "fname"].forEach(function (id) {
       on(id, "keydown", function (e) { if (e.key === "Enter") doAuth(); });
     });
 
     function doAuth() {
       if (busy) return;
+      /*  Enter ile birbasa gonderende «blur» bas vermir - ipucu heç
+          gorunmurdu.  Suphe varsa BIR defe saxlayiriq: ipucu cixir,
+          ikinci toxunusda gonderilir.  Mane deyil, yalniz bir sual.  */
+      if (tipDraw() && !tipSeen) {
+        tipSeen = true;
+        setBusy("btnAuth", false, isUp ? "Hesab yarat" : "Daxil ol");
+        return;
+      }
       var email = ($("email").value || "").trim();
       var pass = $("pass").value || "";
       var fname = $("fname") ? ($("fname").value || "").trim() : "";
