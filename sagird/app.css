@@ -474,3 +474,19 @@ details.fbd summary .fbdot::before{content:"";width:6px;height:6px;border-radius
 .fbre b{display:block;font-size:12px;color:var(--brand);margin-bottom:2px}
 .fbre.fresh{box-shadow:0 0 0 3px var(--brand-tint)}
 .fbwait{margin-top:6px;font-size:12.5px;color:var(--fg-3)}
+
+/* ---- 210: səhv dəftəri mövzu-mövzu -----------------------------------
+   Əvvəl bir rəqəm və «Məşq et (10)» var idi; indi hər mövzu ayrıca
+   bitirilə bilən işdir. */
+.mtops{display:flex;flex-direction:column;gap:8px}
+.mtop{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  background:var(--n-25);border:1px solid var(--n-100)}
+.mtop>span{flex:1;min-width:0}
+.mtop b{display:block;font-size:14px;font-weight:650;line-height:1.35;word-break:break-word}
+.mtop i{display:block;font-style:normal;font-size:12px;color:var(--fg-3);margin-top:1px}
+.mtop .btn{flex:0 0 auto}
+/* 211: abunəsiz hesabda məşq bağlıdır — şagird nəyin bağlandığını görür */
+.mtop.lock{opacity:.75}
+.mlock{flex:0 0 auto;display:inline-flex;color:var(--fg-3)}
+.mlock svg{width:16px;height:16px}
+.mlockn{margin:10px 0 0;font-size:12.5px}

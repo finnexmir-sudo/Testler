@@ -104,10 +104,18 @@ with sync_playwright() as pw:
     ok(db("select count(*) n from public.mistakes where status='open'", one=True)["n"] == NQ, "defterde NQ acıq sual")
     sp.click("#btnHome"); sp.wait_for_selector("#mistBox .mist", timeout=15000)
     mt = sp.inner_text("#mistBox").replace("\n", " ")
-    ok(str(NQ) in mt and "gözləyir" in mt and "Məşq et" in mt, "ev ekraninda defter karti", mt[:80])
+    #  210: kart artiq MOVZU-MOVZU - «Kəsrlər — 3 sual gözləyir» + «Bağla»
+    ok(str(NQ) in mt and "gözləyir" in mt and "sual işlə" in mt, "ev ekraninda defter karti (210)", mt[:90])
+    ok(sp.locator("#mistBox .mtop").count() >= 1, "movzu setri var (210)",
+       sp.locator("#mistBox .mtop").count())
 
     print("C · Məşq: 1-ci düz (təkrara), 2-ci səhv (+1 gün), qalanı düz")
-    sp.click("#btnMist"); sp.wait_for_selector(".opt", timeout=15000)
+    #  210: movzu duymesi hemin movzudan UC sual acir; bu testde butun
+    #  suallar bir movzudandir, ona gore hamisi gelir (NQ <= 3 deyilse
+    #  qalani ikinci dovrede) - asagida NQ suali gozleyirik, ona gore
+    #  «hamisi» rejimini saxlayiriq: movzu duymesi limit 3 verir.
+    NMT = sp.locator("#mistBox .mtop").count()
+    sp.locator("#mistBox [data-mt]").first.click(); sp.wait_for_selector(".opt", timeout=15000)
     html = sp.content()
     ok("is_correct" not in html, "mesq ekraninda is_correct yoxdur")
     def pick(correct):
@@ -121,20 +129,47 @@ with sync_playwright() as pw:
     sp.click("#btnMNext"); sp.wait_for_selector(".opt", timeout=8000)
     pick(False)
     ok(sp.locator(".opt.wrong").count() == 1 and "Səhvdir" in sp.inner_text("#mFb"), "sehv cavab: qirmizi + 'Sehvdir'")
-    for i in range(NQ - 2):
-        sp.click("#btnMNext"); sp.wait_for_selector(".opt", timeout=8000); pick(True)
+    #  210: movzu duymesi UC sual acir (yigcam paket) - qalan suallar
+    #  defterde qalir, ikinci paketde gelir.
+    sp.click("#btnMNext"); sp.wait_for_selector(".opt", timeout=8000); pick(True)
     sp.click("#btnMNext"); sp.wait_for_selector("#btnMHome", timeout=8000)
-    ok("Məşq bitdi" in sp.inner_text("#main") and "%d düz · 1 səhv" % (NQ - 1) in sp.inner_text("#main"), "bitis ekrani sayla", sp.inner_text("#main")[:60])
+    ok("Məşq bitdi" in sp.inner_text("#main") and "2 düz · 1 səhv" in sp.inner_text("#main"),
+       "bitis ekrani sayla (3 suallıq paket)", sp.inner_text("#main")[:60])
     st = db("select status, count(*) n from public.mistakes group by status order by status")
-    ok({r["status"]: r["n"] for r in st} == {"open": 1, "review": NQ - 1}, "bazada 1 open (+1 gun), NQ-1 review", st)
+    #  2 duz -> review; 1 sehv + toxunulmamislar -> open
+    ok({r["status"]: r["n"] for r in st} == {"open": NQ - 2, "review": 2},
+       "bazada 2 review, qalani open", st)
     sp.click("#btnMHome"); sp.wait_for_selector("#mistBox .mist", timeout=15000)
-    ok("gözləyən yoxdur" in sp.inner_text("#mistBox") and sp.locator("#btnMist").count() == 0, "bu gun gozleyen yoxdur - duyme yoxdur")
+    #  210: uc sual islenib, qalanlari defterde qalir - movzu setri durur
+    #  BU GUN gozleyen: NQ-3 toxunulmamis (sehv olan sabaha kecdi)
+    mt2 = sp.inner_text("#mistBox").replace("\n", " ")
+    ok("%d" % (NQ - 3) in mt2 and "gözləyir" in mt2 and sp.locator("#mistBox [data-mt]").count() >= 1,
+       "qalan suallar movzu setrinde qalir (210)", mt2[:90])
+
+    print("C2 · (211) Abunəsiz: sayğac görünür, məşq bağlıdır")
+    #  Usaq NE ITIRDIYINI gormelidir - yoxsa muelliminden istemez.
+    db("delete from public.subscriptions")
+    sp.reload(); sp.wait_for_selector("#mistBox .mist", timeout=15000)
+    ok(sp.locator("#mistBox .mtop").count() >= 1, "abunesiz de movzu setri gorunur (211)")
+    ok(sp.locator("#mistBox [data-mt]").count() == 0, "duyme yoxdur - mesq baglidir (211)")
+    ok(sp.locator("#mistBox .mlock").count() >= 1, "kilid nisani var (211)")
+    ok("abunəsi ilə açılır" in sp.inner_text("#mistBox") and "Mövzunu seç" not in sp.inner_text("#mistBox"),
+       "sebeb yazilir, «Mövzunu seç» yazilmir (211)",
+       sp.inner_text("#mistBox").replace("\n", " ")[-70:])
+    db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)
+           select a.id, p.id, 'active', now() + interval '30 days'
+             from public.accounts a, public.plans p
+            where p.slug = 'repetitor-25' and a.name is not null limit 1""")
+    sp.reload(); sp.wait_for_selector("#mistBox [data-mt]", timeout=15000)
+    ok(True, "abune qayidanda duyme geri gelir (211)")
 
     print("D · Müəllim: Səhvlər sekməsində dəftər sayğacları")
     pg.goto(PANEL + "#/s/" + SID + "/" + GID); pg.wait_for_selector("#sTabs", timeout=15000)
     pg.click("#sTabs [data-v='s']"); pg.wait_for_selector(".mkbox", timeout=8000)
     mk = pg.inner_text(".mkbox").replace("\n", " ")
-    ok("1 gözləyir" in mk and "%d təkrarda" % (NQ - 1) in mk and "0 bağlanıb" in mk, "sayğaclar", mk[:90])
+    #  210: uc suallıq paket - 2 duz (tekrarda), 1 sehv + NQ-3 toxunulmamis
+    ok("%d gözləyir" % (NQ - 2) in mk and "2 təkrarda" in mk and "0 bağlanıb" in mk,
+       "sayğaclar (3 suallıq paketdən sonra)", mk[:90])
 
     print("E · İrəliləyiş kartı (2+ cəhd)")
     #  ikinci cehd - serbest mesq: qarisiq test duz cavablarla (SQL ile)

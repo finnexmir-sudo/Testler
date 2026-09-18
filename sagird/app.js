@@ -1097,17 +1097,46 @@
       if (!box || !m) return;
       var open = Number(m.open) || 0, rev = Number(m.review) || 0, cl = Number(m.closed) || 0, due = Number(m.due) || 0;
       if (!open && !rev && !cl) return;      // hec vaxt sehv olmayib - sakit
+      /*  210: MOVZU-MOVZU.  Evvel bir reqem ve «Məşq et (10)» var idi -
+          konkret hedef yox idi.  Indi «Kəsrlər — 3 sual» + «Bağla»:
+          kicik, bitirile bilen is.  */
+      var tps = (m.topics || []).slice(0, 5);
+      var paid = m.paid !== false;   //  211: kohne serverde acar yoxdur -> acıq
       box.innerHTML = '<div class="spacer"></div><h2>Səhv dəftəri</h2>' +
         '<div class="card mist">' +
           '<div class="mrow"><b>' + due + "</b><span>" + (due ? "sual gözləyir" : "gözləyən yoxdur") + "</span>" +
             '<b class="ok2">' + cl + "</b><span>bağlanıb</span></div>" +
           '<p class="note" style="margin:6px 0 10px">' +
             (due
-              ? "Səhv etdiyin suallar — düz cavablayana qədər burada qalır, bir həftə sonra yenidən gəlir."
+              ? (paid
+                  ? "Mövzunu seç — bir neçə sual, hamısını düz cavablasan mövzu təmizlənir."
+                  //  211: secmek olmur - «Mövzunu seç» yazmaq ziddiyyet idi
+                  : "Səhvlərin mövzu-mövzu toplanır. Məşq müəlliminin abunəsi ilə açılır.")
               : (rev ? "Bir həftə sonra " + rev + " sual təkrar gələcək." : "Hamısı bağlanıb, afərin! 🎉")) + "</p>" +
-          (due ? '<button class="btn go wide" id="btnMist">Məşq et (' + Math.min(due, 10) + ")</button>" : "") +
+          (tps.length
+            ? '<div class="mtops">' + tps.map(function (t) {
+                var n = Math.min(Number(t.due) || 0, 3);
+                //  «Bağla (3)» casdirirdi: setirde 28 yazirdi, duymede 3.
+                //  Indi duyme NE EDECEYINI deyir: «3 sual işlə».
+                //  211: abunesiz hesabda duyme SONUKDUR - usaq neyin
+                //  bagli oldugunu GORUR ve muellimden isteye bilir.
+                return '<div class="mtop' + (paid ? "" : " lock") + '"><span><b>' + esc(t.name) + "</b>" +
+                  '<i>' + (Number(t.due) || 0) + " sual gözləyir</i></span>" +
+                  (paid
+                    ? '<button class="btn sm go" data-mt="' + esc(t.id || "") +
+                        '" data-mn="' + esc(t.name) + '">' + n + " sual işlə</button>"
+                    : '<span class="mlock">' + ic("lock") + "</span>") + "</div>";
+              }).join("") + "</div>" +
+              (paid ? "" :
+                '<p class="note mlockn">Səhvlərin itmir — abunə açılan kimi ' +
+                  "buradan davam edəcəksən.</p>")
+            : "") +
         "</div>";
-      on("btnMist", "click", screenMistakes);
+      Array.prototype.forEach.call(box.querySelectorAll("[data-mt]"), function (b) {
+        b.addEventListener("click", function () {
+          screenMistakes(b.getAttribute("data-mt") || null, b.getAttribute("data-mn") || "");
+        });
+      });
     }).catch(function () {});
   }
 
@@ -1286,15 +1315,29 @@
   }
 
   var MQ = null;   // mesq veziyyeti
-  function screenMistakes() {
+  function screenMistakes(tid, tname) {
     markScreen(false);
+    //  ust zolaq dardir - uzun movzu adi kesilirdi; ad ekranda onsuz da var
     topTitle.textContent = "Səhv dəftəri";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
-    sb.rpc("rpc_student_mistakes", { p_token: TOKEN }).then(function (m) {
-      MQ = { items: (m && m.items) || [], i: 0, ok: 0, bad: 0 };
+    //  210: movzu verilibse yalniz ondan UC sual - yigcam, bitirile bilen
+    sb.rpc("rpc_student_mistakes", {
+      p_token: TOKEN, p_topic: tid || null, p_limit: tid ? 3 : 10
+    }).then(function (m) {
+      MQ = { items: (m && m.items) || [], i: 0, ok: 0, bad: 0, tname: tname || "" };
+      //  211: abunesiz hesabda server sual gondermir - sakit izah
+      if (!MQ.items.length && m && m.paid === false) {
+        show('<div class="card" style="text-align:center">' +
+          "<h1>Məşq bağlıdır</h1>" +
+          '<p class="note">Səhv dəftərindəki məşq müəlliminin abunəsi ilə açılır. ' +
+            "Səhvlərin burada gözləyir — itmir.</p>" +
+          '<button class="btn go wide" id="btnMHome" style="margin-top:12px">Testlərə qayıt</button></div>');
+        on("btnMHome", "click", screenTests);
+        return;
+      }
       if (!MQ.items.length) { screenTests(); return; }
       drawMist();
-    }).catch(function (e) { errScreen(e, screenMistakes); });
+    }).catch(function (e) { errScreen(e, function () { screenMistakes(tid, tname); }); });
   }
   function drawMist() {
     var q = MQ.items[MQ.i], n = MQ.items.length;
@@ -1344,8 +1387,10 @@
     });
   }
   function drawMistDone() {
+    //  210: movzu secilibse ve HAMISI duzdurse - «temizləndi» hissi
+    var temiz = MQ.tname && !MQ.bad && MQ.ok;
     show('<div class="card" style="text-align:center">' +
-        "<h1>Məşq bitdi 🎯</h1>" +
+        "<h1>" + (temiz ? esc(MQ.tname) + " təmizləndi ✅" : "Məşq bitdi 🎯") + "</h1>" +
         '<p class="note">' + MQ.ok + " düz · " + MQ.bad + " səhv. " +
           (MQ.bad ? "Səhvlər sabah yenə gələcək." : "Düz cavablar bir həftə sonra bir də yoxlanacaq.") + "</p>" +
         '<button class="btn go wide" id="btnMHome" style="margin-top:12px">Testlərə qayıt</button>' +

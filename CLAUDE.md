@@ -3985,6 +3985,45 @@ demirdi. İndi zolağın altında bir sətir + bir toxunuş.
   `e2e_panel` (şagirdsiz hesabda kart yoxdur). Şəkil: `test/_v2_bugun.py`.
 - Canlıda: `db/209_gunluk_kart.sql`.
 
+## db/210 — «Səhvini bağla»: mövzu-mövzu, yığcam paket (2026-09-18)
+
+Səhv dəftərinin mexanikası (db/129) hazır idi: açıq → təkrar → bağlı,
+aralarında bir həftə. Amma şagird ekranda bir rəqəm görürdü: «10 sual
+gözləyir · Məşq et». Konkret hədəf yox idi.
+
+- `rpc_student_mistakes(p_token, p_topic, p_limit)`: `topics` açarı
+  (mövzu üzrə bu gün gözləyən sual sayı, ən çoxdan aza) + mövzu süzgəci.
+  Köhnə tək parametrli imza **drop** edildi, yoxsa `smoke_huquq` anon
+  sayını pozardı (overload).
+- Şagird kartı: «Statistika. Ehtimal — 28 sual gözləyir» + «3 sual işlə».
+  Düymə nə edəcəyini deyir; «Bağla (3)» çaşdırırdı (sətirdə 28, düymədə 3).
+- Mövzu seçiləndə 3 sual gəlir. Hamısı düz olsa bitiş ekranı «<mövzu>
+  təmizləndi ✅» deyir (`MQ.tname` + `bad === 0`).
+- Üst zolaq dar olduğu üçün başlıq «Səhv dəftəri» qalır, mövzu adı ekranda.
+- Testlər: `smoke_sehv_bagla.sql` (yoxla.sh siyahısına əlavə),
+  `e2e_defter` 3 suallıq paketə uyğunlaşdırıldı. Şagird kartında
+  «gözləyən» = `next_at <= now()`, müəllim sayğacı isə `open` sayır —
+  səhv cavablanan sual sabaha keçdiyi üçün iki rəqəm fərqlidir.
+- Canlıda: `db/210_sehvini_bagla.sql`.
+
+## db/211 — Səhv dəftəri abunə paketinə keçdi (2026-09-18)
+
+İstifadəçi qərarı: «abunəlikdə edək». Səbəb: uşaq hər gün girir, ləzzətini
+görür; abunə bitəndə özü müəllimə deyir «bunları əvvəlki kimi necə işlədim?».
+
+**Amma tam gizlədilmir** — uşaq nə itirdiyini görməlidir, yoxsa istəməz:
+- sayğaclar və mövzu siyahısı pulsuzda da gəlir (neçə sual gözləyir),
+- `items` boş qaytarılır, `rpc_student_mistake_answer` `42501` verir,
+- `paid` bayrağı → şagird ekranında düymə əvəzinə kilid nişanı,
+  «Səhvlərin mövzu-mövzu toplanır. Məşq müəlliminin abunəsi ilə açılır.»
+  və «Səhvlərin itmir — abunə açılan kimi buradan davam edəcəksən.»
+- Abunəli halda «Mövzunu seç…» mətni qalır; kilidli halda o cümlə YAZILMIR
+  (seçmək olmurdusa, «seç» demək ziddiyyət idi).
+- `mistake_answer` gövdəsi marker ilə genişləndi (`Sessiya bitib…` bloku).
+- Testlər: `smoke_sehv_bagla.sql` §5, `e2e_defter` C2 (kilid, səbəb, abunə
+  qayıdanda düymə geri gəlir).
+- Canlıda: `db/211_sehv_abune.sql`.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
