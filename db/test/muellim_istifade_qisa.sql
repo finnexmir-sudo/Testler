@@ -114,7 +114,10 @@ sayim as (
   (select coalesce(sum(p.answered), 0) from public.practice p join stu on stu.id = p.student_id),
   (select max(p.updated_at) from public.practice p join stu on stu.id = p.student_id)),
 
- ('19 · Şagird SƏHV DƏFTƏRİ işlədib',
+ --  DIQQET: bu reqem «defterde islədi» DEMEK DEYIL.  Sehv 'review'
+ --  veziyyetine TESTDE duz cavablananda da kecir (trg_mistake).  Ona
+ --  gore ad «baglanib/tekrarda»dir - «defteri isletdi» yox.
+ ('19 · Səhv bağlanıb / təkrarda',
   (select count(*) from public.mistakes m join stu on stu.id = m.student_id
     where m.status <> 'open'),
   (select max(m.last_at) from public.mistakes m join stu on stu.id = m.student_id
