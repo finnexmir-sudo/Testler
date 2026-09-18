@@ -236,7 +236,9 @@ with sync_playwright() as pw:
     #  bu, klik yarisindan asili deyil.  Menyunun ELE KLIKLE
     #  acildigi asagida bir defe ayrica yoxlanilir.
     def menu_bas(setir, sec):
-        pg.eval_on_selector_all(setir + " .rmenu", "els => els.forEach(e => e.open = true)")
+        #  216: «Dayandır» artiq ic-ice <details> («Təhlükəli əməliyyat»)
+        #  icindedir - setirdeki BUTUN details-leri aciriq.
+        pg.eval_on_selector_all(setir + " details", "els => els.forEach(e => e.open = true)")
         pg.wait_for_timeout(120)
         pg.locator(setir + " " + sec).click()
     ADM = ".admr[data-em='pkt@t.az']"
@@ -459,6 +461,15 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/adm"); pg.reload()
     pg.wait_for_selector(".admr", timeout=8000)
     ok(pg.locator(".admr [data-stop]").count() == 1, "Dayandir yalniz abuneli adi setirde")
+    #  216: mesaj qutusu ile «Dayandır» ARTIQ YANASI DEYIL - telefonda
+    #  sehven vurulurdu.  Dayandir qapali <details> icindedir.
+    pg.eval_on_selector_all(ROW + " .rmenu", "els => els.forEach(e => e.open = true)")
+    pg.wait_for_timeout(150)
+    ok(pg.locator(ROW + " [data-stop]").is_visible() is False,
+       "«Dayandır» qapali bolmededir - gorunmur")
+    ok(pg.locator(ROW + " .rdz > summary").count() == 1, "«Təhlükəli əməliyyat» bolmesi var")
+    ok(pg.locator(ROW + " .rmsg .rmsgh").count() == 1, "mesaj qutusunda KIME yazildigi yazilir",
+       pg.inner_text(ROW + " .rmsg .rmsgh") if pg.locator(ROW + " .rmsg .rmsgh").count() else "")
     menu_bas(ROW, "[data-stop]")
     pg.wait_for_timeout(900)
     pg.wait_for_selector(".admr", timeout=8000)

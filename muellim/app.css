@@ -1955,6 +1955,25 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .rmenu .rm .rmsg textarea{width:100%;resize:vertical;font:inherit;font-size:13px;padding:8px 10px;
   border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg)}
 .rmenu .rm .rmsg textarea:focus{outline:none;border-color:var(--brand)}
+/*  216: kimə yazıldığı qutunun üstündə — əvvəl heç yerdə görünmürdü */
+.rmenu .rm .rmsg .rmsgh{font-size:12px;font-weight:650;color:var(--fg-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/*  216: abunə düymələri öz sətrində, mesajdan ayrı */
+.rmenu .rm .rops{display:flex;flex-wrap:wrap;gap:6px;width:250px}
+/*  216: «Dayandır» mesaj qutusunun altında və QAPALI — telefonda
+    səhvən vurulurdu.  Açmaq üçün qəsdən toxunmaq lazımdır. */
+.rmenu .rm .rdz{width:250px;margin-top:8px;padding-top:8px;
+  border-top:1px solid var(--n-100)}
+.rmenu .rm .rdz>summary{list-style:none;cursor:pointer;font-size:12px;
+  color:var(--fg-3);display:flex;align-items:center;gap:6px}
+.rmenu .rm .rdz>summary::-webkit-details-marker{display:none}
+.rmenu .rm .rdz>summary::before{content:"▸";font-size:10px;color:var(--fg-3)}
+.rmenu .rm .rdz[open]>summary::before{content:"▾"}
+.rmenu .rm .rdz>summary:hover{color:var(--err)}
+.rmenu .rm .rdz .btn{margin-top:8px;width:100%;justify-content:center}
+/*  .arch yalnız .stu daxilində rənglənib — burada öz nüsxəsi */
+.rmenu .rm .rdz .btn.arch{color:var(--err);border-color:var(--err-line)}
+.rmenu .rm .rdz .btn.arch:hover{background:var(--err-tint)}
 
 /*  16.09: cedvel qatlanani telefonda «acilan» kimi gorunsun - sag kenarda
     nisan: bagli ikən «Dəyiş» (ve ya «Qur»), aciq ikən «Bağla».  */

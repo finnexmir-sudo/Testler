@@ -4178,6 +4178,35 @@ atlanmış miqrasiyanı sonradan tapmaq bir gün apardı.
 **Həmçinin:** hər dəfə SQL işlədəndən sonra bunu bir dəfə işlət — «hamısı
 true» görmədən «canlıya çıxdı» demə.
 
+## İdarəetmə — «Dayandır» mesaj qutusunun yanında idi (2026-09-19)
+
+İstifadəçi telefondan müəllimə mesaj yazarkən gördü: **«Dayandır»**
+düyməsi mesaj qutusunun **düz üstündə** idi. O düymə abunəni kəsir —
+səhvən vurulsa müəllim pullu imkanlarını itirir. Üstəlik qutuda **kimə
+yazıldığı heç yerdə görünmürdü**: telefonda sətir başlığı yuxarıda qalır,
+adam kimə yazdığını görmür.
+
+Üç düzəliş (yalnız `muellim/app.js` + `app.css`):
+
+1. **«Dayandır» mesajın altına keçdi və `<details>` içindədir** —
+   «Təhlükəli əməliyyat» sətrini qəsdən açmaq lazımdır. Açılanda düymə
+   qırmızıdır və bütün eni tutur, yəni nə etdiyi aydındır.
+2. **Mesaj qutusunun üstündə alıcının adı yazılır** («Teranə riyazzyat —
+   mesaj»).
+3. **Təsdiq pəncərəsində ad + e-poçt + nəticə** yazılır: «Abunəni
+   DAYANDIRMAQ? Müəllim pullu imkanları itirəcək.» Əvvəl yalnız e-poçt
+   var idi — oxşar ünvanlarda çaşdırıcı.
+
+Abunə düymələri (+1 ay · +6 ay · Sınaq 1 ay) öz sətrində qaldı.
+
+- Test: `e2e_paket.py` §F — «Dayandır» **görünmür** (qapalı bölmədədir),
+  «Təhlükəli əməliyyat» bölməsi var, qutuda alıcının adı yazılır.
+  `menu_bas()` köməkçisi artıq sətirdəki **bütün** `<details>`-ləri açır.
+
+**Dərs:** dağıdıcı əməliyyat ilə gündəlik əməliyyat bir-birinə yapışıq
+dura bilməz. Masaüstündə fərq görünmürdü, telefonda hər şey bir sütuna
+düzülür və «Dayandır» mətn qutusuna toxunur.
+
 ## 216 — Səhv dəftəri: «Mövzunu seç» yazırdı, seçiləcək mövzu yox idi (2026-09-18)
 
 İstifadəçi (canlı ekran): kartda «17 sual gözləyir» yazırdı, mətn «Mövzunu

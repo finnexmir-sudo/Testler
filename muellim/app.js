@@ -6234,15 +6234,30 @@
       } else {
         badge = '<span class="pb n">paketsiz</span>';
       }
+      /*  216: mesaj qutusu ile «Dayandır» YANASI idi - telefonda sehven
+          vurmaq asan idi (istifadeci, 19.09).  Uc deyisiklik:
+            1. «Dayandır» mesajin ALTINA kecdi ve <details> icindedir -
+               qesdən acmaq lazimdir;
+            2. mesaj qutusunun ustunde KIME yazildigi yazilir - evvel
+               hec yerde gorunmurdu;
+            3. abune duymeleri oz setrinde qalir.  */
       var ops = (a.admin || a.demo) ? "" :
-        '<button class="btn sm" data-m="1">+1 ay</button>' +
-        '<button class="btn sm" data-m="6">+6 ay</button>' +
-        '<button class="btn sm ghost" data-m="1" data-trial="1">Sınaq 1 ay</button>' +
-        (pl ? '<button class="btn sm ghost arch" data-stop="1">Dayandır</button>' : "") +
+        '<div class="rops">' +
+          '<button class="btn sm" data-m="1">+1 ay</button>' +
+          '<button class="btn sm" data-m="6">+6 ay</button>' +
+          '<button class="btn sm ghost" data-m="1" data-trial="1">Sınaq 1 ay</button>' +
+        "</div>" +
         //  199: muellime mesaj - Icmalinin ustunde kart kimi cixir
-        '<div class="rmsg"><textarea rows="3" maxlength="2000" ' +
-          'placeholder="Müəllimə mesaj — İcmalında görəcək"></textarea>' +
-          '<button class="btn sm go" data-msg="1">Mesaj göndər</button></div>';
+        '<div class="rmsg"><b class="rmsgh">' + esc(a.name || a.email || "") +
+          " — mesaj</b>" +
+          '<textarea rows="3" maxlength="2000" ' +
+            'placeholder="Yazdığınızı müəllim İcmalında görəcək"></textarea>' +
+          '<button class="btn sm go" data-msg="1">Mesaj göndər</button></div>' +
+        (pl
+          ? '<details class="rdz"><summary>Təhlükəli əməliyyat</summary>' +
+              '<button class="btn sm ghost arch" data-stop="1">Abunəni dayandır</button>' +
+            "</details>"
+          : "");
       //  «0 ş · 1 t · 0 c» oxunmurdu (istifadeci).  Indi esas reqem
       //  SAGIRD sayidir, altinda yalniz SIFIR OLMAYAN qalanlar yazilir.
       //  QRUP SAYI (istifadeci, 2026-09-11): «qeydiyyatdan kecib, amma
@@ -6385,7 +6400,10 @@
         }
         call = "rpc_admin_message"; args = { p_email: em, p_body: body };
       } else if (b.getAttribute("data-stop")) {
-        if (!confirm(em + " — abunəni dayandırmaq?")) return;
+        //  216: tesdiqde AD da olsun - bir-birine oxsar e-poctlar var
+        var nm = (row.querySelector(".who b") || {}).textContent || "";
+        if (!confirm((nm ? nm + "\n" : "") + em +
+                     "\n\nAbunəni DAYANDIRMAQ? Müəllim pullu imkanları itirəcək.")) return;
         call = "rpc_admin_stop"; args = { p_email: em };
       } else {
         var sel = $("admPlan");
