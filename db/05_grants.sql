@@ -103,6 +103,8 @@ declare
         'rpc_student_feedback','rpc_parent_feedback',
         'rpc_student_feedback_mine','rpc_parent_feedback_mine',
         'rpc_student_mistakes','rpc_student_mistake_answer',
+        --  Gundelik 5 sual (db/212): kecilen derslerden ferdi tekrar
+        'rpc_student_daily','rpc_student_daily_answer',
         --  Ev tapsirigi (db/191): sagird «etdim» deyir
         'rpc_student_homework_done',
         --  Adaptiv movzu mesqi (db/133)
@@ -157,6 +159,8 @@ declare
         'rpc_student_feedback','rpc_parent_feedback',
         'rpc_student_feedback_mine','rpc_parent_feedback_mine',
         'rpc_student_mistakes','rpc_student_mistake_answer',
+        --  Gundelik 5 sual (db/212): kecilen derslerden ferdi tekrar
+        'rpc_student_daily','rpc_student_daily_answer',
         --  Ev tapsirigi (db/191): sagird «etdim» deyir
         'rpc_student_homework_done',
         --  Adaptiv movzu mesqi (db/133)

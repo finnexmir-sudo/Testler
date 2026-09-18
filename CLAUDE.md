@@ -3850,6 +3850,13 @@ sual başına ≤3 toxunuş.
 **Əvvəl soruşulmalı (100 ölç):** otaqda TV/proyektor var? noutbuk gətirir?
 dərsdə uşaqların telefonunda internet olur? (Teranə, İlahə)
 
+**Vəziyyət (2026-09-18):** 1-ci bənd **edildi** (db/210 + db/211), üstünə
+gündəlik fərdi təkrar gəldi (db/212 + db/213). Növbəti razılaşdırılmış
+sıra: valideyn cümə mesajı → dərsdən çıxış bileti → lövhə/TV rejimi.
+Paylaşım mexanikası (Gemini-nin «dostuna at, gör yazır?» linki) yalnız
+db/213-ün D2 rəqəmi normal çıxandan sonra — və imzalanmış token +
+nümayiş hovuzu ilə, yoxsa bank anonim çıxarıla bilər.
+
 Ucuzdan bahaya, sıra ilə:
 1. **«Səhvini bağla» kartı** (şagird tətbiqi): ən çox təkrarlanan 1–3 səhv,
    hər biri 3 sual, 3/3 → «bağlandı»; alınmasa izah + 1–3 gün sonra 2 oxşar
@@ -4023,6 +4030,89 @@ görür; abunə bitəndə özü müəllimə deyir «bunları əvvəlki kimi nec�
 - Testlər: `smoke_sehv_bagla.sql` §5, `e2e_defter` C2 (kilid, səbəb, abunə
   qayıdanda düymə geri gəlir).
 - Canlıda: `db/211_sehv_abune.sql`.
+
+## db/212 — «Bu günün 5 sualı»: şagirdin fərdi gündəlik təkrarı (2026-09-18)
+
+Şagird tətbiqə həftədə bir-iki dəfə girirdi, çünki hər dəfə **özü** qərar
+verməli idi: hansı mövzu, hansı test, neçə sual. Bu qərar yükü gündəlik
+vərdişi öldürür. İndi qərar serverdədir: uşaq açır, hazır beş sual görür,
+üç dəqiqədə bitirir.
+
+Üç xarici AI-ın (GPT, Gemini, Perplexity) üçü də eyni şeyi dedi və yalnız
+bunlar götürüldü: dəqiq 5 sual, bir düymə, mövzu/test seçimi YOX, seriya
+və medal YOX, qaçırılan gün borc yaratmır, sessiya 5-də bitir («daha 20
+sual» təklifi qəsdən yoxdur).
+
+**Məcburi qayda (istifadəçi):** suallar YALNIZ keçilən dərslərdən olur.
+Mənbə `class_plan_items.done_at`. Plan sətri **alt mövzudur**, suallar isə
+**başlığa** bağlıdır (db/101) — ona görə `coalesce(parent_id, id)` ilə
+valideyn mövzuya qalxırıq. Plan heç işarələnməyibsə **fallback**: uşağın
+özünün testdə cavab verdiyi mövzular (cavab verdi = mövzu onsuz da
+keçilib). Boş ekran göstərmək ən pis variantdır.
+
+**Beş slotun sırası** (sabit, təsadüfi deyil) — hər biri boş qala bilər,
+sonda hovuzdan doldurulur; 3 sualdan az yığılsa paket **qurulmur**:
+
+| # | `src` | Nə |
+|---|-------|-----|
+| 1 | `bilirem` | keçilmiş mövzudan əvvəl DÜZ cavabladığı sual (ilk 20 saniyədə uğur) |
+| 2 | `sehv` | ən köhnə, hələ bağlanmamış səhv (dəftərdən) |
+| 3 | `eyni` | eyni bacarığın başqa sualı |
+| 4 | `tekrar` | 5–60 gün əvvəl düz cavabladığı (aralıqlı təkrar) |
+| 5 | `yeni` | müəllimin ən son «keçildi» etdiyi mövzudan |
+
+- `public.daily_packs (student_id, day, items, answers, done_at)` — paket
+  gün içində **sabitdir** (səhifə yenilənsə eyni suallar), gün dəyişəndə
+  yenisi qurulur. Təqvim günü `Asia/Baku`.
+- `rpc_student_daily(p_token)` — paketi qurur/qaytarır, cari sualı
+  göndərir (düz variant getmir), `yesterday` (dünən N/M) və bitəndə
+  `result` (mövzu-mövzu hesabat).
+- `rpc_student_daily_answer(p_token, q, o)` — **yalnız növbəti** suala;
+  sıra serverdədir. `app.mistake_note(..., p_practice := true)` çağırır.
+- **Abunə:** paket 2-ci və 3-cü sualı səhv dəftərindən (db/211) götürür —
+  pulsuz buraxsaq 211-in qapısı arxa qapıdan açılardı. Ona görə abunəsizdə
+  paket **qurulmur** (sual sızmır), amma kart mövzu adlarını yazır və
+  kilid göstərir.
+- Sual hovuzu `kind = 'single'` — gündəlik dövrə bir toxunuşdur.
+
+**Yol boyu düzəldilən köhnə səhv:** `app.mistake_note`-un INSERT qolu
+`p_practice`-i nəzərə almırdı — ilk dəfə səhv edilən sual `next_at = now()`
+ilə düşürdü, halbuki UPDATE qolu «sabaha» qoyurdu. İnterfeys «sabah yenə
+gələcək» yazdığı üçün iki qol arasındakı ziddiyyət aradan qaldırıldı.
+
+- Testlər: `db/test/smoke_gunluk_5.sql` (10 bölmə, yoxla.sh siyahısında),
+  `test/e2e_gunluk.py` (run_e2e.sh-də).
+- Anon siyahısı **23 → 25** (`db/05_grants.sql` iki massivdə,
+  `smoke_huquq.sql` üç yerdə).
+- Canlıda: `db/212_gunluk_5_sual.sql`.
+
+## db/213 — Gündəlik təkrarın iki dayağı (2026-09-18)
+
+db/212 quruldu, amma onun **hər iki ucu** boş idi.
+
+**1. Müəllim asılılığı** (bu riski üç AI-dan yalnız Gemini gördü). Suallar
+yalnız «keçildi» işarələnən dərslərdən gəlir; müəllim planı işarələmirsə
+uşağa heç nə çatmır və bunu heç kim bilmir. «Bu gün» kartına bir sətir:
+«N şagirdə gündəlik təkrar hazırlana bilmir — keçdiyiniz dərsi «Keçildi»
+işarələyin» + birbaşa həmin qrupun dərs planına keçid.
+`rpc_home` → `tekrar_plansiz`, `tekrar_qrup`, `tekrar_hazir`
+(marker: `'bugun', (`). «Plansız» yalnız **planı olan, amma heç nə
+işarələnməyən** qruplardır — planı olmayana «işarələ» demək mənasızdır.
+
+**2. Ölçü** (Perplexity-nin metrikası). `rpc_admin_huni` → `tekrar`
+(marker: `'days',       p_days,`):
+- **D2 qayıtma** — ilk paketi bitirənin 48 saat içində ikinciyə qayıtması.
+  Hədəf ≥40%, <25% olsa «fərdi repetitor» yox, «əlavə test» kimi qəbul
+  olunur. Bu, vərdişin yaranıb-yaranmadığını deyən yeganə rəqəmdir.
+- **Bitirmə faizi** — başlanan paketlərin neçə faizi sona çatır. <75%
+  olsa problem qayıtmadan ƏVVƏL başlayır (suallar çətin, ekran uzun).
+- Nümunə hesab sayılmır (paketləri hər gecə sıfırlanır).
+
+Hər ikisi mövcud funksiyalara marker ilə əlavə olundu — yeni RPC yoxdur,
+anon siyahısı dəyişmir.
+
+- Testlər: `smoke_gunluk_5.sql` §9–10, `e2e_gunluk.py` B3.
+- Canlıda: `db/213_tekrar_itelemesi.sql`.
 
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 

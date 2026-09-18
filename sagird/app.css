@@ -490,3 +490,26 @@ details.fbd summary .fbdot::before{content:"";width:6px;height:6px;border-radius
 .mlock{flex:0 0 auto;display:inline-flex;color:var(--fg-3)}
 .mlock svg{width:16px;height:16px}
 .mlockn{margin:10px 0 0;font-size:12.5px}
+
+/* ---- 212: «Bu günün 5 sualı» — şagirdin fərdi gündəlik təkrarı ------
+   Kart tapşırıqların üstündədir: uşağın tətbiqi hər gün açmasının
+   yeganə şəxsi səbəbi budur. Bir düymə, seçim yoxdur. */
+.dcard{margin:0 0 16px;border-color:var(--brand-line, var(--n-150))}
+.dhead{display:flex;align-items:baseline;gap:10px}
+.dhead b{flex:1;font-size:16px;font-weight:660;letter-spacing:-.01em}
+.dmin{font-size:12.5px;color:var(--fg-3);white-space:nowrap}
+.dsc{font-size:15px;font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
+.dcard.done{background:var(--ok-tint);border-color:var(--ok-line)}
+.dcard.lock{opacity:.8}
+.dlock{display:inline-flex;color:var(--fg-3)}
+.dlock svg{width:16px;height:16px}
+/* sualın hardan gəldiyi — «təsadüfi test» hissini qıran sətir */
+.dwhy{margin:0 0 8px;font-size:13px;color:var(--fg-2);line-height:1.45}
+.dwhy b{display:block;font-weight:640;color:var(--fg-1);font-size:13.5px}
+/* bitiş ekranı: mövzu-mövzu hesabat */
+.dres{margin:14px 0 0;text-align:left;display:flex;flex-direction:column;gap:6px}
+.drow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;
+  background:var(--n-25);border:1px solid var(--n-100)}
+.drow span{flex:1;min-width:0;font-size:14px;word-break:break-word}
+.drow b{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.dtom{margin:14px 0 0}

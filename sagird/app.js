@@ -437,6 +437,12 @@
          Islenmis (cehdi bitmis) tapsiriqlar ayrica: son tarixi olmayan
          tapsiriq il boyu siyahida qalirdi, 40-60 "islenib" karti
          yigilirdi.  3-den coxdursa yigilmis gelir. */
+      /* 212: «Bu günün 5 sualı» - tapsiriqlarin USTUNDE.  Sebeb: bu,
+         usagin tetbiqi HER GUN acmasinin yegane sexsi sebebidir;
+         muellimin tapsirigi son tarixle onsuz da asagida durur.
+         Sayğac serverden ayrica gelir - rpc_student_daily doldurur. */
+      h += '<div id="dayBox"></div>';
+
       h += "<h2>Tapşırıqlar</h2>";
       /* 191: muellimin METNLE yazdigi ev tapsirigi - testlerin ustunde.
          «Etdim» serverde yazilir, valideyn de gorur.  Edilenler yigilir. */
@@ -666,6 +672,7 @@
         drawPrac(); bindRows();
       });
       on("btnMyRes", "click", screenMyResults);
+      loadDaily();
       loadMistakes();
       loadPractice();
       bindRows();
@@ -1091,6 +1098,162 @@
      qeder qalir, bir hefte sonra yeniden gelir.  Duz variant gelmir:
      cavab RPC-si yalniz duz/sehv ve izah qaytarir.
      ================================================================ */
+  /* ================================================================
+     212 - «BU GUNUN 5 SUALI»: sagirdin ferdi gundelik tekrari.
+
+     Qerar SERVERDEDIR.  Usaq acir - hazir bes sual gorur, uc deqiqede
+     bitirir.  Ekranda «movzu sec», «test sec» YOXDUR: her secim qerar
+     yukudur ve gundelik verdisi oldurur.
+
+     Suallar YALNIZ muellimin «kecildi» isareledigi derslerden gelir
+     (db/212).  Bitende «daha 20 sual isle» teklif ETMIRIK - dovre
+     baglanir, sabah yenisi gelir.
+     ================================================================ */
+  function loadDaily() {
+    sb.rpc("rpc_student_daily", { p_token: TOKEN }).then(function (d) {
+      var box = $("dayBox");
+      if (!box || !d) return;
+      var total = Number(d.total) || 0;
+      var i = Number(d.i) || 0;
+      var paid = d.paid !== false;
+      var tps = (d.topics || []).filter(Boolean);
+      //  Hele hec bir ders «kecildi» isarelenmeyibse kart QURULMUR -
+      //  bos ved vermekdense hec ne demek yaxsidir.
+      if (!total && (!paid ? !tps.length : true)) { box.innerHTML = ""; return; }
+
+      var dun = d.yesterday;
+      var sub = tps.length
+        ? "Müəllimin keçdiyi " +
+          tps.map(function (x) { return "«" + esc(x) + "»"; }).join(" və ") + " üzrə"
+        : "Keçdiyin mövzular üzrə";
+
+      if (!paid) {
+        box.innerHTML = '<div class="card dcard lock">' +
+          '<div class="dhead"><b>Bu günün təkrarı</b>' +
+            '<span class="dlock">' + ic("lock") + "</span></div>" +
+          '<p class="note" style="margin:6px 0 0">' + sub +
+            " hər gün sənin üçün 5 sual hazırlanır. Məşq müəlliminin abunəsi ilə açılır.</p>" +
+          "</div>";
+        return;
+      }
+      if (d.done) {
+        box.innerHTML = '<div class="card dcard done">' +
+          '<div class="dhead"><b>Bu gün bitdi 🎉</b>' +
+            '<span class="dsc">' + (Number(d.ok) || 0) + " / " + total + "</span></div>" +
+          '<p class="note" style="margin:6px 0 0">Sabah sənə ' + total +
+            " yeni sual hazırlayacağıq.</p></div>";
+        return;
+      }
+      box.innerHTML = '<div class="card dcard">' +
+        '<div class="dhead"><b>Bu günün ' + total + " sualı</b>" +
+          '<span class="dmin">≈' + Math.max(2, Math.round(total * 0.7)) + " dəq</span></div>" +
+        '<p class="note" style="margin:6px 0 10px">' + sub + " fərdi təkrar." +
+          (dun ? " Dünən: " + (Number(dun.ok) || 0) + "/" + (Number(dun.total) || 0) + "." : "") +
+          "</p>" +
+        '<button class="btn go wide" id="btnDay">' +
+          (i > 0 ? "Davam et — " + (total - i) + " sual qalıb" : "Başla") + "</button></div>";
+      on("btnDay", "click", function () { screenDaily(); });
+    }).catch(function () {});
+  }
+
+  var DQ = null;   // {total, i, ok, q}
+  function screenDaily() {
+    markScreen(false);
+    //  ust zolaq dardir - uzun ad kesilirdi («Bu günün tə…»)
+    topTitle.textContent = "Bu gün";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_student_daily", { p_token: TOKEN }).then(function (d) {
+      DQ = d || {};
+      if (!DQ.total || DQ.done) { drawDailyDone(); return; }
+      drawDaily();
+    }).catch(function (e) { errScreen(e, screenDaily); });
+  }
+
+  //  Sualin hardan geldiyini BIR cumle ile deyirik - «tesadufi test»
+  //  hissi mehz burada qirilir: sistem usagin kecmisine qayidir.
+  var DSRC = {
+    bilirem: "Bunu əvvəl düz həll etmişdin — yadında qalıb?",
+    sehv:    "Bu mövzuda əvvəl səhvin olmuşdu. Gəl onu bağlayaq.",
+    eyni:    "Eyni mövzu — bu dəfə başqa sual.",
+    tekrar:  "Bir müddət əvvəl bunu bacarırdın. Yoxlayaq.",
+    yeni:    "Müəllimin son dərsdə keçdiyi mövzudan."
+  };
+  function drawDaily() {
+    var q = DQ.question, n = Number(DQ.total) || 0, i = Number(DQ.i) || 0;
+    if (!q) { drawDailyDone(); return; }
+    show(
+      '<div class="prog"><div class="bar"><i style="width:' + Math.round(i * 100 / n) + '%"></i></div>' +
+        '<span class="cnt">' + (i + 1) + " / " + n + "</span></div>" +
+      '<p class="dwhy">' + (q.topic ? "<b>" + esc(q.topic) + "</b>" : "") +
+        esc(DSRC[q.src] || "") + "</p>" +
+      '<div class="q"><div class="body">' + esc(q.body) + "</div></div>" +
+      fig(q.media_url) +
+      '<div class="opts" id="opts">' +
+        (q.options || []).map(function (o, k) {
+          return '<button class="opt" data-o="' + esc(o.id) + '">' +
+            '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
+            '<span class="t">' + esc(o.body) + "</span></button>";
+        }).join("") + "</div>" +
+      '<div id="dFb"></div>'
+    );
+    Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (b) {
+      b.addEventListener("click", function () {
+        if (busy) return;
+        busy = true;
+        Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (x) { x.disabled = true; });
+        b.classList.add("sel");
+        sb.rpc("rpc_student_daily_answer", {
+          p_token: TOKEN, p_question_id: q.id, p_option_id: b.getAttribute("data-o")
+        }).then(function (r) {
+          busy = false;
+          b.classList.add(r.correct ? "right" : "wrong");
+          DQ.i = Number(r.i) || (i + 1);
+          DQ.ok = Number(r.ok) || 0;
+          $("dFb").innerHTML =
+            '<div class="' + (r.correct ? "ok" : "warn") + '">' + ic(r.correct ? "check" : "info") +
+              "<span>" + (r.correct
+                ? (r.closed ? "Düzdür! Bu sual dəftərdən çıxdı. ✅" : "Düzdür!")
+                : "Bu dəfə alınmadı. Sabah bir də qarşına çıxacaq.") +
+              (r.explanation ? "<br><i>" + esc(r.explanation) + "</i>" : "") + "</span></div>" +
+            '<button class="btn go wide" id="btnDNext" style="margin-top:10px">' +
+              (r.done ? "Bitir" : "Növbəti") + "</button>";
+          on("btnDNext", "click", function () {
+            if (r.done) { DQ.done = true; drawDailyDone(); return; }
+            screenDaily();
+          });
+        }).catch(function (e) {
+          busy = false;
+          Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (x) { x.disabled = false; });
+          b.classList.remove("sel");
+          $("dFb").innerHTML = msg("err", fail(e));
+        });
+      });
+    });
+  }
+  function drawDailyDone() {
+    //  Bitis ekrani: netice + movzu-movzu hesabat + SABAHIN sebebi.
+    //  «Daha test isle» teklifi QESDEN yoxdur - dovre baglanmalidir.
+    sb.rpc("rpc_student_daily", { p_token: TOKEN }).then(function (d) {
+      var n = Number(d.total) || 0, ok = Number(d.ok) || 0;
+      var res = d.result || [];
+      var dun = d.yesterday;
+      show('<div class="card" style="text-align:center">' +
+          "<h1>Bu gün bitdi 🎉</h1>" +
+          '<p class="note">' + n + " sualdan <b>" + ok + "</b> düz." +
+            (dun ? " Dünən " + (Number(dun.ok) || 0) + "/" + (Number(dun.total) || 0) + " idi." : "") +
+            "</p>" +
+          (res.length
+            ? '<div class="dres">' + res.map(function (x) {
+                return '<div class="drow"><span>' + esc(x.topic) + "</span><b>" +
+                  (Number(x.ok) || 0) + " / " + (Number(x.n) || 0) + "</b></div>";
+              }).join("") + "</div>"
+            : "") +
+          '<p class="note dtom">Sabah sənə ' + (n || 5) + " yeni sual hazırlayacağıq.</p>" +
+          '<button class="btn go wide" id="btnDHome" style="margin-top:12px">Bitir</button></div>');
+      on("btnDHome", "click", screenTests);
+    }).catch(function (e) { errScreen(e, drawDailyDone); });
+  }
+
   function loadMistakes() {
     sb.rpc("rpc_student_mistakes", { p_token: TOKEN }).then(function (m) {
       var box = $("mistBox");

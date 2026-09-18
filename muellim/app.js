@@ -475,9 +475,22 @@
       alt = "";
     }
 
+    /*  213: gundelik tekrarin muellim ucu.  Suallar YALNIZ «kecildi»
+        isarelenen derslerden gelir - plan bos qalirsa usaga hec ne
+        catmir ve bunu hec kim bilmir.  Ittiham deyil, bir toxunusluq
+        isare: birbasa hemin qrupun ders plani sekmesine aparir.  */
+    var plansiz = Number(v.tekrar_plansiz) || 0;
+    var tq = v.tekrar_qrup || null;
+    var nudge = plansiz && tq
+      ? '<div class="bgnud">' + ic("info") + "<span><b>" + plansiz +
+          " şagird</b>ə gündəlik təkrar hazırlana bilmir — " +
+          "keçdiyiniz dərsi «Keçildi» işarələyin.</span>" +
+          '<a class="btn sm ghost" href="#/g/' + esc(tq.id) + '">Dərs planı</a></div>'
+      : "";
+
     box.innerHTML = '<div class="card bugun">' +
       '<div class="bghead">' + ic("cal") + "<span>" + sol + "</span>" + sag + "</div>" +
-      alt + '<div id="bgMsg"></div></div>';
+      alt + nudge + '<div id="bgMsg"></div></div>';
 
     on("bgSend", "click", function () {
       var btn = $("bgSend");
@@ -5794,8 +5807,27 @@
           return '<em class="tg">' + esc(SRC[k] || k) + " · " + (h.src[k] || 0) + "</em>";
         }).join("") + "</div>"
       : "";
+    /*  213: gundelik tekrarin iki reqemi.  D2 - ilk paketi bitirenin
+        48 saat icinde ikinciye qayitmasi; bu, verdisin yaranib-
+        yaranmadigini deyen yegane reqemdir.  Bitirme <75% olsa problem
+        qayitmadan EVVEL baslayir (suallar cetin, ekran uzun).  */
+    var tk = h.tekrar || null;
+    var tkHtml = tk && Number(tk.basladi)
+      ? '<div class="htk"><b>Gündəlik təkrar</b>' +
+          '<em class="tg">' + (Number(tk.basladi) || 0) + " başladı</em>" +
+          '<em class="tg">' + (Number(tk.bitirdi) || 0) + " bitirdi</em>" +
+          (tk.bitirme != null
+            ? '<em class="tg' + (Number(tk.bitirme) >= 75 ? " ok" : " bad") + '">bitirmə ' +
+              Number(tk.bitirme) + "%</em>" : "") +
+          (tk.d2 != null
+            ? '<em class="tg' + (Number(tk.d2) >= 40 ? " ok" : (Number(tk.d2) >= 25 ? "" : " bad")) +
+              '">D2 qayıtma ' + Number(tk.d2) + "% · " + (Number(tk.d2_baza) || 0) + " nəfərdən</em>"
+            : '<em class="tg">D2 üçün hələ məlumat yoxdur</em>') +
+        "</div>"
+      : "";
+
     return '<h2>Huni <span class="muted">· son ' + (h.days || 30) + " gün · nümunə və admin sayılmır</span></h2>" +
-      '<div class="card huni"><div class="hsteps">' + cells + "</div>" + srcHtml +
+      '<div class="card huni"><div class="hsteps">' + cells + "</div>" + tkHtml + srcHtml +
       (stuck.length
         ? '<div class="hstuck"><div class="hsh"><b>Qrup yaratmayanlar</b>' +
             '<span class="muted">' + stuck.length + " nəfər · ünvanı şübhəli olana məktub çatmır, " +

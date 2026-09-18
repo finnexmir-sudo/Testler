@@ -2143,6 +2143,15 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .hsrc{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 0;font-size:12.5px}
 .hsrc b{margin-right:4px;color:var(--fg-2)}
 .hmtxt{width:100%;box-sizing:border-box;margin-top:8px;font-size:13px}
+/* 213: gündəlik təkrarın ölçüsü — D2 qayıtma + bitirmə faizi */
+.htk{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0 0;
+  padding-top:10px;border-top:1px dashed var(--n-100);font-size:12.5px}
+.htk b{margin-right:4px;color:var(--fg-2)}
+/* .tg yalnız .hrow daxilində təyin olunub — burada öz nüsxəsi */
+.htk .tg{font-style:normal;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;
+  background:var(--n-100);color:var(--fg-3);white-space:nowrap}
+.htk .tg.ok{background:var(--ok-tint);color:var(--ok)}
+.htk .tg.bad{background:#fdece6;color:#b42318}
 
 /* ---- 205: sagird setri netice ile ------------------------------------
    Qelib (grid):  telefon        masaustu (>=721px)
@@ -2224,7 +2233,15 @@ details.stk .l3{margin-top:8px}
   border-top:1px dashed var(--n-100);font-size:13.5px}
 .bgact>span{flex:1;min-width:160px}
 .bgact .btn{flex:0 0 auto}
+/* 213: gündəlik təkrar hazırlana bilmir — «Keçildi» işarələnməyib */
+.bgnud{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;
+  border-top:1px dashed var(--n-100);font-size:13.5px;color:var(--fg-2)}
+.bgnud svg{width:16px;height:16px;flex:0 0 auto;color:var(--warn)}
+.bgnud>span{flex:1;min-width:160px}
+.bgnud b{font-weight:700;color:var(--fg-1)}
+.bgnud .btn{flex:0 0 auto}
 @media (max-width:560px){
   .bghead .bgs{flex:1 0 100%;margin-left:0}
   .bgact .btn{width:100%;justify-content:center}
+  .bgnud .btn{width:100%;justify-content:center}
 }

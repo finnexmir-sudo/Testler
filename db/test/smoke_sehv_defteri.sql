@@ -34,6 +34,13 @@ insert into public.students (id, account_id, class_id, created_by, full_name, di
   ('5555000d-0000-0000-0000-0000000000d2','aaaa0000-0000-0000-0000-0000000000d1',
    'cccc0000-0000-0000-0000-0000000000d1','11110000-0000-0000-0000-0000000000d1','Murad Iki','Murad I.','SDFT0002');
 
+--  211-den sonra sehv defterinin MESQI abune paketindedir - bu suite
+--  defterin mexanikasini (acıq/tekrar/bagli) yoxlayir, qapini yox
+--  (qapi smoke_sehv_bagla §5-dedir).  Ona gore abune acilir.
+insert into public.subscriptions (account_id, plan_id, status, current_period_end)
+select 'aaaa0000-0000-0000-0000-0000000000d1', id, 'active', now() + interval '30 days'
+  from public.plans where slug = 'repetitor-25';
+
 --  cavab: ilk N sual sehv, qalani duz
 create or replace function pg_temp.cavab(p_test uuid, p_wrong int) returns jsonb language sql as $$
   select coalesce(jsonb_agg(jsonb_build_object('q', x.qid, 'o', jsonb_build_array(

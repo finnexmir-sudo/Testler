@@ -73,8 +73,9 @@ echo
 echo "18/22 cavab terzi"
 python3 test/e2e_inam.py
 echo
-echo "19/22 sehv defteri"
+echo "19/22 sehv defteri + gundelik tekrar"
 python3 test/e2e_defter.py
+python3 test/e2e_gunluk.py
 echo
 echo "20/22 davamiyyet"
 python3 test/e2e_davamiyyet.py
