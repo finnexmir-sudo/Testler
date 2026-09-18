@@ -4114,6 +4114,42 @@ anon siyahısı dəyişmir.
 - Testlər: `smoke_gunluk_5.sql` §9–10, `e2e_gunluk.py` B3.
 - Canlıda: `db/213_tekrar_itelemesi.sql`.
 
+## db/215 — «Bu gün · girən müəllim» sayğacı yanlış idi (2026-09-18)
+
+İstifadəçi: «Teranə bu gün giriş edib, amma yuxarıda 0 göstərir». Doğru
+idi — eyni ekranda iki rəqəm bir-birini təkzib edirdi:
+
+| Yer | Nə deyirdi |
+|---|---|
+| Hesablar cədvəli | «son giriş — **bu gün 12:54**» ✓ |
+| «Bu gün» lövhəsi | «**0** girən müəllim» ✗ |
+
+**Səbəb.** `seen_today` yalnız `auth.users.last_sign_in_at`-ə baxırdı.
+Supabase onu **ancaq parolla girişdə** yeniləyir. Müəllimin sessiyası
+diridirsə (refresh token), o hər gün paneli açır, amma parol yazmır —
+deməli `last_sign_in_at` köhnə tarixdə qalır. Nəticə: sayğac demək olar
+həmişə 0 göstərirdi və «heç kim girmir» kimi yalan mənzərə verirdi.
+
+Doğru mənbə `profiles.last_seen_at`-dir — paneli açanda `rpc_seen()` onu
+yazır (db/206-dan sonra hər 2 dəqiqədə). Hesablar cədvəli (125/138/174)
+**onsuz da** ikisinin böyüyünü götürürdü, `seen_week` də (db/175) hər iki
+mənbəyə baxırdı. Yaddan çıxan **tək yer `seen_today`** idi.
+
+**Yol boyu buraxdığım səhv — və onu tutan şey.** İlk düzəlişdə iki mənbəni
+mötərizəyə almadım. SQL-də `AND` `OR`-dan güclü bağlayır, ona görə sondakı
+`or` yuxarıdakı «nümunə deyil / admin deyil» şərtlərini qırdı və **adminin
+öz hesabı sayılmağa başladı**. Bunu `smoke_admin_giris.sql` §5 tutdu
+(db/175-in öz testi). Dərs: `and ... or ...` yazanda mötərizə məcburidir;
+`seen_week` onu düz etmişdi, mən oradan köçürmədim.
+
+- Test: `db/test/smoke_giren_saygaci.sql` — 3 bölmə: diri sessiya ilə girən
+  sayılır · lövhə və cədvəl **eyni rəqəmi** deyir (ziddiyyət qayıtmasın) ·
+  dünənki giriş bu günə yox, həftəyə sayılır. Fiksturda admin bu gün
+  **parolla da** girir — mötərizə sızması bir də gizlənməsin.
+- Marker ilə tətbiq olunur; qoruyucu nişan `215b: IKI MENBE MOTERIZEDE`
+  (səhv nüsxə də köhnə nişanı daşıyırdı, ona görə nişan dəyişdirildi).
+- Canlıda: `db/215_giren_muellim_saygaci.sql`.
+
 ## db/214 — «Dostuna at»: sual paylaşımı (2026-09-18, YAZILIB — QOŞULMAYIB)
 
 **Vəziyyət: GÖZLƏYİR.** İstifadəçi qərarı: «dostuna göndəri hələki saxlayaq,
