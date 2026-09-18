@@ -4114,6 +4114,32 @@ anon siyahısı dəyişmir.
 - Testlər: `smoke_gunluk_5.sql` §9–10, `e2e_gunluk.py` B3.
 - Canlıda: `db/213_tekrar_itelemesi.sql`.
 
+## Canlıda hansı miqrasiyalar var? — `db/test/canli_yoxla.sql` (2026-09-18)
+
+**Sistemli problem.** Miqrasiyalar Supabase SQL Editor-a **əl ilə**
+yapışdırılır. Bir fayl atlanırsa **heç bir xəta çıxmır** — sadəcə həmin
+imkan işləmir və biz bunu aylar sonra, təsadüfən görürük.
+
+2026-09-18-də məhz belə oldu: `db/210` və `db/211` atlanmışdı. Nəticə:
+- şagird «Səhv dəftəri»ndəki 17 sualın **heç birini işləyə bilmirdi**
+  (mövzu sətri yox idi, düymə yox idi);
+- `db/211`-in abunə qapısı da qüvvədə deyildi — məşq pulsuz hesabda da
+  açıq qalmışdı, halbuki qərar əksinə idi.
+
+İkisi də səssiz idi. Nə panel xəta verirdi, nə də biz bilirdik.
+
+**Həll:** `db/test/canli_yoxla.sql` — bir sorğu, hər miqrasiya üçün bir
+sətir (`var_mi = true/false`). Supabase SQL Editor-a yapışdır, Run.
+`false` olan hər sətir işlədilməmiş fayldır.
+
+**Qayda:** yeni miqrasiya yazanda bu fayla **bir sətir əlavə et**. Barmaq
+izi kimi yalnız həmin faylda olan bir şey seç: funksiya gövdəsindəki
+unikal söz, yeni sütun və ya yeni cədvəl. Fayl əlavə etmək 30 saniyədir;
+atlanmış miqrasiyanı sonradan tapmaq bir gün apardı.
+
+**Həmçinin:** hər dəfə SQL işlədəndən sonra bunu bir dəfə işlət — «hamısı
+true» görmədən «canlıya çıxdı» demə.
+
 ## 216 — Səhv dəftəri: «Mövzunu seç» yazırdı, seçiləcək mövzu yox idi (2026-09-18)
 
 İstifadəçi (canlı ekran): kartda «17 sual gözləyir» yazırdı, mətn «Mövzunu
