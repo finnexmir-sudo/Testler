@@ -4114,6 +4114,88 @@ anon siyahısı dəyişmir.
 - Testlər: `smoke_gunluk_5.sql` §9–10, `e2e_gunluk.py` B3.
 - Canlıda: `db/213_tekrar_itelemesi.sql`.
 
+## db/214 — «Dostuna at»: sual paylaşımı (2026-09-18, YAZILIB — QOŞULMAYIB)
+
+**Vəziyyət: GÖZLƏYİR.** İstifadəçi qərarı: «dostuna göndəri hələki saxlayaq,
+sonra baxarıq». Kod yazılıb və testləri keçir, amma **heç yerə qoşulmayıb**:
+`db/run.sh`-da yoxdur, `db/05_grants.sql`-da yoxdur, şagird tətbiqində düymə
+yoxdur, `yoxla.sh`/`run_e2e.sh` siyahılarında yoxdur. Canlıda heç bir təsiri
+yoxdur — SQL işlədilməyib.
+
+Fayllar (hamısı repodadır, sadəcə passivdir):
+`db/214_sual_paylas.sql` · `s/index.html` + `s/app.css` + `s/app.js` ·
+`db/test/smoke_paylas.sql` · `test/e2e_paylas.py` · `test/_v2_paylas.py`
+
+### Nə idi
+
+Şagird testin nəticə ekranında bir sualın altında «Dostuna at» basır →
+`https://bil10.az/s/?k=<12 simvol>` linki WhatsApp-a düşür → dost girişsiz,
+kodsuz açır, o bir sualı həll edir, izahı görür, altda bir cümlə oxuyur:
+«Müəllimin bunu sinfə qura bilər — şagirdə pulsuzdur».
+
+Zəncir: şagird → dost → **dostun müəllimi** (şagird ödəmir, müəllim ödəyir).
+Uzun zəncirdir, ona görə güclü kanal deyil — ucuz mərcdir, mühərrik deyil.
+
+### Bank qapısı — bu hissə vacibdir
+
+Girişsiz açılan səhifə bank sualı göstərir; ehtiyatsız qurulsa bankı
+çıxarmaq üçün açıq qapıdır. Beş şərt:
+
+1. **Yalnız şagirdin özünün cavabladığı sual** paylaşıla bilər — ən güclü
+   şərt: paylaşım heç bir yeni məlumat açmır (`attempt_answers` / `mistakes`
+   / `daily_packs.answers`).
+2. Açar 9 bayt təsadüf → 12 simvol; linkdə sualın id-si yoxdur.
+3. Gündə 3 link (`app.share_daily_limit()`); eyni sual üçün ikinci dəfə
+   basanda köhnə link qayıdır, kvota yanmır.
+4. 7 gün ömür + bir link ən çoxu 50 dəfə açılır.
+5. `is_correct` səhifəyə getmir; düz variant yalnız cavabdan **sonra**
+   bildirilir. Şagirdin **tam adı** da getmir — yalnız `display_name`.
+
+RPC-lər: `rpc_share_make(token, qid)` · `rpc_share_open(k, ev)` (ev='click'
+bil10.az klikini sayır — ayrıca anon funksiya açmamaq üçün) ·
+`rpc_share_answer(k, option)`. Hər üçü anon olmalıdır → **anon siyahısı
+25 → 28** (`05_grants.sql` iki massivdə, `smoke_huquq.sql` üç yerdə).
+
+Ölçü `rpc_admin_huni` → `paylasim`: göndərildi → açıldı → cavabladı →
+bil10.az kliki → `profiles.src = 'sual'` qeydiyyatı.
+
+### Açmaq üçün nə lazımdır
+
+1. `db/run.sh`-a `214_sual_paylas.sql` sətri (213-dən sonra)
+2. `db/05_grants.sql` iki massivə üç RPC + `smoke_huquq.sql` 25 → 28
+3. `db/test/yoxla.sh`-a `smoke_paylas.sql`, `test/run_e2e.sh`-a `e2e_paylas.py`
+4. `bump.sh` siyahısına `s/index.html`
+5. Şagird tətbiqinə `shareQ()` + `bindShare()` və `[data-sq]` düymələri
+6. Supabase-də `214` + `05_grants.sql`
+
+### Niyə saxlanıldı — və bir xəbərdarlıq
+
+Şagird tətbiqinə qoşanda **nəticə ekranının HTML-i dəyişdi** və «Sualda
+səhv var?» formasının göndər düyməsi sındı (`e2e_student` tutdu:
+`.wrong [data-rsend]` görünmürdü). Yenidən qoşanda `.rlink[data-rq]`
+düyməsini `.qacts` sarğısına salmaq `bindWrongReports`-un delegasiyasını
+pozur — əvvəl onu düzəlt, sonra qoş. Dərs: nəticə ekranı üç axını daşıyır
+(cavablara baxış · sual şikayəti · paylaşım), birini dəyişəndə o birilər
+sınır.
+
+### Qalan risklər (açılanda nəzərə al)
+
+- **Spam:** uşaq linki sinif qrupuna atsa müəllim pis görünə bilər.
+  Gündə 3 məhdudlaşdırır, sıfırlamır. Lazım olsa müəlliməı «paylaşımı
+  bağla» açarı ver (`classes.free_practice` ilə eyni qəlib, ~1 saat).
+- **Müəllimin görmə boşluğu:** hər şey şagirdin telefonunda baş verir,
+  müəllimin xəbəri olmur. Valideyn şikayət etsə müəllim hazırlıqsız qalır.
+- **Səth:** 3 anonim RPC + bir açıq səhifə həmişəlik hücum səthidir.
+  Rahatladan yeganə şey 1-ci şərtdir.
+
+### Ucuz mexanika deyil — xətt harada
+
+Belə paylaşımı ucuz edən **göndərənə mükafat verilməsidir** («dostunu dəvət
+et, jeton qazan», «cavabı görmək üçün 3 nəfərə göndər»). Burada uşaq
+paylaşdığına görə **heç nə almır**, dostdan **heç nə istənmir** (ad, telefon,
+e-poçt, qeydiyyat yox), paylaşılan şey reklam yox, uşağın özünün həll etdiyi
+real sualdır. Wordle-in paylaşım kvadratı ilə eyni janr. Bu xətti keçmə.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.
