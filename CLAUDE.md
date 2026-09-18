@@ -3963,6 +3963,28 @@ görə «Bizə yazılanlar 1» nişanı sönmürdü.
   «profilində görür». Uğur mesajı `.fbc[data-who]`-dan: «Cavab göndərildi —
   şagird tətbiqini açanda görəcək».
 
+## db/209 — «Bu gün» kartı: müəllimin gündəlik bir dəqiqəsi (2026-09-18)
+
+Hunidə görünən problem: müəllim qayıtmır, çünki hər dəfə özü qərar verməlidir
+(nə göndərim, kimə?). İcmalda rəqəm lövhələri «neçə var» deyirdi, «indi nə et»
+demirdi. İndi zolağın altında bir sətir + bir toxunuş.
+
+- `rpc_home` → `bugun` (marker: `'paid', v_paid,`, db/200–201 kimi):
+  `dunen`, `bu_gun` (neçə ŞAGİRD işlədi, cəhd sayı yox), `susan` (7 gündür
+  heç nə etməyən aktiv şagird), `aktiv`, `verdim` (bu gün verilmiş tapşırıq).
+  Təqvim günü `Asia/Baku`. Pulsuzda da gəlir; ən zəif mövzu isə `topics`-dəndir
+  (db/201, yalnız abunəli).
+- `rpc_quick_assign(class_id, topic_id, count)`: test yığır **və** tapşırıq
+  kimi verir, bir çağırışda. Əvvəl üç addım idi: Test yığ → generator →
+  tapşırıq forması. Daxildə `rpc_generate_test` + `rpc_assign_test`.
+  Abunəsiz hesabda anlaşılan xəta (hazır bank abunə ilədir).
+- Panel `buGunKart(v)` → `#hBugun`, `.card.bugun`. Şagirdsiz hesabda görünmür.
+  Göndərəndən sonra düymə itir, yerinə «Göndərildi — mövzu · N sual · qrup»
+  və «Vərəqə bax».
+- Testlər: `smoke_bu_gun_kart.sql` (yoxla.sh siyahısına əlavə olundu),
+  `e2e_panel` (şagirdsiz hesabda kart yoxdur). Şəkil: `test/_v2_bugun.py`.
+- Canlıda: `db/209_gunluk_kart.sql`.
+
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
 Dəyişiklik canlıya çıxmazdan əvvəl istifadəçi klikləyib yoxlasın deyə.

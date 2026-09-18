@@ -438,6 +438,71 @@
       bitibse novbeti cagiris TEZE melumat alir (kes deyil - kohne
       siqnal gostermek olmaz).  */
   var HOME_REQ = null;
+  /*  209: «Bu gün» karti - muellimin gundelik bir deqiqesi.
+      Reqem lovheleri «neçə var» deyir; bu kart «indi nə et» deyir:
+      dunen kim isledi, kim susur, hansi movzudan test gonderilmeli.
+      Bir toxunus: rpc_quick_assign test yigir VE tapsiriq verir.
+      Sagirdsiz hesabda gorunmur - yeni muellimi casdirmasin.  */
+  function buGunKart(v) {
+    var box = $("hBugun");
+    if (!box) return;
+    var b = (v && v.bugun) || null;
+    if (!b || !(Number(b.aktiv) || 0)) { box.innerHTML = ""; return; }
+    var dunen = Number(b.dunen) || 0, susan = Number(b.susan) || 0;
+    var aktiv = Number(b.aktiv) || 0, verdim = Number(b.verdim) || 0;
+    //  en zeif movzu - Tehluke zonasi ile eyni menbe (201); pulsuzda null
+    var tp = (v.topics || [])[0] || null;
+
+    var sol = dunen
+      ? "<b>" + dunen + "</b> şagird dünən işlədi"
+      : (Number(b.bu_gun) ? "<b>" + Number(b.bu_gun) + "</b> şagird bu gün işlədi"
+                          : "Dünən heç kim işləmədi");
+    var sag = susan
+      ? '<s class="bgs">' + susan + " nəfər bir həftədir səssizdir</s>"
+      : (aktiv ? '<s class="bgs ok2">hamı işləyir</s>' : "");
+
+    var alt;
+    if (tp) {
+      alt = '<div class="bgact"><span><b>' + esc(tp.name) + "</b>" +
+        (tp["class"] ? " · " + esc(tp["class"]) : "") + " — " +
+        (Number(tp.weak_n) || 0) + " şagird zəif</span>" +
+        '<button class="btn sm go" id="bgSend" data-c="' + esc(tp.class_id) +
+          '" data-t="' + esc(tp.id) + '">' + ic("send") + "5 sual göndər</button></div>";
+    } else if (verdim) {
+      alt = '<div class="bgact"><span class="muted">Bu gün ' + verdim +
+        " tapşırıq göndərdiniz.</span></div>";
+    } else {
+      alt = "";
+    }
+
+    box.innerHTML = '<div class="card bugun">' +
+      '<div class="bghead">' + ic("cal") + "<span>" + sol + "</span>" + sag + "</div>" +
+      alt + '<div id="bgMsg"></div></div>';
+
+    on("bgSend", "click", function () {
+      var btn = $("bgSend");
+      if (busy || !btn) return;
+      setBusy("bgSend", true, "5 sual göndər");
+      sb.rpc("rpc_quick_assign", {
+        p_class_id: btn.getAttribute("data-c"),
+        p_topic_id: btn.getAttribute("data-t"), p_count: 5
+      }).then(function (r) {
+        r = r || {};
+        //  duyme itir - eyni movzudan iki defe gondermek menasizdir
+        var a = document.querySelector(".card.bugun .bgact");
+        if (a) {
+          a.innerHTML = '<span class="muted">Göndərildi — ' +
+            esc(r.topic || "") + " · " + (Number(r.count) || 5) + " sual · " +
+            esc(r["class"] || "") + "</span>" +
+            '<a class="btn sm ghost" href="#/t/' + esc(r.test_id || "") + '">Vərəqə bax</a>';
+        }
+      }).catch(function (e) {
+        setBusy("bgSend", false, "5 sual göndər");
+        var m = $("bgMsg"); if (m) m.innerHTML = msg("err", fail(e));
+      });
+    });
+  }
+
   function homeData() {
     if (HOME_REQ) return HOME_REQ;
     HOME_REQ = sb.rpc("rpc_home", {}).then(
@@ -1054,6 +1119,9 @@
           sagirdsiz qrup, testsiz qrup.  Olcu: 6 qeydiyyatdan 3-u panele
           girib qrup yaratmadi - «Qrup yarat» duymesi bes etmirdi.  */
       '<div id="onb" hidden></div>' +
+      //  209: «Bu gün» - muellimin gundelik bir deqiqesi.  Reqem yox,
+      //  EMELIYYAT: dunen kim isledi, kim susur, indi ne gondermeli.
+      '<div id="hBugun"></div>' +
       '<div id="hTop">' +
       /* Reqemler bir baxisda - her biri ayrica kart (Bolt eskizi) */
       '<div class="tiles" id="hTiles">' +
@@ -1285,6 +1353,7 @@
             (st.attempts ? pct(st.avg) + "%" : "—") + "</b><span>orta bal</span>" + tdAvg() + "</div>";
       }
 
+      buGunKart(v);
       bellDot((v.alerts ? v.alerts.length : 0) + (v.hw_alerts ? v.hw_alerts.length : 0));
       var ab = $("hAlerts");
       /*  201 (17.09): MOVZU uzre yigim ustde - «Faizlər · 7-ci sinif —

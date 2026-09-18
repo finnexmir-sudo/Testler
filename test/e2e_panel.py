@@ -221,6 +221,10 @@ with sync_playwright() as pw:
     pg.click("#btnSetup")
     pg.wait_for_selector("#btnGroup", timeout=8000)
     ok(True, "hesab yaranir, esas ekran acilir")
+    #  209: «Bu gün» karti - sagirdsiz hesabda GORUNMUR (yeni muellimi
+    #  casdirmasin); sagird elave olunandan sonra asagida yoxlanilir.
+    ok(pg.locator(".card.bugun").count() == 0, "sagirdsiz hesabda «Bu gün» karti yoxdur (209)")
+
     print("A1 · (160) Hədiyyə paket kartı")
     ok(pg.locator("#giftCard").count() == 1 and "hədiyyədir" in pg.inner_text("#giftCard"),
        "qeydiyyatdan sonra hediyye karti", pg.inner_text("#giftCard")[:60].replace("\n", " "))
