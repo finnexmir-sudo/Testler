@@ -69,29 +69,48 @@ revoke all on function public.rpc_student_mistakes(text, uuid, int) from public;
 grant execute on function public.rpc_student_mistakes(text, uuid, int) to anon, authenticated;
 
 -- ---------------------------------------------------------------------
---  Cavab yazmaq da abune ile (129-un govdesi + yoxlama)
+--  Cavab yazmaq da abune ile.
+--
+--  DIQQET (18.09): burada evvel MARKER usulu var idi - canlidaki
+--  funksiyanin metnini herfbeherf tapib evez edirdi.  Canlida ise metn
+--  bizimkinden ferqli cixdi (bosluq/setir sonu) ve fayl «markeri 1 defe
+--  olmalidir» deyib DAYANDI.  Indi govde TAM yazilir (db/175-in etdiyi
+--  kimi) - fayl tek basina, teleb olunan qeder defe islədilə bilər ve
+--  canlidaki metnden asili deyil.
 -- ---------------------------------------------------------------------
-do $$
+create or replace function public.rpc_student_mistake_answer(p_token text, p_question_id uuid, p_option_id uuid)
+returns jsonb
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
-  v_src  text := pg_get_functiondef('public.rpc_student_mistake_answer(text, uuid, uuid)'::regprocedure);
-  v_mark text := 'raise exception ''Sessiya bitib. Yeniden daxil ol.'' using errcode = ''28000'';
-  end if;';
-  v_add  text;
+  v_st  uuid := app.session_student(p_token);
+  v_ok  boolean;
+  v_exp text;
+  v_m   public.mistakes%rowtype;
 begin
-  if position('abune paketine daxildir' in v_src) > 0 then
-    raise notice '211 artiq tetbiq olunub, kecilir';
-    return;
+  if v_st is null then
+    raise exception 'Sessiya bitib. Yeniden daxil ol.' using errcode = '28000';
   end if;
-  if (length(v_src) - length(replace(v_src, v_mark, ''))) / length(v_mark) <> 1 then
-    raise exception '211: rpc_student_mistake_answer markeri 1 defe olmalidir';
-  end if;
-  v_add := v_mark || '
   --  211: sehv defteri abune paketine daxildir
   if not app.has_active_subscription(
        (select account_id from public.students where id = v_st)) then
-    raise exception ''Səhv dəftəri abune paketine daxildir.'' using errcode = ''42501'';
-  end if;';
-  execute replace(v_src, v_mark, v_add);
+    raise exception 'Səhv dəftəri abunə paketinə daxildir.' using errcode = '42501';
+  end if;
+  select * into v_m from public.mistakes where student_id = v_st and question_id = p_question_id;
+  if v_m.student_id is null or v_m.status = 'closed' or v_m.next_at > now() then
+    raise exception 'Bu sual defterde gozlemir.' using errcode = '22023';
+  end if;
+  select o.is_correct into v_ok from public.question_options o
+   where o.id = p_option_id and o.question_id = p_question_id;
+  if v_ok is null then
+    raise exception 'Variant tapilmadi.' using errcode = '22023';
+  end if;
+  select coalesce(q.explanation, '') into v_exp from public.questions q where q.id = p_question_id;
+  perform app.mistake_note(v_st, p_question_id, v_ok, true);
+  select * into v_m from public.mistakes where student_id = v_st and question_id = p_question_id;
+  return jsonb_build_object('correct', v_ok, 'explanation', v_exp, 'status', v_m.status,
+                            'next_at', v_m.next_at,
+                            'due', (select count(*) from public.mistakes
+                                     where student_id = v_st and status <> 'closed' and next_at <= now()));
 end $$;
 revoke all on function public.rpc_student_mistake_answer(text, uuid, uuid) from public;
 grant execute on function public.rpc_student_mistake_answer(text, uuid, uuid) to anon, authenticated;

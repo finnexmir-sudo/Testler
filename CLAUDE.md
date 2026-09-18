@@ -4114,6 +4114,44 @@ anon siyahısı dəyişmir.
 - Testlər: `smoke_gunluk_5.sql` §9–10, `e2e_gunluk.py` B3.
 - Canlıda: `db/213_tekrar_itelemesi.sql`.
 
+## Marker üsulu canlıda sındı — gövdəni TAM yaz (2026-09-18)
+
+`db/211` canlıda işlədiləndə dayandı:
+
+```
+ERROR: 211: rpc_student_mistake_answer markeri 1 defe olmalidir
+```
+
+**Nə baş verirdi.** Bir neçə miqrasiya mövcud funksiyanı «marker» ilə
+genişləndirirdi: `pg_get_functiondef()` ilə gövdəni oxu, içindəki bir
+mətn parçasını tap, onu əvəz et, `execute` et. Bu üsul **canlıdakı mətnin
+bizim fayldakı ilə hərfbəhərf eyni olmasını** tələb edir — boşluq, sətir
+sonu, hər şey. Canlıda fərqli çıxdı və fayl dayandı.
+
+Yaxşı tərəfi: səssiz sınmadı, açıq xəta verdi. Pis tərəfi: uzaqdan
+diaqnostika etmək lazım gəldi və istifadəçi gözlədi.
+
+**Qayda: mövcud funksiyanı dəyişirsənsə, gövdəni TAM yaz.** `db/175`
+bunu artıq etmişdi və səbəbini də yazmışdı («fayl TƏK BAŞINA tətbiq
+olunanda da doğru nəticə versin») — mən o dərsi təkrarlamadım.
+
+Tam gövdə yazmağın üstünlükləri:
+- canlıdakı mətndən **asılı deyil** (boşluq, sətir sonu fərq etmir);
+- **idempotentdir** — neçə dəfə işlədilsə eyni nəticə;
+- əvvəlki miqrasiya atlanıbsa belə düzgün nəticə verir;
+- oxuyan adam funksiyanın son halını **bir yerdə** görür.
+
+Yeganə xərci: fayl uzanır. Dəyər.
+
+Düzəldilənlər: `db/211` (rpc_student_mistake_answer) və `db/215`
+(rpc_admin_stats) — ikisi də artıq tam gövdə yazır, `pg_get_functiondef`
+işlətmir. Yoxlandı: canlıdakı kimi **fərqli mətnli** gövdə quruldu, fayl
+yenə keçdi; iki dəfə ardıcıl işlədildi, problem yoxdur.
+
+**Hələ marker işlədən fayllar:** `db/209` və `db/213` (`rpc_home`),
+`db/214` (qoşulmayıb). Onlar canlıda keçib, amma növbəti dəfə eyni şey
+təkrarlana bilər — toxunanda tam gövdəyə keçir.
+
 ## Canlıda hansı miqrasiyalar var? — `db/test/canli_yoxla.sql` (2026-09-18)
 
 **Sistemli problem.** Miqrasiyalar Supabase SQL Editor-a **əl ilə**
