@@ -1272,7 +1272,13 @@
           '<p class="note" style="margin:6px 0 10px">' +
             (due
               ? (paid
-                  ? "Mövzunu seç — bir neçə sual, hamısını düz cavablasan mövzu təmizlənir."
+                  /*  216: «Mövzunu seç» YALNIZ secilecek movzu setri
+                      varsa yazilir.  Canlida bir hal cixdi: 17 sual
+                      gozleyirdi, movzu setri ise bos idi - mətn olmayan
+                      bir seyi ved edirdi (istifadeci gordu).  */
+                  ? (tps.length
+                      ? "Mövzunu seç — bir neçə sual, hamısını düz cavablasan mövzu təmizlənir."
+                      : "Səhvlərin burada toplanıb. Bir neçəsini indi işlə.")
                   //  211: secmek olmur - «Mövzunu seç» yazmaq ziddiyyet idi
                   : "Səhvlərin mövzu-mövzu toplanır. Məşq müəlliminin abunəsi ilə açılır.")
               : (rev ? "Bir həftə sonra " + rev + " sual təkrar gələcək." : "Hamısı bağlanıb, afərin! 🎉")) + "</p>" +
@@ -1293,7 +1299,13 @@
               (paid ? "" :
                 '<p class="note mlockn">Səhvlərin itmir — abunə açılan kimi ' +
                   "buradan davam edəcəksən.</p>")
-            : "") +
+            /*  216: movzu setri yoxdursa sagird ILISIB QALIRDI - hec bir
+                duyme yox idi.  Movzusuz mesq onsuz da isleyir (p_topic
+                null), ona gore bir umumi duyme qoyulur.  */
+            : (due && paid
+                ? '<button class="btn go wide" data-mt="" data-mn="" ' +
+                    'style="margin-top:4px">' + Math.min(due, 10) + " sual işlə</button>"
+                : "")) +
         "</div>";
       Array.prototype.forEach.call(box.querySelectorAll("[data-mt]"), function (b) {
         b.addEventListener("click", function () {
@@ -1484,8 +1496,14 @@
     topTitle.textContent = "Səhv dəftəri";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     //  210: movzu verilibse yalniz ondan UC sual - yigcam, bitirile bilen
+    //  216: server hele kohne (tek parametrli) imzada ola biler - o halda
+    //  PostgREST «funksiya tapilmadi» deyir.  Sagird ilisib qalmasin deye
+    //  kohne cagirisa qayidiriq; movzu suzgeci olmur, mesq isleyir.
     sb.rpc("rpc_student_mistakes", {
       p_token: TOKEN, p_topic: tid || null, p_limit: tid ? 3 : 10
+    }).catch(function (e) {
+      if (!/PGRST202|not find|does not exist/i.test(fail(e) + " " + (e && e.code || ""))) throw e;
+      return sb.rpc("rpc_student_mistakes", { p_token: TOKEN });
     }).then(function (m) {
       MQ = { items: (m && m.items) || [], i: 0, ok: 0, bad: 0, tname: tname || "" };
       //  211: abunesiz hesabda server sual gondermir - sakit izah

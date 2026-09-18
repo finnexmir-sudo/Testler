@@ -4114,6 +4114,40 @@ anon siyahısı dəyişmir.
 - Testlər: `smoke_gunluk_5.sql` §9–10, `e2e_gunluk.py` B3.
 - Canlıda: `db/213_tekrar_itelemesi.sql`.
 
+## 216 — Səhv dəftəri: «Mövzunu seç» yazırdı, seçiləcək mövzu yox idi (2026-09-18)
+
+İstifadəçi (canlı ekran): kartda «17 sual gözləyir» yazırdı, mətn «Mövzunu
+seç — …» deyirdi, amma **aşağıda heç bir mövzu sətri yox idi**. Şagird
+üçün bu, iki dəfə pisdir: mətn olmayan bir şeyi vəd edir, və **heç bir
+düymə olmadığı üçün uşaq ilişib qalır** — dəftərdəki 17 sualı işləyə
+bilmir.
+
+Səbəb interfeysdə idi: mətn `due > 0` şərti ilə yazılırdı, mövzu sətirləri
+isə `topics` massivindən gəlirdi — ikisi bir-birindən asılı deyildi.
+`topics` boş qala bilər (məsələn sualların `status` sütunu `published`
+deyilsə; `due` isə `mistakes` cədvəlini heç bir join olmadan sayır).
+
+Üç düzəliş (yalnız `sagird/app.js`, SQL dəyişmir):
+1. «Mövzunu seç» **yalnız** `tps.length > 0` olanda yazılır; əks halda
+   «Səhvlərin burada toplanıb. Bir neçəsini indi işlə.»
+2. Mövzu sətri yoxdursa **ümumi «N sual işlə» düyməsi** çıxır
+   (`data-mt=""` → `p_topic = null`) — şagird ilişib qalmır.
+3. Server hələ **köhnə tək parametrli imzada** ola bilər (db/210
+   işlədilməyibsə). O halda üç parametrli çağırış PostgREST-dən
+   «funksiya tapılmadı» alır; indi `catch` onu tutub köhnə çağırışa
+   qayıdır. Mövzu süzgəci olmur, məşq isə işləyir.
+
+- Test: `test/e2e_defter_bos.py` — A: mövzu sətri boş (suallar `draft`),
+  mətn «Mövzunu seç» **demir**, düymə var · B: köhnə imza qurulur, geriyə
+  qayıdış işləyir və məşq açılır.
+- **Diaqnostika** (canlıda `topics` niyə boşdur): `rpc_student_mistakes`-in
+  imzasına bax — `(text)` qalıbsa db/210 + db/211 işlədilməyib;
+  `(text, uuid, integer)`-dirsə səbəb sualların `status`-udur.
+
+**Dərs:** eyni kartda mətn və siyahı ayrı-ayrı şərtdən gəlirsə, gec-tez
+bir-birini təkzib edirlər. Bu, üçüncü dəfədir (əvvəl «Bağla (3)», sonra
+abunəsiz haldakı «Mövzunu seç»). Mətni **göstərilən şeydən** törət.
+
 ## db/215 — «Bu gün · girən müəllim» sayğacı yanlış idi (2026-09-18)
 
 İstifadəçi: «Teranə bu gün giriş edib, amma yuxarıda 0 göstərir». Doğru
