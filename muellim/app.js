@@ -5946,6 +5946,14 @@
         if (box) box.innerHTML = fbCards(r || [], st2);
       }).catch(function () {});
     });
+    //  208: qutuya yazan kimi duyme «Cavabı göndər» olur, silinende geri
+    on("fbList", "input", function (ev) {
+      var ta = ev.target;
+      if (!ta || ta.tagName !== "TEXTAREA") return;
+      var card = ta.closest ? ta.closest(".fbc") : null;
+      var b = card && card.querySelector("[data-fbsave]");
+      if (b) b.textContent = ta.value.trim() ? "Cavabı göndər" : "Yadda saxla";
+    });
     on("fbList", "click", function (ev) {
       var b = ev.target.closest ? ev.target.closest("[data-fbsave]") : null;
       if (!b || busy) return;
@@ -5953,14 +5961,16 @@
       var card = b.closest(".fbc");
       var sel = card.querySelector("select"), ta = card.querySelector("textarea");
       var m = card.querySelector(".fbcm");
+      var WHO = card.getAttribute("data-who") || "müəllim panelini";
       busy = true; b.disabled = true;
       sb.rpc("rpc_admin_feedback_set", {
         p_id: id, p_status: sel.value, p_note: (ta.value || "").trim() || null
       }).then(function () {
         busy = false; b.disabled = false;
         card.classList.add("saved");
-        m.innerHTML = msg("ok", "Yadda saxlanıldı" +
-          (ta.value.trim() ? " — müəllim cavabı profilində görəcək." : "."));
+        m.innerHTML = msg("ok", ta.value.trim()
+          ? "Cavab göndərildi — " + WHO + " açanda görəcək."
+          : "Status yeniləndi.");
         var cur = document.querySelector("#fbF .chip.on");
         var fs = cur ? cur.getAttribute("data-fs") : "new";
         if (fs !== "all" && fs !== sel.value) {
@@ -5984,8 +5994,20 @@
     });
   }
 
+  /*  208: cavab KIME gedir - qutunun ipucu ve ugur mesaji ucun.
+      Sagird/valideyn oz tetbiqinde, muellim profilinde gorur.  */
+  function fbWho(r) {
+    return r.author_type === "student" ? "şagird"
+         : r.author_type === "parent" ? "valideyn" : "müəllim";
+  }
+  function fbPh(r) {
+    return r.author_type === "teacher" || r.author_type === "admin"
+      ? "Cavab — müəllim profilində görür"
+      : "Cavab — " + fbWho(r) + " tətbiqində görür";
+  }
+
   /* «Bizə yazılanlar» kartlari: kim · nov · sehife · tarix, metn,
-     status + cavab qeydi.  Cavab muellimin profilinde gorunur. */
+     status + cavab.  Cavab yazan terefe catir (208). */
   function fbCards(rows, st) {
     if (!rows.length) {
       return '<div class="card"><p class="muted" style="margin:0">' +
@@ -6005,7 +6027,11 @@
       if (r.author_type !== "teacher" && r.account) meta.push(r.account);
       if (r["class"]) meta.push(r["class"]);
       if (r.page) meta.push("ekran: " + r.page);
-      return '<div class="card fbc" data-id="' + esc(r.id) + '">' +
+      return '<div class="card fbc" data-id="' + esc(r.id) + '" ' +
+        //  208: cavab kime gedir - ugur mesaji ucun
+        'data-who="' + esc(r.author_type === "student" ? "şagird tətbiqini"
+                          : r.author_type === "parent" ? "valideyn tətbiqini"
+                          : "müəllim panelini") + '">' +
         '<div class="fbh"><span class="pill on">' + esc(fbKind(r.kind)) + "</span>" +
           "<b>" + esc(r.who || "") + "</b>" +
           '<span class="fbat">' + dateAz(r.at) + "</span></div>" +
@@ -6036,9 +6062,12 @@
             return '<option value="' + k + '"' + (k === r.status ? " selected" : "") + ">" +
               FB_ST[k] + "</option>";
           }).join("") + "</select>" +
-          '<textarea rows="2" maxlength="1000" placeholder="Cavab (müəllim profilində görür)">' +
+          //  208: duyme qeyd saxlamir, MESAJ gonderir - adi da onu desin
+          //  (bos qutuda yalniz status deyisir, onda «Yadda saxla»).
+          '<textarea rows="2" maxlength="1000" placeholder="' + esc(fbPh(r)) + '">' +
             esc(r.note || "") + "</textarea>" +
-          '<button class="btn sm" data-fbsave="' + esc(r.id) + '">Yadda saxla</button>' +
+          '<button class="btn sm" data-fbsave="' + esc(r.id) + '">' +
+            (r.note ? "Cavabı göndər" : "Yadda saxla") + "</button>" +
         "</div>") +
         '<div class="fbcm"></div>' +
       "</div>";

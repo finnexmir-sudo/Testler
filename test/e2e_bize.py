@@ -180,7 +180,9 @@ with sync_playwright() as pw:
     card.locator("textarea").fill("Növbəti buraxılışda çap düyməsi telefona da gələcək.")
     card.locator("[data-fbsave]").click()
     pg.wait_for_selector(".fbc .fbcm .ok", timeout=8000)
-    ok("profilində görəcək" in pg.inner_text(".fbc .fbcm .ok"), "yadda saxlanildi + izah")
+    #  208: duyme qeyd saxlamir, mesaj gonderir - mesaj da onu deyir
+    ok("müəllim panelini açanda görəcək" in pg.inner_text(".fbc .fbcm .ok"),
+       "cavab gonderildi - kime getdiyi yazilir", pg.inner_text(".fbc .fbcm .ok"))
     pg.wait_for_function("document.querySelectorAll('#fbList .fbc').length === 3", timeout=8000)
     ok("3" in pg.inner_text("#fbH"), "basliq sayi 3-e dusdu", pg.inner_text("#fbH"))
     pg.click("#fbF .chip[data-fs='planned']")
@@ -211,8 +213,14 @@ with sync_playwright() as pw:
     #  status «Yeni» qalir - server ozu «Baxilib»a kecirmelidir (208)
     scard.locator("select").select_option("new")
     scard.locator("textarea").fill("Salam Ayşə! Sağ ol — müəllimin daha asan test yığa bilər, ona çatdırdıq.")
+    #  qutuya yazan kimi duymenin adi deyisir (208)
+    ok(scard.locator("[data-fbsave]").inner_text().strip() == "Cavabı göndər",
+       "cavab yazilanda duyme «Cavabı göndər» olur",
+       scard.locator("[data-fbsave]").inner_text())
     scard.locator("[data-fbsave]").click()
     pg.wait_for_selector(".fbc .fbcm .ok", timeout=8000)
+    ok("şagird tətbiqini açanda görəcək" in pg.inner_text(".fbc .fbcm .ok"),
+       "ugur mesaji: cavab sagirde getdi", pg.inner_text(".fbc .fbcm .ok"))
     r = db("select status, admin_note n, reply_seen_at rs from public.feedback where author_type='student'", one=True)
     ok(r["status"] == "seen", "cavab yazilanda status ozu «Baxilib» olur (208)", r["status"])
     ok(r["n"].startswith("Salam Ayşə") and r["rs"] is None, "cavab yazildi, hele oxunmayib")

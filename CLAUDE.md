@@ -3956,6 +3956,12 @@ görə «Bizə yazılanlar 1» nişanı sönmürdü.
 - Testlər: `smoke_bize_yaz.sql` §9, `smoke_huquq.sql`, `e2e_bize.py` H2.
   Şəkil: `test/_v2_cavab.py`.
 - **Dərs:** yeni kanal açanda hər iki istiqaməti (yaz + oxu) eyni anda qur.
+- Düymənin adı (istifadəçi: «yadda saxlanıldı düz ad deyil, mesaja cavab
+  göndərilirsə göndər olar da»): qutuda mətn varsa «Cavabı göndər», boşdursa
+  «Yadda saxla» (orada yalnız status dəyişir); yazarkən `input` ilə dəyişir.
+  İpucu `fbPh(r)`: şagird/valideyn üçün «tətbiqində görür», müəllim üçün
+  «profilində görür». Uğur mesajı `.fbc[data-who]`-dan: «Cavab göndərildi —
+  şagird tətbiqini açanda görəcək».
 
 ## Önbaxış saytı — yeni.bil10.az (qurulmayıb, ehtiyat)
 
