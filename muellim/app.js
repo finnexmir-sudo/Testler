@@ -4116,7 +4116,7 @@
     g.fillText(d.teacher ? "Müəllim: " + d.teacher : "", 72, H - 100);
     g.fillStyle = "#98a1b3"; g.font = "500 28px " + F;
     //  204: sekil WhatsApp-da valideynler arasinda gezir - unvan gorunsun
-    g.fillText("bil10.az · şagird və valideynə pulsuz", 72, H - 52);
+    g.fillText("bil10.az · şagird ödəmir", 72, H - 52);
   }
   function fitText(g, t, maxW) {
     while (t.length > 4 && g.measureText(t).width > maxW) t = t.slice(0, -2) + "…";
@@ -5737,8 +5737,8 @@
       //  3 - qayda
       "<h2>Qayda</h2>" +
       '<div class="card tight"><ul class="rul" id="qayda">' +
-        "<li><b>Şagird və valideyn — həmişə pulsuz.</b> Onlardan heç vaxt " +
-          "ödəniş istənmir.</li>" +
+        "<li><b>Şagird və valideyn ödəmir.</b> Qrupunuzdakı şagirddən və " +
+          "onun valideynindən ödəniş istənmir.</li>" +
         "<li>Müəllim üçün pilləli paket yoxdur — <b>yalnız hər şagird üçün " +
           azn(per) + " / ay</b>. Şagird sayına məhdudiyyət qoyulmur.</li>" +
         "<li><b>Yeni müəllimə ilk ay hədiyyədir</b> — eyni məhsul, " +

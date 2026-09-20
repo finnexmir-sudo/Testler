@@ -3,7 +3,10 @@
 --  «necədir» (təhlil) abunə ilə
 --
 --  ISTIFADECI QERARI (2026-09-09 muzakiresi):
---   * Valideyn HEC VAXT odemir - bu ved deyismir.  Odeyen muellimdir.
+--   * Valideyn ODEMIR - odeyen muellimdir.  (2026-09-20 duzelis:
+--     «HEMISE/HEC VAXT» sozu verilmir.  Cerceve: MUELLIM vasitesile
+--     gelirse odemir; gelecekde MUSTEQIL elave imkanlar isteyirse
+--     odenisli ola biler.  Bax: CLAUDE.md «Satis ve model qerarlari».)
 --   * Muellimi valideyne hesabat vermek eziyyetinden qurtaran hisse
 --     abunenin icinde olsun: valideyn 1-2 ay rahatliga oyresir, abune
 --     bitende hemin hisse baglanir ve DAVAM ETMEYI VALIDEYN ISTEYIR.

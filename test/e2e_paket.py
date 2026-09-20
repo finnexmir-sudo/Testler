@@ -100,7 +100,9 @@ with sync_playwright() as pw:
        pg.locator("#qayda li").count())
     #  172: mebleg gorunur - yaninda "hele odenis yoxdur" ACIQ durmalidir
     ok("beta dövrü bitdikdən sonra" in mt, "beta qeydi qaydada var")
-    ok("həmişə pulsuz" in mt, "sagird/valideyn pulsuzdur yazilir")
+    #  2026-09-20: «hemise/hec vaxt» vedi cixarildi - indiki zaman
+    ok("şagird və valideyn ödəmir" in mt.lower(), "sagird/valideyn odemir yazilir")
+    ok("həmişə" not in mt.lower(), "«hemise» vedi verilmir")
     ok("ilk ay hədiyyədir" in mt, "hediyye ayi yazilir")
     #  Muellim neyi ITIRECEYINI evvelceden gormelidir (istifadeci teleb etdi)
     ok(pg.locator(".cmp .cc").count() == 2, "pulsuz hedd / abune muqayisesi var",
