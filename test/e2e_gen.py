@@ -195,6 +195,26 @@ with sync_playwright() as pw:
     ok(pg.locator(".popt.ok").count() == 8, "her sualda duzgun cavab isarelidir",
        pg.locator(".popt.ok").count())
     ok("öz sualınız" in pg.inner_text(".paper"), "sualin mensubiyyeti gorunur")
+    #  Qrupsuz yigilan test veraqda qalirdi - teyinat karti asagida idi
+    #  (bir muellim 16 gun test gondere bilmedi).  Indi ust setirde
+    #  «Qrupa ver» var ve teze testde ekran ozu ora sürüşür.
+    row = pg.inner_text(".prnrow")
+    ok(row.strip().startswith("Qrupa ver"), "«Qrupa ver» duymesi setirde birincidir",
+       row.replace("\n", " · ")[:60])
+    ok(pg.locator("#pAsgH").count() == 1, "«Qrupa teyin et» basligi lovberlidir")
+    ok("Test hazırdır. İndi onu qrupa verin" in pg.inner_text("#main"),
+       "teze testde yonlendirici mesaj var")
+    pg.wait_for_timeout(900)
+    ok(pg.evaluate("() => { var r = document.getElementById('pAsgH')"
+                   ".getBoundingClientRect(); return r.top >= -5 && r.top < innerHeight; }"),
+       "ekran ozu teyinat kartina sürüşüb")
+    pg.reload(); pg.wait_for_selector("#pAsgH", timeout=8000)
+    ok("Test hazırdır. İndi onu qrupa verin" not in pg.inner_text("#main"),
+       "mesaj bir defelikdir - ikinci acilisda cixmir")
+    pg.click("#btnGoAsg"); pg.wait_for_timeout(900)
+    ok(pg.evaluate("() => { var r = document.getElementById('pAsgH')"
+                   ".getBoundingClientRect(); return r.top >= -5 && r.top < innerHeight; }"),
+       "duyme basilanda teyinat kartina aparir")
     TID = db("select id::text i from public.tests where owner_type='educator'",
              one=True)["i"]
     ok(db("select count(*) n from public.test_questions where test_id=%s",

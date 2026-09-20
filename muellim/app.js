@@ -5273,6 +5273,11 @@
      SECILMIS gelir - muellim yalniz son tarixi qoyub gonderir.
      PICKNEW bir defelikdir: ekran cizilen kimi silinir. */
   var PICKNEW = "";
+  /*  Generatordan QRUPSUZ yigilan test veraq ekranina dusur.  Orada
+      teyinat karti asagida qalirdi - bir muellim 16 gun test
+      gondere bilmedi (a44785271), biri WhatsApp-da sorusdu (ISRA).
+      Nisan bir defelikdir: veraq cizilen kimi silinir.  */
+  var MADE = "";
 
   function genForClass(g) {
     var f = genFilter();
@@ -7711,6 +7716,7 @@
           goTo("#/a/" + gid);
           return;
         }
+        MADE = v.test_id;
         nav("#/t/" + v.test_id);
       })
       .catch(function (e) {
@@ -8034,7 +8040,8 @@
       }).catch(function () { return []; })
     ]).then(function (res) {
       if (!live()) return;
-      drawPaper(res[0] || {}, res[1] || [], res[2] || [], res[3] || []);
+      var fresh = MADE === id; MADE = "";
+      drawPaper(res[0] || {}, res[1] || [], res[2] || [], res[3] || [], fresh);
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
@@ -8147,7 +8154,7 @@
     setTimeout(off, 2000);
   }
 
-  function drawPaper(t, classes, asgs, students) {
+  function drawPaper(t, classes, asgs, students, fresh) {
     students = students || [];
     //  Yalniz QRUP teyinatlari qrupu secimden cixarir; ferdi teyinat
     //  cixarmir - hemin qrupun basqa sagirdine de vermek olar.
@@ -8180,6 +8187,10 @@
           (done ? " · " + done + " şagird işləyib" : "") + "</p>" +
         '<div class="spacer"></div>' +
         '<div class="prnrow">' +
+          //  Esas addim birinci durur: cap/paylasma ondan sonra
+          (diag || !freeCls.length ? "" :
+            '<button class="btn sm go" id="btnGoAsg">' + ic("clip") +
+              "Qrupa ver</button>") +
           '<button class="btn sm" id="btnPrn">' + ic("print") +
             "Çap / PDF</button>" +
           '<button class="btn sm ghost" id="btnPrnK">' + ic("key") +
@@ -8244,7 +8255,11 @@
                 : "") +
             "</p>" +
           "</div>"
-        : "<h2>Qrupa təyin et</h2>" +
+        : '<h2 id="pAsgH">Qrupa təyin et</h2>' +
+          (fresh && freeCls.length
+            ? msg("ok", "Test hazırdır. İndi onu qrupa verin — şagird " +
+                        "dərhal öz siyahısında görəcək.")
+            : "") +
       '<div class="card">' +
         (given.length || Object.keys(soloN).length
           ? '<div class="pgiven">' +
@@ -8328,6 +8343,21 @@
 
     on("btnBack", "click", function () { goBack("#/gen"); });
     bindReportLinks();
+
+    function goAsg(focus) {
+      var h = $("pAsgH");
+      if (h) {
+        //  Yapisqan zolagin altinda qalmasin - onun hundurluyu qeder geri
+        var bar = document.querySelector(".top");
+        var off = (bar ? bar.getBoundingClientRect().height : 0) + 12;
+        var y = h.getBoundingClientRect().top + window.scrollY - off;
+        window.scrollTo({ top: y < 0 ? 0 : y, behavior: "smooth" });
+      }
+      if (focus && $("pCls")) $("pCls").focus();
+    }
+    on("btnGoAsg", "click", function () { goAsg(true); });
+    //  Teze yigilmis testde muellimi elle axtarmaga qoymuruq
+    if (fresh && freeCls.length) setTimeout(function () { goAsg(false); }, 350);
 
     on("btnPrn",  "click", function () { paperPrint(t, false); });
     on("btnHemkar", "click", function () { hemkarShare(t, qs.length); });
