@@ -4526,3 +4526,157 @@ məsələdir. Sonra bu format bütün fənlərə (təkcə tarixə yox) mövcud
 (şəkilli/analitik) ayrı, sonrakı qərardır — `media_url` heç bir
 ekranda render olunmur, ona görə real frontend işi tələb edir; hələ
 başlanmayıb.
+
+---
+
+## Satış və model qərarları (2026-09-20)
+
+Mənbə: öz söhbətimiz + Claude/Gemini/GPT rəyləri (iki ayrı dövr: birincisi
+«ilk ödəyən müştəri», ikincisi «şagirdə ayrıca abunə»).
+
+### Rəqəmlər (bu qərarların əsası)
+
+- 13 gün: 114 ziyarətçi (gündə ~9), 26-sı nümunəyə basıb — **23%**.
+  Ana səhifə normadan yaxşı işləyir; problem trafik həcmidir.
+- 30 gün: 16 fərqli adam qeydiyyat. 7-si e-poçt təsdiqi ucbatından heç
+  vaxt girə bilməyib (2-si ünvanı səhv yazıb: gemail.com, gamil.com).
+  Təsdiq 17 sentyabrda söndürülüb, yazı səhvi tutucusu canlıdır.
+- Hesabı olan 9 müəllimdən: 4-ü qrup qurmayıb, 1-i şagird əlavə etməyib,
+  1-i (3 qrup + 5 şagird) **16 gündür test göndərə bilməyib**, 2-si bütün
+  yolu keçib.
+- Müştəri şagirdləri: hamısı **dəqiq 10 cavab, bir dəfə**. Yəni test axını
+  uçdan-uca işləyir (9 şagirddə), dayanan şey **ikinci testdir** — onu
+  göndərən müəllimdir.
+- Öz-özünə mövzu məşqi: 11 şagirddən **4-ü** edib (36%), amma **3-ü bir
+  daha qayıtmayıb**. Ayşə 135 cavab — hamısı BİR gündə.
+  DİQQƏT: `app.practice_daily_limit()` = 20 yalnız ABUNƏSİZ hesabda
+  tətbiq olunur; hədiyyə abunəsi varsa limitsizdir. «135 bir gündə ola
+  bilməz» mühakiməsi səhvdir.
+
+### Qərarlar
+
+1. **Şagird/valideynə ayrıca abunə — DONDURULDU** (atılmadı).
+   Üç müstəqil rəy + mən: eyni nəticə. Səbəblər: 250 xırda ödəyən vs 25
+   müəllim (tək adam idarə etməz); kart saxlanmır/avtomatik təkrar yoxdur →
+   2 AZN aylıq ikinci ay yenilənməz; üç tərəfli satış (dəyəri şagird hiss
+   edir, valideyn ödəyir, müəllim tanıdır); **və əsası — müəllimə satış
+   hələ SINANMAYIB** (0 zəng; 600 mesaj Instagram SƏHİFƏLƏRİNƏ gedib,
+   müəllimlərin özünə yox).
+   Qayıdış şərti: ya 20+ ödəyən müəllim, ya 30-40 zəngdən sonra 0 ödəniş.
+
+2. **«Həmişə pulsuz» vədi mətnlərdən çıxarılır**, pulsuz yol qalır.
+   Yeni çərçivə: *müəllim vasitəsilə gəlirsə pulsuz; müstəqil əlavə
+   imkanlar istəyirsə ödənişli.* Dəyişiləsi yerlər:
+   - `index.html:703` `<span class="tbadge">Həmişə pulsuz</span>`
+   - `index.html:752` «Şagird və valideyn üçün həmişə pulsuz.»
+   - `index.html:43,50` og/twitter description
+   - `muellim/app.js:5740` «Şagird və valideyn — həmişə pulsuz. Onlardan
+     heç vaxt ödəniş istənmir.» ← ən bağlayıcı vəd, mütləq dəyişsin
+   - `muellim/app.js:4119` kətan mətni «şagird və valideynə pulsuz»
+   `db/174_valideyn_abune.sql` başlığındakı «Valideyn HEÇ VAXT ödəmir»
+   qeydi də yenilənməlidir.
+
+3. **Pulsuz 5 şagird həddi** (`app.free_seat_limit()`): götürülməsi
+   qərarlaşdırıldı, AMMA ödəniş qəbul edə bilməmişdən əvvəl yox.
+   Satış mətnlərindən «5 şagirdə qədər ödənişsiz» cümləsi indi çıxır.
+   Hədiyyə bitəndə qayda dəyişmir: **KƏSMİRİK, AZALDIRIQ** — məlumat
+   görünən qalır, yeni tapşırıq göndərmək bağlanır.
+
+4. **Ödəniş infrastrukturu** — VÖEN/POS indi lazım DEYİL (istifadəçi
+   qərarı, razılaşdırıldı). İlk 5 müştəri kart köçürməsi ilə ödəyir,
+   paket əl ilə açılır. Müntəzəm gəlir başlayanda rəsmiləşdirmə.
+
+### Növbəti 30 günün ölçüsü
+
+Ziyarətçi sayı DEYİL. **Neçə müəllim öz real qrupuna real test göndərdi.**
+Hədəf: 5.
+
+### Siyahı (sıra ilə, hələ EDİLMİR)
+
+1. **«Bu testi qrupa ver» düyməsi** — generatorda test yığılandan sonra
+   qrupa göndərmə yolu görünmür (`PICKNEW` mesajı yalnız qrupdan
+   girildikdə çıxır). İki müşahidə: a44785271 (16 gün) + İSRA (WhatsApp).
+   Həm sizin datanız, həm iki müstəqil rəy eyni yeri göstərir. 1 gün.
+2. **Hədiyyə bitəndə görünən ekran** (kəsmə yox, azaltma). Yuxarıdakı
+   3-cü qərardan asılıdır.
+3. **Xatırlatma / push bildiriş (Duolingo kimi).** ƏVVƏL PULSUZ SINAQ:
+   müəllim WhatsApp qrupuna bir xatırlatma yazsın, `practice_days`-ə
+   baxaq — 4 uşaqdan 3-ü qayıdırsa push qurmağa dəyər, 0-1 qayıdırsa
+   dəyməz. Texniki vəziyyət: `sw.js`-də push işləyicisi YOXDUR, sıfırdan
+   qurulur. iPhone-da yalnız «Ana ekrana əlavə et» edilibsə işləyir
+   (iOS 16.4+); Android/Chrome-da quraşdırmadan da işləyir. Lazımdır:
+   VAPID açarları, `push_subs` cədvəli, Supabase Edge Function + pg_cron
+   (təmiz SQL-də Web Push mümkün deyil — JWT imzası + yük şifrələməsi).
+   2-3 gün. Uşaq olduğu üçün `consents` işə salınmalı; məxfilik mətni
+   push provayderini (Google/Apple) yazmalıdır.
+4. **Rüblük sınaq + reytinq (valideynə satış).** DİQQƏT: rüb sınağının
+   özü ARTIQ VAR — `db/135_kurikulum_paketi.sql`, «Dərs paketi: isinmə ·
+   ev tapşırığı · rüb sınağı», keçilmiş mövzulardan 20 sual, 7 gün,
+   `plan_exams` təkrarın qarşısını alır. Çatışmayan: kross-sinif reytinqi,
+   sabit tarix, birbaşa satış. Reytinq 200+ eyni vaxtda iştirakçı tələb
+   edir (11 nəfərin içində «3-cü» heç nə demir) + nəzarətsiz onlayn
+   imtahanın sırası inandırıcı deyil. Ona görə əvvəlcə **müəllimə**
+   satılır (sinfin rüblük qiymətləndirməsi), valideyn versiyası sonra.
+5. **Şagird qeydiyyatı / valideyn qeydiyyatı + yarışlar-oyunlar.**
+   1-ci qərarla dondurulub. Pulsuz sınağı: istifadəçinin öz iki uşağı
+   iki həftə HEÇ NƏ DEMƏDƏN buraxılsın; `practice_days`-ə baxılsın.
+   Öz uşağı girmirsə, özgə uşağı heç girməyəcək.
+
+### Satış qaydaları (üç rəyin ortaq nəticəsi)
+
+- Səhifələrə yox, **müəllimin özünə** yaz (riyaziyyat repetitoru,
+  dil müəllimi, hazırlıq müəllimi). Səhifə reklam alır, müəllim dərs keçir.
+- «Platformama bax» yox, **«ilk testinizi birlikdə keçirək»**.
+- İlk 10 müəllimə **əl ilə quraşdırma** (ekran paylaşımı, şagird adlarını
+  özün yaz, ilk testi özün göndər). Bu, xidmət deyil — ölçmə üsuludur.
+  QEYD: istifadəçi əvvəl bunun əksini demişdi («biz hazırlamayaqda, özü
+  edər»); üç rəy də bu qərara qarşı çıxdı.
+- Elan formatı (maddələr, 👉, emoji) soyuq şəxsi yazışmada işləmir —
+  «reklam» kimi oxunur, bir nəfər məhz buna görə əsəbləşdi. Salam +
+  cümlə formalı mətn işləyir.
+- Rədd edilən təklif (Gemini, iki dəfə): «müəllim valideynlərdən uşaq
+  başına 1 AZN yığsın». Müəllimi pul yığana çevirir, valideynlə
+  münasibətini korlayır.
+
+### 6. Valideyn məhsulu — ödəniş + uşağın gündəliyi (2026-09-20, istifadəçi fikri)
+
+Bu, 5-ci bənddəki «valideyn qeydiyyatı»nın konkretləşmiş halıdır və
+ondan fərqli olaraq **müəllimdən asılı deyil** — valideyn özü doldurur.
+
+İstifadəçinin təsviri:
+- Valideyn öz uşağı üçün ödəniş edir
+- **Uşağın gündəliyini yaratmaq imkanı**: hansı gün hansı dərslər
+- Valideyn «bu gün nə keçdiniz?» deyə bilər, çünki fənləri artıq bilir
+- Valideyn uşağına test verə bilir
+- Nəticə: valideyn uşağının təhsili ilə maraqlanan tərəfə çevrilir
+
+**Niyə bu, 2 AZN-lik məşq abunəsindən güclüdür:** valideynə tətbiqi hər gün
+açmaq üçün səbəb verir. Əvvəlki təklifdə valideyn heç nə etmirdi, sadəcə
+ödəyirdi — ona görə ikinci ay yadından çıxardı. Gündəlik isə gündəlik
+əməliyyatdır.
+
+**Nə qədəri artıq var:**
+- `class_schedule` (db/177) — həftəlik cədvəl, AMMA sinfə bağlıdır
+  (`class_id`), müəllim qurur. Valideynin qurduğu MƏKTƏB cədvəli yoxdur.
+- `lesson_changes` — dərsin ləğvi/köçürülməsi. Eyni şəkildə sinfə bağlı.
+- Valideyn ekranında «**Keçilən dərslər**» bölməsi var — amma müəllimin
+  «Keçildi» işarəsindən doldurulur, valideyn yaza bilmir.
+- «Valideyn uşağına test versin» — müəllimin tapşırıq axınının tək
+  şagirdlik variantıdır; server tərəfi əsasən hazırdır, valideyn
+  ekranında UI yoxdur.
+
+**Çatışmayan (əsl iş):**
+- Valideynin özünün yaratdığı uşaq (müəllimsiz) — `students.account_id`
+  indi müəllimin hesabına bağlıdır. Bu, 1-ci qərardakı məlumat modeli
+  məsələsinin elə özüdür.
+- Valideyn tərəfdə cədvəl redaktoru (məktəb dərs cədvəli, fənn adları)
+- Valideyn tərəfdə test seçib göndərmə ekranı
+- Valideyn ödənişi (audience='parent' paketləri `04_seed.sql`-də var:
+  valideyn-aylıq 990, valideyn-illik 9900 — rəqəmlər yer tutucudur)
+
+**Vəziyyət:** 1-ci qərarla birlikdə dondurulub. Açılış şərti eynidir:
+ya 20+ ödəyən müəllim, ya 30-40 zəngdən sonra 0 ödəniş.
+Pulsuz sınağı da eynidir — istifadəçinin öz iki uşağı, iki həftə,
+heç nə demədən.
+
+**Pulsuz/ödənişli çərçivəsi:** istifadəçi düşünüb deyəcək (2026-09-20).
