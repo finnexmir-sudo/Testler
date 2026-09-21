@@ -129,3 +129,6 @@ python3 test/e2e_vaxt.py
 echo
 echo "35/35 oz testini sil / adini deyis"
 python3 test/e2e_testsil.py
+echo
+echo "36/36 tovsiye kodu - kim kimi getirdi"
+python3 test/e2e_tovsiye.py

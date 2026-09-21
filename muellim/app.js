@@ -360,9 +360,17 @@
 
       //  204: ana sehifedeki ?src=... nisani (visit.js sessiyada saxlayir)
       //  qeydiyyatla gedir - hunide «haradan geldi» gorunur
-      var src = "";
+      var src = "", ref = "";
       try { src = sessionStorage.getItem("bil10_src") || ""; } catch (e) {}
-      var p = isUp ? sb.signUp(email, pass, fname, src) : sb.signIn(email, pass);
+      /*  217: tovsiye kodu - kim getirdi (profiles.ref_by).  Nisan
+          localStorage-dedir ve 30 gun yasayir (assets/visit.js).  */
+      try {
+        var rj = JSON.parse(localStorage.getItem("bil10_ref") || "null");
+        if (rj && rj.c && Date.now() - (Number(rj.t) || 0) < 30 * 24 * 3600 * 1000) {
+          ref = String(rj.c);
+        }
+      } catch (e) {}
+      var p = isUp ? sb.signUp(email, pass, fname, src, ref) : sb.signIn(email, pass);
       p.then(function (d) {
         if (isUp && (!d || !d.access_token)) {
           setBusy("btnAuth", false, "Hesab yarat");
@@ -6014,10 +6022,12 @@
         //  180: suret olcusu (kohne bazada yoxdursa kart cixmir)
         sb.rpc("rpc_admin_suret", { p_days: 30 }).catch(function () { return null; }),
         //  202: aktivlesme hunisi (kohne bazada yoxdursa kart cixmir)
-        sb.rpc("rpc_admin_huni", { p_days: 30 }).catch(function () { return null; })
+        sb.rpc("rpc_admin_huni", { p_days: 30 }).catch(function () { return null; }),
+        //  217: kim kimi getirdi (kohne bazada yoxdursa bolme cixmir)
+        sb.rpc("rpc_admin_ref", {}).catch(function () { return null; })
       ]).then(function (r) {
         if (!live()) return;
-        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4], r[5], r[6], r[7], r[8]);
+        drawAdmin(r[0] || {}, r[1] || [], r[2] || [], r[3] || [], r[4], r[5], r[6], r[7], r[8], r[9]);
       }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
@@ -6141,7 +6151,7 @@
     "</div>";
   }
 
-  function drawAdmin(st, rows, reps, fbs, qs, vs, bz, sr, hn) {
+  function drawAdmin(st, rows, reps, fbs, qs, vs, bz, sr, hn, rf) {
     var plans = (st.plans && st.plans.length) ? st.plans
       : [{ slug: "sagird-basi", name: "Hər şagird üçün" }];
     bandHead({
@@ -6203,6 +6213,10 @@
 
       //  ------------------------------------------------------ SURET
       (sr ? suretSection(sr) : "") +
+
+      //  --------------------------------------------------- TOVSIYE
+      //  217: hediyye qerari saya baglidir - siyahi elə odur.
+      refSection(rf) +
 
       //  --------------------------------------------------- HESABLAR
       '<div class="card tight">' +
@@ -6745,6 +6759,25 @@
       uzun çəkdi».  Qerar veren reqem odur, ortalama deyil.
       Hedler: 2 s-e qeder yaxsi, 4 s-e qeder dozulen, ondan sonra
       muellim «yavas» deyir (Google-un LCP hedleri de bu araliqdadir). */
+  /*  217: TOVSIYELER - kim kimi getirdi.  «Hemkarina gonder» linkinde
+      muellimin kodu gedir; buradaki say hediyye ucun yeganə dogru
+      menbedir.  Hec kim getirmeyibse bolme cixmir - bos kart yerdir.  */
+  function refSection(rf) {
+    if (!rf || !rf.length) return "";
+    return '<div class="card tight"><h2 class="ch">Tövsiyələr</h2>' +
+      '<p class="muted" style="margin:0 0 10px">«Həmkarına göndər» linki ilə ' +
+        "gələnlər. Hədiyyə qərarı bu siyahıya görə verilir.</p>" +
+      '<div class="card pad0">' + rf.map(function (r) {
+        var kim = (r.kim || []).map(function (g) {
+          return esc(g.ad || "") + (g.gun ? " · " + dateAz(g.gun) : "");
+        }).join(" · ");
+        return '<div class="trow"><div class="g"><b>' + esc(r.ad || "") + "</b>" +
+          "<i>" + esc(kim) + "</i></div>" +
+          '<span class="pctv pvh">' + (Number(r.n) || 0) + "</span></div>";
+      }).join("") + "</div>" +
+      '<div class="spacer"></div>';
+  }
+
   function suretSection(sr) {
     var n = Number(sr.n) || 0;
     if (!n) {
@@ -8251,17 +8284,31 @@
   /*  204: «Həmkarına göndər» - hazir metn + link.  Telefonda sistem
       paylasma penceresi (WhatsApp ordan secilir), masaustunde metn
       buferə kopyalanir.  Sebeke sorgusu yoxdur.  */
+  /*  217: linkde muellimin OZ tovsiye kodu gedir - «kim getirdi»
+      bilinsin.  Kod serverden alinir (rpc_ref_link); alinmasa link
+      kodsuz gedir - paylasma dayanmir.  */
   function hemkarShare(t, n) {
-    var url = "https://bil10.az/?src=hemkar";
+    var box = $("hemkarMsg");
+    function said(h) { if (box) box.innerHTML = h; }
+    said('<p class="muted" style="margin:8px 0 0">Link hazırlanır…</p>');
+    sb.rpc("rpc_ref_link", {}).catch(function () { return null; })
+      .then(function (r) { hemkarPaylas(t, n, r || {}); });
+  }
+  function hemkarPaylas(t, n, r) {
+    var url = "https://bil10.az/?src=hemkar" + (r.code ? "&r=" + r.code : "");
+    var say = Number(r.n) || 0;
     var txt = "«" + (t.title || "Test") + "» — " + (t.subject || "") + (t.level ? ", " + t.level : "") +
       ", " + n + " sual. Bil10-da hazır bankdan bir dəqiqəyə yığdım, şagird telefonda işləyir, " +
       "nəticə və zəif mövzular özü gəlir. Öz qrupunda yoxla: " + url;
     var box = $("hemkarMsg");
-    function said(h) { if (box) box.innerHTML = h; }
+    //  Neçə həmkar gəlib - paylaşmağın qarşılığı görünsün
+    var alt = say ? '<p class="muted" style="margin:8px 0 0">Bu linklə indiyə qədər <b>' +
+        say + "</b> həmkar qeydiyyatdan keçib.</p>" : "";
+    function said(h) { if (box) box.innerHTML = h + alt; }
     if (navigator.share) {
       navigator.share({ text: txt }).then(function () {
-        said(msg("ok", "Göndərildi. Həmkarınız linkə keçəndə mənbə «həmkar» kimi sayılır."));
-      }).catch(function () {});
+        said(msg("ok", "Göndərildi. Həmkarınız linkə keçəndə sizin adınıza yazılır."));
+      }).catch(function () { said(""); });
       return;
     }
     var done = function () {

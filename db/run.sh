@@ -135,6 +135,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 212_gunluk_5_sual.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 213_tekrar_itelemesi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 215_giren_muellim_saygaci.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 216_teze_sagird_susmur.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 217_tovsiye_kodu.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

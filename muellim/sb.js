@@ -198,10 +198,12 @@
     session: function () { return S; },
     loadSession: loadSession,
 
-    signUp: function (email, password, fullName, src) {
+    signUp: function (email, password, fullName, src, ref) {
       //  204: src - linkdeki ?src=... nisani, profiles.src-e dusur (trigger)
+      //  217: ref - linkdeki ?r=... tovsiye kodu, profiles.ref_by-a dusur
       var data = { full_name: fullName || "" };
       if (src) data.src = String(src).slice(0, 20);
+      if (ref) data.ref = String(ref).slice(0, 12);
       return request("/auth/v1/signup", {
         method: "POST", auth: false,
         body: { email: email, password: password, data: data }

@@ -4759,3 +4759,35 @@ AI-ların TƏKLİF ETDİYİ, AMMA ARTIQ MÖVCUD OLAN (onlar bilmirdi):
 «Təkrar/düzəliş testi» (var, db/109) · cavab vərəqi PDF (var; QR-kodlu
 OMR hissəsi yenidir) · «Şagird şagirdə test» (= db/214, yazılıb,
 qoşulmayıb) · «Bu həftə nə dəyişdi» (siyahıda «Öz rekordun», qurulmayıb).
+
+---
+
+## TÖVSİYƏ KODU — «bu müəllimi kim gətirdi» (db/217, 2026-09-21)
+
+db/204 linkdəki `?src=hemkar` nişanını qeydiyyata qədər daşıyırdı, amma
+**linki kimin paylaşdığı** heç yerdə qalmırdı. Canlı hal: Atilla Yaverli
+«həmkar» nişanı ilə gəldi — kimin linki olduğunu yalnız təxmin etmək
+olurdu.
+
+Zəncir:
+
+1. `rpc_ref_link()` müəllimin kodunu qaytarır (`profiles.ref_code`, ilk
+   paylaşmada yaranır, `app.gen_login_code(6)`).
+2. «Həmkarına göndər» linki: `bil10.az/?src=hemkar&r=<kod>`.
+3. `assets/visit.js` kodu **localStorage**-də 30 gün saxlayır
+   (`bil10_ref` = `{c, t}`). Mənbə (`src`) isə sessiyada qalır — köhnə
+   davranış dəyişmədi.
+4. Panel qeydiyyatda `sb.signUp(..., src, ref)` göndərir.
+5. `app.handle_new_user()` kodu tanıyıb `profiles.ref_by` yazır.
+   Özünü gətirmək və tanınmayan kod — ikisi də boş qalır.
+6. İdarəetmədə «Tövsiyələr» bölməsi (`rpc_admin_ref`): kim kimi
+   gətirib, neçə nəfər. **Hədiyyə qərarı bu siyahıya görə verilir.**
+
+DİQQƏT: nişanların tutulması `assets/visit.js`-də **süzgəclərdən
+əvvəldədir**. Səbəb: WhatsApp-ın daxili brauzerinin ad sətrində
+«WhatsApp» sözü var və robot süzgəcinə düşür — müəllim linkə mesajın
+içindən basırsa (ən adi hal) nişan itərdi. Ziyarət sayğacı yenə də
+süzgəclərin arxasındadır.
+
+Yoxlama: `test/e2e_tovsiye.py` (uçdan-uca: paylaş → gəl → qeydiyyat →
+say), `test/_v2_tovsiye.py` (idarəetmə bölməsinin şəkli).

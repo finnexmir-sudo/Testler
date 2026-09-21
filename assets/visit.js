@@ -5,6 +5,32 @@
 (function () {
   var C = window.CFG;
   if (!C || !C.SUPABASE_URL || !C.SUPABASE_ANON_KEY) return;
+  /*  NISANLAR SUZGECLERDEN EVVEL TUTULUR (217).
+      Asagidaki suzgecler ZIYARETI SAYMAMAQ ucundur; nisani saxlamaq
+      isə sayğac isi deyil - qeydiyyatda «kim getirdi» sualina cavabdir.
+      Konkret hal: WhatsApp-in daxili brauzerinin ad setrinde «WhatsApp»
+      sozu var ve robot suzgecine dusur.  Muellim linke MESAJIN ICINDEN
+      basirsa (en adi hal!) nisan itirdi - aktivlesme «birbasa» kimi
+      yazilardi.  Sayğac yene de sakit qalir: send() asagida, suzgeclerin
+      arxasindadir.
+        ?src=wa|hemkar|kurs|ig ...  - menbe (195, 204)
+        ?r=WAGTYF                   - tovsiye kodu (217)  */
+  var src = "";
+  try {
+    var m = /[?&]src=([a-z0-9_-]{1,20})(?:&|$)/i.exec(location.search || "");
+    if (m) { src = m[1].toLowerCase(); sessionStorage.setItem("bil10_src", src); }
+    else src = sessionStorage.getItem("bil10_src") || "";
+    /*  Tovsiye kodu SESSIYADA yox, localStorage-de - 30 gun.  Sebeb:
+        muellim linki acir, baxir, qapadir, sabah qeydiyyatdan kecir.
+        Sessiya nisani hemin an itir ve getiren bilinmez.  30 gun
+        reklam dunyasinda adi penceredir; kod sexsi melumat deyil.  */
+    var mr = /[?&]r=([A-Za-z0-9]{4,12})(?:&|$)/.exec(location.search || "");
+    if (mr) {
+      localStorage.setItem("bil10_ref",
+        JSON.stringify({ c: mr[1].toUpperCase(), t: Date.now() }));
+    }
+  } catch (e) {}
+
   /* Onbaxis sayti (yeni.bil10.az) sayilmir - orada yalniz biz baxiriq. */
   if (location.hostname.indexOf("yeni.") === 0) return;
   /* OZ ziyaretimiz sayilmir.  Nisani panel qoyur (admin girende) -
@@ -32,12 +58,6 @@
       qruplarinda paylasilir, kimin haradan geldiyi bilinmirdi.  Nisan
       sessiyada saxlanir ki, ana sehifeden panele kecende de qalsin.
       Yalniz qisa, tehlukesiz deyer (server de yoxlayir).  */
-  var src = "";
-  try {
-    var m = /[?&]src=([a-z0-9_-]{1,20})(?:&|$)/i.exec(location.search || "");
-    if (m) { src = m[1].toLowerCase(); sessionStorage.setItem("bil10_src", src); }
-    else src = sessionStorage.getItem("bil10_src") || "";
-  } catch (e) {}
   function send(ev) {
     try {
       fetch(C.SUPABASE_URL + "/rest/v1/rpc/rpc_visit", {
