@@ -4680,3 +4680,51 @@ Pulsuz sınağı da eynidir — istifadəçinin öz iki uşağı, iki həftə,
 heç nə demədən.
 
 **Pulsuz/ödənişli çərçivəsi:** istifadəçi düşünüb deyəcək (2026-09-20).
+
+### QƏRAR: pulsuz hədd — A variantı (2026-09-21)
+
+Üç AI rəyi (Perplexity, Gemini, GPT) + istifadəçi + mən: **yekdil A**.
+Hədd ŞAGİRD SAYINDAN çıxarılır, DƏRİNLİYƏ qoyulur.
+
+Bir cümlə: **«Test göndərmək və yoxlamaq pulsuz; nəyi bilmədiyini
+tapmaq abunə ilə.»**
+
+PULSUZ (limitsiz, həmişəlik):
+- limitsiz şagird və qrup
+- öz sualları, öz testləri
+- test göndərmək (qrupa və tək şagirdə), son tarix, cəhd sayı
+- avtomatik yoxlama, bal
+- şagirdin hansı suala düz/səhv cavab verdiyi
+- valideyn girişi — uşağın nəticəsi
+- son 7 günün tarixçəsi
+
+ABUNƏ:
+hazır bank · avtomatik test yığımı · diaqnostika · zəif mövzu analizi ·
+səhv dəftərində məşq · **gündəlik 5 sual** · limitsiz mövzu məşqi ·
+dərs planı və kurikulum · fərdi plan · təhlükə siqnalları ·
+düzəliş testi · cavab vərəqi · tam tarixçə
+
+«Gündəlik 5 sual» abunəyə keçir (GPT-nin təklifi, qəbul edildi): o,
+şagirdin öz səhvlərindən qurulur — yəni «nəyi bilmədiyini tapmaq»
+kateqoriyasıdır.  Pulsuzda qalsa, xətt istisna ilə başlayır.
+
+DƏYİŞİLƏSİ YERLƏR: `app.free_seat_limit()` · `assets/ferq.js` (tək
+mənbə, üç ekranı idarə edir) · ana səhifə «Nə pulsuz» bölməsi ·
+`db/test/smoke_qiymet.sql` · hədiyyə bitmə ekranı (KƏSMİRİK, AZALDIRIQ).
+
+ŞƏRT: ödəniş qəbul edə bilmədən tətbiq edilmir (kart köçürməsi kifayət).
+
+HƏDDLƏR (rəy fərqləri, seçilən qalın):
+- Valideyn məhsulu: Perplexity 5 ödəyən+30 gün / Gemini 10 ödəyən /
+  **GPT 3 ödəyən** ← seçildi
+- Yarış: Perplexity 200 şagird / Gemini 500 /
+  **GPT 100 aktiv + 30-40 eyni sınaqda** ← seçildi
+- Valideyn qiyməti: aylıq 4.90 TEKLIF EDILDI, **rədd edildi** — kart
+  saxlanmır, aylıq mikro-ödəniş yığılmaz.  **Rüblük və ya illik**
+  (Gemini: rüblük 10 AZN / tədris ili 25 AZN).
+
+AI-ların TƏKLİF ETDİYİ, AMMA ARTIQ MÖVCUD OLAN (onlar bilmirdi):
+«Həmkarına göndər» (var, db/204) · «Səhvini bağla» (var, db/210+211) ·
+«Təkrar/düzəliş testi» (var, db/109) · cavab vərəqi PDF (var; QR-kodlu
+OMR hissəsi yenidir) · «Şagird şagirdə test» (= db/214, yazılıb,
+qoşulmayıb) · «Bu həftə nə dəyişdi» (siyahıda «Öz rekordun», qurulmayıb).
