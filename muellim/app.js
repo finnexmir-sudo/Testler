@@ -2271,15 +2271,17 @@
     r = Number(r) || 0;
     return r >= 80 ? ["k", "Möhkəm"] : (r >= 60 ? ["m", "Təkrar"] : ["l", "Dəstək"]);
   }
+  /*  Cavab: cizilen movzularin adlari.  Siqnal setirleri bunu gozleyir -
+      eyni movzunu iki defe yazmamaq ucun (bax: loadAlerts).  */
   function loadTopicMap(g) {
     var live = guard();
-    sb.rpc("rpc_class_report", { p_class_id: g.id }).then(function (r) {
-      if (!live()) return;
+    return sb.rpc("rpc_class_report", { p_class_id: g.id }).then(function (r) {
+      if (!live()) return [];
       var box = $("gTopics");
-      if (!box) return;
+      if (!box) return [];
       var tp = (r && r.topics) || [];
       tp = tp.filter(function (t) { return (Number(t.total) || 0) >= 5; });
-      if (!tp.length) { box.innerHTML = ""; return; }
+      if (!tp.length) { box.innerHTML = ""; return []; }
       tp.sort(function (a, b) { return Number(a.ratio) - Number(b.ratio); });
       var show = tp.slice(0, 5), cnt = { k: 0, m: 0, l: 0 };
       tp.forEach(function (t) { cnt[topicBand(t.ratio)[0]]++; });
@@ -2293,7 +2295,14 @@
           var b = topicBand(t.ratio), ws = t.weak_students || [];
           return '<div class="tm-row tm-' + b[0] + '">' +
             '<div class="tm-h"><span>' + esc(t.name) +
-              (ws.length ? '<s>' + ws.length + " şagird zəif</s>" : "") + "</span>" +
+              /*  «1 sagird zeif» kim oldugunu demirdi - muellim asagidaki
+                  siqnal setrinden oxuyurdu, yeni EYNI FIKIR IKI YERDE.
+                  Adlar bura gelir, siqnal setri gedir.  */
+              (ws.length ? '<s>zəif: ' + ws.slice(0, 3).map(function (x) {
+                  return '<a href="#/s/' + esc(x.id) + "/" + esc(t.class_id || g.id) +
+                    '">' + esc(firstName(x.name) || x.name) + "</a>";
+                }).join(", ") + (ws.length > 3 ? " və daha " + (ws.length - 3) : "") +
+                "</s>" : "") + "</span>" +
               "<b>" + b[1] + " · " + pct(t.ratio) + "%</b></div>" +
             '<div class="tm-bar"><i style="width:' + pct(t.ratio) + '%"></i></div></div>';
         }).join("") +
@@ -2301,7 +2310,8 @@
           (tp.length > show.length ? "Bütün " + tp.length + " mövzu → Hesabat" : "Hesabata bax") +
           " " + ic("right") + "</a></div>" +
       "</div>";
-    }).catch(function () {});
+      return show.map(function (t) { return String(t.name || ""); });
+    }).catch(function () { return []; });
   }
 
   function loadPrep(g) {
@@ -2451,15 +2461,26 @@
     }).catch(function () {});   /* kart yardimcidir - xetasi ekrani pozmasin */
   }
 
-  function loadAlerts(gid) {
+  /*  tmap: loadTopicMap-in vedi - cizilen movzularin adlari.
+      «Zeif movzu» siqnali Movzu menzeresinde ADBAAD var; ikisi yan-yana
+      duranda muellim eyni fikri iki defe oxuyurdu.  Menzerede olan
+      movzu burada tekrarlanmir; menzere cizilmeyibse (az cavab) setir
+      yerinde qalir - melumat itmir.  */
+  function loadAlerts(gid, tmap) {
     var live = guard();
-    sb.rpc("rpc_class_alerts", { p_class_id: gid }).then(function (v) {
+    Promise.all([
+      sb.rpc("rpc_class_alerts", { p_class_id: gid }),
+      tmap || Promise.resolve([])
+    ]).then(function (rr) {
       if (!live()) return;
+      var v = rr[0], shown = rr[1] || [];
       var box = $("alerts");
       if (!box || !v) return;
       if (v.alerts === null) return;              // pulsuz hesab - sessiz
-      var list = v.alerts || [];
-      if (!list.length) return;                   // siqnal yoxdursa sakitlik
+      var list = (v.alerts || []).filter(function (a) {
+        return !(a.kind === "weak" && shown.indexOf(String(a.topic || "")) >= 0);
+      });
+      if (!list.length) { box.innerHTML = ""; return; }   // siqnal yoxdursa sakitlik
       box.innerHTML = '<div class="spacer"></div>' +
         '<div class="card pad0">' + list.map(function (a) {
           var t;
@@ -3093,8 +3114,7 @@
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
     loadPrep(g);
-    loadTopicMap(g);
-    loadAlerts(g.id);
+    loadAlerts(g.id, loadTopicMap(g));
     loadPlan(g);
     loadLedger(g);
     on("btnRen", "click", function () { renameGroup(g); });
@@ -3451,8 +3471,13 @@
             esc(s.full_name) + "</b></div>" +
           stat +
           '<div class="sacts">' +
-            '<button class="btn sm ghost link" data-rep="' + esc(s.id) + '">' +
-              "Şagirdə bax" + ic("right") + "</button>" +
+            /*  360 px-de «Hüseynov Mirhüseyn» ve «Hüseynov Mirkenan»
+                «Hüseynov Mirhü…» olurdu - muellim iki qardasi ayira
+                bilmirdi.  Etiket telefonda gizlenir, ox qalir; ad
+                onsuz da hemin sehifeye aparir.  */
+            '<button class="btn sm ghost link" data-rep="' + esc(s.id) + '" ' +
+              'aria-label="Şagirdə bax"><span class="sbx">Şagirdə bax</span>' +
+              ic("right") + "</button>" +
             '<button class="btn sm ghost icon" data-edit="' + esc(s.id) + '" ' +
               'title="Redaktə et" aria-label="Redaktə et">' + ic("pen") + "</button></div>" +
           codes.open +

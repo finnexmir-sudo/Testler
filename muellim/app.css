@@ -2088,6 +2088,9 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .card.tmap .tm-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13.5px;margin-bottom:6px}
 .card.tmap .tm-h>span{min-width:0;font-weight:600;color:var(--fg)}
 .card.tmap .tm-h s{display:block;text-decoration:none;font-weight:500;font-size:12px;color:var(--fg-3);margin-top:1px}
+/*  Movzu setrindeki zeif sagird adlari - oz hesabatina aparir  */
+.card.tmap .tm-h s a{color:var(--brand);font-weight:600;text-decoration:none}
+.card.tmap .tm-h s a:hover{text-decoration:underline;text-underline-offset:3px}
 .card.tmap .tm-h b{flex:0 0 auto;font-size:12.5px;font-weight:650;white-space:nowrap}
 .card.tmap .tm-k .tm-h b{color:var(--ok)} .card.tmap .tm-m .tm-h b{color:#9a6700} .card.tmap .tm-l .tm-h b{color:#b54708}
 .card.tmap .tm-bar{height:8px;border-radius:999px;background:var(--n-100);overflow:hidden}
@@ -2318,4 +2321,12 @@ details.stk .l3{margin-top:8px}
   body.bnav-on .afoot .fc a{font-size:12.5px}
   body.bnav-on .afoot .fc p{flex:1 0 100%;font-size:12.5px;line-height:1.5}
   body.bnav-on .afoot .c{margin-top:10px;padding-top:8px;font-size:11px}
+}
+
+/*  «Şagirdə bax» etiketi telefonda yer yeyirdi - iki Hüseynov qardasin
+    adi «Hüseynov Mirhü…» kimi kesilirdi.  Etiket gizlenir, ox qalir;
+    adin ozu onsuz da hemin sehifeye aparir (.l1 b[data-rep]).  */
+@media (max-width:520px){
+  .sacts .btn.link .sbx{display:none}
+  .sacts .btn.link{flex:0 0 30px;width:30px;min-height:30px;padding:0;justify-content:center}
 }
