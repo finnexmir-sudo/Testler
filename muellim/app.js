@@ -8377,9 +8377,12 @@
         '<div class="spacer"></div>' +
         '<div class="prnrow">' +
           //  Esas addim birinci durur: cap/paylasma ondan sonra
-          (diag || !freeCls.length ? "" :
+          /*  Qrupu OLMAYAN muellimde de duyme qalir - asagida qrup
+              yaratma formasi var.  Gizlenende (admin lentinde gorunen
+              hal) muellim 2 test yigib dayanirdi: veraq dalan idi.  */
+          (diag || (classes.length && !freeCls.length) ? "" :
             '<button class="btn sm go" id="btnGoAsg">' + ic("clip") +
-              "Qrupa ver</button>") +
+              (classes.length ? "Qrupa ver" : "Qrup yarat və ver") + "</button>") +
           '<button class="btn sm" id="btnPrn">' + ic("print") +
             "Çap / PDF</button>" +
           '<button class="btn sm ghost" id="btnPrnK">' + ic("key") +
@@ -8445,9 +8448,12 @@
             "</p>" +
           "</div>"
         : '<h2 id="pAsgH">Qrupa təyin et</h2>' +
-          (fresh && freeCls.length
-            ? msg("ok", "Test hazırdır. İndi onu qrupa verin — şagird " +
-                        "dərhal öz siyahısında görəcək.")
+          (fresh && (freeCls.length || !classes.length)
+            ? msg("ok", classes.length
+                ? "Test hazırdır. İndi onu qrupa verin — şagird " +
+                  "dərhal öz siyahısında görəcək."
+                : "Test hazırdır. Bir qrup adı yazın — test ona veriləcək, " +
+                  "sonra şagirdləri əlavə edərsiniz.")
             : "") +
       '<div class="card">' +
         (given.length || Object.keys(soloN).length
@@ -8497,8 +8503,20 @@
             '<button class="btn go" id="btnPAsg">' + ic("plus") + "Tapşırıq ver</button>"
           : (classes.length
               ? ""
-              : '<p class="muted">Əvvəlcə əsas səhifədə qrup yaradın — sonra bu ' +
-                "testi ona təyin edə biləcəksiniz.</p>")) +
+              /*  Muellimi basqa ekrana gondermek dalan idi - orada test
+                  yaddan cixirdi.  Qrup buradaca yaranir ve test derhal
+                  ona verilir: bir forma, bir duyme.  */
+              : '<p class="muted" style="margin:0 0 12px">Hələ qrupunuz yoxdur. ' +
+                  "Adını yazın — qrup yaranacaq və bu test dərhal ona veriləcək.</p>" +
+                '<div class="fieldrow">' +
+                  '<div><label for="pNewG">Qrup adı</label>' +
+                    '<input id="pNewG" placeholder="məsələn: Cümə qrupu"></div>' +
+                  '<div style="flex:0 0 148px"><label for="pNewL">Sinif</label>' +
+                    '<select id="pNewL"><option value="">Sinif seçilməyib</option></select></div>' +
+                "</div>" +
+                '<div id="pNewErr"></div>' +
+                '<button class="btn go" id="btnNewG">' + ic("plus") +
+                  "Qrup yarat və testi ver</button>")) +
       "</div>") +
       '<div class="spacer"></div>' +
       "<h2>Suallar</h2>" +
@@ -8544,9 +8562,59 @@
       }
       if (focus && $("pCls")) $("pCls").focus();
     }
-    on("btnGoAsg", "click", function () { goAsg(true); });
+    on("btnGoAsg", "click", function () {
+      goAsg(true);
+      if (!classes.length && $("pNewG")) $("pNewG").focus();
+    });
     //  Teze yigilmis testde muellimi elle axtarmaga qoymuruq
-    if (fresh && freeCls.length) setTimeout(function () { goAsg(false); }, 350);
+    if (fresh && (freeCls.length || !classes.length)) {
+      setTimeout(function () { goAsg(false); }, 350);
+    }
+
+    /*  Qrupsuz muellim: qrup buradaca yaranir, test derhal ona gedir.  */
+    if (!classes.length && !diag) {
+      loadLevels().then(function (lv) {
+        var sel = $("pNewL");
+        if (!sel) return;
+        sel.innerHTML = '<option value="">Sinif seçilməyib</option>' +
+          (lv || []).map(function (l) {
+            return '<option value="' + esc(l.code) + '"' +
+              (t.level && l.name === t.level ? " selected" : "") + ">" +
+              esc(l.name) + "</option>";
+          }).join("");
+      });
+      on("btnNewG", "click", function () {
+        if (busy) return;
+        var name = (($("pNewG") || {}).value || "").trim();
+        if (!name) {
+          $("pNewErr").innerHTML = msg("err", "Qrupun adını yazın.");
+          if ($("pNewG")) $("pNewG").focus();
+          return;
+        }
+        $("pNewErr").innerHTML = "";
+        setBusy("btnNewG", true, "Qrup yarat və testi ver");
+        sb.rpc("rpc_create_class", {
+          p_account_id: ACC.id,
+          p_name: name,
+          p_kind: ACC.type === "school" ? "school_class" : "tutor_group",
+          p_level_code: (($("pNewL") || {}).value || null)
+        }).then(function (r) {
+          if (!r || !r.id) throw new Error("Qrup yaranmadı.");
+          return sb.rpc("rpc_assign_test", {
+            p_class_id: r.id, p_test_id: t.id,
+            p_closes_at: null, p_max_attempts: 1, p_student_id: null
+          }).then(function () { return refreshContext(); })
+            .then(function () {
+              busy = false;
+              //  Novbeti addim SAGIRDDIR - muellim birbasa qrupa dusur
+              nav("#/g/" + r.id);
+            });
+        }).catch(function (e) {
+          setBusy("btnNewG", false, "Qrup yarat və testi ver");
+          $("pNewErr").innerHTML = msg("err", fail(e));
+        });
+      });
+    }
 
     on("btnPrn",  "click", function () { paperPrint(t, false); });
     on("btnHemkar", "click", function () { hemkarShare(t, qs.length); });
