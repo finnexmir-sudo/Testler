@@ -74,5 +74,12 @@ with sync_playwright() as pw:
     print("  ad eni:", round(ad.evaluate("e=>e.getBoundingClientRect().width")),
           "| kesilib?", ad.evaluate("e=>e.scrollWidth>e.clientWidth+1"))
     p.screenshot(path=OUT + "/qrup.png", full_page=True)
+    #  sagird hesabati - «Sagirde bax»
+    p.locator(".stu .l1 b").first.click()
+    p.wait_for_selector("#sTabs", timeout=20000); p.wait_for_timeout(2000)
+    hs = p.evaluate("document.body.scrollHeight")
+    print("sagird hesabati %d px = %.1f ekran" % (hs, hs / 800.0))
+    print("  xulase bas:", p.locator("#tab-x").inner_text()[:150].replace("\n", " | "))
+    p.screenshot(path=OUT + "/sagird.png", full_page=True)
     br.close()
 print("OK")

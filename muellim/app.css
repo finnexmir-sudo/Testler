@@ -2330,3 +2330,9 @@ details.stk .l3{margin-top:8px}
   .sacts .btn.link .sbx{display:none}
   .sacts .btn.link{flex:0 0 30px;width:30px;min-height:30px;padding:0;justify-content:center}
 }
+
+/*  «Bir baxışda» - sagird hesabatinin ilk setri: zeif movzu + gozleyen
+    sehv.  Ustunde basliq yoxdur: kart ozu cavabdir.  */
+.card.vdet{border-left:4px solid var(--brand)}
+.card.vdet p{margin:0 0 6px;font-size:13.5px;line-height:1.5}
+.card.vdet p:last-of-type{margin-bottom:0}

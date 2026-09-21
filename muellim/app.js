@@ -4415,7 +4415,11 @@
      Xerite pullu (hesabatdaki movzu analizi kimi), test yaratmaq da
      (platforma banki).  Sagirdin OZ xeritesi onun ekranindadir - pulsuz.
      ================================================================ */
-  function loadDiag(id, classId) {
+  /*  worked: sagird artiq test islemisdir.  Onda «Diaqnostik test ver»
+      formasi Xulasenin bas hissesini tutmamalidir - bir setre yigilir.
+      Diaqnostika ILK gunun aletidir: «bu usaq neyi bilmir».  Isleyen
+      sagirdde cavab onsuz da Movzular sekmesindedir.  */
+  function loadDiag(id, classId, worked) {
     var box = $("diagBox");
     if (!box) return;
     box.innerHTML = "<h2>Diaqnostika</h2>" +
@@ -4425,7 +4429,7 @@
       sb.rpc("rpc_diagnostic_options", { p_student_id: id })
     ]).then(function (rr) {
       if (!$("diagBox")) return;          //  ekran artiq deyisib
-      drawDiag(id, classId, rr[0] || {}, rr[1] || {});
+      drawDiag(id, classId, rr[0] || {}, rr[1] || {}, worked);
     }).catch(function (e) {
       var b = $("diagBox");
       if (b) b.innerHTML = "<h2>Diaqnostika</h2>" + msg("err", fail(e));
@@ -4449,12 +4453,15 @@
                  : '<span class="dprev down" title="Əvvəlkindən pis">↓</span>';
   }
 
-  function drawDiag(id, classId, d, o) {
+  function drawDiag(id, classId, d, o, worked) {
     var box = $("diagBox");
     if (!box) return;
     var subs = o.subjects || [];
     var paid = !!(o.paid || d.paid);
-    var h = "<h2>Diaqnostika</h2>";
+    /*  Islemis sagirdde forma <details> icinde - bir setr.  Teze
+        sagirdde (islemeyib) aciq qalir: onda bu, yeganə addimdir.  */
+    var dFold = !!worked && !d.has;
+    var h = dFold ? "" : "<h2>Diaqnostika</h2>";
 
     if (!o.level) {
       box.innerHTML = h + '<div class="card"><p class="muted" style="margin:0">' +
@@ -4528,8 +4535,9 @@
         return '<option value="' + esc(s.slug) + '">' + esc(s.name) + " — " + s.topics +
           " mövzu" + (showBankN() ? " · " + s.questions + " sual" : "") + "</option>";
       }).join("");
-      h += '<div class="card tight" style="margin-top:10px">' +
-        "<b>" + (d.has ? "Yenidən diaqnostika" : "Diaqnostik test ver") + "</b>" +
+      h += (dFold ? '<details class="more dgmore"><summary>Diaqnostik test ver</summary>' : "") +
+        '<div class="card tight" style="margin-top:10px">' +
+        (dFold ? "" : "<b>" + (d.has ? "Yenidən diaqnostika" : "Diaqnostik test ver") + "</b>") +
         '<p class="muted" style="margin:4px 0 10px">' + esc(o.level.name) +
           " — bütün mövzulardan hər birinə 3 sual, bir cəhd, yalnız bu şagirdə. " +
           (d.has ? "Əvvəlki ilə fərq xəritədə görünəcək."
@@ -4543,7 +4551,7 @@
               "Diaqnostik test ver</button>" +
             '<div id="dgMsg"></div>'
           : '<p class="muted" style="margin:0">Bu sinif üçün sual bankında kifayət qədər mövzu yoxdur.</p>') +
-        "</div>";
+        "</div>" + (dFold ? "</details>" : "");
     }
     box.innerHTML = h + '<div id="splanBox"></div>';
     if (paid) loadSPlan(id, classId, d);
@@ -4699,12 +4707,43 @@
       var at = r.attempts || [];
 
       /* ---------------- XULASE ---------------- */
-      var hX = '<div id="diagBox"></div>';
+      /*  «Xulase» sekmesi xulase DEMIRDI: en ustde diaqnostika formasi,
+          sonra sifirlar, sonra valideyn metni.  Muellim «Sagirde bax»
+          basanda bir sual verir - «bu usaqda ne var?».  Cavab indi
+          birinci setirdedir; adlar ve duymeler lazimi sekmeye aparir.  */
+      var hX = "";
+      var vdT = sweakAll.slice(0, 2), vdN = weak.length;
+      if (r.topics !== null && (vdT.length || vdN)) {
+        hX += '<div class="card tight vdet">' +
+          (vdT.length
+            ? "<p><b>Zəif mövzu:</b> " + vdT.map(function (t) {
+                return esc(t.name) + " (" + pct(t.ratio) + "%)";
+              }).join(", ") +
+              (sweakAll.length > vdT.length ? " və daha " + (sweakAll.length - vdT.length) : "") +
+              "</p>"
+            : "<p>Zəif mövzu yoxdur — hamısı 60%-dən yuxarı.</p>") +
+          (vdN ? "<p><b>" + vdN + " səhv</b> düzəliş gözləyir.</p>" : "") +
+          '<div class="row" style="gap:8px;margin-top:4px">' +
+            (vdT.length ? '<button class="btn sm" id="vdT">Mövzular</button>' : "") +
+            (vdN ? '<button class="btn sm" id="vdS">Səhvlər</button>' : "") +
+          "</div>" +
+        "</div>";
+      }
+      hX += '<div id="diagBox"></div>';
       /*  Cavab terzi (db/128): telesik sehv, bilmeden duz, emin idi-sehv.
           Yalniz yeni tetbiqin gonderdiyi cavablar sayilir (n_meta).  */
       var sty = r.style || {};
       if (Number(sty.n_meta) > 0) {
         var hasty = Number(sty.hasty) || 0, gok = Number(sty.guess_ok) || 0, sw = Number(sty.sure_wrong) || 0;
+        /*  Uc sifir uc abzasla izah olunurdu - ekranin ucde biri «hec ne
+            yoxdur» demeye gedirdi.  Yaxsi xeber bir setre sigir; izahlar
+            yalniz nisan varken lazimdir.  */
+        if (!hasty && !gok && !sw) {
+          hX += "<h2>Cavab tərzi</h2>" +
+            '<div class="card tight"><p class="muted" style="margin:0">' +
+              "Narahat edən nişan yoxdur — nə tələsik səhv, nə «bildiyini sanır»." +
+            "</p></div>";
+        } else {
         hX += "<h2>Cavab tərzi</h2>" +
           '<div class="card tight styl">' +
             '<div class="srow' + (hasty ? " bad" : "") + '"><b>' + hasty + "</b><div>Tələsik səhv" +
@@ -4718,6 +4757,7 @@
               "<i>cavabına əmin idi, amma səhv etdi — yanlış öyrənilib, " +
               "ən vacib düzəliş yeri</i></div></div>" +
           "</div>";
+        }
       }
       if (r.topics !== null) {
         hX += "<h2>Valideyn üçün xülasə</h2>" +
@@ -4964,19 +5004,25 @@
         '<div class="stab" id="tab-t"' + (STAB === "t" ? "" : " hidden") + ">" + hT + "</div>";
 
       show(h);
-      loadDiag(id, classId);
+      loadDiag(id, classId, at.length > 0);
       drawTopics();
-      on("sTabs", "click", function (e) {
-        var b = e.target.closest ? e.target.closest("[data-v]") : null;
-        if (!b) return;
-        STAB = b.getAttribute("data-v");
+      function sTabTo(v) {
+        STAB = v;
         Array.prototype.forEach.call(document.querySelectorAll("#sTabs .seg"), function (x) {
           x.classList.toggle("on", x.getAttribute("data-v") === STAB);
         });
         Array.prototype.forEach.call(document.querySelectorAll(".stab"), function (x) {
           x.hidden = x.id !== "tab-" + STAB;
         });
+      }
+      on("sTabs", "click", function (e) {
+        var b = e.target.closest ? e.target.closest("[data-v]") : null;
+        if (!b) return;
+        sTabTo(b.getAttribute("data-v"));
       });
+      //  «Bir baxışda» kartindaki duymeler de eyni sekmelere aparir
+      on("vdT", "click", function () { sTabTo("m"); window.scrollTo({ top: 0 }); });
+      on("vdS", "click", function () { sTabTo("s"); window.scrollTo({ top: 0 }); });
       on("tSub", "click", function (e) {
         var b = e.target.closest ? e.target.closest("[data-ts]") : null;
         if (!b) return;
