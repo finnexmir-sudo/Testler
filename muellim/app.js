@@ -6797,6 +6797,9 @@
         "brauzerində götürülür, bizim serverdə yox: internetin sürəti də, " +
         "telefonun yavaşlığı da rəqəmə daxildir. Sonrakı keçidlər ölçülmür — " +
         "onlar onsuz da sürətlidir. Sessiya başına bir ölçü. " +
+        "<b>Yalnız İcmal ilə açılan sessiya sayılır</b> — başqa ekranla " +
+        "(məsələn İdarəetmə linki ilə) açılanda ölçü götürülmür: təxmin " +
+        "yazmaqdansa yazmamaq düzdür. " +
         "<b>Giriş formasında keçən vaxt sayılmır</b> — orada ölçülən şey " +
         "insanın yazma sürəti olardı; giriş tamamlanandan sonra yenidən " +
         "başlayır. Arxa fonda qalmış səhifənin ölçüsü də atılır. " +
@@ -10118,9 +10121,18 @@
       demoBar();
       mailBar();
       route();
-      //  Icmal-dan basqa ekranla acilibsa (mes. #/g/... linki) olcu
-      //  yene goturulsun - 6 saniyeden sonra hele gonderilmeyibse.
-      setTimeout(suretYaz, 6000);
+      /*  OLCU YALNIZ ICMALINDIR (2026-09-21 duzelisi).
+          Burada evvel «setTimeout(suretYaz, 6000)» vardi: Icmaldan
+          basqa ekranla acilan sessiyada (#/adm, #/gen, #/g/... linki)
+          olcu oz yerinde HEC VAXT goturulmurdu - suretYaz() yalniz
+          qruplar cizilende cagirilir.  Alti saniyeden sonra TAYMER
+          yazirdi: kontekst vaxti + 6000 ms, yeni ~6-9 s.  Bu reqem
+          «4-8 saniye» kovasina dusurdu - idareetmede hemin kova 57%
+          idi.  Ustelik dogrudan yavas acilis (mes. 9 s) 6-da KESILIRDI:
+          PERF_SENT artiq qalxmis olurdu.
+          Indi: olculmeyen sessiya yazilmir.  Dar, amma dogru reqem.  */
+      var m0 = (location.hash || "#/").replace(/^#/, "").split("/").filter(Boolean)[0];
+      if (m0) PERF_T0 = null;
       //  "son giris" - Idareetme ucun; server 2 deqiqede bir yazir
       sb.rpc("rpc_seen", {}).catch(function () {});
       pulseStart();
