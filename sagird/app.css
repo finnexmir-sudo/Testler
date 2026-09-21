@@ -513,3 +513,8 @@ details.fbd summary .fbdot::before{content:"";width:6px;height:6px;border-radius
 .drow span{flex:1;min-width:0;font-size:14px;word-break:break-word}
 .drow b{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
 .dtom{margin:14px 0 0}
+
+/*  217: netice ekraninda «muellime gonder» - paylasma olmayan
+    brauzerde metn burada gorunur, sagird kopyalayir.  */
+.shtxt{width:100%;box-sizing:border-box;margin-bottom:10px;font-size:13px;
+  padding:8px;border:1px solid var(--n-300);border-radius:8px}

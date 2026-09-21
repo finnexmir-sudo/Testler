@@ -985,8 +985,21 @@
           "<span>Bu test artıq işlənib — aşağıda cavabların. Yenidən işləmək olmaz.</span></div>"
         : '<div class="ok" style="margin-bottom:12px">' + ic("check") +
           "<span>Nəticə yadda saxlanıldı. Müəllimin onu panelində görür.</span></div>") +
-      '<div class="row"><button class="btn go" id="btnHome" style="flex:1">Testlər</button>' +
-        '<button class="btn" id="btnLb" style="flex:1">' + ic("cup") + "Lövhə</button></div>" +
+      /*  217: NETICE EKRANI DALAN IDI - «Testlər / Lövhə» ile bitirdi.
+          Olcu: 9 sagirdin her biri DEQIQ bir test isleyib ve bir daha
+          qayitmayib.  Heç kim yarida qoymayib - yeni problem UX deyil,
+          NOVBETI ADDIM yoxdur.  Indi iki korpu qurulur:
+            - «Səhvini bağla» sagirdi SAYTDA saxlayir (mexanika db/210)
+            - «Nəticəmi müəllimə göndər» MUELLIMI geri cekir - o, ikinci
+              testi gondermeyen adamdir ve panele girmir.  Mesaji sagird
+              gonderir, cunki o an tetbiqin icinde olan odur.  */
+      '<div id="resAct"></div>' +
+      (review ? "" :
+        '<button class="btn wide" id="btnShare" style="margin-bottom:10px">' +
+          ic("send") + "Nəticəmi müəllimə göndər</button>" +
+        '<div id="shareMsg"></div>') +
+      '<div class="row"><button class="btn sm" id="btnHome" style="flex:1">Testlər</button>' +
+        '<button class="btn sm" id="btnLb" style="flex:1">' + ic("cup") + "Lövhə</button></div>" +
 
       diagMap(r) +
 
@@ -1032,7 +1045,63 @@
 
     on("btnHome", "click", screenTests);
     on("btnLb", "click", function () { screenBoard(review); });
+    if (!review) on("btnShare", "click", function () { shareResult(r, pct); });
+    resMistLink();
     bindWrongReports();
+  }
+
+  /*  Netice ekraninda «Səhvini bağla» korpusu.  Ayrica sorgu ile gelir
+      ki, bal derhal gorunsun - cavab gec gelse ekran gozlemesin.  */
+  function resMistLink() {
+    sb.rpc("rpc_student_mistakes", { p_token: TOKEN }).then(function (m) {
+      var box = $("resAct");
+      if (!box || !m) return;
+      var due = Number(m.due) || 0;
+      if (!due) return;
+      var paid = m.paid !== false;
+      var t = (m.topics || [])[0] || null;
+      if (!paid) {
+        //  211: abunesiz hesabda mesq baglidir - uşağa YALAN VED vermirik
+        box.innerHTML = '<p class="note" style="margin:0 0 10px">' + due +
+          " səhvin gözləyir. Məşq müəlliminin abunəsi ilə açılır.</p>";
+        return;
+      }
+      var n = t ? Math.min(Number(t.due) || 0, 3) : Math.min(due, 10);
+      box.innerHTML = '<button class="btn go wide" id="btnFixNow" ' +
+        'style="margin-bottom:10px">' +
+        (t ? esc(t.name) + " — " + n + " sual işlə" : "Səhvini bağla — " + n + " sual") +
+        "</button>";
+      on("btnFixNow", "click", function () {
+        screenMistakes(t ? (t.id || null) : null, t ? t.name : "");
+      });
+    }).catch(function () {});
+  }
+
+  /*  Sagird neticesini muellime atir.  MEQSED: muellim ikinci testi
+      gondersin.  Metn qisa ve SUALLA bitir - cavab yazmaga mecbur edir.
+      Sekil deyil, METN: WhatsApp bildirisinde metn gorunur, sekil ise
+      «Şəkil» kimi cixir ve acilmayinca oxunmur.  */
+  function shareResult(r, pct) {
+    /*  Testin adi: rpc_submit_attempt onu qaytarmir (yalniz
+        rpc_test_result qaytarir), amma rpc_start_attempt qaytarib -
+        S.test-de durur.  Ona gore miqrasiya lazim deyil.  */
+    var ad = (S && S.test && S.test.title) || (r.test && r.test.title) || "test";
+    var txt = "Müəllim, «" + ad + "» testini bitirdim — " +
+      r.score + "/" + r.max_score + " (" + pct + "%).\nNövbəti test nə vaxtdır?";
+    var box = $("shareMsg");
+    function said(h) { if (box) box.innerHTML = h; }
+    if (navigator.share) {
+      navigator.share({ text: txt }).catch(function () {});
+      return;
+    }
+    var done = function () {
+      said('<div class="ok" style="margin-bottom:10px">' + ic("check") +
+        "<span>Mətn kopyalandı — müəllimə yapışdır.</span></div>" +
+        '<textarea class="shtxt" readonly rows="3">' + esc(txt) + "</textarea>");
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done, done);
+    } else done();
   }
 
   /* Sualda sehv gorende sagird bir klikle bildirir.  Sual DEYISMIR -

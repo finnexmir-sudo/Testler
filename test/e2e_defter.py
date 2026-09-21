@@ -102,6 +102,29 @@ with sync_playwright() as pw:
         sp.wait_for_timeout(120)
     sp.wait_for_selector(".ring", timeout=15000)
     ok(db("select count(*) n from public.mistakes where status='open'", one=True)["n"] == NQ, "defterde NQ acıq sual")
+
+    #  217: NETICE EKRANI DALAN OLMAMALIDIR.  Olcu: 9 sagirdin her biri
+    #  deqiq bir test isleyib, bir daha qayitmayib.  Indi iki korpu var.
+    sp.wait_for_selector("#btnFixNow", timeout=15000)
+    ok(True, "217: neticede «səhvini bağla» korpusu var")
+    #  Iki hal: movzu setri varsa «Kəsrlər — 3 sual işlə», yoxdursa
+    #  «Səhvini bağla — N sual».  Ikisinde de NE EDECEYI yazilir.
+    ok("sual" in sp.inner_text("#btnFixNow"),
+       "duyme ne edeceyini yazir", sp.inner_text("#btnFixNow"))
+    ok(sp.is_visible("#btnShare"), "217: «Nəticəmi müəllimə göndər» duymesi var")
+    ok("müəllimə göndər" in sp.inner_text("#btnShare"), "duymenin metni",
+       sp.inner_text("#btnShare"))
+    #  Testler/Lovhe artiq ESAS duyme deyil - kicildilib
+    ok(sp.locator("#btnHome.sm").count() == 1, "«Testlər» ikinci plana kecib")
+    ok(sp.get_attribute("#btnFixNow", "id") == "btnFixNow",
+       "duyme mesq ekranina baglidir")
+    #  Paylasma metni: testin ADI olmalidir (rpc_submit_attempt onu
+    #  qaytarmir - S.test-den goturulur) ve SUALLA bitmelidir.
+    sp.click("#btnShare"); sp.wait_for_selector(".shtxt", timeout=8000)
+    sh = sp.input_value(".shtxt")
+    ok("Vurma cədvəli" in sh, "metnde testin adi var", sh.replace("\n", " ")[:70])
+    ok("Növbəti test nə vaxtdır?" in sh, "metn sualla bitir - muellim cavab yazmalidir")
+    ok("%" in sh, "metnde netice var")
     sp.click("#btnHome"); sp.wait_for_selector("#mistBox .mist", timeout=15000)
     mt = sp.inner_text("#mistBox").replace("\n", " ")
     #  210: kart artiq MOVZU-MOVZU - «Kəsrlər — 3 sual gözləyir» + «Bağla»
