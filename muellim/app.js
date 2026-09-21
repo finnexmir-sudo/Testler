@@ -1500,7 +1500,9 @@
         });
         var TF = tgs.length ? tgs[0].id : "";
         function topRows() {
+          //  217: Icmalda uc setir bes edir - tam siyahi hesabatdadir
           return topAll.filter(function (x) { return x.class_id === TF; })
+            .slice(0, 3)
             .map(function (x, i) {
               var p = Math.round(Number(x.avg) || 0);
               /*  Marsrut HEM sagird, HEM qrup id-si isteyir
@@ -1561,7 +1563,10 @@
             rgs.push({ id: x.class_id, name: x["class"] || "" });
           }
         });
-        var RF = "", REXP = false, RCAP = 6;
+        /*  217: telefonda Icmal DORD ekran idi (istifadeci olcusu).
+            Lent alti setirle ~450 px tuturdu; uc setir «uşaqlar
+            işlədimi?» sualina cavab verir, qalani «Daha N» ile.  */
+        var RF = "", REXP = false, RCAP = 3;
         function recRows() {
           var list = RF ? recAll.filter(function (x) {
             return x.class_id === RF;

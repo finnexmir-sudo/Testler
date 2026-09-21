@@ -383,10 +383,10 @@ with sync_playwright() as pw:
     ok(pg.locator("#hRecent .trow").count() >= 1, "son neticeler lenti dolur",
        pg.locator("#hRecent .trow").count())
     ok(pg.locator("#recF").count() == 0, "tek qrupda lent cipleri gizlidir")
-    # Lent yigcamdir: 8 neticeden yalniz 6-si gorunur, qalani duyme ile
+    # 217: lent yigcamdir - 8 neticeden yalniz 3-u gorunur, qalani duyme ile
     rn0 = pg.locator("#hRecent .trow").count()
-    ok(rn0 == 6, "lent en coxu 6 setirle acilir", rn0)
-    ok("Daha 2 nəticə" in pg.inner_text("#recMore"), "acici duyme sayi duz",
+    ok(rn0 == 3, "lent en coxu 3 setirle acilir", rn0)
+    ok("Daha 5 nəticə" in pg.inner_text("#recMore"), "acici duyme sayi duz",
        pg.inner_text("#recMore"))
     pg.click("#recMore")
     ok(pg.locator("#hRecent .trow").count() == 8, "daha N netice acilir",
