@@ -194,6 +194,26 @@ with sync_playwright() as pw:
     ok("%d gözləyir" % (NQ - 2) in mk and "2 təkrarda" in mk and "0 bağlanıb" in mk,
        "sayğaclar (3 suallıq paketdən sonra)", mk[:90])
 
+    print("D2 · (217) «Növbəti test hazırdır» - bir toxunuşla ikinci test")
+    #  Olcu: muellim BIR test gonderib dayanirdi.  Indi tapsiriq
+    #  ekraninin en ustunde hazir test durur, muellim yalniz tesdiqleyir.
+    n0 = db("select count(*) n from public.assignments", one=True)["n"]
+    pg.goto(PANEL + "#/a/" + GID); pg.reload()
+    pg.wait_for_selector("#nextBox .nxt2", timeout=15000)
+    ok(True, "217: «Növbəti test hazırdır» karti cixir")
+    nb = pg.inner_text("#nextBox").replace("\n", " ")
+    ok("Ən zəif mövzular" in nb, "kart zeif movzulari adi ile yazir", nb[:90])
+    ok(pg.is_visible("#btnNext2"), "«Göndər» duymesi var")
+    pg.click("#btnNext2")
+    pg.wait_for_selector(".asgok", timeout=20000)
+    ok(True, "217: bir toxunusla test yigildi VE teyin edildi")
+    n1 = db("select count(*) n from public.assignments", one=True)["n"]
+    ok(n1 == n0 + 1, "bazada ikinci tapsiriq yarandi", "%d -> %d" % (n0, n1))
+    ok("Təkrar —" in pg.inner_text(".asgok"), "testin adi movzulari yazir",
+       pg.inner_text(".asgok").replace("\n", " ")[:80])
+    ok(pg.locator(".asgwa .watxt").count() == 1,
+       "WhatsApp qutusu ozu acilir - muellim sagirdlere xeber verir")
+
     print("E · İrəliləyiş kartı (2+ cəhd)")
     #  ikinci cehd - serbest mesq: qarisiq test duz cavablarla (SQL ile)
     T2 = db("select id::text i from public.tests where slug='riy-3-qarisiq-1'", one=True)["i"]

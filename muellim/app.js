@@ -3635,6 +3635,102 @@
         '<textarea class="watxt" readonly rows="4">' + esc(t) + "</textarea>" +
       "</div>";
   }
+  /*  «NOVBETI TEST HAZIRDIR» (217).  Olcu: muellim BIR test gonderir
+      ve dayanir - 9 sagirdin her biri deqiq bir test islemisdi.  Sebeb
+      maraqsizliq deyil: ikinci test birincisi qeder baha basa gelirdi
+      (test sec -> qrup -> tarix -> cehd).  Indi HAZIR gelir, muellim
+      qerar vermir - TESDIQLEYIR.
+      Zeif movzular rpc_class_report-dan gelir (odenisli; pulsuzda null
+      qayidir ve kart cizilmir - onsuz da hazir bank abunededir).  */
+  function nextRule(g, tp, count) {
+    var subs = {}, levs = {};
+    tp.forEach(function (t) {
+      if (t.subject_slug) subs[t.subject_slug] = 1;
+      if (t.level) levs[t.level] = 1;
+    });
+    var sk = Object.keys(subs), lk = Object.keys(levs);
+    var rule = { pool: "all", count: count, topics: tp.map(function (t) { return t.id; }) };
+    //  Fenn/sinif YALNIZ hamisi eyni olanda - qarisiqda suzgec kesir
+    if (sk.length === 1) rule.subject = sk[0];
+    if (lk.length === 1) { rule.levels = [lk[0]]; rule.level = lk[0]; }
+    rule["class"] = g.id;
+    return rule;
+  }
+
+  function nextTestCard(g, items) {
+    if (NXT_SENT) { NXT_SENT = false; return; }
+    var live = guard();
+    sb.rpc("rpc_class_report", { p_class_id: g.id }).then(function (r) {
+      if (!live()) return null;
+      var tp = (r && r.topics) || [];
+      //  Az cavabli movzu «zeif» sayilmir - bir sehv movzunu batirmesin
+      tp = tp.filter(function (t) { return (Number(t.total) || 0) >= 5 &&
+                                          (Number(t.ratio) || 0) < 80; });
+      if (!tp.length) return null;
+      tp = tp.slice(0, 3);
+      /*  Hovuzu EVVELCEDEN yoxlayiriq.  Yoxsa muellim duymeni basir ve
+          «yalniz 6 sual tapildi» xetasi alir - hazir dediyimiz sey
+          hazir olmur.  Ved verib yerine yetirmemek en pis haldir.  */
+      return sb.rpc("rpc_generate_preview", { p_rule: nextRule(g, tp, 10) })
+        .then(function (v) { return { tp: tp, found: Number((v || {}).found) || 0 }; })
+        .catch(function () { return null; });
+    }).then(function (d) {
+      if (!live() || !d) return;
+      var box = $("nextBox");
+      if (!box) return;
+      var n = Math.min(10, d.found);
+      if (n < 3) return;          // bu qeder sualla test gondermeye deymez
+      //  Hami bitiribse bunu deyirik - «indi vaxtidir» hissi.
+      var son = (items || [])[0] || null;
+      var bitdi = son && Number(son.done) > 0 &&
+                  Number(son.done) >= Number(son.targets || son.done);
+      var adlar = d.tp.map(function (t) { return t.name; }).join(", ");
+      box.innerHTML =
+        '<div class="card nxt2">' +
+          '<div class="pt"><b>Növbəti test hazırdır</b>' +
+            '<span class="muted">' +
+              (bitdi ? "əvvəlki tapşırığı hamı bitirib" : "son nəticələrə görə") +
+            "</span></div>" +
+          '<p class="muted" style="margin:0 0 12px">Ən zəif mövzular: <b>' +
+            esc(adlar) + "</b>. Həmin mövzulardan <b>" + n +
+            " sual</b> — son tarix 7 gün, 1 cəhd.</p>" +
+          '<div id="nxtMsg"></div>' +
+          '<button class="btn go wide" id="btnNext2">' + ic("send") +
+            "Göndər</button>" +
+        "</div>" +
+        '<div class="spacer"></div>';
+      on("btnNext2", "click", function () { nextTestSend(g, d.tp, n); });
+    }).catch(function () {});
+  }
+
+  /*  Bir toxunus: yigir + teyin edir + WhatsApp qutusunu acir.  */
+  function nextTestSend(g, tp, n) {
+    if (busy) return;
+    busy = true;
+    setBusy("btnNext2", true, "Göndər");
+    var ttl = "Təkrar — " + tp.map(function (t) { return t.name; }).join(", ");
+    var closes = new Date(Date.now() + 7 * 864e5);
+    sb.rpc("rpc_generate_test", { p_rule: nextRule(g, tp, n), p_title: ttl })
+      .then(function (v) {
+        return sb.rpc("rpc_assign_test", {
+          p_class_id: g.id, p_test_id: v.test_id,
+          p_closes_at: closes.toISOString(), p_max_attempts: 1
+        });
+      })
+      .then(function () {
+        busy = false;
+        NXT_SENT = true;
+        ASG_FLASH = { title: ttl, closes: closes.toISOString(), who: "" };
+        screenAssign(g.id);
+      })
+      .catch(function (e) {
+        busy = false;
+        setBusy("btnNext2", false, "Göndər");
+        var el = $("nxtMsg");
+        if (el) el.innerHTML = msg("err", fail(e));
+      });
+  }
+
   function bindWaCopy(root) {
     Array.prototype.forEach.call((root || document).querySelectorAll("[data-wacopy]"), function (b) {
       if (b.dataset.bound) return; b.dataset.bound = "1";
@@ -4981,6 +5077,9 @@
       sagird "Kime" secimində evvelceden secilir, Geri ora qaytarir.  */
   var ASG_PRE = "";
   var ASG_FLASH = null;   // son verilen tapsiriq - bir defelik WhatsApp qutusu
+  //  217: indice gonderdik - kart bir defelik gizlenir, yoxsa «Göndər»
+  //  yeniden teklif olunur ve muellim «getdimi?» deye tereddud edir
+  var NXT_SENT = false;
   var PREV_HASH = "", CUR_HASH = "";   // route() doldurur
   function screenAssign(gid, sid) {
     var live = guard();
@@ -5024,6 +5123,7 @@
       sub: "Şagird tapşırığı öz siyahısında görür; son tarix keçəndə bağlanır."
     });
     show(
+      '<div id="nextBox"></div>' +
       '<div class="card tight">' +
         '<div class="swrap"><label class="switch" for="fp">' +
           '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
@@ -5093,8 +5193,17 @@
       "</div>"
     );
 
+    var flash = ASG_FLASH;
     ASG_FLASH = null;
     bindWaCopy($("asgFlash"));
+    nextTestCard(g, items);
+    //  Qutu ekranın altında qalırdı - muellim xeber vermeden cixirdi
+    if (flash && $("asgFlash") && $("asgFlash").scrollIntoView) {
+      setTimeout(function () {
+        var el = $("asgFlash");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 250);
+    }
     on("btnBack", "click", function () {
       //  sagird kartindan gelmisikse ora - amma yigindan cixaraq, yoxsa
       //  kartin oz «geri»si yeniden bura qaytarar (dovr)

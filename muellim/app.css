@@ -2274,3 +2274,9 @@ details.stk .l3{margin-top:8px}
 .mtip .lnk{font:inherit;font-weight:650;color:var(--brand);background:none;border:0;
   padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px;
   word-break:break-all;text-align:left}
+
+/*  217: «Növbəti test hazırdır» - tapsiriq ekraninin en ustu.
+    Muellim BIR test gonderib dayanirdi; ikinci test indi hazir gelir.  */
+.nxt2{border-left:4px solid var(--brand)}
+.nxt2 .pt{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.nxt2 .pt b{font-size:15px;font-weight:650}
