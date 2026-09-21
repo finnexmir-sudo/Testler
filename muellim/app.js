@@ -1635,21 +1635,27 @@
     //  loadLevels() gozleyerken cixis edilibse ACC bosdur - sakit dayan
     if (!ACC) return;
     var groups = null;
-    sb.select("classes", {
-      select: "id,name,kind,level_id",
-      eq: { account_id: ACC.id },
-      order: "name"
-    }).then(function (rows) {
-      groups = rows || [];
-      if (!groups.length) return [];
+    /*  SURET (olculdu 2026-09-21): qruplar ve sagirdler ZENCIRDE
+        gedirdi - sagirdler qruplarin cavabini gozleyirdi.  Halbuki
+        ikisi de yalniz ACC.id-den asilidir; birlikde gede bilerler.
+        Bir novbeli gedis-gelis azaldi: zeif 3G-de ~0,4 s.
+        (Qrupsuz hesabda bir artiq sorgu gedir - ucuzdur ve o hal
+        onsuz da bir defelikdir.)  */
+    Promise.all([
+      sb.select("classes", {
+        select: "id,name,kind,level_id",
+        eq: { account_id: ACC.id },
+        order: "name"
+      }),
       //  Dayandirilmis sagird qrupda GORUNMEMELIDIR - yer limiti de
       //  yalniz aktivleri sayir (app.account_student_count).
-      return sb.select("students", {
+      sb.select("students", {
         select: "id,class_id", eq: { account_id: ACC.id, is_active: true }
-      });
-    }).then(function (studs) {
+      }).catch(function () { return []; })
+    ]).then(function (rr) {
+      groups = rr[0] || [];
       //  Sinif adlari LEVELS-den gelir - cizmezden EVVEL hazir olsun
-      return Promise.resolve(lvReady).then(function () { return studs; });
+      return Promise.resolve(lvReady).then(function () { return rr[1]; });
     }).then(function (studs) {
       //  Icmal ISLEK oldu - olcunun dayanacagi elə buradir
       suretYaz();
