@@ -4549,9 +4549,9 @@ Mənbə: öz söhbətimiz + Claude/Gemini/GPT rəyləri (iki ayrı dövr: birinc
   göndərən müəllimdir.
 - Öz-özünə mövzu məşqi: 11 şagirddən **4-ü** edib (36%), amma **3-ü bir
   daha qayıtmayıb**. Ayşə 135 cavab — hamısı BİR gündə.
-  DİQQƏT: `app.practice_daily_limit()` = 20 yalnız ABUNƏSİZ hesabda
-  tətbiq olunur; hədiyyə abunəsi varsa limitsizdir. «135 bir gündə ola
-  bilməz» mühakiməsi səhvdir.
+  DİQQƏT: `app.practice_daily_limit()` = **5** (db/196; db/137-də 20 idi)
+  və yalnız ABUNƏSİZ hesabda tətbiq olunur; hədiyyə abunəsi varsa
+  limitsizdir. «135 bir gündə ola bilməz» mühakiməsi səhvdir.
 
 ### Qərarlar
 
