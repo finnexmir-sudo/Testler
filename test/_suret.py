@@ -66,7 +66,7 @@ try:
               const kb = x => Math.round((x.transferSize||0)/1024);
               const own = r.filter(x => x.name.indexOf('8011') >= 0);
               const api = r.filter(x => x.name.indexOf('54321') >= 0);
-              const app = own.filter(x => x.name.indexOf('app.js') >= 0)[0] || {};
+              const app = own.filter(x => x.name.indexOf('app.min.js') >= 0)[0] || {};
               return {
                 html: Math.round(n.responseEnd||0),
                 appEnd: Math.round(app.responseEnd||0), appKb: kb(app),

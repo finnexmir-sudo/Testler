@@ -4445,6 +4445,37 @@ sanacaqsan.
 
 ---
 
+## MƏNBƏ ≠ YAYIMLANAN FAYL (2026-09-21)
+
+Saytda işlənən fayl **`app.min.js` / `app.min.css`**-dir — `index.html`
+onları göstərir. Sən isə **`app.js` / `app.css`**-i redaktə edirsən.
+Aradakı körpü `./yig.sh`-dir (esbuild).
+
+`./bump.sh` hər dəfə əvvəl `./yig.sh`-i çağırır, `test/tek.sh` və
+`test/run_e2e.sh` də çağırır — yəni e2e yoxlamaları **saytda işləyən
+faylla** gedir. Ayrıca çağırmağa ehtiyaq yoxdur.
+
+`.min` fayllar repoya girir (GitHub Pages onları verir), `node_modules/`
+girmir. esbuild tapılmasa `yig.sh` **dayanır** — səssizcə köhnə `.min`
+faylla yayımlamaq ən pis haldır.
+
+Sıxılan fayllar: `muellim|sagird|valideyn` × `app.js, sb.js, app.css` +
+`assets/base.css`. `config.js`, `ferq.js`, `pwa.js`, `visit.js` toxunulmur
+(kiçikdirlər), `s/` qovluğu da kənardadır.
+
+NİYƏ: ölçüldü (`test/_suret.py`) — panelin soyuq açılışı zəif 3G-də
+3,5 saniyə çəkirdi, vaxtın ~60%-i fayl yükləməsi idi. Sıxılmadan sonra:
+
+| şərait | əvvəl | sonra |
+|---|---|---|
+| yaxşı 4G | 913 ms | 417 ms |
+| adi 4G | 1738 ms | 1147 ms |
+| zəif 3G | 3480 ms | 2659 ms |
+
+Ümumi yük 241 KB → 160 KB (sıxışdırılmış).
+
+---
+
 ## Üslub
 
 - İnterfeys mətnləri Azərbaycan dilində, düzgün diakritiklərlə (ə, ş, ğ, ı, ö, ü, ç)

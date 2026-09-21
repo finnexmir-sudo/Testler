@@ -4,3 +4,7 @@ __pycache__/
 .DS_Store
 pgdata/
 *.log
+
+# yig.sh-in aleti (esbuild) - repoya girmir
+node_modules/
+package-lock.json

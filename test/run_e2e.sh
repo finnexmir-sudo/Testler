@@ -4,6 +4,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+#  index.html .min fayllari gosterir - yoxlama da onlarla getsin
+./yig.sh >/dev/null
+
 export PGHOST=${PGHOST:-/tmp} PGPORT=${PGPORT:-55432} PGUSER=${PGUSER:-postgres}
 DB=${DB:-panel_e2e}
 API_PORT=${API_PORT:-54321}

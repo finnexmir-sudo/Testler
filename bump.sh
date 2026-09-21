@@ -5,6 +5,10 @@
 # Her dizayn/kod deyisikliyinden SONRA, commit-den EVVEL isled:  ./bump.sh
 set -euo pipefail
 cd "$(dirname "$0")"
+#  Saytda islenen fayl .min-dir; evvel onu yigiriq, sonra versiya
+#  nisani vururuq.  Sira vacibdir: nisan .min fayla gore verilir.
+./yig.sh
+
 V=$(( $(git rev-list --count HEAD) + 1 ))
 for f in index.html muellim/index.html sagird/index.html valideyn/index.html komek/index.html mexfilik/index.html; do
   [ -f "$f" ] || continue
