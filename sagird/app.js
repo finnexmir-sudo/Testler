@@ -1096,7 +1096,7 @@
     }
     var done = function () {
       said('<div class="ok" style="margin-bottom:10px">' + ic("check") +
-        "<span>Mətn kopyalandı — müəllimə yapışdır.</span></div>" +
+        "<span>Mətn kopyalandı — WhatsApp-da müəllimə göndər.</span></div>" +
         '<textarea class="shtxt" readonly rows="3">' + esc(txt) + "</textarea>");
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
