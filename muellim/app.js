@@ -543,9 +543,12 @@
       ? "<b>" + dunen + "</b> şagird dünən işlədi"
       : (Number(b.bu_gun) ? "<b>" + Number(b.bu_gun) + "</b> şagird bu gün işlədi"
                           : "Dünən heç kim işləmədi");
+    /*  216: «hami isleyir» YALNIZ kimse isleyibse dogrudur.  Teze
+        hesabda hec kim hele bir sual da acmayib - orada bu soz
+        yalandir, ona gore sag teref bos qalir.  */
     var sag = susan
       ? '<s class="bgs">' + susan + " nəfər bir həftədir səssizdir</s>"
-      : (aktiv ? '<s class="bgs ok2">hamı işləyir</s>' : "");
+      : (aktiv && (dunen || Number(b.bu_gun)) ? '<s class="bgs ok2">hamı işləyir</s>' : "");
 
     var alt;
     if (tp) {
@@ -5129,15 +5132,29 @@
     });
     show(
       '<div id="nextBox"></div>' +
+      /*  "Yeni tapsiriq" yeni test yaratmaq kimi oxunurdu (canli sual).
+          Burada hazir test secilib qrupa verilir - basliq ve bir cumle
+          bunu deyir.  */
+      "<h2>Hazır testi tapşır</h2>" +
+      '<p class="muted" style="margin:-6px 0 10px">Hazır testi seçin, kimə və nə vaxta ' +
+        "qədər — şagirdin siyahısına düşür. Eyni test bir neçə qrupa verilə bilər.</p>" +
+      '<details class="more tkind"><summary>Hansı test nə vaxt?</summary>' +
+        '<ul class="muted">' +
+          "<li><b>Hazır test və öz testiniz</b> — bu ekran: seçin, tapşırın.</li>" +
+          "<li><b>Ev tapşırığı</b> — dərs planında mövzunu «Keçildi» edəndə sistem özü təklif edir.</li>" +
+          "<li><b>Diaqnostik test</b> — yeni şagird nəyi bilmir: şagirdin hesabatında.</li>" +
+          "<li><b>Səhvlərdən təkrar</b> — şagirdin öz səhvlərindən: şagirdin hesabatında.</li>" +
+        "</ul></details>" +
+      '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>' +
+      '<div class="spacer"></div>' +
+      /* Bu ekran test YARATMIR - hazir testi qrupa yoneldir.
+         Muellimler bunu qarisdirirdi: siyahida yalniz kohneler
+         gorunurdu, yenisini haradan yigmagi ekran demirdi. */
       '<div class="card tight">' +
-        '<div class="swrap"><label class="switch" for="fp">' +
-          '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
-          '<span class="track"><i></i></span>' +
-          "<span><b>Sərbəst məşq</b>" +
-            '<span class="muted">Açıqdırsa şagird hazır bankın digər testlərini də ' +
-              "istədiyi vaxt işləyə bilər. Bağlasanız yalnız verdiyiniz " +
-              "tapşırıqları görər.</span></span></label>" +
-        '<div id="fpErr"></div></div>' +
+        '<p class="muted" style="margin:0 0 12px">Uyğun test yoxdursa ' +
+          "yenisini yığın — hazır olan kimi bura qayıdıb seçilmiş gələcək.</p>" +
+        '<button class="btn wide" id="btnGenHere">' + ic("gen") +
+          "Yeni test yığ</button>" +
       "</div>" +
       '<div class="spacer"></div>' +
       "<h2>Verilmiş tapşırıqlar</h2>" +
@@ -5172,29 +5189,16 @@
           '<div id="hwList" class="card pad0" style="margin-top:10px"></div>' +
           '<div class="spacer"></div>'
         : "") +
-      /*  "Yeni tapsiriq" yeni test yaratmaq kimi oxunurdu (canli sual).
-          Burada hazir test secilib qrupa verilir - basliq ve bir cumle
-          bunu deyir.  */
-      "<h2>Hazır testi tapşır</h2>" +
-      '<p class="muted" style="margin:-6px 0 10px">Hazır testi seçin, kimə və nə vaxta ' +
-        "qədər — şagirdin siyahısına düşür. Eyni test bir neçə qrupa verilə bilər.</p>" +
-      '<details class="more tkind"><summary>Hansı test nə vaxt?</summary>' +
-        '<ul class="muted">' +
-          "<li><b>Hazır test və öz testiniz</b> — bu ekran: seçin, tapşırın.</li>" +
-          "<li><b>Ev tapşırığı</b> — dərs planında mövzunu «Keçildi» edəndə sistem özü təklif edir.</li>" +
-          "<li><b>Diaqnostik test</b> — yeni şagird nəyi bilmir: şagirdin hesabatında.</li>" +
-          "<li><b>Səhvlərdən təkrar</b> — şagirdin öz səhvlərindən: şagirdin hesabatında.</li>" +
-        "</ul></details>" +
-      '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>' +
-      '<div class="spacer"></div>' +
-      /* Bu ekran test YARATMIR - hazir testi qrupa yoneldir.
-         Muellimler bunu qarisdirirdi: siyahida yalniz kohneler
-         gorunurdu, yenisini haradan yigmagi ekran demirdi. */
+      /*  Ayar isin ozu deyil - ekranin altinda durur.  */
       '<div class="card tight">' +
-        '<p class="muted" style="margin:0 0 12px">Uyğun test yoxdursa ' +
-          "yenisini yığın — hazır olan kimi bura qayıdıb seçilmiş gələcək.</p>" +
-        '<button class="btn wide" id="btnGenHere">' + ic("gen") +
-          "Yeni test yığ</button>" +
+        '<div class="swrap"><label class="switch" for="fp">' +
+          '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
+          '<span class="track"><i></i></span>' +
+          "<span><b>Sərbəst məşq</b>" +
+            '<span class="muted">Açıqdırsa şagird hazır bankın digər testlərini də ' +
+              "istədiyi vaxt işləyə bilər. Bağlasanız yalnız verdiyiniz " +
+              "tapşırıqları görər.</span></span></label>" +
+        '<div id="fpErr"></div></div>' +
       "</div>"
     );
 
@@ -5314,7 +5318,7 @@
     if (!items.length) {
       return '<div class="empty"><div class="ic">' + ic("clip") + "</div>" +
         "<b>Hələ tapşırıq verilməyib</b>" +
-        "Aşağıdan test seçin — şagirdlər dərhal görəcək.</div>";
+        "Yuxarıdan test seçin — şagirdlər dərhal görəcək.</div>";
     }
     var list = !f ? items : items.filter(function (a) {
       return f === "off" ? a.open === false : a.open !== false;

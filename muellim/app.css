@@ -2295,3 +2295,27 @@ details.stk .l3{margin-top:8px}
 .nxt2{border-left:4px solid var(--brand)}
 .nxt2 .pt{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .nxt2 .pt b{font-size:15px;font-weight:650}
+
+/* =====================================================================
+   ALTLIQ TELEFONDA (2026-09-21)
+
+   Muellim: «gelen muellimlere sehife yorucu ve qeliz gelir».  Olcduk:
+   tund altliq telefonda her ekranin altinda ~450 px yer yeyirdi - marka
+   izahi, iki sutun basligi, uc setrlik komek mətni.  Panelde asagi
+   zolaq onsuz da esas kecidleri verir, ona gore altliq BIR ZOLAGA
+   yigilir: kecidlerin hec biri itmir, sadece basliqlar ve tekrar eden
+   izah gizlenir.  Yalniz panelde (body.bnav-on) - ana sehifeye deymir.
+   ===================================================================== */
+@media (max-width:720px){
+  body.bnav-on .afoot{margin-top:16px;padding:14px 0 12px}
+  body.bnav-on .afoot .in{display:block;padding:0 16px}
+  body.bnav-on .afoot .fb p{display:none}
+  body.bnav-on .afoot .fc b{display:none}
+  body.bnav-on .afoot .brand svg{width:22px;height:22px;flex:0 0 22px}
+  body.bnav-on .afoot .brand b{font-size:13.5px}
+  body.bnav-on .afoot .brand s{display:none}
+  body.bnav-on .afoot .fc{flex-direction:row;flex-wrap:wrap;gap:6px 14px;margin-top:10px}
+  body.bnav-on .afoot .fc a{font-size:12.5px}
+  body.bnav-on .afoot .fc p{flex:1 0 100%;font-size:12.5px;line-height:1.5}
+  body.bnav-on .afoot .c{margin-top:10px;padding-top:8px;font-size:11px}
+}
