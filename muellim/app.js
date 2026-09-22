@@ -2503,13 +2503,32 @@
               isarelenmis ən son ders odur, tekrar idi;
             · «Ev tapşırığı» Tapşırıqlar ekranina aiddir, plana yox.
           Kohne gorunus toxunulmur.  */
+      /*  YENI + plan var: bu gunun dersi PLAN QUTUSUNDA onsuz da yazilib
+          («BU GÜNÜN DƏRSİ · 3. Çıxma · Keçildi»).  Burada onu tekrar
+          etmek movzunun adini iki defe yazmaq idi.  Kart daralir:
+          yalniz ISINME qalir - plan qutusunda olmayan yeganə is.
+          Plan yoxdursa kart hec cixmir: «Planı qur» linki plan
+          qutusunun ozundedir.  */
+      if (YENI && (!d.has_plan || !nx || (!nx.warm_test_id && !d.paid))) {
+        box.innerHTML = ""; return;
+      }
       var h = '<div class="spacer"></div><div class="card prep">' +
         //  16.09 (istifadeci: «dağınıq»): alt yazi cixdi - asagidaki
         //  etiketlerin tekrari idi; fesil ve tarix oz setrinde (.sub)
-        '<div class="pt"><b>' + (YENI ? "Bu günün dərsi" : "Dərsdən əvvəl") + "</b></div>";
-      //  1. novbeti movzu
-      if (!d.has_plan) {
-        h += row("doc", YENI ? "" : "Bu günün dərsi",
+        '<div class="pt"><b>' + (YENI ? "İsinmə testi" : "Dərsdən əvvəl") + "</b></div>";
+      //  1. novbeti movzu - YENI-de movzunun adi plan qutusundadir,
+      //     burada yalniz isinme testi qalir (yuxarida yazildi)
+      if (YENI) {
+        h += '<p class="muted pwt">Dərsdən əvvəl beş sual — ' +
+          "«<b>" + esc(nx.topic) + "</b>» mövzusundan.</p>" +
+          (nx.warm_test_id
+            ? '<div class="warmline"><span class="wres">' + (nx.warm_takers
+                ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird"
+                : "verilib") + '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəqə bax</a></div>'
+            : '<button class="btn go wide" id="prepWarm" data-item="' + esc(nx.item_id) + '">' +
+              ic("gen") + "İsinmə testini hazırla</button>");
+      } else if (!d.has_plan) {
+        h += row("doc", "Bu günün dərsi",
           '<span class="muted">Dərs planı yoxdur. Plan qursanız bu günün dərsi və hazır test burada olacaq. ' +
           '<a href="#" id="prepPlan">Planı qur</a></span>');
       } else if (nx) {
@@ -2518,7 +2537,7 @@
             duranda goz onlari BIR cumle kimi oxuyurdu.  Indi movzu
             yuxarida, isinme altda - ne oldugu da yazilir: «dərsdən
             əvvəl 5 sual».  */
-        h += row("doc", YENI ? "" : "Bu günün dərsi", "<b>" + esc(nx.topic) + "</b>" +
+        h += row("doc", "Bu günün dərsi", "<b>" + esc(nx.topic) + "</b>" +
           //  «3/7» neyin 3-u idi, bilinmirdi - indi «fəsli · dərs 3/7»
           (nx.group ? '<s class="muted sub">«' + esc(nx.group) + "» fəsli · dərs&nbsp;" + nx.gpos + "/" + nx.gtotal + "</s>" : "") +
           //  135: isinme - dersden evvel 5 sual
@@ -2532,7 +2551,7 @@
                   '<button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">Hazırla</button></div>'
                 : "")));
       } else {
-        h += row("doc", YENI ? "" : "Bu günün dərsi", '<span class="muted">Plan tam keçilib. 🎉</span>');
+        h += row("doc", "Bu günün dərsi", '<span class="muted">Plan tam keçilib. 🎉</span>');
       }
       //  2. son kecilen - YENI-de plan siyahisinda gorunur, tekrar etmirik
       if (ls && !YENI) {
@@ -2594,14 +2613,14 @@
           (d.open && pend.length) || (hw && und.length) ? "pwarn" : "");
       }
       //  4. addimlar
-      h += '<div class="pbtns">' +
-        (ls && d.paid
+      h += (YENI ? "" : '<div class="pbtns">') +
+        (!YENI && ls && d.paid
           //  suallar fesle baglidir - duymede fesil adi (alt movzu deyil)
           ? '<button class="btn sm" id="prepGen">' + ic("gen") + "«" + esc(ls.group || ls.topic) + "» testi yığ</button>"
           : "") +
         (YENI ? ""
               : '<button class="btn sm ghost" id="prepAsg">' + ic("clip") + "Tapşırıq ver</button>") +
-      "</div></div>";
+      (YENI ? "</div>" : "</div></div>");
       box.innerHTML = h;
       on("prepAsg", "click", function () { nav("#/a/" + g.id); });
       on("prepWarm", "click", function () {

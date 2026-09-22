@@ -95,8 +95,24 @@ with sync_playwright() as pw:
     h = p.evaluate("document.body.scrollHeight")
     print("SAGIRDLER: %d px · %d setir" % (h, p.locator("#stu .mrow").count()))
     p.screenshot(path=OUT + "/sagirdler.png", full_page=True)
+    #  ---- ders plani qururuq ki, «Bu gunun dersi» real gorunsun
+    gid0 = cls[0]["id"]
+    riy = q("select id from public.subjects where slug='riyaziyyat'", one=True)["id"]
+    lev = q("select id from public.levels where code='3'", one=True)["id"]
+    pid = q("insert into public.class_plans (class_id, subject_id, level_id)"
+            " values (%s,%s,%s) returning id", (gid0, riy, lev), one=True)["id"]
+    tps = q("select t.id, t.name from public.topics t"
+            " where t.subject_id=%s and t.level_id=%s"
+            "   and not exists (select 1 from public.topics c where c.parent_id=t.id)"
+            " order by t.sort, t.name limit 7", (riy, lev))
+    for i, t0 in enumerate(tps):
+        #  ilk iki ders kecilib, qalanlari yox
+        q("insert into public.class_plan_items (plan_id, topic_id, ord, done_at)"
+          " values (%s,%s,%s, case when %s then now() - interval '3 days' end)",
+          (pid, t0["id"], i + 1, i < 2))
+
     #  ---- ders plani bolmesi
-    p.goto(PANEL + "#/g/" + str(gid) + "/p"); p.reload()
+    p.goto(PANEL + "#/g/" + str(gid0) + "/p"); p.reload()
     p.wait_for_selector("#prep .prep, #planBox", timeout=30000); p.wait_for_timeout(1500)
     print("DERS PLANI:", p.inner_text("#main")[:160].replace("\n", " | "))
     p.screenshot(path=OUT + "/plan.png", full_page=True)

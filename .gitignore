@@ -8,3 +8,6 @@ pgdata/
 # yig.sh-in aleti (esbuild) - repoya girmir
 node_modules/
 package-lock.json
+
+# maket sehifeleri (yalniz yerli baxis ucun)
+muellim/_nusxe_*.html
