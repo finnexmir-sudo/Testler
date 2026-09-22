@@ -31,19 +31,20 @@
 --  («çıxan» qalmir, «azalan» ise artiq var) - ikinci defe surusme olmur.
 -- =====================================================================
 
---  ---------- ADDIM 0: TOQQUSMA YOXLAMASI ----------
---  BUNU HAMISINDAN EVVEL ISLED.  BOS QAYITMALIDIR.
+--  ---------- ADDIM 1: ONBAXIS + TOQQUSMA YOXLAMASI ----------
+--  BIR sorgudur, BIR netice cedveli verir.
 --
---  Tehluke onbaxisda GORUNMUR: sualda hem «Azalan», hem «Çıxılan»
---  variantlari varsa, «Çıxılan» -> «Azalan» olur ve iki EYNI variant
---  yaranir.  «Azalan» variantı deyismediyi ucun onbaxis onu
---  gostermir - bu sorgu ise sayla tutur.
---  Setir qayidarsa DAYAN: hemin sualin variantlarini el ile duzelt.
-
---  TOQQUSMA YOXLAMASI: evezlemeden sonra IKI VARIANT eyni olmur ki?
---  Tehluke: sualda hem «Azalan», hem «Çıxılan» variantlari varsa,
---  «Çıxılan» -> «Azalan» olur ve IKI EYNI VARIANT yaranir.  Bele setir
---  onbaxisda GORUNMUR, cunki «Azalan» variantı deyismir.
+--  NIYE BIR YERDE?  Supabase SQL Editor yalniz SONUNCU sorgunun
+--  neticesini gosterir.  Ayri-ayri yazanda birincinin cavabi
+--  sessizce udulurdu - istifadeci toqqusma yoxlamasini hec gormedi.
+--
+--  Neticenin BIRINCI setri «0-YOXLAMA»-dir:
+--    «toqquşma yoxdur»  -> davam et
+--    «N TOQQUŞMA VAR»    -> DAYAN, asagidaki «toqqusma» setirlerine bax
+--
+--  Toqqusma nedir: sualda hem «Azalan», hem «Çıxılan» variantı varsa,
+--  «Çıxılan» -> «Azalan» olur ve IKI EYNI variant yaranir.  «Azalan»
+--  deyismediyi ucun adi onbaxisda gorunmur - ona gore ayrica sayilir.
 with hedef as (
   select q.id, q.body,
          coalesce((select string_agg(o.body, ' ') from public.question_options o
@@ -51,65 +52,6 @@ with hedef as (
     from public.questions q
     join public.subjects s on s.id = q.subject_id
    where s.slug = 'riyaziyyat' and q.status <> 'archived'
-),
-istisna as (
-  select unnest(array[
-    '4b2274ba-8669-4d88-add4-3267903c0e69',
-    '9d8fe6ac-cdca-4d89-b494-c88cbaf09d82',
-    '28561de0-8b68-4c8a-ac50-18903c616050'
-  ]::uuid[]) as id
-),
-secim as (
-  select id from hedef
-   where ((body || ' ' || opt) ~ '[Çç][ıi]xan'
-      or ((body || ' ' || opt) ~* '[Çç][ıi]x[ıi]lan'
-          and (body || ' ' || opt) ~* 'f[əe]rq'
-          and (body || ' ' || opt) !~* 'azalan'))
-     and id not in (select id from istisna)
-),
-say as (
-  select o.question_id,
-         count(*)                         as variant_sayi,
-         count(distinct o.body)           as indi_ferqli,
-         count(distinct replace(replace(replace(replace(
-           o.body, 'Çıxılan', 'Azalan'), 'çıxılan', 'azalan'),
-                 'Çıxan',   'Çıxılan'), 'çıxan',   'çıxılan')) as sonra_ferqli
-    from public.question_options o
-   where o.question_id in (select id from secim)
-   group by o.question_id
-)
-select 'TOQQUSMA' as hal, s.question_id,
-       (select body from public.questions where id = s.question_id) as sual,
-       s.indi_ferqli, s.sonra_ferqli
-  from say s
- where s.sonra_ferqli < s.indi_ferqli;
-
-
---  ---------- ISTISNALAR ----------
---  Onbaxis oz isini gordu: 28 setrin UCUNDE «çıxan» TERMIN DEYIL,
---  adi feildir.  Bunlari avtomatik ayirmaq mumkun deyil - «Çıxanı
---  tapaq: 50 - x = 18» deyismelidir, «S noqtesinden cixan iki sua»
---  ise yox; ferqi ancaq insan gorur.  Ona gore ad-bad siyahi:
---
---    4b2274ba  «S nöqtəsindən ÇIXAN iki şüa...»      (11-ci sinif, həndəsə)
---              - şüa nöqtədən «çıxır», çıxılmır
---    9d8fe6ac  «Sinuslar teoremindən ÇIXAN nəticə»   (nəticə teoremdən çıxır)
---    28561de0  variant: «Sıfırı ÇIXANDA ədəd dəyişmir»
---              - «çıxanda» feildir; «çıxılanda» qrammatik deyil
---
---  YENI ISTISNA LAZIM OLSA: id-ni bu siyahiya elave et, vessalam.
-
---  ---------- ADDIM 1: ONBAXIS (hec ne deyismir) ----------
-with hedef as (
-  select q.id, q.body,
-         --  suala aid variantlarin metni de yoxlanilir: qusur bezen
-         --  yalniz cavabda olur («fərq çıxılana bərabərdir»)
-         coalesce((select string_agg(o.body, ' ') from public.question_options o
-                    where o.question_id = q.id), '') as opt
-    from public.questions q
-    join public.subjects s on s.id = q.subject_id
-   where s.slug = 'riyaziyyat'
-     and q.status <> 'archived'
 ),
 istisna as (
   select unnest(array[
@@ -127,14 +69,38 @@ secim as (
      and id not in (select id from istisna)
 ),
 --  kok evezlemesi: evvel cixilan -> azalan, SONRA cixan -> cixilan
-duz as (
-  select id, body as evvel,
-         replace(replace(replace(replace(
-           body, 'Çıxılan', 'Azalan'), 'çıxılan', 'azalan'),
-                 'Çıxan',   'Çıxılan'), 'çıxan',   'çıxılan') as sonra
-    from secim
+toqq as (
+  select o.question_id,
+         count(distinct o.body) as indi,
+         count(distinct replace(replace(replace(replace(
+           o.body, 'Çıxılan', 'Azalan'), 'çıxılan', 'azalan'),
+                 'Çıxan',   'Çıxılan'), 'çıxan',   'çıxılan')) as sonra
+    from public.question_options o
+   where o.question_id in (select id from secim)
+   group by o.question_id
+  having count(distinct o.body) > count(distinct replace(replace(replace(replace(
+           o.body, 'Çıxılan', 'Azalan'), 'çıxılan', 'azalan'),
+                 'Çıxan',   'Çıxılan'), 'çıxan',   'çıxılan'))
 )
-select 'sual' as ne, evvel, sonra, id from duz where evvel <> sonra
+select '0-YOXLAMA' as ne,
+       case when (select count(*) from toqq) = 0
+            then 'toqquşma yoxdur — davam et'
+            else (select count(*) from toqq)::text || ' TOQQUŞMA VAR — DAYAN' end as evvel,
+       (select count(*) from secim)::text || ' sual seçilib' as sonra,
+       null::uuid as id
+union all
+select 'toqqusma', 'variantlar birləşir: ' || t.indi::text || ' → ' || t.sonra::text,
+       (select body from public.questions where id = t.question_id), t.question_id
+  from toqq t
+union all
+select 'sual', body,
+       replace(replace(replace(replace(
+         body, 'Çıxılan', 'Azalan'), 'çıxılan', 'azalan'),
+               'Çıxan',   'Çıxılan'), 'çıxan',   'çıxılan'), id
+  from secim
+ where body <> replace(replace(replace(replace(
+         body, 'Çıxılan', 'Azalan'), 'çıxılan', 'azalan'),
+               'Çıxan',   'Çıxılan'), 'çıxan',   'çıxılan')
 union all
 select 'variant', o.body,
        replace(replace(replace(replace(
