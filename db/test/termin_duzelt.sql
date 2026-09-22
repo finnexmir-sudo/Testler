@@ -31,6 +31,60 @@
 --  («çıxan» qalmir, «azalan» ise artiq var) - ikinci defe surusme olmur.
 -- =====================================================================
 
+--  ---------- ADDIM 0: TOQQUSMA YOXLAMASI ----------
+--  BUNU HAMISINDAN EVVEL ISLED.  BOS QAYITMALIDIR.
+--
+--  Tehluke onbaxisda GORUNMUR: sualda hem «Azalan», hem «Çıxılan»
+--  variantlari varsa, «Çıxılan» -> «Azalan» olur ve iki EYNI variant
+--  yaranir.  «Azalan» variantı deyismediyi ucun onbaxis onu
+--  gostermir - bu sorgu ise sayla tutur.
+--  Setir qayidarsa DAYAN: hemin sualin variantlarini el ile duzelt.
+
+--  TOQQUSMA YOXLAMASI: evezlemeden sonra IKI VARIANT eyni olmur ki?
+--  Tehluke: sualda hem «Azalan», hem «Çıxılan» variantlari varsa,
+--  «Çıxılan» -> «Azalan» olur ve IKI EYNI VARIANT yaranir.  Bele setir
+--  onbaxisda GORUNMUR, cunki «Azalan» variantı deyismir.
+with hedef as (
+  select q.id, q.body,
+         coalesce((select string_agg(o.body, ' ') from public.question_options o
+                    where o.question_id = q.id), '') as opt
+    from public.questions q
+    join public.subjects s on s.id = q.subject_id
+   where s.slug = 'riyaziyyat' and q.status <> 'archived'
+),
+istisna as (
+  select unnest(array[
+    '4b2274ba-8669-4d88-add4-3267903c0e69',
+    '9d8fe6ac-cdca-4d89-b494-c88cbaf09d82',
+    '28561de0-8b68-4c8a-ac50-18903c616050'
+  ]::uuid[]) as id
+),
+secim as (
+  select id from hedef
+   where ((body || ' ' || opt) ~ '[Çç][ıi]xan'
+      or ((body || ' ' || opt) ~* '[Çç][ıi]x[ıi]lan'
+          and (body || ' ' || opt) ~* 'f[əe]rq'
+          and (body || ' ' || opt) !~* 'azalan'))
+     and id not in (select id from istisna)
+),
+say as (
+  select o.question_id,
+         count(*)                         as variant_sayi,
+         count(distinct o.body)           as indi_ferqli,
+         count(distinct replace(replace(replace(replace(
+           o.body, 'Çıxılan', 'Azalan'), 'çıxılan', 'azalan'),
+                 'Çıxan',   'Çıxılan'), 'çıxan',   'çıxılan')) as sonra_ferqli
+    from public.question_options o
+   where o.question_id in (select id from secim)
+   group by o.question_id
+)
+select 'TOQQUSMA' as hal, s.question_id,
+       (select body from public.questions where id = s.question_id) as sual,
+       s.indi_ferqli, s.sonra_ferqli
+  from say s
+ where s.sonra_ferqli < s.indi_ferqli;
+
+
 --  ---------- ISTISNALAR ----------
 --  Onbaxis oz isini gordu: 28 setrin UCUNDE «çıxan» TERMIN DEYIL,
 --  adi feildir.  Bunlari avtomatik ayirmaq mumkun deyil - «Çıxanı
