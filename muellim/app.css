@@ -218,8 +218,14 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
   padding:6px;color:var(--fg-2);display:inline-flex;border-radius:8px}
 .bellbtn:hover{color:var(--brand);background:var(--n-100)}
 .bellbtn svg{width:19px;height:19px}
-.bellbtn i{position:absolute;top:5px;right:5px;width:8px;height:8px;
-  border-radius:99px;background:var(--err);border:1.5px solid var(--surface)}
+/*  22.09 (istifadeci): «bildiris ikonunda 1, 2 yazilmalidir».  Evvel
+    8px-lik nisan idi - «nese var» deyirdi, «NECE» demirdi.  Indi say
+    yazilir; ona gore en sabit deyil, mezmuna gore acilir.  */
+.bellbtn i{position:absolute;top:1px;right:0;min-width:16px;height:16px;
+  padding:0 4px;border-radius:99px;background:var(--err);color:#fff;
+  border:1.5px solid var(--surface);font:600 10.5px/13px var(--font, inherit);
+  font-style:normal;display:inline-flex;align-items:center;
+  justify-content:center;box-sizing:border-box}
 .bellbtn i.hide{display:none}
 .bellbtn.hide{display:none}
 

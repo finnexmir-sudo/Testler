@@ -135,23 +135,29 @@ python3 test/e2e_tovsiye.py
 echo
 #  CLAUDE.md «TEHVILDEN EVVEL - MEXANIKI SIYAHI» 1-ci bendi: setirin
 #  vedi ile apardigi yer uyusmalidir.  Bu, href-i OXUMUR - basir.
-echo "37/40 kecid auditi - her setir ved etdiyi yere aparir"
+echo "37/41 kecid auditi - her setir ved etdiyi yere aparir"
 python3 test/e2e_kecid.py
 echo
 #  Istifadeci: «geri niye getmir? iki sehife arasinda qalib» - duymedeki
 #  «Geri» ile BRAUZERIN geri duymesi bir-birine dolasmamalidir.
-echo "38/40 geri auditi - duyme ve brauzer dovr yaratmir"
+echo "38/41 geri auditi - duyme ve brauzer dovr yaratmir"
 python3 test/e2e_geri.py
 echo
 #  Qizbest muellim: «Bezi movzularda testler yoxdur» - 3480 plan
 #  setrinin 2846-sinda «test yig» yoxdur (suallar fesil hovuzundandir).
 #  Duyme olmayanda setir SEBEBI yazmalidir, bos qalmamalidir.
-echo "39/40 plan setri - duyme yoxdursa sebeb yazilir"
+echo "39/41 plan setri - duyme yoxdursa sebeb yazilir"
 python3 test/e2e_plan_gozle.py
 echo
 #  Qizbest muellimin reyi MEHZ bu ekrandan gelib (feedback.page).
 #  Kohne metn «bu sinif materiallari elave olunmayib» deyirdi ve sinfi
 #  deyismeyi teklif edirdi - ikisi de yanlis.  Bank doludur, hazir
 #  platforma testi ise hec vaxt olmayib; duz cixis generatordur.
-echo "40/40 tapsiriq ekrani - bos siyahi duz yere yonlendirir"
+echo "40/41 tapsiriq ekrani - bos siyahi duz yere yonlendirir"
 python3 test/e2e_tapsiriq_bos.py
+echo
+#  Istifadeci: «bildiris ikonunda 1, 2 yazilmalidirki size mektub var».
+#  Zeng evvel yalniz sagird siqnallarini sayirdi - admin mesaji gelende
+#  susurdu.  Hem kohne, hem YENI gorunusde yoxlanilir.
+echo "41/41 zeng nisani - admin mesaji sayilir, zeng onu gosterir"
+python3 test/e2e_zeng_say.py

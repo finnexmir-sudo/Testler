@@ -637,6 +637,10 @@
         sub: "Vaxtı çatmış ev tapşırığı; geriləyən və zəif mövzuda ilişən şagirdlər — avtomatik."
       });
       var h = "";
+      /*  22.09: zeng nisani artiq admin mesajini da sayir - onda ZENGE
+          BASANDA mesaj gorunmelidir, yoxsa say bir yeri gosterir, ekran
+          basqa yeri.  Kart «Bizə yazın»a aparir: cavab orada yazilir.  */
+      h += '<div id="nMsg"></div>';
       //  194: son tarixi bu gun / kecmis, hele etmeyen olan ev tapsiriqlari.
       //  Abuneden asili deyil - ev tapsirigi pulsuzdur.
       if (hwA.length) {
@@ -658,8 +662,32 @@
       //  "Son neticeler" burada tekrar idi (Icmalda var) - cixarildi
       show(h);
       bindAlerts($("nAl"));
+      notifMsg();
       on("btnBack", "click", function () { nav("#/"); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+
+  /*  Siqnallar ekraninda oxunmamis admin mesajlari.  Ayrica sorgu deyil -
+      loadAdminMsg onsuz da rpc_my_messages cagirir ve BELL_MSG-i doldurur;
+      burada eyni sorgunun neticesi setir kimi cizilir.  */
+  function notifMsg() {
+    var live = guard();
+    sb.rpc("rpc_my_messages", {}).then(function (rows) {
+      if (!live()) return;
+      var un = (rows || []).filter(function (r) { return !r.seen_at; });
+      bellMsg(un.length);
+      var box = $("nMsg");
+      if (!box) return;
+      if (!un.length) { box.innerHTML = ""; return; }
+      box.innerHTML = '<div class="card pad0" id="nMsgC"><div class="alh">' +
+        ic("bell") + "Bil10-dan mesaj — " + un.length + " ədəd</div>" +
+        un.map(function (m) {
+          return '<a class="mrow" href="#/bize"><span class="g">' +
+            "<b>" + dateAz(m.at) + "</b><i>" +
+            esc(String(m.body || "").slice(0, 90)) +
+            (String(m.body || "").length > 90 ? "…" : "") + "</i></span></a>";
+        }).join("") + "</div><div class=\"spacer\"></div>";
+    }).catch(function () {});
   }
 
   /* ------------------------------------------------------ «Bizə yazın»
@@ -740,13 +768,14 @@
   }
   function loadAdminMsg() {
     var live = guard();
-    var box = $("adminMsg");
-    if (!box) return;
+    //  Kart yalniz Icmalda var, amma SAY her ekranda lazimdir - ona gore
+    //  sorgu «#adminMsg var?» sertinden ASILI DEYIL.
     sb.rpc("rpc_my_messages", {}).then(function (rows) {
       if (!live()) return;
-      box = $("adminMsg");
-      if (!box) return;
       var un = (rows || []).filter(function (r) { return !r.seen_at; });
+      bellMsg(un.length);
+      var box = $("adminMsg");
+      if (!box) return;
       if (!un.length) { box.innerHTML = ""; return; }
       var m = un[0];
       box.innerHTML = '<div class="card gift amsg" id="amsgCard">' +
@@ -1249,9 +1278,13 @@
       title: "Xoş gəlmisiniz, " + (((CTX.profile && CTX.profile.full_name) || "").split(" ")[0] || "müəllim") + "!",
       sub: "<span id=\"ySub\">Yüklənir…</span>", subId: null
     });
-    show('<div id="yBas"></div><div id="yDiq"></div>' +
+    /*  22.09: «Bil10-dan mesaj» karti yalniz KOHNE Icmalda var idi
+        (#adminMsg + loadAdminMsg).  Yeni Icmala kocurulmemisdi - yeni
+        gorunus acilanda butun admin mesajlari gorunmez olardi.  */
+    show('<div id="adminMsg"></div><div id="yBas"></div><div id="yDiq"></div>' +
          '<div class="card pad0 menu" id="yMenu"><div class="skel">Yüklənir…</div></div>' +
          '<div id="yBax"></div>');
+    loadAdminMsg();
     var live = guard();
     homeData().then(function (v) {
       if (!live() || !$("yMenu")) return;
@@ -10666,10 +10699,26 @@
   btnFb.innerHTML = ic("pen") + "<span>Bizə yaz</span>";
   topWho.parentNode.insertBefore(btnFb, btnBell);
   btnFb.addEventListener("click", function () { nav("#/bize"); });
-  function bellDot(n) {
+  /*  22.09 (istifadeci): «bildiris ikonunda 1, 2 yazilmalidirki size
+      mektub var».  Evvel yalniz nisan idi ve YALNIZ sagird siqnallarini
+      sayirdi - admin mesaji gelende zeng susurdu, muellim «Bizə yaz»a
+      girmeyene qeder xeberi olmurdu.  Indi iki menbe toplanir ve SAY
+      yazilir.  */
+  var BELL_AL = 0, BELL_MSG = 0;
+  function bellPaint() {
     var d = $("bellDot");
-    if (d) d.classList.toggle("hide", !(Number(n) > 0));
+    if (!d) return;
+    var n = (Number(BELL_AL) || 0) + (Number(BELL_MSG) || 0);
+    d.textContent = n > 9 ? "9+" : (n > 0 ? String(n) : "");
+    d.classList.toggle("hide", !(n > 0));
+    if (btnBell) {
+      btnBell.title = n > 0
+        ? "Siqnallar — " + n + (BELL_MSG > 0 ? " (Bil10-dan mesaj var)" : "")
+        : "Siqnallar";
+    }
   }
+  function bellDot(n) { BELL_AL = Number(n) || 0; bellPaint(); }
+  function bellMsg(n) { BELL_MSG = Number(n) || 0; bellPaint(); }
 
   var bnav = document.createElement("nav");
   bnav.id = "bnav";
