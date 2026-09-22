@@ -15,7 +15,21 @@ def q(sql, args=None, one=False):
 #  Paylasilan bazani ARDIMIZCA temiz qoyuruq - yoxsa e2e_panel kimi
 #  skriptler «hesab artiq var» halina dusur (auth.users-i silmirler).
 def temizle():
-    q("""delete from public.subscriptions; delete from public.students;
+    #  Muellimin OZ testleri ve suallari da gedir: auth.users silinende
+    #  kaskad questions-a catir, amma test_questions onlari tutub saxlayir
+    #  (FK xetasi).  Ona gore evvelce testler, sonra hesablar silinir.
+    q("""delete from public.attempt_answers where attempt_id in (
+             select a.id from public.attempts a
+              join public.tests t on t.id = a.test_id
+             where t.owner_type = 'educator');
+           delete from public.attempts where test_id in (
+             select id from public.tests where owner_type = 'educator');
+           delete from public.assignments where test_id in (
+             select id from public.tests where owner_type = 'educator');
+           delete from public.test_questions where test_id in (
+             select id from public.tests where owner_type = 'educator');
+           delete from public.tests where owner_type = 'educator';
+           delete from public.subscriptions; delete from public.students;
            delete from public.classes; delete from public.account_members;
            delete from public.accounts; delete from public.user_roles;
            delete from auth.users;""")
@@ -137,10 +151,11 @@ with sync_playwright() as pw:
     p.screenshot(path=OUT + "/icmal_zeif.png", full_page=True)
     #  setri OZUMUZ basiriq - href-i oxumaq yoxlamaq deyil
     p.locator("#yDiq .mrow").filter(has_text="zəif gedir").first.click()
-    p.wait_for_selector("#rtab-m .mrow", timeout=30000); p.wait_for_timeout(1500)
+    p.wait_for_selector("#zmBox .mrow", timeout=30000); p.wait_for_timeout(1200)
     print("  -> ", p.evaluate("location.hash"))
-    print("  -> movzular:", p.inner_text("#rtab-m")[:170].replace("\n", " | "))
-    p.screenshot(path=OUT + "/zeif_movzular.png", full_page=True)
+    print("  -> zeif sagirdler:", (p.inner_text("#band") + " | " +
+          p.inner_text("#zmBox")).replace("\n", " | ")[:200])
+    p.screenshot(path=OUT + "/zeif_sagirdler.png", full_page=True)
     #  ---- SESSIZ SAGIRDLER: Icmaldaki setir indi adlari gosterir
     p.goto(PANEL + "#/sus"); p.reload()
     p.wait_for_selector("#suBox .mrow, #suBox .empty", timeout=30000); p.wait_for_timeout(900)

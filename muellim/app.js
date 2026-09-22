@@ -675,7 +675,7 @@
                  ["sual", "Sual"], ["tesekkur", "Təşəkkür"]];
   var FB_ST = { "new": "Yeni", seen: "Baxılıb", planned: "Planda",
                 done: "Edilib", closed: "Bağlı" };
-  var FB_PAGE = { "": "İcmal", g: "Qrup", r: "Qrup hesabatı", a: "Tapşırıq", nt: "Nəticələr", sus: "Səssiz şagirdlər",
+  var FB_PAGE = { "": "İcmal", g: "Qrup", r: "Qrup hesabatı", a: "Tapşırıq", nt: "Nəticələr", sus: "Səssiz şagirdlər", zm: "Zəif şagirdlər",
                   b: "Sual bankı", gen: "Test yığ", t: "Test vərəqi", p: "Paket",
                   adm: "İdarəetmə", n: "Siqnallar", q: "Sual", s: "Şagird hesabatı" };
   function fbKind(k) {
@@ -1310,18 +1310,16 @@
         alt: "test göndərin və ya xatırladın", cip: "diqqət", cipCls: "pvl" }));
     }
     if (tp && tp.name) {
-      /*  Setir «5 şagird» deyirdi, ADLARI yazmirdi ve basilanda qrup
-          hesabatinin SAGIRDLER sekmesi acilirdi - istifadeci: «5 şagird
-          kimdir? hanı?»  Adlar onsuz da cavabin icindedir (topics[].weak),
-          indi setirde yazilir; kecid ise MOVZULAR sekmesine gedir - orada
-          hemin movzu oz sagirdleri ile durur.  */
-      var tw = tp.weak || [];
-      d.push(yRow({ ic: "refresh", href: "#/r/" + esc(tp.class_id || "") + "/m",
+      /*  Istifadeci: «ilkində say ver, açılanda həmin şagirdləri
+          göstərsin».  Setirde SAY yazilir, kecid ise hemin sagirdleri
+          sadalayan sehifeye gedir (#/zm).  Evvel qrup hesabatina
+          aparirdi: setir 5 deyirdi, orada 7 yazilirdi - iki ayri
+          qayda idi (220).  Indi ikisi de eyni sorgudan gelir.  */
+      var wn = (tp.weak || []).length || Number(tp.weak_n) || 0;
+      d.push(yRow({ ic: "refresh",
+        href: "#/zm/" + esc(tp.class_id || "") + "/" + esc(tp.id || ""),
         ad: "«" + tp.name + "» zəif gedir",
-        alt: (tw.length
-          ? tw.slice(0, 3).map(function (x) { return firstName(x.name) || x.name; }).join(", ") +
-            (tw.length > 3 ? " və daha " + (tw.length - 3) : "") + " · təkrar testi göndərin"
-          : (Number(tp.weak_n) || 0) + " şagird · təkrar testi göndərin"),
+        alt: wn + " şagird · təkrar testi göndərin",
         cip: pct(tp.ratio) + "%", cipCls: "pvm" }));
     }
     if (gun !== null && gun <= 7) {
@@ -1539,6 +1537,58 @@
     }, function (e) {
       if (!live() || !$("suBox")) return;
       $("suBox").innerHTML = '<div class="card">' + msg("warn", fail(e)) + "</div>";
+    });
+  }
+
+  /*  ZEIF SAGIRDLER - BIR MOVZU UZRE (#/zm/<qrup>/<movzu>)
+      Istifadeci: «ilkinde say ver, açılanda həmin şagirdləri göstərsin».
+      Evvel Icmal setri «5 şagird» deyirdi, qrup hesabatini acirdi, orada
+      «7 şagird» yazilirdi - iki ayri qayda idi (220-ye bax).  Indi setir
+      de, bu sehife de EYNI sorgudan gelir: say ile siyahi ust-uste dusur.  */
+  function screenTopicWeak(gid, tid) {
+    topTitle.textContent = "Zəif şagirdlər";
+    show('<div id="zmBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>');
+    var live = guard();
+    sb.rpc("rpc_topic_weak", { p_class_id: gid, p_topic_id: tid }).then(function (d) {
+      if (!live() || !$("zmBox")) return;
+      d = d || {};
+      var tp = d.topic || {}, st = d.students || [], cl = d["class"] || {};
+      bandHead({
+        back: { id: "zmBack", label: "Geri" }, eye: "Zəif şagirdlər",
+        title: tp.name || "Mövzu",
+        sub: esc(cl.name || "") + (d.ratio !== null && d.ratio !== undefined
+          ? " · qrup ortalaması " + pct(d.ratio) + "%" : "")
+      });
+      on("zmBack", "click", function () { goBack("#/"); });
+      if (!st.length) {
+        $("zmBox").innerHTML = '<div class="card pad0"><div class="empty">' +
+          '<div class="ic">' + ic("check") + "</div>" +
+          "<b>Zəif şagird yoxdur</b>Bu mövzuda hamı 60%-dən yuxarı yazıb.</div></div>";
+        return;
+      }
+      /*  Setir ne deyir: kim · bu movzuda nece sualdan nece duz · faiz.
+          «4 / 11 düz» faizden durustdur - muellim az cavabla cixarilan
+          faize inanmir, ona gore ham reqem de yazilir.  */
+      $("zmBox").innerHTML =
+        ySec(st.length + " şagird · 60%-dən aşağı") +
+        '<div class="card pad0 menu">' + st.map(function (s) {
+          var r = pct(s.ratio);
+          return '<a class="mrow" href="#/s/' + esc(s.id) + "/" + esc(gid) + '">' +
+            av(s.name) +
+            '<span class="g"><b>' + esc(s.name) + "</b>" +
+              "<i>" + s.ok + " / " + s.n + " düz</i>" +
+              '<span class="rbar"><i class="' + pctCls(r) + '" style="width:' + r + '%"></i></span>' +
+            "</span>" +
+            '<span class="pctv ' + pvCls(r) + '">' + r + "%</span>" +
+            ic("right", "ar") + "</a>";
+        }).join("") + "</div>" +
+        '<div class="spacer"></div>' +
+        '<button class="btn go wide" id="zmGen">' + ic("gen") +
+          "Bu mövzudan təkrar testi yığ</button>";
+      on("zmGen", "click", function () { remedialGen(gid, [tp]); });
+    }, function (e) {
+      if (!live() || !$("zmBox")) return;
+      $("zmBox").innerHTML = '<div class="card">' + msg("warn", fail(e)) + "</div>";
     });
   }
 
@@ -10525,7 +10575,7 @@
   var HIST = [], BACKING = false, CUR_I = 0;
   function routeTitle(h) {
     var k = (h || "#/").replace(/^#/, "").split("/").filter(Boolean)[0] || "";
-    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ", nt: "Nəticələr", sus: "Səssiz şagirdlər",
+    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ", nt: "Nəticələr", sus: "Səssiz şagirdlər", zm: "Zəif şagirdlər",
              t: "Vərəq", pk: "Dərs paketi", adm: "İdarəetmə", me: "Profil", n: "Bildirişlər", bize: "Bizə yazın",
              q: "Sual", s: "Şagird", p: "Paket", demo: "Nümunə" }[k] || "Əsas səhifə";
   }
@@ -10664,9 +10714,10 @@
       PREV_HASH = CUR_HASH; CUR_HASH = location.hash || "#/";
     }
     //  qrup, hesabat, tapsiriq ekranlari da «Qruplar» bendinin altindadir
-    bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", nt: "gs", sus: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
+    bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", nt: "gs", sus: "gs", zm: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "nt") return YENI ? screenResults() : nav("#/");
     if (m[0] === "sus") return YENI ? screenSilent() : nav("#/");
+    if (m[0] === "zm" && m[1] && m[2]) return YENI ? screenTopicWeak(m[1], m[2]) : nav("#/r/" + m[1]);
     if (m[0] === "gs") return screenGroups();
     if (m[0] === "g" && m[1]) return screenGroup(m[1], m[2]);
     if (m[0] === "r" && m[1]) return screenReport(m[1], false, m[2]);

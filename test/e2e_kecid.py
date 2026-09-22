@@ -19,7 +19,21 @@ def q(sql, args=None, one=False):
 #  Paylasilan bazani ARDIMIZCA temiz qoyuruq - yoxsa e2e_panel kimi
 #  skriptler «hesab artiq var» halina dusur (auth.users-i silmirler).
 def temizle():
-    q("""delete from public.subscriptions; delete from public.students;
+    #  Muellimin OZ testleri ve suallari da gedir: auth.users silinende
+    #  kaskad questions-a catir, amma test_questions onlari tutub saxlayir
+    #  (FK xetasi).  Ona gore evvelce testler, sonra hesablar silinir.
+    q("""delete from public.attempt_answers where attempt_id in (
+             select a.id from public.attempts a
+              join public.tests t on t.id = a.test_id
+             where t.owner_type = 'educator');
+           delete from public.attempts where test_id in (
+             select id from public.tests where owner_type = 'educator');
+           delete from public.assignments where test_id in (
+             select id from public.tests where owner_type = 'educator');
+           delete from public.test_questions where test_id in (
+             select id from public.tests where owner_type = 'educator');
+           delete from public.tests where owner_type = 'educator';
+           delete from public.subscriptions; delete from public.students;
            delete from public.classes; delete from public.account_members;
            delete from public.accounts; delete from public.user_roles;
            delete from auth.users;""")
@@ -164,12 +178,24 @@ with sync_playwright() as pw:
             #  uyusurmu?  Setirde «X» varsa, X hemin sehifede GORUNMELIDIR.
             #  (Istifadeci: «5 şagird kimdir? hanı?» - setir movzunu ve
             #   sagird sayini yazirdi, acilan sehifede ne biri var idi, ne o biri.)
-            m = re.search("\u00ab([^\u00bb]{3,60})\u00bb", ad)
-            if m:
-                p.wait_for_timeout(700)
-                if m.group(1) not in p.inner_text("#main"):
-                    XETA.append(unvan + " : setir «" + m.group(1) +
-                                "» ved edir, acilan sehifede yoxdur (" + h + ")")
+            p.wait_for_timeout(700)
+            #  ad bezen ZOLAQDA olur (sehifenin basligi), bezen govdede -
+            #  ikisine de baxilir
+            mtn = p.inner_text("#band") + " " + p.inner_text("#main")
+            m = re.search("«([^»]{3,60})»", ad)
+            if m and m.group(1) not in mtn:
+                XETA.append(unvan + " : setir «" + m.group(1) +
+                            "» ved edir, acilan sehifede yoxdur (" + h + ")")
+            #  Istifadeci: «ilkinde say ver, acilanda hemin sagirdleri
+            #  gostersin».  Setirde «N sagird» varsa, acilan sehifede
+            #  DEQIQ N setir olmalidir - 5 deyib 7 gostermek olmaz.
+            ms = re.search(r"(\d+)\s+şagird", ad)
+            if ms and (h.startswith("#/sus") or h.startswith("#/zm")):
+                say = int(ms.group(1))
+                var = p.locator("#suBox .mrow, #zmBox .mrow").count()
+                if var != say:
+                    XETA.append(unvan + " : setir " + str(say) + " şagird deyir, "
+                                "acilan sehifede " + str(var) + " setir var (" + h + ")")
         return cix
 
     print("\n=== KECID AUDITI ===")
