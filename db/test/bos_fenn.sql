@@ -1,45 +1,53 @@
 -- =====================================================================
---  bos_fenn.sql : BANK ORTUYU - FENN x SINIF
+--  bos_fenn.sql : BANK ORTUYU - FESIL SEVIYYESINDE
 --
---  bos_movzular.sql adbaad siyahi verir (minlerle setir, oxunmur).
---  Bu sorgu hemin sayimi fenn ve sinif uzre yigir: bir bax, hansi
---  fennin hansi sinfi bos - novbeti bank isi oradadir.
+--  BU FAYLIN BIRINCI VARIANTI YANLIS IDI - OXU, TEKRARLAMA
+--  22.09-da bu sorgu «yarpaq movzuda en azi 5 sual olmalidir» ferziyyesi
+--  ile yazildi ve «3313 movzu BOS», «Riyaziyyat 1 → 0%» dedi.
+--  Ferziyye yanlisdir.  101_ders_plani_alt.sql-de qesden yazilib:
+--  sual hovuzu FESILDEDIR, alt movzunun oz sualı yoxdur - alt movzu
+--  plan ritmi ucundur.  «Test yig» fesil bitende cixir ve VALIDEYNIN
+--  movzusundan yigir.  app.diag_topics de parent_id is null ile islyir.
+--  Yani yarpagi bos gormek NORMALDIR, nasazliq deyil.
 --
---  «esl» = e-derslik sehife basliqlari cixarilmis yarpaq movzu sayi.
---  «hazir» = en azi 5 platform sualı olan movzu (generator islek qurur).
---  ORTUK faizi hazir/esl.  0% olan setir muellime «test yoxdur» deyir.
+--  DUZGUN SUAL: muellim bir FESIL ucun test yigmaq isteyende alinir?
+--  Cavab: hemin feslin ALT AGACINDA (ozu + butun alt movzulari)
+--  en azi 5 platform/published sual varmi.
 --
 --  ISTIFADE: Supabase -> SQL Editor -> yapisdir -> Run.  Hec ne deyismir.
+--  0% olan setir muellime «testler yoxdur» deyen yerdir - is oradadir.
 -- =====================================================================
-with sayilmaz(nmn) as (
-  values ('ümumiləşdirici%'), ('%xülasə%'), ('%yada salın%'),
-         ('dəyərləndirmə%'), ('qiymətləndirmə%'), ('%summativ%'),
-         ('sual və tapşırıq%'), ('ilkin yoxlama%'), ('layihə%'),
-         ('steam%'), ('praktik dərs%'), ('elm%texnologiya%həyat%'),
-         ('time to watch%'), ('use of english%'), ('mistake detector%'),
-         ('nə öyrəndik%'), ('özünü yoxla%'), ('öyrəndiklərini%'),
-         ('təkrarlama%'), ('%tapşırıqlar%')
+with recursive nesil as (
+  -- her ust seviyye fesil ucun ozu + butun nesli
+  select t.id as kok, t.id as uzv
+    from public.topics t
+   where t.parent_id is null
+  union all
+  select n.kok, c.id
+    from nesil n
+    join public.topics c on c.parent_id = n.uzv
 ),
-say as (
-  select coalesce(sub.name, '?') as fenn,
+fesil as (
+  select t.id,
+         coalesce(sub.name, '?') as fenn,
          coalesce(lv.code, '?')  as sinif,
          coalesce(lv.sort, 0)    as lsort,
          (select count(*) from public.questions q
-           where q.topic_id = t.id
-             and q.owner_type = 'platform'
-             and q.status = 'published') as n
+           where q.owner_type = 'platform'
+             and q.status = 'published'
+             and q.topic_id in (select uzv from nesil n where n.kok = t.id)) as n
     from public.topics t
     left join public.subjects sub on sub.id = t.subject_id
     left join public.levels   lv  on lv.id  = t.level_id
-   where not exists (select 1 from public.topics c where c.parent_id = t.id)
-     and not exists (select 1 from sayilmaz z where lower(t.name) like z.nmn)
+   where t.parent_id is null
 )
 select fenn, sinif,
-       count(*)                        as esl,
+       count(*)                        as fesil,
        count(*) filter (where n >= 5)  as hazir,
        count(*) filter (where n between 1 and 4) as az,
        count(*) filter (where n = 0)   as bos,
-       round(100.0 * count(*) filter (where n >= 5) / count(*))::text || '%' as ortuk
-  from say
+       round(100.0 * count(*) filter (where n >= 5) / count(*))::text || '%' as ortuk,
+       sum(n)                          as sual
+  from fesil
  group by fenn, sinif, lsort
- order by fenn, lsort;
+ order by ortuk, fenn, lsort;
