@@ -10582,8 +10582,20 @@
   function goBack(fallback) {
     var prev = HIST.pop();
     while (prev && prev === CUR_HASH) prev = HIST.pop();
-    if (prev) { BACKING = true; nav(prev); }
-    else nav(fallback || "#/");
+    if (!prev) { nav(fallback || "#/"); return; }
+    /*  ILISME (istifadeci tutdu: «geri niyə getmir? iki səhifə arasında
+        qalıb»).  «Geri» location.hash yazirdi - bu, brauzere TEZE yazi
+        elave edir.  Qrup -> Hesabat -> «Geri»-den sonra brauzer yigininda
+        [qrup, hesabat, qrup] qalirdi; brauzerin oz «geri» duymesi yene
+        hesabata qayidirdi ve muellim iki sehife arasinda dolanirdi.
+        Indi: gedeceyimiz yer brauzerin ONCEKI yazisidirsa, teze yazi
+        yaratmiriq - history.back() ile hemin yaziya qayidiriq, irelidəki
+        yazi da oz yerinde qalir.  BACKING qoyuruq ki, route() yigindan
+        ikinci defe cixarmasin (biz yuxarida onsuz da cixardiq).  */
+    var st = null;
+    try { st = history.state; } catch (e) {}
+    if (st && st.prev === prev) { BACKING = true; history.back(); return; }
+    BACKING = true; nav(prev);
   }
   //  Niyyetli qayidis (Test yig -> Tapsiriqlar, Tapsiriqlar -> sagird karti):
   //  hedef yigindaki sonuncudursa geri gedis kimi (cixarilir), deyilse adi
@@ -10710,7 +10722,15 @@
       //  nomre = vaxt (ms): sehife yenilenende de artan qalir - sayac
       //  sifirlansaydi kohne yazilar «ireli» kimi oxunardi
       if (trav) CUR_I = st.i;
-      else { CUR_I = Date.now(); try { history.replaceState({ i: CUR_I }, ""); } catch (e) {} }
+      /*  Yazi ile birlikde ONDAN EVVELKININ unvani da saxlanir (prev).
+          goBack() ondan bilir ki, brauzerin onceki yazisi elə getmek
+          istediyimiz yerdirmi - onda TEZE yazi yaratmir, history.back()
+          isledir.  (Bax: goBack.)  CUR_HASH hele KOHNE unvandir -
+          asagida yenilenir.  */
+      else {
+        CUR_I = Date.now();
+        try { history.replaceState({ i: CUR_I, prev: CUR_HASH || null }, ""); } catch (e) {}
+      }
       PREV_HASH = CUR_HASH; CUR_HASH = location.hash || "#/";
     }
     //  qrup, hesabat, tapsiriq ekranlari da «Qruplar» bendinin altindadir

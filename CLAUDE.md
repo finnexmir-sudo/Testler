@@ -8,7 +8,7 @@ lisenziyası. Ödəniş şlüzü (Epoint) sonra qoşulacaq.
 
 > **İlk oxunacaq bölmə:** ««HAZIRDIR» NƏ DEMƏKDİR» — orada
 > **TƏHVİLDƏN ƏVVƏL — MEXANİKİ SİYAHI** var. Görünən hər
-> dəyişiklikdən sonra o altı bənd bənd-bənd keçilir. Keçilməyibsə,
+> dəyişiklikdən sonra o yeddi bənd bənd-bənd keçilir. Keçilməyibsə,
 > «hazırdır» yazılmır — nəyin yoxlanmadığı açıq deyilir.
 
 ---
@@ -378,7 +378,12 @@ işləmir.
 Yoxsa müəllim bir ekranda «2 zəif mövzu», o birində «3 zəif mövzu»
 görür və ikisinə də inanmır. İki mənbə varsa — biri silinir.
 
-**6 · Testlər keçdi ≠ yoxladım.** e2e sətrin ENİNƏ, çipin ÜNVANINA,
+**6 · GERİ düyməsi hər yeni səhifədə basılır** — həm düymədəki «Geri»,
+həm BRAUZERİN geri düyməsi. `location.hash` yazmaq brauzerə TƏZƏ yazı
+əlavə edir, ona görə «geri» iki səhifə arasında ilişə bilər.
+`test/e2e_geri.py` bunu yoxlayır.
+
+**7 · Testlər keçdi ≠ yoxladım.** e2e sətrin ENİNƏ, çipin ÜNVANINA,
 boş siyahıya baxmır. Gözlə baxılmayan şey yoxlanmamışdır.
 
 **Bu siyahı bir gündə üç dəfə pozulduğu üçün yazıldı** (hamısı yeni
@@ -390,6 +395,8 @@ görünüşdə, hamısını istifadəçi canlıda tapdı):
   də görünürdü — mən nə birinə, nə o birinə baxmışdım (2-ci bənd).
 - «Nəticələr · zəif mövzu var» → basanda yenə **Qruplar**. Səhifə
   hələ yox idi, amma sətir onu vəd edirdi (1-ci bənd).
+- «Geri» qrup ↔ hesabat arasında ilişirdi: düymə brauzerə təzə yazı
+  əlavə edirdi, brauzerin geri düyməsi ona qayıdırdı (6-cı bənd).
 
 ### Eyni kökdən olan digər hallar (hamısı bu gün)
 
