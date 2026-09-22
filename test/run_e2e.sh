@@ -135,10 +135,16 @@ python3 test/e2e_tovsiye.py
 echo
 #  CLAUDE.md «TEHVILDEN EVVEL - MEXANIKI SIYAHI» 1-ci bendi: setirin
 #  vedi ile apardigi yer uyusmalidir.  Bu, href-i OXUMUR - basir.
-echo "37/38 kecid auditi - her setir ved etdiyi yere aparir"
+echo "37/39 kecid auditi - her setir ved etdiyi yere aparir"
 python3 test/e2e_kecid.py
 echo
 #  Istifadeci: «geri niye getmir? iki sehife arasinda qalib» - duymedeki
 #  «Geri» ile BRAUZERIN geri duymesi bir-birine dolasmamalidir.
-echo "38/38 geri auditi - duyme ve brauzer dovr yaratmir"
+echo "38/39 geri auditi - duyme ve brauzer dovr yaratmir"
 python3 test/e2e_geri.py
+echo
+#  Qizbest muellim: «Bezi movzularda testler yoxdur» - 3480 plan
+#  setrinin 2846-sinda «test yig» yoxdur (suallar fesil hovuzundandir).
+#  Duyme olmayanda setir SEBEBI yazmalidir, bos qalmamalidir.
+echo "39/39 plan setri - duyme yoxdursa sebeb yazilir"
+python3 test/e2e_plan_gozle.py

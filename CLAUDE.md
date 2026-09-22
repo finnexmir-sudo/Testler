@@ -255,6 +255,36 @@ Yəni «şəkilli sual» bu gün hazırlana bilər; «içində doldurulan cədv�
 üçün yeni sual tipi lazımdır.
 
 
+### 10. Dərsbaşına test — bank 22 963 sualdır, 52 200 lazımdır (2026-09-22)
+
+**Haradan çıxdı:** Qızbəst müəllim «Bəzi mövzularda testlər yoxdur»
+yazdı. Ölçü (`db/test/ders_basina_hovuz.sql`):
+
+| rəqəm | dəyər |
+|---|---|
+| plan sətri (dərs) | 3480 |
+| «test yığ» düyməsi olmayan dərs | **2846 = 82%** |
+| bir dərsə düşən sual (orta) | **6.6** |
+| hər dərsə 15 suallıq test üçün lazım olan bank | **52 200** |
+
+Suallar fəsil hovuzundadır (bax «Mövzu ağacı» bölməsi), düymə fəsil
+bitəndə çıxır. Qapını hər dərsə açmaq olmaz: 6.6 sualdan beş ardıcıl
+dərsə fərqli test çıxmır — «hər dəfə eyni test gəlir» şikayəti
+«test yoxdur»dan pisdir.
+
+**2026-09-22-də edilən:** sətir artıq səbəbi yazır («fəsil sonunda ·
+2/4»). Bu, qavrayışı düzəldir, hovuzu yox.
+
+**Əsl həll, hələ başlanmayıb:** bankı dərs səviyyəsinə endirmək —
+təxminən 30 000 yeni sual. Prioritet `ders_basina_hovuz.sql`-in `pay`
+sütunundadır; ən dar yerlər Fizika 9 (1.9), Coğrafiya 7 (2.7),
+İngilis 10-11 (2.7-2.9), Kimya 11 (2.7).
+
+**Şərt:** qapını yalnız payı yetən fəsildə açmaq olar, həm də generator
+əvvəl istifadə olunmuş sualı çıxarmalıdır — indi çıxarmır
+(`db/13_generator.sql` təsadüfi seçir).
+
+
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 
 **İstifadəçinin sualı:** «Ən zəif yerimiz testləri tərtib etməkdir. Test

@@ -739,6 +739,12 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .plrow .plck{margin-left:auto;flex:0 0 auto;width:15px;height:15px;
   accent-color:var(--brand);cursor:pointer}
 .plrow .plck + .pltest,.plrow .plck + .plmk{margin-left:10px}
+/*  22.09: fesil bitmemis dersde «test yig» yoxdur - sebebi setirde
+    yazilir, yoxsa muellim «test yoxdur» deye anlayir.  Duyme deyil,
+    ona gore altdan xett ve marka rengi YOX - susqun etiketdir.  */
+.plrow .plwait{margin-left:auto;flex:0 0 auto;text-decoration:none;
+  color:var(--fg-3);font-size:11px;font-weight:400;white-space:nowrap}
+.plrow .plck + .plwait{margin-left:10px}
 /* adaptiv plan: kecilme tarixi, qrup ortalamasi, tekrar duymesi */
 .plrow .pldate{text-decoration:none;color:var(--fg-3);font-size:11px;
   font-weight:400}

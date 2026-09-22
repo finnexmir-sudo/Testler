@@ -3208,7 +3208,8 @@
             //  ikinci setre kecir; yalniz qutu + «geri al» olan setir kecmir
             return '<div class="plrow' + (it.done ? " done" : "") +
               (cur && it.id === cur.id ? " cur" : "") +
-              (avgChip || it.test_id || (it.done && it.can_test) ? " acts" : "") + '">' +
+              (avgChip || it.test_id || (it.done && Number(it.gtotal) > 1) ||
+               (it.done && it.can_test) ? " acts" : "") + '">' +
               "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
               "<span>" + esc(it.topic) +
                 (it.done && it.done_at
@@ -3232,7 +3233,18 @@
                     ? '<button class="plmk" data-plmk="' + esc(it.id) + '"' +
                       (d.paid ? "" : ' disabled title="Abunə paketi ilə"') +
                       ">test yığ</button>"
-                    : "")) +
+                    /*  22.09 (Qizbest muellim: «Bezi movzularda testler
+                        yoxdur»).  Olcu: 3480 plan setrinin 2846-sinda
+                        (82%) duyme yoxdur - suallar fesil hovuzundandir,
+                        bir derse orta 6.6 sual dusur, hər dersde test
+                        yigmaq olmur.  Qapi duzdur, IZAH yox idi: muellim
+                        bos yer gorurdu ve «test yoxdur» deye anlayirdi.
+                        Indi setir ozu deyir testin haçan geleceyini.  */
+                    : (it.done && Number(it.gtotal) > 1
+                        ? '<s class="plwait" title="Suallar fəsil hovuzundandır — ' +
+                          'test fəsil bitəndə yığılır">fəsil sonunda · ' +
+                          esc(String(it.gpos)) + "/" + esc(String(it.gtotal)) + "</s>"
+                        : ""))) +
               (weak && d.paid
                 ? '<button class="plmk plre" data-plmk="' + esc(it.id) +
                   '" title="Qrup zəif nəticə göstərib — yeni yoxlama yığ">' +
