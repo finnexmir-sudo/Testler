@@ -214,6 +214,47 @@ olsa — 4 həftə xilas edildi. Bil10-da etmədiyimiz addım budur: 21 min
 sual var, 0 pullu hesab; səbəb kod deyil, alıcını əvvəlcədən
 tapmamağımızdır.
 
+### 9. Sual PİLLƏSİ və görüntülü tapşırıqlar (2026-09-22, istifadəçi fikri)
+
+**Haradan çıxdı.** Çıxma terminləri düzəlişindən sonra e-dərslik
+səhifəsinə baxdıq (665/unit-1/səh. 75). Dörd tapşırıq **nərdivandır**,
+hər pillədə yalnız bir şey dəyişir:
+
+| Pillə | Tapşırıq | Nəyi yoxlayır |
+|-------|----------|----------------|
+| 1 · tanıma | «18 − 1 = 17, burada 18 necə adlanır?» | termini bilirmi |
+| 2 · hesablama | «600 − 250 = ?» | əməli bacarırmı |
+| 3 · tərs | «Azalan 600, fərq 250-dirsə, çıxılan?» | əlaqəni qurumu |
+
+Dərslikdəki 3-cü tapşırıqda `11 − 1`, `16 − 0`, `12 − 12` **təsadüfi
+deyil** — sonrakı bütün qaydalar adi məşqin içində əkilib.
+
+**Problem.** Bankımızda demək olar hamısı 3-cü pillədir. Şagird səhv
+yazanda «Çıxma zəifdir» deyirik, amma səbəbi bilmirik: hesablamanı
+bacarmır, yoxsa «azalan» sözünü tanımır?
+
+**Təklif.** `questions.tags` massivinə `pille:1|2|3` nişanı (sxem
+dəyişikliyi lazım deyil). Onda:
+- zəif mövzu sətri «Çıxmada **terminləri** bilmir» deyə bilər;
+- təkrar testi bir pillə **aşağıdan** yığılar, eyni çətinlikdə yox.
+Sınaq üçün bir mövzuda 5-6 yeni sual bəsdir.
+
+**İstifadəçinin sualı:** «belə görüntülü sual və tapşırıqlar hazırlaya
+bilirik?» — yoxlandı, cavab yarımdır:
+
+| Dərslikdəki şey | Bizdə |
+|-----------------|-------|
+| şəkil, həndəsə çizgisi, rəngli düstur | **var** — `media_url`, SVG data-URI (`db/188`); `<img>` ilə çizilir, içindəki skript işləmir |
+| parametrik rəqəmlər (`{b*10}`) | **var** — bankda onsuz da işlənir |
+| bir neçə düz cavab / sərbəst mətn | **var** — `question_kind`: single · multi · text |
+| rəngli söz sual MƏTNİNDƏ | **yox** — mətn həmişə `esc()`-dən keçir; rəng lazımdırsa SVG-yə yazılır |
+| doldurulası cədvəl (dərslikdəki 4-cü tapşırıq) | **yox** — belə tip yoxdur; ya SVG şəkil + hər sütuna bir sual, ya yeni `kind` |
+| şifahi / yazılı ayrımı (baş və əl nişanı) | **yox** — anlayış özü yoxdur |
+
+Yəni «şəkilli sual» bu gün hazırlana bilər; «içində doldurulan cədvəl»
+üçün yeni sual tipi lazımdır.
+
+
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 
 **İstifadəçinin sualı:** «Ən zəif yerimiz testləri tərtib etməkdir. Test
