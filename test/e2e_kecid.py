@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Yeni gorunus (?yeni=1): bos hesab + dolu hesab - telefon."""
-import os, time, psycopg2, psycopg2.extras
+"""KECID AUDITI: yeni gorunusdeki her setir basilir, hara dusduyune baxilir.
+
+CLAUDE.md «TEHVILDEN EVVEL - MEXANIKI SIYAHI» 1-ci bendi: href yazmaq
+yoxlamaq deyil.  Her kecid ACILIR, dusdugu sehifenin BASLIGI oxunur,
+setrin VEDI ile uygunlugu yoxlanilir."""
+import os, re, time, psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright
 DSN = "host=/tmp port=55432 user=postgres dbname=panel_e2e"
 BASE = "http://127.0.0.1:8010/"; PANEL = BASE + "muellim/index.html"
@@ -130,68 +134,64 @@ with sync_playwright() as pw:
     p.wait_for_selector("#prep .prep, #planBox", timeout=30000); p.wait_for_timeout(1500)
     print("DERS PLANI:", p.inner_text("#main")[:160].replace("\n", " | "))
     p.screenshot(path=OUT + "/plan.png", full_page=True)
-    #  ---- ZEIF MOVZU setri: adlar setirde, kecid Movzular sekmesine
-    p.goto(PANEL + "#/"); p.reload()
-    p.wait_for_selector("#yDiq .mrow", timeout=30000); p.wait_for_timeout(1200)
-    print("ZEIF setri:", p.locator("#yDiq").inner_text().replace("\n", " | ")[:120])
-    p.screenshot(path=OUT + "/icmal_zeif.png", full_page=True)
-    #  setri OZUMUZ basiriq - href-i oxumaq yoxlamaq deyil
-    p.locator("#yDiq .mrow").filter(has_text="zəif gedir").first.click()
-    p.wait_for_selector("#rtab-m .mrow", timeout=30000); p.wait_for_timeout(1500)
-    print("  -> ", p.evaluate("location.hash"))
-    print("  -> movzular:", p.inner_text("#rtab-m")[:170].replace("\n", " | "))
-    p.screenshot(path=OUT + "/zeif_movzular.png", full_page=True)
-    #  ---- SESSIZ SAGIRDLER: Icmaldaki setir indi adlari gosterir
-    p.goto(PANEL + "#/sus"); p.reload()
-    p.wait_for_selector("#suBox .mrow, #suBox .empty", timeout=30000); p.wait_for_timeout(900)
-    print("SESSIZ:", p.locator("#suBox").inner_text().replace("\n", " | ")[:170])
-    p.screenshot(path=OUT + "/sessiz.png", full_page=True)
-    #  ---- NETICELER: evvel «#/gs» (qruplar siyahisi), indi «#/nt»
-    p.goto(PANEL + "#/gs"); p.reload()
-    p.wait_for_selector("#groups .gcard, #groups .empty", timeout=30000); p.wait_for_timeout(900)
-    print("EVVEL (#/gs):", p.inner_text("#main")[:110].replace("\n", " | "))
-    p.screenshot(path=OUT + "/net_evvel.png", full_page=True)
-    p.goto(PANEL + "#/nt"); p.reload()
-    p.wait_for_selector("#ntQ .mrow", timeout=30000); p.wait_for_timeout(1200)
-    hh = p.evaluate("document.body.scrollHeight")
-    print("YENI (#/nt): %d px = %.1f ekran" % (hh, hh / 844.0))
-    print("   ust    :", p.locator("#ntUst").inner_text().replace("\n", " | ")[:90])
-    print("   qruplar:", p.locator("#ntQ").inner_text().replace("\n", " | ")[:150])
-    print("   zeif   :", p.locator("#ntZ").inner_text().replace("\n", " | ")[:150])
-    print("   son    :", p.locator("#ntS").inner_text().replace("\n", " | ")[:120])
-    p.screenshot(path=OUT + "/net_yeni.png", full_page=True)
-    #  ---- hesabat: sagirdler ve movzular
-    p.goto(PANEL + "#/r/" + str(gid)); p.reload()
-    p.wait_for_selector("#main .mrow, #main .item", timeout=30000); p.wait_for_timeout(1800)
-    h = p.evaluate("document.body.scrollHeight")
-    print("HESABAT: %d px = %.1f ekran" % (h, h / 844.0))
-    print("   ust:", p.inner_text("#main")[:150].replace("\n", " | "))
-    p.screenshot(path=OUT + "/hesabat.png", full_page=True)
-    try:
-        p.locator("#rTabs .seg, .segs .seg", has_text="Mövzular").first.click()
-        p.wait_for_timeout(1200)
-        print("   movzular:", p.inner_text("#main")[:200].replace("\n", " | "))
-        p.screenshot(path=OUT + "/movzular.png", full_page=True)
-    except Exception as e:
-        print("   movzular: ATLANDI", e)
-    #  ---- MASA USTU: hesabat genis ekranda (istifadeci: «seligesiz»)
-    p2 = ctx.new_page()
-    p2.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
-    p2.set_viewport_size({"width": 1280, "height": 900})
-    p2.goto(PANEL + "#/r/" + str(gid)); p2.reload()
-    p2.wait_for_selector("#main .mrow, #main .item", timeout=30000); p2.wait_for_timeout(1800)
-    box = p2.evaluate("""(() => {
-      const rs = [...document.querySelectorAll('#main .mrow')].slice(0, 6);
-      return rs.map(r => { const b = r.getBoundingClientRect();
-        return Math.round(b.left) + '..' + Math.round(b.right) + ' (' + Math.round(b.width) + ')'; });
-    })()""")
-    print("MASA USTU setir enleri:", box)
-    p2.screenshot(path=OUT + "/hesabat_masa.png", full_page=True)
-    p2.close()
-    try:
-        pass
-    except Exception as e:
-        print("   movzular sekmesi:", str(e)[:80])
-    br.close()
+
+    #  ================= KECID AUDITI =================
+    XETA = []
+    def bashq():
+        t = p.locator("#band h1")
+        return (t.inner_text().strip() if t.count() else p.inner_text("#main")[:40]).replace("\n", " ")
+
+    def kecidler(unvan, qab):
+        """qabdaki her <a>/<button> setrini basib hara dusduyunu yazir"""
+        p.goto(PANEL + unvan); p.reload()
+        p.wait_for_selector(qab + " .mrow", timeout=30000); p.wait_for_timeout(1200)
+        n = p.locator(qab + " .mrow").count()
+        cix = []
+        for i in range(n):
+            p.goto(PANEL + unvan); p.reload()
+            p.wait_for_selector(qab + " .mrow", timeout=30000); p.wait_for_timeout(1000)
+            r = p.locator(qab + " .mrow").nth(i)
+            ad = r.inner_text().replace("\n", " · ")[:52]
+            r.click(); p.wait_for_timeout(1400)
+            h = (p.evaluate("location.hash") or "#/")
+            b = bashq()
+            cix.append((ad, h, b))
+            if b.startswith("Qruplarınız") and "qrup" not in ad.lower():
+                XETA.append(unvan + " : «" + ad + "» -> Qruplar (olu kecid)")
+            if "Yüklənir" in b or not b.strip():
+                XETA.append(unvan + " : «" + ad + "» -> bos sehife " + h)
+            #  CLAUDE.md 1-ci bend, 2-ci sual: setrin VEDI ile acilan sehife
+            #  uyusurmu?  Setirde «X» varsa, X hemin sehifede GORUNMELIDIR.
+            #  (Istifadeci: «5 şagird kimdir? hanı?» - setir movzunu ve
+            #   sagird sayini yazirdi, acilan sehifede ne biri var idi, ne o biri.)
+            m = re.search("\u00ab([^\u00bb]{3,60})\u00bb", ad)
+            if m:
+                p.wait_for_timeout(700)
+                if m.group(1) not in p.inner_text("#main"):
+                    XETA.append(unvan + " : setir «" + m.group(1) +
+                                "» ved edir, acilan sehifede yoxdur (" + h + ")")
+        return cix
+
+    print("\n=== KECID AUDITI ===")
+    for unvan, qab, ad in (("#/", "#yDiq", "Icmal · diqqet"),
+                           ("#/", "#yMenu", "Icmal · menyu"),
+                           ("#/sus", "#suBox", "Sessiz sagirdler"),
+                           ("#/nt", "#ntQ", "Neticeler · qruplar"),
+                           ("#/nt", "#ntZ", "Neticeler · zeif movzular"),
+                           ("#/nt", "#ntS", "Neticeler · son cavablar"),
+                           ("#/g/" + str(gid), "#gDiq", "Qrup · diqqet"),
+                           ("#/g/" + str(gid), "#gMenu", "Qrup menyusu")):
+        print("\n-- " + ad + " (" + unvan + ")")
+        for a, h, b in kecidler(unvan, qab):
+            print("   %-52s -> %-34s %s" % (a, h, b))
+
+    print("\n=== NETICE ===")
+    if XETA:
+        for e in XETA: print("  XETA:", e)
+        raise SystemExit("OLU KECID VAR: %d" % len(XETA))
+    print("  butun kecidler ved etdikleri yere aparir")
+
+#  Paylasilan bazani ardimizca temiz qoyuruq - yoxsa e2e_panel kimi
+#  skriptler «hesab artiq var» halina dusur.
 temizle()
-print("OK")
+print("KECID AUDITI: BUTUN YOXLAMALAR KECDI")

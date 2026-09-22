@@ -6,6 +6,11 @@ siniflər, MİQ və sertifikasiya da əlavə olunacaq.
 Kommersiya məhsuludur: valideyn abunəliyi, repetitor paketləri, məktəb
 lisenziyası. Ödəniş şlüzü (Epoint) sonra qoşulacaq.
 
+> **İlk oxunacaq bölmə:** ««HAZIRDIR» NƏ DEMƏKDİR» — orada
+> **TƏHVİLDƏN ƏVVƏL — MEXANİKİ SİYAHI** var. Görünən hər
+> dəyişiklikdən sonra o altı bənd bənd-bənd keçilir. Keçilməyibsə,
+> «hazırdır» yazılmır — nəyin yoxlanmadığı açıq deyilir.
+
 ---
 
 ## YARIMÇIQ İŞLƏR — iş arasında xatırlat
@@ -336,6 +341,55 @@ yoxlanandan sonra. Yoxsa:
 
 **5 · Şübhə varsa, açıq de.** «Bunu yoxladım, bunu yoxlamadım» həmişə
 «hazırdır»dan yaxşıdır. İstifadəçi yarımçıq işi canlıda tapmamalıdır.
+
+### TƏHVİLDƏN ƏVVƏL — MEXANİKİ SİYAHI (2026-09-22)
+
+**İstifadəçi:** «hər dəfə deyirəm, belə səhvlər etmə, qaydaya mütləq
+yaz ki hər şey dəqiq yoxlanılmalıdır».
+
+Yuxarıdakı beş bənd NİYƏ-ni deyir. Bu siyahı NƏ etməli olduğumu deyir.
+Görünən hər dəyişiklikdən sonra, «hazırdır» sözündən ƏVVƏL, bənd-bənd
+keçilir. Keçilməyən bənd varsa, «hazırdır» yazılmır — nəyin
+yoxlanmadığı açıq yazılır.
+
+**1 · Yeni və ya dəyişdirilmiş HƏR keçid basılır.** Sətir, düymə,
+link, çip — hamısı. Hər biri üçün üç sual:
+- hara aparır? — ünvanı açıb **öz gözümlə görmüşəm**, `href`-ə baxıb
+  «düz olmalıdır» deməmişəm;
+- sətirdəki VƏD ilə açılan səhifə üst-üstə düşürmü? «10 şagird
+  səssizdir» yazırsa, açılan səhifədə **10 ad** olmalıdır — qrup
+  siyahısı yox;
+- sətirdə rəqəm varsa, o rəqəm açılan səhifədəki rəqəmlə **eynidirmi**?
+
+**2 · Hər görünən dəyişiklik İKİ enlikdə yoxlanır.** Telefon (390 px)
+və masaüstü (1280 px). İkisinin də ekran şəkli çəkilir və **baxılır** —
+çəkib göndərmək baxmaq deyil.
+
+**3 · Element növü yoxlanır.** `<a>` və `<button>` eyni CSS ilə eyni
+görünmür: link `display:flex` ilə tam eni tutur, düymə `width:auto`
+qalır və öz məzmununun eninə yığılır. Yeni sətir sinfi yazanda hər iki
+növü sına, yaxud sinfə `width:100%` yaz.
+
+**4 · Boş hal da ekranda yoxlanır.** Siyahı boşdursa nə çıxır? Rəqəm
+`null`-dursa? Şagird hələ girməyibsə? Dolu hal işləyir deyə boş hal
+işləmir.
+
+**5 · Eyni rəqəm iki yerdə yazılırsa, EYNİ sorğudan gəlməlidir.**
+Yoxsa müəllim bir ekranda «2 zəif mövzu», o birində «3 zəif mövzu»
+görür və ikisinə də inanmır. İki mənbə varsa — biri silinir.
+
+**6 · Testlər keçdi ≠ yoxladım.** e2e sətrin ENİNƏ, çipin ÜNVANINA,
+boş siyahıya baxmır. Gözlə baxılmayan şey yoxlanmamışdır.
+
+**Bu siyahı bir gündə üç dəfə pozulduğu üçün yazıldı** (hamısı yeni
+görünüşdə, hamısını istifadəçi canlıda tapdı):
+- «10 şagird bir həftədir səssizdir» → basanda **Qruplar** açılırdı.
+  «Hanı 10 şagird?» — `href`-i yazmışdım, basmamışdım (1-ci bənd).
+- Hesabatda şagird sətirləri pilləli, kənarları yırtıq. Səbəb: o sətir
+  `<button>`-dur, qalanları `<a>` (3-cü bənd). Telefonda da, masaüstündə
+  də görünürdü — mən nə birinə, nə o birinə baxmışdım (2-ci bənd).
+- «Nəticələr · zəif mövzu var» → basanda yenə **Qruplar**. Səhifə
+  hələ yox idi, amma sətir onu vəd edirdi (1-ci bənd).
 
 ### Eyni kökdən olan digər hallar (hamısı bu gün)
 

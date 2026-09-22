@@ -1310,9 +1310,18 @@
         alt: "test göndərin və ya xatırladın", cip: "diqqət", cipCls: "pvl" }));
     }
     if (tp && tp.name) {
-      d.push(yRow({ ic: "refresh", href: "#/r/" + esc(tp.class_id || ""),
+      /*  Setir «5 şagird» deyirdi, ADLARI yazmirdi ve basilanda qrup
+          hesabatinin SAGIRDLER sekmesi acilirdi - istifadeci: «5 şagird
+          kimdir? hanı?»  Adlar onsuz da cavabin icindedir (topics[].weak),
+          indi setirde yazilir; kecid ise MOVZULAR sekmesine gedir - orada
+          hemin movzu oz sagirdleri ile durur.  */
+      var tw = tp.weak || [];
+      d.push(yRow({ ic: "refresh", href: "#/r/" + esc(tp.class_id || "") + "/m",
         ad: "«" + tp.name + "» zəif gedir",
-        alt: (Number(tp.weak_n) || 0) + " şagird · təkrar testi göndərin",
+        alt: (tw.length
+          ? tw.slice(0, 3).map(function (x) { return firstName(x.name) || x.name; }).join(", ") +
+            (tw.length > 3 ? " və daha " + (tw.length - 3) : "") + " · təkrar testi göndərin"
+          : (Number(tp.weak_n) || 0) + " şagird · təkrar testi göndərin"),
         cip: pct(tp.ratio) + "%", cipCls: "pvm" }));
     }
     if (gun !== null && gun <= 7) {
@@ -1458,9 +1467,16 @@
     $("ntS").innerHTML = !rc.length ? "" :
       ySec("Son cavablar") + '<div class="card pad0 menu">' + rc.map(function (a) {
         var fz = pct(a.percent);
-        //  eyni «check» nisani bes defe tekrarlanirdi - adin bas herfi
-        //  setirleri bir-birinden ayirir (sagird siyahisi ile eyni dil)
-        return '<a class="mrow" href="#/r/' + esc(a.class_id || "") + '">' +
+        /*  Setir sagirdin ADINI yazir - basilanda da SAGIRDIN hesabati
+            acilir (219).  Evvel qrupa aparirdi: setir bir sey ved edir,
+            basqa sey verirdi.  student_id yoxdursa (kohne cavab) qrupa
+            qayidir - olu kecid olmasin.
+            Eyni «check» nisani bes defe tekrarlanirdi; adin bas herfi
+            setirleri bir-birinden ayirir (sagird siyahisi ile eyni dil).  */
+        var hd = a.student_id && a.class_id
+          ? "#/s/" + esc(a.student_id) + "/" + esc(a.class_id)
+          : "#/r/" + esc(a.class_id || "");
+        return '<a class="mrow" href="' + hd + '">' +
           av(a.student) +
           '<span class="g"><b>' + esc(a.student || "") + "</b><i>" +
           esc(a.test || "") + (a["class"] ? " · " + esc(a["class"]) : "") +
@@ -4435,7 +4451,12 @@
   }
 
   var RTAB = "s";   // qrup hesabatinda secilmis sekme (sessiya boyu)
-  function screenReport(gid, quiet) {
+  /*  tab: acilacaq sekme ("s" sagirdler / "m" movzular).  Icmaldaki
+      ««X» zəif gedir · 5 şagird» setri MOVZULARI ved edir - ora
+      dusende sagird siyahisi acilirdisa, istifadeci hagli soruşurdu:
+      «5 şagird kimdir? hanı?»  */
+  function screenReport(gid, quiet, tab) {
+    if (tab === "s" || tab === "m" || tab === "f") RTAB = tab;
     var live = guard();
     if (!quiet) show('<div class="card"><div class="skel">Hesabat hazırlanır…</div></div>');
 
@@ -10648,7 +10669,7 @@
     if (m[0] === "sus") return YENI ? screenSilent() : nav("#/");
     if (m[0] === "gs") return screenGroups();
     if (m[0] === "g" && m[1]) return screenGroup(m[1], m[2]);
-    if (m[0] === "r" && m[1]) return screenReport(m[1]);
+    if (m[0] === "r" && m[1]) return screenReport(m[1], false, m[2]);
     if (m[0] === "a" && m[1]) return screenAssign(m[1], m[2]);
     if (m[0] === "b") return screenBank();
     if (m[0] === "gen") return screenGen();
@@ -10680,7 +10701,7 @@
   document.addEventListener("visibilitychange", function () {
     if (document.hidden || !sb.session() || !CTX) return;
     var m = (location.hash || "").replace(/^#/, "").split("/").filter(Boolean);
-    if (m[0] === "r" && m[1]) screenReport(m[1], true);
+    if (m[0] === "r" && m[1]) screenReport(m[1], true, m[2]);
   });
 
   /* ------------------------------------------------------------- boot */

@@ -124,11 +124,16 @@ echo
 echo "33/33 metnle ev tapsirigi"
 python3 test/e2e_ev.py
 echo
-echo "34/34 vaxtli test"
+echo "34/37 vaxtli test"
 python3 test/e2e_vaxt.py
 echo
-echo "35/35 oz testini sil / adini deyis"
+echo "35/37 oz testini sil / adini deyis"
 python3 test/e2e_testsil.py
 echo
-echo "36/36 tovsiye kodu - kim kimi getirdi"
+echo "36/37 tovsiye kodu - kim kimi getirdi"
 python3 test/e2e_tovsiye.py
+echo
+#  CLAUDE.md «TEHVILDEN EVVEL - MEXANIKI SIYAHI» 1-ci bendi: setirin
+#  vedi ile apardigi yer uyusmalidir.  Bu, href-i OXUMUR - basir.
+echo "37/37 kecid auditi - her setir ved etdiyi yere aparir"
+python3 test/e2e_kecid.py
