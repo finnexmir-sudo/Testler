@@ -669,6 +669,23 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   letter-spacing:.04em;text-transform:uppercase;color:var(--brand);
   margin-bottom:4px}
 .plcur b{display:block;font-size:14px;font-weight:600;margin-bottom:10px}
+/*  YENI gorunus: plan qutusunda «Son keçilən» bir sətir  */
+.plprev{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin-top:10px;padding:8px 12px;border:1px solid var(--n-150);
+  border-radius:10px;background:var(--n-25);font-size:12.5px}
+.plprev>s{text-decoration:none;font-size:10.5px;font-weight:640;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--fg-3);flex:0 0 auto}
+.plprev>b{font-weight:620;color:var(--fg);min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plprev .pldate{text-decoration:none;color:var(--fg-3);font-size:11px;flex:0 0 auto;text-transform:none;letter-spacing:0;font-weight:400}
+.plprev .plavg{font-style:normal;font-weight:650;font-size:11.5px;
+  margin-left:auto;flex:0 0 auto}
+.plprev .plavg.pvh{color:var(--ok)}
+.plprev .plavg.pvm{color:var(--warn)}
+.plprev .plavg.pvl{color:var(--err)}
+.plprev .pltest{font-size:11.5px;flex:0 0 auto}
+.plprev .plavg+.pltest{margin-left:0}
+.plprev .pltest:only-of-type{margin-left:auto}
 .plbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .plbtns input{flex:0 0 72px;text-align:center}
 .tkind{margin:-2px 0 10px}

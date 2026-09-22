@@ -2868,6 +2868,22 @@
           : '<div class="plcur done"><b>🎉 Bütün mövzular keçilib!</b>' +
             '<p class="muted" style="margin:6px 0 0">Plan tamamlanıb — ' +
             "hesabatda zəif mövzulara baxıb təkrar testlər verə bilərsiniz.</p></div>") +
+        /*  YENI gorunus: «Son keçilən» artıq ayrıca kartda deyil -
+            muellim onu «Bütün mövzular» açmaqla tapmalı olurdu.
+            Plan qutusunun özündə, bu günün dərsinin altında bir sətir:
+            ad · tarix · testin ortalaması · vərəq.  */
+        (YENI && lastDone
+          ? '<div class="plprev"><s>Son keçilən</s><b>' + esc(lastDone.topic) + "</b>" +
+            (lastDone.done_at ? '<s class="pldate">' + dateAz(lastDone.done_at) + "</s>" : "") +
+            (lastDone.avg != null
+              ? '<em class="plavg ' + (Number(lastDone.avg) >= 80 ? "pvh"
+                  : (Number(lastDone.avg) >= 60 ? "pvm" : "pvl")) + '">' +
+                Math.round(Number(lastDone.avg)) + "%</em>"
+              : "") +
+            (lastDone.test_id
+              ? '<a href="#/t/' + esc(lastDone.test_id) + '" class="pltest">vərəq</a>' : "") +
+            "</div>"
+          : "") +
         "<details><summary>Bütün mövzular</summary>" +
           '<div class="pllist">' + (function () {
             /*  Gelecek fesiller gizli: 8-ci sinifde 11 fesil siyahini
