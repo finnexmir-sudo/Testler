@@ -95,6 +95,25 @@ with sync_playwright() as pw:
     h = p.evaluate("document.body.scrollHeight")
     print("SAGIRDLER: %d px · %d setir" % (h, p.locator("#stu .mrow").count()))
     p.screenshot(path=OUT + "/sagirdler.png", full_page=True)
+    #  ---- ders plani bolmesi
+    p.goto(PANEL + "#/g/" + str(gid) + "/p"); p.reload()
+    p.wait_for_selector("#prep .prep, #planBox", timeout=30000); p.wait_for_timeout(1500)
+    print("DERS PLANI:", p.inner_text("#main")[:160].replace("\n", " | "))
+    p.screenshot(path=OUT + "/plan.png", full_page=True)
+    #  ---- hesabat: sagirdler ve movzular
+    p.goto(PANEL + "#/r/" + str(gid)); p.reload()
+    p.wait_for_selector("#main .mrow, #main .item", timeout=30000); p.wait_for_timeout(1800)
+    h = p.evaluate("document.body.scrollHeight")
+    print("HESABAT: %d px = %.1f ekran" % (h, h / 844.0))
+    print("   ust:", p.inner_text("#main")[:150].replace("\n", " | "))
+    p.screenshot(path=OUT + "/hesabat.png", full_page=True)
+    try:
+        p.locator("#rTabs .seg, .segs .seg", has_text="Mövzular").first.click()
+        p.wait_for_timeout(1200)
+        print("   movzular:", p.inner_text("#main")[:200].replace("\n", " | "))
+        p.screenshot(path=OUT + "/movzular.png", full_page=True)
+    except Exception as e:
+        print("   movzular sekmesi:", str(e)[:80])
     br.close()
 temizle()
 print("OK")

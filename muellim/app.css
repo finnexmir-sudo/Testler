@@ -2379,3 +2379,21 @@ details.stk .l3{margin-top:8px}
 .menu .mrow .rbar i.mid{background:var(--warn)}
 .menu .mrow .rbar i.low{background:var(--err)}
 .menu .mrow .g i .qr{color:var(--err);font-weight:600}
+
+/*  YENI: hesabat - bir setirlik reqemler, movzu setri  */
+.rstat{display:flex;gap:16px;align-items:baseline;margin:2px 4px 14px;font-size:13px;color:var(--fg-2)}
+.rstat b{font-size:17px;font-weight:750;color:var(--fg);margin-right:4px;letter-spacing:-.02em}
+.menu .mrow.tpy,.card.pad0>.mrow.tpy{align-items:flex-start}
+.mrow.tpy{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  border-bottom:1px solid var(--n-100)}
+.mrow.tpy:last-child{border-bottom:0}
+.mrow.tpy .g{flex:1;min-width:0}
+.mrow.tpy .g b{display:block;font-size:14.5px;font-weight:600;line-height:1.35}
+.mrow.tpy .g i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-3);margin-top:2px}
+.mrow.tpy .rbar{display:block;height:4px;border-radius:99px;background:var(--n-100);margin-top:8px}
+.mrow.tpy .rbar i{display:block;height:100%;border-radius:99px;background:var(--brand)}
+.mrow.tpy .rbar i.good{background:var(--ok)}
+.mrow.tpy .rbar i.mid{background:var(--warn)}
+.mrow.tpy .rbar i.low{background:var(--err)}
+.tchip{flex:0 0 auto;font-size:12px;font-weight:650;white-space:nowrap;padding-top:2px}
+.tchip.tl{color:var(--err)} .tchip.tm{color:#9a6700} .tchip.tk{color:var(--ok)}

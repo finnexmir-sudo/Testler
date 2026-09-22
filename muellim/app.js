@@ -2495,13 +2495,21 @@
           «Bu günün dərsi» - istifadecinin sozu («hamısı növbəti, hanı
           bugünün dərsi?»): muellim ucun planin ilk kecilmemis dersi ELE
           bu gun kececeyi dersdir.  Plan qutusu ve siyahi nisani da eyni.  */
+      /*  YENI GORUNUS: «Dərsdən əvvəl» DORD isi bir kartda dasiyirdi -
+          bu gunun dersi, son kecilen, ev tapsirigi testi, yazili.
+          Muellim: «bu bir yerdəki dolaşıqlığı aradan qaldırar».
+          Indi kartda YALNIZ bu gunun dersi qalir:
+            · «Son keçilən» silindi - plan siyahisinda onsuz da
+              isarelenmis ən son ders odur, tekrar idi;
+            · «Ev tapşırığı» Tapşırıqlar ekranina aiddir, plana yox.
+          Kohne gorunus toxunulmur.  */
       var h = '<div class="spacer"></div><div class="card prep">' +
         //  16.09 (istifadeci: «dağınıq»): alt yazi cixdi - asagidaki
         //  etiketlerin tekrari idi; fesil ve tarix oz setrinde (.sub)
-        '<div class="pt"><b>Dərsdən əvvəl</b></div>';
+        '<div class="pt"><b>' + (YENI ? "Bu günün dərsi" : "Dərsdən əvvəl") + "</b></div>";
       //  1. novbeti movzu
       if (!d.has_plan) {
-        h += row("doc", "Bu günün dərsi",
+        h += row("doc", YENI ? "" : "Bu günün dərsi",
           '<span class="muted">Dərs planı yoxdur. Plan qursanız bu günün dərsi və hazır test burada olacaq. ' +
           '<a href="#" id="prepPlan">Planı qur</a></span>');
       } else if (nx) {
@@ -2510,7 +2518,7 @@
             duranda goz onlari BIR cumle kimi oxuyurdu.  Indi movzu
             yuxarida, isinme altda - ne oldugu da yazilir: «dərsdən
             əvvəl 5 sual».  */
-        h += row("doc", "Bu günün dərsi", "<b>" + esc(nx.topic) + "</b>" +
+        h += row("doc", YENI ? "" : "Bu günün dərsi", "<b>" + esc(nx.topic) + "</b>" +
           //  «3/7» neyin 3-u idi, bilinmirdi - indi «fəsli · dərs 3/7»
           (nx.group ? '<s class="muted sub">«' + esc(nx.group) + "» fəsli · dərs&nbsp;" + nx.gpos + "/" + nx.gtotal + "</s>" : "") +
           //  135: isinme - dersden evvel 5 sual
@@ -2524,10 +2532,10 @@
                   '<button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">Hazırla</button></div>'
                 : "")));
       } else {
-        h += row("doc", "Bu günün dərsi", '<span class="muted">Plan tam keçilib. 🎉</span>');
+        h += row("doc", YENI ? "" : "Bu günün dərsi", '<span class="muted">Plan tam keçilib. 🎉</span>');
       }
-      //  2. son kecilen
-      if (ls) {
+      //  2. son kecilen - YENI-de plan siyahisinda gorunur, tekrar etmirik
+      if (ls && !YENI) {
         h += row("check", "Son keçilən", "<b>" + esc(ls.topic) + "</b>" +
           '<s class="muted sub">' + dateAz(ls.done_at) +
           (ls.test_id
@@ -2580,15 +2588,19 @@
           '<div class="hwb">' + esc(hw.body) + "</div>" + names +
           '<div class="hwf"><a href="#/a/' + esc(g.id) + '">hamısı →</a></div>');
       }
-      h += row("clip", "Ev tapşırığı", tl + yl,
-        (d.open && pend.length) || (hw && und.length) ? "pwarn" : "");
+      //  YENI: ev tapsirigi Tapsiriqlar ekranindadir - plana aid deyil
+      if (!YENI) {
+        h += row("clip", "Ev tapşırığı", tl + yl,
+          (d.open && pend.length) || (hw && und.length) ? "pwarn" : "");
+      }
       //  4. addimlar
       h += '<div class="pbtns">' +
         (ls && d.paid
           //  suallar fesle baglidir - duymede fesil adi (alt movzu deyil)
           ? '<button class="btn sm" id="prepGen">' + ic("gen") + "«" + esc(ls.group || ls.topic) + "» testi yığ</button>"
           : "") +
-        '<button class="btn sm ghost" id="prepAsg">' + ic("clip") + "Tapşırıq ver</button>" +
+        (YENI ? ""
+              : '<button class="btn sm ghost" id="prepAsg">' + ic("clip") + "Tapşırıq ver</button>") +
       "</div></div>";
       box.innerHTML = h;
       on("prepAsg", "click", function () { nav("#/a/" + g.id); });
@@ -4223,18 +4235,23 @@
       topTitle.textContent = (r.class && r.class.name) || "Hesabat";
       var sm = r.summary || {};
       bandHead({
-        back: { id: "btnB", label: backLabel("Qrup") }, eye: "Hesabat",
+        back: { id: "btnB", label: YENI ? "Geri" : backLabel("Qrup") }, eye: "Hesabat",
         title: (r.class && r.class.name) || "Hesabat",
         sub: r.paid ? "" : "Son 7 günün məlumatı göstərilir.",
         right: '<button class="btn sm ghost" id="btnRef" title="Yenilə">' +
           ic("refresh") + "Yenilə</button>"
       });
-      var h =
-        '<div class="stats">' +
-          statTile(sm.active + " / " + sm.students, "aktiv şagird", "g1") +
-          statTile(pct(sm.avg) + "%", "orta nəticə", "g2") +
-          statTile(sm.attempts || 0, "işlənmiş test", "g3") +
-        "</div>";
+      /*  YENI: uc ayrica kart telefonda ~100 px yeyirdi ve «lovhe»
+          hissi verirdi.  Eyni reqemler bir setirde oxunur.  */
+      var h = YENI
+        ? '<div class="rstat"><span><b>' + (Number(sm.students) || 0) + "</b>şagird</span>" +
+            '<span><b>' + pct(sm.avg) + "%</b>orta</span>" +
+            '<span><b>' + (Number(sm.attempts) || 0) + "</b>cavab</span></div>"
+        : '<div class="stats">' +
+            statTile(sm.active + " / " + sm.students, "aktiv şagird", "g1") +
+            statTile(pct(sm.avg) + "%", "orta nəticə", "g2") +
+            statTile(sm.attempts || 0, "işlənmiş test", "g3") +
+          "</div>";
 
 
       /*  Uc sekme: Sagirdler / Movzular / Fealiyyet.  Movzular butun
@@ -4246,15 +4263,33 @@
         hS += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("person") +
              "</div><b>Şagird yoxdur</b></div></div>";
       } else {
-        hS += '<div class="card pad0">' + st.map(function (s) {
-          return '<button class="item" data-s="' + esc(s.id) + '">' +
-            av(s.full_name) +
-            '<div class="g"><b>' + esc(s.full_name) + "</b>" +
-            "<i><span>" + (s.attempts || 0) + " test</span><span>·</span>" +
-            "<span>son: " + dateAz(s.last_at) + "</span></i>" +
-            meter(s.avg) + "</div>" +
-            (s.attempts ? pctChip(s.avg) : '<span class="pctv">—</span>') +
-            '<span class="arrow">' + ic("right") + "</span></button>";
+        hS += '<div class="card pad0' + (YENI ? " menu" : "") + '">' + st.map(function (s) {
+          if (!YENI) {
+            return '<button class="item" data-s="' + esc(s.id) + '">' +
+              av(s.full_name) +
+              '<div class="g"><b>' + esc(s.full_name) + "</b>" +
+              "<i><span>" + (s.attempts || 0) + " test</span><span>·</span>" +
+              "<span>son: " + dateAz(s.last_at) + "</span></i>" +
+              meter(s.avg) + "</div>" +
+              (s.attempts ? pctChip(s.avg) : '<span class="pctv">—</span>') +
+              '<span class="arrow">' + ic("right") + "</span></button>";
+          }
+          /*  YENI: setir uc seyi deyir - kim, ne qeder, ne vaxt.  Reng
+              muellime OXUMADAN kime baxmali oldugunu gosterir.  */
+          var n = Number(s.attempts) || 0, fz = n ? pct(s.avg) : null;
+          return '<button class="mrow" data-s="' + esc(s.id) + '">' + av(s.full_name) +
+            '<span class="g"><b>' + esc(s.full_name) + "</b>" +
+              "<i>" + (n ? n + " test · son " + dateAz(s.last_at)
+                         : '<span class="qr">hələ işləməyib</span>') + "</i>" +
+              (fz !== null
+                ? '<span class="rbar"><i class="' + pctCls(fz) + '" style="width:' +
+                  fz + '%"></i></span>'
+                : "") + "</span>" +
+            (fz !== null
+              ? '<span class="pctv ' + (fz >= 80 ? "pvh" : (fz >= 60 ? "pvm" : "pvl")) + '">' +
+                fz + "%</span>"
+              : '<span class="pctv">—</span>') +
+            ic("right", "ar") + "</button>";
         }).join("") + "</div>";
       }
 
@@ -4310,12 +4345,28 @@
             : "");
       }
       function rTopicRow(t) {
-        return '<div class="trow"><div class="g"><b>' +
-          (Number(t.ratio) < 60 ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
-          esc(t.name) + "</b>" +
-          "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
-          meter(t.ratio) + "</div>" +
-          pctChip(t.ratio) + "</div>";
+        if (!YENI) {
+          return '<div class="trow"><div class="g"><b>' +
+            (Number(t.ratio) < 60 ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
+            esc(t.name) + "</b>" +
+            "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
+            meter(t.ratio) + "</div>" +
+            pctChip(t.ratio) + "</div>";
+        }
+        /*  YENI: setrin sag terefi bir sozle vəziyyəti deyir (Zəif /
+            Təkrar / Yaxşı), solda ise KIMIN zeif oldugu - faizi
+            beyninde tercume etmek lazim deyil.  */
+        var r = Number(t.ratio) || 0, b = topicBand(r);
+        var ws = t.weak_students || [];
+        return '<div class="mrow tpy"><span class="g"><b>' + esc(t.name) + "</b>" +
+          "<i>" + (ws.length
+            ? "zəif: " + ws.slice(0, 3).map(function (x) {
+                return esc(firstName(x.name) || x.name); }).join(", ") +
+              (ws.length > 3 ? " və daha " + (ws.length - 3) : "")
+            : esc(t.subject || "") + " · " + t.correct + " / " + t.total) + "</i>" +
+          '<span class="rbar"><i class="' + pctCls(r) + '" style="width:' + r + '%"></i></span>' +
+          "</span>" +
+          '<span class="tchip t' + b[0] + '">' + b[1] + " · " + pct(r) + "%</span></div>";
       }
       function drawRTopics() {
         var box = $("rTopicBox");
@@ -5049,12 +5100,15 @@
         right: '<button class="btn sm sasg" id="btnAsgStu" title="Yalnız bu şagirdə hazır test tapşır">' +
           ic("plus") + "Test tapşır</button>"
       });
-      var h =
-        '<div class="stats">' +
-          statTile(sm.attempts || 0, "test", "g1") +
-          statTile(pct(sm.avg) + "%", "orta", "g2") +
-          statTile(pct(sm.best) + "%", "ən yaxşı", "g3") +
-        "</div>";
+      var h = YENI
+        ? '<div class="rstat"><span><b>' + (Number(sm.attempts) || 0) + "</b>test</span>" +
+            '<span><b>' + pct(sm.avg) + "%</b>orta</span>" +
+            '<span><b>' + pct(sm.best) + "%</b>ən yaxşı</span></div>"
+        : '<div class="stats">' +
+            statTile(sm.attempts || 0, "test", "g1") +
+            statTile(pct(sm.avg) + "%", "orta", "g2") +
+            statTile(pct(sm.best) + "%", "ən yaxşı", "g3") +
+          "</div>";
       /*  Hesabat DORD SEKMEDE: Xulase / Movzular / Sehvler / Tarixce.
           Evvel hamisi bir uzun sehife idi - 8 testle 4000px; il erzinde
           sehvler ve movzular coxaldiqca hara gedeceyi bilinmirdi
@@ -10258,6 +10312,10 @@
     if (HIST.length && HIST[HIST.length - 1] === h) goBack(h); else nav(h);
   }
   function backLabel(fallback) {
+    /*  YENI gorunusde duyme hemise «Geri» yazir: o, goBack() isledir -
+        yeni GELDIYIN yere qaytarir.  Sabit ve ya kecmise gore ad
+        bezen yalan olurdu (istifadeci tutdu).  */
+    if (YENI) return "Geri";
     var prev = HIST[HIST.length - 1];
     return prev && prev !== CUR_HASH ? routeTitle(prev) : fallback;
   }
