@@ -31,6 +31,20 @@
 --  («çıxan» qalmir, «azalan» ise artiq var) - ikinci defe surusme olmur.
 -- =====================================================================
 
+--  ---------- ISTISNALAR ----------
+--  Onbaxis oz isini gordu: 28 setrin UCUNDE «çıxan» TERMIN DEYIL,
+--  adi feildir.  Bunlari avtomatik ayirmaq mumkun deyil - «Çıxanı
+--  tapaq: 50 - x = 18» deyismelidir, «S noqtesinden cixan iki sua»
+--  ise yox; ferqi ancaq insan gorur.  Ona gore ad-bad siyahi:
+--
+--    4b2274ba  «S nöqtəsindən ÇIXAN iki şüa...»      (11-ci sinif, həndəsə)
+--              - şüa nöqtədən «çıxır», çıxılmır
+--    9d8fe6ac  «Sinuslar teoremindən ÇIXAN nəticə»   (nəticə teoremdən çıxır)
+--    28561de0  variant: «Sıfırı ÇIXANDA ədəd dəyişmir»
+--              - «çıxanda» feildir; «çıxılanda» qrammatik deyil
+--
+--  YENI ISTISNA LAZIM OLSA: id-ni bu siyahiya elave et, vessalam.
+
 --  ---------- ADDIM 1: ONBAXIS (hec ne deyismir) ----------
 with hedef as (
   select q.id, q.body,
@@ -43,12 +57,20 @@ with hedef as (
    where s.slug = 'riyaziyyat'
      and q.status <> 'archived'
 ),
+istisna as (
+  select unnest(array[
+    '4b2274ba-8669-4d88-add4-3267903c0e69',   -- «S nöqtəsindən çıxan iki şüa»
+    '9d8fe6ac-cdca-4d89-b494-c88cbaf09d82',   -- «teoremdən çıxan nəticə»
+    '28561de0-8b68-4c8a-ac50-18903c616050'    -- «Sıfırı çıxanda ədəd dəyişmir»
+  ]::uuid[]) as id
+),
 secim as (
   select id, body from hedef
-   where (body || ' ' || opt) ~ '[Çç][ıi]xan'
+   where ((body || ' ' || opt) ~ '[Çç][ıi]xan'
       or ((body || ' ' || opt) ~* '[Çç][ıi]x[ıi]lan'
           and (body || ' ' || opt) ~* 'f[əe]rq'
-          and (body || ' ' || opt) !~* 'azalan')
+          and (body || ' ' || opt) !~* 'azalan'))
+     and id not in (select id from istisna)
 ),
 --  kok evezlemesi: evvel cixilan -> azalan, SONRA cixan -> cixilan
 duz as (
@@ -86,12 +108,20 @@ with hedef as (
     join public.subjects s on s.id = q.subject_id
    where s.slug = 'riyaziyyat' and q.status <> 'archived'
 ),
+istisna as (
+  select unnest(array[
+    '4b2274ba-8669-4d88-add4-3267903c0e69',
+    '9d8fe6ac-cdca-4d89-b494-c88cbaf09d82',
+    '28561de0-8b68-4c8a-ac50-18903c616050'
+  ]::uuid[]) as id
+),
 secim as (
   select id from hedef
-   where (body || ' ' || opt) ~ '[Çç][ıi]xan'
+   where ((body || ' ' || opt) ~ '[Çç][ıi]xan'
       or ((body || ' ' || opt) ~* '[Çç][ıi]x[ıi]lan'
           and (body || ' ' || opt) ~* 'f[əe]rq'
-          and (body || ' ' || opt) !~* 'azalan')
+          and (body || ' ' || opt) !~* 'azalan'))
+     and id not in (select id from istisna)
 )
 update public.question_options o
    set body = replace(replace(replace(replace(
@@ -107,12 +137,20 @@ with hedef as (
     join public.subjects s on s.id = q.subject_id
    where s.slug = 'riyaziyyat' and q.status <> 'archived'
 ),
+istisna as (
+  select unnest(array[
+    '4b2274ba-8669-4d88-add4-3267903c0e69',
+    '9d8fe6ac-cdca-4d89-b494-c88cbaf09d82',
+    '28561de0-8b68-4c8a-ac50-18903c616050'
+  ]::uuid[]) as id
+),
 secim as (
   select id from hedef
-   where (body || ' ' || opt) ~ '[Çç][ıi]xan'
+   where ((body || ' ' || opt) ~ '[Çç][ıi]xan'
       or ((body || ' ' || opt) ~* '[Çç][ıi]x[ıi]lan'
           and (body || ' ' || opt) ~* 'f[əe]rq'
-          and (body || ' ' || opt) !~* 'azalan')
+          and (body || ' ' || opt) !~* 'azalan'))
+     and id not in (select id from istisna)
 )
 update public.questions q
    set body = replace(replace(replace(replace(
