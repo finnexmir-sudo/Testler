@@ -6267,11 +6267,18 @@
       /* Iki ayri hal - eyni mesaji vermek olmaz:
          siyahi tamam bosdursa bu sinif ucun hele test YAZILMAYIB. */
       if (!list.length) {
-        box.innerHTML = note + '<div class="empty"><div class="ic">' + ic("doc") + "</div>" +
-          "<b>Bu sinif üçün hələ test yoxdur</b>" +
-          "Test bazasına " + esc(levelName(g.level_id) || "bu sinif") +
-          " materialları hələ əlavə olunmayıb. Qrupun sinfini dəyişsəniz " +
-          "(yuxarıdakı qələm düyməsi) mövcud testlər açılacaq.</div>";
+        /*  22.09 (Qizbest muellim: «Bəzi mövzularda testlər yoxdur»).
+            Rey mehz BU ekrandan gelib.  Kohne metn «test bazasina bu
+            sinif materiallari elave olunmayib» deyirdi ve sinfi
+            deyismeyi teklif edirdi - IKISI DE YANLIS idi: bankda 22963
+            sual var, her fenn/sinif ortulu; hazir PLATFORMA testi ise
+            hec vaxt olmayib (olculdu: 0).  Yani siyahi boluyur, cunki
+            muellim hele oz testini yigmayib.  Duz cixis - generator.  */
+        box.innerHTML = note + '<div class="empty"><div class="ic">' + ic("gen") + "</div>" +
+          "<b>Hələ test yığmamısınız</b>" +
+          "Sual bankı hazırdır — testi mövzuya görə özünüz yığırsınız, " +
+          "bir neçə saniyə çəkir. Aşağıdakı «Yeni test yığ» ilə başlayın — " +
+          "yığdığınız test bu siyahıya düşəcək.</div>";
         return;
       }
       if (!free.length) {
