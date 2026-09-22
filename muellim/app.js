@@ -1351,7 +1351,21 @@
         alt: plan ? (plan.name || "paket") + (gun !== null ? " · " + gun + " gün qalıb" : "")
                   : "hesab və ayarlar" })
     ];
+    /*  Idareetme bendi KOHNE Icmalda var idi, yenisinde unudulmusdu -
+        admin panele yalniz unvanla gire bilirdi (istifadeci tutdu:
+        «admin səhifəsində admin panelə giriş üçün buton var idi, hanı o?»).
+        Saygac deyil, GIRIS NOKTESIDIR - admin ucun her halda gorunur.  */
+    if (isAdmin()) {
+      m.push(yRow({ ic: "group", ad: "İdarəetmə", href: "#/adm",
+        altHtml: '<span id="yAdmSub">Hesablar və abunələr (admin)</span>' }));
+    }
     $("yMenu").innerHTML = m.join("");
+    if (isAdmin()) {
+      sb.rpc("rpc_admin_feedback_count", {}).then(function (n) {
+        var e = $("yAdmSub");
+        if (e && n > 0) e.innerHTML = "Hesablar, abunələr · <b>" + n + " yeni müraciət</b>";
+      }).catch(function () {});
+    }
 
     //  ---- ele-bele baxan adam ucun: yalniz bos hesabda
     $("yBax").innerHTML = bitdi ? "" :

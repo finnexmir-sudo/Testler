@@ -211,6 +211,26 @@ with sync_playwright() as pw:
         for a, h, b in kecidler(unvan, qab):
             print("   %-52s -> %-34s %s" % (a, h, b))
 
+    #  ---- ADMIN: «Idareetme» bendi Icmalda gorunur ve isleyir
+    #  (Istifadeci: «admin sehifesinde admin panele giris ucun buton
+    #   var idi, hani o?» - yeni menyuda unudulmusdu.)
+    q("insert into public.user_roles (user_id, role) values (%s,'admin')"
+      " on conflict do nothing", (acc["own"],))
+    p.goto(PANEL + "#/"); p.reload()
+    p.wait_for_selector("#yMenu .mrow", timeout=30000); p.wait_for_timeout(1500)
+    adm = p.locator("#yMenu .mrow").filter(has_text="\u0130dar\u0259etm\u0259")
+    if not adm.count():
+        XETA.append("#/ : admin ucun \u00abIdareetme\u00bb bendi yoxdur")
+    else:
+        adm.first.click(); p.wait_for_timeout(1800)
+        hh = p.evaluate("location.hash") or ""
+        bb = bashq()
+        print("\n-- Admin")
+        print("   %-52s -> %-10s %s" % ("\u0130dar\u0259etm\u0259", hh, bb))
+        if not hh.startswith("#/adm"):
+            XETA.append("#/ : \u00abIdareetme\u00bb -> " + hh + " (idareetmeye aparmir)")
+    q("delete from public.user_roles where user_id=%s", (acc["own"],))
+
     print("\n=== NETICE ===")
     if XETA:
         for e in XETA: print("  XETA:", e)

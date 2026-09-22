@@ -144,6 +144,15 @@ with sync_playwright() as pw:
     p.wait_for_selector("#prep .prep, #planBox", timeout=30000); p.wait_for_timeout(1500)
     print("DERS PLANI:", p.inner_text("#main")[:160].replace("\n", " | "))
     p.screenshot(path=OUT + "/plan.png", full_page=True)
+    #  ---- ADMIN: «Idareetme» bendi menyuda
+    q("insert into public.user_roles (user_id, role) values (%s,'admin')"
+      " on conflict do nothing", (acc["own"],))
+    p.goto(PANEL + "#/"); p.reload()
+    p.wait_for_selector("#yMenu .mrow", timeout=30000); p.wait_for_timeout(1500)
+    print("ADMIN menyusu:", p.locator("#yMenu").inner_text().replace("\n", " | ")[-120:])
+    p.screenshot(path=OUT + "/admin_icmal.png", full_page=True)
+    q("delete from public.user_roles where user_id=%s", (acc["own"],))
+
     #  ---- ZEIF MOVZU setri: adlar setirde, kecid Movzular sekmesine
     p.goto(PANEL + "#/"); p.reload()
     p.wait_for_selector("#yDiq .mrow", timeout=30000); p.wait_for_timeout(1200)
