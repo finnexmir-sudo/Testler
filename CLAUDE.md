@@ -1726,6 +1726,40 @@ masaüstündə görünüb. Vəziyyət üçün `done`, `st-ok`, `st-mid`, `st-wea
 yaz. Eyni səbəbdən `<input type="checkbox">` `.plck` base `input`
 qaydasından (40px, padding) azad edilir.
 
+## Arifmetik terminlər — mənbə e-dərslikdir, yaddaş yox
+
+**2026-09-22.** Bankda çıxma sualları bir pillə sürüşmüş terminlə
+yazılmışdı («çıxılan» = azalan, «çıxan» = çıxılan). Düzəlişi
+hazırlayanda mübahisə çıxdı: başqa bir AI iddia etdi ki, Azərbaycan
+dərsliklərində «çıxılan» yoxdur, «çıxan» var.
+
+**Rəsmi mənbə yoxlandı** — e-dərslik, Riyaziyyat, «çıxma əməlinin
+komponentləri» (kitab 665, vahid 1, səh. 75):
+
+```
+a − b = c
+a = azalan     b = çıxılan     c = fərq
+18 − 1 = 17  ->  18 azalan, 1 çıxılan, 17 fərq
+```
+
+«Çıxan» sözü orada **ümumiyyətlə işlənmir**. Türkcədə «eksilen −
+çıkan = fark»dır; bankdakı səhvin mənbəyi çox güman elə budur.
+
+| Əməl | Komponentlər |
+|------|--------------|
+| toplama | toplanan + toplanan = **cəm** |
+| çıxma | **azalan** − **çıxılan** = **fərq** |
+| vurma | vuruq × vuruq = **hasil** |
+| bölmə | bölünən : bölən = **qismət** |
+
+**Qayda:** termin mübahisəsində heç kimin (nə mənim, nə başqa modelin)
+yaddaşı dəlil deyil — e-dərslik açılır, sətir sitat gətirilir.
+Süzgəc: `db/test/termin_yoxla.sql`, düzəliş: `db/test/termin_duzelt.sql`.
+
+Mənbə: http://www.e-derslik.edu.az/books/665/units/unit-1/page75.xhtml
+
+---
+
 ## Sual bankı — qayda
 
 Sual **testin içində deyil, bankdadır**. `test_questions` hansı testin
