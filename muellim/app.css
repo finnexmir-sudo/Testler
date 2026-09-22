@@ -2380,6 +2380,17 @@ details.stk .l3{margin-top:8px}
 .menu .mrow{display:flex;align-items:center;gap:13px;padding:14px 16px;
   border-bottom:1px solid var(--n-100);text-decoration:none;color:inherit}
 .menu .mrow:last-child{border-bottom:0}
+/*  Setir bezen <a>, bezen <button>-dur: hesabatda sagird setrinin
+    unvani yoxdur, klik JS-dedir.  <a> display:flex ile kartin tam
+    enini tutur, <button> ise OZ ENINDE qalir (width:auto) - kart
+    icinde setirler pilleli, kenarlari yirtiq gorunurdu; istifadeci
+    masa ustunde ve telefonda eyni seyi tutdu: «seligesiz».
+    Eni ve duymenin oz fonu/cercivesi aciq sifirlanir - kohne .item
+    setri de eyni sebebden bunlari yazir.  */
+button.mrow{width:100%;text-align:left;background:none;border:0;color:inherit;font:inherit}
+/*  Masa ustunde setrin basildigi bilinsin - kohne .item-de var idi  */
+@media (hover:hover){ .menu .mrow:hover,.card.pad0>.mrow.tpy:hover{background:var(--n-25)} }
+
 .menu .mrow:active{background:var(--n-50,#f5f7f8)}
 .menu .mrow .mi{width:20px;height:20px;flex:0 0 20px;color:var(--brand)}
 .menu .mrow .g{flex:1;min-width:0}
@@ -2405,6 +2416,12 @@ details.stk .l3{margin-top:8px}
 /*  YENI: hesabat - bir setirlik reqemler, movzu setri  */
 .rstat{display:flex;gap:16px;align-items:baseline;margin:2px 4px 14px;font-size:13px;color:var(--fg-2)}
 .rstat b{font-size:17px;font-weight:750;color:var(--fg);margin-right:4px;letter-spacing:-.02em}
+/*  Neticeler (#/nt): ust setirde gedisat cumlesi - reqemlerden sonra  */
+/*  Sessiz sagirdler: qrup siyahisinin altinda bir hereket  */
+.suact{margin-top:8px}
+.suact .btn{text-decoration:none}
+.rstat .ntt{margin-left:auto;font-size:12px;color:var(--fg-3);white-space:nowrap}
+@media (max-width:430px){ .rstat{flex-wrap:wrap} .rstat .ntt{margin-left:0;flex:1 0 100%} }
 .menu .mrow.tpy,.card.pad0>.mrow.tpy{align-items:flex-start}
 .mrow.tpy{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
   border-bottom:1px solid var(--n-100)}

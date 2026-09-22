@@ -26,13 +26,16 @@ insert into public.classes (id, account_id, teacher_id, kind, name, join_code, l
   ('cccc0000-0000-0000-0000-0000000009a1','aaaa0000-0000-0000-0000-0000000009a1',
    '11110000-0000-0000-0000-0000000009a1','tutor_group','BG qrup','KODBG001',
    (select id from public.levels where code = '7' order by sort limit 1));
-insert into public.students (id, account_id, class_id, created_by, full_name, display_name, login_code) values
+--  216: «susan» yalniz BIR HEFTEDEN artiq movcud olan sagirdi sayir
+--  (teze elave olunan sagird «bir heftedir susur» ola bilmez).  Fikstur
+--  sagirdleri 20 gun evvele qoyulur - yoxsa Leyla susan sayilmir.
+insert into public.students (id, account_id, class_id, created_by, full_name, display_name, login_code, created_at) values
   ('5555000b-0000-0000-0000-000000000001','aaaa0000-0000-0000-0000-0000000009a1',
-   'cccc0000-0000-0000-0000-0000000009a1','11110000-0000-0000-0000-0000000009a1','Ayan Bir','Ayan B.','BGST0001'),
+   'cccc0000-0000-0000-0000-0000000009a1','11110000-0000-0000-0000-0000000009a1','Ayan Bir','Ayan B.','BGST0001', now() - interval '20 days'),
   ('5555000b-0000-0000-0000-000000000002','aaaa0000-0000-0000-0000-0000000009a1',
-   'cccc0000-0000-0000-0000-0000000009a1','11110000-0000-0000-0000-0000000009a1','Murad Iki','Murad I.','BGST0002'),
+   'cccc0000-0000-0000-0000-0000000009a1','11110000-0000-0000-0000-0000000009a1','Murad Iki','Murad I.','BGST0002', now() - interval '20 days'),
   ('5555000b-0000-0000-0000-000000000003','aaaa0000-0000-0000-0000-0000000009a1',
-   'cccc0000-0000-0000-0000-0000000009a1','11110000-0000-0000-0000-0000000009a1','Leyla Uc','Leyla U.','BGST0003');
+   'cccc0000-0000-0000-0000-0000000009a1','11110000-0000-0000-0000-0000000009a1','Leyla Uc','Leyla U.','BGST0003', now() - interval '20 days');
 
 --  Ayan DUNEN, Murad BU GUN isleyib; Leyla hec ne etmeyib (susan)
 do $$

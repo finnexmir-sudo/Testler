@@ -675,7 +675,7 @@
                  ["sual", "Sual"], ["tesekkur", "Təşəkkür"]];
   var FB_ST = { "new": "Yeni", seen: "Baxılıb", planned: "Planda",
                 done: "Edilib", closed: "Bağlı" };
-  var FB_PAGE = { "": "İcmal", g: "Qrup", r: "Qrup hesabatı", a: "Tapşırıq",
+  var FB_PAGE = { "": "İcmal", g: "Qrup", r: "Qrup hesabatı", a: "Tapşırıq", nt: "Nəticələr", sus: "Səssiz şagirdlər",
                   b: "Sual bankı", gen: "Test yığ", t: "Test vərəqi", p: "Paket",
                   adm: "İdarəetmə", n: "Siqnallar", q: "Sual", s: "Şagird hesabatı" };
   function fbKind(k) {
@@ -1303,7 +1303,9 @@
         alt: (h0["class"] || "") + " · ev tapşırığı", cip: "diqqət", cipCls: "pvl" }));
     }
     if (Number(bg.susan)) {
-      d.push(yRow({ ic: "warn", cls: "dq", href: "#/gs",
+      //  setir ADLARI ved edir - «#/sus» onlari sadalayir (evvel
+      //  «#/gs» idi: muellim «hanı 10 şagird?» deyirdi, hagli idi)
+      d.push(yRow({ ic: "warn", cls: "dq", href: "#/sus",
         ad: bg.susan + " şagird bir həftədir səssizdir",
         alt: "test göndərin və ya xatırladın", cip: "diqqət", cipCls: "pvl" }));
     }
@@ -1334,7 +1336,7 @@
                 : "qrup yaradın, şagirdləri bir yerə yığın" }),
       yRow({ ic: "gen", ad: "Test yığ", href: "#/gen",
         alt: "hazır bankdan bir dəqiqəyə" }),
-      yRow({ ic: "chart", ad: "Nəticələr", href: "#/gs", alt: netAlt,
+      yRow({ ic: "chart", ad: "Nəticələr", href: "#/nt", alt: netAlt,
         cip: tp && tp.name ? "zəif mövzu var" : "", cipCls: "pvm" }),
       yRow({ ic: "doc", ad: "Sual bankı", href: "#/b",
         alt: nT ? nT + " öz testiniz · hazır suallar" : "hazır suallar və öz suallarınız" }),
@@ -1351,6 +1353,177 @@
         yRow({ ic: "chart", ad: "Nümunə hesaba bax", href: "#/demo",
                alt: "dolu hesab — heç nə qurmadan görün" }) +
       "</div>";
+  }
+
+  /*  NETICELER (#/nt) - yalniz yeni gorunusde.  Evvel Icmaldaki
+      «Nəticələr» setri «#/gs»-e, Qruplar siyahisina aparirdi: muellim
+      netice axtarirdi, qrup ADLARINI tapirdi.  Indi sehifenin ozu var
+      ve dord suala cavab verir: umumi hal nedir · hansi qrup geridedir ·
+      hansi movzu zeifdir · kim ne yazdi.
+      Reqemler iki cagiriadan gelir - rpc_home (umumi, zeif movzular,
+      son cavablar; onsuz da keşdedir) ve rpc_groups_summary (218:
+      qrup uzre orta).  Ikincisini rpc_home-a qatmadim: o, ilk acilis
+      yolundadir, agirlasdirmaq olmaz.  */
+  function screenResults() {
+    topTitle.textContent = "Nəticələr";
+    bandHead({
+      back: { id: "ntBack", label: "Geri" }, eye: "Nəticələr",
+      title: "Nəticələr",
+      sub: "Qrup, mövzu və şagird — üçü də burada."
+    });
+    show('<div id="ntUst"><div class="card"><div class="skel">Yüklənir…</div></div></div>' +
+         '<div id="ntQ"></div><div id="ntZ"></div><div id="ntS"></div>');
+    on("ntBack", "click", function () { goBack("#/"); });
+    var live = guard();
+    Promise.all([
+      homeData(),
+      sb.rpc("rpc_groups_summary", {}).catch(function () { return []; })
+    ]).then(function (rr) {
+      if (!live() || !$("ntUst")) return;
+      ntCiz(rr[0] || {}, rr[1] || []);
+    }, function (e) {
+      if (!live() || !$("ntUst")) return;
+      $("ntUst").innerHTML = '<div class="card">' + msg("warn", fail(e)) + "</div>";
+    });
+  }
+
+  function ntCiz(v, gs) {
+    var st = v.stats || {}, nC = Number(st.attempts) || 0;
+    var aw = st.avg_w, apw = st.avg_pw;
+    /*  ---- UST SETIR: uc reqem + bir cumlelik gedisat.  «Keçən həftə
+        53%» demek muellime hec ne demirdi - indi FERQ yazilir.  */
+    var trend = "";
+    if (aw !== null && aw !== undefined && apw !== null && apw !== undefined) {
+      var fr = Math.round(Number(aw) - Number(apw));
+      trend = fr === 0 ? "keçən həftə ilə eyni"
+        : "keçən həftəyə görə " + (fr > 0 ? "+" : "−") + Math.abs(fr) + "%";
+    } else if (aw !== null && aw !== undefined) {
+      trend = "son 7 gün: " + Math.round(Number(aw)) + "%";
+    }
+    $("ntUst").innerHTML = nC
+      ? '<div class="rstat"><span><b>' + pct(st.avg) + "%</b>orta</span>" +
+        "<span><b>" + nC + "</b>cavab</span>" +
+        "<span><b>" + (Number(st.students) || 0) + "</b>şagird</span>" +
+        (trend ? '<span class="ntt">' + esc(trend) + "</span>" : "") + "</div>"
+      : '<div class="card pad0"><div class="empty"><div class="ic">' + ic("chart") + "</div>" +
+        "<b>Hələ nəticə yoxdur</b>Şagird ilk testi yazandan sonra bu səhifə dolur." +
+        "</div></div><div class=\"spacer\"></div>";
+
+    /*  ---- QRUPLAR: hansina baxmali oldugunu reng deyir.
+        Setirde «N zeif movzu» YAZILMIR: o sayi bu sehifede iki ayri
+        qayda ile hesablayirdiq (rpc_home siqnallari / qrup hesabati)
+        ve eyni qrup ucun ferqli reqem cixirdi.  Zeif movzular onsuz
+        da asagida oz bolmesindedir, qrup adi ile birlikde.  */
+    $("ntQ").innerHTML = !gs.length ? "" :
+      ySec("Qruplar") + '<div class="card pad0 menu">' + gs.map(function (g) {
+        var n = Number(g.attempts) || 0, fz = n ? pct(g.avg) : null;
+        var alt = n
+          ? n + " cavab · " + (Number(g.students) || 0) + " şagird" +
+            (g.last_at ? " · son " + agoAz(g.last_at) : "")
+          : (Number(g.students) ? "hələ test yazan yoxdur" : "şagird əlavə edin");
+        return '<a class="mrow" href="#/r/' + esc(g.id) + '">' + ic("group", "mi") +
+          '<span class="g"><b>' + esc(g.name) + "</b><i>" + esc(alt) + "</i>" +
+          (fz !== null
+            ? '<span class="rbar"><i class="' + pctCls(fz) + '" style="width:' + fz + '%"></i></span>'
+            : "") + "</span>" +
+          (fz !== null ? '<span class="pctv ' + pvCls(fz) + '">' + fz + "%</span>" : "") +
+          ic("right", "ar") + "</a>";
+      }).join("") + '</div><div class="spacer"></div>';
+
+    /*  ---- ZEIF MOVZULAR: butun qruplar uzre bir siyahi.  Setir hansi
+        qrupda oldugunu ve KIMIN zeif oldugunu deyir - muellim hesabata
+        girmeden ne edeceyini bilir.  */
+    var tz = (v.topics || []).filter(function (t) { return t && t.name; });
+    $("ntZ").innerHTML = !tz.length ? "" :
+      ySec("Zəif mövzular") + '<div class="card pad0">' + tz.map(function (t) {
+        var r = Number(t.avg) || 0, b = topicBand(r);
+        var ws = t.weak || [];
+        return '<a class="mrow tpy" href="#/r/' + esc(t.class_id || "") + '">' +
+          '<span class="g"><b>' + esc(t.name) + "</b><i>" +
+          esc(t["class"] || "") +
+          (ws.length
+            ? " · zəif: " + ws.slice(0, 3).map(function (x) {
+                return esc(firstName(x.name) || x.name); }).join(", ") +
+              (ws.length > 3 ? " və daha " + (ws.length - 3) : "")
+            : " · " + (Number(t.weak_n) || 0) + " şagird") + "</i>" +
+          '<span class="rbar"><i class="' + pctCls(r) + '" style="width:' + r + '%"></i></span>' +
+          "</span>" +
+          '<span class="tchip t' + b[0] + '">' + b[1] + " · " + pct(r) + "%</span></a>";
+      }).join("") + '</div><div class="spacer"></div>';
+
+    /*  ---- SON CAVABLAR: kim, hansi test, nece faiz, ne vaxt.
+        Bes setir - sual «son vaxtlar ne oldu?»dur, tam siyahi deyil;
+        sekkiz setirde bolme sehifenin yarisini yeyirdi.  */
+    var rc = (v.recent || []).slice(0, 5);
+    $("ntS").innerHTML = !rc.length ? "" :
+      ySec("Son cavablar") + '<div class="card pad0 menu">' + rc.map(function (a) {
+        var fz = pct(a.percent);
+        //  eyni «check» nisani bes defe tekrarlanirdi - adin bas herfi
+        //  setirleri bir-birinden ayirir (sagird siyahisi ile eyni dil)
+        return '<a class="mrow" href="#/r/' + esc(a.class_id || "") + '">' +
+          av(a.student) +
+          '<span class="g"><b>' + esc(a.student || "") + "</b><i>" +
+          esc(a.test || "") + (a["class"] ? " · " + esc(a["class"]) : "") +
+          (a.at ? " · " + agoAz(a.at) : "") + "</i></span>" +
+          '<span class="pctv ' + pvCls(fz) + '">' + fz + "%</span>" +
+          ic("right", "ar") + "</a>";
+      }).join("") + "</div>";
+  }
+
+  /*  SESSIZ SAGIRDLER (#/sus) - yalniz yeni gorunusde.
+      Icmaldaki «10 şagird bir həftədir səssizdir» setri «#/gs»-e
+      aparirdi; istifadeci hakli soruşdu: «hanı 10 şagird?».  Setir
+      ADLARI ved edir - indi adlari verir.  Her setirden sagirdin oz
+      hesabatina kecilir; orada kodu gondermek ve tapsiriq vermek var.  */
+  function screenSilent() {
+    topTitle.textContent = "Səssiz şagirdlər";
+    bandHead({
+      back: { id: "suBack", label: "Geri" }, eye: "Şagirdlər",
+      title: "Səssiz şagirdlər",
+      sub: "Bir həftədir bir dənə də test işləməyənlər."
+    });
+    show('<div id="suBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>');
+    on("suBack", "click", function () { goBack("#/"); });
+    var live = guard();
+    sb.rpc("rpc_silent_students", {}).then(function (ls) {
+      if (!live() || !$("suBox")) return;
+      ls = ls || [];
+      if (!ls.length) {
+        $("suBox").innerHTML = '<div class="card pad0"><div class="empty">' +
+          '<div class="ic">' + ic("check") + "</div>" +
+          "<b>Səssiz şagird yoxdur</b>Hamı son bir həftədə nəsə işləyib.</div></div>";
+        return;
+      }
+      //  qruplara bolunur: muellim adətən bir qrupa tapsiriq verir
+      var qr = [], say = {};
+      ls.forEach(function (s) {
+        var k = s.class_id || "";
+        if (!say[k]) { say[k] = { ad: s["class"] || "Qrupsuz", id: k, st: [] }; qr.push(say[k]); }
+        say[k].st.push(s);
+      });
+      $("suBox").innerHTML = qr.map(function (g) {
+        return ySec(g.ad + " · " + g.st.length + " nəfər") +
+          '<div class="card pad0 menu">' + g.st.map(function (s) {
+            /*  «Ne vaxtdan?» sualina durust cavab: hec vaxt islemeyibse
+                onu deyirik, islemisdise SON tarixi.  «Bir hefte» yazmaq
+                iki ay susan sagird ucun yalan olardi.  */
+            var alt = s.last_at ? "son cavab: " + agoAz(s.last_at)
+                    : (s.seen_at ? "girib, heç vaxt test işləməyib"
+                                 : "hələ girməyib — kodu göndərin");
+            return '<a class="mrow" href="#/s/' + esc(s.id) + "/" + esc(s.class_id || "") + '">' +
+              av(s.full_name) +
+              '<span class="g"><b>' + esc(s.full_name) + "</b><i>" +
+              (s.seen_at || s.last_at ? esc(alt) : '<span class="qr">' + esc(alt) + "</span>") +
+              "</i></span>" + ic("right", "ar") + "</a>";
+          }).join("") + "</div>" +
+          (g.id ? '<div class="suact"><a class="btn sm" href="#/a/' + esc(g.id) + '">' +
+                  ic("clip") + "«" + esc(g.ad) + "» qrupuna tapşırıq ver</a></div>" : "") +
+          '<div class="spacer"></div>';
+      }).join("");
+    }, function (e) {
+      if (!live() || !$("suBox")) return;
+      $("suBox").innerHTML = '<div class="card">' + msg("warn", fail(e)) + "</div>";
+    });
   }
 
   function screenHome() {
@@ -3828,7 +4001,6 @@
           (faiz !== null ? '<span class="pctv ' + pvCls(faiz) + '">' + faiz + "%</span>" : "") +
           ic("right", "ar") + "</a>";
       }
-      function pvCls(p) { return p >= 80 ? "pvh" : (p >= 60 ? "pvm" : "pvl"); }
 
       function stuRow(s) {
         if (YENI) return stuRowYeni(s);
@@ -4223,6 +4395,8 @@
 
   /* Nisbi vaxt: siyahilarda "3 gun evvel" tarixden tez oxunur */
   /*  205: netice rengi - 80+ yaxsi, 60-79 orta, 60-dan asagi zeif  */
+  //  faiz cipinin rengi (yazi); .rbar zolaginin rengi pctCls-dedir
+  function pvCls(p) { return p >= 80 ? "pvh" : (p >= 60 ? "pvm" : "pvl"); }
   function pctCls(p) {
     if (p === null || p === undefined || isNaN(p)) return "none";
     return p >= 80 ? "good" : (p >= 60 ? "mid" : "low");
@@ -10330,7 +10504,7 @@
   var HIST = [], BACKING = false, CUR_I = 0;
   function routeTitle(h) {
     var k = (h || "#/").replace(/^#/, "").split("/").filter(Boolean)[0] || "";
-    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ",
+    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ", nt: "Nəticələr", sus: "Səssiz şagirdlər",
              t: "Vərəq", pk: "Dərs paketi", adm: "İdarəetmə", me: "Profil", n: "Bildirişlər", bize: "Bizə yazın",
              q: "Sual", s: "Şagird", p: "Paket", demo: "Nümunə" }[k] || "Əsas səhifə";
   }
@@ -10469,7 +10643,9 @@
       PREV_HASH = CUR_HASH; CUR_HASH = location.hash || "#/";
     }
     //  qrup, hesabat, tapsiriq ekranlari da «Qruplar» bendinin altindadir
-    bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
+    bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", nt: "gs", sus: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
+    if (m[0] === "nt") return YENI ? screenResults() : nav("#/");
+    if (m[0] === "sus") return YENI ? screenSilent() : nav("#/");
     if (m[0] === "gs") return screenGroups();
     if (m[0] === "g" && m[1]) return screenGroup(m[1], m[2]);
     if (m[0] === "r" && m[1]) return screenReport(m[1]);

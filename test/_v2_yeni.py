@@ -73,6 +73,15 @@ with sync_playwright() as pw:
             for t in tst:
                 q("select app.demo_attempt(%s,%s,%s,%s,%s::uuid[], now() - make_interval(days => %s))",
                   (s["id"], t, s["class_id"], bac[i], tops[:1] if i < 2 else [], 11 - i - r * 3))
+    #  iki SESSIZ sagird: 20 gun evvel elave olunub, hec ne islemeyib -
+    #  Icmaldaki «N sagird bir heftedir sessizdir» setri ucun
+    for i, ad in enumerate(["Röya Nəbiyeva", "Tural İsmayılov"]):
+        q("insert into public.students (account_id,class_id,created_by,full_name,display_name,"
+          "login_code,is_active,created_at)"
+          " values (%s,%s,%s,%s,%s,%s,true, now()-interval '20 days')",
+          (acc["acc"], cls[i % 2]["id"], acc["own"], ad,
+           ad.split(" ")[0] + " " + ad.split(" ")[1][0] + ".",
+           "SS%s%d" % (str(T)[-5:], i)))
     p.goto(PANEL + "#/"); p.reload()
     p.wait_for_selector("#yMenu .mrow", timeout=30000); p.wait_for_timeout(1500)
     h = p.evaluate("document.body.scrollHeight")
@@ -121,6 +130,25 @@ with sync_playwright() as pw:
     p.wait_for_selector("#prep .prep, #planBox", timeout=30000); p.wait_for_timeout(1500)
     print("DERS PLANI:", p.inner_text("#main")[:160].replace("\n", " | "))
     p.screenshot(path=OUT + "/plan.png", full_page=True)
+    #  ---- SESSIZ SAGIRDLER: Icmaldaki setir indi adlari gosterir
+    p.goto(PANEL + "#/sus"); p.reload()
+    p.wait_for_selector("#suBox .mrow, #suBox .empty", timeout=30000); p.wait_for_timeout(900)
+    print("SESSIZ:", p.locator("#suBox").inner_text().replace("\n", " | ")[:170])
+    p.screenshot(path=OUT + "/sessiz.png", full_page=True)
+    #  ---- NETICELER: evvel «#/gs» (qruplar siyahisi), indi «#/nt»
+    p.goto(PANEL + "#/gs"); p.reload()
+    p.wait_for_selector("#groups .gcard, #groups .empty", timeout=30000); p.wait_for_timeout(900)
+    print("EVVEL (#/gs):", p.inner_text("#main")[:110].replace("\n", " | "))
+    p.screenshot(path=OUT + "/net_evvel.png", full_page=True)
+    p.goto(PANEL + "#/nt"); p.reload()
+    p.wait_for_selector("#ntQ .mrow", timeout=30000); p.wait_for_timeout(1200)
+    hh = p.evaluate("document.body.scrollHeight")
+    print("YENI (#/nt): %d px = %.1f ekran" % (hh, hh / 844.0))
+    print("   ust    :", p.locator("#ntUst").inner_text().replace("\n", " | ")[:90])
+    print("   qruplar:", p.locator("#ntQ").inner_text().replace("\n", " | ")[:150])
+    print("   zeif   :", p.locator("#ntZ").inner_text().replace("\n", " | ")[:150])
+    print("   son    :", p.locator("#ntS").inner_text().replace("\n", " | ")[:120])
+    p.screenshot(path=OUT + "/net_yeni.png", full_page=True)
     #  ---- hesabat: sagirdler ve movzular
     p.goto(PANEL + "#/r/" + str(gid)); p.reload()
     p.wait_for_selector("#main .mrow, #main .item", timeout=30000); p.wait_for_timeout(1800)
@@ -133,6 +161,24 @@ with sync_playwright() as pw:
         p.wait_for_timeout(1200)
         print("   movzular:", p.inner_text("#main")[:200].replace("\n", " | "))
         p.screenshot(path=OUT + "/movzular.png", full_page=True)
+    except Exception as e:
+        print("   movzular: ATLANDI", e)
+    #  ---- MASA USTU: hesabat genis ekranda (istifadeci: «seligesiz»)
+    p2 = ctx.new_page()
+    p2.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
+    p2.set_viewport_size({"width": 1280, "height": 900})
+    p2.goto(PANEL + "#/r/" + str(gid)); p2.reload()
+    p2.wait_for_selector("#main .mrow, #main .item", timeout=30000); p2.wait_for_timeout(1800)
+    box = p2.evaluate("""(() => {
+      const rs = [...document.querySelectorAll('#main .mrow')].slice(0, 6);
+      return rs.map(r => { const b = r.getBoundingClientRect();
+        return Math.round(b.left) + '..' + Math.round(b.right) + ' (' + Math.round(b.width) + ')'; });
+    })()""")
+    print("MASA USTU setir enleri:", box)
+    p2.screenshot(path=OUT + "/hesabat_masa.png", full_page=True)
+    p2.close()
+    try:
+        pass
     except Exception as e:
         print("   movzular sekmesi:", str(e)[:80])
     br.close()
