@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""ZENG NISANI: «size mektub var» deyirmi?
+"""ZENG = POCT QUTUSU.  Yalniz oxunmamis mesaji sayir.
 
 22.09 (istifadeci): «bildiris ikonunda 1, 2 yazilmalidirki size mektub
 var».  Evvel nisan yalniz SAGIRD siqnallarini sayirdi - admin mesaji
@@ -15,6 +15,10 @@ Yoxlanilir:
   5. «Oxudum» basilandan sonra say sonur
   6. eyni sey YENI gorunusde de islyir (?yeni=1)
   7. REYE verilen cavab da eyni kartda ve eyni sayda (db/221)
+  8. SAGIRD SIQNALI saya TESIR ETMIR - bir reqem, bir qayda.
+     (Istifadeci: «baxdiqdan sonra say deyismeli deyildi?»  Siqnal
+     baxmaqla getmir, mektub gedir - ikisini bir reqemde yigmaq
+     yanlis idi.)
 """
 import os, sys, time, psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright
@@ -127,6 +131,29 @@ with sync_playwright() as pw:
         #  cavabi da «Oxudum» ile baglamaq olur (reply_seen_at)
         p.click("#amsgOk"); p.wait_for_timeout(1600)
         yox(nisan(p) == "1", "cavab oxundu - nisan «1» (indi: %r)" % nisan(p))
+
+        #  --- SIQNAL saya TESIR ETMEMELIDIR.  Sessiz sagird yaradiriq:
+        #  Icmalda «N sagird sessizdir» sətri cixir, amma zeng qalir «1».
+        lev2 = q("select id from public.levels where code='3'", one=True)["id"]
+        g2 = q("insert into public.classes (account_id,teacher_id,kind,name,"
+               "join_code,level_id) values (%s,%s,'tutor_group','Sınaq',%s,%s)"
+               " returning id",
+               (acc["acc"], acc["own"], "ZS" + gor[:1].upper() + str(T)[-5:], lev2),
+               one=True)["id"]
+        for i, ad in enumerate(["Röya Nəbiyeva", "Tural İsmayılov"]):
+            q("insert into public.students (account_id,class_id,created_by,"
+              "full_name,display_name,login_code,is_active,created_at)"
+              " values (%s,%s,%s,%s,%s,%s,true, now()-interval '20 days')",
+              (acc["acc"], g2, acc["own"], ad, ad.split(" ")[0],
+               "ZS%s%d" % (str(T)[-5:], i)))
+        p.goto(PANEL + sfx + "#/"); p.reload()
+        p.wait_for_selector("#adminMsg", state="attached", timeout=30000)
+        p.wait_for_timeout(1800)
+        ekran = p.locator("#main").inner_text()
+        yox("səssiz" in ekran.lower(), "sessiz sagird sətri Icmalda GORUNUR")
+        yox(nisan(p) == "1", "siqnal saya TESIR ETMIR - nisan hele «1» (indi: %r)"
+            % nisan(p))
+        p.screenshot(path=OUT + "/%s-siqnal-tesirsiz.png" % gor, full_page=True)
         ctx.close()
     br.close()
 temizle()

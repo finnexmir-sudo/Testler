@@ -10739,25 +10739,32 @@
   btnFb.innerHTML = ic("pen") + "<span>Bizə yaz</span>";
   topWho.parentNode.insertBefore(btnFb, btnBell);
   btnFb.addEventListener("click", function () { nav("#/bize"); });
-  /*  22.09 (istifadeci): «bildiris ikonunda 1, 2 yazilmalidirki size
-      mektub var».  Evvel yalniz nisan idi ve YALNIZ sagird siqnallarini
-      sayirdi - admin mesaji gelende zeng susurdu, muellim «Bizə yaz»a
-      girmeyene qeder xeberi olmurdu.  Indi iki menbe toplanir ve SAY
-      yazilir.  */
-  var BELL_AL = 0, BELL_MSG = 0;
+  /*  ZENG = POCT QUTUSU.  Yalniz OXUNMAMIS mesaji sayir.
+      22.09, iki addimda:
+      (1) Evvel nisan yalniz sagird SIQNALLARINI sayirdi - admin mesaji
+          gelende susurdu.  Istifadeci: «bildiris ikonunda 1,2
+          yazilmalidirki size mektub var».  Mesaji da elave etdim.
+      (2) Onda «2» iki menali oldu: iki mektub, yoxsa iki siqnal?  Biri
+          baxmaqla gedir, digeri GETMIR - siqnal sebeb aradan qalxanda
+          sonur.  Istifadeci haqli olaraq «baxdiqdan sonra say
+          deyismeli deyildi?» sorusdu.
+      Qerar: bir reqem - bir qayda.  Zeng mektub sayir, oxunanda dusur.
+      Siqnallar onsuz da Icmalin basinda qirmizi kartla gorunur, ikinci
+      defe saymaga ehtiyac yoxdur.  */
+  var BELL_MSG = 0;
   function bellPaint() {
     var d = $("bellDot");
     if (!d) return;
-    var n = (Number(BELL_AL) || 0) + (Number(BELL_MSG) || 0);
+    var n = Number(BELL_MSG) || 0;
     d.textContent = n > 9 ? "9+" : (n > 0 ? String(n) : "");
     d.classList.toggle("hide", !(n > 0));
     if (btnBell) {
-      btnBell.title = n > 0
-        ? "Siqnallar — " + n + (BELL_MSG > 0 ? " (Bil10-dan mesaj var)" : "")
-        : "Siqnallar";
+      btnBell.title = n > 0 ? n + " oxunmamış mesaj" : "Mesajlar və siqnallar";
     }
   }
-  function bellDot(n) { BELL_AL = Number(n) || 0; bellPaint(); }
+  //  Kohne cagiris yerleri qalir (siqnal sayi ile cagirilir) - reqem
+  //  artiq nisana getmir.  Funksiya saxlanilir ki cagiris pozulmasin.
+  function bellDot() { bellPaint(); }
   function bellMsg(n) { BELL_MSG = Number(n) || 0; bellPaint(); }
 
   var bnav = document.createElement("nav");
