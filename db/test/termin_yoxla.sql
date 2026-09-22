@@ -40,7 +40,11 @@ with s as (
          coalesce(t.name, '(movzusuz)')               as movzu,
          case q.owner_type when 'platform' then 'bank' else 'muellim' end as sahib,
          q.body,
-         lower(q.body)                                as gov,
+         --  22.09: EVVEL yalniz q.body suzulurdu - «explanation»
+         --  unudulmusdu ve izahlarda kohne termin qalmisdi
+         --  (istifadeci panelde gordu).  Indi ikisi birlikde.
+         coalesce(q.explanation, '')                  as izah,
+         lower(q.body || ' ' || coalesce(q.explanation, '')) as gov,
          (select string_agg(o.body, ' | ' order by o.ord)
             from public.question_options o
            where o.question_id = q.id and o.is_correct) as duz_cavab
