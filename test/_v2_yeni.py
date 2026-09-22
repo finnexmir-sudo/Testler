@@ -12,6 +12,14 @@ def q(sql, args=None, one=False):
         cur.execute(sql, args or ())
         if cur.description:
             r = cur.fetchall(); return (r[0] if r else None) if one else r
+#  Paylasilan bazani ARDIMIZCA temiz qoyuruq - yoxsa e2e_panel kimi
+#  skriptler «hesab artiq var» halina dusur (auth.users-i silmirler).
+def temizle():
+    q("""delete from public.subscriptions; delete from public.students;
+           delete from public.classes; delete from public.account_members;
+           delete from public.accounts; delete from public.user_roles;
+           delete from auth.users;""")
+temizle()
 T = int(time.time() * 1000)
 with sync_playwright() as pw:
     br = pw.chromium.launch(executable_path="/opt/pw-browsers/chromium", args=["--no-sandbox"])
@@ -88,4 +96,5 @@ with sync_playwright() as pw:
     print("SAGIRDLER: %d px · %d setir" % (h, p.locator("#stu .mrow").count()))
     p.screenshot(path=OUT + "/sagirdler.png", full_page=True)
     br.close()
+temizle()
 print("OK")

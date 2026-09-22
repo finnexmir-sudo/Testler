@@ -3225,7 +3225,10 @@
     topTitle.textContent = g.name;
     var lv = levelName(g.level_id);
     bandHead({
-      back: { id: "btnBack", label: "Qruplar" }, eye: "Qrup",
+      /*  «Geri» - sabit ad yox.  Duyme goBack() isledir, yeni GELDIYIN
+          yere qaytarir; sabit etiket («Qruplar») basqa yerden gelende
+          yalan olurdu (istifadeci tutdu).  */
+      back: { id: "btnBack", label: "Geri" }, eye: "Qrup",
       id: "gName", title: g.name, subId: "gMeta",
       sub: '<span id="gSub">' + esc(lv || "") + "</span>"
     });
@@ -3325,7 +3328,7 @@
     var o = GBOL[bol];
     topTitle.textContent = o.ad;
     bandHead({
-      back: { id: "btnBack", label: g.name }, eye: "Qrup · " + g.name,
+      back: { id: "btnBack", label: "Geri" }, eye: "Qrup · " + g.name,
       id: "gName", title: o.ad, subId: "gMeta", sub: ""
     });
     if (bol === "s") {
