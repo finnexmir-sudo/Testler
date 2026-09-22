@@ -25,6 +25,11 @@
 --  Azerbaycan herflerinde etibarli deyil, ona gore acıq serhed:
 --  (^|[^[:alnum:]]) ... ([^[:alnum:]]|$).
 --
+--  22.09: «iki emelin termini bir sualda» qaydasi CIXARILDI.  35 setir
+--  verdi, icinde bir dene de qusur yox idi: «İki ədədin cəmi 480,
+--  fərqi 80-dir» kimi tamamile duzgun cumleler idi.  Tutmayan suzgec
+--  ziyandir - goz oyrenir, sonra esl tapintini da atlayir.
+--
 --  QEYD: bu bir suzgecdir, hokm deyil.  Isarelenen her sual qusurlu
 --  demek deyil - insan oxuyub qerar verir.
 -- =====================================================================
@@ -87,17 +92,8 @@ from (
    where var_cixilan and var_ferq and not var_azalan
 
   union all
-  --  3) Terminli sual, amma ailelerden IKISI birlesib - cox vaxt
-  --     kopyalanmis metnde olur (cixma sualinda «cem» qalib)
+  --  3) Terminli sualda variant YOXDUR ve ya duz cavab isarelenmeyib
   select 3,
-         'iki əməlin termini bir sualda',
-         b.*
-    from b
-   where (cixma_ail::int + topl_ail::int + vurma_ail::int + bolme_ail::int) >= 2
-
-  union all
-  --  4) Terminli sualda variant YOXDUR ve ya duz cavab isarelenmeyib
-  select 4,
          'termin var, amma düz cavab işarələnməyib',
          b.*
     from b
