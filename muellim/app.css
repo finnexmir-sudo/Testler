@@ -2369,3 +2369,13 @@ details.stk .l3{margin-top:8px}
 .menu .mrow.dq{background:var(--err-tint);box-shadow:inset 3px 0 0 var(--err)}
 .menu .mrow.dq .mi{color:var(--err)}
 @media (min-width:721px){ .menu .mrow{padding:15px 18px} }
+
+/*  YENI: sagird setri - ad · netice · ox.  Kod yalniz girmeyende.  */
+.menu .mrow .av{flex:0 0 32px;width:32px;height:32px;font-size:13px}
+.menu .mrow .rbar{display:block;height:4px;border-radius:99px;background:var(--n-100);
+  margin-top:7px;max-width:180px}
+.menu .mrow .rbar i{display:block;height:100%;border-radius:99px;background:var(--brand)}
+.menu .mrow .rbar i.good{background:var(--ok)}
+.menu .mrow .rbar i.mid{background:var(--warn)}
+.menu .mrow .rbar i.low{background:var(--err)}
+.menu .mrow .g i .qr{color:var(--err);font-weight:600}

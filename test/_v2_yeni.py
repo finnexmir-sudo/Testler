@@ -72,5 +72,20 @@ with sync_playwright() as pw:
     print("   diqqet:", p.locator("#yDiq").inner_text().replace("\n", " | ")[:140])
     print("   menyu :", p.locator("#yMenu").inner_text().replace("\n", " | ")[:200])
     p.screenshot(path=OUT + "/dolu.png", full_page=True)
+    #  ---- qrup menyusu
+    gid = q("select id from public.classes where account_id=%s order by name", (acc["acc"],))[0]["id"]
+    p.goto(PANEL + "#/g/" + str(gid)); p.reload()
+    p.wait_for_selector("#gMenu .mrow", timeout=30000); p.wait_for_timeout(2000)
+    h = p.evaluate("document.body.scrollHeight")
+    print("QRUP menyusu: %d px = %.1f ekran" % (h, h / 844.0))
+    print("   diqqet:", p.locator("#gDiq").inner_text().replace("\n", " | ")[:120])
+    print("   menyu :", p.locator("#gMenu").inner_text().replace("\n", " | ")[:220])
+    p.screenshot(path=OUT + "/qrup.png", full_page=True)
+    #  ---- sagirdler bolmesi
+    p.goto(PANEL + "#/g/" + str(gid) + "/s"); p.reload()
+    p.wait_for_selector("#stu .mrow", timeout=30000); p.wait_for_timeout(900)
+    h = p.evaluate("document.body.scrollHeight")
+    print("SAGIRDLER: %d px · %d setir" % (h, p.locator("#stu .mrow").count()))
+    p.screenshot(path=OUT + "/sagirdler.png", full_page=True)
     br.close()
 print("OK")
