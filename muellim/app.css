@@ -2336,3 +2336,36 @@ details.stk .l3{margin-top:8px}
 .card.vdet{border-left:4px solid var(--brand)}
 .card.vdet p{margin:0 0 6px;font-size:13.5px;line-height:1.5}
 .card.vdet p:last-of-type{margin-bottom:0}
+
+/* =====================================================================
+   YENI GORUNUS (2026-09-22) - siyahi seklinde Icmal, acarin arxasinda.
+   ?yeni=1 acir.  Kohne ekranin uslubuna toxunmur.
+   ===================================================================== */
+.msec{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--fg-3);margin:18px 4px 8px}
+.msec:first-child{margin-top:4px}
+.card.bsl{display:block;text-decoration:none;color:inherit;padding:14px 16px;
+  border-left:4px solid var(--brand)}
+.card.bsl .bh1{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.card.bsl .bh1>span{font-size:11.5px;color:var(--fg-3);text-transform:uppercase;
+  letter-spacing:.08em;font-weight:700}
+.card.bsl .bh1 b{font-size:13px;font-weight:700;color:var(--brand)}
+.card.bsl .gb{display:block;height:6px;border-radius:99px;background:var(--n-100);margin:9px 0 11px}
+.card.bsl .gb i{display:block;height:100%;border-radius:99px;background:var(--brand);
+  transition:width .3s}
+.card.bsl .nv{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:650;color:var(--brand)}
+.card.bsl .nv svg{width:16px;height:16px}
+.menu .mrow{display:flex;align-items:center;gap:13px;padding:14px 16px;
+  border-bottom:1px solid var(--n-100);text-decoration:none;color:inherit}
+.menu .mrow:last-child{border-bottom:0}
+.menu .mrow:active{background:var(--n-50,#f5f7f8)}
+.menu .mrow .mi{width:20px;height:20px;flex:0 0 20px;color:var(--brand)}
+.menu .mrow .g{flex:1;min-width:0}
+.menu .mrow .g b{display:block;font-size:15.5px;font-weight:600;letter-spacing:-.01em}
+.menu .mrow .g i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-3);
+  margin-top:2px;line-height:1.45}
+.menu .mrow .ar{width:16px;height:16px;flex:0 0 16px;color:var(--n-400)}
+.menu .mrow .pctv{flex:0 0 auto}
+.menu .mrow.dq{background:var(--err-tint);box-shadow:inset 3px 0 0 var(--err)}
+.menu .mrow.dq .mi{color:var(--err)}
+@media (min-width:721px){ .menu .mrow{padding:15px 18px} }

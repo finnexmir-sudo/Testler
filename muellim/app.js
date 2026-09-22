@@ -1211,7 +1211,150 @@
   }
 
   /* ------------------------------------------------------ qrup siyahisi */
+  /* ================================================================
+     YENI GORUNUS (2026-09-22) - ON BAXIS, ACARIN ARXASINDA
+
+     Muellim: «bir sehifede ferqli melumatlar olmasin, siyahi olsun».
+     Siyahi hem XERITEDIR (ilk girenə «bu tetbiqde ne var» deyir), hem
+     de VEZIYYET gosterir (sagda reqem).  Sehifenin FORMASI deyismir:
+     birinci gun de, yuzuncu gun de eyni setirler durur - yalniz sag
+     teref izahdan reqeme cevrilir.
+
+     Acar: ?yeni=1 acir, ?yeni=0 baglayir, secim brauzerde qalir.
+     Kohne ekran toxunulmaz - yoxlamalar ona baxir.
+     Yeni sorgu YOXDUR: butun reqemler rpc_home-dadir.
+     ================================================================ */
+  var YENI = (function () {
+    try {
+      var q = /[?&]yeni=([01])/.exec(location.search || "");
+      if (q) { localStorage.setItem("bil10_yeni", q[1]); return q[1] === "1"; }
+      return localStorage.getItem("bil10_yeni") === "1";
+    } catch (e) { return false; }
+  })();
+
+  function yRow(o) {
+    //  o: {ic, ad, alt, cip, cipCls, href, cls}
+    return '<a class="mrow' + (o.cls ? " " + o.cls : "") + '" href="' + (o.href || "#/") + '">' +
+      ic(o.ic, "mi") + '<span class="g"><b>' + esc(o.ad) + "</b>" +
+        '<i>' + (o.altHtml || esc(o.alt || "")) + "</i></span>" +
+      (o.cip ? '<span class="pctv ' + (o.cipCls || "") + '">' + esc(o.cip) + "</span>" : "") +
+      ic("right", "ar") + "</a>";
+  }
+  function ySec(t) { return '<div class="msec">' + esc(t) + "</div>"; }
+
+  function screenHomeYeni() {
+    topTitle.textContent = ACC.name;
+    bandHead({
+      eye: "İcmal",
+      title: "Xoş gəlmisiniz, " + (((CTX.profile && CTX.profile.full_name) || "").split(" ")[0] || "müəllim") + "!",
+      sub: "<span id=\"ySub\">Yüklənir…</span>", subId: null
+    });
+    show('<div id="yBas"></div><div id="yDiq"></div>' +
+         '<div class="card pad0 menu" id="yMenu"><div class="skel">Yüklənir…</div></div>' +
+         '<div id="yBax"></div>');
+    var live = guard();
+    homeData().then(function (v) {
+      if (!live() || !$("yMenu")) return;
+      yCiz(v || {});
+      //  Icmal ISLEK oldu - olcunun dayanacagi yer (180)
+      suretYaz();
+    }).catch(function () {
+      if ($("yMenu")) $("yMenu").innerHTML = '<div class="skel">Məlumat alınmadı.</div>';
+    });
+    on("yMenu", "click", function (e) {
+      var a = e.target.closest ? e.target.closest("a[data-go]") : null;
+      if (a) { e.preventDefault(); nav(a.getAttribute("data-go")); }
+    });
+  }
+
+  function yCiz(v) {
+    var st = v.stats || {};
+    var nQ = Number(st.groups) || 0, nS = Number(st.students) || 0;
+    var nT = Number(st.tests) || 0, nC = Number(st.attempts) || 0;
+    var avg = Number(st.avg) || 0, aw = st.avg_w, apw = st.avg_pw;
+    var bg = v.bugun || {}, tp = (v.topics || [])[0] || null;
+    var hw = v.hw_alerts || [], al = v.alerts || [];
+    var plan = ACC && ACC.plan ? ACC.plan : null;
+    var gun = plan && plan.days_left !== null && plan.days_left !== undefined
+      ? Number(plan.days_left) : null;
+    //  ---- ust cumle
+    var sub = nQ ? (nQ + " qrup · " + nS + " şagird") : "Sistem işə düşsün deyə üç addım var.";
+    if ($("ySub")) $("ySub").textContent = sub;
+
+    //  ---- BASLANGIC karti: uc addim bitmeyibse
+    var ok = [nQ > 0, nS > 0, nC > 0];
+    var bitdi = ok.filter(Boolean).length;
+    var novbe = !ok[0] ? ["İlk qrupunuzu yaradın", "#/gs"]
+              : (!ok[1] ? ["Şagird əlavə edin", "#/gs"]
+                        : ["İlk testi tapşırın", "#/gen"]);
+    $("yBas").innerHTML = bitdi === 3 ? "" :
+      '<a class="card bsl" href="' + novbe[1] + '">' +
+        '<span class="bh1"><span>Başlanğıc</span><b>' + bitdi + " / 3 tamamlandı</b></span>" +
+        '<span class="gb"><i style="width:' + (bitdi * 100 / 3) + '%"></i></span>' +
+        '<span class="nv">' + esc(novbe[0]) + ic("right") + "</span></a>" +
+      '<div class="spacer"></div>';
+
+    //  ---- DIQQET setirleri: yalniz is olanda cixir
+    var d = [];
+    if (hw.length) {
+      var h0 = hw[0], un = Number(h0.undone) || 0;
+      d.push(yRow({ ic: "warn", cls: "dq", href: "#/g/" + esc(h0.class_id),
+        ad: un + " şagird tapşırığı etməyib",
+        alt: (h0["class"] || "") + " · ev tapşırığı", cip: "diqqət", cipCls: "pvl" }));
+    }
+    if (Number(bg.susan)) {
+      d.push(yRow({ ic: "warn", cls: "dq", href: "#/gs",
+        ad: bg.susan + " şagird bir həftədir səssizdir",
+        alt: "test göndərin və ya xatırladın", cip: "diqqət", cipCls: "pvl" }));
+    }
+    if (tp && tp.name) {
+      d.push(yRow({ ic: "refresh", href: "#/r/" + esc(tp.class_id || ""),
+        ad: "«" + tp.name + "» zəif gedir",
+        alt: (Number(tp.weak_n) || 0) + " şagird · təkrar testi göndərin",
+        cip: pct(tp.ratio) + "%", cipCls: "pvm" }));
+    }
+    if (gun !== null && gun <= 7) {
+      d.push(yRow({ ic: "star", cls: "dq", href: "#/me",
+        ad: "Paketiniz " + gun + " gün sonra bitir",
+        alt: "şagirdləriniz dayanmasın", cip: gun + " gün", cipCls: "pvl" }));
+    }
+    $("yDiq").innerHTML = d.length
+      ? ySec("Bu həftə") + '<div class="card pad0 menu">' + d.join("") + "</div>" +
+        '<div class="spacer"></div>'
+      : "";
+
+    //  ---- ESAS SIYAHI: forma hemise eynidir, sag teref deyisir
+    var netAlt = nC
+      ? (avg + "% orta" + (aw !== null && aw !== undefined && apw !== null && apw !== undefined
+          ? " · keçən həftə " + Number(apw) + "%" : ""))
+      : "şagird test yazandan sonra dolur";
+    var m = [
+      yRow({ ic: "group", ad: "Qruplar", href: "#/gs",
+        alt: nQ ? nQ + " qrup · " + nS + " şagird"
+                : "qrup yaradın, şagirdləri bir yerə yığın" }),
+      yRow({ ic: "gen", ad: "Test yığ", href: "#/gen",
+        alt: "hazır bankdan bir dəqiqəyə" }),
+      yRow({ ic: "chart", ad: "Nəticələr", href: "#/gs", alt: netAlt,
+        cip: tp && tp.name ? "zəif mövzu var" : "", cipCls: "pvm" }),
+      yRow({ ic: "doc", ad: "Sual bankı", href: "#/b",
+        alt: nT ? nT + " öz testiniz · hazır suallar" : "hazır suallar və öz suallarınız" }),
+      yRow({ ic: "person", ad: "Profil", href: "#/me",
+        alt: plan ? (plan.name || "paket") + (gun !== null ? " · " + gun + " gün qalıb" : "")
+                  : "hesab və ayarlar" })
+    ];
+    $("yMenu").innerHTML = m.join("");
+
+    //  ---- ele-bele baxan adam ucun: yalniz bos hesabda
+    $("yBax").innerHTML = bitdi ? "" :
+      ySec("Elə-belə baxmaq istəyirsiniz?") +
+      '<div class="card pad0 menu">' +
+        yRow({ ic: "chart", ad: "Nümunə hesaba bax", href: "#/demo",
+               alt: "dolu hesab — heç nə qurmadan görün" }) +
+      "</div>";
+  }
+
   function screenHome() {
+    if (YENI) return screenHomeYeni();
     topTitle.textContent = ACC.name;
     show("");
     var used = ACC.students_used, lim = ACC.students_limit;
