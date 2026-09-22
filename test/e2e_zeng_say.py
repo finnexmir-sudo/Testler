@@ -14,6 +14,7 @@ Yoxlanilir:
      (say bir yeri, ekran basqa yeri gostermesin)
   5. «Oxudum» basilandan sonra say sonur
   6. eyni sey YENI gorunusde de islyir (?yeni=1)
+  7. REYE verilen cavab da eyni kartda ve eyni sayda (db/221)
 """
 import os, sys, time, psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright
@@ -104,6 +105,28 @@ with sync_playwright() as pw:
         p.wait_for_selector("#amsgOk", timeout=30000)
         p.click("#amsgOk"); p.wait_for_timeout(1500)
         yox(nisan(p) == "1", "biri oxundu - nisan «1»-e dusdu (indi: %r)" % nisan(p))
+
+        #  --- 221: REYE VERILEN CAVAB da eyni yerde gorunmelidir.
+        #  Istifadeci: «niye iki yere bolmusen?»  Admin «Cavabı göndər»
+        #  basanda muellim Icmalda gormeli idi, gormurdu.
+        q("insert into public.feedback (author_type,user_id,account_id,kind,page,"
+          "body,status,admin_note,answered_at)"
+          " values ('teacher',%s,%s,'teklif','Tapşırıq',"
+          "'Bəzi mövzularda testlər yoxdur.','done',"
+          "'Düzəldildi — bank doludur, «Test yığ» ilə yığırsınız.', now())",
+          (acc["own"], acc["acc"]))
+        p.goto(PANEL + sfx + "#/"); p.reload()
+        p.wait_for_selector("#adminMsg", state="attached", timeout=30000)
+        p.wait_for_timeout(1700)
+        kart = p.locator("#adminMsg").inner_text()
+        yox("Qeydinizə cavab" in kart, "reye verilen cavab ICMALDA kart kimi cixir")
+        yox("Bəzi mövzularda" in kart, "kart hansi qeyde cavab oldugunu yazir")
+        yox(nisan(p) == "2", "cavab da sayilir - nisan «2» (indi: %r)" % nisan(p))
+        p.screenshot(path=OUT + "/%s-cavab.png" % gor, full_page=True)
+
+        #  cavabi da «Oxudum» ile baglamaq olur (reply_seen_at)
+        p.click("#amsgOk"); p.wait_for_timeout(1600)
+        yox(nisan(p) == "1", "cavab oxundu - nisan «1» (indi: %r)" % nisan(p))
         ctx.close()
     br.close()
 temizle()

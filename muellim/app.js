@@ -680,10 +680,12 @@
       if (!box) return;
       if (!un.length) { box.innerHTML = ""; return; }
       box.innerHTML = '<div class="card pad0" id="nMsgC"><div class="alh">' +
-        ic("bell") + "Bil10-dan mesaj — " + un.length + " ədəd</div>" +
+        ic("bell") + "Bil10-dan — " + un.length + " ədəd</div>" +
         un.map(function (m) {
+          var cv = m.kind === "cavab";
           return '<a class="mrow" href="#/bize"><span class="g">' +
-            "<b>" + dateAz(m.at) + "</b><i>" +
+            "<b>" + (cv ? "Qeydinizə cavab" : "Mesaj") + " · " +
+              dateAz(m.at) + "</b><i>" +
             esc(String(m.body || "").slice(0, 90)) +
             (String(m.body || "").length > 90 ? "…" : "") + "</i></span></a>";
         }).join("") + "</div><div class=\"spacer\"></div>";
@@ -778,11 +780,20 @@
       if (!box) return;
       if (!un.length) { box.innerHTML = ""; return; }
       var m = un[0];
+      /*  221: kart artiq IKI seyi gosterir - adminin oz mesajini ve
+          muellimin OZ qeydine verilen cavabi.  Evvel cavab yalniz
+          «Bizə yaz»da qalirdi, ona gore admin eyni metni iki defe
+          gondermeli olurdu (istifadeci: «niye iki yere bolmusen?»).  */
+      var cavabdir = m.kind === "cavab";
       box.innerHTML = '<div class="card gift amsg" id="amsgCard">' +
-          '<span class="gi">' + ic("bell") + "</span>" +
-          '<div class="gt"><b>Bil10-dan mesaj</b>' +
+          '<span class="gi">' + ic(cavabdir ? "check" : "bell") + "</span>" +
+          '<div class="gt"><b>' +
+            (cavabdir ? "Qeydinizə cavab" : "Bil10-dan mesaj") + "</b>" +
             '<s class="mut">' + dateAz(m.at) +
               (un.length > 1 ? " · daha " + (un.length - 1) + " mesaj Profildə" : "") + "</s>" +
+            //  hansi qeyde cavabdir - muellim ay evvel yazmis ola biler
+            (cavabdir && m.ask
+              ? '<s class="mut amask">«' + esc(m.ask) + "»</s>" : "") +
             '<p class="amb">' + amsgBody(m.body) + "</p>" +
             '<div class="acts">' +
               '<button class="btn go sm" id="amsgReply">Cavab yaz</button>' +

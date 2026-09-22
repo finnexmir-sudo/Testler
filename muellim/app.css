@@ -227,6 +227,9 @@ p.muted svg{width:13px;height:13px;stroke-width:1.8;vertical-align:-2px;margin-r
   font-style:normal;display:inline-flex;align-items:center;
   justify-content:center;box-sizing:border-box}
 .bellbtn i.hide{display:none}
+/*  221: kart «hansi qeyde cavabdir» yazir - muellim ay evvel yazmis
+    ola biler, «cavab» sozu tek basina az melumatdir.  */
+.amsg .amask{display:block;margin:2px 0 0;font-style:italic;opacity:.85}
 .bellbtn.hide{display:none}
 
 /* faiz cipleri - deyere gore reng */
