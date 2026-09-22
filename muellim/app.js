@@ -8201,7 +8201,10 @@
       .then(function (fac) {
         //  Ardicilliq nomresi: gec gelen kohne cavab tezesini ezmesin
         if (!live() || seq !== GFSEQ) return;
-        FAC = fac || {}; GFKEY = key; genRefresh();
+        FAC = fac || {}; GFKEY = key;
+        //  daralmis siyahida bos fenn qalmasin (bax genSubFix)
+        if (genSubFix(f)) { genFac(); return; }
+        genRefresh();
       })
       .catch(function () {});
   }
@@ -8290,6 +8293,7 @@
       .then(function (fac) {
         if (!live()) return;
         FAC = fac || {}; GFKEY = genFacKey(f); GFSEQ++;
+        genSubFix(f);
         drawGen();
         loadGenRec(f);
       })
@@ -8302,14 +8306,39 @@
       verirdi: ekran yanib-sonurdu, ve ara merhelede sehife bir anliq
       QISALDIGI ucun brauzer surusmeni sifira sixirdi - muellim
       yerini itirirdi.  Indi forma yerinde qalir.  */
+  /*  22.09 (istifadeci): «yalniz bir fenn secimi var, secmiyende ama
+      basqa fenlerin suallari da cixir».  Sebeb: siyahi subFilter ile
+      muellimin OZ fennlerine daraldilirdi, «Bütün fənlər» ise hec bir
+      suzgec gondermirdi - generator butun banki acirdi.  Ona gore
+      riyaziyyat muellimi ingilis dili suali alirdi.
+      Qayda: EKRAN NE GOSTERIRSE, HOVUZ O OLMALIDIR.  Siyahi
+      daraldilibsa «Bütün fənlər» yoxdur - fenn secilir.  Generator
+      qaydasi onsuz da TEK fenn qebul edir (p_rule->>'subject').  */
+  function genSubList(f) {
+    var hamisi = (FAC.subjects || []).filter(function (x) {
+      return Number(x.n) > 0 || f.subject === x.slug;
+    });
+    return { hamisi: hamisi, gorunen: subFilter(hamisi, f.subject) };
+  }
   function genSubOpts(f) {
-    return '<option value="">Bütün fənlər</option>' +
-      subFilter((FAC.subjects || []).filter(function (x) {
-        return Number(x.n) > 0 || f.subject === x.slug;
-      }), f.subject).map(function (x) {
+    var L = genSubList(f);
+    //  daralma varsa «hamisi» secimi yalan olardi - cixarilir
+    var daralib = L.gorunen.length < L.hamisi.length;
+    return (daralib ? "" : '<option value="">Bütün fənlər</option>') +
+      L.gorunen.map(function (x) {
         return '<option value="' + esc(x.slug) + '"' +
           (f.subject === x.slug ? " selected" : "") + ">" + esc(x.name) + "</option>";
       }).join("");
+  }
+  /*  Daralmis siyahida bos secim qala bilmez - ilk fenn secilir.
+      FAC gelenden sonra cagirilir, ciziliskden EVVEL.  */
+  function genSubFix(f) {
+    var L = genSubList(f);
+    if (L.gorunen.length < L.hamisi.length && !f.subject && L.gorunen.length) {
+      f.subject = L.gorunen[0].slug;
+      return true;
+    }
+    return false;
   }
 
   /*  Cipde YALNIZ reqem yazilir - basliq onsuz da "Sinif"dir.
