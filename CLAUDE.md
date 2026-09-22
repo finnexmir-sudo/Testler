@@ -1767,6 +1767,30 @@ masaüstündə görünüb. Vəziyyət üçün `done`, `st-ok`, `st-mid`, `st-wea
 yaz. Eyni səbəbdən `<input type="checkbox">` `.plck` base `input`
 qaydasından (40px, padding) azad edilir.
 
+## Mövzu ağacı — sual hovuzu FƏSİLDƏDİR, yarpaqda deyil
+
+**2026-09-22.** Bank örtüyünü ölçəndə üç dəfə yanlış nəticə verdim,
+çünki modeli yaddaşdan təxmin etdim. Model belədir:
+
+- **Fəsil** (`topics.parent_id is null`) — **sual hovuzu buradadır.**
+- **Alt mövzu** (yarpaq) — **plan ritmi üçündür, öz sualı yoxdur.**
+  Dərs planının sətirləri yarpaqlardır ki «N/M mövzu» real dərs sayı
+  olsun. `rpc_plan_test` fəsil bitəndə çıxır və **valideynin**
+  mövzusundan yığır. `app.diag_topics` da `parent_id is null` ilə işləyir.
+
+Yəni **yarpağın boş olması nasazlıq deyil, dizayndır.** Mənbə:
+`db/101_ders_plani_alt.sql` — başlıqdaki şərh bunu açıq yazır.
+
+Örtüyü ölçəndə ölçü vahidi **fəsildir** və sayım **alt ağacı bütöv**
+götürməlidir (fəsil + bütün nəsli). Hazır sorğular:
+`db/test/bos_fenn.sql` (fənn × sinif xülasəsi) və
+`db/test/bos_movzular.sql` (adbaad).
+
+**Ümumi dərs, ölçüdən kənar:** hər şeyi işarələyən ölçü heç nəyi
+işarələməyən ölçü qədər yararsızdır. `asili_suallar.sql` 22 963 sualın
+17 270-ni «itib» göstərdi — hamısı yerində idi. Silindi. Bir ölçü
+qərar dəyişdirmirsə, onu yazmaq deyil, atmaq lazımdır.
+
 ## Arifmetik terminlər — mənbə e-dərslikdir, yaddaş yox
 
 **2026-09-22.** Bankda çıxma sualları bir pillə sürüşmüş terminlə
