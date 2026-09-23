@@ -1797,6 +1797,32 @@ masaüstündə görünüb. Vəziyyət üçün `done`, `st-ok`, `st-mid`, `st-wea
 yaz. Eyni səbəbdən `<input type="checkbox">` `.plck` base `input`
 qaydasından (40px, padding) azad edilir.
 
+## Yeni sütun əlavə edəndə — RPC-yə də yaz (2026-09-23)
+
+`db/192` testə vaxt limiti əlavə etdi: `tests.time_limit_sec` sütunu,
+şagird tərəfi, server hesabı, güzəşt — hamısı düzgün. **Amma
+`rpc_test_preview`-ə həmin sahəni yazmadı.**
+
+Nəticə: müəllim 5 dəqiqə seçirdi, baza 300 saniyə yazırdı, ekran isə
+heç nə göstərmirdi. Üç yer birdən boş qalırdı — vərəq başlığı, «vaxtsız»
+çipi, çap başlığı. `t.time_limit_sec` sadəcə `undefined` idi.
+
+**Bu imkan müəllim tərəfində heç vaxt işləməyib.** Şagird tərəfi
+işləyirdi, çünki o, sütunu cədvəldən birbaşa oxuyur.
+
+**Qayda:** cədvələ sütun əlavə edəndə, həmin sütunu oxuyan hər
+`jsonb_build_object`-ə də əlavə et. Sütun var, RPC-də yoxdursa,
+interfeys səssizcə boş qalır — nə xəta, nə xəbərdarlıq.
+
+**Necə tapıldı:** başqa iş görərkən `e2e_vaxt.py` işlədildi və 3
+uğursuzluq çıxdı. Əvvəl həmin testi «təmizdir» saymışdım — çünki
+çıxışda `SEHV` sözünü sayırdım, bu test isə `UGURSUZ` yazır. Sayğac
+sıfır verirdi.
+
+**İkinci qayda:** testin nəticəsi **çıxış kodu ilə** oxunur, söz
+saymaqla yox. `grep -c` fərqli yazılışı, çökməni və vaxt aşımını
+görmür — üçü də «0 səhv» kimi görünür.
+
 ## «Dərsə 20 sual» = 20 FƏRQLİ sual (2026-09-23)
 
 Bank dərs nişanı yazmağa başlayanda hədd qoyduq: dərs testi açılmaq
