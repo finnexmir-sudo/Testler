@@ -3230,13 +3230,17 @@
                 "<summary><b>" + esc(bl.name) + "</b>" +
                 '<span class="plgc' + (tam ? " full" : "") + '">' +
                   nd + "/" + bl.items.length + "</span>" +
-                (DERS_SECIMI && d.paid
-                  ? '<input type="checkbox" class="plck plgk" data-plck="' + esc(p.id) +
-                    '" value="' + esc(son ? son.id : "") + '"' +
-                    (tam ? ' title="Bu fəsildən test üçün seç"'
-                         : ' disabled title="Fəsil bitəndə açılır — ' +
-                           (bl.items.length - nd) + ' dərs qalıb"') + ">"
+                /*  23.09: fesil testi ARTIQ BURADADIR - ders setrinde
+                    yox.  Butun dersler kecilibse cixir; yarimciq
+                    fesilde cixmir, cunki hovuzda hele kecilmemis
+                    dersin sualı var.  «son» - feslin son dersinin
+                    item id-si, movcud yol (rpc_plan_test) dəyişmir.  */
+                (tam && son && !son.test_id
+                  ? '<button class="plmk plgm" data-plmk="' + esc(son.id) + '"' +
+                    (d.paid ? "" : ' disabled title="Abunə paketi ilə"') +
+                    ">fəsildən test yığ</button>"
                   : "") +
+
                 "</summary>" +
                 rows + "</details>";
             }
@@ -3312,22 +3316,20 @@
                     fesildə ise YALNIZ son dersde.  Suallar fesle
                     baglidir - hər dersde teklif etsek bes ders eyni
                     hovuzdan demek olar eyni testi yigardi.  */
-                : (it.can_test
-                    ? '<button class="plmk" data-plmk="' + esc(it.id) + '"' +
-                      (d.paid ? "" : ' disabled title="Abunə paketi ilə"') +
-                      ">test yığ</button>"
-                    /*  22.09 (Qizbest muellim: «Bezi movzularda testler
-                        yoxdur»).  Olcu: 3480 plan setrinin 2846-sinda
-                        (82%) duyme yoxdur - suallar fesil hovuzundandir,
-                        bir derse orta 6.6 sual dusur, hər dersde test
-                        yigmaq olmur.  Qapi duzdur, IZAH yox idi: muellim
-                        bos yer gorurdu ve «test yoxdur» deye anlayirdi.
-                        Indi setir ozu deyir testin haçan geleceyini.  */
-                    : (it.done && Number(it.gtotal) > 1
-                        ? '<s class="plwait" title="Suallar fəsil hovuzundandır — ' +
-                          'test fəsil bitəndə yığılır">fəsil sonunda · ' +
-                          esc(String(it.gpos)) + "/" + esc(String(it.gtotal)) + "</s>"
-                        : ""))) +
+                /*  23.09: «test yig» DERS setrinden FESIL basligina
+                    kocdu.  Duyme onsuz da FESIL testi yigirdi, amma
+                    ders setrinde durdugu ucun muellim onu «bu dersin
+                    testi» kimi oxuyurdu.  Yeri yanlis idi, ozu yox.
+                    Burada yalniz IZAH qalir - fesil hele bitmeyibse.
+                    «gpos < gtotal» = bu, feslin son dersi deyil; son
+                    ders kecilende duyme basliqda cixir, burada izaha
+                    ehtiyac qalmir.  */
+                : (it.done && Number(it.gtotal) > 1
+                   && Number(it.gpos) < Number(it.gtotal)
+                    ? '<s class="plwait" title="Suallar fəsil hovuzundandır — ' +
+                      'test fəsil bitəndə yığılır">fəsil sonunda · ' +
+                      esc(String(it.gpos)) + "/" + esc(String(it.gtotal)) + "</s>"
+                    : "")) +
               (weak && d.paid
                 ? '<button class="plmk plre" data-plmk="' + esc(it.id) +
                   '" title="Qrup zəif nəticə göstərib — yeni yoxlama yığ">' +
@@ -3350,6 +3352,10 @@
     box.addEventListener("click", function (ev) {
       var b = ev.target.closest ? ev.target.closest("button") : null;
       if (!b || busy) return;
+      /*  23.09: fesil testi duymesi <summary> icindedir - klik hem
+          duymeni isledir, hem de fesli acib-baglayardi.  Duyme
+          basilanda acilmani dayandiririq.  */
+      if (b.classList.contains("plgm")) ev.preventDefault();
       var id = b.getAttribute("data-pldone");
       if (id) return planDone(g, b, id);
       id = b.getAttribute("data-plundo");

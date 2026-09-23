@@ -1281,6 +1281,15 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
   background:var(--n-50);border:1px solid var(--n-100)}
 .plgrp .plgc.full{background:var(--ok-tint);border-color:var(--ok-line);
   color:var(--ok)}
+/*  23.09: fesil testi duymesi BASLIQDADIR (evvel son dersin setrinde
+    idi ve «bu dersin testi» kimi oxunurdu).  Yalniz fesil tam
+    kecilende cixir.  <summary> icinde duyme: klik acilib-baglanmani
+    tetikleməsin deye preventDefault lazimdir - JS-de var.  */
+.plgrp>summary .plgm{flex:0 0 auto;border:0;background:none;cursor:pointer;
+  font:inherit;font-size:11.5px;color:var(--brand);text-decoration:underline;
+  text-underline-offset:2px;padding:0}
+.plgrp>summary .plgm:disabled{color:var(--fg-3);cursor:default;
+  text-decoration:none}
 /* fesil daxilindeki dersler bir az iceri */
 .plgrp .plrow{padding-left:30px}
 

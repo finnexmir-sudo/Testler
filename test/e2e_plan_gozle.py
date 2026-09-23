@@ -142,14 +142,27 @@ with sync_playwright() as pw:
     yox(p.locator(".plck").count() == 0, "hec bir checkbox yoxdur (ders de, fesil de)")
     yox(p.locator("[data-plmulti]").count() == 0, "«Seçilən …dan test yığ» duymesi yoxdur")
 
-    print("\n3) fesil bitdi - son derste duyme cixir")
+    print("\n2c) fesil yarimciqdir - basliqda duyme YOXDUR")
+    yox(p.locator(".plgrp > summary .plgm").count() == 0,
+        "yarimciq fesilde «fəsildən test yığ» yoxdur")
+
+    print("\n3) fesil bitdi - duyme FESIL BASLIGINDA cixir")
     kecildi(3)
     r = setirler()
+    #  Duyme artiq DERS setrinde deyil - orada durdugu ucun muellim onu
+    #  «bu dersin testi» kimi oxuyurdu (istifadeci: «test yig? niye
+    #  qaldi orda?»).  Indi feslin basligindadir.
+    for x in r:
+        if "test yığ" in x:
+            yox(False, "ders setrinde «test yig» QALMAMALIDIR: %r" % x[:90])
+    fb = p.locator(".plgrp > summary .plgm")
+    yox(fb.count() == 1, "fesil basliginda duyme var (%d)" % fb.count())
+    if fb.count():
+        yox("fəsildən test yığ" in fb.first.inner_text(),
+            "duyme «fəsildən test yığ» yazir: %r" % fb.first.inner_text())
     s3 = [x for x in r if "Viet" in x]
-    yox(bool(s3), "son ders setri tapildi")
     if s3:
-        yox("test yığ" in s3[0], "son derste «test yig» var: %r" % s3[0][:90])
-        yox("fəsil sonunda" not in s3[0], "son derste izah YOXDUR (duyme var)")
+        yox("fəsil sonunda" not in s3[0], "son derste izah YOXDUR")
     s1 = [x for x in r if "Tam kvadrat" in x]
     if s1:
         yox("fəsil sonunda" in s1[0], "1-ci derste izah qalir")
