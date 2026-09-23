@@ -152,6 +152,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          271_bank_riy8_ders_sahe.sql \
          272_bank_riy8_ders_rasional_tenlik.sql \
          273_bank_riy8_ders_oxsarliq.sql \
+         274_bank_riy8_ders_berabersizlik.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
