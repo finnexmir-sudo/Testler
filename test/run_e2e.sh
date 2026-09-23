@@ -135,34 +135,41 @@ python3 test/e2e_tovsiye.py
 echo
 #  CLAUDE.md «TEHVILDEN EVVEL - MEXANIKI SIYAHI» 1-ci bendi: setirin
 #  vedi ile apardigi yer uyusmalidir.  Bu, href-i OXUMUR - basir.
-echo "37/42 kecid auditi - her setir ved etdiyi yere aparir"
+echo "37/43 kecid auditi - her setir ved etdiyi yere aparir"
 python3 test/e2e_kecid.py
 echo
 #  Istifadeci: «geri niye getmir? iki sehife arasinda qalib» - duymedeki
 #  «Geri» ile BRAUZERIN geri duymesi bir-birine dolasmamalidir.
-echo "38/42 geri auditi - duyme ve brauzer dovr yaratmir"
+echo "38/43 geri auditi - duyme ve brauzer dovr yaratmir"
 python3 test/e2e_geri.py
 echo
 #  Qizbest muellim: «Bezi movzularda testler yoxdur» - 3480 plan
 #  setrinin 2846-sinda «test yig» yoxdur (suallar fesil hovuzundandir).
 #  Duyme olmayanda setir SEBEBI yazmalidir, bos qalmamalidir.
-echo "39/42 plan setri - duyme yoxdursa sebeb yazilir"
+echo "39/43 plan setri - duyme yoxdursa sebeb yazilir"
 python3 test/e2e_plan_gozle.py
 echo
 #  Qizbest muellimin reyi MEHZ bu ekrandan gelib (feedback.page).
 #  Kohne metn «bu sinif materiallari elave olunmayib» deyirdi ve sinfi
 #  deyismeyi teklif edirdi - ikisi de yanlis.  Bank doludur, hazir
 #  platforma testi ise hec vaxt olmayib; duz cixis generatordur.
-echo "40/42 tapsiriq ekrani - bos siyahi duz yere yonlendirir"
+echo "40/43 tapsiriq ekrani - bos siyahi duz yere yonlendirir"
 python3 test/e2e_tapsiriq_bos.py
 echo
 #  Istifadeci: «bildiris ikonunda 1, 2 yazilmalidirki size mektub var».
 #  Zeng evvel yalniz sagird siqnallarini sayirdi - admin mesaji gelende
 #  susurdu.  Hem kohne, hem YENI gorunusde yoxlanilir.
-echo "41/42 zeng nisani - admin mesaji sayilir, zeng onu gosterir"
+echo "41/43 zeng nisani - admin mesaji sayilir, zeng onu gosterir"
 python3 test/e2e_zeng_say.py
 echo
 #  Istifadeci: «yalniz bir fenn secimi var, secmiyende ama basqa
 #  fenlerin suallari da cixir».  EKRAN NE GOSTERIRSE, HOVUZ O OLMALIDIR.
-echo "42/42 generator fenni - siyahi ile hovuz uyusur"
+echo "42/43 generator fenni - siyahi ile hovuz uyusur"
 python3 test/e2e_gen_fenn.py
+echo
+#  db/222: bank suallara «ders:<slug>» nisani yazir.  Nisanli sual
+#  app.ders_min()-e catanda plan testi DERSDEN, catmayanda FESILDEN
+#  yigilir.  Bu gun butun dersler hedddən asagidir - yani fayl hele
+#  HEC NE deyismir; test onu bank dolanda qoruyur.
+echo "43/43 ders testi - nisan yetende dersden, yetmeyende fesilden"
+python3 test/e2e_ders_testi.py
