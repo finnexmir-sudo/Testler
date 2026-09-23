@@ -143,6 +143,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 221_cavab_da_icmalda.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 222_ders_testi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 223_islenmis_sual.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 224_vaxt_vereqde.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 225_hazir_fesil_testleri.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql
