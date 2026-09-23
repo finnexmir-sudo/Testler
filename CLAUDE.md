@@ -1797,6 +1797,43 @@ masaüstündə görünüb. Vəziyyət üçün `done`, `st-ok`, `st-mid`, `st-wea
 yaz. Eyni səbəbdən `<input type="checkbox">` `.plck` base `input`
 qaydasından (40px, padding) azad edilir.
 
+## «Dərsə 20 sual» = 20 FƏRQLİ sual (2026-09-23)
+
+Bank dərs nişanı yazmağa başlayanda hədd qoyduq: dərs testi açılmaq
+üçün həmin dərsin **20 nişanlı sualı** olmalıdır (`app.ders_min()`).
+Amma generator sualları **sadəcə saymır** — təkrarı özü atır
+(`db/13_generator.sql`):
+
+| süzgəc | qayda |
+|---|---|
+| gövdə oxşarlığı | trigram `similarity ≥ 0.95` → sual atılır |
+| eyni düzgün cavab | `ceil(sual sayı / 7)` dəfədən çox olmaz |
+
+İkincisi riyaziyyatda tez dolur: **10 suallıq testdə eyni cavab ən çoxu
+2 dəfə.** «0», «1», «düzdür» kimi cavablar dörd sualda təkrarlansa,
+ikisi atılır.
+
+**Ölçüldü:** sınaq məlumatında 20 sual var idi, hamısının cavabı «düz» —
+generator 2 sual gördü və «kifayət qədər fərqli sual tapılmadı» xətası
+atdı. Yəni **hovuzda 20 sətir olması bəs etmir**, 20-si bir-birindən
+fərqlənməlidir.
+
+Bank yazanda: gövdələr qəlibcə eyni olmasın, düzgün cavablar bir
+dəyərin ətrafında yığılmasın.
+
+### Sual seçimində sıra (db/223)
+
+`app.generate_pick` bu sıra ilə seçir:
+
+1. **mövzu balansı** (`rn_topic`) — bir mövzu bütün testi udmasın
+2. **səhv-bənzərlik** (`rem`) — təkrar testində şagirdin səhv etdiyi sual önə
+3. **təzəlik** (`isk`) — qrupa əvvəl verilmiş sual növbədə geri qalır
+4. təsadüf
+
+Üçüncüsü **şərt deyil, meyildir**. Dar hovuzda sərt süzgəc «kifayət sual
+yoxdur» xətası verərdi; meyil isə təzəni önə çəkir, çatmayanda köhnəsini
+götürür — **test həmişə yığılır**.
+
 ## Mövzu ağacı — sual hovuzu FƏSİLDƏDİR, yarpaqda deyil
 
 **2026-09-22.** Bank örtüyünü ölçəndə üç dəfə yanlış nəticə verdim,
