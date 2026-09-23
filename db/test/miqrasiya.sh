@@ -168,6 +168,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          287_bank_riy6_ders_natural.sql \
          288_bank_riy6_ders_nisbet.sql \
          289_bank_riy6_ders_tam.sql \
+         290_bank_riy6_ders_koordinat.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
