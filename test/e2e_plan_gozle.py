@@ -134,6 +134,14 @@ with sync_playwright() as pw:
         yox("2/3" in s2[0], "2-ci derste mövqe 2/3 yazilib: %r" % s2[0][:90])
         yox("test yığ" not in s2[0], "2-ci derste hele «test yig» yoxdur")
 
+    print("\n2b) DERS SECIMI BAGLIDIR (23.09)")
+    #  Istifadeci qeti dedi: suallar derse gore nisanlanana qeder
+    #  ders/fesil secimi olmasin.  Sebeb: nisan yoxdur, ona gore
+    #  yarimciq fesilden yigilan test kecilmemis dersin sualini verir.
+    #  Fesil sonundaki «test yig» TOXUNULMUR - o, dogru yoldur.
+    yox(p.locator(".plck").count() == 0, "hec bir checkbox yoxdur (ders de, fesil de)")
+    yox(p.locator("[data-plmulti]").count() == 0, "«Seçilən …dan test yığ» duymesi yoxdur")
+
     print("\n3) fesil bitdi - son derste duyme cixir")
     kecildi(3)
     r = setirler()

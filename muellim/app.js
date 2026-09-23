@@ -1272,6 +1272,30 @@
     } catch (e) { return false; }
   })();
 
+  /*  23.09 (istifadeci, qeti): DERS SECIMI BAGLIDIR, FESIL SECIMI ACIQ.
+      Sebeb olculdu: «Kvadrat kök. Həqiqi ədədlər» feslinde 51 sual var,
+      HAMISI nisansiz - yeni sistem hansi sualin hansi derse aid oldugunu
+      BILMIR.  Muellim 7 dersden 1-ni secib test yigsa, sagird hele
+      kecilmemis 6 dersin sualini alir.  Bos duymeden pisdir: bos duyme
+      muellimi esebilesdirir, yanlis test onu sagirdinin qarsisinda pis
+      veziyyete salir.
+      Acar yalniz bank her derse sual nisanladiqdan sonra acilir - onda
+      sert data-dan gelmelidir (dersin nisanli sual sayi >= app.ders_min),
+      bu sabit deyil.  Fesil sonundaki «test yig» TOXUNULMUR - orada
+      butun material kecilib, hovuz dogrudur.
+
+      FESIL checkbox-u da BAGLIDIR - ve o, muveqqeti guzest deyil:
+      ARTIQDIR.  Eyni isi iki movcud yol gorur:
+        bir fesilden test        -> feslin son dersindeki «test yig»
+        bir nece fesilden qarisiq -> «rüb sınağı» (rpc_pack_exam, 135)
+      Rub sinagi ustelik daha yaxsidir: planin butun kecilmis derslerini
+      goturur ve EVVEL sinaqdan kecmis movzulari yadda saxlayir
+      (plan_exams) - novbeti sinaq teze materialdan olur.
+      Planda 10 fesil var; checkbox acilsa 9-unda sonuk durardi - ucuncu
+      qapi, elave seligesizlik.  Kod qalir (bank hazir olanda ders
+      seviyyesinde lazim ola biler), amma ekranda yoxdur.  */
+  var DERS_SECIMI = false;
+
   function yRow(o) {
     //  o: {ic, ad, alt, cip, cipCls, href, cls}
     return '<a class="mrow' + (o.cls ? " " + o.cls : "") + '" href="' + (o.href || "#/") + '">' +
@@ -3196,10 +3220,24 @@
               if (!bl.gid) return rows;          //  fesilsiz - duz setir
               /*  Fesil YIGILMIS gelir.  Yalniz cari dersin fesli acıq acilir.  */
               var nd = bl.items.filter(function (x) { return x.done; }).length;
+              /*  23.09: secim FESILDEDIR.  Aktiv olmasi ucun feslin
+                  BUTUN dersleri kecilmelidir - yarimciq fesilden test
+                  yigilsa, sagird hele kecilmemis dersin sualini alir.
+                  Deyer: son dersin item id-si (hovuz onsuz da fesildir).  */
+              var tam = nd === bl.items.length && bl.items.length > 0;
+              var son = tam ? bl.items[bl.items.length - 1] : null;
               return '<details class="plgrp"' + (i === ci ? " open" : "") + ">" +
                 "<summary><b>" + esc(bl.name) + "</b>" +
-                '<span class="plgc' + (nd === bl.items.length ? " full" : "") + '">' +
-                  nd + "/" + bl.items.length + "</span></summary>" +
+                '<span class="plgc' + (tam ? " full" : "") + '">' +
+                  nd + "/" + bl.items.length + "</span>" +
+                (DERS_SECIMI && d.paid
+                  ? '<input type="checkbox" class="plck plgk" data-plck="' + esc(p.id) +
+                    '" value="' + esc(son ? son.id : "") + '"' +
+                    (tam ? ' title="Bu fəsildən test üçün seç"'
+                         : ' disabled title="Fəsil bitəndə açılır — ' +
+                           (bl.items.length - nd) + ' dərs qalıb"') + ">"
+                  : "") +
+                "</summary>" +
                 rows + "</details>";
             }
             var now = blocks.slice(0, ci + 1), next = blocks.slice(ci + 1);
@@ -3235,7 +3273,8 @@
         '<div id="plm-' + esc(p.id) + '"></div>' +
       "</div>";
 
-      function plRow(it) {
+    
+  function plRow(it) {
             /* Movzu testinin qrup ortalamasi - plan adaptiv olsun:
                zeif cixan movzu qirmizi gorunur, "tekrar yig" teklif olunur */
             var avgN = it.avg == null ? null : Number(it.avg);
@@ -3263,7 +3302,7 @@
                 (cur && it.id === cur.id ? ' <em class="plnext">bu gün</em>' : "") +
               "</span>" +
               avgChip +
-              (it.done && d.paid
+              (DERS_SECIMI && it.done && d.paid
                 ? '<input type="checkbox" class="plck" data-plck="' + esc(p.id) +
                   '" value="' + esc(it.id) + '" title="Birgə test üçün seç">'
                 : "") +
@@ -3340,8 +3379,8 @@
         var m3 = $("plm-" + id);
         if (m3) {
           m3.innerHTML = offerHtml(
-            ids.length === 1 ? "Seçilən mövzudan test yığılsınmı?"
-                             : "Seçilən " + ids.length + " mövzudan qarışıq test yığılsınmı?",
+            ids.length === 1 ? "Seçilən fəsildən test yığılsınmı?"
+                             : "Seçilən " + ids.length + " fəsildən qarışıq test yığılsınmı?",
             ids.join(","), id);
           m3.scrollIntoView({ block: "nearest" });
         }
@@ -3366,8 +3405,8 @@
       //  ile (rpc_plan_test), 2+ movzu qarisiq (rpc_plan_test_multi).
       if (bar) bar.innerHTML = n >= 1
         ? '<button class="btn sm" data-plmulti="' + esc(pid) + '">' +
-          (n === 1 ? "Seçilən mövzudan test yığ"
-                   : "Seçilən " + n + " mövzudan birgə test yığ") + "</button>"
+          (n === 1 ? "Seçilən fəsildən test yığ"
+                   : "Seçilən " + n + " fəsildən birgə test yığ") + "</button>"
         : "";
     });
     function rebindOnly() {}
