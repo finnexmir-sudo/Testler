@@ -1851,6 +1851,16 @@ a = azalan     b = çıxılan     c = fərq
 yaddaşı dəlil deyil — e-dərslik açılır, sətir sitat gətirilir.
 Süzgəc: `db/test/termin_yoxla.sql`, düzəliş: `db/test/termin_duzelt.sql`.
 
+**İki düzəliş yolu, bir nəticə.** Canlı `termin_duzelt*.sql` ilə (uuid
+üzrə) düzəldildi; mənbə bank faylları (75, 76, 19, 16, 78, 204, 231, 250,
+251) isə ayrıca, əl ilə. İki yol eyni cümləni bəzən fərqli yazır və
+köhnə böyük bank faylları canlıda təkrar işlədilə bilmir (son say
+yoxlamaları köhnəlib). Ona görə **`bil10-bank/db/254`** var: 27 sualın
+mətnini mənbə ilə birəbir eyniləşdirir, idempotentdir, bayrağa
+toxunmur — canlıda `termin_duzelt`-dən sonra da işlədilməlidir.
+Bank sessiyasının geniş süzgəci: `bil10-bank/db/test/termin_yoxla_bank.sql`
+(§1 nişanlama, §2 «azalan» ayırıcısı ilə, §3–5).
+
 Mənbə: http://www.e-derslik.edu.az/books/665/units/unit-1/page75.xhtml
 
 ---
