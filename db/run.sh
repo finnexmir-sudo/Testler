@@ -296,6 +296,7 @@ bank 250_bank_riy_qusur_duzelis.sql
 bank 251_bank_riy_sablon_pilot.sql
 bank 252_bank_riy_plan_partiya1_hesablama.sql
 bank 253_bank_riy_plan_partiya2_tehlil.sql
+bank 254_bank_cixma_termin_duzelis.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
