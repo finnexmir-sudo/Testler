@@ -316,6 +316,8 @@ bank 268_bank_riy8_ders_kvadrat_tenlik.sql
 bank 269_bank_riy8_ders_dordbucaqlilar.sql
 bank 270_bank_riy8_ders_rasional_ifade.sql
 bank 271_bank_riy8_ders_sahe.sql
+bank 272_bank_riy8_ders_rasional_tenlik.sql
+bank 273_bank_riy8_ders_oxsarliq.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
