@@ -302,6 +302,7 @@ bank 256_bank_riy_plan_partiya4_sinif8.sql
 bank 257_bank_riy_plan_partiya5_sinif7.sql
 bank 258_bank_riy_plan_partiya6_sinif6.sql
 bank 259_bank_riy_plan_partiya7_sinif5.sql
+bank 260_bank_riy3_cixma16_sablon_berpa.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql

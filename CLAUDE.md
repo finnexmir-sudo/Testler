@@ -1861,6 +1861,14 @@ toxunmur — canlıda `termin_duzelt`-dən sonra da işlədilməlidir.
 Bank sessiyasının geniş süzgəci: `bil10-bank/db/test/termin_yoxla_bank.sql`
 (§1 nişanlama, §2 «azalan» ayırıcısı ilə, §3–5).
 
+**254 şablonu pozdu (2026-09-23).** 27 açardan biri (`riy3-cixma#16`) `db/251`-də
+şablona çevrilmişdi; 254 onun üzərinə adi mətn yazdı, `params` qaldı — sual
+hər cəhddə eyni rəqəmlə çıxırdı. 254-dən çıxarıldı (26 açar), `bil10-bank/db/260`
+şablonu bərpa edir — canlıda 254-dən sonra işlədilməlidir. Hansı bank faylının
+canlıda olduğunu `bil10-bank/db/test/canli_bank_yoxla.sql` deyir (yalnız oxuyur;
+kod miqrasiyaları üçün `db/test/canli_yoxla.sql`). Qayda: yerində düzəliş faylı
+yazanda `params is not null` olan sualları çıxar.
+
 Mənbə: http://www.e-derslik.edu.az/books/665/units/unit-1/page75.xhtml
 
 ---
