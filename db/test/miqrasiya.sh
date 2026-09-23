@@ -135,6 +135,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          254_bank_cixma_termin_duzelis.sql \
          255_bank_riy_plan_partiya3_sinif9.sql \
          256_bank_riy_plan_partiya4_sinif8.sql \
+         257_bank_riy_plan_partiya5_sinif7.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
