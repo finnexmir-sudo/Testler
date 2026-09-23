@@ -635,6 +635,9 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .pkh,.pkr{display:grid;grid-template-columns:1fr 92px 92px;gap:8px;align-items:center;padding:9px 14px;border-top:1px solid var(--n-100)}
 .pkh{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-3);background:var(--n-50);border-top:0}
 .pkh span:not(:first-child),.pkr>*:not(:first-child){text-align:center}
+/*  23.09: isinme sutunu baglananda (DERS_HAZIR) cedvel iki sutuna
+    kecir - yoxsa bos 92px asili qalir.  */
+.pktab.nowarm .pkh,.pktab.nowarm .pkr{grid-template-columns:1fr 92px}
 .pkg{padding:8px 14px 2px;font-size:12px;font-weight:600;color:var(--fg-2);border-top:1px solid var(--n-100)}
 .pkr span:first-child{display:flex;align-items:center;gap:8px;font-size:13.5px;min-width:0}
 .pkr span:first-child i{flex:0 0 22px;font-style:normal;font-size:12px;color:var(--fg-3);text-align:center}

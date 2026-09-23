@@ -142,6 +142,17 @@ with sync_playwright() as pw:
     yox(p.locator(".plck").count() == 0, "hec bir checkbox yoxdur (ders de, fesil de)")
     yox(p.locator("[data-plmulti]").count() == 0, "«Seçilən …dan test yığ» duymesi yoxdur")
 
+    print("\n2d) ISINME BAGLIDIR (23.09)")
+    #  rpc_pack_warm app.pack_topic ile VALIDEYN fesli goturur (135:43),
+    #  kart ise DERSIN adini vəd edirdi.  Ucunun en pisi: isinme dersden
+    #  EVVEL gedir, sagird hele hec birini gormeyib.  Nisan gelene qeder
+    #  bagli.  «Tezlikle» YAZILMIR - tarixsiz ved ikinci yalana cevrilir.
+    tam = p.locator("#main").inner_text()
+    yox("İsinmə testini hazırla" not in tam, "«İsinmə testini hazırla» duymesi yoxdur")
+    yox("isinmə" not in tam.lower() or "fəsildən test" in tam,
+        "ekranda isinme vədi qalmayib")
+    yox("tezlik" not in tam.lower(), "«tezlikle» kimi tarixsiz ved YOXDUR")
+
     print("\n2c) fesil yarimciqdir - basliqda duyme YOXDUR")
     yox(p.locator(".plgrp > summary .plgm").count() == 0,
         "yarimciq fesilde «fəsildən test yığ» yoxdur")

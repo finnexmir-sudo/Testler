@@ -1293,8 +1293,18 @@
       (plan_exams) - novbeti sinaq teze materialdan olur.
       Planda 10 fesil var; checkbox acilsa 9-unda sonuk durardi - ucuncu
       qapi, elave seligesizlik.  Kod qalir (bank hazir olanda ders
-      seviyyesinde lazim ola biler), amma ekranda yoxdur.  */
-  var DERS_SECIMI = false;
+      seviyyesinde lazim ola biler), amma ekranda yoxdur.
+
+      ISINME TESTI de bu acarin altindadir (23.09).  Kart «Dərsdən əvvəl
+      beş sual — «<DERSIN ADI>» mövzusundan» yazirdi, rpc_pack_warm ise
+      app.pack_topic ile VALIDEYN FESLI goturur (135:43) - vəd ders,
+      hovuz fesil.  Ucunun EN PISI: isinme DERSDEN EVVEL gedir, yeni
+      sagird feslin qalan derslerinden de sual alir ve onlarin hec
+      birini gormeyib.  Ders basIamamis ugursuzluq tecrubesi.
+      «Tezlikle qayidacaq» YAZILMADI - qesden: o vedin arxasinda tarix
+      yoxdur (tek 8-ci sinif ucun ~900 sual lazimdir).  Tarixsiz ved
+      bir muddet sonra ikinci yalana cevrilir.  */
+  var DERS_HAZIR = false;
 
   function yRow(o) {
     //  o: {ic, ad, alt, cip, cipCls, href, cls}
@@ -2830,7 +2840,11 @@
           yalniz ISINME qalir - plan qutusunda olmayan yeganə is.
           Plan yoxdursa kart hec cixmir: «Planı qur» linki plan
           qutusunun ozundedir.  */
-      if (YENI && (!d.has_plan || !nx || (!nx.warm_test_id && !d.paid))) {
+      /*  23.09: acar bagliyken kartin yeganə isi (isinme) yoxdur -
+          kart butovlukde cixmir.  Artiq yigilmis isinme varsa netice
+          gorunmeye davam edir: muellim onu itirmesin.  */
+      if (YENI && (!d.has_plan || !nx ||
+                   (!nx.warm_test_id && (!d.paid || !DERS_HAZIR)))) {
         box.innerHTML = ""; return;
       }
       var h = '<div class="spacer"></div><div class="card prep">' +
@@ -2846,8 +2860,11 @@
             ? '<div class="warmline"><span class="wres">' + (nx.warm_takers
                 ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird"
                 : "verilib") + '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəqə bax</a></div>'
-            : '<button class="btn go wide" id="prepWarm" data-item="' + esc(nx.item_id) + '">' +
-              ic("gen") + "İsinmə testini hazırla</button>");
+            : (DERS_HAZIR
+                ? '<button class="btn go wide" id="prepWarm" data-item="' +
+                  esc(nx.item_id) + '">' + ic("gen") +
+                  "İsinmə testini hazırla</button>"
+                : ""));
       } else if (!d.has_plan) {
         h += row("doc", "Bu günün dərsi",
           '<span class="muted">Dərs planı yoxdur. Plan qursanız bu günün dərsi və hazır test burada olacaq. ' +
@@ -2869,7 +2886,10 @@
                 : "verilib") + '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></div>'
             : (d.paid
                 ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
-                  '<button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">Hazırla</button></div>'
+                  (DERS_HAZIR
+                    ? '<button class="plmk" id="prepWarm" data-item="' +
+                      esc(nx.item_id) + '">Hazırla</button>'
+                    : "") + "</div>"
                 : "")));
       } else {
         h += row("doc", "Bu günün dərsi", '<span class="muted">Plan tam keçilib. 🎉</span>');
@@ -3171,7 +3191,7 @@
         '<div class="plhead"><b>' + esc(p.subject) + " · " + esc(p.level) + "</b>" +
           "<span>" + p.done + " / " + p.total + unit + pct + "%</span></div>" +
         //  135: her movzunun uc parcasi bir ekranda
-        '<a href="#/pk/' + esc(p.id) + '" class="plpack">' + ic("doc") + "Dərs paketi: isinmə · ev tapşırığı · rüb sınağı</a>" +
+        '<a href="#/pk/' + esc(p.id) + '" class="plpack">' + ic("doc") + "Dərs paketi: ev tapşırığı · rüb sınağı</a>" +
         '<div class="plbar"><i style="width:' + pct + '%"></i></div>' +
         (cur
           ? '<div class="plcur"><span class="pltag">Bu günün dərsi</span>' +
@@ -3306,7 +3326,7 @@
                 (cur && it.id === cur.id ? ' <em class="plnext">bu gün</em>' : "") +
               "</span>" +
               avgChip +
-              (DERS_SECIMI && it.done && d.paid
+              (DERS_HAZIR && it.done && d.paid
                 ? '<input type="checkbox" class="plck" data-plck="' + esc(p.id) +
                   '" value="' + esc(it.id) + '" title="Birgə test üçün seç">'
                 : "") +
@@ -3715,7 +3735,10 @@
       if (nx && nx.name && prep.warm_test_id !== undefined) {
         d.push(yRow({ ic: "gen", href: "#/g/" + g.id + "/p",
           ad: "Bu günün dərsi: " + nx.name,
-          alt: "dərsdən əvvəl 5 suallıq isinmə hazırlayın" }));
+          //  23.09: isinme baglidir (bax DERS_HAZIR) - setir onu vəd
+          //  etmemelidir.  Plan ozu yene faydalidir, kecid qalir.
+          alt: DERS_HAZIR ? "dərsdən əvvəl 5 suallıq isinmə hazırlayın"
+                          : "planda «keçildi» işarələyin" }));
       }
       $("gDiq").innerHTML = d.length
         ? '<div class="msec">Bu gün</div><div class="card pad0 menu">' + d.join("") +
@@ -8882,12 +8905,14 @@
   function drawPack(planId) {
     var d = PKD, pl = d.plan || {}, items = d.items || [], exams = d.exams || [];
     var pend = Number(d.exam_pending) || 0;
+    var PK_WARM = false;
     var h = '<button class="btn sm ghost" id="btnBack">' + ic("back") + esc(backLabel(pl.class || "Qrup")) + "</button>" +
       '<div class="spacer"></div>' +
       '<div class="card">' +
         "<h1>" + esc(pl.subject || "") + " · " + esc(pl.level || "") + "</h1>" +
         '<p class="muted" style="margin:4px 0 0">' + pl.done + " / " + pl.total + " mövzu keçilib · " +
-          (d.students || 0) + " şagird. Hər dərs üçün hazır üç parça: <b>isinmə</b> dərsdən əvvəl 5 asan sual (1 gün), " +
+          (d.students || 0) + " şagird. Hazır parçalar: " +
+          (DERS_HAZIR ? "<b>isinmə</b> dərsdən əvvəl 5 asan sual (1 gün), " : "") +
           "<b>ev tapşırığı</b> «Keçildi»dən sonra 10 sual (7 gün), <b>rüb sınağı</b> keçilmiş mövzulardan 20 sual (7 gün). " +
           "Bir toxunuş — test yığılır və qrupa tapşırılır.</p>" +
         (d.paid ? "" : '<div class="warn" style="margin-top:10px">' + ic("info") + "<span>Hazır suallardan test yığmaq abunə paketi ilədir.</span></div>") +
@@ -8914,8 +8939,18 @@
       "</div>" +
       '<div class="spacer"></div>' +
       //  movzu cedveli
-      '<div class="card pad0 pktab">' +
-        '<div class="pkh"><span>Mövzu</span><span>İsinmə</span><span>Ev tapşırığı</span></div>' +
+      (function () {
+        //  Sutun sayi CSS-de sabitdir (1fr 92px 92px).  Isinme sutunu
+        //  cixanda «nowarm» sinfi qalan iki sutuna kecirir, yoxsa bos
+        //  92px asili qalir.  PK_WARM burada hesablanir - basliqdan EVVEL.
+        PK_WARM = DERS_HAZIR || items.some(function (x) { return !!x.warm; });
+        return '<div class="card pad0 pktab' + (PK_WARM ? "" : " nowarm") + '">';
+      })() +
+        (function () {
+          return '<div class="pkh"><span>Mövzu</span>' +
+            (PK_WARM ? "<span>İsinmə</span>" : "") +
+            "<span>Ev tapşırığı</span></div>";
+        })() +
         (function () {
           var out = "", grp = null;
           items.forEach(function (it) {
@@ -8923,7 +8958,10 @@
             out += '<div class="pkr' + (it.done ? " done" : "") + '" data-i="' + esc(it.id) + '">' +
               "<span><i>" + (it.done ? "✓" : it.ord) + "</i>" + esc(it.topic) +
                 (it.examined ? ' <s class="pkex" title="rüb sınağına düşüb">sınaq</s>' : "") + "</span>" +
-              pkCell(it.warm, "warm", it, d.paid) +
+              //  23.09: isinme sutunu basliqla birlikde cixdi - xana da
+              //  cixmalidir, yoxsa cedvel surusur.  Artiq yigilmis
+              //  isinme varsa xana qalir: netice itmesin.
+              (PK_WARM ? pkCell(it.warm, "warm", it, d.paid) : "") +
               pkCell(it.hw, "hw", it, d.paid) +
             "</div>";
           });
@@ -10854,8 +10892,12 @@
       '<a href="#/n">' + ic("bell") + "Siqnallar</a>" +
       '<a href="#/bize"' + (cur === "bize" ? ' class="on"' : "") + ">" + ic("pen") + "Bizə yazın</a>" +
       '<a href="#/me"' + (isMe ? ' class="on"' : "") + ">" + ic("person") + "Profil</a>" +
-      '<div class="sbtip"><b>Bil10 ipucu</b>Diaqnostikadan sonra «Bundan başla» sətrinə baxın — ' +
-      "zəif mövzunun isinmə testi bir toxunuşla gedir.</div>";
+      '<div class="sbtip"><b>Bil10 ipucu</b>' +
+      (DERS_HAZIR
+        ? "Diaqnostikadan sonra «Bundan başla» sətrinə baxın — " +
+          "zəif mövzunun isinmə testi bir toxunuşla gedir."
+        : "Fəsil bitəndə başlığındakı «fəsildən test yığ» ilə " +
+          "yoxlama bir toxunuşla gedir.") + "</div>";
     document.body.classList.add("bnav-on");
     btnBell.classList.remove("hide");
     btnFb.classList.remove("hide");
