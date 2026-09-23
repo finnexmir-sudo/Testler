@@ -175,6 +175,9 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          294_bank_riy6_ders_sahe.sql \
          295_bank_riy6_ders_statistika.sql \
          296_bank_riy9_ders_nisan.sql \
+         297_bank_riy9_ders_kok.sql \
+         298_bank_riy9_ders_cevre.sql \
+         299_bank_riy9_ders_funksiya.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
