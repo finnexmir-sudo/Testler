@@ -1169,7 +1169,6 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
    #printBox ekranda hec vaxt gorunmur - yalniz cap zamani.
    body.printing sinfi paperPrint() icinde qoyulub goturulur. */
 #printBox{display:none}
-.prnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .prnc{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--fg-2);cursor:pointer}
 .prnc input{width:16px;height:16px;min-height:0;margin:0;accent-color:var(--brand)}
 .stuq{margin:0 0 10px}
@@ -1859,24 +1858,46 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .plimm button:hover{background:var(--n-100)}
 .plimm button.on{background:var(--teal-tint);color:var(--teal);font-weight:600}
 
-/* 192: vereq duymeleri - hamisi boz idi, secilmirdi.  Her birinin oz rengi:
-   cap = marka, cavab acari = kehreba, vaxt = yasil, yigcam/yeniden = neytral. */
-.prnrow .btn.sm,.prnrow .prnc{height:34px;min-height:0;box-sizing:border-box;border-radius:999px;font-weight:560}
-.prnrow .btn.sm svg,.prnrow .plim svg{width:15px;height:15px}
+/*  23.09: 192-de her duymeye OZ rengi verilmisdi (cap marka, cavab
+    acari kehreba, vaxt yasil).  Meqsed «secilsin» idi, netice eksi
+    oldu: uc reng yan-yana duranda hec biri secilmir - goz hansinin
+    vacib oldugunu taya bilmir (istifadeci: «qatisiq nedir bele»).
+    Indi IYERARXIYA var: bir yasil (esas), bir nane (cap), qalani ag.
+    Ayarlar (cavab acari, yigcam) umumiyyetle duyme deyil - cercivesiz
+    checkbox, capin altinda.  */
+.tacts{display:flex;flex-direction:column;gap:10px}
+.tacts>div{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tacts .btn.sm,.tacts .plim>summary{height:34px;min-height:0;
+  box-sizing:border-box;border-radius:999px;font-weight:560}
+.tacts .btn svg,.tacts .plim svg{width:15px;height:15px}
+/*  1. ESAS - tek yasil, bir az iri */
+.tact1 .btn.go{min-height:38px}
+/*  2. CAP - duyme nane, ayarlar CERCIVESIZ (duyme kimi gorunmesin) */
 #btnPrn{background:var(--brand-tint);border-color:var(--brand-line);color:var(--brand)}
 #btnPrn:hover{background:var(--brand-line);border-color:var(--brand)}
-#btnPrnK{background:var(--warn-tint);border-color:var(--warn-line);color:var(--warn)}
-#btnPrnK:hover{background:var(--warn-line);border-color:var(--warn)}
-.prnrow .prnc{padding:0 12px;border:1px solid var(--n-300);background:var(--surface);color:var(--n-800)}
-.prnrow .prnc:hover{background:var(--n-50);border-color:var(--n-400)}
-#btnRegen{background:var(--surface);border-color:var(--n-300);color:var(--n-800)}
-#btnRegen:hover{background:var(--n-50);border-color:var(--n-400)}
+.tact2 .prnc{border:0;background:none;padding:0 2px;font-size:12.5px;
+  color:var(--fg-2)}
+.tact2 .prnc:hover{color:var(--fg)}
+/*  3. SAKIT zolaq: vaxt limiti de burada oturur - qonsulari agdir,
+    ona gore yasil fon iyerarxiyani pozurdu.  Neytral olur; secilmis
+    vaxt varsa (data-min > 0) marka rengi qayidir - o zaman gercekden
+    bir sey secilib ve gorunmelidir.  */
+.tact3 .plim>summary{background:var(--surface);border-color:var(--n-300);
+  color:var(--n-800)}
+.tact3 .plim>summary:hover,.tact3 .plim[open]>summary{background:var(--n-50);
+  border-color:var(--n-400)}
+.tact3 .plim.set>summary{background:var(--brand-tint);
+  border-color:var(--brand-line);color:var(--brand)}
+/*  4. TEHLUKELI - sag kenarda, kicik; qirmizi yalniz uzerine gelende */
+.tact4{justify-content:flex-end}
+.tact4 .tdel{font-size:12px;color:var(--fg-3);border-color:var(--n-200)}
+.tact4 .tdel:not([disabled]):hover{color:var(--err);border-color:var(--err-line);
+  background:var(--err-tint)}
+.tacts .btn[disabled]{opacity:.45;cursor:not-allowed}
 
 /* 193: oz testi - ad deyis / sil (vereq), pick siyahisinda vereq kecidi */
 .tren{display:flex;gap:8px;align-items:center;margin-bottom:4px}
 .tren input{margin:0;flex:1;min-width:0;font-size:18px;font-weight:600}
-.prnrow .tdel:not([disabled]):hover{color:var(--err);border-color:var(--err-line);background:var(--err-tint)}
-.prnrow .btn[disabled]{opacity:.45;cursor:not-allowed}
 .trw{display:flex;align-items:stretch}
 .trw .trow{flex:1;min-width:0}
 .trw .tgo{flex:0 0 40px;display:flex;align-items:center;justify-content:center;color:var(--fg-3);

@@ -9302,53 +9302,68 @@
           (t.time_limit_sec ? " · ⏱ " + Math.round(t.time_limit_sec / 60) + " dəq" : "") +
           (done ? " · " + done + " şagird işləyib" : "") + "</p>" +
         '<div class="spacer"></div>' +
-        '<div class="prnrow">' +
-          //  Esas addim birinci durur: cap/paylasma ondan sonra
-          /*  Qrupu OLMAYAN muellimde de duyme qalir - asagida qrup
-              yaratma formasi var.  Gizlenende (admin lentinde gorunen
-              hal) muellim 2 test yigib dayanirdi: veraq dalan idi.  */
+        /*  23.09 (istifadeci: «butonlar yan yana qatisiq nedir bele?»).
+            Bir setirde 9 element, bes ayri gorunusde idi: yasil, nane,
+            sari, ag, checkbox, acilan siyahi.  Uc qusur:
+              - uc reng ailesi yan-yana, hansinin vacib oldugu bilinmirdi;
+              - «Yigcam» ve «vaxtsiz» EMELIYYAT deyil, AYARDIR - amma
+                duyme kimi geyinmisdi;
+              - «Sil» «Adi deyis» ile eyni cekide idi: geri qaytarilmayan
+                emeliyyat adi duyme ile yan-yana durmamalidir.
+            Indi dord zolaq: esas / cap / sakit / tehlukeli.
+            «Cavab acari ile» ayrica duyme idi (sari) - indi capin
+            AYARIDIR: bir duyme, iki checkbox.  */
+        '<div class="tacts">' +
+          //  1. ESAS - tek yasil duyme, oz setrinde
           (diag || (classes.length && !freeCls.length) ? "" :
-            '<button class="btn sm go" id="btnGoAsg">' + ic("clip") +
-              (classes.length ? "Qrupa ver" : "Qrup yarat və ver") + "</button>") +
-          '<button class="btn sm" id="btnPrn">' + ic("print") +
-            "Çap / PDF</button>" +
-          '<button class="btn sm ghost" id="btnPrnK">' + ic("key") +
-            "Cavab açarı ilə</button>" +
-          //  204: reklam - muellim hemkarina hazir metn + link gonderir
-          //  (?src=hemkar - hunide gorunur)
-          '<button class="btn sm ghost" id="btnHemkar" title="Həmkarınıza göndərin">' + ic("send") +
-            "Həmkarına göndər</button>" +
-          '<label class="prnc"><input type="checkbox" id="prnC"> Yığcam</label>' +
-          /*  192: vaxt limiti - testin ozunde saxlanir, butun teyinatlara
-              aiddir.  Sagird geri sayan saat gorur, vaxt bitende cavablar
-              ozu gonderilir; qerar serverdedir (limit + 60 s guzest).  */
+            '<div class="tact1"><button class="btn go" id="btnGoAsg">' + ic("clip") +
+              (classes.length ? "Qrupa ver" : "Qrup yarat və ver") + "</button></div>") +
+          //  2. CAP - duyme + ayarlari.  Ayarlar duymenin YANINDA deyil,
+          //     ALTINDA qruplasir: hansi emeliyyata aid oldugu gorunsun.
+          '<div class="tact2">' +
+            '<button class="btn sm" id="btnPrn">' + ic("print") + "Çap / PDF</button>" +
+            '<label class="prnc"><input type="checkbox" id="prnK"> cavab açarı ilə</label>' +
+            '<label class="prnc"><input type="checkbox" id="prnC"> yığcam</label>' +
+          "</div>" +
+          //  3. SAKIT - hamisi ag, eyni cekide; vaxt limiti de buradadir
+          '<div class="tact3">' +
+            //  204: reklam - muellim hemkarina hazir metn + link gonderir
+            '<button class="btn sm ghost" id="btnHemkar" title="Həmkarınıza göndərin">' +
+              ic("send") + "Həmkarına göndər</button>" +
+            (t.gen_rule && !done && !diag
+              ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
+                "Yenidən yığ</button>"
+              : "") +
+            (diag ? "" :
+              '<button class="btn sm ghost" id="btnTRen">' + ic("pen") + "Adı dəyiş</button>") +
+            /*  192: vaxt limiti - testin ozunde saxlanir, butun
+                teyinatlara aiddir.  Sagird geri sayan saat gorur, vaxt
+                bitende cavablar ozu gonderilir; qerar serverdedir.  */
+            (diag ? "" :
+              //  «set» sinfi: vaxt SECILIBSE cip marka rengine kecir -
+              //  secilmeyib ise qonsulari kimi ag qalir (bax .tact3)
+              '<details class="plim' + (t.time_limit_sec ? " set" : "") +
+                '" id="pLim" data-min="' + Math.round((t.time_limit_sec || 0) / 60) + '">' +
+                '<summary title="Vaxt limiti">' + ic("clock") + "<span>" +
+                  (t.time_limit_sec ? Math.round(t.time_limit_sec / 60) + " dəq" : "vaxtsız") +
+                  "</span>" + ic("right") + "</summary>" +
+                '<div class="plimm">' +
+                  [0, 5, 10, 15, 20, 30, 45, 60, 90].map(function (m) {
+                    return '<button type="button" data-min="' + m + '"' +
+                      (Math.round((t.time_limit_sec || 0) / 60) === m ? ' class="on"' : "") + ">" +
+                      (m ? m + " dəq" : "vaxtsız") + "</button>";
+                  }).join("") +
+                "</div></details>") +
+          "</div>" +
+          //  4. TEHLUKELI - ayrica, sag kenarda, kicik
           (diag ? "" :
-            '<details class="plim" id="pLim" data-min="' + Math.round((t.time_limit_sec || 0) / 60) + '">' +
-              '<summary title="Vaxt limiti">' + ic("clock") + "<span>" +
-                (t.time_limit_sec ? Math.round(t.time_limit_sec / 60) + " dəq" : "vaxtsız") +
-                "</span>" + ic("right") + "</summary>" +
-              '<div class="plimm">' +
-                [0, 5, 10, 15, 20, 30, 45, 60, 90].map(function (m) {
-                  return '<button type="button" data-min="' + m + '"' +
-                    (Math.round((t.time_limit_sec || 0) / 60) === m ? ' class="on"' : "") + ">" +
-                    (m ? m + " dəq" : "vaxtsız") + "</button>";
-                }).join("") +
-              "</div></details>") +
-          (t.gen_rule && !done && !diag
-            ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
-              "Yenidən yığ</button>"
-            : "") +
-          /*  193: oz testinin adini deyismek / silmek.  Sagird isleyibse
-              silme bagli - netice itmesin (server de redd edir).  */
-          (diag ? "" :
-            '<button class="btn sm ghost" id="btnTRen">' + ic("pen") + "Adı dəyiş</button>" +
-            '<button class="btn sm ghost tdel" id="btnTDel"' +
+            '<div class="tact4"><button class="btn sm ghost tdel" id="btnTDel"' +
               (done ? ' disabled title="Şagird işləyib — silinmir"' : ' title="Testi sil"') + ">" +
-              ic("x") + "Sil</button>") +
+              ic("x") + "Sil</button></div>") +
         "</div>" +
         '<p class="muted" style="margin:10px 0 0">Çap pəncərəsində printer ' +
           "əvəzinə «PDF olaraq saxla» seçsəniz, vərəq fayl kimi yüklənəcək. " +
-          "«Cavab açarı ilə» variantında açar ayrıca səhifədə çıxır.</p>" +
+          "«cavab açarı ilə» qeyd etsəniz, açar ayrıca səhifədə çıxır.</p>" +
         (t.gen_rule && done && !diag
           ? '<p class="muted" style="margin:8px 0 0">Bu testi artıq şagird ' +
             "işlədiyi üçün yeniləmək olmaz — yeni test yığın.</p>"
@@ -9543,9 +9558,11 @@
       });
     }
 
-    on("btnPrn",  "click", function () { paperPrint(t, false); });
+    //  «Cavab acari ile» artiq ayrica duyme deyil - capin ayaridir
+    on("btnPrn",  "click", function () {
+      paperPrint(t, !!($("prnK") && $("prnK").checked));
+    });
     on("btnHemkar", "click", function () { hemkarShare(t, qs.length); });
-    on("btnPrnK", "click", function () { paperPrint(t, true); });
 
     /* "Kime" siyahisi secilen qrupa baglidir - qrup deyisende yenilenir.
        Artiq ferdi teyinat almis sagird tekrar teklif olunmur. */
