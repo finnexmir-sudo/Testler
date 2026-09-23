@@ -184,6 +184,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          303_bank_riy9_ders_berabersizlik.sql \
          304_bank_riy9_ders_vektorlar.sql \
          305_bank_riy9_ders_silsile.sql \
+         306_bank_riy9_ders_ehtimal.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
