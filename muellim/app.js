@@ -912,7 +912,7 @@
       '<div class="card tight">' +
         "<b>Tez cavab lazımdır?</b>" +
         '<p class="note" style="margin:4px 0 0">WhatsApp: ' +
-          '<a href="https://wa.me/994702023080" target="_blank" rel="noopener">+994 70 202 30 80</a>' +
+          '<a href="https://wa.me/994706114116" target="_blank" rel="noopener">+994 70 611 41 16</a>' +
           ' · Bələdçi: <a href="../komek/#muellim" target="_blank" rel="noopener">necə işləyir →</a></p>' +
       "</div>");
     on("btnBack", "click", function () { goBack(); });
