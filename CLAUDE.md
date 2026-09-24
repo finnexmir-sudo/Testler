@@ -4782,6 +4782,13 @@ tapşırığı DÜZLÜYÜ yoxlayırdı, QURULUŞU yox. Yanaşmalar dörd yerə s
   ziddiyyət, tam şərt), E dərs sırası.
 - Bütün alətlər repodadır: `ders_yoxla.sh`, `kor_ders.py`, `muellim_ders.py`,
   `plan_elave.py` (`bil10-bank/tools/riy_ders/`). Scratchpad-da heç nə qalmır.
+- **Reqressiya testi:** `bil10-bank/tools/riy_ders/test_qurulus_yoxla.py` (29 hal; Claude rəyindən).
+  Yoxlayıcıya toxunanda əvvəl bu keçməlidir; yeni səhv sinfi → tutmalı/tutmamalı hal əlavə olunur.
+- **2026-09-24 vəziyyəti:** 38 fəsil (266–306) yenidən süzülüb, `bil10-bank` main-də (0fa4826). Canlıya
+  265→306 sırası ilə yüklənməlidir (`canli_bank_yoxla.sql` ilə yoxla). Üç AI rəyi və qayda faylına
+  təkliflər **hələ tətbiq olunmayıb** — `bil10-bank/plan/sual_qaydasi_muzakire.md` (istifadəçi ilə
+  danışılmalıdır: kor həlli ayrı agent, rəyçiyə açar verməmək, VARIANT-LEAK, hook). Kitab tip cədvəli
+  pilotu (kvadratik funksiya, tərs/parametr) həmin faylda; PDF-lər repoya girmir.
 
 ## Çətinlik səviyyəsi — ölçülür, təxmin edilmir
 
