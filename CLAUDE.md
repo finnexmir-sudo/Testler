@@ -4757,6 +4757,32 @@ NİYƏ: ölçüldü (`test/_suret.py`) — panelin soyuq açılışı zəif 3G-d
 
 ---
 
+## Sual YAZMA qaydası — tək mənbə (2026-09-24)
+
+**Baş verən.** db/306 (9-cu sinif, statistika) müəllim nümunəsi 21 sualdan 8-də
+QURULUŞ qüsuru tapdı: «3-ün tezliyi neçədir?» → cavab 3 (qiymətlə tezliyi
+qarışdıran da düz cavab verir); düz variantda mötərizəli səbəb («Birinci
+sinifdə (6/20 böyükdür)»); absurd distraktor («qiymətləri dəyişdirir»);
+yerləşdirmə dərsində C ilə izah (kombinezon sonra keçilir); «niyə
+bərabərdir?» sualında «bərabər deyillər» variantı; «rast gəlinir» yönlüksüz.
+Düz cavabların hamısı düz idi, rəyçi agent də keçirmişdi — çünki rəyçi
+tapşırığı DÜZLÜYÜ yoxlayırdı, QURULUŞU yox. Yanaşmalar dörd yerə səpələnmişdi
+(bu fayl, qeydlər, common.py, scratchpad-dakı TASK.md).
+
+**Mexanizm indi:**
+- **Qayda faylı:** `bil10-bank/plan/sual_yazma_qaydasi.md` — A quruluş,
+  B dərs sırası, C cavab hovuzu/təkrar, D dil, E metadata, F proses. Yeni səhv
+  sinfi → bura bənd + yoxlayıcıya kod + rəyçi tapşırığına sual.
+- **Avtomatik:** `bil10-bank/tools/riy_ders/qurulus_yoxla.py itemsNUM.json`
+  — TEZLIK-CAVAB, IPUCU, DUZ-UZUN, ZIDDIYYET, DERS-SIRASI (`yarpaq_sira.tsv` +
+  `GETIRIR`/`getirir_<sinif>.json`), MEXANIZMSIZ, DIL. `q.py`-dən sonra,
+  `emit.py`-dən əvvəl; 0 olmalıdır.
+- **Rəyçi:** `bil10-bank/tools/riy_ders/REY_TAPSIRIGI.md` — A–G, D bəndi
+  quruluşdur (tutmalı olduğu səhvi tuturmu, ipucu, absurd distraktor,
+  ziddiyyət, tam şərt), E dərs sırası.
+- Bütün alətlər repodadır: `ders_yoxla.sh`, `kor_ders.py`, `muellim_ders.py`,
+  `plan_elave.py` (`bil10-bank/tools/riy_ders/`). Scratchpad-da heç nə qalmır.
+
 ## Çətinlik səviyyəsi — ölçülür, təxmin edilmir
 
 Real sınaqda «çətin» suallar çətin çıxmadı. Səbəb faktın nadirliyi
