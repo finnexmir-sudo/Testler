@@ -4784,11 +4784,18 @@ tapşırığı DÜZLÜYÜ yoxlayırdı, QURULUŞU yox. Yanaşmalar dörd yerə s
   `plan_elave.py` (`bil10-bank/tools/riy_ders/`). Scratchpad-da heç nə qalmır.
 - **Reqressiya testi:** `bil10-bank/tools/riy_ders/test_qurulus_yoxla.py` (29 hal; Claude rəyindən).
   Yoxlayıcıya toxunanda əvvəl bu keçməlidir; yeni səhv sinfi → tutmalı/tutmamalı hal əlavə olunur.
-- **2026-09-24 vəziyyəti:** 38 fəsil (266–306) yenidən süzülüb, `bil10-bank` main-də (0fa4826). Canlıya
-  265→306 sırası ilə yüklənməlidir (`canli_bank_yoxla.sql` ilə yoxla). Üç AI rəyi və qayda faylına
-  təkliflər **hələ tətbiq olunmayıb** — `bil10-bank/plan/sual_qaydasi_muzakire.md` (istifadəçi ilə
-  danışılmalıdır: kor həlli ayrı agent, rəyçiyə açar verməmək, VARIANT-LEAK, hook). Kitab tip cədvəli
-  pilotu (kvadratik funksiya, tərs/parametr) həmin faylda; PDF-lər repoya girmir.
+- **2026-09-24 vəziyyəti:** 38 fəsil (266–306) yenidən süzülüb, `bil10-bank` main-də. Canlıya
+  265→306 sırası ilə yüklənməlidir (`canli_bank_yoxla.sql` ilə yoxla).
+- **Qayda v2 təsdiqləndi (2026-09-24, 1bd1f94).** İstifadəçi: «suallarımız DİM-in hazırladığı suallar
+  kimi keyfiyyətli, faydalı, işə yarayan olsun». Qayda indi **bütün fənlər** üçündür: DİM səviyyəsi
+  bölməsi (fəsil spesifikasiyası: idrak B ≤ 20 %, A ≥ 30 %, ≥ 12 çətin, ≥ 4 tip), kitabdan yalnız
+  tip cədvəli, kor həll ayrı agent, rəyçi düzəlişi yenidən kor həlldən, VARIANT-LEAK. Alətlər
+  `FENN`/`PREF` mühit dəyişəni ilə hər fənn üçün işləyir.
+- **Hər fənn öz sessiyasında** (istifadəçi qərarı). Protokol və fənn üzrə nömrə aralıqları:
+  `bil10-bank/CLAUDE.md` — riyaziyyat 307–399, informatika 400–449, fizika 450–499, kimya 500–549,
+  biologiya 550–599, coğrafiya 600–649, Az dili 650–699, ingilis 700–749, tarix 750–799, ədəbiyyat
+  800–849, qalanı 850–899. **Kod sessiyası yeni miqrasiyanı 900-dən yazır** — `db/` siyahısındakı son
+  nömrədən sonrakını götürmə, 226–899 bank aralığıdır.
 
 ## Çətinlik səviyyəsi — ölçülür, təxmin edilmir
 
