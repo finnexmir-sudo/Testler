@@ -5764,6 +5764,10 @@
           weak.map(function (w, i) {
             return '<div class="wq' + (i >= WCAP ? " hide" : "") + '"><div class="g"><b>' +
               esc(w.body) + "</b>" +
+              //  900: qrafikli sualda sekilsiz metn hec ne demir -
+              //  «Hansi qrafik artandir?» sualina baxib muellim
+              //  sagirdin neyi sehv etdiyini bile bilmirdi.
+              fig(w.media_url) +
               (w.topic ? '<span class="wtag">' + esc(w.topic) + "</span>" : "") +
               (Number(w.hasty) > 0 ? '<span class="wtag wb-h" title="5 saniyədən tez">tələsik</span>' : "") +
               /*  «əmin idi» tək başına heç nə demirdi (istifadəçi

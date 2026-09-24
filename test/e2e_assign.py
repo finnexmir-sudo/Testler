@@ -264,10 +264,15 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(900)
     pg.click("#btnAsgs"); pg.wait_for_selector("#pick .empty", timeout=8000)
     t = pg.inner_text("#pick")
-    ok("hələ test yoxdur" in t, "bos test bazasi duzgun izah olunur",
+    #  Metn bdc2de0-de deyisdi: evvel «bu sinif ucun hele test yoxdur»
+    #  deyirdik ve sinfi deyismeyi teklif edirdik - IKISI DE YANLIS idi
+    #  (bankda sual var, hazir platforma testi ise hec vaxt olmayib).
+    #  Indi dogru cixis gosterilir: generator.  Yoxlama da ona baxir.
+    ok("Hələ test yığmamısınız" in t, "bos test bazasi duzgun izah olunur",
        t.replace("\n", " ")[:70])
     ok("Bütün testlər verilib" not in t, "yaniltici 'hamisi verilib' yazilmir")
-    ok("2-ci sinif" in t, "hansi sinif oldugu yazilir")
+    ok("Yeni test yığ" in t, "muellime dogru cixis (generator) gosterilir")
+    ok("sinfi dəyiş" not in t.lower(), "sinfi deyismek teklif OLUNMUR")
     # geri qaytaririq
     pg.click("#btnBack"); pg.wait_for_selector("#btnRen", timeout=8000)
     pg.click("#btnRen"); pg.wait_for_selector("#gLev", timeout=8000)

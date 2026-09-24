@@ -1822,6 +1822,10 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .qfig img{max-width:100%;max-height:220px;height:auto;background:#fff;
   border:1px solid var(--line);border-radius:var(--r);padding:8px}
 .sq .qfig img,.qrow .qfig img{max-height:130px}
+/*  900: sehvler siyahisi yigcam setirdir (metn 2 setire kesilir) -
+    sekil de kicik olmalidir, yoxsa on sual bir ekrana sigmir.  */
+.wq .qfig{margin:6px 0 2px;text-align:left}
+.wq .qfig img{max-height:110px}
 .paper .qfig img{max-height:300px}
 
 /* 191: metnle ev tapsirigi - tapsiriqlar ekrani */

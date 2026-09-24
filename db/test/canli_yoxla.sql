@@ -57,6 +57,11 @@ select * from (values
  ('213 təkrar itələməsi',
     (select exists (select 1 from f where proname='rpc_home' and def like '%tekrar_plansiz%'))),
  ('215 girən müəllim sayğacı',
-    (select exists (select 1 from f where proname='rpc_admin_stats' and def like '%215b: IKI MENBE MOTERIZEDE%')))
+    (select exists (select 1 from f where proname='rpc_admin_stats' and def like '%215b: IKI MENBE MOTERIZEDE%'))),
+ ('900 nəticə ekranında sualın şəkli',
+    (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
+        and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')
+        and exists (select 1 from f where proname='rpc_student_report' and def like '%media_url%')
+        and exists (select 1 from f where proname='rpc_test_preview' and def like '%media_url%')))
 ) as t(miqrasiya, var_mi)
 order by var_mi, miqrasiya;

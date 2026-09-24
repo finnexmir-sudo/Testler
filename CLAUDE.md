@@ -1823,6 +1823,26 @@ sıfır verirdi.
 saymaqla yox. `grep -c` fərqli yazılışı, çökməni və vaxt aşımını
 görmür — üçü də «0 səhv» kimi görünür.
 
+### Davamı: `db/224` eyni tələyə düşdü, əks istiqamətdə (2026-09-24)
+
+`db/192`-nin buraxdığı sahəni `db/224` əlavə etdi — amma gövdəni
+`pg_get_functiondef`-dən götürəndə `rpc_test_preview`-dən
+**`'media_url', q.media_url,` sətrini itirdi**. Nəticə: müəllimin
+kağız vərəqində sualın şəkli görünməz oldu. `db/188` məhz bundan
+xəbərdarlıq etmişdi: «köhnə fayllarda media_url var idi, sonrakı
+miqrasiyalar funksiyanı yenidən yazanda sütunu apardı».
+
+`db/900` onu qaytardı.
+
+**Qayda:** mövcud funksiyanı yenidən yazanda əlavə etdiyin sətri yox,
+**itirdiyin sətri** axtar. Əvvəlki gövdə ilə yenisini sətir-sətir
+tutuşdur (`diff`), «bir sətir əlavə etdim» deyib keçmə.
+
+**Yoxlayıcı:** `test/e2e_sekil.py` — bu tələni tutan yeganə testdir
+(«kağız vərəqdə şəkil var»). Vərəqə, nəticə ekranına və ya sual
+payload-una toxunan hər dəyişiklikdən sonra onu işlət; `db/900`-dan
+sonra `test/e2e_netice_sekli.py` də var.
+
 ## «Dərsə 20 sual» = 20 FƏRQLİ sual (2026-09-23)
 
 Bank dərs nişanı yazmağa başlayanda hədd qoyduq: dərs testi açılmaq
