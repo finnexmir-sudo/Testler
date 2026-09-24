@@ -353,6 +353,7 @@ bank 303_bank_riy9_ders_berabersizlik.sql
 bank 304_bank_riy9_ders_vektorlar.sql
 bank 305_bank_riy9_ders_silsile.sql
 bank 306_bank_riy9_ders_ehtimal.sql
+bank 307_bank_riy9_ders_funksiya_pilot.sql
 bank 400_bank_inf10_ders_sebeke.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
