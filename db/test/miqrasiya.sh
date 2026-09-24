@@ -186,6 +186,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          305_bank_riy9_ders_silsile.sql \
          306_bank_riy9_ders_ehtimal.sql \
          307_bank_riy9_ders_funksiya_pilot.sql \
+         308_bank_riy9_ders_funksiya_qrafik.sql \
          400_bank_inf10_ders_sebeke.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
