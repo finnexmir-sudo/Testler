@@ -4853,6 +4853,19 @@ qəlib: **4 nömrələnmiş mülahizə + kombinasiya variantları**
 (`A) 1,3  B) yalnız 1  C) 2,4  D) 1,2,3  E) 3,4`). Sxemə toxunmur —
 mövcud `single` növünün içindədir, sual mətni sadəcə çoxsətirli yazılır.
 
+> **Çoxsətirli sual mətni — hər ekranda `white-space:pre-wrap` lazımdır.**
+> Sual mətni `\n` və abzasla gəlirsə (proqram kodu, mülahizə siyahısı),
+> `white-space` verilməyən yerdə sətirlər **birləşir** — kod yenidən
+> səhv sintaksis kimi görünür, mülahizələr bir abzasa yığılır.
+> Ortaq qayda `muellim/app.css`-dədir (`.paper .qh b, #printBox .ppb,
+> .shq > b, .repc .rhead b, .smp .sq b, .qrow .g b, .wq .g > b, .fbb`);
+> şagird `.q .body`, valideyn `.hwr b`.
+> **Sual mətnini göstərən yeni ekran yazanda selektoru həmin qaydaya əlavə et.**
+> Kəsim də yadda saxla: `-webkit-line-clamp:2` olan siyahıda 6 sətirlik
+> kod iki sətirə yığılır — pre-wrap tək başına bəs etmir.
+> Yoxlayıcı: `test/e2e_kod_setirleri.py` — CSS-i yox, `innerText`-i ölçür,
+> yəni ekranda **görünəni**.
+
 Pilot: `utarix-9-birlesme` mövzusunda real şagird üzərində sınandı.
 Nəticə: format işlədi («vaxt aparan, düşündürücü, çətin orta»),
 amma **əl ilə yazılan yeni fakt riskli oldu** — bir sınaq sualında
