@@ -39,6 +39,26 @@ jobs:
           echo "HTTP $code: $(cat /tmp/cavab.json)"
           [ "$code" = "200" ] || { echo "Supabase cavab vermedi - layihe dayanib ola biler"; exit 1; }
 
+      #  901: TEMIZLIK EVVEL ve AYRICA.  Evvel ikisi bir cagirisda idi;
+      #  yenidenqurma vaxt heddine dusende (19.09-dan beri her gun)
+      #  TEMIZLIK DE geri qayidirdi ve nusxeler yigilirdi.  Indi porsiya-
+      #  porsiya silinir, «left» sifir olana qeder.
+      - name: Kohne numune nusxelerini yigisdir (db/901)
+        run: |
+          set -euo pipefail
+          URL=$(grep -oE 'SUPABASE_URL: *"[^"]+"' muellim/config.js | sed -E 's/.*"([^"]+)"/\1/')
+          KEY=$(grep -oE 'SUPABASE_ANON_KEY: *"[^"]+"' muellim/config.js | sed -E 's/.*"([^"]+)"/\1/')
+          for i in $(seq 1 20); do
+            code=$(curl -sS -o /tmp/gc.json -w '%{http_code}' -X POST \
+              -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+              -d '{"p_limit":5}' "$URL/rest/v1/rpc/rpc_demo_gc")
+            echo "  $i) HTTP $code: $(cat /tmp/gc.json)"
+            #  901 hele canliya tetbiq olunmayibsa 404 - is dayanmir
+            [ "$code" = "404" ] && { echo "  db/901 hele tetbiq olunmayib, atlandi"; break; }
+            [ "$code" = "200" ] || { echo "yigisdirma sindi"; exit 1; }
+            grep -q '"left":0' /tmp/gc.json && { echo "  temizdir"; break; }
+          done
+
       - name: Numune hesabi yeniden qur (db/136)
         run: |
           set -euo pipefail

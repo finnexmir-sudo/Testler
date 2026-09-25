@@ -146,6 +146,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 224_vaxt_vereqde.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 225_hazir_fesil_testleri.sql
 #  900+ : bank araligindan (226-899) SONRAKI nuve miqrasiyalari
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 900_netice_sekli.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 901_numune_temizleyici.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

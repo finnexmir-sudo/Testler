@@ -110,7 +110,9 @@ declare
         --  Adaptiv movzu mesqi (db/133)
         'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer',
         --  Numune hesabin gece sifirlanmasi (db/136) - is axini anon acarla cagirir
-        'rpc_demo_reset',
+        --  901: yigisdirma ayri, yungul funksiyadadir - is axini onu
+        --  sifir qayidana qeder cagirir (rpc_demo_reset vaxt heddine dusurdu)
+        'rpc_demo_reset','rpc_demo_gc',
         --  Ziyaret saygaci (db/161): ana sehife/beledci anon acarla yazir
         'rpc_visit'];
   fn text;
@@ -166,7 +168,9 @@ declare
         --  Adaptiv movzu mesqi (db/133)
         'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer',
         --  Numune hesabin gece sifirlanmasi (db/136) - is axini anon acarla cagirir
-        'rpc_demo_reset',
+        --  901: yigisdirma ayri, yungul funksiyadadir - is axini onu
+        --  sifir qayidana qeder cagirir (rpc_demo_reset vaxt heddine dusurdu)
+        'rpc_demo_reset','rpc_demo_gc',
         --  Ziyaret saygaci (db/161): ana sehife/beledci anon acarla yazir
         'rpc_visit'];
   leak text;

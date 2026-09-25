@@ -62,6 +62,11 @@ select * from (values
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_student_report' and def like '%media_url%')
-        and exists (select 1 from f where proname='rpc_test_preview' and def like '%media_url%')))
+        and exists (select 1 from f where proname='rpc_test_preview' and def like '%media_url%'))),
+ ('901 nümunə nüsxələrinin yığışdırılması',
+    (select exists (select 1 from f where proname='demo_gc')
+        and exists (select 1 from f where proname='rpc_demo_gc')
+        and exists (select 1 from f where proname='rpc_demo_reset'
+                      and def like '%statement_timeout%')))
 ) as t(miqrasiya, var_mi)
 order by var_mi, miqrasiya;
