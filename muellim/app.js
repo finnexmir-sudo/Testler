@@ -4443,9 +4443,15 @@
   }
   function asgShareBox(title, closes, who) {
     var t = waAsgText(title, closes, who);
+    /*  25.09: «Şagirdlərə xəbər verin» tek basina oxunanda «demeli ozum
+        gondermeliyem» kimi basa dusulurdu.  Indi evvelce CATDIGI
+        deyilir, xeber vermek ISTEYE gore qalir.  */
     return '<div class="ok asgok">' + ic("check") +
-      "<span><b>Tapşırıq verildi:</b> «" + esc(title) + "»" +
-      (who ? " — yalnız " + esc(who) : "") + ". Şagirdlərə xəbər verin:</span></div>" +
+      "<span><b>Tapşırıq verildi:</b> «" + esc(title) + "» — " +
+      (who ? "yalnız " + esc(who) : "qrupun bütün şagirdləri") +
+      ". Test artıq " + (who ? "onun" : "onların") + " siyahısındadır — " +
+      "kodla girəndə görəcək" + (who ? "" : "lər") +
+      ". İstəsəniz xəbər də verin:</span></div>" +
       '<div class="asgwa">' +
         '<a class="btn sm go" target="_blank" rel="noopener" href="https://wa.me/?text=' +
           encodeURIComponent(t) + '">' + ic("send") + "WhatsApp-a göndər</a>" +
@@ -4475,10 +4481,27 @@
     return rule;
   }
 
-  function nextTestCard(g, items) {
+  /*  «Novbeti test hazirdir» karti.  25.09-da istifadeci UC qusur tapdi:
+        1. Sagirdin hesabatindan «Test tapsir» ile gelende de test BUTUN
+           QRUPA gedirdi - ekranda iki ferqli unvan var idi, ferqi
+           gorunmurdu.  Indi: sagirdden gelibse YALNIZ o sagirde gedir
+           ve zeif movzular da onun oz hesabatindan goturulur.
+        2. Eyni test IKI DEFE gonderilmisdi - «bu movzulardan artiq aciq
+           tapsiriq var?» yoxlamasi yox idi.  Indi var.
+        3. Gonderilenden sonra kime getdiyi yazilmirdi.  Indi yazilir.  */
+  function nextTestCard(g, items, students) {
     if (NXT_SENT) { NXT_SENT = false; return; }
     var live = guard();
-    sb.rpc("rpc_class_report", { p_class_id: g.id }).then(function (r) {
+    var sid = ASG_PRE || "";
+    var stu = sid
+      ? (students || []).filter(function (x) { return x.id === sid; })[0] || null
+      : null;
+    //  Sagird kontekstinde movzular ONUN hesabatindan; qrupda - qrupdan.
+    //  Ikisi de abuneye baglidir (topics null gelir) - o halda kart cixmir.
+    var sorgu = sid
+      ? sb.rpc("rpc_student_report", { p_student_id: sid })
+      : sb.rpc("rpc_class_report", { p_class_id: g.id });
+    sorgu.then(function (r) {
       if (!live()) return null;
       var tp = (r && r.topics) || [];
       //  Az cavabli movzu «zeif» sayilmir - bir sehv movzunu batirmesin
@@ -4503,6 +4526,20 @@
       var bitdi = son && Number(son.done) > 0 &&
                   Number(son.done) >= Number(son.targets || son.done);
       var adlar = d.tp.map(function (t) { return t.name; }).join(", ");
+      var ttl = nextTitle(d.tp);
+      /*  TEKRAR GONDERILMENIN QARSISI (25.09).  Eyni basliqla ACIQ
+          tapsiriq varsa ve hele hec kim bitirmeyibse, ikincisini
+          yigmagin menasi yoxdur - sagird eyni testi iki defe gorurdu.
+          Basliq movzulardan qurulur, yeni eyni movzular = eyni basliq.  */
+      var eyni = (items || []).filter(function (a) {
+        if (String(a.title || "") !== ttl || a.open === false) return false;
+        //  sagird kontekstinde: hemin sagirde verilmis (ve ya butun
+        //  qrupa verilmis - o da onu gorur) tapsiriq sayilir
+        return sid ? (!a.student_id || a.student_id === sid) : !a.student_id;
+      })[0];
+      var kim = stu
+        ? "yalnız " + stu.full_name
+        : "qrupun bütün şagirdləri";
       box.innerHTML =
         '<div class="card nxt2">' +
           '<div class="pt"><b>Növbəti test hazırdır</b>' +
@@ -4511,35 +4548,52 @@
             "</span></div>" +
           '<p class="muted" style="margin:0 0 12px">Ən zəif mövzular: <b>' +
             esc(adlar) + "</b>. Həmin mövzulardan <b>" + n +
-            " sual</b> — son tarix 7 gün, 1 cəhd.</p>" +
+            " sual</b> — son tarix 7 gün, 1 cəhd. Kimə: <b>" + esc(kim) + "</b>.</p>" +
           '<div id="nxtMsg"></div>' +
-          '<button class="btn go wide" id="btnNext2">' + ic("send") +
-            "Göndər</button>" +
+          (eyni
+            ? '<div class="warn nxtvar">' + ic("info") + "<span>" +
+                "Bu mövzulardan test <b>artıq verilib</b> — " +
+                (Number(eyni.done) || 0) + "/" + (Number(eyni.targets) || 1) +
+                " şagird bitirib. Bitməmiş ikincisini göndərmək " +
+                "şagirdin siyahısında eyni testi iki dəfə göstərir." +
+              "</span></div>"
+            : '<button class="btn go wide" id="btnNext2">' + ic("send") +
+                "Göndər</button>") +
         "</div>" +
         '<div class="spacer"></div>';
-      on("btnNext2", "click", function () { nextTestSend(g, d.tp, n); });
+      if (!eyni) on("btnNext2", "click", function () { nextTestSend(g, d.tp, n, sid, stu); });
     }).catch(function () {});
   }
 
-  /*  Bir toxunus: yigir + teyin edir + WhatsApp qutusunu acir.  */
-  function nextTestSend(g, tp, n) {
+  /*  Basliq movzulardan qurulur - «artiq verilib» yoxlamasi da bununla
+      isleyir, ona gore TEK yerde yazilir.  */
+  function nextTitle(tp) {
+    return "Təkrar — " + tp.map(function (t) { return t.name; }).join(", ");
+  }
+
+  /*  Bir toxunus: yigir + teyin edir + WhatsApp qutusunu acir.
+      p_sid verilibse tapsiriq YALNIZ o sagirde gedir (25.09: muellim
+      sagirdin hesabatindan basirdi, test ise butun qrupa gedirdi).  */
+  function nextTestSend(g, tp, n, p_sid, p_stu) {
     if (busy) return;
     busy = true;
     setBusy("btnNext2", true, "Göndər");
-    var ttl = "Təkrar — " + tp.map(function (t) { return t.name; }).join(", ");
+    var ttl = nextTitle(tp);
     var closes = new Date(Date.now() + 7 * 864e5);
     sb.rpc("rpc_generate_test", { p_rule: nextRule(g, tp, n), p_title: ttl })
       .then(function (v) {
         return sb.rpc("rpc_assign_test", {
           p_class_id: g.id, p_test_id: v.test_id,
-          p_closes_at: closes.toISOString(), p_max_attempts: 1
+          p_closes_at: closes.toISOString(), p_max_attempts: 1,
+          p_student_id: p_sid || null
         });
       })
       .then(function () {
         busy = false;
         NXT_SENT = true;
-        ASG_FLASH = { title: ttl, closes: closes.toISOString(), who: "" };
-        screenAssign(g.id);
+        ASG_FLASH = { title: ttl, closes: closes.toISOString(),
+                      who: p_stu ? p_stu.full_name : "" };
+        screenAssign(g.id, p_sid || "");
       })
       .catch(function (e) {
         busy = false;
@@ -6114,7 +6168,7 @@
     var flash = ASG_FLASH;
     ASG_FLASH = null;
     bindWaCopy($("asgFlash"));
-    nextTestCard(g, items);
+    nextTestCard(g, items, students);
     //  Qutu ekranın altında qalırdı - muellim xeber vermeden cixirdi
     if (flash && $("asgFlash") && $("asgFlash").scrollIntoView) {
       setTimeout(function () {
@@ -6305,6 +6359,12 @@
       gondere bilmedi (a44785271), biri WhatsApp-da sorusdu (ISRA).
       Nisan bir defelikdir: veraq cizilen kimi silinir.  */
   var MADE = "";
+  /*  Tapsiriq verilenden SONRA bir defelik tesdiq.  Evvel ekran sadece
+      yenilenirdi: muellim «verilib» setrini gorurdu, amma testin
+      SAGIRDE NECE CATDIGI hec yerde yazilmirdi.  Qizbest muellime uc
+      defe «testi gondermek olmur» yazdi - mexanizm isleyirdi, sadece
+      hec ne demirdik (25.09).  MADE kimi: qoyulur, bir defe oxunur.  */
+  var ASG = null;
 
   function genForClass(g) {
     var f = genFilter();
@@ -9147,7 +9207,8 @@
     ]).then(function (res) {
       if (!live()) return;
       var fresh = MADE === id; MADE = "";
-      drawPaper(res[0] || {}, res[1] || [], res[2] || [], res[3] || [], fresh);
+      var verildi = ASG; ASG = null;
+      drawPaper(res[0] || {}, res[1] || [], res[2] || [], res[3] || [], fresh, verildi);
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
@@ -9274,7 +9335,7 @@
     setTimeout(off, 2000);
   }
 
-  function drawPaper(t, classes, asgs, students, fresh) {
+  function drawPaper(t, classes, asgs, students, fresh, verildi) {
     students = students || [];
     //  Yalniz QRUP teyinatlari qrupu secimden cixarir; ferdi teyinat
     //  cixarmir - hemin qrupun basqa sagirdine de vermek olar.
@@ -9394,7 +9455,35 @@
             "</p>" +
           "</div>"
         : '<h2 id="pAsgH">Qrupa təyin et</h2>' +
-          (fresh && (freeCls.length || !classes.length)
+          /*  Tapsiriq indice verildi - NE BAS VERDIYINI aciq yaziriq.
+              Evvel yalniz «verilib» setri qalirdi ve muellim testin
+              sagirde catib-catmadigini bilmirdi.  Uc sual cavablanir:
+              kime getdi · o necə gorecek · sizin elave is gorməyiniz
+              lazimdirmi.  */
+          /*  msg() metni ESCAPE edir - burada <b>/<br> lazimdir, ona gore
+              qutu elle qurulur.  Istifadeci melumati (qrup adi, sagird
+              adi) ayrica esc()-den kecir.  */
+          (verildi
+            ? '<div class="ok pasgok">' + ic("check") + "<span>" +
+                "<b>Tapşırıq verildi.</b> " +
+                (verildi.hami
+                  ? esc(verildi.qrup) + " qrupunun bütün şagirdləri bu testi indi görür."
+                  //  «Kimə» siyahisinda ad onsuz da «yalnız Aysel M.» kimidir -
+                  //  bas sozu atiriq, yoxsa «yalnız ... (yalnız o)» cixir.
+                  : "Yalnız " + esc(verildi.who.replace(/^yalnız\s+/i, "")) +
+                    " bu testi görür — qrupun qalanı yox.") +
+                (verildi.son
+                  ? " Son tarix: " + esc(dateAz(verildi.son)) + "."
+                  : " Son tarix yoxdur — siz götürənə qədər açıq qalır.") +
+                " Cəhd sayı: " +
+                (verildi.cehd === 0 ? "limitsiz" : String(verildi.cehd)) + "." +
+                "<br>Şagird öz giriş kodu ilə " +
+                "<b>bil10.az/sagird</b> ünvanına girəndə test onun " +
+                "siyahısında olacaq — ayrıca link, fayl və ya mesaj " +
+                "göndərmək lazım deyil. Nəticə həll edən kimi bu panelə düşür." +
+              "</span></div>"
+            : "") +
+          (fresh && !verildi && (freeCls.length || !classes.length)
             ? msg("ok", classes.length
                 ? "Test hazırdır. İndi onu qrupa verin — şagird " +
                   "dərhal öz siyahısında görəcək."
@@ -9671,6 +9760,18 @@
       }).then(function () {
         //  sehife yenilenir - teze teyinat "verilib" siyahisinda gorunur
         busy = false;
+        //  Tesdiq ucun: kime getdi, hansi qrupa, ne vaxta qeder
+        var wsel = $("pWho"), csel = $("pCls");
+        var wtxt = wsel && wsel.selectedIndex >= 0
+          ? wsel.options[wsel.selectedIndex].textContent : "";
+        ASG = {
+          who:    (wsel && wsel.value) ? wtxt : "",
+          hami:   !(wsel && wsel.value),
+          qrup:   csel && csel.selectedIndex >= 0
+                    ? csel.options[csel.selectedIndex].textContent.split(" · ")[0] : "",
+          son:    closes,
+          cehd:   Number(($("pTry") || {}).value || 1)
+        };
         screenPaper(t.id);
       }).catch(function (e) {
         setBusy("btnPAsg", false, "Tapşırıq ver");

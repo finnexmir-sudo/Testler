@@ -1839,6 +1839,16 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 .hwrow b{display:block;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere}
 .hwrow i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-2);margin-top:3px}
 
+/*  «Novbeti test hazirdir» kartinda «artiq verilib» xeberdarligi -
+    duymenin yerini tutur, ona gore eni tam.  */
+.nxtvar{margin:0}
+.nxtvar span{line-height:1.5}
+
+/*  Tapsiriq verildikden sonraki tesdiq - iki cumle, ikinci setir
+    izahdir.  Adi .ok qutusu tek setirlik nezerde tutulub.  */
+.pasgok span{line-height:1.5}
+.pasgok b{font-weight:640}
+
 /* Cox setirli sual metni - BUTUN ekranlarda eyni (sagird tetbiqi ile bir):
    test onizleme/kagiz (.paper .qh), cap (#printBox .ppb), sagird hesabati
    cavab vereqi (.shq), keyfiyyet/siqnal kartlari (.repc .rhead),
