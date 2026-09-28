@@ -1266,11 +1266,17 @@
      ================================================================ */
   var YENI = (function () {
     try {
-      var q = /[?&]yeni=([01])/.exec(location.search || "");
-      if (q) { localStorage.setItem("bil10_yeni", q[1]); return q[1] === "1"; }
-      return localStorage.getItem("bil10_yeni") === "1";
-    } catch (e) { return false; }
-  })();
+        var q = /[?&]yeni=([01])/.exec(location.search || "");
+        if (q) {
+            localStorage.setItem("bil10_yeni", q[1]);
+            return q[1] === "1";
+        }
+        var ls = localStorage.getItem("bil10_yeni");
+        return ls !== "0";
+    } catch (e) {
+        return true;
+    }
+})();
 
   /*  23.09 (istifadeci, qeti): DERS SECIMI BAGLIDIR, FESIL SECIMI ACIQ.
       Sebeb olculdu: «Kvadrat kök. Həqiqi ədədlər» feslinde 51 sual var,
