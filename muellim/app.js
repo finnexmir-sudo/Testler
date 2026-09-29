@@ -6720,6 +6720,17 @@
       /* Generatordan teze qayitmisiqsa - bildiris ve secim.
          Bir defelikdir: burada oxuyub derhal silirik. */
       var neu = PICKNEW; PICKNEW = "";
+      /*  29.09 (istifadeci): «profilde secdiyim fennlere gore gelir, sual
+          yigda da belə etmişik, burada qalıb».  Test secimi butun fennleri
+          gosterirdi.  Indi muellimin fennlerine daralir (generatorla eyni
+          qayda).  Qalir: muellimin OZ testi (basqa fennde de olsa) ve indice
+          yigilan test.  Daralma hec ne qoymursa - tam siyahi.  */
+      if (myNames.length) {
+        var dar = free.filter(function (t) {
+          return myNames.indexOf(String(t.subject || "")) >= 0 || t.mine || t.id === neu;
+        });
+        if (dar.length) free = dar;
+      }
       var isNew = neu && free.filter(function (t) { return t.id === neu; }).length > 0;
       var note = "";
       if (neu) {
