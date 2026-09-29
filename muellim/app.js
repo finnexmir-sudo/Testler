@@ -3731,7 +3731,7 @@
       "</div>" +
       '<div id="prep"></div>' +
       '<div class="spacer"></div>' +
-      '<button class="btn go wide" id="btnAsgs">' + ic("clip") + "Tapşırıq ver</button>" +
+      '<button class="btn go wide" id="btnAsgs">' + ic("clip") + "Test ver və ya ev tapşırığı yaz</button>" +
       '<div class="spacer"></div>' +
       '<button class="btn sm ghost" id="btnRen">' + ic("pen") + "Qrupun adını dəyiş</button>" +
       '<div class="card tight hide" id="gCard"></div>');
@@ -6682,7 +6682,7 @@
       if (neu) {
         note = isNew
           ? msg("ok", "Test yığıldı və aşağıda seçildi — son tarixi " +
-                      "təyin edib «Tapşırıq ver» düyməsini basın.")
+                      "təyin edib «" + asgBtnLabel() + "» düyməsini basın.")
           //  Asagi sinifler artiq KECIR (db/112).  Siyahiya dusmeyen
           //  test yalniz YUXARI sinif ucun yigilmis ola biler.
           : msg("warn", "Test yığıldı, amma bu siyahıya düşmür — " +
@@ -6892,7 +6892,7 @@
         var pre = students.filter(function (st) { return st.id === ASG_PRE; })[0];
         if ($("aWho").value === ASG_PRE && pre) {
           $("aErr").innerHTML = msg("ok", "Yalnız " + (pre.full_name || "bu şagird") +
-            " üçün — testi seçin, «Tapşırıq ver» basın.");
+            " üçün — testi seçin, «" + asgBtnLabel() + "» basın.");
         }
       }
       on("btnAsg", "click", function () { doAssign(g); });
@@ -9819,7 +9819,7 @@
               "testi neçə dəfə işləyə biləcəyidir; hesabatda həm orta, həm də " +
               "ən yaxşı nəticə görünür.</p>" +
             '<div id="pAsgMsg"></div>' +
-            '<button class="btn go" id="btnPAsg">' + ic("plus") + "Tapşırıq ver</button>"
+            '<button class="btn go" id="btnPAsg">' + ic("plus") + asgBtnLabel() + "</button>"
           : (classes.length
               ? ""
               /*  Muellimi basqa ekrana gondermek dalan idi - orada test
@@ -10035,7 +10035,7 @@
         closes = d.toISOString();
       }
       $("pAsgMsg").innerHTML = "";
-      setBusy("btnPAsg", true, "Tapşırıq ver");
+      setBusy("btnPAsg", true, asgBtnLabel());
       sb.rpc("rpc_assign_test", {
         p_class_id: cls, p_test_id: t.id,
         p_closes_at: closes, p_max_attempts: Number(($("pTry") || {}).value || 1),
@@ -10058,7 +10058,7 @@
         };
         screenPaper(t.id);
       }).catch(function (e) {
-        setBusy("btnPAsg", false, "Tapşırıq ver");
+        setBusy("btnPAsg", false, asgBtnLabel());
         $("pAsgMsg").innerHTML = msg("err", fail(e));
       });
     });

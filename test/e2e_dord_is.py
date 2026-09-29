@@ -138,9 +138,10 @@ with sync_playwright() as pw:
     ok(pg.locator("#prep .card.prep").count() >= 3, "kart AYRI kartlara bolunub", pg.locator("#prep .card.prep").count())
     ok("bu günün dərsi" in kt.lower(), "«Bu gunun dersi» karti var")
     ok("test" in kt.lower() and "yazılı" in kt.lower(), "«Test» ve «Yazili» kartlari var")
-    ok(pg.locator("#main button", has_text="Tapşırıq ver").count() == 1,
-       "«Tapsiriq ver» duymesi TEKDIR",
-       pg.locator("#main button", has_text="Tapşırıq ver").count())
+    ok(pg.locator("#main button", has_text="Tapşırıq ver").count() == 0,
+       "menyuda qarisdiran «Tapsiriq ver» adi qalmayib")
+    ok(pg.locator("#btnAsgs").count() == 1 and "ev tapşırığı yaz" in pg.inner_text("#btnAsgs"),
+       "boyuk duyme iki ise de deyir: test ver / ev tapsirigi yaz", pg.inner_text("#btnAsgs"))
     ok(pg.locator("#prepAsg").count() == 0, "kartda ikinci «Tapsiriq ver» yoxdur")
     ok(pg.locator("#prepPlan").count() == 1, "plan yoxdursa «Plani qur» linki var")
     pg.screenshot(path="/tmp/claude-0/is_A_menyu.png", full_page=True)
