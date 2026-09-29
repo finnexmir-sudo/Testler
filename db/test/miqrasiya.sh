@@ -190,6 +190,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          309_bank_riy7_ders_statistika.sql \
          310_bank_riy7_ders_rasional.sql \
          311_bank_riy7_ders_paralellik.sql \
+         312_bank_riy7_ders_coxhedliler.sql \
          319_bank_riy7_ders_nisan.sql \
          320_bank_riy7_paralellik_duzelis.sql \
          321_bank_riy7_coxhedliler_duzelis.sql \
