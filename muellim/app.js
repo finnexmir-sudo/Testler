@@ -1685,6 +1685,31 @@
     });
   }
 
+  /*  «Xatırla» mesajlari (etmeyenler sehifesi VE sagird hesabati EYNI metni verir).
+      Mesaj sagirdin yox AILENIN oxuyacagi kimi yazilir.  Test adi yalniz DEQIQ bilinende:
+      sagirdin ust-uste dusen aciq tapsiriqlari sayi gozleyen testlerin sayina beraberdirse
+      hamisi gozleyir; yoxsa (bezisini edib) hansi oldugu bilinmir - yalniz say, ad uydurulmur.  */
+  function pendTitles(items, n, sid) {
+    var tpq = (items || []).filter(function (a) {
+      return a.open !== false && (!a.student_id || a.student_id === sid);
+    });
+    return tpq.length === n ? tpq.map(function (a) { return "«" + a.title + "»"; }) : [];
+  }
+  function hwMsgText(name, hw, url) {
+    return "Salam! " + (firstName(name) || name) + " üçün Bil10-da ev tapşırığı gözləyir: «" +
+      String(hw.body || "").replace(/\s+/g, " ").trim() + "»." +
+      (hw.due ? "\nSon tarix: " + hwDay(hw.due) + "." : "") +
+      (url ? "\nGirmək üçün: " + url : "") +
+      "\nÖz kodu ilə daxil olsun — «Tapşırıqlar»da görünür.";
+  }
+  function testMsgText(name, n, basl, url) {
+    return "Salam! " + (firstName(name) || name) + " üçün Bil10-da " +
+      (basl.length ? (n > 1 ? n + " test gözləyir: " : "test gözləyir: ") + basl.join(", ") + "."
+                   : (n > 1 ? n + " test gözləyir." : "test gözləyir.")) +
+      (url ? "\nGirmək üçün: " + url : "") +
+      "\nÖz kodu ilə daxil olsun — «Tapşırıqlar»da görünür.";
+  }
+
   /*  TAPSIRIGI ETMEYENLER (#/ht/<qrup>) - yalniz yeni gorunusde.
       Icmalda «2 şagird yazılı tapşırığı etməyib» setri var; evvel qrup
       menyusuna aparirdi, adlar asagida idi (29.09, istifadeci: «belə
@@ -1703,7 +1728,6 @@
     ]).then(function (rr) {
       if (!live() || !$("htBox")) return;
       var d = rr[0] || {}, hw = d.hw || null, und = hw ? (hw.undone || []) : [];
-      var acik = ((rr[3] || {}).items || []).filter(function (a) { return a.open !== false; });
       var pend = d.pending || [];
       var cn = ((rr[2] || [])[0] || {}).name || "";
       var ids = {};
@@ -1732,14 +1756,7 @@
         if (und.length) {
           h += '<div class="card pad0 menu">' + und.map(function (n) {
             var fn0 = firstName(n) || n;
-            /*  Mesaj SAGIRDIN yox, AILENIN oxuyacagi kimi yazilir (kicik sinifde
-                adeten valideyne gedir): «Ad üçün ... gözləyir».  */
-            return row(n, ids[n] || "", "yazılı tapşırığı etməyib",
-              "Salam! " + fn0 + " üçün Bil10-da ev tapşırığı gözləyir: «" +
-              String(hw.body || "").replace(/\s+/g, " ").trim() + "»." +
-              (hw.due ? "\nSon tarix: " + hwDay(hw.due) + "." : "") +
-              (url ? "\nGirmək üçün: " + url : "") +
-              "\nÖz kodu ilə daxil olsun — «Tapşırıqlar»da görünür.");
+            return row(n, ids[n] || "", "yazılı tapşırığı etməyib", hwMsgText(n, hw, url));
           }).join("") + "</div>";
         } else {
           h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
@@ -1751,19 +1768,11 @@
         h += ySec("Test · " + (pend.length ? pend.length + " şagird işləməyib" : "hamı işləyib"));
         if (pend.length) {
           h += '<div class="card pad0 menu">' + pend.map(function (x) {
-            var n = Number(x.n) || 1, fn1 = firstName(x.name) || x.name;
-            /*  Hansi test(ler)?  Yalniz DEQIQ bilinende yazilir: bu sagirdin ust-uste dusen
-                aciq tapsiriqlari sayi gozleyen testlerin sayina beraberdirse hamisi gozleyir.
-                Sayi cox olarsa (bezisini edib) hansi oldugu bilinmir - yalniz say.  */
-            var tpq = acik.filter(function (a) { return !a.student_id || a.student_id === x.student_id; });
-            var basl = tpq.length === n ? tpq.map(function (a) { return "«" + a.title + "»"; }) : [];
+            var n = Number(x.n) || 1;
+            var basl = pendTitles((rr[3] || {}).items, n, x.student_id);
             return row(x.name, x.student_id,
               n + " test gözləyir" + (basl.length ? " · " + basl.join(", ") : ""),
-              "Salam! " + fn1 + " üçün Bil10-da " +
-              (basl.length ? (n > 1 ? n + " test gözləyir: " : "test gözləyir: ") + basl.join(", ") + "."
-                           : (n > 1 ? n + " test gözləyir." : "test gözləyir.")) +
-              (url ? "\nGirmək üçün: " + url : "") +
-              "\nÖz kodu ilə daxil olsun — «Tapşırıqlar»da görünür.");
+              testMsgText(x.name, n, basl, url));
           }).join("") + "</div>";
         } else {
           h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
@@ -5955,6 +5964,43 @@
     }
   }
 
+  /*  Sagird hesabatinin «Diqqet» karti: bu sagirdin GOZLEYEN tapsiriqlari (yazili + test).
+      Etmeyenler sehifesi (#/ht) ile EYNI sorgu ve EYNI mesaj metni.  */
+  function loadStuPend(sid, cid, sname, live) {
+    Promise.all([
+      sb.rpc("rpc_lesson_prep", { p_class_id: cid }),
+      sb.rpc("rpc_class_assignments", { p_class_id: cid }).catch(function () { return null; })
+    ]).then(function (rr) {
+      var box = $("stuPend");
+      if (!live() || !box) return;
+      var d = rr[0] || {}, hw = d.hw || null, und = hw ? (hw.undone || []) : [];
+      var mine = (d.pending || []).filter(function (x) { return x.student_id === sid; })[0];
+      var url = (window.CFG && window.CFG.STUDENT_URL) || "";
+      var rows = [], msgs = [];
+      function add(ad, alt, text) {
+        msgs.push(text);
+        rows.push('<div class="stpr"><div class="g"><b>' + esc(ad) + "</b><i>" + esc(alt) + "</i></div>" +
+          '<button type="button" class="btn sm ghost" data-sp="' + (msgs.length - 1) + '">Mesajı kopyala</button></div>');
+      }
+      if (hw && und.indexOf(sname) >= 0) {
+        add("Yazılı tapşırığı etməyib", "«" + String(hw.body || "").replace(/\s+/g, " ").trim().slice(0, 70) + "»" +
+          (hw.due ? " · son tarix " + hwDay(hw.due) : ""), hwMsgText(sname, hw, url));
+      }
+      if (mine) {
+        var n = Number(mine.n) || 1;
+        var basl = pendTitles((rr[1] || {}).items, n, sid);
+        add(n + " test gözləyir", basl.length ? basl.join(", ") : "hələ işləməyib", testMsgText(sname, n, basl, url));
+      }
+      if (!rows.length) return;
+      box.innerHTML = '<div class="stp"><div class="stph">Gözləyən tapşırıqlar</div>' + rows.join("") + "</div>";
+      var card = $("stuDiq");
+      if (card) card.hidden = false;
+      Array.prototype.forEach.call(box.querySelectorAll("[data-sp]"), function (b) {
+        b.addEventListener("click", function () { copyText(msgs[Number(b.getAttribute("data-sp"))], b); });
+      });
+    }).catch(function () {});
+  }
+
   function screenStudent(id, classId) {
     var live = guard();
     topTitle.textContent = "Şagird hesabatı";
@@ -5966,16 +6012,23 @@
       bandHead({
         back: { id: "btnB", label: backLabel("Geri") }, eye: "Şagird hesabatı",
         av: av(s.full_name), title: s.full_name,
-        sub: "<span>" + esc(s.display_name) + "</span> " +
+        //  YENI: ad tekrari yox - gorunen ad tam addan ferqlidirse yazilir
+        sub: (YENI && (!s.display_name || s.display_name === s.full_name) ? ""
+              : "<span>" + esc(s.display_name) + "</span> ") +
           '<span class="code key">' + esc(s.login_code) + "</span>",
         //  Tek bu sagirde hazir test: tapsiriq ekrani o secilmis acilir
         right: '<button class="btn sm sasg" id="btnAsgStu" title="Yalnız bu şagirdə hazır test tapşır">' +
           ic("plus") + "Test tapşır</button>"
       });
+      /*  YENI: «100% en yaxsi» faydasiz idi; en vacib reqem - GEDISAT (63% -> 67%) - sehifenin
+          en asagisindaki sekil kartinda gizli idi.  Indi ustdedir.  */
+      var pdt = YENI && (r.attempts || []).length >= 2 ? progData(r) : null;
       var h = YENI
         ? '<div class="rstat"><span><b>' + (Number(sm.attempts) || 0) + "</b>test</span>" +
             '<span><b>' + pct(sm.avg) + "%</b>orta</span>" +
-            '<span><b>' + pct(sm.best) + "%</b>ən yaxşı</span></div>"
+            (pdt ? '<span class="rtr ' + (pdt.to >= pdt.from ? "up" : "dn") + '"><b>' +
+              (pdt.to >= pdt.from ? "↗ +" : "↘ ") + (pdt.to - pdt.from) + "</b>gedişat " +
+              pdt.from + "% → " + pdt.to + "%</span>" : "") + "</div>"
         : '<div class="stats">' +
             statTile(sm.attempts || 0, "test", "g1") +
             statTile(pct(sm.avg) + "%", "orta", "g2") +
@@ -6001,9 +6054,9 @@
           birinci setirdedir; adlar ve duymeler lazimi sekmeye aparir.  */
       var hX = "";
       var vdT = sweakAll.slice(0, 2), vdN = weak.length;
+      var vdIn = "";
       if (r.topics !== null && (vdT.length || vdN)) {
-        hX += '<div class="card tight vdet">' +
-          (vdT.length
+        vdIn = (vdT.length
             ? "<p><b>Zəif mövzu:</b> " + vdT.map(function (t) {
                 return esc(t.name) + " (" + pct(t.ratio) + "%)";
               }).join(", ") +
@@ -6014,10 +6067,18 @@
           '<div class="row" style="gap:8px;margin-top:4px">' +
             (vdT.length ? '<button class="btn sm" id="vdT">Mövzular</button>' : "") +
             (vdN ? '<button class="btn sm" id="vdS">Səhvlər</button>' : "") +
+            //  YENI: «Təkrar test ver» - bu səhvlərdən yalnız bu şagirdə test (Səhvlər sekmesindəki ilə eyni)
+            (YENI && vdN ? '<button class="btn sm go" id="vdF">' + ic("gen") + "Təkrar test ver</button>" : "") +
           "</div>" +
-        "</div>";
+          (YENI ? '<div id="vdFMsg"></div>' : "");
       }
-      hX += '<div id="diagBox"></div>';
+      /*  YENI: «Diqqət» kartı - GOZLEYEN tapsiriqlar (yazili + test, «Mesaji kopyala») birinci,
+          altinda zeif movzu / sehv.  Muellim «Yazili tapsirigi etmeyib» sətrindən gəlir - gəliş
+          səbəbi bu səhifədə görünməli idi (29.09).  Gozleyen yoxsa blok cixmir.  */
+      hX += YENI
+        ? '<div class="card tight vdet" id="stuDiq"' + (vdIn ? "" : " hidden") + '><div id="stuPend"></div>' + vdIn + "</div>"
+        : (vdIn ? '<div class="card tight vdet">' + vdIn + "</div>" : "");
+      hX += '<div id="diagBox"' + (YENI ? ' class="dgy"' : "") + "></div>";
       /*  Cavab terzi (db/128): telesik sehv, bilmeden duz, emin idi-sehv.
           Yalniz yeni tetbiqin gonderdiyi cavablar sayilir (n_meta).  */
       var sty = r.style || {};
@@ -6026,11 +6087,27 @@
         /*  Uc sifir uc abzasla izah olunurdu - ekranin ucde biri «hec ne
             yoxdur» demeye gedirdi.  Yaxsi xeber bir setre sigir; izahlar
             yalniz nisan varken lazimdir.  */
+        var nMeta = Number(sty.n_meta) || 0;
         if (!hasty && !gok && !sw) {
-          hX += "<h2>Cavab tərzi</h2>" +
+          hX += "<h2>" + (YENI ? "Öyrənmə tərzi" : "Cavab tərzi") + "</h2>" +
             '<div class="card tight"><p class="muted" style="margin:0">' +
               "Narahat edən nişan yoxdur — nə tələsik səhv, nə «bildiyini sanır»." +
             "</p></div>";
+        } else if (YENI) {
+          /*  YENI: qapali bolme; her reqemin yaninda «neceden» (48 - neden?), reng menali:
+              qirmizi YALNIZ «bildiyini sanir» (en vacib duzelis yeri), telesik - narinci,
+              «bilmeden duz» pis deyil - neytral.  */
+          function sr(cls, n, ad, izah) {
+            return '<div class="srow' + (n ? cls : "") + '"><b>' + n + "</b><div>" + ad +
+              ' <span class="of">' + nMeta + " cavabdan</span><i>" + izah + "</i></div></div>";
+          }
+          hX += '<details class="more styd"><summary>Öyrənmə tərzi <span class="fn">' +
+              (sw ? "bildiyini sanır: " + sw : (hasty ? "tələsik: " + hasty : "nişan var")) + "</span></summary>" +
+            '<div class="card tight styl" style="margin-top:10px">' +
+              sr(" bad", sw, "Bildiyini sanır", "cavabına əmin idi, amma səhv etdi — yanlış öyrənilib, ən vacib düzəliş yeri") +
+              sr(" mid", hasty, "Tələsik səhv", "5 saniyədən tez verilmiş səhv cavab — diqqətsizlikdir, bilik boşluğu deyil") +
+              sr("", gok, "Bilmədən düz", "«Əmin deyiləm» deyib düz cavablayıb — mövzu oturmayıb") +
+            "</div></details>";
         } else {
         hX += "<h2>Cavab tərzi</h2>" +
           '<div class="card tight styl">' +
@@ -6047,6 +6124,30 @@
           "</div>";
         }
       }
+      if (r.topics !== null && YENI) {
+        /*  YENI: valideyne gondermek TEK bolmede - Metn / Sekil karti (evvel iki ayri bolme idi,
+            metn monospace idi, sekil kartinin sag yarisi bos qalirdi).  */
+        var hasPC = (r.attempts || []).length >= 2;
+        hX += "<h2>Valideynə göndər</h2>" +
+          '<div class="card vsend">' +
+            (hasPC ? '<div class="segs vsegs" id="vTabs">' + seg("m", "Mətn", VTAB) + seg("i", "Şəkil kartı", VTAB) + "</div>" : "") +
+            '<div id="vp-m"' + (VTAB === "m" || !hasPC ? "" : " hidden") + ">" +
+              '<textarea id="vTxt" class="veltxt" readonly rows="9"></textarea>' +
+              '<p class="muted" style="margin:0 0 12px">Mətni kopyalayıb WhatsApp-da valideynə göndərin.</p>' +
+              '<button class="btn go" id="vCopy">' + ic("clip") + "Mətni kopyala</button>" +
+            "</div>" +
+            (hasPC
+              ? '<div id="vp-i"' + (VTAB === "i" ? "" : " hidden") + ' class="pcard">' +
+                  '<canvas id="pcv" width="1080" height="1350"></canvas>' +
+                  '<p class="muted" style="margin:10px 0 12px">Şəkil kimi paylaşın: valideynə WhatsApp-da, ' +
+                    "ya da öz səhifənizdə. Şagirdin adı və sizin adınız üstündədir.</p>" +
+                  '<div class="row" style="gap:8px">' +
+                    '<button class="btn go" id="pcShare">' + ic("send") + "Paylaş</button>" +
+                    '<a class="btn ghost" id="pcDl" download="bil10-netice.png" href="#">' + ic("doc") + "Şəkli yüklə</a>" +
+                  '</div><div id="pcMsg"></div></div>'
+              : "") +
+          "</div>";
+      } else
       if (r.topics !== null) {
         hX += "<h2>Valideyn üçün xülasə</h2>" +
           '<div class="card">' +
@@ -6284,7 +6385,13 @@
       function tabLbl(t, n) {
         return t + (n ? ' <span class="tn">' + n + "</span>" : "");
       }
-      h += (YENI ? '<div id="stuKart"></div>' : "") +
+      var asgMenu = YENI
+        ? '<div class="card pad0 menu" id="stuAsgMenu" hidden>' +
+            yRow({ ic: "clip", ad: "Hazır test", alt: "kitabxanadan seçin — yalnız bu şagirdə", href: "#" }).replace('<a class="mrow"', '<a data-am="t" class="mrow"') +
+            yRow({ ic: "chart", ad: "Diaqnostik test", alt: "nəyi bilmir? — bütün mövzulardan", href: "#" }).replace('<a class="mrow"', '<a data-am="d" class="mrow"') +
+            (weak.length ? yRow({ ic: "gen", ad: "Səhvlərdən təkrar", alt: weak.length + " səhvdən test", href: "#" }).replace('<a class="mrow"', '<a data-am="s" class="mrow"') : "") +
+          "</div>" : "";
+      h += (YENI ? '<div id="stuKart"></div>' + asgMenu : "") +
         '<div class="segs stabs" id="sTabs">' +
           seg("x", "Xülasə", STAB) +
           seg("m", tabLbl("Mövzular", nWeakT), STAB) +
@@ -6297,7 +6404,7 @@
         '<div class="stab" id="tab-t"' + (STAB === "t" ? "" : " hidden") + ">" + hT + "</div>";
 
       show(h);
-      if (YENI) stuKart(id, classId, live);
+      if (YENI) { stuKart(id, classId, live); loadStuPend(id, classId, s.full_name, live); }
       loadDiag(id, classId, at.length > 0);
       drawTopics();
       function sTabTo(v) {
@@ -6351,6 +6458,16 @@
           $("vTxt").value = velText(VSTY, r);
         });
         on("vCopy", "click", function () { copyText($("vTxt").value, $("vCopy")); });
+        on("vTabs", "click", function (e) {
+          var b = e.target.closest ? e.target.closest("[data-v]") : null;
+          if (!b) return;
+          VTAB = b.getAttribute("data-v");
+          Array.prototype.forEach.call(document.querySelectorAll("#vTabs .seg"), function (x) {
+            x.classList.toggle("on", x.getAttribute("data-v") === VTAB);
+          });
+          if ($("vp-m")) $("vp-m").hidden = VTAB !== "m";
+          if ($("vp-i")) $("vp-i").hidden = VTAB !== "i";
+        });
         if ($("pcv")) {
           var pdata = progData(r);
           drawProgCard($("pcv"), pdata);
@@ -6373,28 +6490,51 @@
       //  Qrup ekranindan gelibse ora, yoxsa qrup hesabatina (canli sual:
       //  "Geri" qrupa yox, hesabata atirdi)
       on("btnB", "click", function () { goBack("#/r/" + classId); });
-      on("btnAsgStu", "click", function () { nav("#/a/" + classId + "/" + id); });
+      //  YENI: «Test tapşır» menyu açır (hazır test / diaqnostik / səhvlərdən təkrar) - üç ayrı yerə səpələnməsin
+      on("btnAsgStu", "click", function () {
+        var m = $("stuAsgMenu");
+        if (!YENI || !m) { nav("#/a/" + classId + "/" + id); return; }
+        m.hidden = !m.hidden;
+      });
+      on("stuAsgMenu", "click", function (ev) {
+        var a = ev.target.closest ? ev.target.closest("[data-am]") : null;
+        if (!a) return;
+        ev.preventDefault();
+        var k = a.getAttribute("data-am"), to;
+        if (k === "t") { nav("#/a/" + classId + "/" + id); return; }
+        $("stuAsgMenu").hidden = true;
+        if (k === "d") {
+          sTabTo("x");
+          var dg = document.querySelector("#diagBox details.dgmore");
+          if (dg) dg.open = true;
+          to = $("diagBox");
+        } else { sTabTo("s"); to = $("btnFix"); }
+        if (to && to.scrollIntoView) to.scrollIntoView({ block: "center" });
+      });
       on("btnRem", "click", function () { remedialGen(classId, sweakAll); });
 
       //  Sehvler uzerinde is: mehz sehv edilen suallardan ferdi test
-      on("btnFix", "click", function () {
+      //  (Sehvler sekmesindeki #btnFix VE Diqqet kartindaki #vdF eyni is gorur)
+      function runFix(btnId, msgId, lbl) {
         if (busy) return;
-        setBusy("btnFix", true, "Bu səhvlərdən təkrar testi yığ");
+        setBusy(btnId, true, lbl);
         sb.rpc("rpc_remedial_test", { p_student_id: id, p_count: 10 })
           .then(function (res) {
-            setBusy("btnFix", false, "Bu səhvlərdən təkrar testi yığ");
+            setBusy(btnId, false, lbl);
             //  msg() metni esc edir - linki ozumuz yigiriq
-            $("fixMsg").innerHTML = '<div class="ok" style="margin-top:10px">' +
+            $(msgId).innerHTML = '<div class="ok" style="margin-top:10px">' +
               ic("check") + "<span>" + (Number(res.count) || 0) +
               " sualdan test yığıldı və tapşırıq YALNIZ bu şagirdə verildi " +
               "— qrupun qalanı onu görmür. " +
               '<a href="#/t/' + esc(res.test_id) + '">Vərəqə bax</a></span></div>';
           })
           .catch(function (e) {
-            setBusy("btnFix", false, "Bu səhvlərdən təkrar testi yığ");
-            $("fixMsg").innerHTML = msg("err", fail(e));
+            setBusy(btnId, false, lbl);
+            $(msgId).innerHTML = msg("err", fail(e));
           });
-      });
+      }
+      on("btnFix", "click", function () { runFix("btnFix", "fixMsg", "Bu səhvlərdən təkrar testi yığ"); });
+      on("vdF", "click", function () { runFix("vdF", "vdFMsg", "Təkrar test ver"); });
 
       //  Cavab vereqi: setre klik - acilir/baglanir, ilk aciliska yuklenir
       var atl = $("atList");
@@ -6450,6 +6590,7 @@
       sagird "Kime" secimində evvelceden secilir, Geri ora qaytarir.  */
   var ASG_PRE = "";
   var ASG_FLASH = null;   // son verilen tapsiriq - bir defelik WhatsApp qutusu
+  var VTAB = "m";        // valideynə göndər: m = mətn, i = şəkil kartı
   var ASG_CID = "";      // tapsiriq ekranindaki qrupun id-si (siyahi satirlari ucun)
   var HW_FLASH = "";      // ev tapsirigi yazildi - hub-da bir defelik tesdiq (YENI)
   //  217: indice gonderdik - kart bir defelik gizlenir, yoxsa «Göndər»
