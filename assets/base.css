@@ -504,3 +504,16 @@ label{color:var(--fg-2);font-weight:700;font-size:12.5px}
 .empty b{font-weight:800}
 .empty .ic{background:var(--mint);color:var(--teal);border-radius:14px}
 .pwabar{border-radius:18px}
+
+/* KESR: 3/4 ve 12 1/4 ust-alt (menbe: app.js kesr()).  Baza deyismir, yalniz gosterme.
+   «/» gorunmur amma metnde qalir - kopyalananda «3/4» cixir. */
+.kesr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;
+  position:relative;line-height:1.12;margin:0 .1em;text-align:center;white-space:nowrap;
+  font-variant-numeric:lining-nums}
+.kesr .kn,.kesr .kd{display:block;padding:0 .22em;font-size:.94em}
+.kesr .kn{border-bottom:.09em solid currentColor;padding-bottom:.04em}
+.kesr .kd{padding-top:.04em}
+.kmix{display:inline-flex;align-items:center;gap:.06em;white-space:nowrap;position:relative}
+.kmix .kw{font-size:1em}
+.ks{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+@media print{.kesr .kn{border-bottom-color:#000}}

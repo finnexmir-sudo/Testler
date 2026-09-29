@@ -115,6 +115,49 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+  //  KESR-BASLA
+  /*  KESR: «3/4» ve «12 1/4» ekranda UST-ALT gosterilir (bazaya toxunmadan).
+      Giris YALNIZ esc()-den kecmis metndir; cixisa yalniz reqemlerden
+      qurulan <span> girir - suala yazilmis HEC BIR HTML kecmir.
+      Cevrilir: iki tam eded arasindaki «/» (3/4, 17/12) ve tam + duzgun kesr
+      (12 1/4).  Cevrilmir: zencir (2/3/4), onluq (0,5/2  3/4,5), hesli
+      (x/6), vahid (km/saat, q/sm3).  Menfi isare ve sekilce kesrin xaricinde
+      qalir (−3/7, 1/2-den).  Eyni funksiya sagird/app.js-de de var -
+      test/kesr_vahid.js ikisinin EYNI oldugunu yoxlayir.  */
+  function kesr(h) {
+    function dig(c) { return c >= "0" && c <= "9"; }
+    function fr(a, b, mix) {
+      return '<span class="kesr" ' + (mix ? "" : 'role="math" aria-label="' + a + "/" + b + '"') + ">" +
+        '<span class="kn" aria-hidden="true">' + a + "</span>" +
+        '<span class="ks">/</span>' +
+        '<span class="kd" aria-hidden="true">' + b + "</span></span>";
+    }
+    return String(h).replace(/(\d+) (\d+)\/(\d+)|(\d+)\/(\d+)/g, function (m) {
+      var args = arguments, mix = args[1] !== undefined;
+      var i = args[args.length - 2], s = args[args.length - 1];
+      var a = mix ? args[2] : args[4], b = mix ? args[3] : args[5];
+      var end = i + m.length;
+      //  sag terefde: zencir (/) ve ya onluq hisse (,5 .5) olmamalidir
+      var n1 = s.charAt(end), n2 = s.charAt(end + 1);
+      var sagOk = n1 !== "/" && !((n1 === "," || n1 === ".") && dig(n2));
+      if (mix) {
+        var c1 = s.charAt(i - 1), c2 = s.charAt(i - 2);
+        var solOk = c1 !== "/" && !((c1 === "," || c1 === ".") && dig(c2)) && c1 !== ",";
+        var duz = Number(args[2]) < Number(args[3]);
+        if (sagOk && solOk && duz) {
+          return '<span class="kmix" role="math" aria-label="' + args[1] + " " + a + "/" + b + '">' +
+            '<span class="kw" aria-hidden="true">' + args[1] + '</span><span class="ks"> </span>' + fr(a, b, true) + "</span>";
+        }
+        //  tam hisse kesre baglanmir - yalniz kesr ayrica yoxlanir
+        return args[1] + " " + (sagOk ? fr(a, b) : a + "/" + b);
+      }
+      var d1 = s.charAt(i - 1), d2 = s.charAt(i - 2);
+      var solOk2 = d1 !== "/" && !((d1 === "," || d1 === ".") && dig(d2));
+      return sagOk && solOk2 ? fr(a, b) : m;
+    });
+  }
+  function qt(s) { return kesr(esc(s)); }
+  //  KESR-SON
   function $(id) { return document.getElementById(id); }
 
   /*  188: SUALIN SEKLI.  Bank sualina hendese cizgisi, elektrik
@@ -791,7 +834,7 @@
       '<div class="prog"><div class="bar"><i style="width:' + pct + '%"></i></div>' +
         (S.deadline ? '<span class="tmr" id="tmr">⏱ ' + timerText() + "</span>" : "") +
         '<span class="cnt">' + (S.i + 1) + " / " + n + "</span></div>" + rest +
-      '<div class="q"><div class="body">' + esc(q.body) + "</div>" +
+      '<div class="q"><div class="body">' + qt(q.body) + "</div>" +
         '<button class="spk' + (VOICE ? "" : " hide") + '" id="spk" ' +
           'title="Sualı dinlə" aria-label="Sualı dinlə">' + ic("sound") + "</button>" +
       "</div>" +
@@ -805,7 +848,7 @@
               return '<button class="opt' + (o.id === picked ? " sel" : "") + '" ' +
                 'data-o="' + esc(o.id) + '">' +
                 '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
-                '<span class="t">' + esc(o.body) + "</span></button>";
+                '<span class="t">' + qt(o.body) + "</span></button>";
             }).join("") +
           "</div>") +
       //  "Emin deyilem" - bilmeden duz cavabi muellim gorsun (cavab terzi).
@@ -1028,14 +1071,14 @@
     function qRow(w) {
             var right = !!w.correct;
             return '<div class="' + (right ? "right" : "wrong") + '">' +
-              '<div class="qh"><b>' + esc(w.body) + "</b>" +
+              '<div class="qh"><b>' + qt(w.body) + "</b>" +
                 '<span class="qmark ' + (right ? "y" : "n") + '">' +
                   ic(right ? "check" : "x") + "</span></div>" +
               fig(w.media_url) +
               (w.picked && w.picked.length
-                ? '<p class="picked">Sən yazdın: ' + w.picked.map(esc).join(", ") + "</p>"
+                ? '<p class="picked">Sən yazdın: ' + w.picked.map(qt).join(", ") + "</p>"
                 : "") +
-              (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
+              (w.explanation ? "<i>" + qt(w.explanation) + "</i>" : "") +
               (right ? "" :
                 '<button class="rlink" data-rq="' + esc(w.question_id || "") +
                   '">Sualda səhv var?</button>' +
@@ -1255,13 +1298,13 @@
         '<span class="cnt">' + (i + 1) + " / " + n + "</span></div>" +
       '<p class="dwhy">' + (q.topic ? "<b>" + esc(q.topic) + "</b>" : "") +
         esc(DSRC[q.src] || "") + "</p>" +
-      '<div class="q"><div class="body">' + esc(q.body) + "</div></div>" +
+      '<div class="q"><div class="body">' + qt(q.body) + "</div></div>" +
       fig(q.media_url) +
       '<div class="opts" id="opts">' +
         (q.options || []).map(function (o, k) {
           return '<button class="opt" data-o="' + esc(o.id) + '">' +
             '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
-            '<span class="t">' + esc(o.body) + "</span></button>";
+            '<span class="t">' + qt(o.body) + "</span></button>";
         }).join("") + "</div>" +
       '<div id="dFb"></div>'
     );
@@ -1283,7 +1326,7 @@
               "<span>" + (r.correct
                 ? (r.closed ? "Düzdür! Bu sual dəftərdən çıxdı. ✅" : "Düzdür!")
                 : "Bu dəfə alınmadı. Sabah bir də qarşına çıxacaq.") +
-              (r.explanation ? "<br><i>" + esc(r.explanation) + "</i>" : "") + "</span></div>" +
+              (r.explanation ? "<br><i>" + qt(r.explanation) + "</i>" : "") + "</span></div>" +
             '<button class="btn go wide" id="btnDNext" style="margin-top:10px">' +
               (r.done ? "Bitir" : "Növbəti") + "</button>";
           on("btnDNext", "click", function () {
@@ -1475,14 +1518,14 @@
     var multi = q.kind === "multi";
     show(
       pracHead(Number(d.score) || 0, Number(d.level) || 2, Number(d.streak) || 0, !!d.mastered) +
-      '<div class="q"><div class="body">' + esc(q.body || "") + "</div></div>" +
+      '<div class="q"><div class="body">' + qt(q.body || "") + "</div></div>" +
       fig(q.media_url) +
       (q.kind === "text"
         ? '<div class="opts"><input id="pans" class="tans" maxlength="120" autocomplete="off" placeholder="Cavabı yaz"></div>'
         : '<div class="opts" id="popts">' + (q.options || []).map(function (o, k) {
             return '<button class="opt" data-o="' + esc(o.id) + '">' +
               '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
-              '<span class="t">' + esc(o.body) + "</span></button>";
+              '<span class="t">' + qt(o.body) + "</span></button>";
           }).join("") + "</div>") +
       (multi ? '<p class="note">Bir neçə düz cavab ola bilər — seçib «Cavabla» bas.</p>' : "") +
       ((multi || q.kind === "text") ? '<button class="btn go wide" id="btnPAns">Cavabla</button>' : "") +
@@ -1511,7 +1554,7 @@
             "<span>" + (r.correct
               ? "Düzdür! <b>+" + g + "</b> bal." + (jm ? " 🏆 <b>Mövzu mənimsənilib!</b>" : "")
               : "Səhvdir. <b>" + g + "</b> bal. Səhv dəftərinə düşdü — sonra bir də gələcək.") +
-            (r.explanation ? "<br><i>" + esc(r.explanation) + "</i>" : "") + "</span></div>" +
+            (r.explanation ? "<br><i>" + qt(r.explanation) + "</i>" : "") + "</span></div>" +
           (lim ? '<p class="note" style="margin:8px 0 0">Bugünkü ' + qq.max + " sual bitdi — sabah davam et. Müəllimin abunəsi ilə limitsizdir.</p>" : "") +
           '<div class="row" style="margin-top:10px">' +
             (lim ? "" : '<button class="btn go" id="btnPNext" style="flex:1">' + (jm ? "Davam et" : "Növbəti") + "</button>") +
@@ -1597,13 +1640,13 @@
         '<span class="cnt">' + (MQ.i + 1) + " / " + n + "</span></div>" +
       (q.topic ? '<p class="note" style="margin:0 0 6px">' + esc(q.topic) +
         (q.status === "review" ? " · təkrar" : "") + "</p>" : "") +
-      '<div class="q"><div class="body">' + esc(q.body) + "</div></div>" +
+      '<div class="q"><div class="body">' + qt(q.body) + "</div></div>" +
       fig(q.media_url) +
       '<div class="opts" id="opts">' +
         (q.options || []).map(function (o, k) {
           return '<button class="opt" data-o="' + esc(o.id) + '">' +
             '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
-            '<span class="t">' + esc(o.body) + "</span></button>";
+            '<span class="t">' + qt(o.body) + "</span></button>";
         }).join("") + "</div>" +
       '<div id="mFb"></div>'
     );
@@ -1623,7 +1666,7 @@
               "<span>" + (r.correct
                 ? (r.status === "closed" ? "Düzdür! Bu sual dəftərdən çıxdı. ✅" : "Düzdür! Bir həftə sonra bir də yoxlayacağıq.")
                 : "Səhvdir. Sabah yenə gələcək — bu dəfə düşünüb cavabla.") +
-              (r.explanation ? "<br><i>" + esc(r.explanation) + "</i>" : "") + "</span></div>" +
+              (r.explanation ? "<br><i>" + qt(r.explanation) + "</i>" : "") + "</span></div>" +
             '<button class="btn go wide" id="btnMNext" style="margin-top:10px">' +
               (MQ.i + 1 < n ? "Növbəti" : "Bitir") + "</button>";
           on("btnMNext", "click", function () { MQ.i++; drawMist(); });

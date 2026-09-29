@@ -73,6 +73,49 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+  //  KESR-BASLA
+  /*  KESR: «3/4» ve «12 1/4» ekranda UST-ALT gosterilir (bazaya toxunmadan).
+      Giris YALNIZ esc()-den kecmis metndir; cixisa yalniz reqemlerden
+      qurulan <span> girir - suala yazilmis HEC BIR HTML kecmir.
+      Cevrilir: iki tam eded arasindaki «/» (3/4, 17/12) ve tam + duzgun kesr
+      (12 1/4).  Cevrilmir: zencir (2/3/4), onluq (0,5/2  3/4,5), hesli
+      (x/6), vahid (km/saat, q/sm3).  Menfi isare ve sekilce kesrin xaricinde
+      qalir (−3/7, 1/2-den).  Eyni funksiya sagird/app.js-de de var -
+      test/kesr_vahid.js ikisinin EYNI oldugunu yoxlayir.  */
+  function kesr(h) {
+    function dig(c) { return c >= "0" && c <= "9"; }
+    function fr(a, b, mix) {
+      return '<span class="kesr" ' + (mix ? "" : 'role="math" aria-label="' + a + "/" + b + '"') + ">" +
+        '<span class="kn" aria-hidden="true">' + a + "</span>" +
+        '<span class="ks">/</span>' +
+        '<span class="kd" aria-hidden="true">' + b + "</span></span>";
+    }
+    return String(h).replace(/(\d+) (\d+)\/(\d+)|(\d+)\/(\d+)/g, function (m) {
+      var args = arguments, mix = args[1] !== undefined;
+      var i = args[args.length - 2], s = args[args.length - 1];
+      var a = mix ? args[2] : args[4], b = mix ? args[3] : args[5];
+      var end = i + m.length;
+      //  sag terefde: zencir (/) ve ya onluq hisse (,5 .5) olmamalidir
+      var n1 = s.charAt(end), n2 = s.charAt(end + 1);
+      var sagOk = n1 !== "/" && !((n1 === "," || n1 === ".") && dig(n2));
+      if (mix) {
+        var c1 = s.charAt(i - 1), c2 = s.charAt(i - 2);
+        var solOk = c1 !== "/" && !((c1 === "," || c1 === ".") && dig(c2)) && c1 !== ",";
+        var duz = Number(args[2]) < Number(args[3]);
+        if (sagOk && solOk && duz) {
+          return '<span class="kmix" role="math" aria-label="' + args[1] + " " + a + "/" + b + '">' +
+            '<span class="kw" aria-hidden="true">' + args[1] + '</span><span class="ks"> </span>' + fr(a, b, true) + "</span>";
+        }
+        //  tam hisse kesre baglanmir - yalniz kesr ayrica yoxlanir
+        return args[1] + " " + (sagOk ? fr(a, b) : a + "/" + b);
+      }
+      var d1 = s.charAt(i - 1), d2 = s.charAt(i - 2);
+      var solOk2 = d1 !== "/" && !((d1 === "," || d1 === ".") && dig(d2));
+      return sagOk && solOk2 ? fr(a, b) : m;
+    });
+  }
+  function qt(s) { return kesr(esc(s)); }
+  //  KESR-SON
   function $(id) { return document.getElementById(id); }
 
   /*  188: SUALIN SEKLI.  Bank sualina hendese cizgisi, elektrik
@@ -6040,7 +6083,7 @@
           '<div class="card pad0" style="margin-top:10px" id="wList">' +
           weak.map(function (w, i) {
             return '<div class="wq' + (i >= WCAP ? " hide" : "") + '"><div class="g"><b>' +
-              esc(w.body) + "</b>" +
+              qt(w.body) + "</b>" +
               //  900: qrafikli sualda sekilsiz metn hec ne demir -
               //  «Hansi qrafik artandir?» sualina baxib muellim
               //  sagirdin neyi sehv etdiyini bile bilmirdi.
@@ -6055,7 +6098,7 @@
               (Number(w.sure_wrong) > 0
                 ? '<span class="wtag wb-s" title="Şagird cavabına əmin idi, amma səhv etdi — ' +
                   'yəni mövzunu bildiyini sanır">bildiyini sanır</span>' : "") +
-              (w.explanation ? "<i>" + esc(w.explanation) + "</i>" : "") +
+              (w.explanation ? "<i>" + qt(w.explanation) + "</i>" : "") +
               //  "1x" her setirde menasiz idi - say yalniz tekrarda
               "</div>" + (Number(w.wrong) > 1
                 ? '<span class="wn">' + w.wrong + "×</span>" : "") + "</div>";
@@ -6235,14 +6278,14 @@
             box.dataset.done = "1";
             box.innerHTML = (s.items || []).map(function (q) {
               return '<div class="shq">' +
-                "<b>" + q.ord + ". " + esc(q.body) + "</b>" + fig(q.media_url) +
+                "<b>" + q.ord + ". " + qt(q.body) + "</b>" + fig(q.media_url) +
                 '<div class="sa">' +
                   '<span class="' + (q.ok ? "sc" : "sw") + '">Cavabı: ' +
                     esc(q.chosen) + "</span>" +
                   (q.ok ? "" : '<span class="sc">Düzü: ' + esc(q.correct) + "</span>") +
                 "</div>" +
                 (!q.ok && q.explanation
-                  ? '<i class="sex">' + esc(q.explanation) + "</i>" : "") +
+                  ? '<i class="sex">' + qt(q.explanation) + "</i>" : "") +
               "</div>";
             }).join("");
           })
@@ -8186,7 +8229,7 @@
       var flags = r.flags || [];
       var rpb = r.rpb == null ? "—" : (Number(r.rpb) >= 0 ? "+" : "") + Number(r.rpb).toFixed(2);
       return '<div class="card repc qsc" data-q="' + esc(qid) + '">' +
-        '<div class="rhead"><b>' + esc(r.body) + "</b>" +
+        '<div class="rhead"><b>' + qt(r.body) + "</b>" +
           '<span class="rcnt" title="cavab sayı">' + r.n + "</span></div>" +
         fig(r.media_url) +
         '<div class="qm">' +
@@ -8205,7 +8248,7 @@
           var pct = Number(o.pct) || 0;
           return '<div class="qso' + (o.correct ? " ok" : "") + '">' +
             '<span class="qsb"><i style="width:' + pct + '%"></i></span>' +
-            "<span class=\"qst\">" + (o.correct ? ic("check") : "") + esc(o.body) + "</span>" +
+            "<span class=\"qst\">" + (o.correct ? ic("check") : "") + qt(o.body) + "</span>" +
             '<span class="qsn">' + pct + "%</span></div>";
         }).join("") +
         '<div class="rbtns">' +
@@ -8326,7 +8369,7 @@
     return reps.map(function (r) {
       var qid = r.question_id;
       return '<div class="card repc" data-q="' + esc(qid) + '">' +
-        '<div class="rhead"><b>' + esc(r.body) + "</b>" +
+        '<div class="rhead"><b>' + qt(r.body) + "</b>" +
           '<span class="rcnt">' + r.n + "</span></div>" +
         fig(r.media_url) +
         '<div class="qm">' +
@@ -8338,7 +8381,7 @@
           "</span></div>" +
         (r.options || []).map(function (o) {
           return '<div class="popt' + (o.is_correct ? " ok" : "") + '">' +
-            (o.is_correct ? ic("check") : "") + "<span>" + esc(o.body) +
+            (o.is_correct ? ic("check") : "") + "<span>" + qt(o.body) +
             "</span></div>";
         }).join("") +
         '<div class="rwho">' + (r.reports || []).map(function (x) {
@@ -9558,7 +9601,7 @@
         "<span>Tarix: ____________</span><span>Bal: ______</span></div>" +
       "</div>" +
       qs.map(function (q) {
-        var b = '<div class="ppq"><div class="ppb">' + q.ord + ". " + esc(q.body) +
+        var b = '<div class="ppq"><div class="ppb">' + q.ord + ". " + qt(q.body) +
           (q.kind === "multi"
             ? ' <i class="ppmu">(bir neçə düzgün cavab)</i>' : "") + "</div>" +
           fig(q.media_url);
@@ -9567,7 +9610,7 @@
         } else {
           b += (q.options || []).map(function (o, i) {
             return '<div class="ppo"><b>' + L.charAt(i) + ")</b> <span>" +
-              esc(o.body) + "</span></div>";
+              qt(o.body) + "</span></div>";
           }).join("");
         }
         return b + "</div>";
@@ -9580,7 +9623,7 @@
           var a;
           if (q.kind === "text") {
             a = (q.options || []).filter(function (o) { return o.correct; })
-              .map(function (o) { return esc(o.body); }).join(" / ");
+              .map(function (o) { return qt(o.body); }).join(" / ");
           } else {
             a = (q.options || []).map(function (o, i) {
               return o.correct ? L.charAt(i) : "";
@@ -9842,7 +9885,7 @@
       '<div class="card pad0 paper">' +
         qs.map(function (q) {
           return '<div class="pq">' +
-            '<div class="qh"><b>' + q.ord + ". " + esc(q.body) + "</b></div>" +
+            '<div class="qh"><b>' + q.ord + ". " + qt(q.body) + "</b></div>" +
             fig(q.media_url) +
             '<div class="qm">' +
               (q.topic ? "<span>" + esc(q.topic) + "</span><span>·</span>" : "") +
@@ -9858,10 +9901,10 @@
             '<div class="rslot" id="rs-' + esc(q.id) + '"></div>' +
             (q.options || []).map(function (o) {
               return '<div class="popt' + (o.correct ? " ok" : "") + '">' +
-                (o.correct ? ic("check") : "") + "<span>" + esc(o.body) + "</span></div>";
+                (o.correct ? ic("check") : "") + "<span>" + qt(o.body) + "</span></div>";
             }).join("") +
             (q.explanation
-              ? '<div class="pex">' + esc(q.explanation) + "</div>" : "") +
+              ? '<div class="pex">' + qt(q.explanation) + "</div>" : "") +
           "</div>";
         }).join("") +
       "</div>"
@@ -10452,11 +10495,11 @@
         list = list || [];
         if (!list.length) { box.innerHTML = ""; return; }
         box.innerHTML = list.map(function (q) {
-          return '<div class="sq"><b>' + esc(q.body) + "</b>" + fig(q.media_url) +
+          return '<div class="sq"><b>' + qt(q.body) + "</b>" + fig(q.media_url) +
             ((q.options || []).length
               ? "<ul>" + q.options.map(function (o) {
                   return '<li' + (o.correct ? ' class="c"' : "") + ">" +
-                    esc(o.body) + "</li>";
+                    qt(o.body) + "</li>";
                 }).join("") + "</ul>"
               : '<p class="muted">Açıq cavablı sual</p>') +
             "</div>";
@@ -10552,7 +10595,7 @@
           return '<div class="qitem">' +
             '<button class="qrow" data-q="' + esc(q.id) + '"' +
               (mine ? "" : " disabled") + ">" +
-              '<div class="g"><b>' + esc(q.body) + "</b>" + fig(q.media_url) + "<i>" +
+              '<div class="g"><b>' + qt(q.body) + "</b>" + fig(q.media_url) + "<i>" +
                 meta.map(function (m, i) {
                   return (i ? "<span>·</span>" : "") + "<span>" + m + "</span>";
                 }).join("") +
@@ -10564,7 +10607,7 @@
             (opts.length
               ? '<ul class="qopts">' + opts.map(function (o) {
                   return '<li' + (o.correct ? ' class="c"' : "") + ">" +
-                    esc(o.body) + "</li>";
+                    qt(o.body) + "</li>";
                 }).join("") + "</ul>"
               : "") +
           "</div>";
@@ -11027,11 +11070,11 @@
       p_explanation: QD.explanation || ""
     }).then(function (r) {
       if (!$("qparOut")) return;
-      $("qparOut").innerHTML = '<div class="qsample"><b>' + esc(r.body || "") + "</b>" +
+      $("qparOut").innerHTML = '<div class="qsample"><b>' + qt(r.body || "") + "</b>" +
         '<ul class="qopts">' + (r.options || []).map(function (o) {
-          return "<li" + (o.correct ? ' class="c"' : "") + ">" + esc(o.body) + "</li>";
+          return "<li" + (o.correct ? ' class="c"' : "") + ">" + qt(o.body) + "</li>";
         }).join("") + "</ul>" +
-        (r.explanation ? '<p class="muted">' + esc(r.explanation) + "</p>" : "") +
+        (r.explanation ? '<p class="muted">' + qt(r.explanation) + "</p>" : "") +
         '<p class="muted">Hər açılışda başqa rəqəmlər çıxır — yenə basın.</p></div>';
     }).catch(function (e) { if ($("qparOut")) $("qparOut").innerHTML = msg("err", fail(e)); });
   }
