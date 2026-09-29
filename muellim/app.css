@@ -2626,3 +2626,33 @@ details.styd{margin-top:14px}
 .card.vsend .pcard{padding:0;box-shadow:none;border:0}
 .dgy .dgmore>summary{display:none}
 .dgy .dgmore>.card{margin-top:0}
+
+/* Sagird hesabati: Mövzular / Sehvler / Tarixce (YENI) */
+.trow.weakrow{box-shadow:inset 3px 0 0 var(--err)}
+.tlink{display:inline-block;margin-top:6px;font-size:12.5px;font-weight:620;color:var(--brand);text-decoration:none}
+.wfilt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;margin:0 0 10px;border-radius:12px;
+  background:var(--brand-tint);border:1px solid var(--brand-line);font-size:13.5px}
+.wfilt b{flex:1;min-width:0;color:var(--fg)}
+.wq .wans{margin:6px 0 2px;font-size:12.5px;line-height:1.5;color:var(--fg-2)}
+.wq .wans:empty{display:none}
+.wq .wans .wax b{color:#b42318;font-weight:620}
+.wq .wans .way b{color:var(--ok);font-weight:620}
+.wq .wtag.wb-s{background:none;border-color:transparent;color:#b42318;padding-left:2px}
+.dynw .dynb{position:relative;padding-top:16px}
+.dynw .dyn{position:relative;z-index:1;height:110px;gap:5px}
+.dynw .dyn i{position:relative;z-index:1}
+.dynw .dyn i em{position:absolute;left:0;right:0;top:-15px;text-align:center;font-style:normal;font-size:10px;
+  font-weight:650;color:var(--fg-2)}
+.dynw .dgl{position:absolute;left:0;right:0;border-top:1px dashed var(--n-200);z-index:0;height:0;text-decoration:none;
+  margin-bottom:0;transform:translateY(-1px)}
+.dynw .dgl s{position:absolute;right:0;top:-13px;font-size:9.5px;text-decoration:none;color:var(--fg-3)}
+.dynw .dyd{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--fg-3)}
+.atr .ar{width:16px;height:16px;flex:0 0 16px;color:var(--n-400);margin-left:6px;transition:transform .15s}
+.atr.open .ar{transform:rotate(90deg)}
+@media (max-width:480px){
+  .segs.stabs .seg{position:relative;padding:9px 0}
+  .segs.stabs .seg .tn{position:absolute;top:1px;right:1px;min-width:15px;padding:0 3px;margin:0;font-size:9.5px;line-height:15px}
+}
+.wq .wans b{display:inline;-webkit-line-clamp:unset;-webkit-box-orient:horizontal;overflow:visible;
+  font-size:inherit;line-height:inherit;letter-spacing:0}
+.wq .wans .wax,.wq .wans .way{display:block}

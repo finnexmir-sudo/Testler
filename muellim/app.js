@@ -4926,7 +4926,9 @@
     var r = pct(ratio);
     /*  DIQQET: "ok" YAZMA - base.css-de umumi mesaj qutusudur;
         meter-i mint renge boyayib zolagi gizledirdi (3-cu toqqusma!) */
-    var cls = r >= 75 ? "m-ok" : (r >= 50 ? "m-mid" : "m-low");
+    //  29.09: hedler pctChip ve «zeif movzu = 60-dan asagi» ile EYNI (evvel 75/50 idi:
+    //  50-59% cubugu narinci, yazisi qirmizi idi)
+    var cls = r >= 80 ? "m-ok" : (r >= 60 ? "m-mid" : "m-low");
     return '<div class="meter ' + cls + '"><i style="width:' + r + '%"></i></div>';
   }
 
@@ -6046,6 +6048,13 @@
       var sweakAll = tsure.filter(function (t) { return Number(t.ratio) < 60 && t.id; });
       var weak = (r.weak !== null && r.weak) ? r.weak : [];
       var at = r.attempts || [];
+      /*  «Sehvler» reqemi UC yerde idi (sekme 10, Diqqet «10 sehv», dəftər «47 gozleyir») -
+          ferqli sorgular.  YENI: hamisi sehv DEFTERINDEN (gozleyir + tekrarda), yoxdursa siyahidan.  */
+      var mk0 = r.mistakes || {};
+      var nSehv = weak.length;
+      if (YENI && ((Number(mk0.open) || 0) + (Number(mk0.review) || 0) + (Number(mk0.closed) || 0)) > 0) {
+        nSehv = (Number(mk0.open) || 0) + (Number(mk0.review) || 0);
+      }
 
       /* ---------------- XULASE ---------------- */
       /*  «Xulase» sekmesi xulase DEMIRDI: en ustde diaqnostika formasi,
@@ -6053,7 +6062,7 @@
           basanda bir sual verir - «bu usaqda ne var?».  Cavab indi
           birinci setirdedir; adlar ve duymeler lazimi sekmeye aparir.  */
       var hX = "";
-      var vdT = sweakAll.slice(0, 2), vdN = weak.length;
+      var vdT = sweakAll.slice(0, 2), vdN = nSehv;
       var vdIn = "";
       if (r.topics !== null && (vdT.length || vdN)) {
         vdIn = (vdT.length
@@ -6065,12 +6074,12 @@
             : "<p>Zəif mövzu yoxdur — hamısı 60%-dən yuxarı.</p>") +
           (vdN ? "<p><b>" + vdN + " səhv</b> düzəliş gözləyir.</p>" : "") +
           //  YENI: «Mövzular» / «Səhvlər» düymələri çıxarıldı - eyni sekmələr yuxarıdakı zolaqda var (29.09)
-          ((!YENI && (vdT.length || vdN)) || (YENI && vdN)
+          ((!YENI && (vdT.length || vdN)) || (YENI && weak.length)
             ? '<div class="row" style="gap:8px;margin-top:4px">' +
               (!YENI && vdT.length ? '<button class="btn sm" id="vdT">Mövzular</button>' : "") +
               (!YENI && vdN ? '<button class="btn sm" id="vdS">Səhvlər</button>' : "") +
               //  YENI: «Təkrar test ver» - bu səhvlərdən yalnız bu şagirdə test (Səhvlər sekmesindəki ilə eyni)
-              (YENI && vdN ? '<button class="btn sm go" id="vdF">' + ic("gen") + "Təkrar test ver</button>" : "") +
+              (YENI && weak.length ? '<button class="btn sm go" id="vdF">' + ic("gen") + "Təkrar test ver</button>" : "") +
             "</div>" : "") +
           (YENI ? '<div id="vdFMsg"></div>' : "");
       }
@@ -6216,11 +6225,16 @@
       }
       function topicRow(t) {
         var bad = Number(t.ratio) < 60;
-        return '<div class="trow"><div class="g"><b>' +
-          (bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
+        //  YENI: «nöqtə» adin ustunde tek qalirdi (b elementi -webkit-box) - sol cizgi ile evez olundu;
+        //  bu movzudan sehv sual varsa Sehvler sekmesine suzgecli kecid
+        var hasW = YENI && weak.some(function (w) { return w.topic === t.name; });
+        return '<div class="trow' + (YENI && bad ? " weakrow" : "") + '"><div class="g"><b>' +
+          (!YENI && bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
           esc(t.name) + "</b>" +
           "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
-          meter(t.ratio) + "</div>" +
+          meter(t.ratio) +
+          (hasW ? '<a href="#" class="tlink" data-tf="' + esc(t.name) + '">səhvlərinə bax →</a>' : "") +
+          "</div>" +
           pctChip(t.ratio) + "</div>";
       }
       function drawTopics() {
@@ -6312,14 +6326,17 @@
         hS += '<button class="btn go wide" id="btnFix">' + ic("gen") +
             "Bu səhvlərdən təkrar testi yığ (" + weak.length + " sual)</button>" +
           '<div id="fixMsg"></div>' +
+          (YENI ? '<div id="wFilt"></div>' : "") +
           '<details class="more filt wrongbox" open style="margin-top:10px">' +
-          "<summary>Səhv edilən suallar " +
-            '<span class="fn">' + weak.length + "</span>" +
-            '<span class="muted" style="font-weight:400;margin-left:auto">ən çox səhv edilən ' +
-              weak.length + "</span></summary>" +
+          (YENI
+            ? "<summary>Ən çox səhv edilən suallar " + '<span class="fn">' + weak.length + "</span></summary>"
+            : "<summary>Səhv edilən suallar " +
+              '<span class="fn">' + weak.length + "</span>" +
+              '<span class="muted" style="font-weight:400;margin-left:auto">ən çox səhv edilən ' +
+                weak.length + "</span></summary>") +
           '<div class="card pad0" style="margin-top:10px" id="wList">' +
           weak.map(function (w, i) {
-            return '<div class="wq' + (i >= WCAP ? " hide" : "") + '"><div class="g"><b>' +
+            return '<div class="wq' + (i >= WCAP ? " hide" : "") + '" data-tp="' + esc(w.topic || "") + '"><div class="g"><b>' +
               qt(w.body) + "</b>" +
               //  900: qrafikli sualda sekilsiz metn hec ne demir -
               //  «Hansi qrafik artandir?» sualina baxib muellim
@@ -6336,6 +6353,8 @@
                 ? '<span class="wtag wb-s" title="Şagird cavabına əmin idi, amma səhv etdi — ' +
                   'yəni mövzunu bildiyini sanır">bildiyini sanır</span>' : "") +
               (w.explanation ? "<i>" + qt(w.explanation) + "</i>" : "") +
+              //  YENI: sagirdin YAZDIGI ve DUZ cavab (db/902 - yoxdursa bos qalir)
+              (YENI ? '<div class="wans" data-qid="' + esc(w.qid || "") + '"></div>' : "") +
               //  "1x" her setirde menasiz idi - say yalniz tekrarda
               "</div>" + (Number(w.wrong) > 1
                 ? '<span class="wn">' + w.wrong + "×</span>" : "") + "</div>";
@@ -6352,6 +6371,21 @@
          qrafik hec ne demir - uc testden basliyir. */
       if (at.length >= 3) {
         var bars = at.slice(0, 12).slice().reverse();
+        if (YENI) {
+          /*  YENI: diaqramda RAQEM, 60/80% xetleri ve ilk-son tarix var (evvel nə rəqəm, nə tarix
+              idi - «kim neçə alıb» bilinmirdi).  */
+          hT += '<div class="card dynw"><div class="dynb">' +
+            '<div class="dyn">' +
+            '<u class="dgl" style="bottom:60%"><s>60%</s></u><u class="dgl" style="bottom:80%"><s>80%</s></u>' +
+            bars.map(function (a) {
+              var pv = Math.round(Number(a.percent) || 0), p = Math.max(6, pv);
+              var c = pv >= 80 ? "dh" : (pv >= 60 ? "dm" : "dl");
+              return '<i class="' + c + '" style="height:' + p + '%" title="' + esc(a.test) + " · " + pv + '%"><em>' + pv + "</em></i>";
+            }).join("") + "</div></div>" +
+            '<div class="dyd"><span>' + dateAz(bars[0].at) + "</span><span>" + dateAz(bars[bars.length - 1].at) + "</span></div>" +
+            '<p class="muted" style="margin:8px 0 0">Soldan sağa: köhnədən yeniyə. Yaşıl ≥80%, narıncı 60–79%, qırmızı &lt;60%.</p></div>' +
+            '<div class="spacer"></div>';
+        } else {
         hT += '<div class="card"><div class="dyn">' + bars.map(function (a) {
             var p = Math.max(6, Math.round(Number(a.percent) || 0));
             var c = p >= 80 ? "dh" : (p >= 60 ? "dm" : "dl");
@@ -6361,6 +6395,7 @@
           '<p class="muted" style="margin:10px 0 0">Soldan sağa: köhnədən ' +
             "yeniyə. Yaşıl ≥80%, narıncı 60-79%, qırmızı &lt;60%.</p></div>" +
           '<div class="spacer"></div>';
+        }
       }
       if (!at.length) {
         hT += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("clock") +
@@ -6370,11 +6405,12 @@
         var ACAP = 8;
         hT += '<div class="card pad0" id="atList">' + at.map(function (a, i) {
           var hid = i >= ACAP ? " hide" : "";
-          return '<button class="trow atr' + hid + '" data-att="' + esc(a.id) + '">' +
+          //  YENI: «cavab vereqi» yazisi ikinci setre dusurdu - yerine sagda ox (acilir)
+          return '<button class="trow atr' + hid + '" data-att="' + esc(a.id) + '"' + (YENI ? ' aria-expanded="false"' : "") + ">" +
             '<div class="g"><b>' + esc(a.test) + "</b>" +
             "<i>" + dateAz(a.at) + " · " + a.score + " / " + a.max +
-            ' · <span class="lnk2">cavab vərəqi</span></i></div>' +
-            pctChip(a.percent) + "</button>" +
+            (YENI ? "" : ' · <span class="lnk2">cavab vərəqi</span>') + "</i></div>" +
+            pctChip(a.percent) + (YENI ? ic("right", "ar") : "") + "</button>" +
             '<div class="sheet hide' + (hid ? " late" : "") + '" id="sh-' + esc(a.id) + '"></div>';
         }).join("") +
         (at.length > ACAP
@@ -6397,7 +6433,7 @@
         '<div class="segs stabs" id="sTabs">' +
           seg("x", "Xülasə", STAB) +
           seg("m", tabLbl("Mövzular", nWeakT), STAB) +
-          seg("s", tabLbl("Səhvlər", weak.length), STAB) +
+          seg("s", tabLbl("Səhvlər", nSehv), STAB) +
           seg("t", tabLbl("Tarixçə", at.length), STAB) +
         "</div>" +
         '<div class="stab" id="tab-x"' + (STAB === "x" ? "" : " hidden") + ">" + hX + "</div>" +
@@ -6409,6 +6445,50 @@
       if (YENI) { stuKart(id, classId, live); loadStuPend(id, classId, s.full_name, live); }
       loadDiag(id, classId, at.length > 0);
       drawTopics();
+      var WTF = "", wExp = false;
+      /*  Mövzu suzgeci: Movzular sekmesinden «sehvlerine bax» - Sehvler sekmesinde YALNIZ o movzunun
+          suallari, «Filtri temizle» ile geri.  */
+      function applyWF() {
+        var box = $("wList");
+        if (!box) return;
+        Array.prototype.forEach.call(box.querySelectorAll(".wq"), function (x, i) {
+          var okr = !WTF || x.getAttribute("data-tp") === WTF;
+          x.classList.toggle("hide", !(okr && (WTF || wExp || i < 5)));
+        });
+        if ($("wMore")) $("wMore").hidden = !!WTF;
+        var fb = $("wFilt");
+        if (fb) {
+          fb.innerHTML = WTF
+            ? '<div class="wfilt">Mövzu: <b>' + esc(WTF) + '</b><button type="button" class="btn sm ghost" id="wFiltX">Filtri təmizlə ×</button></div>'
+            : "";
+          on("wFiltX", "click", function () { WTF = ""; applyWF(); });
+        }
+      }
+      if (YENI) {
+        on("topicBox", "click", function (e) {
+          var a = e.target.closest ? e.target.closest("[data-tf]") : null;
+          if (!a) return;
+          e.preventDefault();
+          WTF = a.getAttribute("data-tf");
+          sTabTo("s"); applyWF();
+          window.scrollTo({ top: 0 });
+        });
+        //  Sagirdin yazdigi / duz cavab: ayri RPC (db/902) - yoxdursa (SQL islenmeyib) sessiz bos qalir
+        if (weak.length) {
+          sb.rpc("rpc_student_wrong_detail", { p_student_id: id }).then(function (list) {
+            if (!live()) return;
+            var by = {};
+            (list || []).forEach(function (x) { by[x.qid] = x; });
+            Array.prototype.forEach.call(document.querySelectorAll(".wans[data-qid]"), function (el) {
+              var x = by[el.getAttribute("data-qid")];
+              if (!x) return;
+              var none = !x.chosen || x.chosen === "—";
+              el.innerHTML = '<span class="wax">Yazdı: <b>' + (none ? "cavab verməyib" : qt(x.chosen)) + "</b></span>" +
+                (x.correct ? ' <span class="way">Düz: <b>' + qt(x.correct) + "</b></span>" : "");
+            });
+          }).catch(function () {});
+        }
+      }
       function sTabTo(v) {
         STAB = v;
         Array.prototype.forEach.call(document.querySelectorAll("#sTabs .seg"), function (x) {
@@ -6442,6 +6522,7 @@
         $("atMore").remove();
       });
       on("wMore", "click", function () {
+        wExp = true;
         Array.prototype.forEach.call(document.querySelectorAll("#wList .wq.hide"), function (x) {
           x.classList.remove("hide");
         });
@@ -6545,8 +6626,10 @@
         if (!b) return;
         var box = $("sh-" + b.getAttribute("data-att"));
         if (!box) return;
-        if (!box.classList.contains("hide")) { box.classList.add("hide"); return; }
-        box.classList.remove("hide");
+        if (!box.classList.contains("hide")) {
+          box.classList.add("hide"); b.classList.remove("open"); b.setAttribute("aria-expanded", "false"); return;
+        }
+        box.classList.remove("hide"); b.classList.add("open"); b.setAttribute("aria-expanded", "true");
         if (box.dataset.done) return;
         box.innerHTML = '<div class="skel" style="padding:12px 16px">Yüklənir…</div>';
         sb.rpc("rpc_attempt_sheet", { p_attempt_id: b.getAttribute("data-att") })

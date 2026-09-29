@@ -141,6 +141,23 @@ with sync_playwright() as pw:
             from (select id, row_number() over (order by id) rn
                     from public.questions where owner_type='platform' and topic_id = %s::uuid order by id limit 6) q(id, rn)""",
        (S0, TOPIC, TOPIC))
+    #  sagirdin secdiyi cavab (yanlis variant) - «Yazdi / Duz» ucun
+    db("""update public.attempt_answers aa set selected_option_ids = array[(
+            select o.id from public.question_options o
+             where o.question_id = aa.question_id and not o.is_correct order by o.ord limit 1)]""")
+    #  daha iki movzu: 55% (zeif) ve 70% (orta) - cubuq/faiz reng uygunlugu
+    AT = db("select id::text i from public.attempts where student_id = %s order by finished_at desc limit 1", (S0,), one=True)["i"]
+    tops = db("""select q.topic_id::text i from public.questions q
+                   join public.topics t on t.id = q.topic_id join public.subjects s on s.id = t.subject_id
+                  where q.owner_type='platform' and s.slug='riyaziyyat' and q.topic_id <> %s::uuid
+                    and q.level_id = (select level_id from public.questions where topic_id = %s::uuid limit 1)
+                  group by q.topic_id order by count(*) desc limit 2""", (TOPIC, TOPIC))
+    for tp_, nok, nbad in ((tops[0]["i"], 6, 5), (tops[1]["i"], 7, 3)):
+        db("""insert into public.attempt_answers (attempt_id, question_id, topic_id, is_correct, question_body)
+              select %s::uuid, q.id, %s::uuid, rn <= %s, 'Movzu numune ' || rn
+                from (select id, row_number() over (order by id) rn from public.questions
+                       where owner_type='platform' and topic_id = %s::uuid order by id limit %s) q(id, rn)""",
+           (AT, tp_, nok, tp_, nok + nbad))
     db("insert into public.assignments (class_id, test_id, assigned_by) values (%s::uuid, %s::uuid, %s::uuid)", (GA, VT, uid))
     db("insert into public.homework (class_id, created_by, body, due) values (%s::uuid, %s::uuid, %s, current_date)",
        (GA, uid, "12-ci paraqrafı oxu"))
@@ -213,7 +230,12 @@ with sync_playwright() as pw:
     ok("şagirdə ver" in pg.inner_text("#btnMake"), "düymə «Testi yığ və şagirdə ver»", pg.inner_text("#btnMake"))
     pg.wait_for_function("document.querySelector('#gPrev') && document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && document.querySelector('#gPrev').innerText.length > 5", timeout=15000)
     nA = db("select count(*) n from public.assignments where class_id=%s::uuid", (GA,), one=True)["n"]
-    pg.click("#btnMake"); pg.wait_for_selector(".pasgok", timeout=25000); pg.wait_for_timeout(800)
+    pg.click("#btnMake")
+    try:
+        pg.wait_for_selector(".pasgok", timeout=25000)
+    except Exception:
+        print("   gErr:", pg.inner_text("#gErr")[:200], "| prev:", pg.inner_text("#gPrev")[:150]); raise
+    pg.wait_for_timeout(800)
     ok("Yalnız" in pg.inner_text(".pasgok") and "qrupun qalanı yox" in pg.inner_text(".pasgok"), "vərəqdə «yalnız … görür — qrupun qalanı yox»", pg.inner_text(".pasgok")[:90].replace("\n", " "))
     yeni = db("select a.student_id::text s from public.assignments a where a.class_id=%s::uuid order by a.created_at desc limit 1", (GA,), one=True)
     ok(db("select count(*) n from public.assignments where class_id=%s::uuid", (GA,), one=True)["n"] == nA + 1, "bazada bir tapşırıq artdı")
@@ -222,6 +244,57 @@ with sync_playwright() as pw:
     pg.evaluate("location.hash = '#/gen'"); pg.wait_for_selector("#gsub", timeout=20000); pg.wait_for_timeout(600)
     ok(pg.locator("#gAsg").count() == 1 and pg.locator("#gAsg").input_value() == "", "sonrakı «Test yığ»: seçim təmizdir")
     ok(pg.inner_text("#btnMake").strip() == "Testi yığ", "düymə yenə «Testi yığ»", pg.inner_text("#btnMake"))
+
+    print("\nG · Səhvlər sekmesi")
+    pg.goto(PANEL + "#/s/" + S0 + "/" + GA); pg.reload(); pg.wait_for_selector("#sTabs", timeout=20000); pg.wait_for_timeout(1000)
+    diq = pg.locator("#stuDiq").evaluate("e => e.textContent")
+    import re as _re
+    mdiq = _re.search(r"(\d+)\s*səhv düzəliş", diq)
+    tabn = pg.locator("#sTabs [data-v='s'] .tn").inner_text().strip()
+    ok(mdiq and mdiq.group(1) == tabn, "sekmə rəqəmi = Diqqət kartındakı rəqəm (bir mənbə)", "%s / %s" % (mdiq.group(1) if mdiq else None, tabn))
+    pg.locator("#sTabs [data-v='s']").click(); pg.wait_for_selector(".wq .wans", state="attached", timeout=10000); pg.wait_for_timeout(1500)
+    ok("Ən çox səhv edilən suallar" in pg.locator("#tab-s").evaluate("e => e.textContent"), "başlıq «Ən çox səhv edilən suallar»")
+    ok("ən çox səhv edilən" not in pg.locator("#tab-s summary").first.inner_text().lower().replace("ən çox səhv edilən suallar", ""), "eyni söz iki dəfə yazılmır")
+    w0 = pg.locator("#wList .wq").first
+    wt = w0.locator(".wans").evaluate("e => e.textContent")
+    ok("Yazdı:" in wt and "Düz:" in wt, "hər sualda «Yazdı … · Düz …» var", wt[:90])
+    row = db("""select o.body chosen from public.attempt_answers aa join public.question_options o on o.id = aa.selected_option_ids[1]
+                where aa.question_body like 'Zeif movzu numune%%' limit 1""", one=True)
+    ok(row and any(row["chosen"] in pg.locator("#wList .wq").nth(i).locator(".wans").evaluate("e => e.textContent") for i in range(pg.locator("#wList .wq").count())),
+       "yazılan cavab bazadakı ilə üst-üstə düşür", row["chosen"] if row else None)
+    pg.screenshot(path="/tmp/claude-0/sh_sehvler.png", full_page=False)
+
+    print("\nI · Mövzular sekmesi")
+    pg.locator("#sTabs [data-v='m']").click(); pg.wait_for_selector("#topicBox .trow", timeout=10000); pg.wait_for_timeout(500)
+    ok(pg.locator("#topicBox .wdot").count() == 0, "adın üstündə tək qalan nöqtə yoxdur")
+    ok(pg.locator("#topicBox .trow.weakrow").count() >= 2, "zəif mövzu sətirləri sol xətlə", pg.locator("#topicBox .trow.weakrow").count())
+    #  cubuq rengi = faiz rengi (80/60)
+    pairs = pg.evaluate("""() => Array.from(document.querySelectorAll('#topicBox .trow')).map(r => ({
+        m: (r.querySelector('.meter') || {className: ''}).className, p: (r.querySelector('.pctv') || {className: ''}).className,
+        v: r.querySelector('.pctv') ? r.querySelector('.pctv').textContent : ''}))""")
+    okmap = all(("m-ok" in x["m"]) == ("pvh" in x["p"]) and ("m-mid" in x["m"]) == ("pvm" in x["p"]) and ("m-low" in x["m"]) == ("pvl" in x["p"]) for x in pairs)
+    ok(okmap and len(pairs) >= 3, "çubuğun rəngi faizin rəngi ilə eynidir", str([(x["v"], x["m"].replace("meter ", "")) for x in pairs]))
+    ok(pg.locator("#topicBox .tlink").count() >= 1, "«səhvlərinə bax →» keçidi var")
+    tl = pg.locator("#topicBox .tlink").first
+    tname = tl.get_attribute("data-tf")
+    tl.click(); pg.wait_for_selector("#wFilt .wfilt", timeout=10000); pg.wait_for_timeout(300)
+    ok(pg.locator("#tab-s").is_visible(), "keçid Səhvlər sekmesini açır")
+    vis = pg.locator("#wList .wq:visible")
+    ok(vis.count() >= 1 and all(vis.nth(i).get_attribute("data-tp") == tname for i in range(vis.count())), "yalnız «%s» mövzusunun sualları göstərilir" % tname, vis.count())
+    ok(tname in pg.inner_text("#wFilt"), "süzgəc zolağında mövzunun adı yazılıb")
+    pg.click("#wFiltX"); pg.wait_for_timeout(300)
+    ok(pg.locator("#wFilt .wfilt").count() == 0, "«Filtri təmizlə» zolağı silir")
+
+    print("\nH · Tarixçə sekmesi")
+    pg.locator("#sTabs [data-v='t']").click(); pg.wait_for_selector(".dynw", timeout=10000); pg.wait_for_timeout(400)
+    ok(pg.locator(".dynw .dyn i em").count() == 3, "hər sütunun üstündə rəqəm var", pg.locator(".dynw .dyn i em").count())
+    ok(pg.locator(".dynw .dgl").count() == 2, "60% və 80% xətləri")
+    ok(pg.locator(".dynw .dyd span").count() == 2, "ilk və son tarix")
+    ok("cavab vərəqi" not in pg.locator("#atList").evaluate("e => e.textContent"), "sətirdə ikinci sətrə düşən «cavab vərəqi» yazısı yoxdur")
+    ok(pg.locator("#atList .atr .ar").count() == 3, "sətirlərdə açılış oxu var")
+    pg.locator("#atList .atr").first.click(); pg.wait_for_timeout(1200)
+    ok(pg.locator("#atList .atr.open").count() == 1 and pg.locator("#atList .sheet:not(.hide)").count() == 1, "sətrə basanda cavab vərəqi açılır")
+    pg.screenshot(path="/tmp/claude-0/sh_tarixce.png", full_page=False)
 
     print("\nE · Ad təkrarı (görünən ad tam adla eynidir)")
     pg.goto(PANEL + "#/s/" + S1 + "/" + GA); pg.reload(); pg.wait_for_selector("#sTabs", timeout=20000); pg.wait_for_timeout(800)
@@ -236,8 +309,18 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/s/" + S0 + "/" + GA); pg.reload()
     pg.wait_for_selector("#stuPend .stpr", timeout=25000); pg.wait_for_timeout(1500)
     ok(scroll_x(pg) <= 1, "yana sürüşmə yoxdur", scroll_x(pg))
+    tabs = pg.evaluate("""() => { var w = document.getElementById('sTabs').getBoundingClientRect();
+        return Array.from(document.querySelectorAll('#sTabs .seg')).map(s => { var r = s.getBoundingClientRect();
+          return {l: r.left >= w.left - 1, r: r.right <= w.right + 1, clip: s.scrollWidth > s.clientWidth + 1}; }); }""")
+    ok(all(t["l"] and t["r"] and not t["clip"] for t in tabs), "4 sekmə telefonda sıxılmır və kəsilmir", str(tabs))
+    pg.locator("#sTabs").screenshot(path="/tmp/claude-0/sh_sekmeler_telefon.png")
     bt = pg.locator("#stuPend .stpr [data-sp]").first.bounding_box(); rw = pg.locator("#stuPend .stpr").first.bounding_box()
     ok(bt["x"] + bt["width"] <= rw["x"] + rw["width"] + 1, "«Mesajı kopyala» düyməsi sıranın içindədir")
+    pg.locator("#sTabs [data-v='s']").click(); pg.wait_for_selector(".wq .wans", state="attached", timeout=10000); pg.wait_for_timeout(1200)
+    ok(scroll_x(pg) <= 1, "Səhvlər sekmesi telefonda yana sürüşmür", scroll_x(pg))
+    wh = pg.locator("#wList .wq .wans").first.bounding_box()
+    ok(wh["height"] < 60, "«Yazdı/Düz» qısa yer tutur (iki sətir)", round(wh["height"]))
+    pg.locator("#wList").screenshot(path="/tmp/claude-0/sh_sehvler_telefon.png")
     pg.screenshot(path="/tmp/claude-0/sh_xulase_telefon.png", full_page=False)
     ctx.close()
     br.close()
