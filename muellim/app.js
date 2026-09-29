@@ -6064,12 +6064,14 @@
               "</p>"
             : "<p>Zəif mövzu yoxdur — hamısı 60%-dən yuxarı.</p>") +
           (vdN ? "<p><b>" + vdN + " səhv</b> düzəliş gözləyir.</p>" : "") +
-          '<div class="row" style="gap:8px;margin-top:4px">' +
-            (vdT.length ? '<button class="btn sm" id="vdT">Mövzular</button>' : "") +
-            (vdN ? '<button class="btn sm" id="vdS">Səhvlər</button>' : "") +
-            //  YENI: «Təkrar test ver» - bu səhvlərdən yalnız bu şagirdə test (Səhvlər sekmesindəki ilə eyni)
-            (YENI && vdN ? '<button class="btn sm go" id="vdF">' + ic("gen") + "Təkrar test ver</button>" : "") +
-          "</div>" +
+          //  YENI: «Mövzular» / «Səhvlər» düymələri çıxarıldı - eyni sekmələr yuxarıdakı zolaqda var (29.09)
+          ((!YENI && (vdT.length || vdN)) || (YENI && vdN)
+            ? '<div class="row" style="gap:8px;margin-top:4px">' +
+              (!YENI && vdT.length ? '<button class="btn sm" id="vdT">Mövzular</button>' : "") +
+              (!YENI && vdN ? '<button class="btn sm" id="vdS">Səhvlər</button>' : "") +
+              //  YENI: «Təkrar test ver» - bu səhvlərdən yalnız bu şagirdə test (Səhvlər sekmesindəki ilə eyni)
+              (YENI && vdN ? '<button class="btn sm go" id="vdF">' + ic("gen") + "Təkrar test ver</button>" : "") +
+            "</div>" : "") +
           (YENI ? '<div id="vdFMsg"></div>' : "");
       }
       /*  YENI: «Diqqət» kartı - GOZLEYEN tapsiriqlar (yazili + test, «Mesaji kopyala») birinci,
