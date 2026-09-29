@@ -3004,7 +3004,7 @@
             '<p class="dkm1">' + esc(ls.topic) + "</p>" +
             (ls.test_id
               ? (av != null
-                  ? '<div class="dkres"><span class="dkbig ' + (av >= 70 ? "ok" : av >= 50 ? "mid" : "low") + '">' + av +
+                  ? '<div class="dkres"><span class="dkbig ' + (av >= 70 ? "n-hi" : av >= 50 ? "n-mid" : "n-low") + '">' + av +
                     '%</span><span class="dkn">test nəticəsi · ' + (ls.takers || 0) + " şagird</span></div>"
                   : '<p class="muted dkp">Test verilib, hələ yazan yoxdur.</p>')
               : "") +

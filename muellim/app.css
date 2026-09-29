@@ -2568,8 +2568,8 @@ details.more.newasg>summary{
 .dkbar{height:6px;border-radius:99px;background:var(--n-150);margin-top:10px;overflow:hidden}
 .dkbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),#22b8a5)}
 .dkres{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
-.dkbig{font-size:34px;font-weight:720;letter-spacing:-.03em;line-height:1}
-.dkbig.ok{color:var(--ok)}.dkbig.mid{color:#c98a12}.dkbig.low{color:#d1500b}
+.dkbig{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.dkbig.n-hi{color:var(--ok)}.dkbig.n-mid{color:#c98a12}.dkbig.n-low{color:#d1500b}
 .dk .btn.sm{margin-top:2px}
 .dk.k-ders .warmline{background:var(--n-0)}
 .hwl.tam{display:block;margin:0;padding:0;border:0;background:none}
