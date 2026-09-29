@@ -1698,10 +1698,12 @@
     Promise.all([
       sb.rpc("rpc_lesson_prep", { p_class_id: gid }),
       sb.rpc("rpc_class_students", { p_class_id: gid }).catch(function () { return null; }),
-      sb.select("classes", { select: "id,name", eq: { id: gid } }).catch(function () { return []; })
+      sb.select("classes", { select: "id,name", eq: { id: gid } }).catch(function () { return []; }),
+      sb.rpc("rpc_class_assignments", { p_class_id: gid }).catch(function () { return null; })
     ]).then(function (rr) {
       if (!live() || !$("htBox")) return;
       var d = rr[0] || {}, hw = d.hw || null, und = hw ? (hw.undone || []) : [];
+      var acik = ((rr[3] || {}).items || []).filter(function (a) { return a.open !== false; });
       var pend = d.pending || [];
       var cn = ((rr[2] || [])[0] || {}).name || "";
       var ids = {};
@@ -1718,7 +1720,7 @@
         var lnk = sid ? "#/s/" + esc(sid) + "/" + esc(gid) : "#/g/" + esc(gid) + "/s";
         return '<div class="mrow udr"><a class="udl" href="' + lnk + '">' + av(name) +
           '<span class="g"><b>' + esc(name) + "</b><i>" + esc(alt) + "</i></span></a>" +
-          '<button type="button" class="btn sm ghost" data-ud="' + (msgs.length - 1) + '">Xatırlat</button></div>';
+          '<button type="button" class="btn sm ghost" data-ud="' + (msgs.length - 1) + '">Mesajı kopyala</button></div>';
       }
       var h = "";
       if (hw) {
@@ -1730,10 +1732,14 @@
         if (und.length) {
           h += '<div class="card pad0 menu">' + und.map(function (n) {
             var fn0 = firstName(n) || n;
+            /*  Mesaj SAGIRDIN yox, AILENIN oxuyacagi kimi yazilir (kicik sinifde
+                adeten valideyne gedir): «Ad üçün ... gözləyir».  */
             return row(n, ids[n] || "", "yazılı tapşırığı etməyib",
-              "Salam, " + fn0 + "! Bil10-da ev tapşırığın gözləyir: «" + String(hw.body || "").replace(/\s+/g, " ").trim() + "»." +
+              "Salam! " + fn0 + " üçün Bil10-da ev tapşırığı gözləyir: «" +
+              String(hw.body || "").replace(/\s+/g, " ").trim() + "»." +
               (hw.due ? "\nSon tarix: " + hwDay(hw.due) + "." : "") +
-              (url ? "\nLink: " + url : "") + "\nKodunla gir — «Tapşırıqlar»da.");
+              (url ? "\nGirmək üçün: " + url : "") +
+              "\nÖz kodu ilə daxil olsun — «Tapşırıqlar»da görünür.");
           }).join("") + "</div>";
         } else {
           h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
@@ -1746,9 +1752,18 @@
         if (pend.length) {
           h += '<div class="card pad0 menu">' + pend.map(function (x) {
             var n = Number(x.n) || 1, fn1 = firstName(x.name) || x.name;
-            return row(x.name, x.student_id, n + " test gözləyir",
-              "Salam, " + fn1 + "! Bil10-da " + (n > 1 ? n + " testin" : "testin") + " gözləyir." +
-              (url ? "\nLink: " + url : "") + "\nKodunla gir — «Tapşırıqlar»da.");
+            /*  Hansi test(ler)?  Yalniz DEQIQ bilinende yazilir: bu sagirdin ust-uste dusen
+                aciq tapsiriqlari sayi gozleyen testlerin sayina beraberdirse hamisi gozleyir.
+                Sayi cox olarsa (bezisini edib) hansi oldugu bilinmir - yalniz say.  */
+            var tpq = acik.filter(function (a) { return !a.student_id || a.student_id === x.student_id; });
+            var basl = tpq.length === n ? tpq.map(function (a) { return "«" + a.title + "»"; }) : [];
+            return row(x.name, x.student_id,
+              n + " test gözləyir" + (basl.length ? " · " + basl.join(", ") : ""),
+              "Salam! " + fn1 + " üçün Bil10-da " +
+              (basl.length ? (n > 1 ? n + " test gözləyir: " : "test gözləyir: ") + basl.join(", ") + "."
+                           : (n > 1 ? n + " test gözləyir." : "test gözləyir.")) +
+              (url ? "\nGirmək üçün: " + url : "") +
+              "\nÖz kodu ilə daxil olsun — «Tapşırıqlar»da görünür.");
           }).join("") + "</div>";
         } else {
           h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +

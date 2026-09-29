@@ -6,8 +6,8 @@
 açılırdı, adlar aşağıdakı kartda idi (say ilə siyahı üst-üstə düşmürdü).
 
   A  İcmal sətri: say + «yazılı» sözü; basanda #/ht/<qrup> açılır
-  B  səhifədə EYNİ say qədər ad var; hər adın yanında «Xatırlat»; ad hesabata aparır
-  C  «Xatırlat» hazır mesajı kopyalayır (ad, tapşırıq mətni, «Kodunla gir»)
+  B  səhifədə EYNİ say qədər ad var; hər adın yanında «Mesajı kopyala»; ad hesabata aparır
+  C  «Mesajı kopyala» hazır mesajı kopyalayır (ad, tapşırıq mətni / test adı, giriş)
   D  «Geri» İcmala qaytarır (düymə və brauzerin geri düyməsi)
   E  test bölməsi; boş qrup üçün boş hal
   F  telefonda yana sürüşmə yoxdur, düymə sıranın içindədir
@@ -154,7 +154,7 @@ with sync_playwright() as pw:
     ok("12-ci paraqrafı oxu" in bas, "tapşırığın mətni yazılıb")
     yaz = pg.locator("#htBox .menu").first.locator(".udr")
     ok(yaz.count() == 2, "yazılı bölmədə 2 sıra var (say ilə eyni)", yaz.count())
-    ok(all(yaz.nth(i).locator("[data-ud]").count() == 1 for i in range(2)), "hər sırada «Xatırlat» var")
+    ok(all(yaz.nth(i).locator("[data-ud]").count() == 1 for i in range(2)), "hər sırada «Mesajı kopyala» var")
     ok(pg.locator("#htBox .udr").count() == 4, "cəmi 4 sıra (2 yazılı + 2 test)", pg.locator("#htBox .udr").count())
     ok(pg.locator("#htBox a.mrow", has_text="Tapşırıqlara bax").count() == 1, "«Tapsiriqlara bax» menyu sirasi kimidir (iconlu, oxlu)")
     pg.screenshot(path="/tmp/claude-0/ht_sehife_masaustu.png", full_page=True)
@@ -162,16 +162,43 @@ with sync_playwright() as pw:
     ok(pg.url.endswith("#/a/" + GA), "«Tapsiriqlara bax» tapsiriqlar ekranina aparir", pg.url[-20:])
     pg.go_back(); pg.wait_for_selector("#htBox .udr", timeout=15000)
 
-    print("\nC · «Xatırlat»")
+    print("\nC · «Mesajı kopyala»")
     yaz.first.locator("[data-ud]").click(); pg.wait_for_timeout(500)
     ok("Kopyalandı" in yaz.first.locator("[data-ud]").inner_text(), "düymə «Kopyalandı» deyir", yaz.first.locator("[data-ud]").inner_text())
     clip = pg.evaluate("navigator.clipboard.readText()")
-    ok("Salam" in clip and "12-ci paraqrafı oxu" in clip and "Kodunla gir" in clip, "mesaj kopyalanıb", clip.replace("\n", " | ")[:100])
-    ok("Şagird" in clip.split("!")[0], "mesaj şagirdin adı ilə başlayır")
+    ok(clip.startswith("Salam! Şagird üçün Bil10-da ev tapşırığı gözləyir: «12-ci paraqrafı oxu"), "yazılı mesaj: ailənin oxuyacağı formada", clip.replace("\n", " | ")[:110])
+    ok("Son tarix:" in clip and "Öz kodu ilə daxil olsun" in clip and "Girmək üçün:" in clip, "son tarix və giriş təlimatı var")
+    ok("Kodunla gir" not in clip, "köhnə «Kodunla gir» sözü yoxdur")
+    #  test mesaji: bir aciq tapsiriq, 2 sagird - hansi test oldugu YAZILIR
+    trow = pg.locator("#htBox .menu").nth(1).locator(".udr").first
+    ok("Vurma cədvəli" in trow.inner_text(), "test sırasında testin adı görünür", trow.inner_text().replace("\n", " ")[:80])
+    trow.locator("[data-ud]").click(); pg.wait_for_timeout(500)
+    clip2 = pg.evaluate("navigator.clipboard.readText()")
+    ok("Bil10-da test gözləyir: «Vurma cədvəli" in clip2, "test mesajı testin adını deyir", clip2.replace("\n", " | ")[:110])
     yaz.first.locator("a.udl").click(); pg.wait_for_timeout(1500)
     ok("/s/" in pg.url, "ada basanda şagirdin hesabatı açılır", pg.url[-40:])
     pg.go_back(); pg.wait_for_selector("#htBox .udr", timeout=15000)
     ok(pg.url.endswith("#/ht/" + GA), "brauzerin geri düyməsi səhifəyə qaytarır")
+
+    print("\nC2 · Test adı yalnız dəqiq bilinəndə yazılır")
+    v1 = db("select id::text i from public.tests where slug='riy-3-vurma-1'", one=True)["i"]
+    db("""insert into public.assignments (class_id, test_id, assigned_by)
+          select %s::uuid, t.id, %s::uuid from public.tests t
+           where t.owner_type = 'platform' and t.status = 'published' and t.id <> %s::uuid
+             and t.slug <> 'riy-3-vurma-1' order by t.slug limit 1""", (GA, uid, v1))
+    db("insert into public.attempts (test_id, student_id, status, percent, finished_at) values (%s::uuid, %s::uuid, 'submitted', 50, now())", (v1, SIDS[0]))
+    pg.goto(PANEL + "#/ht/" + GA); pg.reload(); pg.wait_for_selector("#htBox .udr", timeout=20000); pg.wait_for_timeout(600)
+    t1 = pg.locator("#htBox .menu").nth(1).locator(".udr", has_text="1 test gözləyir")
+    t2 = pg.locator("#htBox .menu").nth(1).locator(".udr", has_text="2 test gözləyir")
+    ok(t1.count() == 1 and t2.count() == 1, "biri 1, biri 2 test gözləyir", "%d / %d" % (t1.count(), t2.count()))
+    ok("«" not in t1.first.inner_text(), "1 test gözləyən: hansı olduğu bilinmir - ad YAZILMIR (yanlış ad yoxdur)")
+    t1.first.locator("[data-ud]").click(); pg.wait_for_timeout(400)
+    c1 = pg.evaluate("navigator.clipboard.readText()")
+    ok("1 test gözləyir" in c1 or "test gözləyir." in c1, "mesajda yalnız say", c1.replace("\n", " | ")[:90])
+    ok("«" not in c1.split("\n")[0], "mesajda test adı uydurulmur")
+    t2.first.locator("[data-ud]").click(); pg.wait_for_timeout(400)
+    c2 = pg.evaluate("navigator.clipboard.readText()")
+    ok("2 test gözləyir: «" in c2 and c2.split("\n")[0].count("«") == 2, "2 test gözləyən: iki testin adı yazılır", c2.replace("\n", " | ")[:120])
 
     print("\nD · Geri")
     pg.click("#htBack"); pg.wait_for_selector("#yDiq", timeout=15000)
@@ -191,7 +218,7 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/ht/" + GA); pg.reload(); pg.wait_for_selector("#htBox .udr", timeout=20000); pg.wait_for_timeout(600)
     ok(scroll_x(pg) <= 1, "yana sürüşmə yoxdur", scroll_x(pg))
     rw = pg.locator("#htBox .udr").first.bounding_box(); bt = pg.locator("#htBox .udr [data-ud]").first.bounding_box()
-    ok(bt["x"] + bt["width"] <= rw["x"] + rw["width"] + 1 and bt["x"] >= rw["x"], "«Xatırlat» düyməsi sıranın içindədir")
+    ok(bt["x"] + bt["width"] <= rw["x"] + rw["width"] + 1 and bt["x"] >= rw["x"], "«Mesajı kopyala» düyməsi sıranın içindədir")
     ok(bt["height"] >= 30, "düymənin hündürlüyü kifayətdir", round(bt["height"]))
     pg.screenshot(path="/tmp/claude-0/ht_sehife_telefon.png", full_page=True)
     ctx.close()
