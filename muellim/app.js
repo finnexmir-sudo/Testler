@@ -6208,12 +6208,7 @@
              "</div><b>Hələ cavab yoxdur</b>Şagird test işlədikcə " +
              "mövzular burada yığılacaq.</div></div>";
       } else {
-        hM += (YENI
-                ? '<div class="tsum">' + (sweakAll.length
-                    ? "<b>" + sweakAll.length + "</b> zəif mövzu <span>(60%-dən aşağı)</span>"
-                    : "Zəif mövzu yoxdur <span>(hamısı 60%-dən yuxarı)</span>") + "</div>"
-                : "") +
-          (subjs.length > 1
+        hM +=           (subjs.length > 1
                 ? '<div class="chips recf" id="tSub">' +
                   '<button class="chip' + (TSUB ? "" : " on") + '" data-ts="">Hamısı</button>' +
                   subjs.map(function (x) {
@@ -6256,6 +6251,24 @@
         if (sure.length) {
           /*  Zeifden yaxsiya; yaxsi (>=80%) movzular yigilmis - muellime
               zeif olanlar lazimdir.  Uzun siyahi "Daha N" ile acilir.  */
+          /*  YENI: zeif (<60) ve «tekrar lazimdir» (60-79) AYRI bolmelerdedir - evvel bir
+              siyahida idi, «2» reqemi hansi setirleri saydigi bilinmirdi (29.09).  */
+          var wkN = YENI ? need.filter(function (t) { return Number(t.ratio) < 60; }) : [];
+          var mdN = YENI ? need.filter(function (t) { return Number(t.ratio) >= 60; }) : [];
+          var mdV = TEXP ? mdN : mdN.slice(0, Math.max(3, TCAP - wkN.length));
+          if (YENI && need.length) {
+            h2 += (wkN.length
+                    ? '<div class="tsec w">Zəif mövzular · ' + wkN.length + " <span>60%-dən aşağı</span></div>" +
+                      '<div class="card pad0">' + wkN.map(topicRow).join("") + "</div>"
+                    : '<div class="ok">' + ic("check") + "<span>Zəif mövzu yoxdur — hamısı 60%-dən yuxarı.</span></div>") +
+                  (mdN.length
+                    ? '<div class="tsec">Təkrar lazımdır · ' + mdN.length + " <span>60–79%</span></div>" +
+                      '<div class="card pad0">' + mdV.map(topicRow).join("") +
+                      (mdN.length > mdV.length
+                        ? '<button class="morebtn" id="tMore">Daha ' + (mdN.length - mdV.length) + " mövzu göstər</button>"
+                        : "") + "</div>"
+                    : "");
+          } else
           h2 += (need.length
                   ? '<div class="card pad0">' + vis.map(topicRow).join("") +
                     (need.length > vis.length
