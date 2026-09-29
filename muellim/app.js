@@ -6371,6 +6371,12 @@
       defe «testi gondermek olmur» yazdi - mexanizm isleyirdi, sadece
       hec ne demirdik (25.09).  MADE kimi: qoyulur, bir defe oxunur.  */
   var ASG = null;
+  /*  Generatorda qrup secilib, test yigilib, amma TAPSIRIQ VERILMEYIB
+      (abune, limit ...).  Evvel xeta .catch(function(){}) ile UDULURDU:
+      muellim «Test hazirdir, indi qrupa verin» oxuyurdu ve niye
+      verilmediyini bilmirdi (29.09, istifadeci: «test yig etdim ama
+      teyin ede bilmedim»).  Indi sebeb vereqde yazilir.  */
+  var ASG_ERR = null;
 
   function genForClass(g) {
     var f = genFilter();
@@ -8851,16 +8857,28 @@
     var f = genFilter();
     $("gErr").innerHTML = "";
     setBusy("btnMake", true, "Testi yığ");
+    //  Qrupun ADI indi oxunur - yigandan sonra siyahi deyise biler
+    var qadSel = $("gAsg"), qad = "";
+    if (f.asg && qadSel && qadSel.selectedIndex >= 0) {
+      qad = qadSel.options[qadSel.selectedIndex].textContent;
+    }
+    var qid = f.asg;
+    ASG = null; ASG_ERR = null;
     sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: (f.title || "").trim() || genAutoTitle(f) })
       .then(function (v) {
         //  qrup secilibse test derhal tapsiriq kimi gedir; tapsiriq
-        //  alinmasa da test hazirdir - veraqde elle vermek olar
-        if (!f.asg) return v;
+        //  alinmasa da test hazirdir - veraqde elle vermek olar.
+        //  Ikisi de vereqde YAZILIR: verildise kime, verilmediyse niye.
+        if (!qid) return v;
+        var closes = new Date(Date.now() + 7 * 864e5);
         return sb.rpc("rpc_assign_test", {
-          p_class_id: f.asg, p_test_id: v.test_id,
-          p_closes_at: new Date(Date.now() + 7 * 864e5).toISOString(),
-          p_max_attempts: 1
-        }).catch(function () {}).then(function () { return v; });
+          p_class_id: qid, p_test_id: v.test_id,
+          p_closes_at: closes.toISOString(), p_max_attempts: 1
+        }).then(function () {
+          ASG = { hami: true, qrup: qad, who: "", son: closes.toISOString(), cehd: 1 };
+        }, function (e) {
+          ASG_ERR = { qrup: qad, cid: qid, msg: fail(e) };
+        }).then(function () { return v; });
       })
       .then(function (v) {
         busy = false;
@@ -9214,7 +9232,8 @@
       if (!live()) return;
       var fresh = MADE === id; MADE = "";
       var verildi = ASG; ASG = null;
-      drawPaper(res[0] || {}, res[1] || [], res[2] || [], res[3] || [], fresh, verildi);
+      var xeta = ASG_ERR; ASG_ERR = null;
+      drawPaper(res[0] || {}, res[1] || [], res[2] || [], res[3] || [], fresh, verildi, xeta);
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
@@ -9341,7 +9360,7 @@
     setTimeout(off, 2000);
   }
 
-  function drawPaper(t, classes, asgs, students, fresh, verildi) {
+  function drawPaper(t, classes, asgs, students, fresh, verildi, xeta) {
     students = students || [];
     //  Yalniz QRUP teyinatlari qrupu secimden cixarir; ferdi teyinat
     //  cixarmir - hemin qrupun basqa sagirdine de vermek olar.
@@ -9473,7 +9492,7 @@
             ? '<div class="ok pasgok">' + ic("check") + "<span>" +
                 "<b>Tapşırıq verildi.</b> " +
                 (verildi.hami
-                  ? esc(verildi.qrup) + " qrupunun bütün şagirdləri bu testi indi görür."
+                  ? "«" + esc(verildi.qrup) + "» — bütün şagirdlər bu testi indi görür."
                   //  «Kimə» siyahisinda ad onsuz da «yalnız Aysel M.» kimidir -
                   //  bas sozu atiriq, yoxsa «yalnız ... (yalnız o)» cixir.
                   : "Yalnız " + esc(verildi.who.replace(/^yalnız\s+/i, "")) +
@@ -9489,7 +9508,12 @@
                 "göndərmək lazım deyil. Nəticə həll edən kimi bu panelə düşür." +
               "</span></div>"
             : "") +
-          (fresh && !verildi && (freeCls.length || !classes.length)
+          //  Tapsiriq VERILMEDI - sebebi yazilir, forma o qrupu secili acir
+          (xeta
+            ? msg("warn", "Test yığıldı, amma «" + xeta.qrup + "» qrupuna tapşırıq " +
+                "verilə bilmədi: " + xeta.msg + " Aşağıdan özünüz verə bilərsiniz.")
+            : "") +
+          (fresh && !verildi && !xeta && (freeCls.length || !classes.length)
             ? msg("ok", classes.length
                 ? "Test hazırdır. İndi onu qrupa verin — şagird " +
                   "dərhal öz siyahısında görəcək."
@@ -9518,14 +9542,20 @@
           ? '<p class="muted" style="margin:0">Bu test bütün qruplarınıza verilib.</p>'
           : "") +
         (freeCls.length
-          ? '<div><label for="pWho">Kimə</label>' +
+          ? (given.length || verildi
+              //  Verilmis qrup varsa forma BASQA qrup ucundur - yoxsa
+              //  muellim «hara verirem?» sorusunda qalir (29.09)
+              ? '<p class="muted" style="margin:0 0 10px"><b>Başqa qrupa da vermək üçün:</b></p>'
+              : "") +
+            '<div><label for="pWho">Kimə</label>' +
               '<select id="pWho"></select></div>' +
             '<p class="muted" style="margin:-8px 0 14px">Tək şagird ' +
               "seçsəniz, tapşırığı yalnız o görəcək — qrupun qalanı yox.</p>" +
             '<div class="fieldrow">' +
               '<div><label for="pCls">Qrup</label><select id="pCls">' +
                 freeCls.map(function (c) {
-                  return '<option value="' + esc(c.id) + '">' + esc(c.name) +
+                  return '<option value="' + esc(c.id) + '"' +
+                    (xeta && xeta.cid === c.id ? " selected" : "") + ">" + esc(c.name) +
                     (soloN[c.id] ? " · " + soloN[c.id] + " şagirdə verilib" : "") +
                     "</option>";
                 }).join("") + "</select></div>" +

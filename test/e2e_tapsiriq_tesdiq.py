@@ -73,7 +73,7 @@ with sync_playwright() as pw:
     pg.fill("#pass", "tesdiqparol1"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=20000)
     pg.select_option("#atype", "tutor"); pg.fill("#aname", "Tesdiq hesabi")
-    pg.click("#btnSetup"); pg.wait_for_selector("#gForm", timeout=20000)
+    pg.click("#btnSetup"); pg.wait_for_timeout(4500)   # yeni gorunusde #gForm ana sehifede yoxdur
 
     uid = db("select id::text i from auth.users where email=%s", (MAIL,), one=True)["i"]
     acc = db("select id::text i from public.accounts where owner_id=%s::uuid", (uid,), one=True)["i"]
@@ -110,7 +110,7 @@ with sync_playwright() as pw:
     t = pg.inner_text(".pasgok") if pg.locator(".pasgok").count() else ""
     print("   mətn: " + t.replace("\n", " ")[:150])
     ok("Tapşırıq verildi" in t, "«Tapşırıq verildi» yazir")
-    ok(QRUP in t and "bütün şagirdləri" in t, "KIME getdiyi yazilir (butun qrup, adi ile)")
+    ok(QRUP in t and "bütün şagirdlər" in t, "KIME getdiyi yazilir (butun qrup, adi ile)")
     ok("öz giriş kodu" in t and "bil10.az/sagird" in t, "sagird NECE gorecek - yazilir")
     ok("link, fayl və ya mesaj göndərmək lazım deyil" in t,
        "elave gondermek lazim olmadigi ACIQ yazilir")

@@ -69,7 +69,7 @@ with sync_playwright() as pw:
     pg.fill("#pass", "nxtparol123"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=20000)
     pg.select_option("#atype", "tutor"); pg.fill("#aname", "Nxt hesabi")
-    pg.click("#btnSetup"); pg.wait_for_selector("#gForm", timeout=20000)
+    pg.click("#btnSetup"); pg.wait_for_timeout(4500)   # yeni gorunusde #gForm ana sehifede yoxdur
 
     uid = db("select id::text i from auth.users where email=%s", (MAIL,), one=True)["i"]
     acc = db("select id::text i from public.accounts where owner_id=%s::uuid", (uid,), one=True)["i"]

@@ -90,7 +90,7 @@ with sync_playwright() as pw:
     mp.fill("#pass", "qrafikparol1"); mp.click("#btnAuth")
     mp.wait_for_selector("#btnSetup", timeout=20000)
     mp.select_option("#atype", "tutor"); mp.fill("#aname", "Qrafik hesabi")
-    mp.click("#btnSetup"); mp.wait_for_selector("#gForm", timeout=20000)
+    mp.click("#btnSetup"); mp.wait_for_timeout(4500)   # yeni gorunusde #gForm ana sehifede yoxdur
 
     acc = db("""select a.id::text i from public.accounts a
                  join auth.users u on u.id = a.owner_id where u.email = 'qrafik@t.az'""",
