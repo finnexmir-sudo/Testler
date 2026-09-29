@@ -2506,3 +2506,28 @@ button.mrow{width:100%;text-align:left;background:none;border:0;color:inherit;fo
 .mrow.tpy .rbar i.low{background:var(--err)}
 .tchip{flex:0 0 auto;font-size:12px;font-weight:650;white-space:nowrap;padding-top:2px}
 .tchip.tl{color:var(--err)} .tchip.tm{color:#9a6700} .tchip.tk{color:var(--ok)}
+
+/*  YENI: sagirdin hesab kart (29.09).  Kodlar, valideyn girisi, ad,
+    kod yenileme, dayandirma - kohne gorunusde sagird SIYAHISINDA idi,
+    yenide sagird sehifesindedir.  .card ustunden .card.stkart ile ezilir. */
+.card.stkart{padding:0;margin:0 0 14px;overflow:hidden}
+.card.stkart>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;
+  padding:13px 16px;font-size:14.5px;font-weight:620;color:var(--fg)}
+.card.stkart>summary::-webkit-details-marker{display:none}
+.card.stkart>summary svg{width:16px;height:16px;flex:0 0 16px}
+.card.stkart>summary i{font-style:normal;font-weight:400;font-size:12.5px;color:var(--fg-3);margin-left:auto}
+.card.stkart[open]>summary{border-bottom:1px solid var(--n-100)}
+.stkart .skl,.stkart .skr,.stkart .skn,.stkart .skedit{margin:0;padding:11px 16px}
+.stkart .skl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stkart .skc{flex:0 0 68px;font-size:11px;font-weight:600;color:var(--fg-3);
+  text-transform:uppercase;letter-spacing:.04em}
+.stkart .skl .code{flex:0 0 auto}
+.stkart .btn.icon{flex:0 0 30px;width:30px;min-height:30px}
+.stkart .skl .btn[data-sk="wa"],.stkart .skl .btn[data-sk="pwa"]{margin-left:auto}
+.stkart .skr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stkart .skt,.stkart .skd,.stkart .skedit{border-top:1px solid var(--n-100)}
+.stkart .skd .btn{color:var(--err);border-color:var(--n-200)}
+.stkart .skd .btn:hover{background:var(--err-tint);border-color:var(--err-line)}
+.stkart .skd .muted{flex:1;min-width:140px;font-size:12px;color:var(--fg-3)}
+.stkart .skn{font-size:12px;color:var(--fg-3);line-height:1.45;padding-top:0}
+.stkart .skedit input{width:100%}

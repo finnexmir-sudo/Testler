@@ -422,7 +422,9 @@ with sync_playwright() as pw:
     ok(wa and first_code and first_code in wa, "linkde giris kodu var")
 
     pg.locator("[data-copy]").first.click(); pg.wait_for_timeout(400)
-    ok("Kopyalandı" in pg.inner_text("#stu"), "kopyala duymesi teqdiq verir")
+    #  Ikon duymede yazi sigmirdi (29.09) - teqdiq indi yalniz ✓ isaresidir
+    ok("M4 10l3.6 3.6" in pg.locator("[data-copy]").first.inner_html(),
+       "kopyala duymesi teqdiq verir (✓ isaresi)")
     ok(pg.evaluate("navigator.clipboard.readText()") == first_code,
        "kod lovheye kopyalanir")
 

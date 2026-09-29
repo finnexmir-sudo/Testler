@@ -4622,7 +4622,9 @@
   function copyText(t, btn) {
     var done = function () {
       var old = btn.innerHTML;
-      btn.innerHTML = ic("check") + "Kopyalandı";
+      //  30 px-lik ikon duymede «Kopyalandi» yazisi sigmir, kodun ustune
+      //  dusurdu (29.09) - orada yalniz isare.
+      btn.innerHTML = ic("check") + (btn.classList.contains("icon") ? "" : "Kopyalandı");
       setTimeout(function () { btn.innerHTML = old; }, 1500);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -5561,6 +5563,171 @@
   }
 
   var STAB = "x";   // sagird hesabinda secilmis sekme (sessiya boyu)
+  /* ================================================================
+     YENI: SAGIRDIN HESAB KARTI (29.09)
+
+     Yeni gorunusde sagird setiri UC SEYE endirilmisdi (ad, netice,
+     novbeti addim) ve koddaki serh deyirdi: «redakte ve kodlar sagirdin
+     oz sehifesindedir».  Amma sagird sehifesinde bunlar YOX idi:
+       * kodu kopyala / WhatsApp ile gonder
+       * valideyn kodu ve valideyn girisi (ac / bagla / yenile)
+       * sagirdin adini deyis
+       * giris kodunu yenile
+       * dayandir / davam etdir (paketde yer bosaltmaq)
+     Siyahida yazilirdi «hele girmeyib - kodu gonderin», gondermek ucun
+     ise duyme yox idi.  Yeni gorunusu standart edenden sonra istifadeci
+     tapdi: «bezi yerleri gormurem».  (Yoxlama: test/_yeni_kohne_ferq.py)
+
+     Kohne funksiyalar (renameStudent, parentAccess, setActive) sagird
+     SIYAHISININ DOM-una baglidir - [data-row] axtarir ve sonda
+     loadStudents() cagirir.  Burada eyni RPC-ler oz kartimizdan cagirilir.
+     Kart yalniz YENI gorunusde cizilir; kohne gorunus deyismir.
+     ================================================================ */
+  function stuKart(sid, classId, live) {
+    if (!$("stuKart")) return;
+    sb.rpc("rpc_class_students", { p_class_id: classId }).then(function (d) {
+      if (!live() || !$("stuKart")) return;
+      var st = ((d || {}).students || []).filter(function (x) { return x.id === sid; })[0];
+      if (!st) { $("stuKart").innerHTML = ""; return; }
+      draw(st);
+    }).catch(function () {});
+
+    //  Yalniz kart yenilenir (valideyn emeliyyatlari) ...
+    function again() { stuKart(sid, classId, live); }
+    //  ... ve ya BUTUN sehife: ad, giris kodu, yer sayi basliqda da var
+    function whole() { refreshContext().catch(function () {}); screenStudent(sid, classId); }
+
+    function act(el, txt, fn, done) {
+      if (el.disabled) return;
+      var old = el.innerHTML;
+      el.disabled = true; el.textContent = txt;
+      fn().then(done).catch(function (e) {
+        el.disabled = false; el.innerHTML = old; alert(fail(e));
+      });
+    }
+
+    function line(cap, code, wa, cp) {
+      return '<div class="skl"><span class="skc">' + cap + "</span>" +
+        '<span class="code key">' + esc(code) + "</span>" +
+        '<button class="btn sm ghost icon" data-sk="' + cp + '" title="Kopyala" aria-label="Kopyala">' +
+          ic("copy") + "</button>" +
+        '<button class="btn sm" data-sk="' + wa + '">' + ic("send") + "WhatsApp-la göndər</button></div>";
+    }
+
+    function draw(st) {
+      var b = $("stuKart");
+      var aktiv = st.is_active !== false;
+      var girib = !!(st.seen_at || st.last_at);
+      var body;
+      if (!aktiv) {
+        body = '<p class="muted skn">Dayandırılıb — giriş bağlıdır, paketdə yer tutmur. ' +
+                 "Keçmiş nəticələri qalır.</p>" +
+               '<div class="skr"><button class="btn sm" data-sk="on">Davam etdir</button></div>';
+      } else {
+        body = line("Şagird", st.login_code, "wa", "cp") +
+          (st.parent_code
+            ? line("Valideyn", st.parent_code, "pwa", "pcp") +
+              '<div class="skr"><button class="btn sm ghost" data-sk="pnew">' + ic("refresh") +
+                "Valideyn kodunu yenilə</button>" +
+              '<button class="btn sm ghost" data-sk="poff">Valideyn girişini bağla</button></div>'
+            : '<div class="skl"><span class="skc">Valideyn</span>' +
+              '<button class="btn sm ghost" data-sk="pon">Valideyn girişini aç</button></div>' +
+              '<p class="muted skn">Valideyn uşağın dərslərini və nəticələrini görəcək. ' +
+                "İstədiyiniz vaxt bağlaya bilərsiniz.</p>") +
+          '<div class="skr skt"><button class="btn sm ghost" data-sk="ren">' + ic("pen") +
+            "Adı dəyiş</button></div>" +
+          '<div id="skEdit"></div>' +
+          '<div class="skr skd"><button class="btn sm ghost" data-sk="reset">' + ic("refresh") +
+            'Giriş kodunu yenilə</button><span class="muted">Köhnə kod etibarsız olur.</span></div>' +
+          '<div class="skr skd"><button class="btn sm ghost" data-sk="off">Dayandır</button>' +
+            '<span class="muted">Giriş bağlanır, yer boşalır, nəticələr qalır.</span></div>';
+      }
+      //  Sagird girene qeder ACIQ (kodu gondermek lazimdir), girenden
+      //  sonra yigilir - kohne siyahi ile eyni qayda.  Dayandirilmis da aciq.
+      b.innerHTML = '<details class="card stkart"' + ((!girib || !aktiv) ? " open" : "") + ">" +
+        "<summary>" + ic("key") + "Giriş kodları və hesab <i>" +
+          (!aktiv ? "dayandırılıb" : (girib ? "şagird girib" : "hələ girməyib")) +
+        "</i></summary>" + body + "</details>";
+
+      var det = b.querySelector("details");
+      det.addEventListener("click", function (ev) {
+        var el = ev.target.closest ? ev.target.closest("[data-sk]") : null;
+        if (!el) return;
+        var a = el.getAttribute("data-sk");
+        if (a === "cp")  return copyText(st.login_code, el);
+        if (a === "pcp") return copyText(st.parent_code, el);
+        if (a === "wa")  { window.open(waLink(st), "_blank", "noopener"); return; }
+        if (a === "pwa") { window.open(waLinkParent(st), "_blank", "noopener"); return; }
+        if (a === "ren") return rename();
+        if (a === "cancel") { $("skEdit").innerHTML = ""; return; }
+        if (a === "save") return save();
+        if (a === "pon") {
+          return act(el, "Açılır…", function () {
+            return sb.rpc("rpc_parent_access", { p_student_id: sid, p_on: true });
+          }, again);
+        }
+        if (a === "poff") {
+          if (!confirm("Valideyn girişi bağlansın?\n\nAçıq baxış dərhal kəsiləcək və kod işləməyəcək.")) return;
+          return act(el, "Bağlanır…", function () {
+            return sb.rpc("rpc_parent_access", { p_student_id: sid, p_on: false });
+          }, again);
+        }
+        if (a === "pnew") {
+          if (!confirm("Valideyn kodu yenilənsin?\n\nKöhnə kod dərhal etibarsız olacaq.")) return;
+          return act(el, "Gözləyin…", function () {
+            return sb.rpc("rpc_parent_code_reset", { p_student_id: sid });
+          }, again);
+        }
+        if (a === "reset") {
+          if (!confirm("Kod yenilənsin?\n\nKöhnə kod dərhal etibarsız olacaq və şagird yenidən daxil olmalıdır.")) return;
+          return act(el, "Gözləyin…", function () {
+            return sb.rpc("rpc_reset_student_code", { p_student_id: sid });
+          }, whole);
+        }
+        if (a === "off") {
+          if (!confirm("«" + st.full_name + "» dayandırılsın?\n\nGiriş kodu dərhal işləməyi dayandırır və şagird " +
+                       "paketdə yer tutmur. Keçmiş nəticələri qalır — istənilən vaxt davam etdirə bilərsiniz.")) return;
+          return act(el, "Dayandırılır…", function () {
+            return sb.update("students", { id: sid }, { is_active: false });
+          }, whole);
+        }
+        if (a === "on") {
+          return act(el, "Açılır…", function () {
+            return sb.update("students", { id: sid }, { is_active: true });
+          }, whole);
+        }
+      });
+
+      function rename() {
+        var ed = $("skEdit");
+        if (!ed) return;
+        if (ed.firstChild) { ed.innerHTML = ""; return; }
+        ed.innerHTML = '<div class="skedit"><label for="skName">Ad və soyad</label>' +
+          '<input id="skName" maxlength="120"><div id="skErr"></div>' +
+          '<div class="skr"><button class="btn go sm" data-sk="save">Yadda saxla</button>' +
+          '<button class="btn ghost sm" data-sk="cancel">Ləğv et</button></div></div>';
+        var inp = $("skName");
+        inp.value = st.full_name; inp.focus(); inp.select();
+        inp.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") save();
+          if (e.key === "Escape") ed.innerHTML = "";
+        });
+      }
+      function save() {
+        var full = (($("skName") || {}).value || "").trim();
+        if (!full) { $("skErr").innerHTML = msg("err", "Ad boş ola bilməz."); return; }
+        var bt = det.querySelector('[data-sk="save"]');
+        bt.disabled = true; bt.textContent = "Gözləyin…";
+        sb.update("students", { id: sid }, { full_name: full, display_name: shortName(full) })
+          .then(whole)
+          .catch(function (e) {
+            bt.disabled = false; bt.textContent = "Yadda saxla";
+            $("skErr").innerHTML = msg("err", fail(e));
+          });
+      }
+    }
+  }
+
   function screenStudent(id, classId) {
     var live = guard();
     topTitle.textContent = "Şagird hesabatı";
@@ -5890,7 +6057,8 @@
       function tabLbl(t, n) {
         return t + (n ? ' <span class="tn">' + n + "</span>" : "");
       }
-      h += '<div class="segs stabs" id="sTabs">' +
+      h += (YENI ? '<div id="stuKart"></div>' : "") +
+        '<div class="segs stabs" id="sTabs">' +
           seg("x", "Xülasə", STAB) +
           seg("m", tabLbl("Mövzular", nWeakT), STAB) +
           seg("s", tabLbl("Səhvlər", weak.length), STAB) +
@@ -5902,6 +6070,7 @@
         '<div class="stab" id="tab-t"' + (STAB === "t" ? "" : " hidden") + ">" + hT + "</div>";
 
       show(h);
+      if (YENI) stuKart(id, classId, live);
       loadDiag(id, classId, at.length > 0);
       drawTopics();
       function sTabTo(v) {
