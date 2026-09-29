@@ -18,6 +18,54 @@ lisenziyası. Ödəniş şlüzü (Epoint) sonra qoşulacaq.
 İstifadəçi bunları özü istəyib. **Boş vaxt olanda, yaxud mövzu
 yaxınlaşanda xatırlat** — hər dəfə deyil, yerinə düşəndə.
 
+### 0. Növbəti tədris ilinə plan — keyfiyyət hədəfi (2026-09-29, razılaşdırılıb)
+
+**İstifadəçi hədəfi:** növbəti tədris ilinə qədər «tam optimal və sınaqdan
+keçmiş» proqram. Müştəri cəlbi HƏLƏLİK prioritet DEYİL. Əsası beynəlxalq
+araşdırma (ASSISTments, Sparx, Eedi, Yang 2021, Rohrer 2020, Bergman&Chan,
+Bastani/PNAS və s.) — nəticələr söhbətdə verilib. Əsas müşahidə: uğuru
+texnologiya yox, **ritm** (müəllimdən az zəhmət) və **ölçmə** həll edir.
+
+İstifadəçinin qərarları (nömrə söhbətdəki təklif nömrəsidir):
+
+1. **Avtomatik həftəlik tapşırıq (qarışıq təkrar).** İSTİFADƏÇİ: abunəlikdə
+   şagirdin «istədiyi qədər test yığması» yox, **proqramın ona verdiyi**
+   testləri işləməsi olsun — əlində olan şey maraqsız gəlir, gözləmə
+   maraqlı edir («filan gün gəlsəm hansı test düşəcək?»). Yəni şagird
+   tərəfdə seçim yerinə **proqramın təyin etdiyi növbəti test + «sabah/bu
+   cümə nə düşəcək» ipucu**. Müəllim tərəfdə: bir dəfə qurur, hər həftə
+   özü gedir (son 3–4 həftənin mövzuları qarışıq — fasilələrlə/qarışıq
+   təkrar, sübutlu). Açıq qalan sual: şagirdin sərbəst məşq imkanı qalsınmı
+   (Sparx-da «Independent learning» ayrıca sahə var) — istifadəçi «yerinə»
+   dedi, ona görə susmaya görə **proqram verir**; sərbəst hissəni ayrıca
+   müzakirə edirik.
+2. **Pilot və ölçmə.** Bəyənildi. İSTİFADƏÇİ: gözləmə üçün əlverişlidir,
+   «semestr suallarını necə verəcəyəm» — yəni əvvəl-sonra ölçmə **ilkin
+   diaqnostik test + semestr sonu eyni səviyyəli test** ilə. 3–5 repetitorla
+   bir rüb. Admin paneli: həftəlik aktiv şagird, tapşırığı tamamlama faizi,
+   zəif mövzuda təkrar cəhddə irəliləyiş.
+3. **Təxmin qorunması** — İSTİFADƏÇİ qərarı MƏNƏ verdi: EDİLƏCƏK. «Tələsik»
+   cavablar zəif mövzu/mənimsəmə hesabına girmir, müəllimə ayrıca görünür.
+4. **İzahı ən çox səhv edilən suallara yazmaq** (real cavab məlumatına görə,
+   zamanla) — bəyənildi. Yalnız DÜZGÜN işlənmiş nümunə (öz-özünə izah
+   tapşırığı əlavə etmək nəticəni pisləşdirib).
+5. **Valideynə həftəlik xülasə** — mənə verildi: **ayrı «Valideynlər»
+   səhifəsində**, müəllim istəsə, bir toxunuşla hazır WhatsApp mətni;
+   susmaya görə söndürülü, əsas ekranı dolaşdırmır (istifadəçi əvvəl
+   WhatsApp düymələrinin yer tutub səhifəni korladığını demişdi).
+   Avtomatik göndərmə YOX (xarici şəbəkə qadağası).
+6. **Zəif şəbəkədə real sınaq** — istifadəçi başa düşmədi, qərar mənə
+   verildi: EDİLƏCƏK. Mənası: ucuz Android telefonda və zəif internetdə
+   oflayn PWA-nın real yoxlanması.
+7. **Səhv bildirişlərindən keyfiyyət dövrü** — olar.
+
+**ETMƏMƏK:** süni intellekt söhbəti (çərçivəsiz öyrənməyə zərər verir),
+xal/nişan oyunlaşdırması (təsir 1–3 aydan sonra sıfıra düşür), yeni
+funksiyalar pilotdan ƏVVƏL.
+
+**Vaxt xətti (təklif):** okt–dek: 1, 2, 3 · yan–fev: pilot · mart–may: 4, 7, 6
+· iyun–avq: cilalama + e-dərslik yenilənməsi · sentyabr: buraxılış.
+
 ### 1. 2FA — ən yüksək prioritet (2026-09-09, «sabah edəcəm»)
 
 Üç hesabda ikinci amil YOXDUR. Ən təhlükəli yol: **GitHub parolu
