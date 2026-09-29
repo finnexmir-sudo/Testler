@@ -226,6 +226,22 @@ with sync_playwright() as pw:
     pg.click("#asgMore"); pg.wait_for_timeout(300)
     ok(pg.locator("#asgList .asg").count() >= 5, "«Daha» hamisini acir", pg.locator("#asgList .asg").count())
 
+    print("\nC2 · Menyuda etməyənlərin ADLARI görünür (Test və Yazılı kartları)")
+    pg.goto(PANEL + "#/a/" + GA); pg.reload(); pg.wait_for_selector("#hwText", timeout=20000)
+    pg.fill("#hwText", "12-ci paraqrafı oxu"); pg.click("#btnHwAdd"); pg.wait_for_timeout(1200)
+    pg.goto(PANEL + "#/g/" + GA); pg.reload()
+    pg.wait_for_selector("#prep .k-yaz .hwn", timeout=20000); pg.wait_for_timeout(500)
+    ok(pg.locator("#prep .k-yaz .hwn .nm").count() == 2, "«Yazılı» kartında 2 ad var", pg.locator("#prep .k-yaz .hwn .nm").count())
+    ok(all(pg.locator("#prep .k-yaz .hwn .nm").nth(i).is_visible() and
+           pg.locator("#prep .k-yaz .hwn .nm").nth(i).bounding_box()["height"] > 8 for i in range(2)),
+       "adlar GORUNUR (hundurluk > 0)")
+    ok(pg.locator("#prep .k-test .hwn a").count() == 2 and pg.locator("#prep .k-test .hwn a").first.is_visible(),
+       "«Test» kartında 2 ad var və görünür")
+    ok(pg.inner_text("#prep .k-yaz .hwn").count("Şagird") == 2,
+       "iki şagirdin adı yazılıb (yalnız ad)", pg.inner_text("#prep .k-yaz .hwn").replace("\n", " "))
+    ok("," not in pg.inner_text("#prep .k-yaz .hwn").replace("etməyən:", ""), "kartda vergül görünmür")
+    pg.screenshot(path="/tmp/claude-0/is_C2_adlar.png", full_page=True)
+
     print("\nD · Telefon")
     ctx.close()
     ctx, pg = context(br, 390, 844)

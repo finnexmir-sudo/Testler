@@ -2978,7 +2978,7 @@
             //  yalniz ad: tam adlar telefonda uc setir tuturdu (istifadeci)
             return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '" title="' + esc(x.name) + '">' +
               esc(firstName(x.name) || x.name) + "</a>" + (x.n > 1 ? " (" + x.n + ")" : "");
-          }).join(", ") + (pend.length > 8 ? " və daha " + (pend.length - 8) : "") + "</div>");
+          }).join('<span class="cm">, </span>') + (pend.length > 8 ? " və daha " + (pend.length - 8) : "") + "</div>");
       }
       var hw = d.hw, und = hw ? (hw.undone || []) : [], yl;
       if (!hw) {
@@ -2992,7 +2992,7 @@
         else if (!und.length) st = '<span class="hwst k">Hamı edib ✓</span>';
         else {
           st = '<span class="hwst w">' + hd + "/" + ht + " etdi</span>";
-          names = '<div class="hwn">etməyən: ' + und.slice(0, 8).map(function (n) { return esc(firstName(n) || n); }).join(", ") +
+          names = '<div class="hwn">etməyən: ' + und.slice(0, 8).map(function (n) { return '<span class="nm">' + esc(firstName(n) || n) + "</span>"; }).join('<span class="cm">, </span>') +
             (und.length > 8 ? " və daha " + (und.length - 8) : "") + "</div>";
         }
         yl = hwBox("Yazılı", who + (hw.due ? " · son tarix " + hwDay(hw.due) : ""), st,
