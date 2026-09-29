@@ -2540,17 +2540,52 @@ details.more.newasg>summary{
   padding:13px 16px;border:1px solid var(--n-200);border-radius:12px;
   background:var(--n-0);font-size:14.5px;font-weight:600;justify-content:center}
 
-/* Qrup menyusu: «Dersden evvel» ayri kartlara bolunub (her is oz karti) */
+/* Qrup menyusu: «Dersden evvel» ayri kartlar - her birinin oz reng ve nisani var */
+.msec.dkm{margin:22px 2px 10px;font-size:12px;color:var(--brand);letter-spacing:.1em}
+.dkgrid{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:900px){.dkgrid{grid-template-columns:1fr 1fr}}
+.card.prep.dk{position:relative;margin:0;padding:16px 18px 18px;overflow:hidden;
+  border:1px solid var(--n-150);box-shadow:0 1px 2px rgba(18,58,81,.05),0 6px 18px -10px rgba(18,58,81,.18)}
+.card.prep.dk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--pk,var(--brand))}
+.dk.k-ders{--pk:var(--brand);background:linear-gradient(180deg,var(--brand-tint) 0,var(--n-0) 62%)}
+.dk.k-son{--pk:#3b6fb5}
+.dk.k-test{--pk:#c98a12}
+.dk.k-yaz{--pk:#7a5bb5}
+.dk.pwarn{--pk:#d1500b}
+.dkh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.dki{flex:0 0 32px;height:32px;border-radius:10px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--pk) 14%,var(--n-0));color:var(--pk)}
+.dki svg{width:17px;height:17px}
+.dkt{font-size:15px;font-weight:680;letter-spacing:-.01em;color:var(--fg)}
+.dka{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--fg-3);white-space:nowrap}
+.dkm1{margin:0 0 8px;font-size:19px;font-weight:680;letter-spacing:-.018em;line-height:1.25;color:var(--fg)}
+.dkp{margin:0 0 12px;font-size:13.5px;line-height:1.5}
+.dkfs{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.dkchip{display:inline-block;padding:3px 10px;border-radius:999px;background:var(--n-0);
+  border:1px solid var(--brand-line);color:var(--brand);font-size:12px;font-weight:620}
+.dkn{font-size:12.5px;color:var(--fg-2)}
+.dkn b{color:var(--fg);font-weight:700}
+.dkbar{height:6px;border-radius:99px;background:var(--n-150);margin-top:10px;overflow:hidden}
+.dkbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),#22b8a5)}
+.dkres{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+.dkbig{font-size:34px;font-weight:720;letter-spacing:-.03em;line-height:1}
+.dkbig.ok{color:var(--ok)}.dkbig.mid{color:#c98a12}.dkbig.low{color:#d1500b}
+.dk .btn.sm{margin-top:2px}
+.dk.k-ders .warmline{background:var(--n-0)}
 .hwl.tam{display:block;margin:0;padding:0;border:0;background:none}
-.hwl.tam .hwh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.hwl.tam .hwh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
 .hwl.tam .hwh i{display:none}
-.hwl.tam .hwst{font-size:13.5px;font-weight:600}
-.hwl.tam .hwst.w{color:#b54708}
-.hwl.tam .hwst.k{color:var(--ok)}
-.hwl.tam .hwst.m{color:var(--fg-3);font-weight:500}
-.hwl.tam .hwb{margin-top:6px;font-size:14px;font-weight:600;color:var(--fg);line-height:1.45}
-.hwl.tam .hwn{margin-top:4px;font-size:13px;color:var(--fg-2);line-height:1.5}
-.hwl.tam .hwn a{text-decoration:none;font-weight:600}
-.hwl.tam .hwf{display:flex;justify-content:flex-end;margin-top:6px}
-.hwl.tam .hwf a{font-size:12.5px;text-decoration:none;font-weight:600}
-.card.prep.pwarn{border-left:3px solid #b54708}
+.hwl.tam .hwst{display:inline-block;padding:5px 12px;border-radius:999px;font-size:13px;font-weight:650;
+  background:var(--n-100);color:var(--fg-3);margin:0}
+.hwl.tam .hwst.w{background:#fdece0;color:#b54708}
+.hwl.tam .hwst.k{background:#e1f5ea;color:var(--ok)}
+.hwl.tam .hwb{margin-top:10px;font-size:15px;font-weight:620;color:var(--fg);line-height:1.45}
+.hwl.tam .hwn{margin-top:10px;font-size:13.5px;color:var(--fg-2);line-height:1.6}
+.hwl.tam .hwn a{display:inline-block;padding:2px 10px;margin:0 2px 4px 0;border-radius:999px;background:var(--n-100);
+  color:var(--fg);text-decoration:none;font-weight:620}
+.hwl.tam .hwf{display:flex;justify-content:flex-end;margin-top:8px}
+.hwl.tam .hwf a{font-size:13px;text-decoration:none;font-weight:650;color:var(--brand)}
+.hwl.tam .hwh s{text-decoration:none;font-size:12.5px;color:var(--fg-3)}
+.hwl.tam .hwn{font-size:0}
+.hwl.tam .hwn a{font-size:13.5px}
+.dkgrid{margin-bottom:18px}

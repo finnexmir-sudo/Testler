@@ -2964,20 +2964,27 @@
       /*  MENYU (tam): «Dərsdən əvvəl» BIR boyuk kart idi - istifadeci:
           «ayrı kartlara bölək, daha oxunaqlı olsun».  Indi her is oz
           kartindadir: bu günün dərsi · son keçilən · test · yazılı.  */
-      function tamKart(basliq, alt, govde, cls) {
-        return '<div class="card prep' + (cls ? " " + cls : "") + '"><div class="pt"><b>' + basliq + "</b>" +
-          (alt ? '<span class="muted">' + alt + "</span>" : "") + "</div>" + govde + "</div>" +
-          '<div class="spacer"></div>';
+      function tamKart(nis, basliq, alt, govde, cls) {
+        return '<div class="card prep dk ' + nis + (cls ? " " + cls : "") + '">' +
+          '<div class="dkh"><span class="dki">' + ic(nis === "k-ders" ? "cal" : nis === "k-son" ? "check"
+            : nis === "k-test" ? "clip" : "pen") + "</span>" +
+          '<b class="dkt">' + basliq + "</b>" +
+          (alt ? '<span class="dka">' + alt + "</span>" : "") + "</div>" + govde + "</div>";
       }
       function tamHazirla() {
-        var k = '<div class="msec">Dərsdən əvvəl</div>', body;
+        var k = '<div class="msec dkm">Dərsdən əvvəl</div><div class="dkgrid">', body;
         if (!d.has_plan) {
-          body = '<p class="muted pwt">Dərs planı yoxdur. Plan qursanız bu günün dərsi və hazır test burada olacaq. ' +
-            '<a href="#" id="prepPlan">Planı qur</a></p>';
+          body = '<p class="muted dkp">Dərs planı yoxdur. Plan qursanız bu günün dərsi və hazır test burada olacaq.</p>' +
+            '<a href="#" id="prepPlan" class="btn sm ghost">' + ic("plus") + "Planı qur</a>";
         } else if (nx) {
-          body = '<p class="pwt"><b>' + esc(nx.topic) + "</b>" +
-            (nx.group ? '<br><span class="muted">«' + esc(nx.group) + "» fəsli · dərs&nbsp;" + nx.gpos + "/" + nx.gtotal + "</span>" : "") +
-            "</p>" +
+          var gp = Number(nx.gpos) || 0, gt = Number(nx.gtotal) || 0;
+          body = '<p class="dkm1">' + esc(nx.topic) + "</p>" +
+            (nx.group
+              ? '<div class="dkfs"><span class="dkchip">' + esc(nx.group) + "</span>" +
+                (gt ? '<span class="dkn">dərs <b>' + gp + "</b> / " + gt + "</span>" : "") + "</div>" +
+                (gt ? '<div class="dkbar" aria-hidden="true"><i style="width:' +
+                  Math.max(4, Math.min(100, Math.round(gp * 100 / gt))) + '%"></i></div>' : "")
+              : "") +
             (nx.warm_test_id
               ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
                 '<span class="wres">' + (nx.warm_takers
@@ -2988,26 +2995,28 @@
                     '<button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">Hazırla</button></div>'
                   : ""));
         } else {
-          body = '<p class="muted pwt">Plan tam keçilib. 🎉</p>';
+          body = '<p class="dkm1">Plan tam keçilib 🎉</p>';
         }
-        k += tamKart("Bu günün dərsi", "", body);
+        k += tamKart("k-ders", "Bu günün dərsi", "", body);
         if (ls) {
-          k += tamKart("Son keçilən", dateAz(ls.done_at),
-            '<p class="pwt"><b>' + esc(ls.topic) + "</b></p>" +
+          var av = ls.test_id && ls.avg != null ? Math.round(ls.avg) : null;
+          k += tamKart("k-son", "Son keçilən", dateAz(ls.done_at),
+            '<p class="dkm1">' + esc(ls.topic) + "</p>" +
             (ls.test_id
-              ? '<p class="muted pwt">' + (ls.avg != null
-                  ? "Test " + Math.round(ls.avg) + "% · " + (ls.takers || 0) + " şagird"
-                  : "Test verilib, hələ yazan yoxdur") + "</p>"
+              ? (av != null
+                  ? '<div class="dkres"><span class="dkbig ' + (av >= 70 ? "ok" : av >= 50 ? "mid" : "low") + '">' + av +
+                    '%</span><span class="dkn">test nəticəsi · ' + (ls.takers || 0) + " şagird</span></div>"
+                  : '<p class="muted dkp">Test verilib, hələ yazan yoxdur.</p>')
               : "") +
             (d.paid
-              ? '<button class="btn sm" id="prepGen">' + ic("gen") + "«" + esc(ls.group || ls.topic) + "» testi yığ</button>"
+              ? '<button class="btn sm ghost" id="prepGen">' + ic("gen") + "«" + esc(ls.group || ls.topic) + "» testi yığ</button>"
               : ""));
         }
-        k += tamKart("Test", "ev tapşırığı", tl.replace(/^<div class="hwl">/, '<div class="hwl tam">'),
+        k += tamKart("k-test", "Test", "ev tapşırığı", tl.replace(/^<div class="hwl">/, '<div class="hwl tam">'),
           d.open && pend.length ? "pwarn" : "");
-        k += tamKart("Yazılı tapşırıq", "ev tapşırığı", yl.replace(/^<div class="hwl">/, '<div class="hwl tam">'),
+        k += tamKart("k-yaz", "Yazılı tapşırıq", "ev tapşırığı", yl.replace(/^<div class="hwl">/, '<div class="hwl tam">'),
           hw && und.length ? "pwarn" : "");
-        return k;
+        return k + "</div>";
       }
       //  4. addimlar
       if (tam) h = tamHazirla(); else
