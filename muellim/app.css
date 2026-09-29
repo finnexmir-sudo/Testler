@@ -2670,3 +2670,14 @@ details.styd{margin-top:14px}
 .tsec span{text-transform:none;letter-spacing:0;font-weight:500;font-size:12px}
 .tsec.w{color:#b54708}
 #topicBox>.ok{margin-top:4px}
+
+/* Mövzular: sətir açılır (əməliyyat paneli); basılmayan sətirdə əl işarəsi yoxdur */
+#tab-m .trow:not(.topen){cursor:default}
+#tab-m .trow.topen{cursor:pointer}
+#topicBox .trow.topen .ar{width:16px;height:16px;flex:0 0 16px;color:var(--n-400);transition:transform .15s}
+#topicBox .trow.topen.open .ar{transform:rotate(90deg)}
+#topicBox .trow.topen.open{border-bottom-color:transparent}
+.tpan{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:2px 16px 14px;background:var(--n-25);
+  border-bottom:1px solid var(--n-100)}
+.tpan[hidden]{display:none}
+.tpan .tlink{margin:0}

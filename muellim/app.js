@@ -6225,17 +6225,22 @@
       }
       function topicRow(t) {
         var bad = Number(t.ratio) < 60;
-        //  YENI: «nöqtə» adin ustunde tek qalirdi (b elementi -webkit-box) - sol cizgi ile evez olundu;
-        //  bu movzudan sehv sual varsa Sehvler sekmesine suzgecli kecid
+        //  YENI: sətrə basanda ALTINDA emeliyyat paneli acilir (29.09: el isaresi gelirdi, klik bir sey etmirdi):
+        //  «Bu movzudan test yig - yalniz bu sagird ucun» + (varsa) «sehvlerine bax».  Dot evezine sol cizgi.
         var hasW = YENI && weak.some(function (w) { return w.topic === t.name; });
-        return '<div class="trow' + (YENI && bad ? " weakrow" : "") + '"><div class="g"><b>' +
+        var core = '<div class="trow' + (YENI ? " topen" : "") + (YENI && bad ? " weakrow" : "") + '"' +
+          (YENI ? ' data-tp-id="' + esc(t.id || "") + '"' : "") + '><div class="g"><b>' +
           (!YENI && bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
           esc(t.name) + "</b>" +
           "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
-          meter(t.ratio) +
+          meter(t.ratio) + "</div>" +
+          pctChip(t.ratio) + (YENI ? ic("right", "ar") : "") + "</div>";
+        if (!YENI) return core;
+        return core + '<div class="tpan" hidden>' +
+          (t.id ? '<button type="button" class="btn sm go" data-tg="' + esc(t.id) + '">' + ic("gen") +
+            "Bu mövzudan test yığ — «" + esc(firstName(s.full_name) || s.full_name) + "» üçün</button>" : "") +
           (hasW ? '<a href="#" class="tlink" data-tf="' + esc(t.name) + '">səhvlərinə bax →</a>' : "") +
-          "</div>" +
-          pctChip(t.ratio) + "</div>";
+          "</div>";
       }
       function drawTopics() {
         var box = $("topicBox");
@@ -6485,12 +6490,30 @@
       }
       if (YENI) {
         on("topicBox", "click", function (e) {
+          var tg = e.target.closest ? e.target.closest("[data-tg]") : null;
+          if (tg) {
+            //  bir mövzudan test - YALNIZ bu sagirde (remedialGen stu ile)
+            var tid = tg.getAttribute("data-tg");
+            var top1 = tAll.filter(function (x) { return x.id === tid; })[0];
+            if (top1) remedialGen(classId, [top1], { id: id, name: s.full_name });
+            return;
+          }
           var a = e.target.closest ? e.target.closest("[data-tf]") : null;
-          if (!a) return;
-          e.preventDefault();
-          WTF = a.getAttribute("data-tf");
-          sTabTo("s"); applyWF();
-          window.scrollTo({ top: 0 });
+          if (a) {
+            e.preventDefault();
+            WTF = a.getAttribute("data-tf");
+            sTabTo("s"); applyWF();
+            window.scrollTo({ top: 0 });
+            return;
+          }
+          var row = e.target.closest ? e.target.closest(".trow.topen") : null;
+          if (!row) return;
+          var pan = row.nextElementSibling;
+          if (!pan || !pan.classList.contains("tpan")) return;
+          var willOpen = pan.hidden;
+          Array.prototype.forEach.call(document.querySelectorAll("#topicBox .tpan"), function (x) { x.hidden = true; });
+          Array.prototype.forEach.call(document.querySelectorAll("#topicBox .trow.topen"), function (x) { x.classList.remove("open"); });
+          if (willOpen) { pan.hidden = false; row.classList.add("open"); }
         });
         //  Sagirdin yazdigi / duz cavab: ayri RPC (db/902) - yoxdursa (SQL islenmeyib) sessiz bos qalir
         if (weak.length) {
