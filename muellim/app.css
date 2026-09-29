@@ -2656,3 +2656,9 @@ details.styd{margin-top:14px}
 .wq .wans b{display:inline;-webkit-line-clamp:unset;-webkit-box-orient:horizontal;overflow:visible;
   font-size:inherit;line-height:inherit;letter-spacing:0}
 .wq .wans .wax,.wq .wans .way{display:block}
+
+/* «Movzular 2» = zeif movzu sayi: narinci nisan + siyahinin ustunde izah */
+.seg .tn.tw,.seg.on .tn.tw{background:#fdece0;color:#b54708}
+.tsum{margin:0 2px 10px;font-size:13.5px;color:var(--fg)}
+.tsum b{font-size:15px;color:#b54708;font-weight:700}
+.tsum span{color:var(--fg-3);font-size:12.5px}

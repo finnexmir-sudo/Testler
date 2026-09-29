@@ -266,6 +266,11 @@ with sync_playwright() as pw:
 
     print("\nI · Mövzular sekmesi")
     pg.locator("#sTabs [data-v='m']").click(); pg.wait_for_selector("#topicBox .trow", timeout=10000); pg.wait_for_timeout(500)
+    ok(pg.locator("#sTabs [data-v='m'] .tn.tw").count() == 1, "«Mövzular» nişanı zəif mövzu rəngindədir (narıncı)")
+    nw = pg.locator("#sTabs [data-v='m'] .tn").inner_text().strip()
+    ok(pg.locator("#tab-m .tsum").evaluate("e => e.textContent").startswith(nw + " zəif mövzu"), "siyahının üstündə «%s zəif mövzu (60%%-dən aşağı)» yazılıb" % nw, pg.locator("#tab-m .tsum").evaluate("e => e.textContent"))
+    ok(int(nw) == pg.locator("#topicBox .trow.weakrow").count(), "nişan rəqəmi = sol xətli sətirlərin sayı", "%s / %d" % (nw, pg.locator("#topicBox .trow.weakrow").count()))
+    ok(pg.locator("#sTabs [data-v='s'] .tn.tw").count() == 0, "«Səhvlər» nişanı neytral qalır")
     ok(pg.locator("#topicBox .wdot").count() == 0, "adın üstündə tək qalan nöqtə yoxdur")
     ok(pg.locator("#topicBox .trow.weakrow").count() >= 2, "zəif mövzu sətirləri sol xətlə", pg.locator("#topicBox .trow.weakrow").count())
     #  cubuq rengi = faiz rengi (80/60)

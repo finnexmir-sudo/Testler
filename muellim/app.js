@@ -6208,7 +6208,12 @@
              "</div><b>Hələ cavab yoxdur</b>Şagird test işlədikcə " +
              "mövzular burada yığılacaq.</div></div>";
       } else {
-        hM += (subjs.length > 1
+        hM += (YENI
+                ? '<div class="tsum">' + (sweakAll.length
+                    ? "<b>" + sweakAll.length + "</b> zəif mövzu <span>(60%-dən aşağı)</span>"
+                    : "Zəif mövzu yoxdur <span>(hamısı 60%-dən yuxarı)</span>") + "</div>"
+                : "") +
+          (subjs.length > 1
                 ? '<div class="chips recf" id="tSub">' +
                   '<button class="chip' + (TSUB ? "" : " on") + '" data-ts="">Hamısı</button>' +
                   subjs.map(function (x) {
@@ -6420,8 +6425,8 @@
 
       /* ---------------- sekmeler ---------------- */
       var nWeakT = tsure.filter(function (t) { return Number(t.ratio) < 60; }).length;
-      function tabLbl(t, n) {
-        return t + (n ? ' <span class="tn">' + n + "</span>" : "");
+      function tabLbl(t, n, cls) {
+        return t + (n ? ' <span class="tn' + (cls ? " " + cls : "") + '">' + n + "</span>" : "");
       }
       var asgMenu = YENI
         ? '<div class="card pad0 menu" id="stuAsgMenu" hidden>' +
@@ -6432,7 +6437,8 @@
       h += (YENI ? '<div id="stuKart"></div>' + asgMenu : "") +
         '<div class="segs stabs" id="sTabs">' +
           seg("x", "Xülasə", STAB) +
-          seg("m", tabLbl("Mövzular", nWeakT), STAB) +
+          //  YENI: «Movzular 2» = ZEIF movzu sayi (60%-den asagi) - nisan narinci, «Sehvler»den ferqlenir
+          seg("m", tabLbl("Mövzular", nWeakT, YENI ? "tw" : ""), STAB) +
           seg("s", tabLbl("Səhvlər", nSehv), STAB) +
           seg("t", tabLbl("Tarixçə", at.length), STAB) +
         "</div>" +
