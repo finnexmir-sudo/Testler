@@ -187,6 +187,9 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          306_bank_riy9_ders_ehtimal.sql \
          307_bank_riy9_ders_funksiya_pilot.sql \
          308_bank_riy9_ders_funksiya_qrafik.sql \
+         309_bank_riy7_ders_statistika.sql \
+         310_bank_riy7_ders_rasional.sql \
+         319_bank_riy7_ders_nisan.sql \
          400_bank_inf10_ders_sebeke.sql \
          401_bank_inf11_ders_modellesdirme.sql \
          402_bank_inf11_ders_modellesdirme_a.sql \

@@ -363,6 +363,9 @@ bank 305_bank_riy9_ders_silsile.sql
 bank 306_bank_riy9_ders_ehtimal.sql
 bank 307_bank_riy9_ders_funksiya_pilot.sql
 bank 308_bank_riy9_ders_funksiya_qrafik.sql
+bank 309_bank_riy7_ders_statistika.sql
+bank 310_bank_riy7_ders_rasional.sql
+bank 319_bank_riy7_ders_nisan.sql
 bank 400_bank_inf10_ders_sebeke.sql
 bank 401_bank_inf11_ders_modellesdirme.sql
 bank 402_bank_inf11_ders_modellesdirme_a.sql
