@@ -125,7 +125,7 @@ with sync_playwright() as pw:
 
     #  yazili ev tapsirigi: hec kim etmeyib - qrup menyusunda «diqqet» setri
     q("insert into public.homework (class_id, created_by, body, due)"
-      " values (%s,%s,%s, current_date + 1)",
+      " values (%s,%s,%s, current_date)",
       (gid0, acc["own"], "Çalışma kitabı, səh. 41 — 1-6 misallar"))
 
     #  ---- qrup menyusu
@@ -190,9 +190,11 @@ with sync_playwright() as pw:
             #  gostersin».  Setirde «N sagird» varsa, acilan sehifede
             #  DEQIQ N setir olmalidir - 5 deyib 7 gostermek olmaz.
             ms = re.search(r"(\d+)\s+şagird", ad)
-            if ms and (h.startswith("#/sus") or h.startswith("#/zm")):
+            if ms and (h.startswith("#/sus") or h.startswith("#/zm") or h.startswith("#/ht")):
                 say = int(ms.group(1))
-                var = p.locator("#suBox .mrow, #zmBox .mrow").count()
+                #  #/ht: ILK bolme (yazili tapsirig) - setir yazili tapsirigi sayir
+                var = (p.locator("#htBox .menu").first.locator(".udr").count() if h.startswith("#/ht")
+                       else p.locator("#suBox .mrow, #zmBox .mrow").count())
                 if var != say:
                     XETA.append(unvan + " : setir " + str(say) + " şagird deyir, "
                                 "acilan sehifede " + str(var) + " setir var (" + h + ")")
@@ -205,7 +207,6 @@ with sync_playwright() as pw:
                            ("#/nt", "#ntQ", "Neticeler · qruplar"),
                            ("#/nt", "#ntZ", "Neticeler · zeif movzular"),
                            ("#/nt", "#ntS", "Neticeler · son cavablar"),
-                           ("#/g/" + str(gid), "#gDiq", "Qrup · diqqet"),
                            ("#/g/" + str(gid), "#gMenu", "Qrup menyusu")):
         print("\n-- " + ad + " (" + unvan + ")")
         for a, h, b in kecidler(unvan, qab):

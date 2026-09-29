@@ -2590,3 +2590,10 @@ details.more.newasg>summary{
 .hwl.tam .hwn .nm{display:inline-block;padding:2px 10px;margin:0 2px 4px 0;border-radius:999px;background:var(--n-100);
   color:var(--fg);font-weight:620}
 .dkgrid{margin-bottom:18px}
+
+/* Tapsirigi etmeyenler (#/ht): sira = ad (kecid) + «Xatirlat» duymesi */
+.menu .mrow.udr{cursor:default;padding:10px 12px 10px 16px}
+.mrow.udr .udl{display:flex;align-items:center;gap:13px;flex:1;min-width:0;text-decoration:none;color:inherit}
+.mrow.udr .btn{flex:0 0 auto;white-space:nowrap}
+.card.udt{padding:14px 16px}
+.card.udt .udb{font-size:15px;font-weight:620;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:4px}

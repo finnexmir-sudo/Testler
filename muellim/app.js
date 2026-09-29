@@ -1425,8 +1425,11 @@
     var d = [];
     if (hw.length) {
       var h0 = hw[0], un = Number(h0.undone) || 0;
-      d.push(yRow({ ic: "warn", cls: "dq", href: "#/g/" + esc(h0.class_id),
-        ad: un + " şagird tapşırığı etməyib",
+      //  Setir «yazili» ev tapsirigini sayir - ad da bunu deyir, kecid ise
+      //  HEMIN sagirdlerin adlarini sadalayir (#/ht).  Evvel qrup menyusuna
+      //  aparirdi, adlar asagidaki kartda idi: say ve siyahi ust-uste dusmurdu.
+      d.push(yRow({ ic: "warn", cls: "dq", href: "#/ht/" + esc(h0.class_id),
+        ad: un + " şagird yazılı tapşırığı etməyib",
         alt: (h0["class"] || "") + " · ev tapşırığı", cip: "diqqət", cipCls: "pvl" }));
     }
     if (Number(bg.susan)) {
@@ -1678,6 +1681,92 @@
     }, function (e) {
       if (!live() || !$("suBox")) return;
       $("suBox").innerHTML = '<div class="card">' + msg("warn", fail(e)) + "</div>";
+    });
+  }
+
+  /*  TAPSIRIGI ETMEYENLER (#/ht/<qrup>) - yalniz yeni gorunusde.
+      Icmalda «2 şagird yazılı tapşırığı etməyib» setri var; evvel qrup
+      menyusuna aparirdi, adlar asagida idi (29.09, istifadeci: «belə
+      qalsın?»).  Indi setir de, sehife de EYNI sorgudan (rpc_lesson_prep)
+      gelir: yazili tapsirigi etmeyenler + testi islemeyenler, her birinin
+      yaninda «Xatırlat» - hazir mesaj kopyalanir (WhatsApp duymesi yox).  */
+  function screenUndone(gid) {
+    topTitle.textContent = "Tapşırığı etməyənlər";
+    show('<div id="htBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>');
+    var live = guard();
+    Promise.all([
+      sb.rpc("rpc_lesson_prep", { p_class_id: gid }),
+      sb.rpc("rpc_class_students", { p_class_id: gid }).catch(function () { return null; }),
+      sb.select("classes", { select: "id,name", eq: { id: gid } }).catch(function () { return []; })
+    ]).then(function (rr) {
+      if (!live() || !$("htBox")) return;
+      var d = rr[0] || {}, hw = d.hw || null, und = hw ? (hw.undone || []) : [];
+      var pend = d.pending || [];
+      var cn = ((rr[2] || [])[0] || {}).name || "";
+      var ids = {};
+      (((rr[1] || {}).students) || []).forEach(function (x) { ids[String(x.full_name || "")] = x.id; });
+      bandHead({
+        back: { id: "htBack", label: "Geri" }, eye: "Ev tapşırığı",
+        title: "Tapşırığı etməyənlər", sub: esc(cn)
+      });
+      on("htBack", "click", function () { goBack("#/"); });
+      var url = (window.CFG && window.CFG.STUDENT_URL) || "";
+      var msgs = [];     //  düymə nömrəsi -> mesaj mətni
+      function row(name, sid, alt, text) {
+        msgs.push(text);
+        var lnk = sid ? "#/s/" + esc(sid) + "/" + esc(gid) : "#/g/" + esc(gid) + "/s";
+        return '<div class="mrow udr"><a class="udl" href="' + lnk + '">' + av(name) +
+          '<span class="g"><b>' + esc(name) + "</b><i>" + esc(alt) + "</i></span></a>" +
+          '<button type="button" class="btn sm ghost" data-ud="' + (msgs.length - 1) + '">Xatırlat</button></div>';
+      }
+      var h = "";
+      if (hw) {
+        h += ySec("Yazılı tapşırıq · " + (und.length ? und.length + " şagird etməyib" : "hamı edib"));
+        h += '<div class="card udt"><div class="udb">' + esc(hw.body) + "</div>" +
+          '<div class="muted">' + (hw.personal ? "yalnız " + esc(firstName(hw.student || "") || hw.student || "") : "bütün qrup") +
+          (hw.due ? " · son tarix " + hwDay(hw.due) : "") + "</div></div>" +
+          '<div class="spacer"></div>';
+        if (und.length) {
+          h += '<div class="card pad0 menu">' + und.map(function (n) {
+            var fn0 = firstName(n) || n;
+            return row(n, ids[n] || "", "yazılı tapşırığı etməyib",
+              "Salam, " + fn0 + "! Bil10-da ev tapşırığın gözləyir: «" + String(hw.body || "").replace(/\s+/g, " ").trim() + "»." +
+              (hw.due ? "\nSon tarix: " + hwDay(hw.due) + "." : "") +
+              (url ? "\nLink: " + url : "") + "\nKodunla gir — «Tapşırıqlar»da.");
+          }).join("") + "</div>";
+        } else {
+          h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
+            "</div><b>Hamı edib</b>Bu tapşırığı etməyən şagird yoxdur.</div></div>";
+        }
+        h += '<div class="spacer"></div>';
+      }
+      if (d.open) {
+        h += ySec("Test · " + (pend.length ? pend.length + " şagird işləməyib" : "hamı işləyib"));
+        if (pend.length) {
+          h += '<div class="card pad0 menu">' + pend.map(function (x) {
+            var n = Number(x.n) || 1, fn1 = firstName(x.name) || x.name;
+            return row(x.name, x.student_id, n + " test gözləyir",
+              "Salam, " + fn1 + "! Bil10-da " + (n > 1 ? n + " testin" : "testin") + " gözləyir." +
+              (url ? "\nLink: " + url : "") + "\nKodunla gir — «Tapşırıqlar»da.");
+          }).join("") + "</div>";
+        } else {
+          h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
+            "</div><b>Hamı işləyib</b>Gözləyən test qalmayıb.</div></div>";
+        }
+        h += '<div class="spacer"></div>';
+      }
+      if (!hw && !d.open) {
+        h = '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
+          "</div><b>Açıq tapşırıq yoxdur</b>Bu qrupa hələ test və ya yazılı tapşırıq verilməyib.</div></div>";
+      }
+      h += '<a class="btn sm" href="#/a/' + esc(gid) + '">' + ic("clip") + "Tapşırıqlara bax</a>";
+      $("htBox").innerHTML = h;
+      Array.prototype.forEach.call($("htBox").querySelectorAll("[data-ud]"), function (b) {
+        b.addEventListener("click", function () { copyText(msgs[Number(b.getAttribute("data-ud"))], b); });
+      });
+    }, function (e) {
+      if (!live() || !$("htBox")) return;
+      $("htBox").innerHTML = '<div class="card">' + msg("warn", fail(e)) + "</div>";
     });
   }
 
@@ -11410,9 +11499,10 @@
       PREV_HASH = CUR_HASH; CUR_HASH = location.hash || "#/";
     }
     //  qrup, hesabat, tapsiriq ekranlari da «Qruplar» bendinin altindadir
-    bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", nt: "gs", sus: "gs", zm: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
+    bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", nt: "gs", sus: "gs", zm: "gs", ht: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "nt") return YENI ? screenResults() : nav("#/");
     if (m[0] === "sus") return YENI ? screenSilent() : nav("#/");
+    if (m[0] === "ht" && m[1]) return YENI ? screenUndone(m[1]) : nav("#/g/" + m[1]);
     if (m[0] === "zm" && m[1] && m[2]) return YENI ? screenTopicWeak(m[1], m[2]) : nav("#/r/" + m[1]);
     if (m[0] === "gs") return screenGroups();
     if (m[0] === "g" && m[1]) return screenGroup(m[1], m[2]);
