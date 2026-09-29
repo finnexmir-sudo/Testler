@@ -5569,7 +5569,7 @@
      Yeni gorunusde sagird setiri UC SEYE endirilmisdi (ad, netice,
      novbeti addim) ve koddaki serh deyirdi: «redakte ve kodlar sagirdin
      oz sehifesindedir».  Amma sagird sehifesinde bunlar YOX idi:
-       * kodu kopyala / WhatsApp ile gonder
+       * kodu kopyala
        * valideyn kodu ve valideyn girisi (ac / bagla / yenile)
        * sagirdin adini deyis
        * giris kodunu yenile
@@ -5606,12 +5606,13 @@
       });
     }
 
-    function line(cap, code, wa, cp) {
+    //  WhatsApp «gonder» duymesi YOXDUR (istifadeci, 29.09: «yer tutur,
+    //  sehifeni korlayir, ozleri basa dusurler») - kod + kopyala kifayetdir.
+    function line(cap, code, cp) {
       return '<div class="skl"><span class="skc">' + cap + "</span>" +
         '<span class="code key">' + esc(code) + "</span>" +
         '<button class="btn sm ghost icon" data-sk="' + cp + '" title="Kopyala" aria-label="Kopyala">' +
-          ic("copy") + "</button>" +
-        '<button class="btn sm" data-sk="' + wa + '">' + ic("send") + "WhatsApp-la göndər</button></div>";
+          ic("copy") + "</button></div>";
     }
 
     function draw(st) {
@@ -5624,9 +5625,9 @@
                  "Keçmiş nəticələri qalır.</p>" +
                '<div class="skr"><button class="btn sm" data-sk="on">Davam etdir</button></div>';
       } else {
-        body = line("Şagird", st.login_code, "wa", "cp") +
+        body = line("Şagird", st.login_code, "cp") +
           (st.parent_code
-            ? line("Valideyn", st.parent_code, "pwa", "pcp") +
+            ? line("Valideyn", st.parent_code, "pcp") +
               '<div class="skr"><button class="btn sm ghost" data-sk="pnew">' + ic("refresh") +
                 "Valideyn kodunu yenilə</button>" +
               '<button class="btn sm ghost" data-sk="poff">Valideyn girişini bağla</button></div>'
@@ -5656,8 +5657,6 @@
         var a = el.getAttribute("data-sk");
         if (a === "cp")  return copyText(st.login_code, el);
         if (a === "pcp") return copyText(st.parent_code, el);
-        if (a === "wa")  { window.open(waLink(st), "_blank", "noopener"); return; }
-        if (a === "pwa") { window.open(waLinkParent(st), "_blank", "noopener"); return; }
         if (a === "ren") return rename();
         if (a === "cancel") { $("skEdit").innerHTML = ""; return; }
         if (a === "save") return save();

@@ -2523,7 +2523,6 @@ button.mrow{width:100%;text-align:left;background:none;border:0;color:inherit;fo
   text-transform:uppercase;letter-spacing:.04em}
 .stkart .skl .code{flex:0 0 auto}
 .stkart .btn.icon{flex:0 0 30px;width:30px;min-height:30px}
-.stkart .skl .btn[data-sk="wa"],.stkart .skl .btn[data-sk="pwa"]{margin-left:auto}
 .stkart .skr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .stkart .skt,.stkart .skd,.stkart .skedit{border-top:1px solid var(--n-100)}
 .stkart .skd .btn{color:var(--err);border-color:var(--n-200)}

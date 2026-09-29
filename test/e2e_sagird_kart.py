@@ -13,7 +13,7 @@ Her duyme HEQIQETEN basilir, netice BAZADA yoxlanilir.
 Yoxlanir:
   A  siyahida «hele girmeyib» sagirdin setri kartli sehifeye aparir; kart ACIQDIR
   B  giris/valideyn kodu duzgun gorunur; kopyala buferi doldurur
-  C  «WhatsApp-la gonder» duzgun mesaj acir (kod + unvan)
+  C  WhatsApp «gonder» duymesi YOXDUR (istifadeci: yer tutur, sehifeni korlayir)
   D  valideyn: bagla -> ac -> kodu yenile  (baza deyisir)
   E  ad deyismek: bos ad redd olunur; yeni ad bazada, basliqda
   F  giris kodunu yenile: kod deyisir, BASLIQ da yenilenir
@@ -22,7 +22,7 @@ Yoxlanir:
   I  kohne gorunusde kart YOXDUR (o deyismir)
   J  telefonda enden asmir
 """
-import sys, time, urllib.parse
+import sys, time
 import psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright
 
@@ -153,22 +153,12 @@ with sync_playwright() as pw:
     pg.click('#stuKart [data-sk="pcp"]'); pg.wait_for_timeout(400)
     ok(pg.evaluate("navigator.clipboard.readText()") == r0["parent_code"], "kopyala: valideyn kodu buferdedir")
 
-    print("\nC · WhatsApp-la göndər")
-    with ctx.expect_page() as pi:
-        pg.click('#stuKart [data-sk="wa"]')
-    w1 = pi.value; w1.wait_for_url("https://wa.me/**", timeout=8000)
-    u1 = urllib.parse.unquote(w1.url)
-    ok(r0["login_code"] in u1 and "Giriş kodu" in u1, "sagird mesajinda KOD var", u1[:60])
-    ok("/sagird/" in u1, "sagird mesajinda SAGIRD unvani var")
-    ok(r0["parent_code"] not in u1, "sagird mesajinda valideyn kodu YOXDUR (qarismir)")
-    w1.close()
-    with ctx.expect_page() as pi:
-        pg.click('#stuKart [data-sk="pwa"]')
-    w2 = pi.value; w2.wait_for_url("https://wa.me/**", timeout=8000)
-    u2 = urllib.parse.unquote(w2.url)
-    ok(r0["parent_code"] in u2 and "/valideyn/" in u2, "valideyn mesajinda valideyn kodu ve VALIDEYN unvani var")
-    ok(r0["login_code"] not in u2, "valideyn mesajinda sagirdin kodu YOXDUR")
-    w2.close()
+    print("\nC · WhatsApp «göndər» düyməsi YOXDUR (yer tutur, səhifəni korlayır)")
+    ok(pg.locator("#stuKart [data-sk='wa'], #stuKart [data-sk='pwa']").count() == 0,
+       "kartda WhatsApp duymesi yoxdur")
+    ok("WhatsApp" not in pg.inner_text("#stuKart"), "kartda «WhatsApp» yazisi yoxdur")
+    ok(pg.locator("#stuKart .skl").count() == 2, "yalniz iki kod setri: sagird + valideyn",
+       pg.locator("#stuKart .skl").count())
 
     print("\nD · Valideyn girişi: bağla → aç → yenilə")
     pg.click('#stuKart [data-sk="poff"]'); pg.wait_for_timeout(2500)
@@ -241,7 +231,7 @@ with sync_playwright() as pw:
     ok(pg.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1"), "yana surusme yoxdur")
     bx = pg.locator("#stuKart .stkart").bounding_box()
     ok(bx and bx["width"] <= 390, "kart ekrandan enmir", bx and round(bx["width"]))
-    for sel in ('[data-sk="wa"]', '[data-sk="pwa"]', '[data-sk="cp"]', '[data-sk="reset"]', '[data-sk="off"]'):
+    for sel in ('[data-sk="cp"]', '[data-sk="pcp"]', '[data-sk="reset"]', '[data-sk="off"]'):
         b = pg.locator("#stuKart " + sel).first.bounding_box()
         ok(b and b["x"] >= 0 and b["x"] + b["width"] <= 391, "duyme ekranin icindedir " + sel, b and round(b["x"] + b["width"]))
     pg.screenshot(path="/tmp/claude-0/kart/kart_telefon.png", full_page=True)
