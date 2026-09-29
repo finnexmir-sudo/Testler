@@ -192,6 +192,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          311_bank_riy7_ders_paralellik.sql \
          319_bank_riy7_ders_nisan.sql \
          320_bank_riy7_paralellik_duzelis.sql \
+         321_bank_riy7_coxhedliler_duzelis.sql \
          400_bank_inf10_ders_sebeke.sql \
          401_bank_inf11_ders_modellesdirme.sql \
          402_bank_inf11_ders_modellesdirme_a.sql \
