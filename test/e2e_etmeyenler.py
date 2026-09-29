@@ -156,7 +156,11 @@ with sync_playwright() as pw:
     ok(yaz.count() == 2, "yazılı bölmədə 2 sıra var (say ilə eyni)", yaz.count())
     ok(all(yaz.nth(i).locator("[data-ud]").count() == 1 for i in range(2)), "hər sırada «Xatırlat» var")
     ok(pg.locator("#htBox .udr").count() == 4, "cəmi 4 sıra (2 yazılı + 2 test)", pg.locator("#htBox .udr").count())
+    ok(pg.locator("#htBox a.mrow", has_text="Tapşırıqlara bax").count() == 1, "«Tapsiriqlara bax» menyu sirasi kimidir (iconlu, oxlu)")
     pg.screenshot(path="/tmp/claude-0/ht_sehife_masaustu.png", full_page=True)
+    pg.locator("#htBox a.mrow", has_text="Tapşırıqlara bax").click(); pg.wait_for_selector("#btnAsgT", timeout=15000)
+    ok(pg.url.endswith("#/a/" + GA), "«Tapsiriqlara bax» tapsiriqlar ekranina aparir", pg.url[-20:])
+    pg.go_back(); pg.wait_for_selector("#htBox .udr", timeout=15000)
 
     print("\nC · «Xatırlat»")
     yaz.first.locator("[data-ud]").click(); pg.wait_for_timeout(500)
