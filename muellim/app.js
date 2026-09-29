@@ -3211,7 +3211,7 @@
         var f = genFilter();
         f.subject = d.subject || ""; f.levels = d.level ? [d.level] : [];
         f.topics = ls.topic_id ? [ls.topic_id] : []; f.remNames = [];
-        f.difficulty = []; f.cls = ""; f.title = ""; f.asg = "";
+        f.difficulty = []; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = "";
         f.count = 10;
         f.back = g.id; f.backName = g.name || "";
         nav("#/gen");
@@ -6513,7 +6513,7 @@
         } else { sTabTo("s"); to = $("btnFix"); }
         if (to && to.scrollIntoView) to.scrollIntoView({ block: "center" });
       });
-      on("btnRem", "click", function () { remedialGen(classId, sweakAll); });
+      on("btnRem", "click", function () { remedialGen(classId, sweakAll, YENI ? { id: id, name: s.full_name } : null); });
 
       //  Sehvler uzerinde is: mehz sehv edilen suallardan ferdi test
       //  (Sehvler sekmesindeki #btnFix VE Diqqet kartindaki #vdF eyni is gorur)
@@ -7004,7 +7004,7 @@
     f.title = ""; f.cls = ""; f.remNames = [];
     //  Teyinati generator DEYIL, tapsiriq ekrani verecek: orada son
     //  tarix, cehd sayi ve "tek sagird" secimi var.
-    f.asg = "";
+    f.asg = ""; f.asgStu = "";
     //  Qrupun sinfi susmaya secili gelir; muellim istese asagi
     //  sinifleri de elave edir (cox secim).
     var kod = levelCode(g.level_id);
@@ -8944,6 +8944,8 @@
                     //  Bos = sinif suzgeci yoxdur (butun sinifler).
                     levels: [], topics: [], difficulty: [],
                     count: 10, title: "", asg: "",
+                    //  «yalniz bu sagirde»: sagird hesabatindan zeif movzulara test yigilanda
+                    asgStu: "", asgStuName: "",
                     cls: "", remNames: [],
                     //  tapsiriq ekranindan gelmisiksa hara qayidaq
                     back: "", backName: "" };
@@ -9014,13 +9016,17 @@
   /* Hesabatdan gelen "duzelis testi" niyyeti: zeif movzular secili,
      qrup qeyd olunub - generator hemin qrupun sehvlerine benzeyen
      suallari one cekecek. */
-  function remedialGen(gid, weak) {
+  /*  stu = {id, name}: sagird hesabatindan cagirilanda test YALNIZ o sagirde verilir
+      (evvel butun qrupa gedirdi - 29.09: qrup secili gelir, «qrupa ver» yazilirdi).  */
+  function remedialGen(gid, weak, stu) {
     var f = genFilter();
     f.difficulty = [];
     f.topics = weak.map(function (t) { return t.id; });
     f.remNames = weak.map(function (t) { return t.name; });
     f.cls = gid;
     f.asg = gid;   //  qrupun icinden gelinib - hazir olanda hemin qrupa verilsin
+    f.asgStu = stu ? stu.id : "";
+    f.asgStuName = stu ? stu.name : "";
     f.count = Math.min(10, Math.max(5, f.topics.length * 3));
     f.title = "Düzəliş testi";
     /* Fenn ve sinif de avtomatik secilir - muellim yalniz "Testi yig"
@@ -9293,6 +9299,9 @@
           ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi «' +
             esc(f.backName || "qrup") + "» tapşırıq ekranına " +
             "qayıdacaqsınız — test orada seçilmiş gələcək.</p>"
+          : f.asgStu
+          ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi test <b>yalnız «' + esc(f.asgStuName) +
+            "»</b> şagirdinə veriləcək — qrupun qalanı görmür (son tarix 7 gün, 1 cəhd).</p>"
           : '<label for="gAsg">Qrupa tapşırıq ver (istəyə görə)</label>' +
             '<select id="gAsg"><option value="">Yalnız test yığılsın</option></select>' +
             '<p class="muted" style="margin:-8px 0 14px">Qrup seçsəniz, test yaranan ' +
@@ -9363,7 +9372,7 @@
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
     //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin
-    if (!f.back) sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
+    if (!f.back && !f.asgStu) sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
                            order: "name" })
       .then(function (rows) {
         var sel = $("gAsg");
@@ -9477,7 +9486,7 @@
           ff.pool = "all";
           ff.subject = x.d.subject; ff.levels = x.d.level ? [x.d.level] : [];
           ff.topics = x.d.last.topic_id ? [x.d.last.topic_id] : [];
-          ff.difficulty = []; ff.cls = ""; ff.remNames = []; ff.asg = "";
+          ff.difficulty = []; ff.cls = ""; ff.remNames = []; ff.asg = ""; ff.asgStu = "";
           ff.count = 10;
           ff.title = (x.d.last.group || x.d.last.topic) + " — ev tapşırığı";
           ff.back = x.c.id; ff.backName = x.c.name;
@@ -9490,7 +9499,7 @@
 
   //  qrup secilibse duymenin adi hemin iki isi deyir: yig VE ver
   function makeLabel(f) {
-    return f.asg && !f.back ? "Testi yığ və qrupa ver" : "Testi yığ";
+    return f.asg && !f.back ? (f.asgStu ? "Testi yığ və şagirdə ver" : "Testi yığ və qrupa ver") : "Testi yığ";
   }
 
   function makeTest() {
@@ -9503,7 +9512,7 @@
     if (f.asg && qadSel && qadSel.selectedIndex >= 0) {
       qad = qadSel.options[qadSel.selectedIndex].textContent;
     }
-    var qid = f.asg;
+    var qid = f.asg, qstu = f.asgStu, qstuName = f.asgStuName;
     ASG = null; ASG_ERR = null;
     sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: (f.title || "").trim() || genAutoTitle(f) })
       .then(function (v) {
@@ -9514,15 +9523,19 @@
         var closes = new Date(Date.now() + 7 * 864e5);
         return sb.rpc("rpc_assign_test", {
           p_class_id: qid, p_test_id: v.test_id,
-          p_closes_at: closes.toISOString(), p_max_attempts: 1
+          p_closes_at: closes.toISOString(), p_max_attempts: 1,
+          p_student_id: qstu || null
         }).then(function () {
-          ASG = { hami: true, qrup: qad, who: "", son: closes.toISOString(), cehd: 1 };
+          ASG = { hami: !qstu, qrup: qad, who: qstu ? qstuName : "", son: closes.toISOString(), cehd: 1 };
         }, function (e) {
           ASG_ERR = { qrup: qad, cid: qid, msg: fail(e) };
         }).then(function () { return v; });
       })
       .then(function (v) {
         busy = false;
+        //  yigim bitdi - «qrupa/sagirde ver» niyyeti bir defelikdir: sonraki «Test yig»
+        //  ozunden avvelki niyyeti (ve ya sagirdi) daşımasın
+        f.asg = ""; f.asgStu = ""; f.asgStuName = "";
         //  Tapsiriq ekranindan gelmisiksa ora qayidiriq - teze test
         //  siyahida secili gelsin deye id-ni otururuk.
         if (f.back) {

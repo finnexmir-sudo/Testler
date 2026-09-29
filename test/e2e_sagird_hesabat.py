@@ -204,6 +204,25 @@ with sync_playwright() as pw:
     ok(pg.locator("#aWho").input_value() == S0, "şagird «Kimə»də seçilib")
     pg.go_back(); pg.wait_for_selector("#stuDiq", state="attached", timeout=20000)
 
+    print("\nD2 · Mövzular sekmesi: «Zəif mövzulardan test yığ» YALNIZ bu şagirdə verir")
+    pg.goto(PANEL + "#/s/" + S0 + "/" + GA); pg.reload(); pg.wait_for_selector("#sTabs", timeout=20000); pg.wait_for_timeout(800)
+    pg.locator("#sTabs [data-v='m']").click(); pg.wait_for_selector("#btnRem", timeout=10000)
+    pg.click("#btnRem"); pg.wait_for_selector("#gsub", timeout=20000); pg.wait_for_timeout(800)
+    ok(pg.locator("#gAsg").count() == 0, "qrup seçimi YOXDUR (hamıya getmir)")
+    ok("yalnız" in pg.locator("#main").evaluate("e => e.textContent") and "Şagird A1" in pg.locator("#main").evaluate("e => e.textContent"), "«yalnız <ad> şagirdinə veriləcək» yazılır")
+    ok("şagirdə ver" in pg.inner_text("#btnMake"), "düymə «Testi yığ və şagirdə ver»", pg.inner_text("#btnMake"))
+    pg.wait_for_function("document.querySelector('#gPrev') && document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && document.querySelector('#gPrev').innerText.length > 5", timeout=15000)
+    nA = db("select count(*) n from public.assignments where class_id=%s::uuid", (GA,), one=True)["n"]
+    pg.click("#btnMake"); pg.wait_for_selector(".pasgok", timeout=25000); pg.wait_for_timeout(800)
+    ok("Yalnız" in pg.inner_text(".pasgok") and "qrupun qalanı yox" in pg.inner_text(".pasgok"), "vərəqdə «yalnız … görür — qrupun qalanı yox»", pg.inner_text(".pasgok")[:90].replace("\n", " "))
+    yeni = db("select a.student_id::text s from public.assignments a where a.class_id=%s::uuid order by a.created_at desc limit 1", (GA,), one=True)
+    ok(db("select count(*) n from public.assignments where class_id=%s::uuid", (GA,), one=True)["n"] == nA + 1, "bazada bir tapşırıq artdı")
+    ok(yeni["s"] == S0, "tapşırıq YALNIZ bu şagirdə yazıldı (student_id dolu)", yeni["s"])
+    #  niyyət bir dəfəlikdir: sonrakı «Test yığ» şagirdi/qrupu daşımır
+    pg.evaluate("location.hash = '#/gen'"); pg.wait_for_selector("#gsub", timeout=20000); pg.wait_for_timeout(600)
+    ok(pg.locator("#gAsg").count() == 1 and pg.locator("#gAsg").input_value() == "", "sonrakı «Test yığ»: seçim təmizdir")
+    ok(pg.inner_text("#btnMake").strip() == "Testi yığ", "düymə yenə «Testi yığ»", pg.inner_text("#btnMake"))
+
     print("\nE · Ad təkrarı (görünən ad tam adla eynidir)")
     pg.goto(PANEL + "#/s/" + S1 + "/" + GA); pg.reload(); pg.wait_for_selector("#sTabs", timeout=20000); pg.wait_for_timeout(800)
     bt = pg.locator("#band").evaluate("e => e.textContent")
