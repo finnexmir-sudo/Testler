@@ -377,6 +377,8 @@ bank 401_bank_inf11_ders_modellesdirme.sql
 bank 402_bank_inf11_ders_modellesdirme_a.sql
 bank 403_bank_inf10_ders_sebeke_a.sql
 bank 404_bank_inf10_ders_informasiya.sql
+bank 405_bank_inf9_ders_kodlasdirma.sql
+bank 406_bank_inf9_kodlasdirma_arxiv.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
