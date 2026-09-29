@@ -2530,3 +2530,27 @@ button.mrow{width:100%;text-align:left;background:none;border:0;color:inherit;fo
 .stkart .skd .muted{flex:1;min-width:140px;font-size:12px;color:var(--fg-3)}
 .stkart .skn{font-size:12px;color:var(--fg-3);line-height:1.45;padding-top:0}
 .stkart .skedit input{width:100%}
+
+/* Tapsiriq verilenden sonra (YENI): tesdiq en basda, secim baglı qutuda */
+.asg.fresh{background:var(--brand-tint);box-shadow:inset 3px 0 0 var(--brand)}
+details.more.asgwad{margin:6px 0 14px}
+details.more.asgwad .asgwa{margin-top:8px}
+details.more.newasg{margin:0}
+details.more.newasg>summary{
+  padding:13px 16px;border:1px solid var(--n-200);border-radius:12px;
+  background:var(--n-0);font-size:14.5px;font-weight:600;justify-content:center}
+
+/* Qrup menyusu: «Dersden evvel» ayri kartlara bolunub (her is oz karti) */
+.hwl.tam{display:block;margin:0;padding:0;border:0;background:none}
+.hwl.tam .hwh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.hwl.tam .hwh i{display:none}
+.hwl.tam .hwst{font-size:13.5px;font-weight:600}
+.hwl.tam .hwst.w{color:#b54708}
+.hwl.tam .hwst.k{color:var(--ok)}
+.hwl.tam .hwst.m{color:var(--fg-3);font-weight:500}
+.hwl.tam .hwb{margin-top:6px;font-size:14px;font-weight:600;color:var(--fg);line-height:1.45}
+.hwl.tam .hwn{margin-top:4px;font-size:13px;color:var(--fg-2);line-height:1.5}
+.hwl.tam .hwn a{text-decoration:none;font-weight:600}
+.hwl.tam .hwf{display:flex;justify-content:flex-end;margin-top:6px}
+.hwl.tam .hwf a{font-size:12.5px;text-decoration:none;font-weight:600}
+.card.prep.pwarn{border-left:3px solid #b54708}

@@ -2811,7 +2811,9 @@
     }).catch(function () { return []; });
   }
 
-  function loadPrep(g) {
+  function loadPrep(g, tam) {
+    //  tam: qrup menyusunda (YY) kohne «Dərsdən əvvəl» kartinin tam hali
+    var YY = YENI && !tam;
     var live = guard();
     sb.rpc("rpc_lesson_prep", { p_class_id: g.id }).then(function (d) {
       if (!live()) return;
@@ -2832,7 +2834,7 @@
           «Bu günün dərsi» - istifadecinin sozu («hamısı növbəti, hanı
           bugünün dərsi?»): muellim ucun planin ilk kecilmemis dersi ELE
           bu gun kececeyi dersdir.  Plan qutusu ve siyahi nisani da eyni.  */
-      /*  YENI GORUNUS: «Dərsdən əvvəl» DORD isi bir kartda dasiyirdi -
+      /*  YY GORUNUS: «Dərsdən əvvəl» DORD isi bir kartda dasiyirdi -
           bu gunun dersi, son kecilen, ev tapsirigi testi, yazili.
           Muellim: «bu bir yerdəki dolaşıqlığı aradan qaldırar».
           Indi kartda YALNIZ bu gunun dersi qalir:
@@ -2840,7 +2842,7 @@
               isarelenmis ən son ders odur, tekrar idi;
             · «Ev tapşırığı» Tapşırıqlar ekranina aiddir, plana yox.
           Kohne gorunus toxunulmur.  */
-      /*  YENI + plan var: bu gunun dersi PLAN QUTUSUNDA onsuz da yazilib
+      /*  YY + plan var: bu gunun dersi PLAN QUTUSUNDA onsuz da yazilib
           («BU GÜNÜN DƏRSİ · 3. Çıxma · Keçildi»).  Burada onu tekrar
           etmek movzunun adini iki defe yazmaq idi.  Kart daralir:
           yalniz ISINME qalir - plan qutusunda olmayan yeganə is.
@@ -2849,17 +2851,17 @@
       /*  23.09: acar bagliyken kartin yeganə isi (isinme) yoxdur -
           kart butovlukde cixmir.  Artiq yigilmis isinme varsa netice
           gorunmeye davam edir: muellim onu itirmesin.  */
-      if (YENI && (!d.has_plan || !nx ||
+      if (YY && (!d.has_plan || !nx ||
                    (!nx.warm_test_id && (!d.paid || !DERS_HAZIR)))) {
         box.innerHTML = ""; return;
       }
       var h = '<div class="spacer"></div><div class="card prep">' +
         //  16.09 (istifadeci: «dağınıq»): alt yazi cixdi - asagidaki
         //  etiketlerin tekrari idi; fesil ve tarix oz setrinde (.sub)
-        '<div class="pt"><b>' + (YENI ? "İsinmə testi" : "Dərsdən əvvəl") + "</b></div>";
-      //  1. novbeti movzu - YENI-de movzunun adi plan qutusundadir,
+        '<div class="pt"><b>' + (YY ? "İsinmə testi" : "Dərsdən əvvəl") + "</b></div>";
+      //  1. novbeti movzu - YY-de movzunun adi plan qutusundadir,
       //     burada yalniz isinme testi qalir (yuxarida yazildi)
-      if (YENI) {
+      if (YY) {
         h += '<p class="muted pwt">Dərsdən əvvəl beş sual — ' +
           "«<b>" + esc(nx.topic) + "</b>» mövzusundan.</p>" +
           (nx.warm_test_id
@@ -2900,8 +2902,8 @@
       } else {
         h += row("doc", "Bu günün dərsi", '<span class="muted">Plan tam keçilib. 🎉</span>');
       }
-      //  2. son kecilen - YENI-de plan siyahisinda gorunur, tekrar etmirik
-      if (ls && !YENI) {
+      //  2. son kecilen - YY-de plan siyahisinda gorunur, tekrar etmirik
+      if (ls && !YY) {
         h += row("check", "Son keçilən", "<b>" + esc(ls.topic) + "</b>" +
           '<s class="muted sub">' + dateAz(ls.done_at) +
           (ls.test_id
@@ -2954,20 +2956,70 @@
           '<div class="hwb">' + esc(hw.body) + "</div>" + names +
           '<div class="hwf"><a href="#/a/' + esc(g.id) + '">hamısı →</a></div>');
       }
-      //  YENI: ev tapsirigi Tapsiriqlar ekranindadir - plana aid deyil
-      if (!YENI) {
+      //  YY: ev tapsirigi Tapsiriqlar ekranindadir - plana aid deyil
+      if (!YY) {
         h += row("clip", "Ev tapşırığı", tl + yl,
           (d.open && pend.length) || (hw && und.length) ? "pwarn" : "");
       }
+      /*  MENYU (tam): «Dərsdən əvvəl» BIR boyuk kart idi - istifadeci:
+          «ayrı kartlara bölək, daha oxunaqlı olsun».  Indi her is oz
+          kartindadir: bu günün dərsi · son keçilən · test · yazılı.  */
+      function tamKart(basliq, alt, govde, cls) {
+        return '<div class="card prep' + (cls ? " " + cls : "") + '"><div class="pt"><b>' + basliq + "</b>" +
+          (alt ? '<span class="muted">' + alt + "</span>" : "") + "</div>" + govde + "</div>" +
+          '<div class="spacer"></div>';
+      }
+      function tamHazirla() {
+        var k = '<div class="msec">Dərsdən əvvəl</div>', body;
+        if (!d.has_plan) {
+          body = '<p class="muted pwt">Dərs planı yoxdur. Plan qursanız bu günün dərsi və hazır test burada olacaq. ' +
+            '<a href="#" id="prepPlan">Planı qur</a></p>';
+        } else if (nx) {
+          body = '<p class="pwt"><b>' + esc(nx.topic) + "</b>" +
+            (nx.group ? '<br><span class="muted">«' + esc(nx.group) + "» fəsli · dərs&nbsp;" + nx.gpos + "/" + nx.gtotal + "</span>" : "") +
+            "</p>" +
+            (nx.warm_test_id
+              ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
+                '<span class="wres">' + (nx.warm_takers
+                  ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird"
+                  : "verilib") + '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></div>'
+              : (d.paid && DERS_HAZIR
+                  ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
+                    '<button class="plmk" id="prepWarm" data-item="' + esc(nx.item_id) + '">Hazırla</button></div>'
+                  : ""));
+        } else {
+          body = '<p class="muted pwt">Plan tam keçilib. 🎉</p>';
+        }
+        k += tamKart("Bu günün dərsi", "", body);
+        if (ls) {
+          k += tamKart("Son keçilən", dateAz(ls.done_at),
+            '<p class="pwt"><b>' + esc(ls.topic) + "</b></p>" +
+            (ls.test_id
+              ? '<p class="muted pwt">' + (ls.avg != null
+                  ? "Test " + Math.round(ls.avg) + "% · " + (ls.takers || 0) + " şagird"
+                  : "Test verilib, hələ yazan yoxdur") + "</p>"
+              : "") +
+            (d.paid
+              ? '<button class="btn sm" id="prepGen">' + ic("gen") + "«" + esc(ls.group || ls.topic) + "» testi yığ</button>"
+              : ""));
+        }
+        k += tamKart("Test", "ev tapşırığı", tl.replace(/^<div class="hwl">/, '<div class="hwl tam">'),
+          d.open && pend.length ? "pwarn" : "");
+        k += tamKart("Yazılı tapşırıq", "ev tapşırığı", yl.replace(/^<div class="hwl">/, '<div class="hwl tam">'),
+          hw && und.length ? "pwarn" : "");
+        return k;
+      }
       //  4. addimlar
-      h += (YENI ? "" : '<div class="pbtns">') +
-        (!YENI && ls && d.paid
+      if (tam) h = tamHazirla(); else
+      h += (YY ? "" : '<div class="pbtns">') +
+        (!YY && ls && d.paid
           //  suallar fesle baglidir - duymede fesil adi (alt movzu deyil)
           ? '<button class="btn sm" id="prepGen">' + ic("gen") + "«" + esc(ls.group || ls.topic) + "» testi yığ</button>"
           : "") +
-        (YENI ? ""
+        //  menyuda «Tapşırıq ver» duymesi artiq asagidadir - ikinci yox
+        (YY || tam ? ""
               : '<button class="btn sm ghost" id="prepAsg">' + ic("clip") + "Tapşırıq ver</button>") +
-      (YENI ? "</div>" : "</div></div>");
+      (YY ? "</div>" : "</div></div>");
       box.innerHTML = h;
       on("prepAsg", "click", function () { nav("#/a/" + g.id); });
       on("prepWarm", "click", function () {
@@ -2975,12 +3027,13 @@
         if (busy || !b) return;
         busy = true; b.disabled = true; b.textContent = "Yığılır…";
         sb.rpc("rpc_pack_warm", { p_item_id: b.getAttribute("data-item"), p_count: 5 })
-          .then(function () { busy = false; loadPrep(g); })
+          .then(function () { busy = false; loadPrep(g, tam); })
           .catch(function (e) { busy = false; b.disabled = false; b.textContent = "Hazırla"; alert(fail(e)); });
       });
-      prepPlanLink();
+      if (!tam) prepPlanLink();
       on("prepPlan", "click", function (e) {
         e.preventDefault();
+        if (tam) { nav("#/g/" + g.id + "/p"); return; }
         var b = document.querySelector('#gTabs [data-v="p"]');
         if (b) b.click();
         var op = $("btnPlOpen");
@@ -3667,6 +3720,7 @@
         yRow({ ic: "cal",   ad: "Dərs planı", alt: "yüklənir…", href: "#/g/" + g.id + "/p" }) +
         yRow({ ic: "doc",   ad: "Dəftər", alt: "davamiyyət və ödəniş", href: "#/g/" + g.id + "/d" }) +
       "</div>" +
+      '<div id="prep"></div>' +
       '<div class="spacer"></div>' +
       '<button class="btn go wide" id="btnAsgs">' + ic("clip") + "Tapşırıq ver</button>" +
       '<div class="spacer"></div>' +
@@ -3675,6 +3729,9 @@
     on("btnBack", "click", function () { goBack("#/gs"); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
     on("btnRen", "click", function () { renameGroup(g); });
+    //  «Dərsdən əvvəl» (bu günün dərsi, son keçilən, ev tapşırığı) menyuda
+    //  qayıtdı: yalniz bu qisa sehifede, plan sehifesinde yox (dolasiq olmasin)
+    loadPrep(g, true);
 
     var live = guard();
     function setRow(i, alt, cip, cipCls) {
@@ -3724,32 +3781,9 @@
       setRow(3, nx && nx.name ? "bu gün: " + nx.name
         : (prep.has_plan ? "plan qurulub" : "plan qurulmayıb"));
 
-      //  ---- BU GUN setirleri: yalniz is olanda
-      var d = [];
-      var hw = prep.hw || null;
-      var un = hw && hw.undone ? hw.undone.length : 0;
-      if (un) {
-        d.push(yRow({ ic: "warn", cls: "dq", href: "#/a/" + g.id,
-          ad: un + " şagird ev tapşırığını etməyib",
-          alt: (hw.body || "").slice(0, 60), cip: "diqqət", cipCls: "pvl" }));
-      }
-      if ((prep.pending || []).length) {
-        d.push(yRow({ ic: "clip", cls: "dq", href: "#/a/" + g.id,
-          ad: prep.pending.length + " şagird testi işləməyib",
-          alt: "son tarix yaxınlaşır", cip: "diqqət", cipCls: "pvl" }));
-      }
-      if (nx && nx.name && prep.warm_test_id !== undefined) {
-        d.push(yRow({ ic: "gen", href: "#/g/" + g.id + "/p",
-          ad: "Bu günün dərsi: " + nx.name,
-          //  23.09: isinme baglidir (bax DERS_HAZIR) - setir onu vəd
-          //  etmemelidir.  Plan ozu yene faydalidir, kecid qalir.
-          alt: DERS_HAZIR ? "dərsdən əvvəl 5 suallıq isinmə hazırlayın"
-                          : "planda «keçildi» işarələyin" }));
-      }
-      $("gDiq").innerHTML = d.length
-        ? '<div class="msec">Bu gün</div><div class="card pad0 menu">' + d.join("") +
-          "</div><div class=\"spacer\"></div>"
-        : "";
+      //  «Bu gün» setirleri (etməyən şagird, bu günün dərsi) «Dərsdən əvvəl»
+      //  kartindadir - burada ikinci defe yazilmir.
+      $("gDiq").innerHTML = "";
     }).catch(function () {});
   }
 
@@ -4447,6 +4481,10 @@
       (closes ? "Son tarix: " + dateAz(closes) + ".\n" : "") +
       "Link: " + url + "\nKodunla gir — «Tapşırıqlar»da gözləyir.";
   }
+  //  «Tapşırıq ver» ile «Tapşırıq yaz» qarisirdi: YENI-de hazir testi
+  //  vermek «Testi ver», metnle olan ise «Ev tapşırığı yaz» adlanir.
+  function asgBtnLabel() { return YENI ? "Testi ver" : "Tapşırıq ver"; }
+
   function asgShareBox(title, closes, who) {
     var t = waAsgText(title, closes, who);
     /*  25.09: «Şagirdlərə xəbər verin» tek basina oxunanda «demeli ozum
@@ -4457,13 +4495,17 @@
       (who ? "yalnız " + esc(who) : "qrupun bütün şagirdləri") +
       ". Test artıq " + (who ? "onun" : "onların") + " siyahısındadır — " +
       "kodla girəndə görəcək" + (who ? "" : "lər") +
-      ". İstəsəniz xəbər də verin:</span></div>" +
+      (YENI ? "" : ". İstəsəniz xəbər də verin:") + "</span></div>" +
+      /*  YENI: xeber hissesi baglidir - tesdiq ozu ekranin basinda tam
+          oxunur, WhatsApp metni yer tutub sehifeni daginiq gostermir.  */
+      (YENI ? '<details class="more asgwad"><summary>Şagirdlərə xəbər vermək istəsəniz</summary>' : "") +
       '<div class="asgwa">' +
         '<a class="btn sm go" target="_blank" rel="noopener" href="https://wa.me/?text=' +
           encodeURIComponent(t) + '">' + ic("send") + "WhatsApp-a göndər</a>" +
         '<button class="btn sm ghost" type="button" data-wacopy="1">' + ic("copy") + "Mətni kopyala</button>" +
         '<textarea class="watxt" readonly rows="4">' + esc(t) + "</textarea>" +
-      "</div>";
+      "</div>" +
+      (YENI ? "</details>" : "");
   }
   /*  «NOVBETI TEST HAZIRDIR» (217).  Olcu: muellim BIR test gonderir
       ve dayanir - 9 sagirdin her biri deqiq bir test islemisdi.  Sebeb
@@ -6267,12 +6309,16 @@
       eye: g.name, title: "Tapşırıqlar",
       sub: "Şagird tapşırığı öz siyahısında görür; son tarix keçəndə bağlanır."
     });
-    show(
+    /*  Tapsiriq VERILENDEN SONRA (YENI): tesdiq en basda tam oxunur, altinda
+        verilmis tapsiriqlar (son 3), hazir test secimi ise baglı «Yeni
+        tapşırıq ver» qutusundadir.  Evvel hamisi eyni anda acilirdi -
+        muellim «dağınıq» dedi.  Adi girisde (tesdiq yoxdur) secim aciqdir.  */
+    var pickHtml =
       '<div id="nextBox"></div>' +
       /*  "Yeni tapsiriq" yeni test yaratmaq kimi oxunurdu (canli sual).
           Burada hazir test secilib qrupa verilir - basliq ve bir cumle
           bunu deyir.  */
-      "<h2>Hazır testi tapşır</h2>" +
+      "<h2>" + (YENI ? "Hazır testi ver" : "Hazır testi tapşır") + "</h2>" +
       '<p class="muted" style="margin:-6px 0 10px">Hazır testi seçin, kimə və nə vaxta ' +
         "qədər — şagirdin siyahısına düşür. Eyni test bir neçə qrupa verilə bilər.</p>" +
       '<details class="more tkind"><summary>Hansı test nə vaxt?</summary>' +
@@ -6293,12 +6339,16 @@
         '<button class="btn wide" id="btnGenHere">' + ic("gen") +
           "Yeni test yığ</button>" +
       "</div>" +
-      '<div class="spacer"></div>' +
+      '<div class="spacer"></div>';
+    var flashHtml = ASG_FLASH
+      ? '<div id="asgFlash">' + asgShareBox(ASG_FLASH.title, ASG_FLASH.closes, ASG_FLASH.who) + "</div>" : "";
+    var listHtml =
       "<h2>Verilmiş tapşırıqlar</h2>" +
-      (ASG_FLASH ? '<div id="asgFlash">' + asgShareBox(ASG_FLASH.title, ASG_FLASH.closes, ASG_FLASH.who) + "</div>" : "") +
+      (YENI ? "" : flashHtml) +
       '<div class="segs asgf" id="asgTabs"></div>' +
       '<div id="asgList" class="card pad0"></div>' +
-      '<div class="spacer"></div>' +
+      '<div class="spacer"></div>';
+    var restHtml =
       /*  191: metnle ev tapsirigi.  Repetitor her dersden sonra «bunu oxu,
           bunu tekrarla» deyir - bura yazir, sagird siyahisinda gorur,
           «etdim» deyir, valideyn de gorur.  Test deyil - sadece metn.  */
@@ -6321,7 +6371,7 @@
             "</div>" +
             '<div id="hwErr"></div>' +
             '<button class="btn go" id="btnHwAdd" style="margin-top:10px">' + ic("plus") +
-              "Tapşırıq yaz</button>" +
+              "Ev tapşırığı yaz</button>" +
           "</div>" +
           '<div id="hwList" class="card pad0" style="margin-top:10px"></div>' +
           '<div class="spacer"></div>'
@@ -6336,15 +6386,22 @@
               "istədiyi vaxt işləyə bilər. Bağlasanız yalnız verdiyiniz " +
               "tapşırıqları görər.</span></span></label>" +
         '<div id="fpErr"></div></div>' +
-      "</div>"
-    );
+      "</div>";
+    if (YENI && ASG_FLASH) {
+      show(flashHtml + '<div class="spacer"></div>' + listHtml +
+        '<details class="more newasg" id="newAsg"><summary>Yeni tapşırıq ver</summary>' +
+        '<div class="spacer"></div>' + pickHtml + "</details>" +
+        '<div class="spacer"></div>' + restHtml);
+    } else {
+      show(pickHtml + listHtml + restHtml);
+    }
 
     var flash = ASG_FLASH;
     ASG_FLASH = null;
     bindWaCopy($("asgFlash"));
     nextTestCard(g, items, students);
     //  Qutu ekranın altında qalırdı - muellim xeber vermeden cixirdi
-    if (flash && $("asgFlash") && $("asgFlash").scrollIntoView) {
+    if (flash && !YENI && $("asgFlash") && $("asgFlash").scrollIntoView) {
       setTimeout(function () {
         var el = $("asgFlash");
         if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -6439,6 +6496,7 @@
       on("asgMore", "click", function () { AEXP = true; drawAsgList(); });
     }
     AEXP = false;
+    AFRESH = !!flash && YENI;
     drawAsgList();
     on("asgTabs", "click", function (ev) {
       var b = ev.target.closest ? ev.target.closest(".seg") : null;
@@ -6469,8 +6527,10 @@
           : "Aşağıdan test seçib tapşırıq verin.") + "</div>";
     }
     //  "Bagli" il boyu boyuyur: ilk 8 + "Daha N" (AEXP acanda hamisi)
-    var ACAP2 = 8;
-    var full = list.length > ACAP2 && !AEXP && f === "off";
+    //  YENI: aktiv siyahi da 3-le baslayir (tapsiriq verilenden sonra
+    //  yeddisi birden acilib sehifeni daginiq gostermesin)
+    var ACAP2 = YENI ? 3 : 8;
+    var full = list.length > ACAP2 && !AEXP && (f === "off" || YENI);
     var shown = full ? list.slice(0, ACAP2) : list;
     return shown.map(function (a) {
       var open = a.open !== false;
@@ -6480,7 +6540,7 @@
       //  Ferdi teyinatda mexrec 1-dir - "0/5 sagird bitirib" yanlis olardi
       var solo = !!a.student_id;
       var tot  = Number(a.targets) || (solo ? 1 : students);
-      return '<div class="asg">' +
+      return '<div class="asg' + (AFRESH && a === items[0] ? " fresh" : "") + '">' +
         '<div class="l1"><b>' + esc(a.title) + "</b>" +
           (solo
             ? '<span class="pill solo">' + ic("person") +
@@ -6503,6 +6563,7 @@
       : "");
   }
   var AEXP = false;   // "Bagli" siyahisi tam acilib
+  var AFRESH = false; // tapsiriq indice verilib - en yenisi ayrica gorunur
 
   function bindAsgRows(g) {
     var box = $("asgList");
@@ -6773,7 +6834,7 @@
           "tapşırıq siz götürənə qədər açıq qalır" +
           (students.length ? "; tək şagird seçsəniz onu yalnız o görəcək." : ".") + "</p>" +
         '<div id="aErr"></div>' +
-        '<button class="btn go" id="btnAsg">' + ic("plus") + "Tapşırıq ver</button>";
+        '<button class="btn go" id="btnAsg">' + ic("plus") + asgBtnLabel() + "</button>";
       function pickMark() {
         var sel = $("aTest"), box2 = $("aList");
         if (!sel || !box2) return;
@@ -6849,7 +6910,7 @@
       closes = d.toISOString();
     }
     $("aErr").innerHTML = "";
-    setBusy("btnAsg", true, "Tapşırıq ver");
+    setBusy("btnAsg", true, asgBtnLabel());
     var selT = $("aTest"), selW = $("aWho");
     var ttl = selT && selT.selectedIndex >= 0 ? selT.options[selT.selectedIndex].text : "Test";
     var whoName = selW && selW.value && selW.selectedIndex >= 0
@@ -6864,7 +6925,7 @@
       screenAssign(g.id, ASG_PRE);
     })
       .catch(function (e) {
-        setBusy("btnAsg", false, "Tapşırıq ver");
+        setBusy("btnAsg", false, asgBtnLabel());
         $("aErr").innerHTML = msg("err", fail(e));
       });
   }
@@ -8557,6 +8618,7 @@
     f.topics = weak.map(function (t) { return t.id; });
     f.remNames = weak.map(function (t) { return t.name; });
     f.cls = gid;
+    f.asg = gid;   //  qrupun icinden gelinib - hazir olanda hemin qrupa verilsin
     f.count = Math.min(10, Math.max(5, f.topics.length * 3));
     f.title = "Düzəliş testi";
     /* Fenn ve sinif de avtomatik secilir - muellim yalniz "Testi yig"
@@ -8835,7 +8897,7 @@
               "kimi ona tapşırıq gedəcək (son tarix 7 gün, 1 cəhd).</p>") +
         '<div id="gPrev"><div class="skel">Hovuz yoxlanılır…</div></div>' +
         '<div id="gErr"></div>' +
-        '<button class="btn go" id="btnMake">' + ic("gen") + "Testi yığ</button>" +
+        '<button class="btn go" id="btnMake">' + ic("gen") + makeLabel(f) + "</button>" +
       "</div>"
     );
 
@@ -8910,7 +8972,11 @@
               (f.asg === c.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
           }).join("");
       }).catch(function () {});
-    on("gAsg", "change", function () { f.asg = $("gAsg").value; });
+    on("gAsg", "change", function () {
+      f.asg = $("gAsg").value;
+      var mb = $("btnMake");
+      if (mb && !busy) mb.innerHTML = ic("gen") + makeLabel(f);
+    });
 
     var t = null;
     on("gCnt", "input", function () {
@@ -9020,11 +9086,16 @@
     }).catch(function () {});
   }
 
+  //  qrup secilibse duymenin adi hemin iki isi deyir: yig VE ver
+  function makeLabel(f) {
+    return f.asg && !f.back ? "Testi yığ və qrupa ver" : "Testi yığ";
+  }
+
   function makeTest() {
     if (busy) return;
     var f = genFilter();
     $("gErr").innerHTML = "";
-    setBusy("btnMake", true, "Testi yığ");
+    setBusy("btnMake", true, makeLabel(f));
     //  Qrupun ADI indi oxunur - yigandan sonra siyahi deyise biler
     var qadSel = $("gAsg"), qad = "";
     if (f.asg && qadSel && qadSel.selectedIndex >= 0) {
@@ -9063,7 +9134,7 @@
         nav("#/t/" + v.test_id);
       })
       .catch(function (e) {
-        setBusy("btnMake", false, "Testi yığ");
+        setBusy("btnMake", false, makeLabel(f));
         var el = $("gErr");
         if (el) el.innerHTML = msg("err", fail(e));
       });
