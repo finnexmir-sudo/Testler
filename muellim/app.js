@@ -15,6 +15,7 @@
   /* Minimal xetli ikonlar. Emoji yerine SVG: her platformada eyni
      gorunur ve interfeysin tonu ciddi qalir. */
   var ICON = {
+    gear:   '<path d="M3 5.5h8M14.5 5.5H16M3 13.5h2M8.5 13.5H16"/><circle cx="12.7" cy="5.5" r="1.7"/><circle cx="6.7" cy="13.5" r="1.7"/>',
     group:  '<circle cx="7.4" cy="7.4" r="2.3"/><path d="M3.4 15.1a4 4 0 0 1 8 0"/>' +
             '<path d="M12.4 6.1a2.3 2.3 0 0 1 0 4.5"/><path d="M13.4 12.3a4 4 0 0 1 2.2 2.8"/>',
     person: '<circle cx="9.5" cy="7" r="2.8"/><path d="M4.5 16a5 5 0 0 1 10 0"/>',
@@ -1674,7 +1675,7 @@
               (s.seen_at || s.last_at ? esc(alt) : '<span class="qr">' + esc(alt) + "</span>") +
               "</i></span>" + ic("right", "ar") + "</a>";
           }).join("") + "</div>" +
-          (g.id ? '<div class="suact"><a class="btn sm" href="#/a/' + esc(g.id) + '">' +
+          (g.id ? '<div class="suact"><a class="btn sm" href="#/a/' + esc(g.id) + (YENI ? "/t" : "") + '">' +
                   ic("clip") + "«" + esc(g.ad) + "» qrupuna tapşırıq ver</a></div>" : "") +
           '<div class="spacer"></div>';
       }).join("");
@@ -2447,7 +2448,7 @@
       }
     }
     on("onbGen", "click", function () { nav("#/gen"); });
-    on("onbAsg", "click", function () { if (g) nav("#/a/" + g.id); });
+    on("onbAsg", "click", function () { if (g) nav("#/a/" + g.id + (YENI ? "/t" : "")); });
     on("onbClose", "click", function () {
       try { localStorage.setItem("bil10_onb_off", "1"); } catch (e) {}
       onbOff();
@@ -3072,7 +3073,7 @@
       var hw = d.hw, und = hw ? (hw.undone || []) : [], yl;
       if (!hw) {
         yl = hwBox("Yazılı", "", '<span class="hwst m">Yazılmayıb</span>',
-          '<div class="hwf"><a href="#/a/' + esc(g.id) + '">Yaz →</a></div>');
+          '<div class="hwf"><a href="#/a/' + esc(g.id) + (YENI ? "/h" : "") + '">Yaz →</a></div>');
       } else {
         var hd = Number(hw.done) || 0, ht = Number(hw.total) || 0;
         var who = hw.personal ? "yalnız " + esc(firstName(hw.student || "") || hw.student || "") : "bütün qrup";
@@ -3839,7 +3840,8 @@
   var GBOL = {
     s: { ad: "Şagirdlər", ic: "group" },
     p: { ad: "Dərs planı", ic: "cal" },
-    d: { ad: "Dəftər", ic: "doc" }
+    d: { ad: "Dəftər", ic: "doc" },
+    x: { ad: "Qrup ayarları", ic: "gear" }
   };
   function drawGroupYeni(g, bol) {
     if (GBOL[bol]) return drawGroupBolme(g, bol);
@@ -3865,11 +3867,10 @@
       '<div class="spacer"></div>' +
       '<button class="btn go wide" id="btnAsgs">' + ic("clip") + "Test ver və ya ev tapşırığı yaz</button>" +
       '<div class="spacer"></div>' +
-      '<button class="btn sm ghost" id="btnRen">' + ic("pen") + "Qrupun adını dəyiş</button>" +
-      '<div class="card tight hide" id="gCard"></div>');
+      '<button class="btn sm ghost" id="btnSet">' + ic("gear") + "Qrup ayarları</button>");
     on("btnBack", "click", function () { goBack("#/gs"); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
-    on("btnRen", "click", function () { renameGroup(g); });
+    on("btnSet", "click", function () { nav("#/g/" + g.id + "/x"); });
     //  «Dərsdən əvvəl» (bu günün dərsi, son keçilən, ev tapşırığı) menyuda
     //  qayıtdı: yalniz bu qisa sehifede, plan sehifesinde yox (dolasiq olmasin)
     loadPrep(g, true);
@@ -3952,6 +3953,34 @@
       on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(g.id); });
       on("btnStu", "click", function () { addStudent(g.id); });
       loadStudents(g.id);
+    } else if (bol === "x") {
+      /*  QRUP AYARLARI: «Sərbəst məşq» tapsiriq deyil, qrup ayaridir - evvel
+          tapsiriq ekraninin en altinda idi (29.09).  Ad deyismek de burada.  */
+      show('<div class="card tight" id="fpBox"><div class="skel">Yüklənir…</div></div>' +
+        '<div class="spacer"></div>' +
+        '<button class="btn sm ghost" id="btnRen">' + ic("pen") + "Qrupun adını dəyiş</button>" +
+        '<div class="card tight hide" id="gCard"></div>');
+      on("btnRen", "click", function () { renameGroup(g); });
+      var liveX = guard();
+      sb.select("classes", { select: "id,free_practice", eq: { id: g.id } }).then(function (rows) {
+        if (!liveX() || !$("fpBox")) return;
+        var free = !rows || !rows[0] || rows[0].free_practice !== false;
+        $("fpBox").innerHTML = '<div class="swrap"><label class="switch" for="fp">' +
+          '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
+          '<span class="track"><i></i></span>' +
+          "<span><b>Sərbəst məşq</b>" +
+            '<span class="muted">Açıqdırsa şagird hazır bankın digər testlərini də ' +
+              "istədiyi vaxt işləyə bilər. Bağlasanız yalnız verdiyiniz " +
+              "tapşırıqları görər.</span></span></label>" +
+          '<div id="fpErr"></div></div>';
+        on("fp", "change", function () {
+          var el = $("fp"), val = el.checked;
+          el.disabled = true; $("fpErr").innerHTML = "";
+          sb.update("classes", { id: g.id }, { free_practice: val })
+            .then(function () { el.disabled = false; })
+            .catch(function (e) { el.disabled = false; el.checked = !val; $("fpErr").innerHTML = msg("err", fail(e)); });
+        });
+      }).catch(function (e) { if ($("fpBox")) $("fpBox").innerHTML = msg("warn", fail(e)); });
     } else if (bol === "p") {
       show('<div id="planBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>' +
            '<div id="prep"></div>');
@@ -6405,12 +6434,24 @@
       sagird "Kime" secimində evvelceden secilir, Geri ora qaytarir.  */
   var ASG_PRE = "";
   var ASG_FLASH = null;   // son verilen tapsiriq - bir defelik WhatsApp qutusu
+  var ASG_CID = "";      // tapsiriq ekranindaki qrupun id-si (siyahi satirlari ucun)
+  var HW_FLASH = "";      // ev tapsirigi yazildi - hub-da bir defelik tesdiq (YENI)
   //  217: indice gonderdik - kart bir defelik gizlenir, yoxsa «Göndər»
   //  yeniden teklif olunur ve muellim «getdimi?» deye tereddud edir
   var NXT_SENT = false;
   var PREV_HASH = "", CUR_HASH = "";   // route() doldurur
   function screenAssign(gid, sid) {
     var live = guard();
+    /*  YENI: «Tapşırıqlar» = BAXIS (verilmis tapsiriqlar) + iki dugme.  Vermek
+        ayri sehifelerdedir: #/a/<qrup>/t (test ver), #/a/<qrup>/h (ev tapsirigi
+        yaz).  Sagird hesabatindan gelende (#/a/<qrup>/<sagird>) birbasa «test
+        ver», sagirdle.  Tapsiriq indice verilibse - tesdiq ustdedir, yene baxis.  */
+    var view = "*";
+    if (YENI) {
+      view = (sid === "t" || sid === "h") ? sid : (sid ? "t" : "");
+      if (sid === "t" || sid === "h") sid = "";
+      if (ASG_FLASH) view = "";
+    }
     ASG_PRE = sid || "";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     Promise.all([
@@ -6429,16 +6470,19 @@
       if (!live()) return;
       var rows = res[0];
       if (!rows || !rows.length) throw new Error("Qrup tapılmadı.");
-      drawAssign(rows[0], res[1] || {}, res[3] || [], res[4]);
-      if (ASG_PRE) {
+      drawAssign(rows[0], res[1] || {}, res[3] || [], res[4], view);
+      if (ASG_PRE && view !== "") {
         var pk = $("pick");
         if (pk && pk.scrollIntoView) pk.scrollIntoView({ block: "start" });
       }
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
-  function drawAssign(g, d, students, hw) {
+  function drawAssign(g, d, students, hw, view) {
     topTitle.textContent = g.name;
+    //  Y: yeni gorunus (baxis / test ver / ev tapsirigi yaz ayri ekranlar); kohnede hamisi bir yerde
+    var Y = YENI && view !== "*";
+    ASG_CID = g.id;
     var items = d.items || [];
     var free  = d.free_practice !== false;
     //  191: metnle ev tapsirigi.  hw === null -> server bilmir (kohne baza),
@@ -6446,22 +6490,24 @@
     var hwOn = hw !== null && hw !== undefined;
 
     bandHead({
-      back: { id: "btnBack", label: ASG_PRE ? "Şagird hesabatı" : backLabel(g.name) },
-      eye: g.name, title: "Tapşırıqlar",
-      sub: "Şagird tapşırığı öz siyahısında görür; son tarix keçəndə bağlanır."
+      back: { id: "btnBack", label: ASG_PRE ? "Şagird hesabatı" : (Y && view ? "Tapşırıqlar" : backLabel(g.name)) },
+      eye: g.name,
+      title: Y && view === "t" ? "Test ver" : (Y && view === "h" ? "Ev tapşırığı yaz" : "Tapşırıqlar"),
+      sub: Y && view === "t" ? "Hazır testi seçin, kimə və nə vaxta qədər — şagirdin siyahısına düşür."
+         : (Y && view === "h" ? "Şagird siyahısında görür, «etdim» deyir; valideyn də görür."
+            : "Şagird tapşırığı öz siyahısında görür; son tarix keçəndə bağlanır.")
     });
     /*  Tapsiriq VERILENDEN SONRA (YENI): tesdiq en basda tam oxunur, altinda
         verilmis tapsiriqlar (son 3), hazir test secimi ise baglı «Yeni
         tapşırıq ver» qutusundadir.  Evvel hamisi eyni anda acilirdi -
         muellim «dağınıq» dedi.  Adi girisde (tesdiq yoxdur) secim aciqdir.  */
     var pickHtml =
-      '<div id="nextBox"></div>' +
       /*  "Yeni tapsiriq" yeni test yaratmaq kimi oxunurdu (canli sual).
           Burada hazir test secilib qrupa verilir - basliq ve bir cumle
-          bunu deyir.  */
-      "<h2>" + (YENI ? "Hazır testi ver" : "Hazır testi tapşır") + "</h2>" +
-      '<p class="muted" style="margin:-6px 0 10px">Hazır testi seçin, kimə və nə vaxta ' +
-        "qədər — şagirdin siyahısına düşür. Eyni test bir neçə qrupa verilə bilər.</p>" +
+          bunu deyir.  Y-de basliq zolaqdadir.  */
+      (Y ? "" : "<h2>" + (YENI ? "Hazır testi ver" : "Hazır testi tapşır") + "</h2>" +
+        '<p class="muted" style="margin:-6px 0 10px">Hazır testi seçin, kimə və nə vaxta ' +
+          "qədər — şagirdin siyahısına düşür. Eyni test bir neçə qrupa verilə bilər.</p>") +
       '<details class="more tkind"><summary>Hansı test nə vaxt?</summary>' +
         '<ul class="muted">' +
           "<li><b>Hazır test və öz testiniz</b> — bu ekran: seçin, tapşırın.</li>" +
@@ -6528,19 +6574,52 @@
               "tapşırıqları görər.</span></span></label>" +
         '<div id="fpErr"></div></div>' +
       "</div>";
-    if (YENI && ASG_FLASH) {
-      show(flashHtml + '<div class="spacer"></div>' + listHtml +
-        '<details class="more newasg" id="newAsg"><summary>Yeni tapşırıq ver</summary>' +
-        '<div class="spacer"></div>' + pickHtml + "</details>" +
-        '<div class="spacer"></div>' + restHtml);
+    /*  Y: ev tapsirigi FORMASI ve SIYAHISI ayri; sərbəst məşq qrup ayarlarına köçdü */
+    var hwFormHtml = hwOn
+      ? '<div class="card tight" id="hwForm">' +
+          '<label for="hwText">Tapşırıq</label>' +
+          '<textarea id="hwText" rows="3" maxlength="500" ' +
+            'placeholder="Məs.: 12-ci paraqrafı oxu, çalışma 3–5-i dəftərdə həll et"></textarea>' +
+          '<div class="fieldrow" style="margin-top:10px">' +
+            '<div><label for="hwWho">Kimə</label><select id="hwWho">' +
+              '<option value="">Bütün qrup</option>' +
+              students.map(function (st) {
+                return '<option value="' + esc(st.id) + '">' + esc(st.full_name) + "</option>";
+              }).join("") + "</select></div>" +
+            '<div style="flex:0 0 150px"><label for="hwDue">Son tarix</label>' +
+              '<input type="date" id="hwDue"></div>' +
+          "</div>" +
+          '<div id="hwErr"></div>' +
+          '<button class="btn go" id="btnHwAdd" style="margin-top:10px">' + ic("plus") +
+            "Ev tapşırığı yaz</button>" +
+        "</div>"
+      : msg("warn", "Ev tapşırığı bu bazada hələ yoxdur.");
+    var hwListHtml = hwOn
+      ? "<h2>Yazılı tapşırıqlar</h2>" +
+        '<div id="hwErr"></div><div id="hwList" class="card pad0"></div><div class="spacer"></div>'
+      : "";
+    var actHtml = '<div class="asgact"><button class="btn go" id="btnAsgT">' + ic("clip") + "Test ver</button>" +
+      (hwOn ? '<button class="btn" id="btnAsgH">' + ic("pen") + "Ev tapşırığı yaz</button>" : "") + "</div>" +
+      '<div class="spacer"></div>';
+    var hwFlashHtml = HW_FLASH ? msg("ok", HW_FLASH) + '<div class="spacer"></div>' : "";
+    HW_FLASH = "";
+    if (Y && view === "t") {
+      //  sagird hesabatindan gelende «Novbeti test hazirdir» (yalniz o sagird ucun) burada durur
+      show((ASG_PRE ? '<div id="nextBox"></div>' : "") + pickHtml);
+    } else if (Y && view === "h") {
+      show(hwFormHtml);
+    } else if (Y) {
+      show(flashHtml + hwFlashHtml + actHtml + '<div id="nextBox"></div>' + listHtml + hwListHtml);
     } else {
-      show(pickHtml + listHtml + restHtml);
+      show('<div id="nextBox"></div>' + pickHtml + listHtml + restHtml);
     }
 
     var flash = ASG_FLASH;
     ASG_FLASH = null;
     bindWaCopy($("asgFlash"));
-    nextTestCard(g, items, students);
+    if ($("nextBox")) nextTestCard(g, items, students);
+    on("btnAsgT", "click", function () { nav("#/a/" + g.id + "/t"); });
+    on("btnAsgH", "click", function () { nav("#/a/" + g.id + "/h"); });
     //  Qutu ekranın altında qalırdı - muellim xeber vermeden cixirdi
     if (flash && !YENI && $("asgFlash") && $("asgFlash").scrollIntoView) {
       setTimeout(function () {
@@ -6551,7 +6630,8 @@
     on("btnBack", "click", function () {
       //  sagird kartindan gelmisikse ora - amma yigindan cixaraq, yoxsa
       //  kartin oz «geri»si yeniden bura qaytarar (dovr)
-      if (ASG_PRE) { goTo("#/s/" + ASG_PRE + "/" + g.id); return; }
+      if (ASG_PRE && view !== "") { goTo("#/s/" + ASG_PRE + "/" + g.id); return; }
+      if (Y && view) { goBack("#/a/" + g.id); return; }
       goBack("#/g/" + g.id);
     });
 
@@ -6567,7 +6647,7 @@
       list = list || [];
       if (!list.length) {
         box.innerHTML = '<div class="empty"><b>Hələ tapşırıq yazılmayıb</b>' +
-          "Yuxarıda yazın — şagird dərhal görür.</div>";
+          (Y ? "«Ev tapşırığı yaz» ilə əlavə edin — şagird dərhal görür." : "Yuxarıda yazın — şagird dərhal görür.") + "</div>";
         return;
       }
       box.innerHTML = list.map(function (x) {
@@ -6605,10 +6685,16 @@
         p_due: $("hwDue").value || null,
         p_student_id: $("hwWho").value || null
       }).then(function () {
+        //  YENI: yazilandan sonra BAXIS ekranina qayidiriq - tesdiq orada
+        if (Y) {
+          HW_FLASH = "Ev tapşırığı yazıldı — şagird siyahısında görür.";
+          btn.disabled = false; goTo("#/a/" + g.id);
+          return null;
+        }
         $("hwText").value = ""; $("hwDue").value = ""; $("hwWho").value = "";
         $("hwErr").innerHTML = msg("ok", "Yazıldı — şagird siyahısında görür.");
         return sb.rpc("rpc_homework_list", { p_class_id: g.id });
-      }).then(function (l) { btn.disabled = false; drawHw(l); })
+      }).then(function (l) { btn.disabled = false; if (l) drawHw(l); })
         .catch(function (e) { btn.disabled = false; $("hwErr").innerHTML = msg("err", fail(e)); });
     });
     on("btnGenHere", "click", function () { genForClass(g); });
@@ -6647,14 +6733,14 @@
     });
 
     bindAsgRows(g);
-    loadPick(g, students || []);
+    if ($("pick")) loadPick(g, students || []);
   }
 
   function asgRows(items, students, f) {
     if (!items.length) {
       return '<div class="empty"><div class="ic">' + ic("clip") + "</div>" +
         "<b>Hələ tapşırıq verilməyib</b>" +
-        "Yuxarıdan test seçin — şagirdlər dərhal görəcək.</div>";
+        (YENI ? "«Test ver» ilə başlayın — şagirdlər dərhal görəcək." : "Yuxarıdan test seçin — şagirdlər dərhal görəcək.") + "</div>";
     }
     var list = !f ? items : items.filter(function (a) {
       return f === "off" ? a.open === false : a.open !== false;
@@ -6665,7 +6751,7 @@
         "</b>" +
         (f === "off"
           ? "Son tarixi keçən və götürülən tapşırıqlar bura düşür; nəticələr qalır."
-          : "Aşağıdan test seçib tapşırıq verin.") + "</div>";
+          : (YENI ? "«Test ver» ilə yeni tapşırıq verin." : "Aşağıdan test seçib tapşırıq verin.")) + "</div>";
     }
     //  "Bagli" il boyu boyuyur: ilk 8 + "Daha N" (AEXP acanda hamisi)
     //  YENI: aktiv siyahi da 3-le baslayir (tapsiriq verilenden sonra
@@ -6682,7 +6768,8 @@
       var solo = !!a.student_id;
       var tot  = Number(a.targets) || (solo ? 1 : students);
       return '<div class="asg' + (AFRESH && a === items[0] ? " fresh" : "") + '">' +
-        '<div class="l1"><b>' + esc(a.title) + "</b>" +
+        '<div class="l1"><b>' + (YENI && a.test_id
+          ? '<a class="asgt" href="#/t/' + esc(a.test_id) + '">' + esc(a.title) + "</a>" : esc(a.title)) + "</b>" +
           (solo
             ? '<span class="pill solo">' + ic("person") +
               "yalnız " + esc(a.student || "bir şagird") + "</span>"
@@ -6696,7 +6783,10 @@
           (Number(a.questions) || 0) + " sual · " + tries +
           (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : "") + "</div>" +
         '<div class="l2">' + done + "/" + tot + " şagird bitirib" +
-          (a.avg != null ? " · orta " + pct(a.avg) + "%" : "") + "</div>" +
+          (a.avg != null ? " · orta " + pct(a.avg) + "%" : "") +
+          //  YENI: etmeyenler - adlari sadalayan sehifeye (#/ht), say-siyahi qaydasi
+          (YENI && open && done < tot && ASG_CID
+            ? ' · <a class="asgn" href="#/ht/' + esc(ASG_CID) + '">etməyənlər →</a>' : "") + "</div>" +
       "</div>";
     }).join("") +
     (full
@@ -7074,7 +7164,8 @@
       p_student_id: (selW && selW.value) || null
     }).then(function (r) {
       ASG_FLASH = { title: (r && r.test) || ttl.replace(/\s+\(\d+ sual\)$/, ""), closes: closes, who: whoName };
-      screenAssign(g.id, ASG_PRE);
+      //  YENI: verilenden sonra BAXIS ekrani (tesdiq en basda) - «test ver» sehifesi baglanir
+      if (YENI && !ASG_PRE) goTo("#/a/" + g.id); else screenAssign(g.id, ASG_PRE);
     })
       .catch(function (e) {
         setBusy("btnAsg", false, asgBtnLabel());
@@ -9055,7 +9146,7 @@
 
     on("btnBack", "click", function () {
       //  imtina: geri qayidis niyyetini de temizleyirik
-      if (f.back) { var gid = f.back; f.back = ""; f.backName = ""; goTo("#/a/" + gid); return; }
+      if (f.back) { var gid = f.back; f.back = ""; f.backName = ""; goTo("#/a/" + gid + (YENI ? "/t" : "")); return; }
       nav("#/");
     });
     on("gRemOff", "click", function (e) {
@@ -9279,7 +9370,7 @@
           var gid = f.back;
           f.back = ""; f.backName = "";
           PICKNEW = v.test_id;
-          goTo("#/a/" + gid);
+          goTo("#/a/" + gid + (YENI ? "/t" : ""));
           return;
         }
         MADE = v.test_id;

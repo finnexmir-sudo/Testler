@@ -62,7 +62,7 @@ def ac(br, GA):
     ctx, pg = context(br, 1280, 1000)
     pg.goto(PANEL); pg.wait_for_timeout(700)
     pg.fill("#email", MAIL); pg.fill("#pass", "pfparol123"); pg.click("#btnAuth"); pg.wait_for_timeout(3000)
-    pg.goto(PANEL + "#/a/" + GA); pg.reload()
+    pg.goto(PANEL + "#/a/" + GA + "/t"); pg.reload()
     pg.wait_for_selector("#aList .trow", timeout=20000)
     return ctx, pg
 

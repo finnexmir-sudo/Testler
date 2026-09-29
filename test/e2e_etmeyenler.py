@@ -133,8 +133,8 @@ with sync_playwright() as pw:
     ctx, pg = context(br, 1280, 1000)
     ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin="http://127.0.0.1:8010")
     daxil(pg)
-    pg.goto(PANEL + "#/a/" + GA); pg.reload(); pg.wait_for_selector("#hwText", timeout=20000)
-    pg.fill("#hwText", "12-ci paraqrafı oxu, çalışma 3–5-i həll et"); pg.fill("#hwDue", time.strftime("%Y-%m-%d")); pg.click("#btnHwAdd"); pg.wait_for_timeout(1500)
+    pg.goto(PANEL + "#/a/" + GA + "/h"); pg.reload(); pg.wait_for_selector("#hwText", timeout=20000)
+    pg.fill("#hwText", "12-ci paraqrafı oxu, çalışma 3–5-i həll et"); pg.fill("#hwDue", time.strftime("%Y-%m-%d")); pg.click("#btnHwAdd"); pg.wait_for_selector("#hwList .hwrow", timeout=15000)
 
     print("\nA · İcmal sətri")
     pg.goto(PANEL + "#/"); pg.reload()
