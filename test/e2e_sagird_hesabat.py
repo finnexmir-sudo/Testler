@@ -291,6 +291,32 @@ with sync_playwright() as pw:
     ok(tname in pg.inner_text("#wFilt"), "süzgəc zolağında mövzunun adı yazılıb")
     pg.click("#wFiltX"); pg.wait_for_timeout(300)
     ok(pg.locator("#wFilt .wfilt").count() == 0, "«Filtri təmizlə» zolağı silir")
+    #  HER movzuda sehv varsa kecid var; suzgec o movzunun BUTUN sehv suallarini gosterir (top-10 yox, db/902)
+    pg.locator("#sTabs [data-v='m']").click(); pg.wait_for_timeout(200)
+    wrong_by = {r["n"]: r["c"] for r in db(
+        """select tp.name n, count(distinct aa.question_id) c
+             from public.attempt_answers aa join public.attempts a on a.id = aa.attempt_id and a.student_id = %s::uuid
+             join public.topics tp on tp.id = aa.topic_id
+            where aa.is_correct is not true group by tp.name""", (S0,))}
+    nwrong = sum(wrong_by.values())
+    ok(nwrong > 10 and len(wrong_by) >= 3, "hazırlıq: 10-dan çox səhv sual, ≥3 mövzuda", "%d sual / %d mövzu" % (nwrong, len(wrong_by)))
+    links = pg.locator("#topicBox .tlink")
+    lnames = sorted(links.nth(i).get_attribute("data-tf") for i in range(links.count()))
+    ok(lnames == sorted(wrong_by), "səhvi olan HƏR mövzunun panelində «səhvlərinə bax →» var", "%s / %s" % (lnames, sorted(wrong_by)))
+    for nm, cnt in sorted(wrong_by.items()):
+        pg.locator("#sTabs [data-v='m']").click(); pg.wait_for_timeout(150)
+        lk = pg.locator("#topicBox .tlink[data-tf=\"%s\"]" % nm)
+        lk.locator("xpath=../preceding-sibling::div[contains(@class,'trow')][1]").click(); pg.wait_for_timeout(150)
+        lk.click(); pg.wait_for_selector("#wFilt .wfilt", timeout=10000); pg.wait_for_timeout(1200)
+        vis = pg.locator("#wList .wq:visible")
+        ok(vis.count() == cnt and all(vis.nth(i).get_attribute("data-tp") == nm for i in range(vis.count())),
+           "«%s»: süzgəc %d səhv sualın hamısını göstərir" % (nm, cnt), vis.count())
+        ok(pg.locator("#wCnt").inner_text().strip() == str(cnt), "başlıqdakı say süzgəclə uyğundur (%d)" % cnt)
+        ok(pg.locator("#wList .wq:visible .wans").evaluate_all("els => els.every(e => e.textContent.trim().length > 0)"),
+           "hər sualda «Yazdı» sətri dolu")
+        pg.click("#wFiltX"); pg.wait_for_timeout(200)
+        ok(pg.locator("#wList .wq.wx").count() == 0 and pg.locator("#wList .wq:visible").count() == 5 and pg.locator("#wCnt").inner_text().strip() == "10",
+           "«Filtri təmizlə» ilk 5 sualı və 10 sayını qaytarır")
 
     print("\nH · Tarixçə sekmesi")
     pg.locator("#sTabs [data-v='t']").click(); pg.wait_for_selector(".dynw", timeout=10000); pg.wait_for_timeout(400)

@@ -17,8 +17,10 @@
 --  (chosen / correct) gorur - eyni yoxlamalar: app.can_read_student,
 --  abune.  Sagirdin OZ tokeni bu funksiyaya catmir (yalniz authenticated).
 --
---  Qaytarir: [{qid, chosen, correct}] - HER SUAL ucun sagirdin SON sehv
---  cavabi (en cox 200 sual).
+--  Qaytarir: HER SEHV SUAL ucun {qid, body, media_url, explanation, topic,
+--  wrong, hasty, sure_wrong, chosen, correct} (chosen/correct - SON sehv cavab),
+--  en cox sehv edilen birinci, en cox 200 sual.  rpc_student_report yalniz 10-nu
+--  verir; «Movzular -> sehvlerine bax» suzgeci burdan BUTUN siyahini alir.
 --
 --  ISLETMEK: bu fayl; qrant faylin oz icindedir (05_grants tekrar lazim deyil).
 -- =====================================================================
@@ -43,27 +45,48 @@ begin
   end if;
 
   return coalesce((
-    select jsonb_agg(z.x)
+    select jsonb_agg(z.x order by z.wrong desc, z.qid)
       from (
-        select distinct on (aa.question_id)
+        select r.wrong, r.question_id as qid,
                jsonb_build_object(
-                 'qid', aa.question_id,
+                 'qid', r.question_id,
+                 'body', r.question_body,
+                 'media_url', qq.media_url,
+                 'explanation', r.question_explanation,
+                 'topic', tp.name,
+                 'wrong', r.wrong,
+                 'hasty', r.hasty,
+                 'sure_wrong', r.sure_wrong,
                  'chosen', coalesce((
                     select string_agg(o.body, ' · ' order by o.ord)
                       from public.question_options o
-                     where o.id = any(aa.selected_option_ids)),
-                    nullif(btrim(coalesce(aa.text_answer, '')), ''), '—'),
+                     where o.id = any(r.selected_option_ids)),
+                    nullif(btrim(coalesce(r.text_answer, '')), ''), '—'),
                  'correct', coalesce((
                     select string_agg(o.body, ' · ' order by o.ord)
                       from public.question_options o
-                     where o.question_id = aa.question_id and o.is_correct), '')
+                     where o.question_id = r.question_id and o.is_correct), '')
                ) as x
-          from public.attempt_answers aa
-          join public.attempts a on a.id = aa.attempt_id
-                                and a.student_id = p_student_id
-                                and a.status = 'submitted'
-         where aa.is_correct is not true
-         order by aa.question_id, a.finished_at desc
+          from (
+            --  her sual ucun: umumi say (window) + SON sehv cavab (rn = 1)
+            select aa.question_id, aa.question_body, aa.question_explanation,
+                   aa.topic_id, aa.selected_option_ids, aa.text_answer,
+                   count(*) over w as wrong,
+                   count(*) filter (where aa.seconds is not null
+                                      and aa.seconds <= app.hasty_sec()) over w as hasty,
+                   count(*) filter (where aa.sure is true) over w as sure_wrong,
+                   row_number() over (w order by a.finished_at desc) as rn
+              from public.attempt_answers aa
+              join public.attempts a on a.id = aa.attempt_id
+                                    and a.student_id = p_student_id
+                                    and a.status = 'submitted'
+             where aa.is_correct is not true
+            window w as (partition by aa.question_id)
+          ) r
+          left join public.topics tp on tp.id = r.topic_id
+          left join public.questions qq on qq.id = r.question_id
+         where r.rn = 1
+         order by r.wrong desc, r.question_id
          limit 200
       ) z), '[]'::jsonb);
 end $$;

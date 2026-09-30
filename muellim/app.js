@@ -6229,11 +6229,44 @@
               "Zəif mövzulardan test yığ (" + sweakAll.length + ")</button>"
             : "");
       }
+      /*  bir sehv sualin setri - ilk 10 (rpc_student_report) ve movzu suzgecinde elave suallar (db/902) eyni markup  */
+      function wAns(w) {
+        if (w.chosen === undefined) return "";
+        var none = !w.chosen || w.chosen === "—";
+        return '<span class="wax">Yazdı: <b>' + (none ? "cavab verməyib" : qt(w.chosen)) + "</b></span>" +
+          (w.correct ? ' <span class="way">Düz: <b>' + qt(w.correct) + "</b></span>" : "");
+      }
+      function wRow(w, hid) {
+        return '<div class="wq' + (hid ? " hide" : "") + '" data-q="' + esc(w.qid || "") + '" data-tp="' + esc(w.topic || "") + '"><div class="g"><b>' +
+          qt(w.body) + "</b>" +
+          //  900: qrafikli sualda sekilsiz metn hec ne demir -
+          //  «Hansi qrafik artandir?» sualina baxib muellim
+          //  sagirdin neyi sehv etdiyini bile bilmirdi.
+          fig(w.media_url) +
+          (w.topic ? '<span class="wtag">' + esc(w.topic) + "</span>" : "") +
+          (Number(w.hasty) > 0 ? '<span class="wtag wb-h" title="5 saniyədən tez">tələsik</span>' : "") +
+          /*  «əmin idi» tək başına heç nə demirdi (istifadəçi
+              soruşdu).  Şagird cavabı verəndən sonra «əminsən?»
+              sualına bəli deyib, amma səhv edib — yəni mövzunu
+              bildiyini SANIR.  Ən təhlükəli səhv budur, ona görə
+              nişan qalır, sadəcə adı aydınlaşır.  */
+          (Number(w.sure_wrong) > 0
+            ? '<span class="wtag wb-s" title="Şagird cavabına əmin idi, amma səhv etdi — ' +
+              'yəni mövzunu bildiyini sanır">bildiyini sanır</span>' : "") +
+          (w.explanation ? "<i>" + qt(w.explanation) + "</i>" : "") +
+          //  YENI: sagirdin YAZDIGI ve DUZ cavab (db/902 - yoxdursa bos qalir)
+          (YENI ? '<div class="wans" data-qid="' + esc(w.qid || "") + '">' + wAns(w) + "</div>" : "") +
+          //  "1x" her setirde menasiz idi - say yalniz tekrarda
+          "</div>" + (Number(w.wrong) > 1
+            ? '<span class="wn">' + w.wrong + "×</span>" : "") + "</div>";
+      }
       function topicRow(t) {
         var bad = Number(t.ratio) < 60;
         //  YENI: sətrə basanda ALTINDA emeliyyat paneli acilir (29.09: el isaresi gelirdi, klik bir sey etmirdi):
         //  «Bu movzudan test yig - yalniz bu sagird ucun» + (varsa) «sehvlerine bax».  Dot evezine sol cizgi.
-        var hasW = YENI && weak.some(function (w) { return w.topic === t.name; });
+        //  db/902 sonrasi: SEHVI OLAN HER movzuda (top-10 yox) - suzgec o movzunun butun sehv suallarini gosterir
+        var hasW = YENI && weak.length > 0 && (Number(t.total) - Number(t.correct) > 0 ||
+          weak.some(function (w) { return w.topic === t.name; }));
         var core = '<div class="trow' + (YENI ? " topen" : "") + (YENI && bad ? " weakrow" : "") + '"' +
           (YENI ? ' data-tp-id="' + esc(t.id || "") + '"' : "") + '><div class="g"><b>' +
           (!YENI && bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
@@ -6358,36 +6391,13 @@
           (YENI ? '<div id="wFilt"></div>' : "") +
           '<details class="more filt wrongbox" open style="margin-top:10px">' +
           (YENI
-            ? "<summary>Ən çox səhv edilən suallar " + '<span class="fn">' + weak.length + "</span></summary>"
+            ? "<summary>Ən çox səhv edilən suallar " + '<span class="fn" id="wCnt">' + weak.length + "</span></summary>"
             : "<summary>Səhv edilən suallar " +
               '<span class="fn">' + weak.length + "</span>" +
               '<span class="muted" style="font-weight:400;margin-left:auto">ən çox səhv edilən ' +
                 weak.length + "</span></summary>") +
           '<div class="card pad0" style="margin-top:10px" id="wList">' +
-          weak.map(function (w, i) {
-            return '<div class="wq' + (i >= WCAP ? " hide" : "") + '" data-tp="' + esc(w.topic || "") + '"><div class="g"><b>' +
-              qt(w.body) + "</b>" +
-              //  900: qrafikli sualda sekilsiz metn hec ne demir -
-              //  «Hansi qrafik artandir?» sualina baxib muellim
-              //  sagirdin neyi sehv etdiyini bile bilmirdi.
-              fig(w.media_url) +
-              (w.topic ? '<span class="wtag">' + esc(w.topic) + "</span>" : "") +
-              (Number(w.hasty) > 0 ? '<span class="wtag wb-h" title="5 saniyədən tez">tələsik</span>' : "") +
-              /*  «əmin idi» tək başına heç nə demirdi (istifadəçi
-                  soruşdu).  Şagird cavabı verəndən sonra «əminsən?»
-                  sualına bəli deyib, amma səhv edib — yəni mövzunu
-                  bildiyini SANIR.  Ən təhlükəli səhv budur, ona görə
-                  nişan qalır, sadəcə adı aydınlaşır.  */
-              (Number(w.sure_wrong) > 0
-                ? '<span class="wtag wb-s" title="Şagird cavabına əmin idi, amma səhv etdi — ' +
-                  'yəni mövzunu bildiyini sanır">bildiyini sanır</span>' : "") +
-              (w.explanation ? "<i>" + qt(w.explanation) + "</i>" : "") +
-              //  YENI: sagirdin YAZDIGI ve DUZ cavab (db/902 - yoxdursa bos qalir)
-              (YENI ? '<div class="wans" data-qid="' + esc(w.qid || "") + '"></div>' : "") +
-              //  "1x" her setirde menasiz idi - say yalniz tekrarda
-              "</div>" + (Number(w.wrong) > 1
-                ? '<span class="wn">' + w.wrong + "×</span>" : "") + "</div>";
-          }).join("") +
+          weak.map(function (w, i) { return wRow(w, i >= WCAP); }).join("") +
           (weak.length > WCAP
             ? '<button class="morebtn" id="wMore">Daha ' + (weak.length - WCAP) + " sual göstər</button>"
             : "") +
@@ -6476,20 +6486,33 @@
       loadDiag(id, classId, at.length > 0);
       drawTopics();
       var WTF = "", wExp = false;
+      var DET = null, DETP = false;   /* db/902 nəticəsi; DETP - hələ yüklənir */
       /*  Mövzu suzgeci: Movzular sekmesinden «sehvlerine bax» - Sehvler sekmesinde YALNIZ o movzunun
-          suallari, «Filtri temizle» ile geri.  */
+          BUTUN sehv suallari (ilk 10 + db/902-den elave), «Filtri temizle» ile geri.  */
       function applyWF() {
         var box = $("wList");
         if (!box) return;
+        Array.prototype.forEach.call(box.querySelectorAll(".wq.wx"), function (x) { x.remove(); });
+        var have = {};
         Array.prototype.forEach.call(box.querySelectorAll(".wq"), function (x, i) {
+          have[x.getAttribute("data-q")] = 1;
           var okr = !WTF || x.getAttribute("data-tp") === WTF;
           x.classList.toggle("hide", !(okr && (WTF || wExp || i < 5)));
         });
+        if (WTF && DET) {
+          box.insertAdjacentHTML("beforeend", DET.filter(function (w) {
+            return w.topic === WTF && !have[w.qid];
+          }).map(function (w) { return wRow(w, false).replace('class="wq', 'class="wq wx'); }).join(""));
+        }
+        var shown = WTF ? box.querySelectorAll(".wq:not(.hide)").length : weak.length;
+        if ($("wCnt")) $("wCnt").textContent = shown;
         if ($("wMore")) $("wMore").hidden = !!WTF;
         var fb = $("wFilt");
         if (fb) {
           fb.innerHTML = WTF
-            ? '<div class="wfilt">Mövzu: <b>' + esc(WTF) + '</b><button type="button" class="btn sm ghost" id="wFiltX">Filtri təmizlə ×</button></div>'
+            ? '<div class="wfilt">Mövzu: <b>' + esc(WTF) + '</b><button type="button" class="btn sm ghost" id="wFiltX">Filtri təmizlə ×</button></div>' +
+              (shown ? "" : '<p class="muted" style="margin:8px 0 0">' +
+                (DETP ? "Suallar yüklənir…" : "Bu mövzunun səhv sualları göstərilə bilmədi.") + "</p>")
             : "";
           on("wFiltX", "click", function () { WTF = ""; applyWF(); });
         }
@@ -6521,20 +6544,22 @@
           Array.prototype.forEach.call(document.querySelectorAll("#topicBox .trow.topen"), function (x) { x.classList.remove("open"); });
           if (willOpen) { pan.hidden = false; row.classList.add("open"); }
         });
-        //  Sagirdin yazdigi / duz cavab: ayri RPC (db/902) - yoxdursa (SQL islenmeyib) sessiz bos qalir
+        //  Sagirdin yazdigi / duz cavab + movzu suzgeci ucun butun sehv suallar: ayri RPC (db/902) -
+        //  yoxdursa (SQL islenmeyib) sessiz bos qalir, ilk 10 kohne kimi gorunur
         if (weak.length) {
+          DETP = true;
           sb.rpc("rpc_student_wrong_detail", { p_student_id: id }).then(function (list) {
+            DETP = false;
             if (!live()) return;
+            DET = (list || []).filter(function (x) { return x && x.qid; });
             var by = {};
-            (list || []).forEach(function (x) { by[x.qid] = x; });
+            DET.forEach(function (x) { by[x.qid] = x; });
             Array.prototype.forEach.call(document.querySelectorAll(".wans[data-qid]"), function (el) {
               var x = by[el.getAttribute("data-qid")];
-              if (!x) return;
-              var none = !x.chosen || x.chosen === "—";
-              el.innerHTML = '<span class="wax">Yazdı: <b>' + (none ? "cavab verməyib" : qt(x.chosen)) + "</b></span>" +
-                (x.correct ? ' <span class="way">Düz: <b>' + qt(x.correct) + "</b></span>" : "");
+              if (x) el.innerHTML = wAns(x);
             });
-          }).catch(function () {});
+            if (WTF) applyWF();
+          }).catch(function () { DETP = false; if (WTF) applyWF(); });
         }
       }
       function sTabTo(v) {
