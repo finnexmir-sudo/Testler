@@ -5325,7 +5325,7 @@
     return {
       name: firstName(st.full_name) || "Şagird",
       period: dovr === "ümumi" ? "bütün dövr" : ay[new Date().getMonth()],
-      n: pc.length, from: from, to: to, best: Math.max.apply(null, pc.concat([0])),
+      n: pc.length, k: k, kisa: dovr !== "ümumi", from: from, to: to, best: Math.max.apply(null, pc.concat([0])),
       avg: avgOf(pc), strong: strong,
       teacher: (CTX && CTX.profile && CTX.profile.full_name) || ""
     };
@@ -6028,9 +6028,13 @@
       var h = YENI
         ? '<div class="rstat"><span><b>' + (Number(sm.attempts) || 0) + "</b>test</span>" +
             '<span><b>' + pct(sm.avg) + "%</b>orta</span>" +
+            //  «+40» = ILK testlerin ortasi ile SON testlerin ortasi arasinda ferq (faiz bendi):
+            //  4-den az testde ilk/son test, 4 ve cox - ilk 3 / son 3 test.  Yazi bunu deyir.
             (pdt ? '<span class="rtr ' + (pdt.to >= pdt.from ? "up" : "dn") + '"><b>' +
-              (pdt.to >= pdt.from ? "↗ +" : "↘ ") + (pdt.to - pdt.from) + "</b>gedişat " +
-              pdt.from + "% → " + pdt.to + "%</span>" : "") + "</div>"
+              (pdt.to >= pdt.from ? "↗ +" : "↘ ") + (pdt.to - pdt.from) + "</b>" +
+              (pdt.k > 1 ? "ilk " + pdt.k + " test " : "ilk test ") + pdt.from + "% → " +
+              (pdt.k > 1 ? "son " + pdt.k + " test " : "son test ") + pdt.to + "%" +
+              (pdt.kisa ? " · son 30 gün" : " · bütün dövr") + "</span>" : "") + "</div>"
         : '<div class="stats">' +
             statTile(sm.attempts || 0, "test", "g1") +
             statTile(pct(sm.avg) + "%", "orta", "g2") +
@@ -6217,7 +6221,9 @@
                   }).join("") + "</div>"
                 : "") +
           '<div id="topicBox"></div>' +
-          (sweakAll.length
+          //  YENI: umumi «Zeif movzulardan test yig» duymesi GOTURULDU - iki fenn/sinif qarisanda xeta verirdi;
+          //  hər mövzu sətrinin öz düyməsi var (sətrə basanda panel)
+          (!YENI && sweakAll.length
             ? '<div class="spacer"></div>' +
               '<button class="btn go wide" id="btnRem">' + ic("gen") +
               "Zəif mövzulardan test yığ (" + sweakAll.length + ")</button>"
