@@ -58,6 +58,19 @@ select * from (values
     (select exists (select 1 from f where proname='rpc_home' and def like '%tekrar_plansiz%'))),
  ('215 girən müəllim sayğacı',
     (select exists (select 1 from f where proname='rpc_admin_stats' and def like '%215b: IKI MENBE MOTERIZEDE%'))),
+ ('222 dərs testi (nişanlı hovuz)',
+    (select exists (select 1 from f where proname='ders_sual_sayi')
+        and exists (select 1 from f where proname='rpc_plan_test' and def like '%ders_min%'))),
+ ('223 işlənmiş sual növbədə geri qalır',
+    (select exists (select 1 from f where proname='generate_pick' and def like '%exclude%')
+        and exists (select 1 from f where proname='rpc_plan_test' and def like '%exclude%'))),
+ ('903 dərs qapısı dərs-dərs',
+    (select exists (select 1 from f where proname='rpc_plan_get' and def like '%ders_hazir%')
+        and exists (select 1 from f where proname='rpc_plan_test' and def like '%p_scope%')
+        and exists (select 1 from information_schema.columns
+                     where table_schema='public' and table_name='class_plan_items' and column_name='fesil_test_id')
+        and (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+              where n.nspname='public' and p.proname='rpc_plan_test') = 1)),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

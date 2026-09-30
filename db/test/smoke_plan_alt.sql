@@ -196,7 +196,7 @@ begin
   if has_function_privilege('anon', 'public.rpc_plan_get(uuid)', 'EXECUTE') then
     raise exception 'anon plani gore bilir';
   end if;
-  if has_function_privilege('anon', 'public.rpc_plan_test(uuid, int)', 'EXECUTE') then
+  if has_function_privilege('anon', 'public.rpc_plan_test(uuid, int, text)', 'EXECUTE') then
     raise exception 'anon plan testi yiga bilir';
   end if;
 end $$;

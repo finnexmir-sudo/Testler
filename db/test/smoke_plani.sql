@@ -321,7 +321,7 @@ do $$
 begin
   assert not has_function_privilege('anon', 'public.rpc_plan_get(uuid)', 'EXECUTE'),
          'anon plani gorur';
-  assert not has_function_privilege('anon', 'public.rpc_plan_test(uuid, int)', 'EXECUTE'),
+  assert not has_function_privilege('anon', 'public.rpc_plan_test(uuid, int, text)', 'EXECUTE'),
          'anon test yigir';
 end $$;
 \echo 'OK  7 · anon plan funksiyalarini gormur'

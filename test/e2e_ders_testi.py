@@ -139,7 +139,7 @@ with sync_playwright() as pw:
           " values (%s,%s,%s, now() - make_interval(days => %s))",
           (pid, d, i + 1, 3 - i))
 
-    def yig(ders_id, ad):
+    def yig(ders_id, ad, sc):
         p.goto(PANEL + "?yeni=1#/g/" + str(gid) + "/p"); p.reload()
         p.wait_for_selector(".card.plan", timeout=30000)
         p.evaluate("document.querySelectorAll('.card.plan details')"
@@ -147,7 +147,9 @@ with sync_playwright() as pw:
         p.wait_for_timeout(700)
         it = q("select id from public.class_plan_items where plan_id=%s and topic_id=%s",
                (pid, ders_id), one=True)["id"]
-        b = p.locator('[data-plmk="%s"]' % it)
+        #  903: iki ayri dugme - dersin sirasinda (data-sc=ders, yalniz hazir ders)
+        #  ve fesil basliginda (data-sc=fesil).  Hansini basmaq muellimin secimidir.
+        b = p.locator('[data-plmk="%s"][data-sc="%s"]' % (it, sc))
         if not b.count():
             yox(False, "%s: «test yig» duymesi yoxdur" % ad); return None
         #  «test yig» derhal yigmir - TESDIQ qutusu acir (planOfferLate),
@@ -163,7 +165,7 @@ with sync_playwright() as pw:
         return t["test_id"] if t else None
 
     print("\n=== BOL fəsli — nişan yetir, DƏRS testi gözlənilir ===")
-    tid = yig(dBOL, "BOL")
+    tid = yig(dBOL, "BOL", "ders")
     if tid:
         rows = q("""select count(*) n,
                            count(*) filter (where qq.tags @> array[%s]) nis
@@ -180,7 +182,7 @@ with sync_playwright() as pw:
         yox(False, "BOL: test yigilmadi")
 
     print("\n=== AZ fəsli — nişan çatmır, FƏSİL testi gözlənilir ===")
-    tid = yig(dAZ, "AZ")
+    tid = yig(dAZ, "AZ", "fesil")
     if tid:
         rows = q("""select count(*) n,
                            count(*) filter (where qq.tags @> array[%s]) nis

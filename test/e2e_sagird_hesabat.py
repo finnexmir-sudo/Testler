@@ -312,6 +312,8 @@ with sync_playwright() as pw:
         ok(vis.count() == cnt and all(vis.nth(i).get_attribute("data-tp") == nm for i in range(vis.count())),
            "«%s»: süzgəc %d səhv sualın hamısını göstərir" % (nm, cnt), vis.count())
         ok(pg.locator("#wCnt").inner_text().strip() == str(cnt), "başlıqdakı say süzgəclə uyğundur (%d)" % cnt)
+        ok(pg.locator("#wMore").count() == 0 or not pg.locator("#wMore").is_visible(),
+           "süzgəcdə «Daha N sual göstər» görünmür (basanda başqa fənlərin sualları açılırdı)")
         ok(pg.locator("#wList .wq:visible .wans").evaluate_all("els => els.every(e => e.textContent.trim().length > 0)"),
            "hər sualda «Yazdı» sətri dolu")
         pg.click("#wFiltX"); pg.wait_for_timeout(200)

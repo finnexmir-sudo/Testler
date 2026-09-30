@@ -1353,7 +1353,17 @@
       birini gormeyib.  Ders basIamamis ugursuzluq tecrubesi.
       «Tezlikle qayidacaq» YAZILMADI - qesden: o vedin arxasinda tarix
       yoxdur (tek 8-ci sinif ucun ~900 sual lazimdir).  Tarixsiz ved
-      bir muddet sonra ikinci yalana cevrilir.  */
+      bir muddet sonra ikinci yalana cevrilir.
+
+      30.09: DERS TESTI bu bayraqdan CIXDI.  Qapi indi DERS-DERS acilir: server her plan
+      setrinde ders_hazir deyir (app.ders_sual_sayi >= app.ders_min, db/903), «test yığ»
+      yalniz hazir dersde cixir.  Bu bayraq YALNIZ uc yerde qalir - onlar hele FESIL
+      hovuzundan yigir, ders nisani ile yox, ona gore bagli saxlanilib:
+        · isinme (rpc_pack_warm -> app.pack_topic = valideyn fesil),
+        · birge test secimi (generatorda 'any_tags' yoxdur: bir nece dersin nisani OR,
+          «@>» ise AND teleb edir - 222 basliginda yazilib),
+        · paketdeki isinme sutunu (eyni rpc_pack_warm).
+      Hansini acmaq lazimdirsa, evvel hemin RPC dersin nisanini oxumalidir.  */
   var DERS_HAZIR = false;
 
   function yRow(o) {
@@ -3481,8 +3491,8 @@
                     fesilde cixmir, cunki hovuzda hele kecilmemis
                     dersin sualı var.  «son» - feslin son dersinin
                     item id-si, movcud yol (rpc_plan_test) dəyişmir.  */
-                (tam && son && !son.test_id
-                  ? '<button class="plmk plgm" data-plmk="' + esc(son.id) + '"' +
+                (tam && son && !planFesilVar(son)
+                  ? '<button class="plmk plgm" data-plmk="' + esc(son.id) + '" data-sc="fesil"' +
                     (d.paid ? "" : ' disabled title="Abunə paketi ilə"') +
                     ">fəsildən test yığ</button>"
                   : "") +
@@ -3542,7 +3552,7 @@
             return '<div class="plrow' + (it.done ? " done" : "") +
               (cur && it.id === cur.id ? " cur" : "") +
               (avgChip || it.test_id || (it.done && Number(it.gtotal) > 1) ||
-               (it.done && it.can_test) ? " acts" : "") + '">' +
+               (it.done && it.can_test) || (it.done && it.ders_hazir) ? " acts" : "") + '">' +
               "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
               "<span>" + esc(it.topic) +
                 (it.done && it.done_at
@@ -3557,7 +3567,10 @@
                   '" value="' + esc(it.id) + '" title="Birgə test üçün seç">'
                 : "") +
               (it.test_id
-                ? '<a href="#/t/' + esc(it.test_id) + '" class="pltest">vərəq</a>'
+                //  903: feslin SON dersinde saxlanmis FESIL testi «dersin testi» deyil -
+                //  adi ile ayrilir ki, ders hazir olanda ikisi qarismasin
+                ? '<a href="#/t/' + esc(it.test_id) + '" class="pltest">' +
+                  (it.test_id === it.fesil_test_id ? "fəsil vərəqi" : "vərəq") + "</a>"
                 /*  can_test serverden gelir: fesilsiz movzuda ozu,
                     fesildə ise YALNIZ son dersde.  Suallar fesle
                     baglidir - hər dersde teklif etsek bes ders eyni
@@ -3570,14 +3583,24 @@
                     «gpos < gtotal» = bu, feslin son dersi deyil; son
                     ders kecilende duyme basliqda cixir, burada izaha
                     ehtiyac qalmir.  */
-                : (it.done && Number(it.gtotal) > 1
+                : (it.done && Number(it.gtotal) > 1 && !it.ders_hazir
                    && Number(it.gpos) < Number(it.gtotal)
                     ? '<s class="plwait" title="Suallar fəsil hovuzundandır — ' +
                       'test fəsil bitəndə yığılır">fəsil sonunda · ' +
                       esc(String(it.gpos)) + "/" + esc(String(it.gtotal)) + "</s>"
                     : "")) +
+              /*  30.09: DERS TESTI dərs-dərs açılır.  «ders_hazir» serverdən gəlir
+                  (app.ders_sual_sayi >= app.ders_min) - brauzer saymır.  Hazır dərsdə,
+                  öz testi hələ yoxdursa: «test yığ» (yalnız BU dərsdən).  Fəsil testi
+                  ayrıdır - başlıqdakı düymə, «fəsil vərəqi» dərsin öz testi sayılmır.
+                  Hazır olmayan dərsdə yuxarıdakı «fəsil sonunda» izahı qalır.  */
+              (it.done && it.ders_hazir && !planOwnTest(it)
+                ? '<button class="plmk plds" data-plmk="' + esc(it.id) + '" data-sc="ders"' +
+                  (d.paid ? ' title="Yalnız bu dərsdən test yığır"' : ' disabled title="Abunə paketi ilə"') +
+                  ">test yığ</button>"
+                : "") +
               (weak && d.paid
-                ? '<button class="plmk plre" data-plmk="' + esc(it.id) +
+                ? '<button class="plmk plre" data-plmk="' + esc(it.id) + '" data-sc="' + planScope(it) +
                   '" title="Qrup zəif nəticə göstərib — yeni yoxlama yığ">' +
                   "təkrar yığ</button>"
                 : "") +
@@ -3619,7 +3642,7 @@
       id = b.getAttribute("data-pltest");
       if (id) return planTest(g, b, id);
       id = b.getAttribute("data-plmk");
-      if (id) return planOfferLate(id);
+      if (id) return planOfferLate(id, b.getAttribute("data-sc") || "fesil");
       id = b.getAttribute("data-plmulti");
       if (id) {
         var ids = [];
@@ -3664,6 +3687,19 @@
     function rebindOnly() {}
   }
 
+  /*  30.09: DERS testi ve FESIL testi ayri anlayislardir.
+      · planOwnTest  - dersin OZ testi var (fesil testi sayilmir: feslin son dersinde
+                       kohne fesil testi test_id-de durur, fesil_test_id ile eynidir)
+      · planFesilVar - fesil testi yigilib.  fesil_test_id yoxdursa ve ders hazir
+                       deyilse, son dersdeki test_id fesil testidir (903-den evvelki yazi)
+      · planScope    - «tekrar yig» / teklif hansi hovuzdan yigsin: ders hazirdirsa ve
+                       dersin oz testi yoxdursa (ve ya oz testidirse) ders, yoxsa fesil  */
+  function planOwnTest(it) { return !!it.test_id && it.test_id !== it.fesil_test_id; }
+  function planFesilVar(it) { return !!it.fesil_test_id || (!!it.test_id && !it.ders_hazir); }
+  function planScope(it) {
+    return it.ders_hazir && (planOwnTest(it) || !it.test_id) ? "ders" : "fesil";
+  }
+
   /*  can_test-i YERLI olaraq yeniden hesablayir.
       Serverin qaydasi ile eynidir (db/32): fesilsiz movzuda ozu,
       fesildə ise YALNIZ son ders.  Niye tekrarlanir: "Kecildi"
@@ -3688,7 +3724,7 @@
     sb.rpc("rpc_plan_done", { p_item_id: itemId }).then(function () {
       busy = false;
       //  yerli veziyyeti yenile ve TEKLIF goster - "komekci isci" ani
-      var plan = null, topic = "";
+      var plan = null, topic = "", doneIt = null;
       (PLD.plans || []).forEach(function (p) {
         (p.items || []).forEach(function (it) {
           if (it.id === itemId) {
@@ -3696,7 +3732,7 @@
             //  done_at-i da qoyuruq: yoxsa setirde tarix yalniz
             //  sehife yenilenenden sonra cixirdi
             it.done_at = new Date().toISOString();
-            p.done++; plan = p; topic = it.topic;
+            p.done++; plan = p; topic = it.topic; doneIt = it;
           }
         });
         planCanTest(p);
@@ -3707,7 +3743,7 @@
       if (slot) {
         slot.innerHTML = offerHtml(
           "«" + esc(topic) + "» keçildi. Ev tapşırığı verilsinmi?",
-          itemId, plan.id);
+          itemId, plan.id, planScope(doneIt));
       }
     }).catch(function (e) {
       busy = false; b.disabled = false;
@@ -3716,15 +3752,22 @@
   }
 
   /* Test teklifi qutusu - hem "Kecildi" aninda, hem sonradan siyahidan */
-  function offerHtml(head, itemId, planId) {
+  /*  scope: "ders" - yalniz bu dersin nisanli sualları (server sayir: ders_hazir);
+      "fesil" - feslin butun hovuzu; bos - birge test (bir nece movzu, fesil).
+      Qutunun metni hovuzu DUZ deyir: evvel hemise «bu fəsildən» yazilirdi.  */
+  function offerHtml(head, itemId, planId, scope) {
+    var ders = scope === "ders";
     return '<div class="ploffer">' +
       "<b>" + head + "</b>" +
-      '<p class="muted" style="margin:4px 0 10px">Sistem bu fəsildən test yığır ' +
+      '<p class="muted" style="margin:4px 0 10px">Sistem ' +
+        (ders ? "yalnız bu dərsdən" : "bu fəsildən") + " test yığır " +
         "və qrupa dərhal tapşırır (son tarix 7 gün, 1 cəhd). Sonra şagirdlərə " +
         "hazır WhatsApp mətni çıxır.</p>" +
       '<div class="plbtns">' +
-        '<input id="plCnt" type="number" min="3" max="50" value="10">' +
-        '<button class="btn go sm" data-pltest="' + esc(itemId) + '">' +
+        //  ders testinin olcusunu server teyin edir (app.ders_test_count) - say sahesi yalniz fesil ucundur
+        (ders ? "" : '<input id="plCnt" type="number" min="3" max="50" value="10">') +
+        '<button class="btn go sm" data-pltest="' + esc(itemId) + '"' +
+          (scope ? ' data-sc="' + esc(scope) + '"' : "") + ">" +
           "Yığ və tapşırıq ver</button>" +
         '<button class="btn sm ghost" data-plskip="' + esc(planId) +
           '">Sonra</button>' +
@@ -3734,11 +3777,11 @@
 
   /* "Sonra" deyilmis (ve ya bir nece movzu kecilmis) halda siyahidan
      istenilen KECILMIS movzu ucun teklifi yeniden acmaq */
-  function planOfferLate(itemId) {
-    var plan = null, topic = "";
+  function planOfferLate(itemId, scope) {
+    var plan = null, topic = "", group = "";
     (PLD && PLD.plans || []).forEach(function (p) {
       (p.items || []).forEach(function (it) {
-        if (it.id === itemId) { plan = p; topic = it.topic; }
+        if (it.id === itemId) { plan = p; topic = it.topic; group = it.group || ""; }
       });
     });
     if (!plan) return;
@@ -3747,7 +3790,8 @@
     var m = $("plm-" + plan.id);
     if (m) {
       m.innerHTML = offerHtml(
-        "«" + esc(topic) + "» — ev tapşırığı verilsinmi?", itemId, plan.id);
+        (scope === "fesil" && group ? "«" + esc(group) + "» fəsli" : "«" + esc(topic) + "»") +
+          " — ev tapşırığı verilsinmi?", itemId, plan.id, scope);
       m.scrollIntoView({ block: "nearest" });
     }
   }
@@ -3761,6 +3805,8 @@
 
   function planTest(g, b, itemId) {
     var n = Number(($("plCnt") || {}).value) || 15;
+    //  30.09: hovuzu muellim secib (ders / fesil) - server sessizce deyismir
+    var sc = b.getAttribute("data-sc") || null;
     //  vergullu id = bir nece movzudan QARISIQ test
     var multi = itemId.indexOf(",") >= 0;
     var card = b.closest ? b.closest(".plan") : null;
@@ -3769,7 +3815,8 @@
     (multi
       ? sb.rpc("rpc_plan_test_multi",
                { p_item_ids: itemId.split(","), p_count: n })
-      : sb.rpc("rpc_plan_test", { p_item_id: itemId, p_count: n }))
+      : sb.rpc("rpc_plan_test", sc ? { p_item_id: itemId, p_count: n, p_scope: sc }
+                                   : { p_item_id: itemId, p_count: n }))
       .then(function (r) {
         busy = false;
         //  tek movzuda itemin testini yerli olaraq bagla; qarisiq test
@@ -3778,7 +3825,16 @@
         if (!multi) {
           (PLD.plans || []).forEach(function (p) {
             (p.items || []).forEach(function (it) {
-              if (it.id === itemId) { it.test_id = r.test_id; pid = p.id; }
+              if (it.id === itemId) {
+                //  server ile eyni qayda (903): fesil testi fesil_test_id-ye, dersin oz
+                //  testini pozmur; ders testi yalniz test_id-ye
+                if (sc === "ders") it.test_id = r.test_id;
+                else {
+                  if (!it.test_id || it.test_id === it.fesil_test_id) it.test_id = r.test_id;
+                  it.fesil_test_id = r.test_id;
+                }
+                pid = p.id;
+              }
             });
           });
         }
@@ -6500,13 +6556,17 @@
           x.classList.toggle("hide", !(okr && (WTF || wExp || i < 5)));
         });
         if (WTF && DET) {
-          box.insertAdjacentHTML("beforeend", DET.filter(function (w) {
-            return w.topic === WTF && !have[w.qid];
-          }).map(function (w) { return wRow(w, false).replace('class="wq', 'class="wq wx'); }).join(""));
+          //  «Daha N sual» dugmesinden EVVEL - yoxsa duymenin altinda qalirdi
+          (box.querySelector("#wMore") || { insertAdjacentHTML: function (a, h) { box.insertAdjacentHTML("beforeend", h); } })
+            .insertAdjacentHTML("beforebegin", DET.filter(function (w) {
+              return w.topic === WTF && !have[w.qid];
+            }).map(function (w) { return wRow(w, false).replace('class="wq', 'class="wq wx'); }).join(""));
         }
         var shown = WTF ? box.querySelectorAll(".wq:not(.hide)").length : weak.length;
         if ($("wCnt")) $("wCnt").textContent = shown;
-        if ($("wMore")) $("wMore").hidden = !!WTF;
+        //  «hidden» atributu YETMIR: .morebtn oz display qaydasi ile onu ezir (30.09: suzgecde
+        //  «Daha 5 sual göstər» gorunurdu ve basanda basqa fennlerin suallarini acirdi)
+        if ($("wMore")) $("wMore").classList.toggle("hide", !!WTF);
         var fb = $("wFilt");
         if (fb) {
           fb.innerHTML = WTF
