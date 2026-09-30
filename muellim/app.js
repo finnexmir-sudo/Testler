@@ -3443,9 +3443,13 @@
                 ic("check") + "Keçildi</button>" +
             "</div>" +
             '<div class="plslot" id="pls-' + esc(p.id) + '"></div></div>'
-          : '<div class="plcur done"><b>🎉 Bütün mövzular keçilib!</b>' +
+          //  30.09: sətirlər dərsdirsə «dərslər» (yuxarıdakı «N / M dərs» ilə eyni söz)
+          : '<div class="plcur done"><b>🎉 Bütün ' + (grouped ? "dərslər" : "mövzular") + " keçilib!</b>" +
             '<p class="muted" style="margin:6px 0 0">Plan tamamlanıb — ' +
-            "hesabatda zəif mövzulara baxıb təkrar testlər verə bilərsiniz.</p></div>") +
+            "hesabatda zəif mövzulara baxıb təkrar testlər verə bilərsiniz.</p>" +
+            //  30.09: SON dersi «Kecildi» edende cari ders qalmir - teklif qutusunun yeri yox idi
+            //  (planDone #pls-<plan> tapmirdi) ve «Ev tapsirigi verilsinmi?» hec vaxt cixmirdi
+            '<div class="plslot" id="pls-' + esc(p.id) + '"></div></div>') +
         /*  YENI gorunus: «Son keçilən» artıq ayrıca kartda deyil -
             muellim onu «Bütün mövzular» açmaqla tapmalı olurdu.
             Plan qutusunun özündə, bu günün dərsinin altında bir sətir:
@@ -3742,9 +3746,29 @@
       loadPrep(g);
       var slot = plan && $("pls-" + plan.id);
       if (slot) {
-        slot.innerHTML = offerHtml(
-          "«" + esc(topic) + "» keçildi. Ev tapşırığı verilsinmi?",
-          itemId, plan.id, planScope(doneIt));
+        /*  30.09: «Kecildi»den sonra teklif NE VAXT cixir.
+            · ders hazirdir (ders_hazir) - HER dersden sonra, yalniz bu dersin testi;
+            · hazir deyil - yalniz FESIL BITENDE (fesilsiz movzuda ozu): fesil testi butun
+              fesil hovuzundandir, yarimciq fesilde hele kecilmemis dersin sualini verer
+              (23.09-da duyme mehz bunun ucun fesil basligina kocdu).
+            Yarimciq fesilde teklif evezine qisa izah: yazi «fəsil sonunda · N/M» ile uygundur.  */
+        var grp = (plan.items || []).filter(function (x) {
+          return doneIt.group_id && x.group_id === doneIt.group_id;
+        });
+        var bitdi = !doneIt.group_id || grp.every(function (x) { return x.done; });
+        var sc = planScope(doneIt);
+        if (sc === "ders") {
+          slot.innerHTML = offerHtml("«" + esc(topic) + "» keçildi. Ev tapşırığı verilsinmi?",
+            itemId, plan.id, "ders");
+        } else if (bitdi) {
+          slot.innerHTML = offerHtml(
+            doneIt.group_id ? "«" + esc(doneIt.group) + "» fəsli bitdi. Ev tapşırığı verilsinmi?"
+                            : "«" + esc(topic) + "» keçildi. Ev tapşırığı verilsinmi?",
+            itemId, plan.id, "fesil");
+        } else {
+          slot.innerHTML = '<p class="muted plhint">«' + esc(topic) + "» keçildi. Bu dərsin öz testi hələ yoxdur — " +
+            "fəsil bitəndə ev tapşırığı təklif olunacaq (" + esc(String(doneIt.gpos)) + "/" + esc(String(doneIt.gtotal)) + ").</p>";
+        }
       }
     }).catch(function (e) {
       busy = false; b.disabled = false;

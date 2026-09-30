@@ -77,13 +77,13 @@ QELIB = ["%d ədədinin kvadratı neçədir?", "Tənliyin kökünü tapın: x - 
          "%d ilə 4-ün cəmi neçədir?", "Kəsrin surəti %d olarsa, nə alınır?",
          "%d ədədinin yarısı nədir?"]
 sayac = [0]
-def suallar(ad, nisan, n):
+def suallar(ad, nisan, n, top=None):
     for i in range(n):
         sayac[0] += 1
         k = sayac[0]
         qq = q("insert into public.questions (owner_type,subject_id,level_id,topic_id,kind,body,"
                "status,tags,ext_key) values ('platform',%s,%s,%s,'single',%s,'published',%s,%s) returning id",
-               (subj, lev, fes, "%s · %s" % (ad, QELIB[k % len(QELIB)] % (k * 3 + 7)),
+               (subj, lev, top or fes, "%s · %s" % (ad, QELIB[k % len(QELIB)] % (k * 3 + 7)),
                 [nisan] if nisan else [], "dq-%d" % k), one=True)["id"]
         q("insert into public.question_options (question_id,ord,body,is_correct)"
           " values (%s,1,%s,true),(%s,2,%s,false),(%s,3,%s,false)",
@@ -98,8 +98,17 @@ suallar("Fəsil ümumi", None, 30)
 #  (plan bitibse) «Kecildi» teklif qutusunu gosterecek yer olmur.
 fes2 = q("insert into public.topics (subject_id,level_id,parent_id,name,slug,sort)"
          " values (%s,%s,null,'Sonrakı fəsil','dq-fesil2',910) returning id", (subj, lev), one=True)["id"]
+#  Ucuncu fesil: iki HAZIR OLMAYAN ders (E, F) - «Kecildi»den sonra teklifin vaxti yoxlanir
+fes3 = q("insert into public.topics (subject_id,level_id,parent_id,name,slug,sort)"
+         " values (%s,%s,null,'Üçüncü fəsil','dq-fesil3',905) returning id", (subj, lev), one=True)["id"]
+dE = q("insert into public.topics (subject_id,level_id,parent_id,name,slug,sort)"
+       " values (%s,%s,%s,'Dərs E','dq-e',906) returning id", (subj, lev, fes3), one=True)["id"]
+dF = q("insert into public.topics (subject_id,level_id,parent_id,name,slug,sort)"
+       " values (%s,%s,%s,'Dərs F','dq-f',907) returning id", (subj, lev, fes3), one=True)["id"]
+suallar("Üçüncü fəsil", None, 20, fes3)
 dD = q("insert into public.topics (subject_id,level_id,parent_id,name,slug,sort)"
        " values (%s,%s,%s,'Dərs D','dq-d',911) returning id", (subj, lev, fes2), one=True)["id"]
+suallar("Sonrakı fəsil", None, 20, fes2)
 print("hedd=%d · ders testi=%d sual · A/C: %d nişanlı, B: 5 nişanlı, +30 nişansız" % (HEDD, DTEST, HEDD + 5))
 
 with sync_playwright() as pw:
@@ -129,7 +138,9 @@ with sync_playwright() as pw:
     for i, ad in enumerate(("Dərs A", "Dərs B", "Dərs C")):
         ITEM[ad] = q("insert into public.class_plan_items (plan_id,topic_id,ord) values (%s,%s,%s) returning id",
                      (pid, DERS[ad]["id"], i + 1), one=True)["id"]
-    q("insert into public.class_plan_items (plan_id,topic_id,ord) values (%s,%s,4)", (pid, dD))
+    ITEM["Dərs E"] = q("insert into public.class_plan_items (plan_id,topic_id,ord) values (%s,%s,4) returning id", (pid, dE), one=True)["id"]
+    ITEM["Dərs F"] = q("insert into public.class_plan_items (plan_id,topic_id,ord) values (%s,%s,5) returning id", (pid, dF), one=True)["id"]
+    ITEM["Dərs D"] = q("insert into public.class_plan_items (plan_id,topic_id,ord) values (%s,%s,6) returning id", (pid, dD), one=True)["id"]
     def kecdi(ad, gun):
         q("update public.class_plan_items set done_at = now() - make_interval(days => %s) where id=%s", (gun, ITEM[ad]))
 
@@ -205,6 +216,11 @@ with sync_playwright() as pw:
     box = p.locator(".ploffer").inner_text()
     yox("bu fəsildən" in box and "yalnız bu dərsdən" not in box and FES in box, "qutu «bu fəsildən» deyir, fəsli adlandırır", box.replace("\n", " ")[:120])
     yox(p.locator("#plCnt").count() == 1, "fəsil testində sual sayı sahəsi var")
+    def merkez():
+        a = p.locator("#plCnt").bounding_box(); b = p.locator(".ploffer [data-pltest]").bounding_box()
+        return a["y"] + a["height"] / 2, b["y"] + b["height"] / 2
+    ya, yb = merkez()
+    yox(abs(ya - yb) <= 1, "«Yığ və tapşırıq ver» düyməsi «10» sahəsi ilə EYNİ səviyyədədir", "mərkəzlər: %.1f / %.1f" % (ya, yb))
     p.locator(".card.plan").screenshot(path=OUT + "/5-qutu-fesil-masaustu.png")
     p.locator('[data-pltest="%s"][data-sc="fesil"]' % ITEM["Dərs C"]).click(); p.wait_for_timeout(6000)
     rc = item_row("Dərs C")
@@ -271,6 +287,41 @@ with sync_playwright() as pw:
     yox(npg == 1, "rpc_plan_test-in tək imzası var (PostgREST iki namizəd arasında seçə bilmir)", npg)
     g = q("select count(*) n from public.class_plan_items i join public.topics t on t.id=i.topic_id where i.plan_id=%s", (pid,), one=True)["n"]
 
+    print("\n=== hazır olmayan dərs: təklif YALNIZ fəsil bitəndə ===")
+    kecdi("Dərs C", 1)
+    ac()
+    p.locator('[data-pldone="%s"]' % ITEM["Dərs E"]).click(); p.wait_for_timeout(1500)
+    yox(p.locator(".ploffer").count() == 0, "E (hazır deyil, fəsil bitməyib): «Ev tapşırığı verilsinmi?» qutusu ÇIXMIR")
+    ht = p.locator(".plhint").inner_text() if p.locator(".plhint").count() else ""
+    yox("fəsil bitəndə" in ht and "1/2" in ht, "əvəzinə qısa izah: fəsil bitəndə təklif olunacaq (1/2)", ht[:100])
+    yox(p.locator("[data-pltest]").count() == 0, "yarımçıq fəsildə yığma düyməsi yoxdur")
+    p.locator(".card.plan").screenshot(path=OUT + "/10-yarimciq-fesil-izah.png")
+    p.locator('[data-pldone="%s"]' % ITEM["Dərs F"]).click(); p.wait_for_timeout(1500)
+    bx = p.locator(".ploffer").inner_text() if p.locator(".ploffer").count() else ""
+    yox("Üçüncü fəsil" in bx and "fəsli bitdi" in bx and "bu fəsildən" in bx,
+        "F (fəslin SON dərsi, hazır deyil): fəsil testi təklifi çıxır", bx.replace("\n", " ")[:110])
+    p.locator(".card.plan").screenshot(path=OUT + "/9-fesil-bitdi-teklif.png")
+    p.locator('[data-pltest="%s"][data-sc="fesil"]' % ITEM["Dərs F"]).click(); p.wait_for_timeout(6000)
+    rf = item_row("Dərs F")
+    yox(bool(rf["f"]) and testin(rf["f"])["title"] == "Üçüncü fəsil — yoxlama", "fəsil testi yığıldı: «Üçüncü fəsil — yoxlama»")
+
+    print("\n=== planın SON dərsi «Keçildi» — təklif qutusu çıxır ===")
+    ac()
+    yox(p.locator('[data-pldone="%s"]' % ITEM["Dərs D"]).count() == 1, "D cari dərsdir («Keçildi» düyməsi var)")
+    p.locator('[data-pldone="%s"]' % ITEM["Dərs D"]).click(); p.wait_for_timeout(1500)
+    yox(p.locator(".plcur.done > b").count() == 1 and "Bütün dərslər keçilib" in p.locator(".plcur.done > b").inner_text(), "plan bitdi: «Bütün dərslər keçilib» (yuxarıdakı «dərs» sözü ilə eyni)")
+    bx = p.locator(".ploffer").inner_text() if p.locator(".ploffer").count() else ""
+    yox("Sonrakı fəsil" in bx and "fəsli bitdi" in bx and "bu fəsildən" in bx, "SON dərsdən sonra da «Ev tapşırığı verilsinmi?» çıxır (D hazır deyil → «bu fəsildən»)", bx.replace("\n", " ")[:100])
+    p.locator(".card.plan").screenshot(path=OUT + "/7-son-ders-qutu.png")
+    p.set_viewport_size({"width": 390, "height": 900}); p.wait_for_timeout(500)
+    yox(p.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "telefonda son dərs qutusu yana sürüşmə yaratmır")
+    p.locator(".ploffer").scroll_into_view_if_needed()
+    p.locator(".card.plan").screenshot(path=OUT + "/8-son-ders-qutu-telefon.png")
+    p.set_viewport_size({"width": 1280, "height": 1000})
+    p.locator('[data-pltest="%s"]' % ITEM["Dərs D"]).click(); p.wait_for_timeout(6000)
+    rd = item_row("Dərs D")
+    yox(bool(rd["t"]), "son dərsdən test yığıldı və qrupa verildi")
+    q("update public.class_plan_items set done_at=null, test_id=null, fesil_test_id=null where id=%s", (ITEM["Dərs D"],))
     print("\n=== telefon (390 px) ===")
     kecdi("Dərs A", 3)
     q("update public.class_plan_items set test_id=null, fesil_test_id=null where plan_id=%s", (pid,))

@@ -703,7 +703,7 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .plprev .plavg+.pltest{margin-left:0}
 .plprev .pltest:only-of-type{margin-left:auto}
 .plbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.plbtns input{flex:0 0 72px;text-align:center}
+.plbtns input{flex:0 0 72px;text-align:center;margin:0}   /*  30.09: input-un global margin-bottom:14px-i onu düymədən 7px yuxarı qaldırırdı  */
 .tkind{margin:-2px 0 10px}
 .tkind summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--brand);list-style:none}
 .tkind summary::-webkit-details-marker{display:none}
@@ -719,6 +719,7 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
 .grec .pt b{font-size:14px;font-weight:650}
 .grow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--n-100);font-size:13.5px}
 .grow>div{flex:1;min-width:0}
+.plhint{margin:10px 0 0;font-size:13.5px;line-height:1.45}
 .ploffer{margin-top:12px;padding:12px;border:1px dashed var(--ok-line);
   border-radius:10px;background:var(--ok-tint)}
 .ploffer b{font-size:13px}
