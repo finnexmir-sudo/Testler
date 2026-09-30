@@ -23,7 +23,10 @@ select * from (values
  ('196 məşq həddi 5',
     (select exists (select 1 from f where proname='practice_daily_limit' and def like '%select 5%'))),
  ('197 demo reset where true',
-    (select exists (select 1 from f where proname='rpc_demo_reset' and def like '%where true%'))),
+    --  901 rpc_demo_reset-i yenidən yazdı (silmə demo_gc-yə keçdi) - «where true» artıq gövdədə yoxdur,
+    --  ona görə 197 YA öz gövdəsi, YA 901 ilə örtülür
+    (select exists (select 1 from f where proname='rpc_demo_reset'
+                      and (def like '%where true%' or def like '%statement_timeout%')))),
  ('198 nümunə «Bizə yaz» yetim',
     (select exists (select 1 from f where proname='feedback_is_demo'))),
  ('200 İcmal həftə',
