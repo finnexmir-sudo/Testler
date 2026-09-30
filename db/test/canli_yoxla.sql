@@ -74,6 +74,8 @@ select * from (values
                      where table_schema='public' and table_name='class_plan_items' and column_name='fesil_test_id')
         and (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
               where n.nspname='public' and p.proname='rpc_plan_test') = 1)),
+ ('904 şagird girişi = son aktivlik',
+    (select exists (select 1 from f where proname='rpc_admin_accounts' and def like '%904: «sagird girisi»%'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

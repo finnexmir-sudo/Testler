@@ -157,3 +157,29 @@ begin
     'hesab sayi deyisdi: ' || (st->>'accounts');
 end $$;
 \echo 'OK  5 · adminin oz girisi «bu gun / hefte» sayina dusmur'
+
+-- =====================================================================
+--  6. (904) «Sagird girisi» = SON AKTIVLIK.  Sessiya 30 gunluk (164): sagird
+--  kodu yeniden yazmadan her gun test yazir.  Sessiya 10 gun evveldir, test
+--  1 saat evvel bitib -> idareetmede «10 gun evvel» yox, «1 saat evvel».
+-- =====================================================================
+reset role; reset request.jwt.claim.sub;
+update public.student_sessions set created_at = now() - interval '10 days';
+insert into public.attempts (test_id, student_id, status, percent, finished_at)
+  select (select id from public.tests limit 1), st.id, 'submitted', 50, now() - interval '1 hour'
+    from public.students st
+    join public.accounts a on a.id = st.account_id and a.name = 'Kohne hesab' limit 1;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000b1';
+do $$
+declare v jsonb; k jsonb;
+begin
+  v := public.rpc_admin_accounts(null, null);
+  select x into k from jsonb_array_elements(v) x where x->>'name' = 'Kohne hesab';
+  assert (k->>'student_login')::timestamptz > now() - interval '2 hours',
+    'sagird girisi son testi saymir: ' || (k->>'student_login');
+  assert (k->>'student_login')::timestamptz < now() - interval '30 minutes',
+    'sagird girisi sessiyadan tezedir ama test 1 saat evveldir: ' || (k->>'student_login');
+end $$;
+\echo 'OK  6 · sagird girisi son test cehdini de sayir (904)'
+
