@@ -194,12 +194,14 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          313_bank_riy7_ders_ucbucaqlar.sql \
          314_bank_riy7_ders_muxteser.sql \
          315_bank_riy7_ders_funksiya.sql \
+         316_bank_riy7_ders_tenlikler_sistemi.sql \
          319_bank_riy7_ders_nisan.sql \
          320_bank_riy7_paralellik_duzelis.sql \
          321_bank_riy7_coxhedliler_duzelis.sql \
          322_bank_riy7_ucbucaqlar_arxiv.sql \
          323_bank_riy7_muxteser_arxiv.sql \
          324_bank_riy7_funksiya_duzelis.sql \
+         325_bank_riy7_tenlikler_sistemi_duzelis.sql \
          400_bank_inf10_ders_sebeke.sql \
          401_bank_inf11_ders_modellesdirme.sql \
          402_bank_inf11_ders_modellesdirme_a.sql \

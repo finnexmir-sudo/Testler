@@ -370,12 +370,14 @@ bank 312_bank_riy7_ders_coxhedliler.sql
 bank 313_bank_riy7_ders_ucbucaqlar.sql
 bank 314_bank_riy7_ders_muxteser.sql
 bank 315_bank_riy7_ders_funksiya.sql
+bank 316_bank_riy7_ders_tenlikler_sistemi.sql
 bank 319_bank_riy7_ders_nisan.sql
 bank 320_bank_riy7_paralellik_duzelis.sql
 bank 321_bank_riy7_coxhedliler_duzelis.sql
 bank 322_bank_riy7_ucbucaqlar_arxiv.sql
 bank 323_bank_riy7_muxteser_arxiv.sql
 bank 324_bank_riy7_funksiya_duzelis.sql
+bank 325_bank_riy7_tenlikler_sistemi_duzelis.sql
 bank 400_bank_inf10_ders_sebeke.sql
 bank 401_bank_inf11_ders_modellesdirme.sql
 bank 402_bank_inf11_ders_modellesdirme_a.sql
