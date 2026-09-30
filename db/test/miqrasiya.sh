@@ -207,6 +207,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          326_bank_riy7_konqruyentlik_duzelis.sql \
          327_bank_riy7_situasiya_duzelis.sql \
          328_bank_riy7_cetinlik.sql \
+         329_bank_riy7_kohne_qusurlar.sql \
          400_bank_inf10_ders_sebeke.sql \
          401_bank_inf11_ders_modellesdirme.sql \
          402_bank_inf11_ders_modellesdirme_a.sql \

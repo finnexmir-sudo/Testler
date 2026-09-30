@@ -383,6 +383,7 @@ bank 325_bank_riy7_tenlikler_sistemi_duzelis.sql
 bank 326_bank_riy7_konqruyentlik_duzelis.sql
 bank 327_bank_riy7_situasiya_duzelis.sql
 bank 328_bank_riy7_cetinlik.sql
+bank 329_bank_riy7_kohne_qusurlar.sql
 bank 400_bank_inf10_ders_sebeke.sql
 bank 401_bank_inf11_ders_modellesdirme.sql
 bank 402_bank_inf11_ders_modellesdirme_a.sql
