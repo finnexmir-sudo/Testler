@@ -206,6 +206,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          405_bank_inf9_ders_kodlasdirma.sql \
          406_bank_inf9_kodlasdirma_arxiv.sql \
          407_bank_inf_ders_nisan.sql \
+         850_izah_sablon_temizle.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
