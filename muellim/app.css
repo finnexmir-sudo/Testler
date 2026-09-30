@@ -1513,6 +1513,15 @@ details.wrongbox > summary{display:flex;align-items:center;gap:8px}
 @media (max-width:600px){ .band .gseat{min-width:0;flex:1} }
 /*  telefonda sag blok (sagird yeri) basligin altina tam enle  */
 @media (max-width:600px){ .bh{flex-wrap:wrap} .br{width:100%;align-self:auto} .br .bseat{flex:1} }
+/*  Qrup menyusu (telefon): «Geri» basligin yaninda, «QRUP» yazisi yoxdur - menyunun 5 setri ekrana sigir */
+@media (max-width:600px){
+  .band.gcompact .bandin{display:flex;align-items:center;gap:12px;padding:12px 14px}
+  .band.gcompact .bback{margin:0;flex:none}
+  .band.gcompact .bh{flex:1;min-width:0;flex-wrap:nowrap}
+  .band.gcompact .beye{display:none}
+  .band.gcompact h1{font-size:20px;margin:0 0 2px}
+  .band.gcompact p{font-size:13px;line-height:1.35}
+}
 
 
 /* ---------------------------------------------- Bolt eskizinden (1-7) */

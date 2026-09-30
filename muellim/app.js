@@ -169,6 +169,7 @@
     var b = $("band");
     if (!b) return;
     b.innerHTML = html ? '<div class="bandin">' + html + "</div>" : "";
+    b.classList.remove("gcompact");   //  yalniz qrup menyusu telefonda sixilir - bagqa ekrana kecmesin
     b.classList.toggle("hide", !html);
     main.classList.toggle("over", !!html);
   }
@@ -3936,6 +3937,9 @@
       id: "gName", title: g.name, subId: "gMeta",
       sub: '<span id="gSub">' + esc(lv || "") + "</span>"
     });
+    //  30.09: telefonda (375x667) baslig ekranin dord birini tuturdu, menyunun 5-ci setri
+    //  yarimciq kesilirdi.  Geri duymesi basligin YANINA kecir (app.css: .band.gcompact)
+    if ($("band")) $("band").classList.add("gcompact");
     show('<div id="gDiq"></div>' +
       '<div class="card pad0 menu" id="gMenu">' +
         yRow({ ic: "group", ad: "Şagirdlər", alt: "yüklənir…", href: "#/g/" + g.id + "/s" }) +
