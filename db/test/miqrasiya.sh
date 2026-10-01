@@ -224,6 +224,9 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          409_bank_inf9_ders_texnologiya.sql \
          410_bank_inf9_texnologiya_nisan.sql \
          411_bank_inf9_texnologiya_duzelis.sql \
+         412_bank_inf9_ders_proqramlasdirma.sql \
+         413_bank_inf9_proqramlasdirma_nisan.sql \
+         414_bank_inf9_proqramlasdirma_duzelis.sql \
          850_izah_sablon_temizle.sql \
          425_bank_inf4_ders_alqoritm.sql \
          426_bank_inf_alqoritm4.sql \
