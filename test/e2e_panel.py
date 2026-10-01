@@ -231,16 +231,17 @@ with sync_playwright() as pw:
     #  174: «Bitmə: 3 okt (24 gün)» -> «3 okt-dək (24 gün) hər şey açıqdır»
     gc0 = pg.inner_text("#giftCard").replace("\n", " ")
     ok("qədər" in gc0 and "gün)" in gc0, "kartda bitme tarixi ve gun sayi", gc0[:80])
-    ok("pulsuz həddə düşür" in gc0, "kartda «sonra ne olacaq» yazilir", gc0[-120:])
+    #  30.09: Bil10-da pulsuz paket yoxdur - kart «pulsuz hedd» demir, muddet bitende bize yazmagi deyir
+    ok("pulsuz" not in gc0.lower() and "Müddəti uzatmaq istəsəniz" in gc0, "kartda «pulsuz hedd» yoxdur, uzatmaq ucun bize yazmaq deyilir", gc0[-120:])
     #  169: hediyye = odenisli mehsulun ozu - LIMITSIZ.  Evvel 'repetitor-25'
     #  verilirdi ("0 / 25"), yeni pulsuz ay odenislinin eynisidir, ona gore
     #  kart doluluq xetti yox, aktiv sagird sayini ve tarifi gosterir.
     bseat = pg.inner_text("#band .bseat").replace("\n", " ")
     ok("aktiv şagird" in bseat and "Hər şagird üçün" in bseat,
        "hediyye ile limitsiz plan, pill plan adi", bseat[:70])
-    #  174: odenisin NE VAXT baslayacagi kartin alt qeydindedir
-    ok("Beta bitənə qədər ödəniş yoxdur" in bseat,
-       "kartda odenisin ne vaxt baslayacagi yazilir", bseat[-90:])
+    #  30.09: qiymet yazilmir - «Sonra: hər şagird üçün X / ay» sətri çıxdı
+    ok("/ ay" not in bseat and "₼" not in bseat and "ödəniş" not in bseat.lower(),
+       "zolaqdaki kartda qiymet / odenis sozu yoxdur", bseat[-90:])
     ok(pg.locator("#giftCard a[href*='wa.me/994501234567']").count() == 1, "kartda WhatsApp duymesi")
     #  16.09: ilk qrup formasi BASLANGIC kartinin 1-ci addimindadir
     #  (#onb), hediyye karti onun USTUNDE qalir; qruplar asinxron gelir -
@@ -258,6 +259,8 @@ with sync_playwright() as pw:
     db("update public.app_state set val = val || jsonb_build_object('on', false) where key = 'hediyye'; delete from public.subscriptions")
     pg.reload(); pg.wait_for_selector("#btnGroup", timeout=8000)
     ok(pg.locator("#giftCard").count() == 0, "abune olmayanda kart yoxdur")
+    fc0 = pg.inner_text("#freeCard").replace("\n", " ") if pg.locator("#freeCard").count() else ""
+    ok(fc0 and "pulsuz" not in fc0.lower() and "bizə yazın" in fc0, "paketsiz hesab: «pulsuz hedd» yoxdur, bize yazmaq deyilir", fc0[:90])
     ok("0 / 5" in pg.inner_text(".seat"), "yer gostericisi 0 / 5", pg.inner_text(".seat").replace("\n"," "))
     ok("Leyla Muellim" in pg.inner_text("#topWho"), "ustlukde ad gorunur")
 

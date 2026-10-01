@@ -2691,3 +2691,8 @@ details.styd{margin-top:14px}
   border-bottom:1px solid var(--n-100)}
 .tpan[hidden]{display:none}
 .tpan .tlink{margin:0}
+
+/*  905: bagli hesab ekrani */
+.card.lockcard h2{margin:0 0 8px}
+.card.lockcard p{margin:0 0 12px;line-height:1.5}
+.card.lockcard .btn{margin-top:4px}

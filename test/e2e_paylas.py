@@ -143,7 +143,7 @@ with sync_playwright() as pw:
     ok(fp.locator(".sfb").count() == 1, "cavab reaksiyasi var", fp.inner_text(".sfb")[:60])
     pit = fp.inner_text(".spitch").replace("\n", " ")
     ok("Müəllimin bunu sinfə qura bilər" in pit, "tekrarlana bilen cumle var", pit[:80])
-    ok("pulsuzdur" in pit, "sagirde pulsuz oldugu yazilir")
+    ok("pulsuz" not in pit.lower() and "kodla girirsən" in pit, "«pulsuz» vedi yoxdur, sagirde kodla girmek yazilir", pit[:90])
     fp.click("#goBil"); fp.wait_for_timeout(700)
     ok(db("select clicks from public.shares limit 1", one=True)["clicks"] == 1, "bil10.az kliki sayilir")
     fctx.close()

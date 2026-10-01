@@ -51,7 +51,7 @@
   function pitch() {
     return '<div class="scard spitch">' +
       "<p><b>Müəllimin bunu sinfə qura bilər.</b></p>" +
-      "<s>Şagirdə pulsuzdur — kodla girirsən, testi işləyirsən, nəticəni dərhal görürsən.</s>" +
+      "<s>Şagird üçün sadədir — kodla girirsən, testi işləyirsən, nəticəni dərhal görürsən.</s>" +
       '<a class="btn go" id="goBil" href="../?src=sual">Bil10 nədir?</a></div>' +
       '<p class="sfoot"><a href="../?src=sual">bil10.az</a> · onlayn test sistemi</p>';
   }

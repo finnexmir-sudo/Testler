@@ -76,6 +76,10 @@ select * from (values
               where n.nspname='public' and p.proname='rpc_plan_test') = 1)),
  ('904 şagird girişi = son aktivlik',
     (select exists (select 1 from f where proname='rpc_admin_accounts' and def like '%904: «sagird girisi»%'))),
+ ('905 hesab bağlıdır (sınaq bitəndə)',
+    (select exists (select 1 from f where proname='account_locked')
+        and exists (select 1 from f where proname='rpc_account_lock')
+        and exists (select 1 from public.app_state where key='hesab_bagli'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

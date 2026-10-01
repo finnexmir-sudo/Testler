@@ -1463,6 +1463,14 @@
       }
       //  137: abunesiz gundelik limit
       var qt = d.quota || {};
+      //  905: muellimin hesabi baglidir (sinaq bitib) - oz basina mesq limiti 0.  Verilmis testler ve
+      //  neticeler yerindedir; burada «bu gun bitdi» yox, neden bagli oldugu deyilir.
+      if (!qt.paid && Number(qt.max) === 0) {
+        box.innerHTML = '<div class="spacer"></div><h2>Mövzu məşqi</h2><div class="card">' +
+          '<p class="note" style="margin:0">Məşq hazırda bağlıdır — müəllimin hesabı aktiv olanda yenidən açılacaq. ' +
+          "Verilmiş testlər və nəticələr olduğu kimi qalır.</p></div>";
+        return;
+      }
       var qtxt = (!qt.paid && qt.max)
         ? '<p class="note adq' + (qt.used >= qt.max ? " full" : "") + '">Bu gün <b>' + (qt.used || 0) + " / " + qt.max + "</b> sual" +
           (qt.used >= qt.max ? " — bugünkü limit dolub, sabah davam et." : "") +

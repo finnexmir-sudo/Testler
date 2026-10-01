@@ -66,16 +66,14 @@ with sync_playwright() as pw:
     pg.fill("#aname", "Paket hesabi"); pg.click("#btnSetup")
     pg.wait_for_selector("#gForm", timeout=8000)
 
-    #  174: PULSUZ HEDDE olan hesab «nə dəyişir» siyahisini DAIMI gorur -
-    #  «niyə hazır suallar bağlandı?» sualinin cavabi ekranda olmalidir.
-    ok(pg.locator("#freeCard").count() == 1, "pulsuz hedd karti gorunur")
+    #  30.09: Bil10-da PULSUZ paket yoxdur.  Paketi olmayan hesab «pulsuz hedd» kartı yox,
+    #  neytral «paket aktiv deyil» karti gorur: neyin qaldigi + kime yazmaq.
+    ok(pg.locator("#freeCard").count() == 1, "paketsiz hesab karti gorunur")
     fc = pg.inner_text("#freeCard").replace("\n", " ")
-    ok("pulsuz həddədir" in fc, "kart veziyyeti deyir", fc[:70])
+    ok("pulsuz" not in fc.lower(), "kartda «pulsuz» sozu yoxdur", fc[:70])
+    ok("Hesabın paketi aktiv deyil" in fc, "kart veziyyeti deyir", fc[:70])
     ok("Şagirdləriniz işləməyə davam edir" in fc, "sagirdlerin qalacagi yazilir")
-    ok(pg.locator("#freeCard .fold.ferq").evaluate("e => e.open"),
-       "siyahi ACIQ gelir (artiq onun realligidir)")
-    ok("Hazır suallar" in fc and "Diaqnostika" in fc and "5 şagird yeri" in fc,
-       "siyahida esas bendler var", fc[-120:])
+    ok("bizə yazın" in fc, "kime yazmaq lazim oldugu deyilir")
 
     print("A · Abunə səhifəsi (abunəsiz)")
     ok(pg.locator("#btnPkt").count() == 1, "esas sehifede Paket bendi var")
@@ -133,20 +131,16 @@ with sync_playwright() as pw:
         ok(bx and bx["width"] <= 24 and bx["height"] <= 24,
            "«info» ikonu 16px-dir (uslubsuz qalmayib)", bx)
 
-    #  TEK MENBE (assets/ferq.js).  Eyni siyahi ana sehifede de var.
-    #  Elle tekrarlansaydi, bir imkan deyisende biri kohne qalar ve
-    #  YALAN VED yaranardi - ona gore herfen tutusdurulur.
-    panel_pulsuz = pg.locator(".cmp .cc:first-child .rul li").all_inner_texts()
-    panel_abune  = pg.locator(".cmp .cc.on .rul li").all_inner_texts()
+    #  30.09: ana sehifede «hedd» bolmesi, qiymet ve «pulsuz» vedi YOXDUR.  Paneldeki siyahi
+    #  (assets/ferq.js) yalniz Abune sehifesindedir ve o gizlidir (SHOW_PLANS).
     ana = new_page()
     ana.goto("http://127.0.0.1:8010/index.html")
-    ana.wait_for_selector("#heddBox .rul li", timeout=15000)
-    ana_pulsuz = ana.locator("#heddBox .cc:first-child .rul li").all_inner_texts()
-    ana_abune  = ana.locator("#heddBox .cc.on .rul li").all_inner_texts()
-    ok(ana_pulsuz == panel_pulsuz and ana_abune == panel_abune,
-       "ana sehife ve panel siyahisi EYNIDIR (tek menbe)",
-       "%d/%d <-> %d/%d" % (len(ana_pulsuz), len(ana_abune),
-                            len(panel_pulsuz), len(panel_abune)))
+    ana.wait_for_selector(".hero", timeout=15000)
+    mt_ana = ana.inner_text("body").lower()
+    ok("pulsuz" not in mt_ana and "ödəmir" not in mt_ana and "1,50" not in mt_ana and "₼" not in mt_ana and "kart tələb" not in mt_ana,
+       "ana sehifede «pulsuz» / «odemir» / qiymet yoxdur")
+    ok(ana.locator("#hedd").count() == 0 and ana.locator("#heddBox").count() == 0, "«hedd» bolmesi yoxdur")
+    ok(ana.locator('a[href="#hedd"]').count() == 0, "«Nə pulsuz» keçidi menyuda da, altlıqda da yoxdur")
     print("A3 · Sürət ölçüsü: bir açılış = bir ölçü")
     #  db/180.  Iki tele var: (1) olcu hec gonderilmeye biler,
     #  (2) iki defe gonderile biler - o zaman butun reqemler ikiqat
@@ -189,25 +183,7 @@ with sync_playwright() as pw:
        "yazma vaxti olcuye dusmur (4 s gozlenildi)", pg2 and pg2["ms_max"])
     gp.close(); gctx.close()
 
-    #  Qiymet REQEMI ana sehifede YAZILIR.
-    #  Evvel eksi qerar verilmisdi - «reqem yalniz muqayiseye devet
-    #  olardi».  2026-09-11-de istifadeci onu deyisdi: muellim qiymeti
-    #  onsuz da sorusur, gizletmek supheni artirir ve qeydiyyati lengidir.
-    #  «Nezerde tutulan tarif» ifadesi qesden secilib - reqemi deyirik,
-    #  amma ozumuzu baglamiriq.
-    hedd_t = ana.inner_text("#hedd")
-    ok("1,50 ₼" in hedd_t, "ana sehifede tarif yazilir")
-    ok("nəzərdə tutulan" in hedd_t,
-       "tarif «nəzərdə tutulan» kimi verilir - qeti ved deyil")
-    ok("Beta mərhələsi" in hedd_t and "ödənişsizdir" in hedd_t,
-       "beta qeydi var")
-    #  Yer de yoxlanilir: evvel yalniz METN axtarilirdi, «ustundedir»
-    #  sozu yoxlanmirdi - siyahi yuxari kocse test yene kecerdi.
-    bq = ana.locator("#hedd .betabar").bounding_box()
-    sy = ana.locator("#hedd #heddBox").bounding_box()
-    ok(bq and sy and bq["y"] < sy["y"],
-       "beta qeydi siyahinin USTUNDEdir",
-       bq and sy and str(round(bq["y"])) + " < " + str(round(sy["y"])))
+    #  30.09: qiymet reqemi ana sehifeden CIXDI (yuxarida: «pulsuz» / «1,50» / «hedd» yoxdur yoxlanilir).
     ana.close()
     #  abunesiz hesabda hele sagird yoxdur -> 0 x 1,50 = 0 ₼
     abx = pg.inner_text(".abn").replace("\n", " ")
@@ -564,8 +540,9 @@ with sync_playwright() as pw:
     bs = pg.inner_text("#band .bseat").replace("\n", " ")
     #  174: mebleg AYRI SETIRDE deyil, alt qeydin icindedir - «Sınaq
     #  bitir 3 okt» ile «1,50 ₼» yanasi durmasin (yanlis netice verirdi).
-    ok("Beta bitənə qədər ödəniş yoxdur" in bs and "Sonra: hər şagird üçün" in bs,
-       "kartda odenisin NE VAXT baslayacagi aydin yazilir", bs[-90:])
+    #  30.09: qiymet yazilmir - zolaqdaki kartda nə «Sonra: hər şagird üçün X / ay», nə «ödəniş» var
+    ok("Sonra: hər şagird üçün" not in bs and "/ ay" not in bs and "₼" not in bs and "ödəniş" not in bs.lower(),
+       "kartda qiymet / odenis sozu yoxdur", bs[-90:])
     #  172: kartda qalan gun ve "indi odenis yoxdur" qeydi
     ok("Hədiyyə bitir" in bs and "gün" in bs,
        "kartda hediyyenin bitme tarixi ve qalan gun", bs[:110])
@@ -575,10 +552,8 @@ with sync_playwright() as pw:
     gc = pg.inner_text("#giftCard").replace("\n", " ")
     #  174: EN VACIB SETIR - o gun NE ITIRECEYI yazilir.  Evvel yalniz
     #  «bitmə: 3 okt» yazilirdi, muellim neyin baglandigini bilmirdi.
-    ok("pulsuz həddə düşür" in gc and "hazır suallar və diaqnostika bağlanır" in gc,
-       "hediyye kartinda «sonra ne olacaq» yazilir", gc[-150:])
-    ok("mövcud şagirdləriniz işləməyə davam edir" in gc,
-       "sagirdlerin qalacagi yazilir")
+    ok("pulsuz" not in gc.lower() and "Müddəti uzatmaq istəsəniz" in gc,
+       "hediyye kartinda «pulsuz hedd» yoxdur, uzatmaq ucun bize yazmaq deyilir", gc[-150:])
     pg.goto(PANEL + "#/p"); pg.reload()
     pg.wait_for_selector(".abn", timeout=15000)
     mt = pg.inner_text("#main")
@@ -596,8 +571,8 @@ with sync_playwright() as pw:
        " where account_id = %s", (acc,))
     pg.goto(PANEL + "#/"); pg.reload(); pg.wait_for_selector("#band .bseat", timeout=15000)
     bs = pg.inner_text("#band .bseat").replace("\n", " ")
-    ok("Beta bitənə qədər ödəniş yoxdur" in bs,
-       "el ile verilmis sinaqda da eyni qeyd", bs[-90:])
+    ok("Sonra: hər şagird üçün" not in bs and "₼" not in bs,
+       "el ile verilmis sinaqda da qiymet yazilmir", bs[-90:])
     pg.goto(PANEL + "#/p"); pg.reload()
     pg.wait_for_selector(".abn", timeout=15000)
     mt = pg.inner_text("#main")

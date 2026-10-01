@@ -150,6 +150,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 901_numune_temizleyici.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 902_sehv_cavablari.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 903_ders_qapisi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 904_sagird_aktivlik.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 905_hesab_bagli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql
@@ -365,6 +366,9 @@ bank 306_bank_riy9_ders_ehtimal.sql
 #  160: yerli test bazasinda hediyye paket SONDURULUR - e2e/smoke-lerin pulsuz
 #  hedd (0 / 5) yoxlamalari pozulmasin; smoke_hediyye ve e2e_panel ozu acir.
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -c "update public.app_state set val = val || jsonb_build_object('on', false) where key = 'hediyye'"
+#  905: yerli test bazasinda «hesab baglidir» SONDURULUR - qalan testlerin abunesiz hesablari islemeye
+#  davam etsin; smoke_hesab_bagli / e2e_hesab_bagli ozu acir ve geri qoyur.
+[ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -c "update public.app_state set val = jsonb_build_object('on', false) where key = 'hesab_bagli'"
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 05_grants.sql
 # Statistika toplanir.  Teze qurulmus bazada planlayicinin hec bir
 # statistikasi olmur ve TAM BASQA plan secir: olcduk, rpc_bank_facets

@@ -1057,18 +1057,10 @@
         : "<b>" + dateAz(pl.ends) + "</b>-a qədər (" + days + " gün) hər şey " +
           "açıqdır: hazır suallar, avtomatik test, diaqnostika, dərs planı, " +
           "şagird sayına limit yoxdur.") + "</p>" +
-      //  Paketin serti + "hele odenis yoxdur" - istifadeci teleb etdi:
-      //  muellim indiden bilsin, amma indi pul istenildiyini dusunmesin.
-      //  Yigilan siyahi: 7 gun qalanda OZU acilir (qerar ani).
-      ferqFold(soon) +
-      //  EN VACIB SETIR: o gun NE ITIRECEYINI yazir.  Evvel «bitmə: 3
-      //  okt» yazilirdi, amma 4 oktyabrda neyin baglandigini muellim
-      //  ozu kesf edecekdi (istifadeci tutdu).  Qiymet burada TEKRAR
-      //  edilmir - o, zolaqdaki kartda bir defe yazilib.
-      '<p class="gterms"><b>' + dateAz(pl.ends) + "</b>-dan sonra hesab " +
-        "pulsuz həddə düşür: mövcud şagirdləriniz işləməyə davam edir, " +
-        "hazır suallar və diaqnostika bağlanır. Uzatmaq istəsəniz — " +
-        "bizə yazın.</p>" +
+      //  30.09: «pulsuz hedd» ve qiymet yazilari CIXDI - Bil10-da pulsuz paket yoxdur; muddet
+      //  bitende muellim bize yazir, muddeti el ile uzadiriq.
+      '<p class="gterms"><b>' + dateAz(pl.ends) + "</b>-dək hər şey açıqdır. " +
+        "Müddəti uzatmaq istəsəniz — bizə yazın.</p>" +
       "</div>" +
       (href
         ? '<a class="glink" target="_blank" rel="noopener" href="' +
@@ -1117,35 +1109,6 @@
         ferqBasliq() + ul(f.abune) + "</div>" +
     "</div>";
   }
-  /*  Esas sehifede: yigilan «Pulsuz həddə nə dəyişir?».  Susmada
-      BAGLIDIR - hediyye karti «xos gəldin» kartidir, birinci gun 11
-      bend sadalasaq hediyye hede kimi oxunur.  aciq=true olanda (7
-      gun qalanda, yaxud artiq pulsuz hedde dusende) ozu acilir -
-      qerar verdiyi andir, gizletmek menasizdir.  */
-  function ferqFold(aciq) {
-    var f = ferqSiyahi();   //  esas sehife - susan hedd
-    return '<details class="fold ferq"' + (aciq ? " open" : "") + ">" +
-      "<summary>Pulsuz həddə nə dəyişir?</summary>" +
-      '<ul class="rul lim">' +
-        f.pulsuz.map(function (x) { return "<li>" + x + "</li>"; }).join("") +
-      "</ul>" +
-      '<div class="fh">Abunə ilə açılır</div>' +
-      ferqBasliq() +
-      '<ul class="rul">' +
-        f.abune.map(function (x) { return "<li>" + x + "</li>"; }).join("") +
-      "</ul></details>";
-  }
-
-  //  Zolaqdaki kartin alt qeydi.  Mebleg AYRI SETIRDE yazilmir -
-  //  yoxsa «Sınaq bitir 3 okt» ile «1,50 ₼» yanasi durur ve muellim
-  //  «3 oktyabrdan odeyecem» deye basa dusur.  Halbuki o gun hesab
-  //  PULSUZ hedde dusur; odenis beta bitende baslayir.  Iki ayri
-  //  teqvim yanasi qoyulmamalidir (istifadeci tutdu).
-  function betaKart(pl, tarif) {
-    var t = pl && pl.odenis_start ? dateAz(pl.odenis_start) : "";
-    return (t ? t + "-dək ödəniş yoxdur." : "Beta bitənə qədər ödəniş yoxdur.") +
-      (tarif ? " Sonra: hər şagird üçün " + tarif + " / ay." : "");
-  }
   function betaQeyd(pl) {
     var t = pl && pl.odenis_start ? dateAz(pl.odenis_start) : "";
     return t
@@ -1171,17 +1134,18 @@
     if (isAdmin() && ACC.is_owner) return "";        //  admin odemir
     var wa = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
     var me = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    //  30.09: «pulsuz hedd» yazisi cixdi (Bil10-da pulsuz paket yoxdur).  Paketi olmayan hesab
+    //  neyin acildigini ve kime yazacagini bilir.
     return '<div class="card gift" id="freeCard">' +
       '<span class="gi">' + ic("star") + "</span>" +
-      '<div class="gt"><b>Hesab pulsuz həddədir</b>' +
+      '<div class="gt"><b>Hesabın paketi aktiv deyil</b>' +
       "<p>Şagirdləriniz işləməyə davam edir, öz sualınız və öz testiniz " +
-        "tam açıqdır. Hazır suallar, diaqnostika və dərs planı isə " +
-        "abunə ilədir.</p>" +
-      ferqFold(true) + "</div>" +
+        "tam açıqdır. Hazır suallar, diaqnostika və dərs planı üçün " +
+        "bizə yazın.</p></div>" +
       (wa
         ? '<a class="glink" target="_blank" rel="noopener" href="' +
           esc("https://wa.me/" + wa.replace(/[^0-9]/g, "") + "?text=" +
-              encodeURIComponent("Salam! Bil10 abunəsi haqqında sualım var." +
+              encodeURIComponent("Salam! Bil10 paketi haqqında sualım var." +
                 (me ? " Hesab: " + me : ""))) +
           '">WhatsApp-la yazın ' + ic("right") + "</a>"
         : "") +
@@ -1238,9 +1202,8 @@
               (hd ? "Hədiyyə bitir" : "Növbəti ödəniş") + "</span><b>" + son +
               (dl != null && dl >= 0 ? " · " + dl + " gün" : "") + "</b></div>"
           : "") +
-        (hd ? '<div class="gnote">' +
-                esc(betaKart(pl, azn(pl.per_seat_minor))) + "</div>"
-            : "") +
+        //  30.09: «Sonra: hər şagird üçün X / ay» sətri CIXDI - qiymet yazilmir
+        "" +
       "</div>";
     }
     var pct = lim > 0 ? Math.min(100, Math.round(used * 100 / lim)) : 0;
@@ -10017,7 +9980,7 @@
        if (/yeniden cehd|yenidən cəhd/i.test(t)) {
          show('<div class="card" id="demoLim"><b>Nümunə hazırlanır</b>' +
            '<p class="muted" style="margin:8px 0 14px">Bu saat çox adam baxır. Bir neçə dəqiqədən sonra yenidən cəhd edin, ' +
-           'ya da öz hesabınızı 1 dəqiqəyə açın — pulsuzdur.</p>' +
+           'ya da öz hesabınızı 1 dəqiqəyə açın.</p>' +
            '<div class="btns"><button class="btn" id="demoRetry">Yenidən cəhd et</button> ' +
            '<button class="btn ghost" id="demoUp">Hesab aç</button></div></div>');
          on("demoRetry", "click", function () { screenDemo(); });
@@ -10028,7 +9991,7 @@
          t = "Nümunə hesab hazır deyil (anonim giriş bağlıdır).";
        }
        show(msg("warn", t) +
-         '<div class="card"><p style="margin:0 0 10px">Öz hesabınızı 1 dəqiqəyə açın — e-poçt və parol kifayətdir, pulsuzdur.</p>' +
+         '<div class="card"><p style="margin:0 0 10px">Öz hesabınızı 1 dəqiqəyə açın — e-poçt və parol kifayətdir.</p>' +
          '<button class="btn go" id="demoUp">Hesab aç</button></div>');
        on("demoUp", "click", function () { sb.signOut().then(function () { nav("#/"); screenAuth("up"); }); });
      });
@@ -11968,6 +11931,7 @@
 
   function route() {
     if (!ACC) { bnavHide(); noAccount(); return; }
+    if (ACC.locked) { screenLocked(); return; }
     var m = (location.hash || "#/").replace(/^#/, "").split("/").filter(Boolean);
     /*  "Yeni test yig" niyyeti yalniz generator ekraninda yasayir.
         Muellim oradan basqa yere kecirse niyyet de silinir - yoxsa
@@ -12057,7 +12021,17 @@
         ACC = CTX.accounts.filter(function (a) { return a.id === keep; })[0] || CTX.accounts[0];
       } else { ACC = null; }
       ozBrauzer(isAdmin());
-      return CTX;
+      if (!ACC) return CTX;
+      /*  905: sinagi bitmis hesab BAGLIDIR (1-A).  Server deyir (rpc_account_locked): ayar,
+          abune, guzest, numune/admin istisnasi bir yerdedir - brauzer ozu hesablamir.  SQL
+          islenmeyibse (funksiya yoxdur) hesab acik sayilir - panel qirilmasin.  */
+      return sb.rpc("rpc_account_lock", { p_account: ACC.id }).then(function (l) {
+        ACC.locked = !!(l && l.locked === true);
+        //  sebeb: sinaq bitib / pullu abune bitib / hec vaxt abunesi olmayib - ekran duz yazsin
+        ACC.lockKind = (l && l.kind) || "";
+        ACC.lockEnds = (l && l.ends) || null;
+        return CTX;
+      }).catch(function () { ACC.locked = false; return CTX; });
     });
   }
 
@@ -12182,6 +12156,45 @@
       hesab yaranib.  Indi: sessiya anonimdirse (e-poct yoxdur) qurasdirma
       yox, numune acilir - rpc_demo_start hazir nusxeni tapib qaytarir.
       Server de anonime hesab acmir (rpc_create_account).  */
+  /*  905 · 1-A: sinaq/abune muddeti bitib - butun panel yerine BIR ekran.  Melumat silinmir; sahib
+      muddeti uzadan kimi sehife yenilenende her sey qayidir.  2-B: sagird ve valideyn verilmis
+      testlere/neticelere baxir, yeni tapsiriq ve oz basina mesq muddet uzanana qeder baglidir.  */
+  function screenLocked() {
+    bnavHide();
+    topTitle.textContent = "Hesab";
+    /*  Sebeb ekranda DUZ yazilir: sinaq bitibse «Sınaq», pullu abune bitibse «Abunə» (server deyir:
+        rpc_account_lock.kind).  Hec vaxt abunesi olmayana «sinaq bitib» demek yalan olardi.  */
+    var kind = (ACC && ACC.lockKind) || "yox";
+    var end = ACC && ACC.lockEnds ? dateAz(ACC.lockEnds) : "";
+    var T = kind === "abune"
+      ? { h: "Abunə müddəti bitib", c: "Hesabınız müvəqqəti bağlıdır",
+          p: "Abunə müddəti başa çatıb" + (end ? " (" + end + ")" : "") + ". Davam etmək üçün bizə yazın — abunəni birlikdə yeniləyək.",
+          w: "Salam! Bil10 abunəmi yeniləmək istəyirəm." }
+      : (kind === "sinaq"
+        ? { h: "Sınaq müddəti bitib", c: "Hesabınız müvəqqəti bağlıdır",
+            p: "Sınaq müddəti başa çatıb" + (end ? " (" + end + ")" : "") + ". Davam etmək üçün bizə yazın — müddəti birlikdə uzadaq.",
+            w: "Salam! Bil10 hesabımın müddətini uzatmaq istəyirəm." }
+        : { h: "Hesab aktiv deyil", c: "Hesabınız hələ aktiv deyil",
+            p: "Hesabınızın paketi aktiv deyil. Davam etmək üçün bizə yazın.",
+            w: "Salam! Bil10 hesabımı aktivləşdirmək istəyirəm." });
+    bandHead({ eye: "Hesab", title: T.h });
+    var wa = (window.CFG && window.CFG.CONTACT_WHATSAPP) || "";
+    var me = (CTX && CTX.profile && CTX.profile.full_name) || "";
+    var href = wa
+      ? "https://wa.me/" + wa.replace(/[^0-9]/g, "") + "?text=" +
+        encodeURIComponent(T.w + (me ? " Hesab: " + me : ""))
+      : "";
+    show('<div class="card lockcard" id="lockCard" data-kind="' + esc(kind) + '">' +
+      "<h2>" + esc(T.c) + "</h2>" +
+      "<p>" + esc(T.p) + "</p>" +
+      '<p class="muted">Qruplarınız, şagirdləriniz və testləriniz silinməyib: hesab aktiv olan kimi hər şey ' +
+        "qaldığı yerdən davam edir. Şagirdləriniz artıq verilmiş testlərə və öz nəticələrinə baxa bilir; " +
+        "yeni tapşırıq və məşq hesab aktiv olana qədər bağlıdır.</p>" +
+      (href ? '<a class="btn go wide" id="lockWa" target="_blank" rel="noopener" href="' + esc(href) + '">' +
+        ic("right") + "WhatsApp-la yazın</a>" : "") +
+    "</div>");
+  }
+
   function noAccount() {
     sb.me().then(function (u) {
       if (u && (u.is_anonymous || !u.email)) { screenDemo(); return; }
