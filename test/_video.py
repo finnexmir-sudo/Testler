@@ -45,7 +45,9 @@ from playwright.sync_api import sync_playwright
 
 DSN = "host=/tmp port=55432 user=postgres dbname=panel_e2e"
 BASE = "http://127.0.0.1:8010/"
-PANEL, STUDENT = BASE + "muellim/index.html", BASE + "sagird/index.html"
+#  30.09: skript KOHNE gorunusun secicilerine baglidir (#groups .gcard, #gTabs, #prep) - ?yeni=0.
+#  Yeni menyu gorunusu ucun skript ayrica yazilmalidir (bax: hesabat).
+PANEL, STUDENT = BASE + "muellim/index.html?yeni=0", BASE + "sagird/index.html"
 CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
 CFG = """window.CFG = {
   SUPABASE_URL: "http://127.0.0.1:54321",
@@ -302,7 +304,7 @@ def qisa(pg):
     pg.fill("#gname", "3-cü sinif — şənbə qrupu"); pg.select_option("#glevel", "3"); pg.click("#btnGroup")
     pg.wait_for_selector("#groups .gcard", timeout=15000)
     db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)
-          select a.id, p.id, 'active', now() + interval '30 days'
+          select a.id, p.id, 'trialing', now() + interval '30 days'
             from public.accounts a, public.plans p where p.slug = 'repetitor-25'""")
     pg.click("#groups .gcard"); pg.wait_for_selector("#gTabs", timeout=15000)
     for nm in ("Aysu Məmmədova", "Kənan Əliyev", "Nigar Həsənova", "Tural Quliyev"):
@@ -407,7 +409,7 @@ def qisa(pg):
     # 5 · son kart
     card(pg, '<div class="logo">' + LOGO + '</div><div class="site">bil10.az</div>'
              '<h2>Test hazırlamaq — <span class="y">1 dəqiqə</span><br>Yoxlamaq — <span class="y">0 dəqiqə</span></h2>'
-             '<div class="pill">Şagird və valideyn üçün pulsuz</div>'
+             '<div class="pill">Nümunəyə baxın — qeydiyyatsız</div>'
              '<div class="sm">Nümunəyə baxın — qeydiyyatsız<br>bil10.az</div>', 3.6)
 
 def tam(pg):
@@ -427,7 +429,7 @@ def tam(pg):
     pg.fill("#gname", "3-cü sinif — şənbə qrupu"); pg.select_option("#glevel", "3"); pg.click("#btnGroup")
     pg.wait_for_selector("#groups .gcard", timeout=15000)
     db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)
-          select a.id, p.id, 'active', now() + interval '30 days'
+          select a.id, p.id, 'trialing', now() + interval '30 days'
             from public.accounts a, public.plans p where p.slug = 'repetitor-25'""")
     pg.click("#groups .gcard"); pg.wait_for_selector("#gTabs", timeout=15000)
     for nm in ("Aysu Məmmədova", "Kənan Əliyev", "Nigar Həsənova"):
@@ -570,7 +572,7 @@ def tam(pg):
     say(pg, "DƏRS PLANI|«Dərs paketi» keçidi")
     tap(pg, "a.plpack")
     pg.wait_for_selector(".pktab", timeout=15000); pg.wait_for_timeout(600)
-    say(pg, "DƏRS PLANI › DƏRS PAKETİ|Hər mövzu üçün: isinmə testi, ev tapşırığı, rüb sınağı — bir yerdə", 2.6)
+    say(pg, "DƏRS PLANI › DƏRS PAKETİ|Hər mövzu üçün: ev tapşırığı, rüb sınağı — bir yerdə", 2.6)
     tap(pg, ".pkr >> nth=0 >> [data-pkwarm]")
     pg.wait_for_selector("#pkMsg .ok", timeout=30000); pg.wait_for_timeout(400)
     say(pg, "DƏRS PAKETİ|İsinmə testi yığıldı və qrupa verildi — dərsin ilk 5 dəqiqəsi hazırdır", 2.8)
@@ -783,7 +785,7 @@ def tam(pg):
 
     card(pg, '<div class="logo">' + LOGO + '</div><div class="site">bil10.az</div>'
              '<h2>Test hazırlamaq — <span class="y">1 dəqiqə</span><br>Yoxlamaq — <span class="y">0 dəqiqə</span></h2>'
-             '<div class="pill">Şagird və valideyn üçün pulsuz</div>'
+             '<div class="pill">Nümunəyə baxın — qeydiyyatsız</div>'
              '<div class="sm">Bu, əsas axındır — daha çox imkan bələdçidə: <b style="color:#fff">bil10.az/komek</b><br>'
              'Nümunəyə baxın — qeydiyyatsız · info@bil10.az</div>', 4.5)
 
@@ -805,7 +807,7 @@ SCENES = [
  ("Şagird kartı", "Hər şagirdin öz xəritəsi",
   "Diaqnostika mövzu-mövzu səviyyəni göstərir: «bundan başla». Səhv dəftəri səhv etdiyi sualları yenidən gətirir.", "card", 8),
  ("Dərs planı", "Dərsdən əvvəl bir baxış",
-  "Kurikulum üzrə hazır plan: bu günün dərsi, isinmə 5 sual, son keçilən, tapşırığı etməyənlər — bir kartda.", "prep", 8),
+  "Kurikulum üzrə hazır plan: bu günün dərsi, son keçilən, tapşırığı etməyənlər — bir kartda.", "prep", 8),
  ("Ev tapşırığı", "«Bunu oxu, bunu təkrarla»",
   "Test olmayan tapşırığı da yazırsınız. Şagird «Etdim» deyir — siz və valideyn dərhal görürsünüz.", "hw", 7),
  ("Valideyn", "Valideyn də görür",
@@ -830,7 +832,7 @@ def carx(pg):
                  '<h1>' + t + '</h1><div class="sm">' + d + '</div></div>'
                  '<div class="phone"><img src="' + shots[key] + '" alt=""></div>', sec * R)
     card(pg, '<div class="logo">' + LOGO + '</div><h1>Bil10</h1>'
-             '<h2>Şagird və valideyn üçün <span class="y">pulsuz</span></h2>'
+             '<h2>Testi verin,<br><span class="y">qalanını sistem etsin</span></h2>'
              '<div class="pill">Nümunəyə baxın — qeydiyyatsız</div>'
              '<div class="site">bil10.az</div>', 5.0 * R)
     #  uz sekli

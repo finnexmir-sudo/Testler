@@ -1172,6 +1172,13 @@
     var pill = '<span class="pill' + ((pl || (isAdmin() && ACC.is_owner)) ? " on" : "") +
       '">' + esc(plan) + "</span>";
 
+    //  30.09: NUMUNE hesabinin abunesi «active» qurulur (db/136, 25 yer) - kart «Bu ay 37,50 ₼ · Növbəti
+    //  ödəniş» yazirdi: ziyaretci numunede QIYMET gorurdu.  Numunede yalniz sagird sayi + paket adi.
+    if (ACC.is_demo && pl) {
+      return '<div class="bseat gseat">' +
+        '<div class="seat"><div><div class="num">' + used + "</div>" +
+          '<div class="lbl">aktiv şagird</div></div>' + pill + "</div></div>";
+    }
     if (pl && Number(pl.per_seat_minor) > 0) {
       //  Pulsuz dovrde (hediyye VE ya adminin verdiyi sinaq) pul
       //  tutulmur - mebleg NOVBETI ay kimi yazilir: muellim indiden
@@ -3024,12 +3031,12 @@
               '<span class="wres">' + (nx.warm_takers
                 ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird"
                 : "verilib") + '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></div>'
-            : (d.paid
+            //  30.09: isinme baglidir (DERS_HAZIR) - «İsinmə dərsdən əvvəl 5 sual» yazisi duymesiz qalirdi,
+            //  yalan ved kimi oxunurdu.  Yigilmis isinme varsa (yuxaridaki budaq) gorunur.
+            : (d.paid && DERS_HAZIR
                 ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
-                  (DERS_HAZIR
-                    ? '<button class="plmk" id="prepWarm" data-item="' +
-                      esc(nx.item_id) + '">Hazırla</button>'
-                    : "") + "</div>"
+                  '<button class="plmk" id="prepWarm" data-item="' +
+                  esc(nx.item_id) + '">Hazırla</button></div>'
                 : "")));
       } else {
         h += row("doc", "Bu günün dərsi", '<span class="muted">Plan tam keçilib. 🎉</span>');

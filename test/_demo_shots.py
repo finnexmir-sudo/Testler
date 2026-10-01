@@ -4,7 +4,7 @@
 Muellim (7-ci sinif qrupu), sagird (DEMO0001), valideyn (VDEMO001)."""
 import os, psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright
-DSN = "host=/tmp port=55432 user=postgres dbname=panel_e2e"; BASE = "http://127.0.0.1:8010/"; PANEL = BASE + "muellim/index.html"
+DSN = "host=/tmp port=55432 user=postgres dbname=panel_e2e"; BASE = "http://127.0.0.1:8010/"; PANEL = BASE + "muellim/index.html?yeni=0"
 OUT = "/tmp/claude-0/video/shots"; os.makedirs(OUT, exist_ok=True)
 CFG = """window.CFG = { SUPABASE_URL: "http://127.0.0.1:54321", SUPABASE_ANON_KEY: "test-anon-key", STUDENT_URL: "https://bil10.az/sagird/", PARENT_URL: "https://bil10.az/valideyn/", SHOW_PLANS: false };"""
 def db(q, one=False):
