@@ -1,5 +1,5 @@
 -- =====================================================================
---  smoke_bank_axtaris.sql : 907 - bank axtarisi movzu adina da baxir
+--  smoke_bank_axtaris.sql : 907 (bank axtarisi movzu adina da baxir) + 908 (rpc_topic_search)
 --  Hamisi tranzaksiyada, sonda GERI alinir (baza deyismir).
 -- =====================================================================
 \set ON_ERROR_STOP on
@@ -88,6 +88,38 @@ begin
   assert (select count(*) from public.questions q join public.topics t on t.id = q.topic_id
            where q.owner_type = 'platform' and q.status = 'published' and t.name = 'Söz birləşmələri') <= n_real,
          'movzunun bezi suallari axtarisda yoxdur';
+
+
+  ---------------------------------------------------------------- 908: rpc_topic_search
+  v_a := public.rpc_topic_search('smoke alt qeyd', 'platform');
+  assert jsonb_array_length(v_a) = 1, '908: 1 movzu gozlenirdi: ' || v_a::text;
+  assert v_a->0->>'name' = 'Smoke Alt Qeyd' and (v_a->0->>'n')::int = 1, '908: ad/say: ' || v_a::text;
+  assert v_a->0->>'subject_slug' = 'az-dili' and v_a->0->>'subject' is not null, '908: fenn qaytarilmadi: ' || v_a::text;
+
+  --  fesil adi de movzudur (ona suallar birbasa bagli olanda): 2 movzu, ikisi de «Smoke ...» ile baslayir
+  v_a := public.rpc_topic_search('Smoke', 'platform');
+  assert jsonb_array_length(v_a) = 2, '908: «Smoke» ucun 2 movzu gozlenirdi: ' || v_a::text;
+
+  --  suali olmayan movzu (alt movzu yarpagi) cixmir
+  v_a := public.rpc_topic_search('frazeoloji', 'platform');
+  assert jsonb_array_length(v_a) = 0, '908: suali olmayan movzu cixdi: ' || v_a::text;
+
+  --  2 simvoldan qisa / bos
+  assert jsonb_array_length(public.rpc_topic_search('s', 'platform')) = 0, '908: 1 simvol netice verdi';
+  assert jsonb_array_length(public.rpc_topic_search('   ', 'platform')) = 0, '908: bosluq netice verdi';
+
+  --  hovuz: «oz suallarim» - muellimin oz sualı yoxdur, platforma movzusu cixmir
+  assert jsonb_array_length(public.rpc_topic_search('smoke alt qeyd', 'mine')) = 0, '908: mine hovuzunda platforma movzusu cixdi';
+
+  --  real movzu: sual sayi sifirdan boyuk, limit isleyir
+  v_a := public.rpc_topic_search('Söz birləşmələri', 'platform', 1);
+  assert jsonb_array_length(v_a) = 1 and (v_a->0->>'n')::int > 0, '908: real movzu: ' || v_a::text;
+
+  --  yanlis hovuz
+  begin
+    perform public.rpc_topic_search('smoke', 'xyz');
+    assert false, '908: yanlis hovuz xeta vermedi';
+  exception when sqlstate '22023' then null; end;
 
   raise warning 'smoke_bank_axtaris: HAMISI KECDI (real movzu: % sual)', n_real;
 end $$;

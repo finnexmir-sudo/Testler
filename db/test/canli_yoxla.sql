@@ -89,6 +89,8 @@ select * from (values
         and def like '%media_url%')),
  ('907 bank axtarışı mövzu adına da baxır (rpc_bank_list: topics.name + ders: alt mövzu)',
     (select exists (select 1 from f where proname='rpc_bank_list' and def like '%ders:%%' and def like '%parent_id%'))),
+ ('908 mövzu axtarışı (rpc_topic_search)',
+    (select exists (select 1 from f where proname='rpc_topic_search'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

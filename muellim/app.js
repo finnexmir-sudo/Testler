@@ -9472,6 +9472,9 @@
             "<span>Hazır suallar abunə paketinə daxildir. " +
             "Öz suallarınızdan yığa bilərsiniz.</span></div>"
           : "") +
+        '<div style="margin-top:12px"><label for="gTq">Mövzu axtar</label>' +
+          '<input id="gTq" autocomplete="off" placeholder="məs. frazeoloji birləşmə, kəsr, zərf…">' +
+          '<div id="gTqHits"></div></div>' +
         '<div style="margin-top:12px"><label for="gsub">Fənn</label>' +
           '<select id="gsub">' + genSubOpts(f) + "</select></div>" +
         /*  SINIF - COX SECIM.  Repetitor 8-ci sinfi hazirlayarken
@@ -9562,6 +9565,27 @@
       var i = f.topics.indexOf(t);
       if (i >= 0) f.topics.splice(i, 1); else f.topics.push(t);
       genSync();
+    });
+    //  908: movzunu adla tap - fenn ve sinif ozu secilir, movzu nisani yanir
+    var tq = null;
+    on("gTq", "input", function () {
+      clearTimeout(tq);
+      tq = setTimeout(function () { topicSearch("gTqHits", $("gTq").value, f.pool, "gen"); }, 350);
+    });
+    on("gTqHits", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-th]") : null;
+      if (!b) return;
+      var tp = THITS[Number(b.getAttribute("data-i"))];
+      if (!tp) return;
+      f.subject = tp.subject_slug; f.levels = tp.level ? [tp.level] : [];
+      f.topics = [tp.id]; f.cls = ""; f.remNames = [];
+      var inp = $("gTq"); if (inp) inp.value = "";
+      var hb = $("gTqHits");
+      if (hb) hb.innerHTML = '<div class="ok" style="margin:10px 0 0">' + ic("check") +
+        "<span>Seçildi: <b>" + esc(tp.name) + "</b> — " +
+        esc([tp.subject, tp.level_name].filter(Boolean).join(", ")) + ".</span></div>";
+      var sel = $("gsub"); if (sel) sel.value = f.subject;
+      genSync(); genFacets();
     });
     on("gsub", "change", function () {
       //  Sinif nisanlari ile eyni yol - ekran silinmir
@@ -10730,6 +10754,49 @@
   }
 
   /* Suzgeci RPC-nin gozledi formaya salir - bos sahələr getmir */
+  /* ---------------------------------------------------------------
+     908: MOVZU AXTARISI.  Muellim movzunun ADINI yazir («frazeoloji
+     birlesme»).  Bank siyahisi ve Test yig ekrani eyni RPC-ni cagirir
+     (rpc_topic_search): fenn/sinifden asili olmadan movzunu fenni, sinfi
+     ve sual sayi ile verir.  RPC canlida yoxdursa (908 isledilmeyib)
+     sakitce bos siyahi qayidir - ekran sinmir, sadece kart cixmir.
+     --------------------------------------------------------------- */
+  var THITS = [];      // son netice (dugmeler indeksle bu siyahiya baxir)
+  var TSSEQ = 0;       // gec gelen kohne cavab tezesini ezmesin
+
+  function topicHitsHtml(list, mode) {
+    THITS = list || [];
+    if (!THITS.length) return "";
+    var rows = THITS.map(function (t, i) {
+      var meta = [t.subject, t.level_name, (Number(t.n) || 0) + " sual"]
+        .filter(Boolean).map(esc).join(" · ");
+      return '<div class="thit"><div class="tn"><b>' + esc(t.name) + "</b><i>" + meta + "</i></div>" +
+        '<div class="ta">' + (mode === "gen"
+          ? '<button class="btn sm go" type="button" data-th="sec" data-i="' + i + '">Seç</button>'
+          : '<button class="btn sm go" type="button" data-th="gen" data-i="' + i + '">' + ic("gen") + "Test yığ</button>" +
+            '<button class="btn sm ghost" type="button" data-th="q" data-i="' + i + '">Suallar</button>') +
+        "</div></div>";
+    }).join("");
+    return mode === "gen"
+      ? '<div class="thits in">' + rows + "</div>"
+      : '<div class="card tight thits"><div class="thh">Mövzular</div>' + rows + "</div>" +
+        '<div class="spacer"></div>';
+  }
+
+  function topicSearch(boxId, q, pool, mode) {
+    var box = $(boxId);
+    if (!box) return;
+    var my = ++TSSEQ;
+    q = (q || "").trim();
+    if (q.length < 2) { box.innerHTML = ""; THITS = []; return; }
+    sb.rpc("rpc_topic_search", { p_q: q, p_pool: pool || "platform", p_limit: 6 })
+      .then(function (r) {
+        if (my !== TSSEQ || !$(boxId)) return;
+        $(boxId).innerHTML = topicHitsHtml(Array.isArray(r) ? r : [], mode);
+      })
+      .catch(function () { if (my === TSSEQ && $(boxId)) $(boxId).innerHTML = ""; });
+  }
+
   function bankRule(f) {
     var r = { pool: f.pool };
     if (f.subject) r.subject = f.subject;
@@ -10858,6 +10925,7 @@
         "</details>" +
       "</div>" +
       '<div class="spacer"></div>' +
+      '<div id="bTopHit"></div>' +
       '<div id="bList" class="card pad0"><div class="skel">Yüklənir…</div></div>'
     );
 
@@ -10898,10 +10966,32 @@
     var t = null;
     on("bq", "input", function () {
       clearTimeout(t);
-      t = setTimeout(function () { f.q = ($("bq").value || "").trim(); loadBank(); }, 350);
+      t = setTimeout(function () {
+        f.q = ($("bq").value || "").trim(); loadBank();
+        topicSearch("bTopHit", f.q, f.pool, "bank");
+      }, 350);
+    });
+    //  movzu kartindan: «Test yig» (generator bu movzu secili) ve ya «Suallar» (siyahi bu movzuya daralir)
+    on("bTopHit", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-th]") : null;
+      if (!b) return;
+      var tp = THITS[Number(b.getAttribute("data-i"))];
+      if (!tp) return;
+      if (b.getAttribute("data-th") === "gen") {
+        var g = genFilter();
+        g.pool = f.pool; g.subject = tp.subject_slug; g.levels = tp.level ? [tp.level] : [];
+        g.topics = [tp.id]; g.difficulty = []; g.cls = ""; g.remNames = [];
+        g.title = ""; g.count = 10; g.asg = ""; g.asgStu = ""; g.asgStuName = "";
+        g.back = ""; g.backName = "";
+        nav("#/gen");
+      } else {
+        f.subject = tp.subject_slug; f.level = tp.level || ""; f.topics = [tp.id]; f.q = "";
+        screenBank();
+      }
     });
 
     loadBank();
+    topicSearch("bTopHit", f.q, f.pool, "bank");
   }
 
   /* Nece suzgec aciqdir - yigilanda da gorunsun deye */

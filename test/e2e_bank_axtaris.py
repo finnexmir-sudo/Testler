@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Bank axtarisi MOVZU ADINA da baxir (db/907): «Hazir suallar» -> axtaris xanasi.
+"""Bank axtarisi MOVZU ADINA da baxir (db/907) + movzu kartlari ve Test yig-da movzu axtarisi (db/908).
 
 Sikayet: muellim «frazeoloji birlesme» yazdi, hec ne cixmadi - rpc_bank_list yalniz sualin metnine baxirdi.
 Burada yerli bazada movzu adi (sual metninde kecmeyen) ile axtarilir: «Söz birləşmələri».
@@ -48,6 +48,37 @@ def run(pw, w, h, tag):
 
     p.fill("#bq", TOPIC.lower()); p.wait_for_selector(".qitem", timeout=20000)
     ok(p.locator("#bList .qitem").count() > 0, "kicik herflerle de tapilir")
+
+    # ---- 908: movzu karti (sual bankinda)
+    p.fill("#bq", TOPIC); p.wait_for_selector("#bTopHit .thit", timeout=20000); p.wait_for_timeout(500)
+    card = p.evaluate("""() => { const e = document.querySelector('#bTopHit .thit'); return e ? e.innerText : ''; }""")
+    ok(TOPIC.lower() in card.lower() and "sual" in card, "movzu karti: ad + sual sayi", card)
+    ok(p.locator("#bTopHit [data-th='gen']").count() > 0 and p.locator("#bTopHit [data-th='q']").count() > 0,
+       "kartda «Test yığ» ve «Suallar» duymeleri var")
+    p.screenshot(path="%s/%s_karti.png" % (OUT, tag))
+    p.locator("#bTopHit [data-th='gen']").first.click()
+    p.wait_for_selector("#gTopBox .chip.on", timeout=25000); p.wait_for_timeout(600)
+    ok("#/gen" in p.evaluate("location.hash"), "«Test yığ» generatora aparir")
+    ok(p.evaluate("document.getElementById('gsub').value") == "az-dili", "fenn avtomatik secildi (Azərbaycan dili)")
+    on_chip = p.evaluate("document.querySelector('#gTopBox .chip.on').innerText")
+    ok(TOPIC.lower() in on_chip.lower(), "movzu nisani yanir: " + on_chip, on_chip)
+    p.screenshot(path="%s/%s_gen_secili.png" % (OUT, tag))
+
+    # ---- 908: Test yig ekraninda movzu axtarisi
+    p.evaluate("location.hash='#/'"); p.wait_for_timeout(500)
+    p.evaluate("location.hash='#/gen'"); p.wait_for_selector("#gTq", timeout=20000)
+    p.click("#gPool [data-v='platform']"); p.wait_for_timeout(600)
+    p.evaluate("(() => { const s = document.getElementById('gsub'); s.value=''; s.dispatchEvent(new Event('change')); })()")
+    p.wait_for_timeout(500)
+    p.fill("#gTq", "Söz birləşm"); p.wait_for_selector("#gTqHits .thit", timeout=20000); p.wait_for_timeout(400)
+    ok(p.locator("#gTqHits .thit").count() > 0, "Test yığ: movzu axtarisi netice verdi")
+    p.screenshot(path="%s/%s_gen_axtaris.png" % (OUT, tag))
+    p.locator("#gTqHits [data-th='sec']").first.click(); p.wait_for_selector("#gTopBox .chip.on", timeout=25000); p.wait_for_timeout(500)
+    ok(p.evaluate("document.getElementById('gsub').value") == "az-dili", "Test yığ: fenn secildi")
+    ok("Seçildi" in p.evaluate("document.getElementById('gTqHits').innerText"), "Test yığ: «Seçildi» yazisi")
+    p.screenshot(path="%s/%s_gen_secildi.png" % (OUT, tag))
+    p.fill("#gTq", "zzqqxx"); p.wait_for_timeout(1200)
+    ok(p.locator("#gTqHits .thit").count() == 0, "olmayan soz: kart yoxdur")
     br.close()
 
 with sync_playwright() as pw:

@@ -2696,3 +2696,15 @@ details.styd{margin-top:14px}
 .card.lockcard h2{margin:0 0 8px}
 .card.lockcard p{margin:0 0 12px;line-height:1.5}
 .card.lockcard .btn{margin-top:4px}
+
+/* 908: movzu axtarisi neticesi (sual banki + Test yig) */
+.thits .thh{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-3);padding:4px 0 2px}
+.thit{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--n-100)}
+.thits .thh + .thit{border-top:0}
+.thits.in{margin:10px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:2px 12px}
+.thits.in .thit:first-child{border-top:0}
+.thit .tn{flex:1;min-width:0}
+.thit .tn b{display:block;color:var(--fg);font-weight:570;overflow-wrap:anywhere}
+.thit .tn i{display:block;font-style:normal;font-size:13px;color:var(--fg-2)}
+.thit .ta{display:flex;gap:8px;flex:0 0 auto}
+@media(max-width:560px){.thit{flex-wrap:wrap}.thit .ta{flex:1 1 100%}.thit .ta .btn{flex:1}}
