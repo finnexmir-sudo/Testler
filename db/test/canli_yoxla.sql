@@ -87,6 +87,8 @@ select * from (values
       where proname in ('rpc_start_attempt','rpc_student_daily','rpc_student_mistakes','rpc_student_practice_next',
                         'rpc_test_preview','rpc_submit_attempt','rpc_test_result','rpc_attempt_sheet')
         and def like '%media_url%')),
+ ('907 bank axtarışı mövzu adına da baxır (rpc_bank_list: topics.name + ders: alt mövzu)',
+    (select exists (select 1 from f where proname='rpc_bank_list' and def like '%ders:%%' and def like '%parent_id%'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

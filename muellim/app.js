@@ -10800,7 +10800,7 @@
           seg("all", "Hamısı", f.pool) +
         "</div>" +
         '<div class="spacer"></div>' +
-        '<input id="bq" placeholder="Sual mətnində axtar…" value="' + esc(f.q) + '">' +
+        '<input id="bq" placeholder="Mövzu və ya sual mətnində axtar…" value="' + esc(f.q) + '">' +
         /* Telefonda 10 nisan siyahini ekrandan qovurdu.  Hovuz secicisi
            ve axtaris hemise gorunur, qalani yigilir. */
         '<details class="more filt"' + (nFilt(f) ? " open" : "") + ">" +
