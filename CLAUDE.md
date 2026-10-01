@@ -1891,6 +1891,40 @@ tutuşdur (`diff`), «bir sətir əlavə etdim» deyib keçmə.
 payload-una toxunan hər dəyişiklikdən sonra onu işlət; `db/900`-dan
 sonra `test/e2e_netice_sekli.py` də var.
 
+### Üçüncü dəfə: `db/900` özü bir yeri qaçırdı — `rpc_attempt_sheet` (2026-10-01)
+
+`db/900` şəkli üç yerdə qaytardı (şagirdin nəticəsi, kağız vərəq, hesabatın
+`weak`-i). **Dördüncü yer qaldı:** müəllimin **cəhd vərəqi**
+(`rpc_attempt_sheet`, şagird hesabatı → Tarixçə → cəhdə bas). Ekran
+`fig(q.media_url)`-i çağırırdı, RPC isə sahəni vermirdi — qrafikli
+sual vərəqdə şəkilsiz idi. `db/906` düzəltdi (eyni yol: `questions`-a
+`left join`, nüsxə yox).
+
+**Niyə qaçdı:** «hansı RPC-lər bu sahəni verir?» sualına **RPC-lərdən**
+baxıb cavab axtardıq, ekrandan yox. Düzgün istiqamət tərsdir:
+**ekran → onu bəsləyən RPC**. İnterfeysdə `fig(…media_url)` olan hər
+yeri tap (`grep -n "media_url" muellim/app.js sagird/app.js`), hər biri
+hansı RPC-dən oxuyur — hamısında sahə var?
+
+**Hazır siyahı (səkkiz yer, hamısı `media_url` verməlidir):**
+
+| kim | ekran | RPC |
+|---|---|---|
+| şagird | test | `rpc_start_attempt` |
+| şagird | günlük 5 sual | `rpc_student_daily` |
+| şagird | səhv dəftəri | `rpc_student_mistakes` |
+| şagird | mövzu məşqi | `rpc_student_practice_next` |
+| şagird | nəticə (təzə / sonradan) | `rpc_submit_attempt` / `rpc_test_result` |
+| müəllim | kağız vərəq + çap | `rpc_test_preview` |
+| müəllim | hesabat «Səhvlər» | `rpc_student_report` (`weak`) |
+| müəllim | cəhd vərəqi | `rpc_attempt_sheet` |
+
+`db/test/canli_yoxla.sql` bunu **canlıda** bir sorğu ilə yoxlayır
+(`906b`). Yerli yoxlayıcılar: `test/e2e_sekil_netice.py` — vərəq, çap,
+təzə və sonradan nəticə, **cəhd vərəqi**; 390 və 1280 px.
+`test/e2e_netice_sekli.py` (900) — nəticə ekranı və hesabatın «Səhvlər»
+sekməsi; `test/e2e_sekil.py` (188) — şagird test ekranı və bank.
+
 ## «Dərsə 20 sual» = 20 FƏRQLİ sual (2026-09-23)
 
 Bank dərs nişanı yazmağa başlayanda hədd qoyduq: dərs testi açılmaq

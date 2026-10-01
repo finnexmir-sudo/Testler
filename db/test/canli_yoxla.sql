@@ -80,6 +80,13 @@ select * from (values
     (select exists (select 1 from f where proname='account_locked')
         and exists (select 1 from f where proname='rpc_account_lock')
         and exists (select 1 from public.app_state where key='hesab_bagli'))),
+ ('906 cəhd vərəqində sualın şəkli (rpc_attempt_sheet)',
+    (select exists (select 1 from f where proname='rpc_attempt_sheet' and def like '%media_url%'))),
+ ('906b şəkil BÜTÜN səkkiz yerdə (şagird: start/daily/mistakes/practice_next; müəllim: preview/submit/result/sheet)',
+    (select count(distinct proname) = 8 from f
+      where proname in ('rpc_start_attempt','rpc_student_daily','rpc_student_mistakes','rpc_student_practice_next',
+                        'rpc_test_preview','rpc_submit_attempt','rpc_test_result','rpc_attempt_sheet')
+        and def like '%media_url%')),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

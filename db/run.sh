@@ -151,6 +151,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 902_sehv_cavablari.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 903_ders_qapisi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 904_sagird_aktivlik.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 905_hesab_bagli.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 906_cehd_vereqi_sekil.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql
