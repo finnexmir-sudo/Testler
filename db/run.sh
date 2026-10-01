@@ -384,6 +384,10 @@ bank 326_bank_riy7_konqruyentlik_duzelis.sql
 bank 327_bank_riy7_situasiya_duzelis.sql
 bank 328_bank_riy7_cetinlik.sql
 bank 329_bank_riy7_kohne_qusurlar.sql
+bank 330_bank_riy10_ders_triq_ifade.sql
+bank 340_bank_riy10_ders_nisan.sql
+bank 341_bank_riy10_triq_ifade_duzelis.sql
+bank 342_bank_riy10_triq_ifade_cetinlik.sql
 bank 400_bank_inf10_ders_sebeke.sql
 bank 401_bank_inf11_ders_modellesdirme.sql
 bank 402_bank_inf11_ders_modellesdirme_a.sql
