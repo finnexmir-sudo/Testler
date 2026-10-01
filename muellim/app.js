@@ -10733,12 +10733,15 @@
       qalirdi.  Her sorgu oz neslini goturur; cavab gelende nesil
       hele de sonuncudursa yazilir.  */
   var BFSEQ = 0;   // suzgec (rpc_bank_facets)
+  var BOPTS = false;   // siyahida variantlar hamisi aciqdir?  default - baglidir
   var BSEQ  = 0;   // netice sahesi (rpc_bank_list / rpc_bank_coverage)
 
   /*  Siyahida nece sual atlanir.  rpc_bank_list offset-i onsuz da
       desteklyirdi - ekran hemise 0 gonderirdi, ona gore 51-ci suala
       catmaq MUMKUN DEYILDI.  Suzgec deyisende sifirlanir.  */
   var BOFF = 0;
+  //  Siyahi sehifesi: 50 sual telefonda ~8000 px idi (istifadeci: «50 coxdur») - 10-10 artir.
+  var BPAGE = 10;
 
   /*  KATALOG REJIMI.  Platforma hovuzunda duz 50 sual tokmek menasiz
       idi: setirler disabled gelir (muellim platforma sualini ne acir,
@@ -10795,6 +10798,13 @@
         $(boxId).innerHTML = topicHitsHtml(Array.isArray(r) ? r : [], mode);
       })
       .catch(function () { if (my === TSSEQ && $(boxId)) $(boxId).innerHTML = ""; });
+  }
+
+  //  bir sualin variantlarini ac / bagla (class .hide - «hidden» atributu CSS-e uduzur)
+  function setQOpts(item, open) {
+    var ul = item.querySelector(".qopts"), b = item.querySelector(".qtg");
+    if (ul) { if (open) ul.classList.remove("hide"); else ul.classList.add("hide"); }
+    if (b) { b.classList.toggle("on", !!open); b.setAttribute("aria-expanded", open ? "true" : "false"); }
   }
 
   function bankRule(f) {
@@ -11224,7 +11234,7 @@
     }
     if (!append) BOFF = 0;
     var my = ++BSEQ;
-    sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: 50, p_offset: BOFF })
+    sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: BPAGE, p_offset: BOFF })
       .then(function (d) {
         if (!live() || my !== BSEQ) return;
         var box = $("bList");
@@ -11271,8 +11281,13 @@
               "</i></div>" +
               (mine ? '<span class="arrow">' + ic("right") + "</span>" : "") +
             "</button>" +
+            /*  908-den sonra: 50 sual x 4 variant sehifeni cox uzadirdi (istifadeci).
+                Variantlar DEFAULT BAGLIDIR, «Variantlar · 4» ile acilir; yuxaridaki
+                «Hamisini ac» hamisina aiddir.  Variantlar DOM-dadir - yalniz gizlidir.  */
             (opts.length
-              ? '<ul class="qopts">' + opts.map(function (o) {
+              ? '<button class="qtg' + (BOPTS ? " on" : "") + '" type="button" data-qtg="1" aria-expanded="' +
+                  (BOPTS ? "true" : "false") + '">Variantlar · ' + opts.length + "</button>" +
+                '<ul class="qopts' + (BOPTS ? "" : " hide") + '">' + opts.map(function (o) {
                   return '<li' + (o.correct ? ' class="c"' : "") + ">" +
                     qt(o.body) + "</li>";
                 }).join("") + "</ul>"
@@ -11282,7 +11297,7 @@
 
         var more = shown < total
           ? '<button class="morebtn" id="bMore">Daha ' +
-            Math.min(50, total - shown) + " sual göstər (" + shown + "/" + total + ")</button>"
+            Math.min(BPAGE, total - shown) + " sual göstər (" + shown + "/" + total + ")</button>"
           : "";
 
         if (append) {
@@ -11291,17 +11306,34 @@
           box.insertAdjacentHTML("beforeend", rows + more);
         } else {
           box.innerHTML =
-            '<div class="bcount">' +
+            '<div class="bcount"><span>' +
               (f.pool === "mine" || showBankN()
                 ? total + " sual" + (shown < total ? " · " + shown + "-i göstərilir" : "")
-                : (shown < total ? "İlk " + shown + " sual göstərilir" : "Tapılan suallar")) + "</div>" +
+                : (shown < total ? "İlk " + shown + " sual göstərilir" : "Tapılan suallar")) + "</span>" +
+              '<button class="qall" type="button" id="bAll">' + (BOPTS ? "Variantları bağla" : "Variantları aç") + "</button></div>" +
             rows + more;
         }
 
+        //  variantlari ac/bagla: tek sual ve hamisi (dinleyici qutuya BIR defe baglanir)
+        if (!box.dataset.qtgBound) {
+          box.dataset.qtgBound = "1";
+          box.addEventListener("click", function (e) {
+            var t = e.target.closest ? e.target.closest("[data-qtg], #bAll") : null;
+            if (!t) return;
+            if (t.id === "bAll") {
+              BOPTS = !BOPTS;
+              Array.prototype.forEach.call(box.querySelectorAll(".qitem"), function (it) { setQOpts(it, BOPTS); });
+              t.textContent = BOPTS ? "Variantları bağla" : "Variantları aç";
+              return;
+            }
+            var it = t.closest(".qitem"), ul = it && it.querySelector(".qopts");
+            if (ul) setQOpts(it, ul.classList.contains("hide"));
+          });
+        }
         on("bMore", "click", function () {
           var mb = $("bMore");
           if (mb) { mb.disabled = true; mb.textContent = "Yüklənir…"; }
-          BOFF += 50;
+          BOFF += BPAGE;
           loadBank(true);
         });
         Array.prototype.forEach.call(box.querySelectorAll("[data-q]"), function (b) {

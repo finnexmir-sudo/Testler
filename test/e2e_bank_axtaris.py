@@ -34,12 +34,34 @@ def run(pw, w, h, tag):
     p.click("#bPool [data-v='platform']"); p.wait_for_timeout(800)
 
     p.fill("#bq", TOPIC); p.wait_for_selector(".qitem", timeout=20000); p.wait_for_timeout(600)
+    # sehife ONLUQDUR: ilk 10, «Daha 10 sual göstər» ile 20, 30 ...
+    ok(p.locator("#bList .qitem").count() == 10, "ilk sehife 10 sual", p.locator("#bList .qitem").count())
+    ok("Daha 10" in p.inner_text("#bMore"), "duyme «Daha 10 sual göstər»", p.inner_text("#bMore"))
+    for k in (20, 30, 40, 50):
+        p.click("#bMore"); p.wait_for_function("n => document.querySelectorAll('#bList .qitem').length >= n", arg=k, timeout=20000)
+    ok(p.locator("#bList .qitem").count() == 50, "10-10 artir: 50-ye catdi", p.locator("#bList .qitem").count())
     r = p.evaluate("""(t) => { const it = [...document.querySelectorAll('#bList .qitem')];
         const rows = it.map(x => ({ body: x.querySelector('.g b').innerText, meta: x.querySelector('.g i').innerText }));
         return { n: rows.length, byTopic: rows.filter(r => r.meta.indexOf(t) >= 0 && r.body.toLowerCase().indexOf(t.toLowerCase()) < 0).length,
                  sample: rows.slice(0, 2) }; }""", TOPIC)
     ok(r["n"] > 0, "movzu adi ile axtaris netice verdi (%d sual)" % r["n"], r)
     ok(r["byTopic"] > 0, "sual metninde olmayan, yalniz movzu adina gore tapilan sual var (%d)" % r["byTopic"], r)
+    # ---- variantlar default BAGLIDIR (sehife uzanmasin), duyme ile acilir
+    vis = "() => [...document.querySelectorAll('#bList .qopts')].filter(u => u.offsetParent !== null).length"
+    ok(p.locator("#bList .qopts").count() > 0 and p.evaluate(vis) == 0, "siyahida variantlar default baglidir")
+    ok(p.locator("#bList .qtg").count() == p.locator("#bList .qitem").count(), "her suala «Variantlar · N» duymesi var")
+    h_bagli = p.evaluate("document.querySelector('#bList').offsetHeight")
+    p.locator("#bList .qtg").first.click(); p.wait_for_timeout(200)
+    ok(p.evaluate(vis) == 1 and p.locator("#bList .qtg").first.get_attribute("aria-expanded") == "true", "bir sualin variantlari acildi")
+    p.locator("#bList .qtg").first.click(); p.wait_for_timeout(200)
+    ok(p.evaluate(vis) == 0, "ikinci klik bagladi")
+    p.click("#bAll"); p.wait_for_timeout(300)
+    n_all = p.locator("#bList .qopts").count()
+    ok(p.evaluate(vis) == n_all and "bağla" in p.inner_text("#bAll"), "«Variantları aç» hamisini acdi (%d)" % n_all)
+    h_aciq = p.evaluate("document.querySelector('#bList').offsetHeight")
+    ok(h_aciq > h_bagli, "baglı siyahi daha qisadir (%d px < %d px)" % (h_bagli, h_aciq))
+    p.click("#bAll"); p.wait_for_timeout(300)
+    ok(p.evaluate(vis) == 0 and "aç" in p.inner_text("#bAll"), "«Variantları bağla» hamisini bagladi")
     p.screenshot(path="%s/%s_movzu.png" % (OUT, tag))
 
     p.fill("#bq", "zzqqxx yoxdur"); p.wait_for_selector("text=Sual tapılmadı", timeout=20000)
