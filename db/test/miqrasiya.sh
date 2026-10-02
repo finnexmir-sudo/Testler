@@ -249,8 +249,11 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          667_bank_az4_ders_feil.sql \
          668_bank_az4_ders_komekci.sql \
          669_bank_az4_ders_metn.sql \
+         670_bank_az4_ders_sual_evezlik_2.sql \
          671_bank_az4_ders_zerf_2.sql \
+         672_bank_az4_ders_feil_2.sql \
          673_bank_az4_ders_komekci_2.sql \
+         674_bank_az4_ders_metn_2.sql \
          680_bank_az4_ders_cumle.sql \
          681_bank_az4_ders_durgu.sql \
          682_bank_az4_ders_yazi.sql \

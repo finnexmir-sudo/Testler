@@ -425,8 +425,11 @@ bank 666_bank_az4_ders_evezlik.sql
 bank 667_bank_az4_ders_feil.sql
 bank 668_bank_az4_ders_komekci.sql
 bank 669_bank_az4_ders_metn.sql
+bank 670_bank_az4_ders_sual_evezlik_2.sql
 bank 671_bank_az4_ders_zerf_2.sql
+bank 672_bank_az4_ders_feil_2.sql
 bank 673_bank_az4_ders_komekci_2.sql
+bank 674_bank_az4_ders_metn_2.sql
 bank 680_bank_az4_ders_cumle.sql
 bank 681_bank_az4_ders_durgu.sql
 bank 682_bank_az4_ders_yazi.sql
