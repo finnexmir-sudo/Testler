@@ -420,6 +420,7 @@ bank 665_bank_az4_ders_isim_sifet_zerf.sql
 bank 666_bank_az4_ders_evezlik.sql
 bank 667_bank_az4_ders_feil.sql
 bank 680_bank_az4_ders_cumle.sql
+bank 682_bank_az4_ders_yazi.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
