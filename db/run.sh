@@ -437,6 +437,7 @@ bank 685_bank_az4_ders_cumle_2.sql
 bank 686_bank_az4_ders_durgu_2.sql
 bank 687_bank_az4_ders_yazi_2.sql
 bank 688_bank_az4_ders_insa_2.sql
+bank 689_bank_az4_ders_cetin.sql
 bank 660_bank_az4_ders_nisan.sql
 bank 661_bank_az4_kohne_duzelis.sql
 bank 662_bank_az4_kohne_cetinlik.sql
