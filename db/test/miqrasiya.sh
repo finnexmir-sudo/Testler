@@ -240,6 +240,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          650_movzular_az4.sql \
          651_bank_az4_ders_frazeologiya.sql \
          665_bank_az4_ders_isim_sifet_zerf.sql \
+         666_bank_az4_ders_evezlik.sql \
          680_bank_az4_ders_cumle.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
