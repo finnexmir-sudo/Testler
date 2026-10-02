@@ -240,6 +240,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          650_movzular_az4.sql \
          651_bank_az4_ders_frazeologiya.sql \
          652_bank_az4_ders_mecaz_leksika.sql \
+         653_bank_az4_ders_orfoqrafiya.sql \
          665_bank_az4_ders_isim_sifet_zerf.sql \
          666_bank_az4_ders_evezlik.sql \
          667_bank_az4_ders_feil.sql \
@@ -248,6 +249,9 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          681_bank_az4_ders_durgu.sql \
          682_bank_az4_ders_yazi.sql \
          685_bank_az4_ders_cumle_2.sql \
+         686_bank_az4_ders_durgu_2.sql \
+         687_bank_az4_ders_yazi_2.sql \
+         688_bank_az4_ders_insa_2.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
