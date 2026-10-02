@@ -415,8 +415,10 @@ bank 432_bank_inf_informasiya4.sql
 bank 433_bank_inf_informasiya4_duzelis.sql
 bank 650_movzular_az4.sql
 bank 651_bank_az4_ders_frazeologiya.sql
+bank 652_bank_az4_ders_mecaz_leksika.sql
 bank 665_bank_az4_ders_isim_sifet_zerf.sql
 bank 666_bank_az4_ders_evezlik.sql
+bank 667_bank_az4_ders_feil.sql
 bank 680_bank_az4_ders_cumle.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
