@@ -249,6 +249,8 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          667_bank_az4_ders_feil.sql \
          668_bank_az4_ders_komekci.sql \
          669_bank_az4_ders_metn.sql \
+         671_bank_az4_ders_zerf_2.sql \
+         673_bank_az4_ders_komekci_2.sql \
          680_bank_az4_ders_cumle.sql \
          681_bank_az4_ders_durgu.sql \
          682_bank_az4_ders_yazi.sql \
@@ -258,6 +260,7 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          688_bank_az4_ders_insa_2.sql \
          660_bank_az4_ders_nisan.sql \
          661_bank_az4_kohne_duzelis.sql \
+         662_bank_az4_kohne_cetinlik.sql \
          08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
          23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
          27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
