@@ -114,5 +114,27 @@
     return currentSub().then(function (sub) { return sub ? unregister(sub.endpoint) : null; }).catch(function () { return null; });
   }
 
-  window.B10Push = { state: state, enable: enable, disable: disable, sync: sync, leave: leave };
+  /*  «Bloklanib» halinda: cihaza uygun ADDIMLAR (sabit metn - istifadeci melumati yoxdur, innerHTML-e tehlukesizdir).
+      formal=true: valideyn («toxunun»), false: sagird («toxun»).  */
+  function help(formal) {
+    var f = !!formal;
+    var ua = navigator.userAgent || "";
+    var steps;
+    if (isIos()) {
+      steps = ["Telefonun «Ayarlar» bölməsinə " + (f ? "keçin" : "keç") + ".",
+               "«Bildirişlər» → «Bil10» tətbiqini " + (f ? "tapın" : "tap") + ".",
+               "«Bildirişlərə icazə ver»i " + (f ? "açın" : "aç") + "."];
+    } else if (/Android/i.test(ua)) {
+      steps = ["Ünvan xəttinin solundakı kiçik işarəyə " + (f ? "toxunun" : "toxun") + ".",
+               "«İcazələr» → «Bildirişlər» bölməsində «İcazə ver» " + (f ? "seçin" : "seç") + ".",
+               "Səhifəni " + (f ? "yeniləyin" : "yenilə") + " və «Bildirişləri aç»-a yenidən " + (f ? "basın" : "bas") + "."];
+    } else {
+      steps = ["Ünvan xəttinin solundakı kilid işarəsinə " + (f ? "basın" : "bas") + ".",
+               "«Sayt ayarları» → «Bildirişlər» → «İcazə ver» " + (f ? "seçin" : "seç") + ".",
+               "Səhifəni " + (f ? "yeniləyin" : "yenilə") + " və «Bildirişləri aç»-a yenidən " + (f ? "basın" : "bas") + "."];
+    }
+    return '<ol class="pc-steps">' + steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + "</ol>";
+  }
+
+  window.B10Push = { state: state, enable: enable, disable: disable, sync: sync, leave: leave, help: help };
 })();

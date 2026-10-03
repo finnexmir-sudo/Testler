@@ -259,7 +259,8 @@
         return;
       }
       if (st === "denied") {
-        box.innerHTML = '<p class="note pushon">Bildirişlər bu cihazda bloklanıb. Brauzer ayarlarından icazə verə bilərsiniz.</p>';
+        box.innerHTML = '<div class="card pushcard pushblk"><div class="pc-t"><b>Bildirişlər bloklanıb</b>' +
+          "<i>Brauzer bu saytın bildirişini bağlayıb. Açmaq üçün:</i>" + window.B10Push.help(true) + "</div></div>";
         return;
       }
       if (st === "ios") {
@@ -268,16 +269,17 @@
         return;
       }
       box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Yeni test və son tarix barədə xəbər tutun</b>' +
-        "<i>Qısa bildiriş telefonunuza gələcək. İstədiyiniz vaxt söndürə bilərsiniz.</i></div>" +
+        "<i>Qısa bildiriş telefonunuza gələcək. İstədiyiniz vaxt söndürə bilərsiniz.</i>" +
+        '<i class="pc-h">Brauzer soruşanda «İcazə ver» seçin.</i></div>' +
         '<div class="pc-a"><button type="button" class="btn sm go" id="pushOn">Bildirişləri aç</button></div></div>' +
         '<div id="pushMsg"></div>';
       on("pushOn", "click", function () {
         var b = $("pushOn");
         if (b) { b.disabled = true; b.textContent = "Açılır…"; }
         window.B10Push.enable("parent", scope, reg).then(drawPush, function (e) {
+          if (e && e.message === "denied") { drawPush(); return; }     // artıq bloklanıb: addımlarla kart
           var m = $("pushMsg");
-          var t = e && e.message === "denied" ? "Bildirişlər bloklanıb. Brauzer ayarlarından icazə verə bilərsiniz."
-                : e && e.message === "dismissed" ? "İcazə verilmədi."
+          var t = e && e.message === "dismissed" ? "İcazə verilmədi. Yenidən basıb «İcazə ver» seçin."
                 : "Bildiriş açıla bilmədi. Bir az sonra yenidən yoxlayın.";
           if (m) m.innerHTML = msg("warn", t);
           if (b) { b.disabled = false; b.textContent = "Bildirişləri aç"; }
