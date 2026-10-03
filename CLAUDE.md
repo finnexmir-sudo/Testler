@@ -361,6 +361,58 @@ kartda bu yazılıb.
 - Planşetdə (Android Chrome) «Bildirişləri aç» düyməsi cavab vermirdi —
   telefonda işləyir; diaqnostika əlavə olunub (v713), səbəb təsdiqlənməyib.
 
+### 13. Müəllimsiz yol — şagird və valideyn müstəqil (2026-10-06, istifadəçi qərarı)
+
+**Qərar.** Müəllimlər bəzən ehtiyat edir; ona görə şagird və valideyn
+müəllimdən **asılı olmadan** işləyə bilməlidir. Müəllim məhsulu qalır
+(əvəz yox, tamamlayıcı): müəllim varsa gündəlik paket onun planından
+yığılır, yoxdursa şagirdin öz zəif mövzularından. Seçim meyarı:
+**dünya praktikasında sübutlu üsullar** (xal/nişan yox, öyrənmə təsiri).
+Ana fikir: **pulu ödəyən valideyn «uşaq həqiqətən irəliləyir» sübutunu
+görməlidir.** Rəqiblər (otk.az, testup.az, AzSınaq, Abituriyentaze —
+yalnız axtarış təsvirinə baxılıb) əsasən sınaq/yoxlama verir; biz
+**öyrətməyə** çıxırıq.
+
+**Baza artıq hazırdır:** `account_type` = parent/individual,
+`group_kind` = self_study, `students.self_user_id` (müstəqil öyrənən),
+diaqnostik test, səhv dəftəri (aralıqlı təkrar), gündəlik 5 sual
+(`daily_topics` fallback: plan yoxdursa şagirdin öz cavab verdiyi
+mövzular), parametrli suallar (`pq_seed`), push bildirişlər, valideyn
+səhifəsi (bir neçə uşaq). **Çatışan: müstəqil başlanğıc yolu** — indi
+şagird yalnız müəllimin verdiyi kodla girir.
+
+**Sübut (qısa).** Aralıqlı təkrar (g≈0,74) · cavabı yaddan çıxarma
+(testing effect, g≈0,61) · qarışıq məşq riyaziyyatda (24 saat sonra
+38 %→77 %, amma tədqiqatdan tədqiqata dəyişir) · valideynə həftəlik xəbər
+(kursdan kəsilmə −28 %, ümumi valideyn iştirakı təsiri kiçik, 0,12) ·
+oyunlaşdırma ibtidaidə güclü (g≈1,29), amma xal/nişan/reytinq zamanla
+zəifləyə bilər → **öz irəliləyişini göstər, reytinq yox**.
+Mənbələr: Springer (spaced retrieval STEM, 2024) · Rohrer RCT (2019) ·
+Taylor&Francis (technology-mediated parental engagement) · Wiley
+(gamification K-12 meta-analysis).
+
+**İdeyalar (istifadəçi «çoxunu bəyəndim» dedi), tövsiyə sırası:**
+
+| # | İdeya | Qeyd |
+|---|-------|------|
+| 1 | **«Oxşar sual»** — səhvdən sonra eyni növdən yeni ədədlərlə sual | `pq_seed` ilə demək olar hazır; bizim fərqimiz |
+| 2 | **«Nə üçün səhv etdim?»** — «tələsdim / bilmirdim / hesabı səhv saldım», aylıq səhv növləri | bir toxunuş; konkret məsləhət |
+| 3 | **Pilləli kömək** — ipucu 1, ipucu 2, həll; ipucu sayı = ustalıq siqnalı | tez təslim olmasın |
+| 4 | **Qarışıq gündəlik 5 sual** — 2–3 mövzu, aralıqlı | mövcud paketin genişlənməsi |
+| 5 | **Aylıq «inkişaf kartı»** — «mayda kəsrlər 55 %, indi 70 %», yenidən diaqnostika, WhatsApp-da paylaşılır | həm pul səbəbi, həm **paylanma** (ən zəif yerimiz) |
+| 6 | **Valideynə həftəlik bir cümlə** (bazar axşamı) + «evdə soruşun…» + valideyn «Afərin» düyməsi | push hazırdır |
+| 7 | **Şagirdin öz həftəlik hədəfi** (4 gün × 5 sual), fasilə günlü seriya | cəza yox, reytinq yox |
+| 8 | **«Öyrənmə yolu» xəritəsi** — mövzu pillələri tanış→möhkəmləndir→yoxla (Azərbaycan şəhərləri temalı variant) | ikinci mərhələ |
+| 9 | **İmtahan simulyasiyası** — vaxtla, bölmələrlə, «xalı harada itirdin: tələsmə / bilməmə» | |
+
+**Mərhələlər:** (0) müstəqil başlanğıc: valideyn hesab açır, uşağı əlavə
+edir, uşaq kodla girir; pulsuz/ödənişli sərhəd. (1) 1, 2, 5, 6.
+(2) 4, 7, 3. (3) 8, 9. Hər mərhələni 5–10 real ailədə sınayırıq.
+
+**ETMƏYƏK:** reytinq lövhəsi, seriya itirmə cəzası, kənar şəbəkədən AI
+(memarlığa ziddir). Qayda: bölmə 7-dəki «paralel iki layihə yox»
+qüvvədədir — bu, Bil10-un içində yeni giriş yoludur, ayrıca layihə deyil.
+
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 
 **İstifadəçinin sualı:** «Ən zəif yerimiz testləri tərtib etməkdir. Test
