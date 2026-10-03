@@ -276,11 +276,14 @@
       on("pushOn", "click", function () {
         var b = $("pushOn");
         if (b) { b.disabled = true; b.textContent = "Açılır…"; }
-        window.B10Push.enable("parent", scope, reg).then(drawPush, function (e) {
+        window.B10Push.enable("parent", scope, reg, function () {
+          var m0 = $("pushMsg");
+          if (m0 && !m0.innerHTML) m0.innerHTML = '<p class="note pushon">İcazə pəncərəsi görünmürsə:</p>' + window.B10Push.help(true);
+        }).then(drawPush, function (e) {
           if (e && e.message === "denied") { drawPush(); return; }     // artıq bloklanıb: addımlarla kart
           var m = $("pushMsg");
           var t = e && e.message === "dismissed" ? "İcazə verilmədi. Yenidən basıb «İcazə ver» seçin."
-                : "Bildiriş açıla bilmədi. Bir az sonra yenidən yoxlayın.";
+                : "Bildiriş açıla bilmədi (" + window.B10Push.why(e) + "). Bir az sonra yenidən yoxlayın.";
           if (m) m.innerHTML = msg("warn", t);
           if (b) { b.disabled = false; b.textContent = "Bildirişləri aç"; }
         });

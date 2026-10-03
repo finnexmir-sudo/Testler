@@ -45,12 +45,13 @@ STUB = """
   window.__push = st;
   function FakeN() {}
   Object.defineProperty(FakeN, 'permission', { get() { return st.perm; } });
-  FakeN.requestPermission = () => { st.asked++; st.perm = st.next; persist(); return Promise.resolve(st.perm); };
+  FakeN.requestPermission = () => { st.asked++; if (window.__HANG_PERM) return new Promise(() => {}); st.perm = st.next; persist(); return Promise.resolve(st.perm); };
   window.Notification = FakeN;
   window.PushManager = function () {};
   const reg = { pushManager: {
     getSubscription: async () => st.sub,
     subscribe: async (o) => {
+      if (window.__SUB_FAIL) { const e = new Error('push service error'); e.name = 'AbortError'; throw e; }
       st.subOpts = { userVisibleOnly: o.userVisibleOnly, keyLen: o.applicationServerKey.length };
       st.sub = mk('https://fcm.googleapis.com/fcm/send/E2E-' + Math.random().toString(36).slice(2) + '-aaaaaaaaaaaa');
       persist();
@@ -204,6 +205,23 @@ with sync_playwright() as pw:
         p = page(ctx, perm="denied"); sag_login(p)
         st = p.locator(".pushblk .pc-steps").inner_text()
         ok("İcazələr" in st and "Ünvan xəttinin solundakı kiçik işarə" in st, "Android: «İcazələr → Bildirişlər» addımları", st.replace("\n", " | "))
+        ctx.close()
+
+        print("8 · diaqnostika: icaze penceresi gorunmur / abune alinmir")
+        ctx = br.new_context(viewport={"width": w, "height": h})
+        p = page(ctx, extra_init="window.__HANG_PERM=true;"); sag_login(p)
+        p.click("#pushOn")
+        p.wait_for_selector("#pushMsg .pc-steps", timeout=9000)
+        ok(p.locator("#pushMsg .pc-steps li").count() >= 3 and "görünmürsə" in p.locator("#pushMsg").inner_text(), "4 san. cavab yoxdursa: «pəncərə görünmürsə» + addımlar")
+        ok(db("select count(*) n from public.push_subs where student_id=%s", (S1,), one=True)["n"] == 0, "icazə gəlməyibsə bazaya yazılmır")
+        p.screenshot(path="%s/sagird_%s_yavas.png" % (OUT, tag), full_page=True)
+        p.close()
+        p = page(ctx, extra_init="window.__SUB_FAIL=true;"); sag_login(p)
+        p.click("#pushOn"); p.wait_for_selector("#pushMsg", timeout=8000)
+        p.wait_for_function("document.querySelector('#pushMsg').innerText.indexOf('abunə') >= 0", timeout=8000)
+        tx = p.locator("#pushMsg").inner_text()
+        ok("abunə (push xidməti)" in tx and "AbortError" in tx, "abunə xətası: mərhələ + xəta adı mesajda", tx)
+        ok(p.locator("#pushOn").is_enabled(), "xətadan sonra düymə yenə aktivdir")
         ctx.close()
 
     # ------------------------------------------------------------------ VALIDEYN (iki usaq)

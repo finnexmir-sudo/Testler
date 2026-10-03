@@ -491,11 +491,15 @@
       on("pushOn", "click", function () {
         var b = document.getElementById("pushOn");
         if (b) { b.disabled = true; b.textContent = "Açılır…"; }
-        window.B10Push.enable("student", scope, reg).then(drawPush, function (e) {
+        window.B10Push.enable("student", scope, reg, function () {
+          //  4 saniyedir cavab yoxdur: brauzer icaze penceresini gostermeyib ola biler
+          var m0 = document.getElementById("pushMsg");
+          if (m0 && !m0.innerHTML) m0.innerHTML = '<p class="note pushon">İcazə pəncərəsi görünmürsə:</p>' + window.B10Push.help(false);
+        }).then(drawPush, function (e) {
           if (e && e.message === "denied") { drawPush(); return; }     // artıq bloklanıb: addımlarla kart
           var m = document.getElementById("pushMsg");
           var t = e && e.message === "dismissed" ? "İcazə verilmədi. Yenidən basıb «İcazə ver» seç."
-                : "Bildiriş açıla bilmədi. Bir az sonra yenidən yoxla.";
+                : "Bildiriş açıla bilmədi (" + window.B10Push.why(e) + "). Bir az sonra yenidən yoxla.";
           if (m) m.innerHTML = msg("warn", t);
           if (b) { b.disabled = false; b.textContent = "Bildirişləri aç"; }
         });

@@ -74,19 +74,37 @@
   }
 
   //  register({endpoint, p256dh, auth}) -> Promise (servere yazir)
-  function enable(role, scope, register) {
+  //  onSlow() - icaze sorgusuna 4 saniyede cavab gelmese BIR defe cagirilir: Chrome bezen pencereni gostermir
+  //  (sessiz rejim) ve «duyme hec ne etmir» kimi gorunurdu.  Xetaya hansi MERHELEDE dusduyu (step) yazilir -
+  //  «Bildiris acila bilmedi» yerine konkret sebeb gorunsun.
+  function enable(role, scope, register, onSlow) {
+    var step = "icazə", slow = null;
+    if (onSlow) slow = setTimeout(function () { try { onSlow(); } catch (e) {} }, 4000);
     return Notification.requestPermission().then(function (p) {
+      clearTimeout(slow);
       if (p !== "granted") throw new Error(p === "denied" ? "denied" : "dismissed");
+      step = "xidmət işçisi (sw)";
       return ready();
     }).then(function (reg) {
+      step = "abunə (push xidməti)";
       return reg.pushManager.getSubscription().then(function (sub) {
         return sub || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toKey(pubKey()) });
       });
     }).then(function (sub) {
+      step = "serverə yazma";
       var j = sub.toJSON ? sub.toJSON() : {};
       var k = j.keys || {};
       return register({ endpoint: j.endpoint || sub.endpoint, p256dh: k.p256dh, auth: k.auth });
-    }).then(function (r) { offSet(role, scope, false); return r; });
+    }).then(function (r) { offSet(role, scope, false); return r; }, function (e) {
+      clearTimeout(slow);
+      try { e.step = step; e.errName = e && e.name; } catch (x) {}
+      throw e;
+    });
+  }
+
+  //  Xeta ucun qisa texniki sebeb (istifadeci mesaja baxib bize yaza bilsin)
+  function why(e) {
+    return (e && e.step ? e.step : "?") + (e && e.errName ? " · " + e.errName : "");
   }
 
   //  unregister(endpoint) -> Promise (serverden silir)
@@ -136,5 +154,5 @@
     return '<ol class="pc-steps">' + steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + "</ol>";
   }
 
-  window.B10Push = { state: state, enable: enable, disable: disable, sync: sync, leave: leave, help: help };
+  window.B10Push = { state: state, enable: enable, disable: disable, sync: sync, leave: leave, help: help, why: why };
 })();
