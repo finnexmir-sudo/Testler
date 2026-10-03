@@ -225,6 +225,67 @@
       });
   }
 
+  /*  910: telefona bildiris.  Bir duyme BUTUN usaqlar ucun abune edir (eyni telefon).  Cari usagin
+      sessiyasi islemirse xeta verir; qalan usaqlarin bitmis sessiyasi hec neyi pozmur.  */
+  function drawPush() {
+    var box = $("pushBox");
+    if (!box || !window.B10Push || DEMO || !TOKEN) return;
+    var scope = "p";                     // bir cihaz = bir valideyn secimi (butun usaqlar)
+    function sub1(t, s) {
+      return sb.rpc("rpc_push_subscribe", { p_token: t, p_role: "parent", p_endpoint: s.endpoint,
+        p_p256dh: s.p256dh, p_auth: s.auth, p_ua: (navigator.userAgent || "").slice(0, 200) });
+    }
+    function reg(s) {
+      return sub1(TOKEN, s).then(function (r) {
+        return Promise.all(KIDS.filter(function (k) { return k.t !== TOKEN; }).map(function (k) {
+          return sub1(k.t, s).catch(function () { return null; });
+        })).then(function () { return r; });
+      });
+    }
+    function unreg(ep) {
+      return Promise.all(KIDS.map(function (k) {
+        return sb.rpc("rpc_push_unsubscribe", { p_token: k.t, p_role: "parent", p_endpoint: ep }).catch(function () { return null; });
+      }));
+    }
+    window.B10Push.state("parent", scope).then(function (st) {
+      if (!$("pushBox")) return;
+      if (st === "off") { box.innerHTML = ""; return; }
+      if (st === "on") {
+        window.B10Push.sync("parent", scope, reg);           // yeni usaq elave olunubsa / sessiya yenilenibse tazele
+        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="pushOff">Söndür</button></p>';
+        on("pushOff", "click", function () {
+          window.B10Push.disable("parent", scope, unreg).then(drawPush, drawPush);
+        });
+        return;
+      }
+      if (st === "denied") {
+        box.innerHTML = '<p class="note pushon">Bildirişlər bu cihazda bloklanıb. Brauzer ayarlarından icazə verə bilərsiniz.</p>';
+        return;
+      }
+      if (st === "ios") {
+        box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Bildiriş almaq istəyirsiniz?</b>' +
+          "<i>iPhone-da əvvəl tətbiqi ana ekrana əlavə edin: «Paylaş» → «Ana ekrana əlavə et». Sonra buradan aça bilərsiniz.</i></div></div>";
+        return;
+      }
+      box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Yeni test və son tarix barədə xəbər tutun</b>' +
+        "<i>Qısa bildiriş telefonunuza gələcək. İstədiyiniz vaxt söndürə bilərsiniz.</i></div>" +
+        '<div class="pc-a"><button type="button" class="btn sm go" id="pushOn">Bildirişləri aç</button></div></div>' +
+        '<div id="pushMsg"></div>';
+      on("pushOn", "click", function () {
+        var b = $("pushOn");
+        if (b) { b.disabled = true; b.textContent = "Açılır…"; }
+        window.B10Push.enable("parent", scope, reg).then(drawPush, function (e) {
+          var m = $("pushMsg");
+          var t = e && e.message === "denied" ? "Bildirişlər bloklanıb. Brauzer ayarlarından icazə verə bilərsiniz."
+                : e && e.message === "dismissed" ? "İcazə verilmədi."
+                : "Bildiriş açıla bilmədi. Bir az sonra yenidən yoxlayın.";
+          if (m) m.innerHTML = msg("warn", t);
+          if (b) { b.disabled = false; b.textContent = "Bildirişləri aç"; }
+        });
+      });
+    });
+  }
+
   function drawHome(d) {
     var s   = d.summary || {};
     var out = "";
@@ -280,6 +341,9 @@
       out += '<p class="muted">Son 30 gündə test yazılmayıb.</p>';
     }
     out += "</div>";
+
+    /* ---- 910: telefona bildiris (CFG.VAPID_PUBLIC bos olanda hec ne cixmir) ---- */
+    out += '<div id="pushBox"></div>';
 
     /* ---- bu heftenin dersleri (db/177) ----
        Muellim cedvel qurmayibsa server NULL qaytarir ve BURADA HEC NE
@@ -473,6 +537,7 @@
       "</div></details>";
 
     show(out);
+    drawPush();
     on("kidAdd", "click", function (e) { e.preventDefault(); ADD_MODE = true; screenLogin(""); });
     on("kids", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-k]") : null;
@@ -561,10 +626,24 @@
     var sayta = DEMO && !expired;
     var all = KIDS.map(function (k) { return k.t; });
     if (TOKEN && all.indexOf(TOKEN) < 0) all.push(TOKEN);
+    var wasDemo = DEMO;
     TOKEN = null; CHILD = null; KIDS = []; ADD_MODE = false; DEMO = false;
     try { localStorage.removeItem(LS); } catch (e) {}
     markDemo();
-    all.forEach(function (t) { sb.rpc("rpc_parent_logout", { p_token: t }).catch(function () {}); });
+    //  910: EVVEL bu cihazdaki bildiris abunesi silinir (sessiya hele aktivdir), SONRA sessiyalar baglanir.
+    //  Eks halda sessiya evvel silinerdi ve abune qalardi - basqasi girse bildiris bu valideyne gelerdi.
+    function serverLogout() {
+      all.forEach(function (t) { sb.rpc("rpc_parent_logout", { p_token: t }).catch(function () {}); });
+    }
+    if (window.B10Push && all.length && !wasDemo) {
+      window.B10Push.leave(function (ep) {
+        return Promise.all(all.map(function (t) {
+          return sb.rpc("rpc_push_unsubscribe", { p_token: t, p_role: "parent", p_endpoint: ep }).catch(function () { return null; });
+        }));
+      }).then(serverLogout, serverLogout);
+    } else {
+      serverLogout();
+    }
     if (sayta) { location.href = "../"; return; }
     screenLogin(expired ? msg("warn", "Giriş vaxtı bitib. Kodu yenidən yazın.") : "");
   }

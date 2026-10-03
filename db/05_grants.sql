@@ -114,7 +114,10 @@ declare
         --  sifir qayidana qeder cagirir (rpc_demo_reset vaxt heddine dusurdu)
         'rpc_demo_reset','rpc_demo_gc',
         --  Ziyaret saygaci (db/161): ana sehife/beledci anon acarla yazir
-        'rpc_visit'];
+        'rpc_visit',
+        --  Telefona bildiris (db/910): sagird/valideyn tokenle abune olur ve cixir.
+        --  rpc_push_claim / rpc_push_done BURADA OLMAMALIDIR - yalniz service_role.
+        'rpc_push_subscribe','rpc_push_unsubscribe'];
   fn text;
 begin
   --  a) artiq acilmis olani bagla.  "from public" VACIBDIR: Postgres
@@ -172,7 +175,10 @@ declare
         --  sifir qayidana qeder cagirir (rpc_demo_reset vaxt heddine dusurdu)
         'rpc_demo_reset','rpc_demo_gc',
         --  Ziyaret saygaci (db/161): ana sehife/beledci anon acarla yazir
-        'rpc_visit'];
+        'rpc_visit',
+        --  Telefona bildiris (db/910): sagird/valideyn tokenle abune olur ve cixir.
+        --  rpc_push_claim / rpc_push_done BURADA OLMAMALIDIR - yalniz service_role.
+        'rpc_push_subscribe','rpc_push_unsubscribe'];
   leak text;
   v_say int;
 begin

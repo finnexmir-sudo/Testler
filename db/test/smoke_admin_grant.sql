@@ -29,35 +29,35 @@ declare v text;
 begin
   --  1) abune yoxdur + SINAQ -> trialing, gelir 0
   perform public.rpc_admin_grant('samir@t.az', 'sagird-basi', 1, true);
-  v := (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
+  v := (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
                           from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2');
   assert v = 'trialing/trial', '1: sinaq trialing olmalidir: ' || v;
   assert (public.rpc_admin_stats()->>'mrr_minor')::bigint = 0, '1: sinaq gelir vermemelidir';
 
   --  2) sinaq + ODENISLI -> active (muddet bu gunden), gelir = 2 sagird x 1,50
   perform public.rpc_admin_grant('samir@t.az', 'sagird-basi', 1, false);
-  v := (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
+  v := (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
                           from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2');
   assert v = 'active/manual', '2: sinaqdan odenisliye kecmelidir: ' || v;
   assert (public.rpc_admin_stats()->>'mrr_minor')::bigint = 300, '2: gelir 3 AZN olmalidir: ' || (public.rpc_admin_stats()->>'mrr_minor')::bigint;
 
   --  3) hele QUVVEDE olan odenisli + SINAQ -> odenisli QALIR (evvelki qayda)
   perform public.rpc_admin_grant('samir@t.az', 'sagird-basi', 1, true);
-  v := (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
+  v := (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
                           from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2');
   assert v = 'active/manual', '3: quvvedeki odenisli sinaga enmemelidir: ' || v;
 
   --  4) DAYANDIR -> canceled, gelir 0
   perform public.rpc_admin_stop('samir@t.az');
   assert (public.rpc_admin_stats()->>'mrr_minor')::bigint = 0, '4: dayandirilandan sonra gelir 0 olmalidir';
-  assert (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
-                          from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2') = 'canceled/manual', '4: ' || (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
+  assert (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
+                          from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2') = 'canceled/manual', '4: ' || (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
                           from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2');
 
   --  5) dayandirilmis + SINAQ -> YENI trialing setri, gelir 0
   perform public.rpc_admin_grant('samir@t.az', 'sagird-basi', 1, true);
-  assert (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
-                          from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2') = 'canceled/manual,trialing/trial', '5: ' || (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
+  assert (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
+                          from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2') = 'canceled/manual,trialing/trial', '5: ' || (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
                           from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2');
   assert (public.rpc_admin_stats()->>'mrr_minor')::bigint = 0, '5: gelir 0 olmalidir';
 end $$;
@@ -75,8 +75,8 @@ declare v_end timestamptz;
 begin
   assert (public.rpc_admin_stats()->>'mrr_minor')::bigint = 0, '6: vaxti kecmis abune gelir vermemelidir';
   perform public.rpc_admin_grant('samir@t.az', 'sagird-basi', 1, true);
-  assert (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
-                          from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2') = 'trialing/trial', '6: kecmis active + sinaq = trialing olmalidir: ' || (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
+  assert (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
+                          from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2') = 'trialing/trial', '6: kecmis active + sinaq = trialing olmalidir: ' || (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
                           from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2');
   assert (public.rpc_admin_stats()->>'mrr_minor')::bigint = 0, '6: gelir 0 olmalidir (evvel 3 AZN idi)';
   select current_period_end into v_end from public.subscriptions
@@ -86,8 +86,8 @@ begin
 
   --  7) kecmis active + ODENISLI -> active (muddet bu gunden)
   perform public.rpc_admin_grant('samir@t.az', 'sagird-basi', 1, false);
-  assert (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
-                          from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2') = 'active/manual', '7: ' || (select coalesce(string_agg(status::text || '/' || provider, ',' order by created_at), '-')
+  assert (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
+                          from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2') = 'active/manual', '7: ' || (select coalesce(string_agg(status::text || '/' || provider, ',' order by status::text), '-')
                           from public.subscriptions where account_id = 'aaaa0000-0000-0000-0000-0000000007a2');
   assert (public.rpc_admin_stats()->>'mrr_minor')::bigint = 300, '7: gelir 3 AZN';
   raise warning 'smoke_admin_grant: HAMISI KECDI';

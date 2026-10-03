@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>VAPID açarları</title>
+<style>
+  :root { --bg:#fbfdfc; --fg:#173b50; --fg2:#527176; --line:#dcebe6; --brand:#087f75; --warn:#a35b00; --warnbg:#fff4e0; }
+  body { margin:0; font:16px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  main { max-width:680px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 6px; }
+  p { color:var(--fg2); margin:6px 0 14px; }
+  .box { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; margin:14px 0; }
+  label { display:block; font-weight:600; font-size:14px; margin-bottom:6px; }
+  code, textarea { font:13px/1.4 ui-monospace, Menlo, Consolas, monospace; }
+  textarea { width:100%; box-sizing:border-box; border:1px solid var(--line); border-radius:8px; padding:8px; resize:vertical; background:#f6faf8; color:var(--fg); }
+  button { font:inherit; font-weight:600; border:0; border-radius:10px; padding:10px 16px; background:var(--brand); color:#fff; cursor:pointer; }
+  button.ghost { background:#fff; color:var(--brand); border:1px solid var(--line); }
+  .warn { background:var(--warnbg); color:var(--warn); border-radius:10px; padding:10px 12px; font-size:14px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .ok { color:var(--brand); font-size:13px; margin-top:6px; min-height:18px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Bildiriş açarları (VAPID)</h1>
+  <p>Bu səhifə açarları <b>yalnız sizin brauzerinizdə</b> yaradır. Heç bir yerə göndərmir, heç bir xarici sorğu yoxdur.</p>
+  <div class="warn"><b>Gizli açarı</b> heç kimə göndərməyin, chat-a, GitHub-a və ya saytın fayllarına yazmayın. Yalnız Supabase → Edge Functions → Secrets-ə yazın. Açıq açar isə <code>config.js</code>-də durur.</div>
+
+  <div class="box">
+    <button id="gen">Yeni açarlar yarat</button>
+    <div class="ok" id="msg"></div>
+  </div>
+
+  <div class="box">
+    <label for="pub">Açıq açar (VAPID_PUBLIC) — sagird/config.js və valideyn/config.js-ə</label>
+    <textarea id="pub" rows="2" readonly placeholder="Hələ yaradılmayıb"></textarea>
+    <div class="row"><button class="ghost" data-copy="pub">Kopyala</button></div>
+  </div>
+
+  <div class="box">
+    <label for="priv">Gizli açar (VAPID_PRIVATE) — YALNIZ Supabase sirlərinə</label>
+    <textarea id="priv" rows="2" readonly placeholder="Hələ yaradılmayıb"></textarea>
+    <div class="row"><button class="ghost" data-copy="priv">Kopyala</button></div>
+  </div>
+
+<script>
+(function () {
+  function b64u(buf) {
+    var s = "", b = new Uint8Array(buf);
+    for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  var msg = document.getElementById("msg");
+  document.getElementById("gen").addEventListener("click", function () {
+    if (!window.crypto || !crypto.subtle) { msg.textContent = "Bu brauzer şifrələməni dəstəkləmir."; return; }
+    crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]).then(function (kp) {
+      return Promise.all([crypto.subtle.exportKey("raw", kp.publicKey), crypto.subtle.exportKey("jwk", kp.privateKey)]);
+    }).then(function (r) {
+      document.getElementById("pub").value = b64u(r[0]);          // 65 bayt, sıxılmamış nöqtə
+      document.getElementById("priv").value = r[1].d;             // 32 bayt, base64url
+      msg.textContent = "Yaradıldı. İndi hər iki açarı kopyalayın. Səhifəni bağlayanda açarlar itir, yenidən yaratsanız köhnə abunəliklər keçərsiz olur.";
+    }).catch(function (e) { msg.textContent = "Xəta: " + (e && e.message || e); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (b) {
+    b.addEventListener("click", function () {
+      var t = document.getElementById(b.getAttribute("data-copy"));
+      if (!t.value) return;
+      t.select();
+      var done = function () { msg.textContent = "Kopyalandı."; };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t.value).then(done, function () { document.execCommand("copy"); done(); });
+      else { document.execCommand("copy"); done(); }
+    });
+  });
+})();
+</script>
+</main>
+</body>
+</html>

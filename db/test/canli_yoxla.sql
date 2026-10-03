@@ -93,6 +93,11 @@ select * from (values
     (select exists (select 1 from f where proname='rpc_topic_search'))),
  ('909 vaxtı keçmiş active + sınaq = trialing (rpc_admin_grant)',
     (select exists (select 1 from f where proname='rpc_admin_grant' and def like '%v_expired%'))),
+ ('910 push bildirişlər (abunəlik, növbə, göndərici RPC-ləri, push ayarı)',
+    (select exists (select 1 from f where proname='rpc_push_subscribe')
+        and exists (select 1 from f where proname='rpc_push_claim')
+        and exists (select 1 from f where proname='rpc_push_done')
+        and exists (select 1 from public.app_state where key='push'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

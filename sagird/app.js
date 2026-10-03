@@ -451,6 +451,56 @@
     });
   }
 
+  /*  910: telefona bildiris.  Ortaq klient assets/push.js-dir; burada yalniz kart ve servere yazma.
+      Abunelik sagirdin ozune baglidir (sessiya 12 saatdir, bildiris ise sessiyadan sonra da gelmelidir). */
+  function drawPush() {
+    var box = document.getElementById("pushBox");
+    if (!box || !window.B10Push || DEMO || !ME) return;
+    var scope = ME.id, tok = TOKEN;
+    function reg(s) {
+      return sb.rpc("rpc_push_subscribe", { p_token: tok, p_role: "student", p_endpoint: s.endpoint,
+        p_p256dh: s.p256dh, p_auth: s.auth, p_ua: (navigator.userAgent || "").slice(0, 200) });
+    }
+    function unreg(ep) { return sb.rpc("rpc_push_unsubscribe", { p_token: tok, p_role: "student", p_endpoint: ep }); }
+    window.B10Push.state("student", scope).then(function (st) {
+      if (!document.getElementById("pushBox")) return;
+      if (st === "off") { box.innerHTML = ""; return; }
+      if (st === "on") {
+        window.B10Push.sync("student", scope, reg);          // sessiya yenilenib - abuneni tazele
+        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="pushOff">Söndür</button></p>';
+        on("pushOff", "click", function () {
+          window.B10Push.disable("student", scope, unreg).then(drawPush, drawPush);
+        });
+        return;
+      }
+      if (st === "denied") {
+        box.innerHTML = '<p class="note pushon">Bildirişlər bu cihazda bloklanıb. Brauzer ayarlarından icazə verə bilərsən.</p>';
+        return;
+      }
+      if (st === "ios") {
+        box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Bildiriş almaq istəyirsən?</b>' +
+          "<i>iPhone-da əvvəl tətbiqi ana ekrana əlavə et: «Paylaş» → «Ana ekrana əlavə et». Sonra buradan aça bilərsən.</i></div></div>";
+        return;
+      }
+      box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Yeni test gələndə xəbər tut</b>' +
+        "<i>Telefonuna qısa bildiriş gələcək. İstəyəndə söndürə bilərsən.</i></div>" +
+        '<div class="pc-a"><button type="button" class="btn sm go" id="pushOn">Bildirişləri aç</button></div></div>' +
+        '<div id="pushMsg"></div>';
+      on("pushOn", "click", function () {
+        var b = document.getElementById("pushOn");
+        if (b) { b.disabled = true; b.textContent = "Açılır…"; }
+        window.B10Push.enable("student", scope, reg).then(drawPush, function (e) {
+          var m = document.getElementById("pushMsg");
+          var t = e && e.message === "denied" ? "Bildirişlər bloklanıb. Brauzer ayarlarından icazə verə bilərsən."
+                : e && e.message === "dismissed" ? "İcazə verilmədi."
+                : "Bildiriş açıla bilmədi. Bir az sonra yenidən yoxla.";
+          if (m) m.innerHTML = msg("warn", t);
+          if (b) { b.disabled = false; b.textContent = "Bildirişləri aç"; }
+        });
+      });
+    });
+  }
+
   var PSUB = "", PEXP = false;   // serbest mesq: fenn suzgeci, "daha" acildi
   var SERBEST_TEST = false;      // 04.10: serbest mesq (test siyahisi) gizli - gelecekde odenisli mehsul
   //  04.10 (sahibin qerari): «Movzu mesqi» (adaptiv, gunluk limitli) de sagirde GOSTERILMIR - sonra ozumuz
@@ -612,6 +662,8 @@
 
       /* 2b. Sehv defteri (db/129): sayğac serverden ayrica gelir - yer
          tutucu; rpc_student_mistakes yuklenende dolur.  */
+      //  910: «Bildirisleri ac» karti (CFG.VAPID_PUBLIC bos olanda hec ne cixmir)
+      h += '<div id="pushBox"></div>';
       h += '<div id="adBox"></div>';
       h += '<div id="mistBox"></div>';
 
@@ -781,6 +833,7 @@
       });
       loadDaily();
       loadMistakes();
+      drawPush();
       if (MOVZU_MESQ) loadPractice();
       bindRows();
     }).catch(function (e) {
@@ -1858,6 +1911,13 @@
       try { localStorage.removeItem(LS); } catch (e) {}
       location.href = "../";
       return;
+    }
+    //  910: bu cihazdaki bildiris abunesi silinsin (basqa usaq girerse ona gelmesin)
+    if (TOKEN && window.B10Push) {
+      var tkOut = TOKEN;
+      window.B10Push.leave(function (ep) {
+        return sb.rpc("rpc_push_unsubscribe", { p_token: tkOut, p_role: "student", p_endpoint: ep });
+      });
     }
     TOKEN = null; ME = null; CLS = null; S = null; DEMO = false;
     try { localStorage.removeItem(LS); } catch (e) {}

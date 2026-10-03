@@ -92,3 +92,46 @@ self.addEventListener("fetch", function (e) {
     })
   );
 });
+
+/* =====================================================================
+   PUSH BILDIRISLER (db/910, 05.10)
+   Server (Edge Function push-send) sifreli yuk gonderir: {title, body, url}.
+   userVisibleOnly:true teleb edir ki, HER push-da bildiris GOSTERILSIN -
+   ona gore burada bos/xeta halinda da bildiris cixir (sakitce itmir).
+
+   TEHLUKESIZLIK:
+   * Gelen metn yalniz bildiris olaraq GOSTERILIR (HTML deyil, kod deyil).
+   * Basanda yalniz OZ SAYTIMIZIN unvani acilir - kenar unvan gelse, saytin koku acilir.
+   ===================================================================== */
+self.addEventListener("push", function (e) {
+  var d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) {
+    try { d = { body: e.data.text() }; } catch (y) { d = {}; }
+  }
+  var scope = self.registration.scope;
+  e.waitUntil(self.registration.showNotification(String(d.title || "Bil10").slice(0, 80), {
+    body: String(d.body || "").slice(0, 200),
+    icon: scope + "assets/icons/icon-192.png",
+    badge: scope + "assets/icons/icon-192.png",
+    tag: d.tag ? String(d.tag).slice(0, 60) : undefined,
+    data: { url: String(d.url || "") }
+  }));
+});
+
+self.addEventListener("notificationclick", function (e) {
+  e.notification.close();
+  var scope = self.registration.scope;
+  var target = scope;
+  try {
+    var u = new URL((e.notification.data && e.notification.data.url) || "", scope);
+    if (u.origin === self.location.origin) target = u.href;      // kenar unvan - kok
+  } catch (x) {}
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (list) {
+    for (var i = 0; i < list.length; i++) {
+      var c = list[i];
+      //  Eyni bolmede (sagird/valideyn) artiq aciq pencere varsa onu one cixar
+      if (c.url.indexOf(target.replace(/[?#].*$/, "")) === 0 && "focus" in c) return c.focus();
+    }
+    return self.clients.openWindow(target);
+  }));
+});
