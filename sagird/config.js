@@ -6,5 +6,5 @@ window.CFG = {
   SUPABASE_ANON_KEY: "sb_publishable_MNyO1nTpvz05LYUKxX0-Jg_eyDbVrv_",    // Supabase -> Settings -> API Keys -> publishable
   //  910: telefona bildiris - VAPID AÇIQ (public) açar.  BOŞ olanda bildiriş xidməti tam gizlidir.
   //  Gizli açar (VAPID_PRIVATE) bura HEÇ VAXT yazılmır - yalnız Supabase Edge Function sirlərində durur.
-  VAPID_PUBLIC: ""
+  VAPID_PUBLIC: "BGm9W_AMv0B4lIvkhcVW5MzpgDICp06cChHzJpfJ-aIRU83cBh6NCoOAgGh-VKU4MBpiGotZdnTGNP2tU7hI158"
 };
