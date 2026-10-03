@@ -3,7 +3,7 @@
 """Sagird ana sehifesi (04.10): «Serbest mesq» GIZLIDIR + «Yeni test» bildirisi (tetbiqin icinde, push deyil).
 
 Qaydalar:
-  - sehifede «Sərbəst məşq» basligi ve platforma test siyahisi YOXDUR; yalniz muellimin tapsiriqlari var;
+  - sehifede «Sərbəst məşq» basligi, platforma test siyahisi ve «Mövzu məşqi» YOXDUR; yalniz muellimin tapsiriqlari var;
   - ilk acilis: movcud tapsiriqlar «gorulmus» sayilir -> bildiris YOXDUR;
   - muellim yeni tapsiriq verir -> yeniden acanda «Yeni test» karti: bir testdirse adi, coxdursa «N yeni test»;
   - «Sonra» / «Bax» / «Başla» kartı baglayir, bir daha cixmir (bu cihazda);
@@ -50,8 +50,10 @@ db("insert into public.accounts (id, type, name, owner_id) values (%s, 'tutor', 
 db("insert into public.account_members values (%s, %s, true)", (ACC, OWN))
 db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)
       select %s::uuid, p.id, 'trialing', now() + interval '30 days' from public.plans p where p.slug = 'repetitor-25'""", (ACC,))
-GID = db("""insert into public.classes (account_id, teacher_id, kind, name, join_code)
-            values (%s, %s, 'tutor_group', 'Bildiris sinfi', 'BLD00001') returning id::text i""", (ACC, OWN), one=True)["i"]
+#  sinif VAR (3-cu): «Movzu mesqi» bayraq acilsa cixardi - gizli olmasi bosluqdan deyil, bayraqdandir
+LEV = db("select l.id::text i from public.levels l join public.programs p on p.id = l.program_id where p.slug='ibtidai' and l.code='3'", one=True)["i"]
+GID = db("""insert into public.classes (account_id, teacher_id, kind, name, join_code, level_id)
+            values (%s, %s, 'tutor_group', 'Bildiris sinfi', 'BLD00001', %s) returning id::text i""", (ACC, OWN, LEV), one=True)["i"]
 db("""insert into public.students (account_id, class_id, created_by, full_name, display_name, login_code)
       values (%s, %s, %s, 'Lalə Test', 'Lalə T.', 'BILDIRIS')""", (ACC, GID, OWN))
 TESTS = [r["i"] for r in db("""select t.id::text i from public.tests t where t.owner_type = 'platform' and t.status = 'published'
@@ -94,6 +96,9 @@ with sync_playwright() as pw:
         ok("Sərbəst məşq" not in txt, "«Sərbəst məşq» başlığı yoxdur")
         ok(sp.locator("#pracBox").count() == 0 and sp.locator("#pSub").count() == 0, "platforma test siyahısı və fənn çipləri yoxdur")
         ok(sp.locator(".test").count() == 2, "yalnız müəllimin 2 tapşırığı görünür", sp.locator(".test").count())
+        ok("Mövzu məşqi" not in txt and "Məşq hazırda bağlıdır" not in txt, "«Mövzu məşqi» də gizlidir (04.10)")
+        ok(sp.locator("#adBox .arow").count() == 0 and sp.locator("#adBox").inner_text().strip() == "", "«Mövzu məşqi» qutusu boşdur")
+        sp.screenshot(path="%s/%s_tam_sehife.png" % (OUT, tag), full_page=True)
 
         print("2 · İlk açılış: mövcud tapşırıqlar «görülmüş» — bildiriş yoxdur")
         ok(sp.locator("#newBox").count() == 0, "ilk açılışda «Yeni test» kartı yoxdur")

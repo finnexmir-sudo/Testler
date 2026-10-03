@@ -4035,7 +4035,8 @@
     } else if (bol === "x") {
       /*  QRUP AYARLARI: «Sərbəst məşq» tapsiriq deyil, qrup ayaridir - evvel
           tapsiriq ekraninin en altinda idi (29.09).  Ad deyismek de burada.  */
-      show('<div class="card tight" id="fpBox"><div class="skel">Yüklənir…</div></div>' +
+      //  04.10: «Serbest mesq» sagirde gizlidir - ayar da gizlenir (gelecekde SERBEST_AYAR = true).
+      show('<div class="card tight' + (SERBEST_AYAR ? "" : " hide") + '" id="fpBox"><div class="skel">Yüklənir…</div></div>' +
         '<div class="spacer"></div>' +
         '<button class="btn sm ghost" id="btnRen">' + ic("pen") + "Qrupun adını dəyiş</button>" +
         '<div class="card tight hide" id="gCard"></div>');
@@ -6936,8 +6937,8 @@
           '<div id="hwList" class="card pad0" style="margin-top:10px"></div>' +
           '<div class="spacer"></div>'
         : "") +
-      /*  Ayar isin ozu deyil - ekranin altinda durur.  */
-      '<div class="card tight">' +
+      /*  Ayar isin ozu deyil - ekranin altinda durur.  04.10: serbest mesq gizli - ayar da gizlidir.  */
+      '<div class="card tight' + (SERBEST_AYAR ? "" : " hide") + '">' +
         '<div class="swrap"><label class="switch" for="fp">' +
           '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
           '<span class="track"><i></i></span>' +
@@ -10728,6 +10729,8 @@
   /*  Movzu nisanlarinin heddi: bundan cox olanda sinif teleb olunur.
       Telefonda ~20 nisan iki-uc setirdir, 60 nisan ekrani udur.  */
   var TOPCAP = 20;
+  //  04.10: «Serbest mesq» sagirde gizlidir -> muellimde bu ayarin menasi yoxdur (kod yerindedir).
+  var SERBEST_AYAR = false;
 
   /*  SORGU NESLI.  guard() yalniz UNVANI tutusdurur - bank ekraninda
       hovuz/suzgec deyisende unvan ("#/b") DEYISMIR, ona gore kohne

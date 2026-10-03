@@ -453,6 +453,9 @@
 
   var PSUB = "", PEXP = false;   // serbest mesq: fenn suzgeci, "daha" acildi
   var SERBEST_TEST = false;      // 04.10: serbest mesq (test siyahisi) gizli - gelecekde odenisli mehsul
+  //  04.10 (sahibin qerari): «Movzu mesqi» (adaptiv, gunluk limitli) de sagirde GOSTERILMIR - sonra ozumuz
+  //  «jest» (hediyye) kimi verecayik.  Kod ve server RPC-leri yerindedir; MOVZU_MESQ = true etmek kifayetdir.
+  var MOVZU_MESQ = false;
   function screenTests() {
     markScreen(true);
     stopTimer();
@@ -778,7 +781,7 @@
       });
       loadDaily();
       loadMistakes();
-      loadPractice();
+      if (MOVZU_MESQ) loadPractice();
       bindRows();
     }).catch(function (e) {
       if (e && (e.status === 403 || /Sessiya/i.test(e.message || ""))) {

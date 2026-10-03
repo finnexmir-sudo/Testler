@@ -108,9 +108,9 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#btnAsgs", timeout=8000)
     ok(True, "qrup ekraninda 'Tapsiriqlar' duymesi var")
     pg.click("#btnAsgs")
-    pg.wait_for_selector("#fp", timeout=8000)
+    pg.wait_for_selector("#asgList", state="attached", timeout=8000)   # 04.10: #fp gizlidir - yukleme gostericisi #asgList
     ok("/a/" + GID in pg.url, "tapsiriq ekraninin oz unvani var", pg.url.split("#")[-1])
-    ok(pg.is_checked("#fp"), "serbest mesq ilkin olarak ACIQDIR")
+    ok(pg.is_checked("#fp"), "serbest mesq bazada ilkin olaraq ACIQDIR (ayar gizlidir, deyer yerindedir)")
     ok("Hələ tapşırıq verilməyib" in pg.inner_text("#asgList"), "bos veziyyet aydindir")
     pg.wait_for_function("document.querySelectorAll('#aTest option').length > 0",
                          timeout=8000)
@@ -230,15 +230,13 @@ with sync_playwright() as pw:
     ok("1/1 şagird bitirib" in row, "bitiren sagird sayilir", row[-50:])
     ok("orta 100%" in row, "orta netice gorunur", row[-30:])
 
-    print("G · Sərbəst məşqi bağlamaq")
-    pg.uncheck("#fp"); pg.wait_for_timeout(600)
-    ok(db("select free_practice f from public.classes where id = %s", (GID,),
-          one=True)["f"] is False, "ayar bazada saxlanildi")
+    print("G · Sərbəst məşq ayarı müəllimdə gizlidir (04.10: şagirdə sərbəst məşq verilmir)")
+    ok(pg.locator("#fp").count() == 0 or not pg.locator("#fp").is_visible(),
+       "«Sərbəst məşq» açarı müəllim ekranında görünmür")
     sp.reload(); sp.wait_for_selector(".test", timeout=8000)
-    ok(sp.locator(".test").count() == 1, "sagirde yalniz tapsiriq qalir",
-       sp.locator(".test").count())
     heads = sp.locator("#main h2").evaluate_all("els => els.map(e => e.textContent)")
-    ok("Sərbəst məşq" not in heads, "serbest mesq bolmesi gizlenir", heads)
+    ok(sp.locator(".test").count() == 1, "şagirdə yalnız tapşırıq görünür", sp.locator(".test").count())
+    ok("Sərbəst məşq" not in heads, "serbest mesq bolmesi yoxdur", heads)
 
     print("H · Testi olmayan sinif aydın izah olunur")
     # Test bazasinda yalniz 3-cu sinif var.
