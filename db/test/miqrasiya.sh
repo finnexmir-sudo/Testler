@@ -262,6 +262,9 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          687_bank_az4_ders_yazi_2.sql \
          688_bank_az4_ders_insa_2.sql \
          689_bank_az4_ders_cetin.sql \
+         663_bank_az4_ders_sifet_asan.sql \
+         675_bank_az4_ders_hallanma.sql \
+         690_bank_az4_ders_asan_payi.sql \
          660_bank_az4_ders_nisan.sql \
          661_bank_az4_kohne_duzelis.sql \
          662_bank_az4_kohne_cetinlik.sql \
