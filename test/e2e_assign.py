@@ -191,14 +191,15 @@ with sync_playwright() as pw:
     sp.wait_for_selector(".test", timeout=8000)
     heads = sp.locator("#main h2").evaluate_all("els => els.map(e => e.textContent)")
     ok("Tapşırıqlar" in heads, "'Tapsiriqlar' bolmesi var", heads)
-    ok("Sərbəst məşq" in heads, "'Serbest mesq' bolmesi var", heads)
+    #  04.10: serbest mesq (test siyahisi) sagirde GIZLIDIR (SERBEST_TEST = false) - gelecekde odenisli mehsul
+    ok("Sərbəst məşq" not in heads, "'Serbest mesq' bolmesi sagirde gizlidir", heads)
     ok(sp.locator(".test.asg").count() == 1, "bir tapsiriq gorunur",
        sp.locator(".test.asg").count())
     asg = sp.inner_text(".test.asg").replace("\n", " ")
     ok("Vurma cədvəli" in asg, "duzgun test", asg[:50])
     ok("son tarix" in asg, "sagird son tarixi gorur", asg[-40:])
-    ok(sp.locator(".test:not(.asg)").count() == 3,
-       "teyin olunan test serbest mesqde TEKRARLANMIR",
+    ok(sp.locator(".test:not(.asg)").count() == 0,
+       "platforma test siyahisi sagirde yoxdur (yalniz muellimin tapsirigi)",
        sp.locator(".test:not(.asg)").count())
 
     print("E · Tapşırığı işləmək")

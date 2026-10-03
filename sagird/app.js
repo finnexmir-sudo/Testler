@@ -421,7 +421,38 @@
     return d.getDate() + " " + ay[d.getMonth()];
   }
 
+  //  «Yeni test» bildirisi: gorulen tapsiriq id-leri bu cihazda.  localStorage ola da bilmeyebilir
+  //  (gizli pencere / bloklanib) - onda bildiris sadece cixmir, tetbiq isleyir.
+  function seenKey() { return "b10_seen_asg_" + (ME ? ME.id : ""); }
+  function seenGet() {
+    try {
+      var v = localStorage.getItem(seenKey());
+      var a = v == null ? null : JSON.parse(v);
+      return Array.isArray(a) ? a : null;
+    } catch (e) { return null; }
+  }
+  function seenSet(ids) {
+    try { localStorage.setItem(seenKey(), JSON.stringify(ids.slice(-200))); } catch (e) {}
+  }
+  function markSeen(list) {
+    var seen = seenGet() || [];
+    list.forEach(function (t) { if (seen.indexOf(t.id) < 0) seen.push(t.id); });
+    seenSet(seen);
+  }
+  //  Yeni = muellimin verdiyi, acilmis (kilidsiz), hele islenmeyen ve bu cihazda gorulmeyen tapsiriq.
+  function newAssignments(asg) {
+    var seen = seenGet();
+    if (seen === null) {                       // ilk acilis: movcudlari «gorulmus» say, bildiris yoxdur
+      seenSet(asg.map(function (t) { return t.id; }));
+      return [];
+    }
+    return asg.filter(function (t) {
+      return !t.locked && !(Number(t.done) > 0) && seen.indexOf(t.id) < 0;
+    });
+  }
+
   var PSUB = "", PEXP = false;   // serbest mesq: fenn suzgeci, "daha" acildi
+  var SERBEST_TEST = false;      // 04.10: serbest mesq (test siyahisi) gizli - gelecekde odenisli mehsul
   function screenTests() {
     markScreen(true);
     stopTimer();
@@ -432,10 +463,14 @@
     sb.rpc("rpc_student_tests", { p_token: TOKEN }).then(function (d) {
       d = d || {};
       var asg  = d.assigned || [];
-      var prac = d.practice || [];
+      /*  04.10 (sahibin qerari): «Serbest mesq» - butun fennlerin test siyahisi - sagirde GOSTERILMIR.
+          Gelecekde bizim oz mehsulumuz (odenisli) olacaq: SERBEST_TEST = true etmek kifayetdir, kod yerindedir.
+          Gizli olsa da kecmis neticeler «ishlenmis test / ortalama» saylarina DAXILDIR (pracAll). */
+      var pracAll = d.practice || [];
+      var prac = SERBEST_TEST ? pracAll : [];
 
       /* Salamlama + kicik gostericiler - "ireliledigimi gorurem" hissi */
-      var worked = asg.concat(prac).filter(function (t) {
+      var worked = asg.concat(pracAll).filter(function (t) {
         return Number(t.done) > 0;
       });
       var avg = 0;
@@ -453,6 +488,22 @@
         "<div><b>Salam, " + esc(ME ? ME.display_name : "") + "! 👋</b>" +
         (CLS ? "<i>" + esc(CLS.name) + streakTxt + "</i>" : "") + "</div></div>");
       var h = "";
+      /*  04.10: «Yeni test» bildirisi.  Muellim yeni tapsiriq verende sagird tetbiqi acanda yuxarida kart
+          cixir.  Bu TELEFONA PUSH DEYIL - yalniz tetbiqin icinde, hec bir icaze/xarici sorgu yoxdur.
+          Gorulen tapsiriq id-leri bu cihazda (localStorage, sagirdin id-si ile; token saxlanmir) durur.
+          Ilk acilis: movcud tapsiriqlar «gorulmus» sayilir - kohne tapsiriqlar «yeni» kimi gelmesin. */
+      var fresh = DEMO ? [] : newAssignments(asg);
+      if (fresh.length) {
+        var one = fresh.length === 1 ? fresh[0] : null;
+        h += '<div class="card newtest" id="newBox"><div class="nt-t"><span class="nt-tag">Yeni test</span>' +
+          "<b>" + (one ? esc(one.title) : fresh.length + " yeni test") + "</b>" +
+          "<i>" + (one
+            ? esc(one.subject || "") + (one.subject ? " · " : "") + (one.questions || 0) + " sual" +
+              (one.closes_at ? " · son tarix " + esc(dateAz(one.closes_at)) : "")
+            : "Müəllimin yeni tapşırıqları var") + "</i></div>" +
+          '<div class="nt-a"><button class="btn sm go" id="ntGo">' + (one ? "Başla" : "Bax") + "</button>" +
+          '<button class="btn sm ghost" id="ntX">Sonra</button></div></div>';
+      }
       if (worked.length) {
         h += '<div class="stiles">' +
           '<div class="st a"><b>' + worked.length +
@@ -486,7 +537,7 @@
          Sayğac serverden ayrica gelir - rpc_student_daily doldurur. */
       h += '<div id="dayBox"></div>';
 
-      h += "<h2>Tapşırıqlar</h2>";
+      h += '<h2 id="asgH">Tapşırıqlar</h2>';
       /* 191: muellimin METNLE yazdigi ev tapsirigi - testlerin ustunde.
          «Etdim» serverde yazilir, valideyn de gorur.  Edilenler yigilir. */
       var hw = d.homework || [];
@@ -715,6 +766,16 @@
         drawPrac(); bindRows();
       });
       on("btnMyRes", "click", screenMyResults);
+      on("ntX", "click", function () {
+        markSeen(fresh);
+        var nb = document.getElementById("newBox"); if (nb && nb.parentNode) nb.parentNode.removeChild(nb);
+      });
+      on("ntGo", "click", function () {
+        markSeen(fresh);
+        if (fresh.length === 1) { startTest(fresh[0].id); return; }
+        var nb = document.getElementById("newBox"); if (nb && nb.parentNode) nb.parentNode.removeChild(nb);
+        var ah = document.getElementById("asgH"); if (ah && ah.scrollIntoView) ah.scrollIntoView({ block: "start" });
+      });
       loadDaily();
       loadMistakes();
       loadPractice();
