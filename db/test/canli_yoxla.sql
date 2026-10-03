@@ -98,6 +98,9 @@ select * from (values
         and exists (select 1 from f where proname='rpc_push_claim')
         and exists (select 1 from f where proname='rpc_push_done')
         and exists (select 1 from public.app_state where key='push'))),
+ ('911 yeni test bildirişi (assignments trigger-i)',
+    (select exists (select 1 from f where proname='trg_asg_push')
+        and exists (select 1 from pg_trigger where tgname='trg_asg_push' and not tgisinternal))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

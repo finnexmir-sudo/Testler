@@ -156,6 +156,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 907_bank_axtaris_movzu.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 908_movzu_axtaris.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 909_sinaq_kohne_active.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 910_push.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 911_push_yeni_test.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql
