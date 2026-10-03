@@ -145,6 +145,18 @@ begin
     'acilma vaxtindan evvel getmir: ' || r.send_after;
 end $$;
 
+-- ------------------------------------------------ 10 · bildirisin url-i: dogru bolme
+do $$ begin
+  assert (select count(*) from public.push_outbox where role = 'student' and url = './sagird/') >= 1
+         and not exists (select 1 from public.push_outbox where role = 'student' and url <> './sagird/'),
+    'sagird bildirisi ./sagird/-ya aparir: ' || coalesce((select string_agg(distinct url, ',') from public.push_outbox where role = 'student'), '-');
+  assert (select count(*) from public.push_outbox where role = 'parent' and url = './valideyn/') >= 1
+         and not exists (select 1 from public.push_outbox where role = 'parent' and url <> './valideyn/'),
+    'valideyn bildirisi ./valideyn/-ya aparir';
+  assert app.push_enqueue('student', '5555000a-0000-0000-0000-00000000f6a1', 'test', null, 'T', 'B', './x/') is not null, 'ozel url';
+  assert (select url from public.push_outbox order by id desc limit 1) = './x/', 'verilen url saxlanir';
+end $$;
+
 -- ------------------------------------------------ 8 · xeta teyinati pozmur
 alter table public.push_outbox add constraint py_boz check (false) not valid;
 update public.app_state set val = '{"on": true}' where key = 'push';
