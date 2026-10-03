@@ -428,6 +428,101 @@ edir (ad, sinif / abituriyent qrupu → fənlər avtomatik), uşaq kodla girir. 
 (memarlığa ziddir). Qayda: bölmə 7-dəki «paralel iki layihə yox»
 qüvvədədir — bu, Bil10-un içində yeni giriş yoludur, ayrıca layihə deyil.
 
+#### 13a. Tədqiqat nəticələri — 4 sessiya (2026-10-06; istifadəçi «əlavə et» dedi)
+
+Tədqiqat sessiyaları (oxu-yalnız) dörd sahəni araşdırdı. **Bunlar tövsiyədir,
+qərar deyil**; «yoxlanmayıb» yazılanlar sübut deyil. Kod və baza ölçmələri
+birbaşa bazadandır, dünya praktikası hissəsi əsasən axtarış xülasələridir
+(bəzi rəsmi səhifələr 403 verdi).
+
+**1. Yerləşdirmə diaqnostikası («7-ci sinfə keçib», oktyabr).**
+i-Ready/IXL/NWEA/Khan hamısı sinifdən ən azı BİR AŞAĞIDAN başlayır, adaptiv
+irəliləyir, bir oturuşda hər şeyi sınamır. Bizim `rpc_diagnostic_create`
+(db/118) dəyişdirmədən yararsızdır: tək sinifdən yığır (N-1 yoxdur), hələ
+keçilməmiş fəsilləri də sınayır, 7-ci sinif tam diaqnostikası 70 fəsil/210
+sual/~4,5 saatdır, nəticə yalnız SON cəhddən hesablanır (bölmək olmur),
+yarımçıq qaralama yalnız həmin cihazda (localStorage, 2 gün).
+**Tövsiyə:** dəst = (N-1)-in HAMISI + N-in yalnız Q1 etiketli fəsilləri;
+əvvəl 3 əsas fənn (riyaziyyat, Az dili, İngilis); hər seans ≤5–6 fəsil/15–18
+sual/~20 dəq = ayrı test, müddət 14 gün; rəng 3/3·2/3·0–1 qalır; N-1-də
+qırmızıların ≥50 %-i varsa «bir sinif aşağı yoxla»; cari sinifdə qırmızı =
+«yeni mövzu». Kod: yeni fayl (118-dən proqramla), `p_level_code`+`p_part`,
+`gen_rule`-a `run`/`part`, nəticə eyni `run`-dakı bütün cəhdləri birləşdirir.
+**Abituriyent:** `levels`-də abituriyent səviyyəsi YOXDUR (yerli bazada
+yalnız 1–11) — əvvəl səviyyə və mövzu xəritəsi.
+Yoxlanmayıb: bank `quarter` etiketinin real dərs təqvimi ilə uyğunluğu;
+canlı bazada abituriyent səviyyəsi; 3 sualın statistik etibarlılığı.
+
+**2. Bank əhatəsi (28 277 platforma sualı, yerli baza).** Dərin: riyaziyyat
+5, 6, 8, 9 (1 296–2 106). NAZİK: **7-ci sinif riyaziyyat (529, 10 fəsil,
+47–65)**, 6–7-ci sinif ədəbiyyat (5 fəsil), 7-ci sinif informatika (1 fəsil);
+7 və 10-da «tarix» yox (yalnız ümumi tarix). Parametrli sual cəmi 6.
+→ Bank sessiyasına prioritet: 7-ci sinif riyaziyyat, 6–7 ədəbiyyat.
+
+**3. Cari fəsil və mənimsəmə.** `app.daily_topics` YALNIZ
+`class_plan_items.done_at`-dən oxuyur (`student_plan_items.done_at` yox) —
+müəllimsiz yolda yeni mənbə lazımdır. `topics`-də temp saxlanmır (`sort`
+dərslik sırasıdır, `ord` yalnız plan sətirlərindədir). **Cari fəsil, tövsiyə
+(variant 3):** təqvimə görə təxmini TƏKLİF (sentyabrdan mayadək xətti) +
+həftədə bir toxunuşla «hazırda hansı mövzudayıq?»; seçilmişdən əvvəlki hər
+şey «keçilib»; 10 gün toxunuş olmasa təklif bir pillə irəliləyir; «özü
+cavab verdiyi mövzular» ehtiyatı qalır. **Mənimsəmə (tədqiqatlardan
+çıxarılmış eşiklər, uşaqda SINANMAYIB):** son 10 cavabdan ≥8, ən azı 10
+cavab, ≥2 fərqli gün, ≥6 fərqli sual; bir dəfə düz ≠ mənimsəmə; təkrar
+3→7→21 gün (paketin 4-cü slotu); geriləmə bir pillə (yaşıl→sarı),
+tarixçə silinmir; hədəf ~85 % uğur; valideynə «təkrar vaxtıdır» yazılır.
+**DİQQƏT:** mənimsəmə artıq var — `practice` (db/133, 137, `score` 0–100,
+100 olanda `mastered_at`). İki fərqli «mənimsənildi» olmaz; birləşdirmək
+lazımdır. Cavab tarixçəsi PARÇALANIB (`attempt_answers` yalnız test,
+`practice` yalnız yekun say, `daily_packs.answers`-də mövzunun ADI var, id
+və vaxt yox) → `answer_log(student_id, topic_id, question_id, ok, at, src)`
++ `topic_mastery(student_id, topic_id, level, step, next_at, mastered_at)`.
+Yoxlanmayıb: məktəbin real tempi; kurikulum ardıcıllığı; eşiklərin uşaq
+üçün optimallığı.
+
+**4. Dərs cədvəli ideyası (istifadəçi: «cədvəli də salaq»).** Tədqiqatçı
+SONRAYA dedi, səbəbləri: cədvəl FƏNNİ bilir, MÖVZUNU yox (paket mövzu
+üzrə qurulur); bildiriş vaxtını çox dəyişmir (19:00 hər iki növbəyə
+yarayır), əsas faydası bildirişin MƏTNİdir; gün×dərs şəbəkəsi ~35 toxunuşdur;
+«sabah dərs var → ön hazırlıq» üçün sübut tapılmadı. Daha ucuz alternativ:
+gündəlik kartda «Bu gün hansı fənlər keçdi?» çipləri (10 saniyə, boşsa adi
+paket). Azərbaycan: II növbədə 309 560 şagird (2022/23); dərs 45 dəq;
+II növbənin saatları yoxlanmayıb. Data: `student_schedule(student_id,
+weekday 1..6, subject_id)` + `students.school_shift`; mövcud `class_schedule`
+yaramır (müəllim qrupu üçündür). Kilid ekranında növbə/saat yazılmasın.
+
+**5. Hüquqi və qeydiyyat (hüquqi məsləhət DEYİL; qanunun tam mətni oxunmayıb).**
+«Fərdi məlumatlar haqqında» qanun (2010, № 998-IIIQ): yazılı razılıq,
+razılıq verə bilməyənlər üçün valideyn (m. 8.3), silmə (m. 7.1, 9.4), xaricə
+ötürmə razılıqla (m. 14), informasiya sistemlərinin qeydiyyatı (m. 15,
+1000-dən az istisnası TƏSDİQLƏNMƏYİB). 14–18 yaş qaydası yoxlanmayıb.
+**Layihədə:** `public.consents` sxemdə var, amma HEÇ BİR RPC/kod ona
+yazmır (yoxlanıb: `insert into public.consents` yoxdur); `mexfilik/index.html`
+müəllimsiz yola UYĞUN DEYİL («razılığın alınması müəllimin öhdəliyidir»,
+valideyn hesabı yoxdur); silmə yalnız info@bil10.az ilə əl ilə; Supabase
+xaricdədir, siyasət xaricə ötürməyə açıq razılıq almır; «hesab bağlanır,
+məlumat qalır» saxlama müddəti olmadan m. 9.4 ilə ziddiyyət ola bilər.
+**Mərhələ 0 üçün MÜTLƏQ:** (1) `consents`-ə faktiki yazan RPC, açıq
+(əvvəlcədən işarələnməmiş) razılıq qutusu, `evidence`-də versiya+vaxt;
+(2) xaricdə saxlama üçün ayrıca aydın cümlə; (3) hesab və uşaq
+məlumatının özünəxidmət silməsi + razılığı geri götürmə; (4) məxfilik
+siyasətinin yenilənməsi (valideyn hesabı, e-poçt, saxlama müddəti);
+(5) uşaq kodunun yenilənməsi (köhnə sessiyalar ölür). **Buraxılışdan əvvəl
+hüquqşünasa bir baxış tövsiyə olunur.** Onboarding: ana e-poçtla bir
+ekranda; kod iri, «WhatsApp-a göndər» + QR + «yenisini ver» (ClassDojo/
+Seesaw/Khan nümunələri). Telefon/WhatsApp OTP sonraya (Supabase WhatsApp
+yalnız Twilio ilə; Azərbaycan əhatəsi/qiyməti yoxlanmayıb). Valideyn
+ekranı: həftədə bir xülasə, qınaq yox dəstək tonu, güclü tərəf əvvəl, sonda
+bir «evdə soruşun…»; uşaq valideynin gördüyünü görür, valideyn cavab
+mətnini görmür; gündəlik «çalışmayıb» susmaya görə BAĞLI.
+
+**Mənbələr (seçmə):** Springer — spaced retrieval STEM (2024) · Rohrer RCT
+(2019) · Cepeda 2008 (ED505660) · Rawson & Dunlosky 2011 (EJ934616) ·
+Khan «Mastery levels» · ALEKS manual · FSRS/Anki docs · Duolingo HLR (ACL
+P16-1174) · meclis.gov.az (qanun mətni, id=1201) · DLA Piper AZ · Supabase
+phone-login & regions · ClassDojo/Seesaw/Khan parent-login səhifələri ·
+azedu.az/news/34410 (növbələr) · teston.az (II növbə sayı).
+
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 
 **İstifadəçinin sualı:** «Ən zəif yerimiz testləri tərtib etməkdir. Test
