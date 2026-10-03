@@ -395,7 +395,7 @@ Taylor&Francis (technology-mediated parental engagement) · Wiley
 
 | # | İdeya | Qeyd |
 |---|-------|------|
-| 1 | **«Oxşar sual»** — səhvdən sonra eyni növdən yeni ədədlərlə sual | `pq_seed` ilə demək olar hazır; bizim fərqimiz |
+| 1 | **«Oxşar sual»** — səhvdən sonra eyni növdən yeni sual | **DÜZƏLİŞ (06.10):** `pq_seed` mexanizmi var, amma bankda cəmi **6** parametrli sual var (28 277-dən) — «hazırdır» demək səhv idi. Ucuz yol: eyni mövzu + yaxın çətinlik + hələ görmədiyi sual. Parametrləşdirmə sonra, riyaziyyatdan |
 | 2 | **«Nə üçün səhv etdim?»** — «tələsdim / bilmirdim / hesabı səhv saldım», aylıq səhv növləri | bir toxunuş; konkret məsləhət |
 | 3 | **Pilləli kömək** — ipucu 1, ipucu 2, həll; ipucu sayı = ustalıq siqnalı | tez təslim olmasın |
 | 4 | **Qarışıq gündəlik 5 sual** — 2–3 mövzu, aralıqlı | mövcud paketin genişlənməsi |
@@ -405,8 +405,23 @@ Taylor&Francis (technology-mediated parental engagement) · Wiley
 | 8 | **«Öyrənmə yolu» xəritəsi** — mövzu pillələri tanış→möhkəmləndir→yoxla (Azərbaycan şəhərləri temalı variant) | ikinci mərhələ |
 | 9 | **İmtahan simulyasiyası** — vaxtla, bölmələrlə, «xalı harada itirdin: tələsmə / bilməmə» | |
 
+**İstifadəçi qərarları (06.10):** PULSUZ HİSSƏ OLMAYACAQ — **1 aylıq sınaq**
+(kartsız), sonra hesab bağlanır, məlumat qalır. **Qiymət uşaq başınadır**;
+uşağın hazırlaşdığı sinif/qrupa görə fənlər üstün seçilir. Auditoriya:
+**analar** (valideyn tanışları çoxdur — tez yayıla bilər; müəllim tanışı azdır).
+Məqsəd: «uşaq nəzarətdə», **amma arxayınlıq çərçivəsində, casusluq yox**
+(uşaq valideynin gördüyünü görür). Qiymət yer tutucusu: 9,90 AZN/ay uşaq
+başına (04_seed `valideyn-aylik`), 2-ci uşağa endirim — **hipotez, ilk 10
+ailədə yoxlanır**. Ödəniş: ilk ~20–30 ailə üçün əl ilə (köçürmə → admin
+aktivləşdirir); Epoint (bölmə 4) çox yayılmadan əvvəl lazımdır.
+**Məzmun dərinliyi (bankda, 06.10):** sinif başına 1 168–4 821 sual
+(11-ci: 2 915, 10-cu: 2 571, fənn başına ~190–565 — gündə 5 sualla ~40
+günə bitər). Abituriyent qrupları üçün bu **nazikdir** — vəd verməzdən
+əvvəl dərinləşdirmək və ya «beta» yazmaq lazımdır. Qrup tərkibi DİM-in
+rəsmi cədvəli ilə yoxlanmalıdır (yadda deyil, təsdiq olunmayıb).
+
 **Mərhələlər:** (0) müstəqil başlanğıc: valideyn hesab açır, uşağı əlavə
-edir, uşaq kodla girir; pulsuz/ödənişli sərhəd. (1) 1, 2, 5, 6.
+edir (ad, sinif / abituriyent qrupu → fənlər avtomatik), uşaq kodla girir. (1) 1, 2, 5, 6.
 (2) 4, 7, 3. (3) 8, 9. Hər mərhələni 5–10 real ailədə sınayırıq.
 
 **ETMƏYƏK:** reytinq lövhəsi, seriya itirmə cəzası, kənar şəbəkədən AI
