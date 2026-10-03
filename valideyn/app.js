@@ -252,7 +252,8 @@
       if (st === "off") { box.innerHTML = ""; return; }
       if (st === "on") {
         window.B10Push.sync("parent", scope, reg);           // yeni usaq elave olunubsa / sessiya yenilenibse tazele
-        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="pushOff">Söndür</button></p>';
+        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="pushOff">Söndür</button>' +
+          '<small class="pc-n">«Çıxış» etsəniz, bu telefona bildiriş gəlməyəcək.</small></p>';
         on("pushOff", "click", function () {
           window.B10Push.disable("parent", scope, unreg).then(drawPush, drawPush);
         });

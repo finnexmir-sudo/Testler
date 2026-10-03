@@ -108,9 +108,9 @@ S1, S2 = SIDS
 for t, sid in (("tokP1", S1), ("tokP2", S2)):
     db("insert into public.parent_sessions (token_hash, student_id, expires_at) values (app.hash_token(%s), %s, now() + interval '10 days')", (t, sid))
 
-def page(ctx, key=VAPID, perm=None, extra_init=""):
+def page(ctx, key=VAPID, perm=None, extra_init="", fresh=True):
     p = ctx.new_page()
-    p.add_init_script(("window.__FRESH=true;window.__PERM=%s;" % ("'" + perm + "'" if perm else "undefined")) + STUB + extra_init)
+    p.add_init_script(("window.__FRESH=%s;window.__PERM=%s;" % ("true" if fresh else "false", "'" + perm + "'" if perm else "undefined")) + STUB + extra_init)
     p.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=cfg(key)))
     p.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)))
     p.route(BLOCK, lambda r: (fails.append("XARICI SORGU: " + r.request.url), r.abort()))
@@ -151,6 +151,7 @@ with sync_playwright() as pw:
         row = db("select endpoint, ua from public.push_subs where student_id=%s", (S1,), one=True)
         ok(row["endpoint"].startswith("https://fcm.googleapis.com/") and row["ua"], "endpoint + ua yazılıb")
         ok("açıqdır" in p.locator("#pushBox").inner_text(), "kart «açıqdır» göstərir")
+        ok("Çıxış" in p.locator("#pushBox").inner_text() and "gəlməyəcək" in p.locator("#pushBox").inner_text(), "açıq kartda: «Çıxış etsən bildiriş gəlməyəcək» qeydi")
         p.screenshot(path="%s/sagird_%s_aciq.png" % (OUT, tag), full_page=True)
 
         print("3 · yeniden acanda: abune 1 setir qalir (sinxron), «Sondur» silir ve cihazda yadda qalir")
@@ -243,6 +244,7 @@ with sync_playwright() as pw:
         ok(n == 2, "bir düymə BÜTÜN uşaqlar üçün abunə edir (2 sətir)", n)
         ok(db("select count(distinct endpoint) n from public.push_subs", one=True)["n"] == 1, "eyni telefon: eyni endpoint")
         ok({r["student_id"] for r in db("select student_id::text from public.push_subs")} == {S1, S2}, "hər iki uşağa bağlıdır")
+        ok("Çıxış" in p.locator("#pushBox").inner_text() and "gəlməyəcək" in p.locator("#pushBox").inner_text(), "açıq kartda: «Çıxış etsəniz bildiriş gəlməyəcək» qeydi")
         p.screenshot(path="%s/valideyn_%s_aciq.png" % (OUT, tag), full_page=True)
         p.click("#pushOff"); p.wait_for_selector("#pushOn", timeout=10000)
         n = wait_db("select count(*) n from public.push_subs", 0)
@@ -265,6 +267,24 @@ with sync_playwright() as pw:
         ok(n == 0, "çıxışda abunələr silindi", n)
         ok(wait_db("select count(*) n from public.parent_sessions", 0) == 0, "sessiyalar da bağlandı (abunə silinəndən SONRA)")
         ctx.close()
+
+    print("== EYNI TELEFON: valideyn + sagird birlikde (390x844)")
+    db("delete from public.push_subs"); db("delete from public.parent_sessions")
+    for t, sid in (("tokP1", S1), ("tokP2", S2)):
+        db("insert into public.parent_sessions (token_hash, student_id, expires_at) values (app.hash_token(%s), %s, now() + interval '10 days')", (t, sid))
+    ctx = br.new_context(viewport={"width": 390, "height": 844})
+    pp = page(ctx, extra_init=seed)
+    pp.goto(PARENT); pp.wait_for_selector("#pushOn", timeout=20000); pp.click("#pushOn"); pp.wait_for_selector("#pushOff", timeout=10000)
+    ok(wait_db("select count(*) n from public.push_subs where role='parent'", 2) == 2, "valideyn: 2 sətir")
+    ps = page(ctx, fresh=False); sag_login(ps)
+    #  icaze/abune artiq CIHAZDADIR (valideyn acib) - sagird sehifesi «aciqdir» gosterir ve sinxronla oz setrini yazir
+    ps.wait_for_selector("#pushOff", timeout=10000)
+    ok(wait_db("select count(*) n from public.push_subs where role='student'", 1) == 1, "şagird də eyni telefonda abunə oldu (cihaz icazəsi artıq var)")
+    ok(db("select count(distinct endpoint) n from public.push_subs", one=True)["n"] == 1, "iki rol: EYNI endpoint (bir telefon)")
+    ps.click("#btnOut"); ps.wait_for_selector("#btnIn", timeout=10000)
+    ok(wait_db("select count(*) n from public.push_subs where role='student'", 0) == 0, "şagird çıxış etdi: şagird abunəsi silindi")
+    ok(db("select count(*) n from public.push_subs where role='parent'", one=True)["n"] == 2, "valideyn abunəsi QALDI (şagirdin çıxışı valideynə toxunmur)")
+    ctx.close()
 
     br.close()
 
