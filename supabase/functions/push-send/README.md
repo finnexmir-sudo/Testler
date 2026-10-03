@@ -5,7 +5,7 @@ Növbədəki bildirişləri (`push_outbox`, `db/910`) göndərir. Cron hər dəq
 ## Bir dəfəlik quraşdırma
 
 1. **SQL:** `db/910_push.sql` məzmununu Supabase → SQL Editor-da işlədin. Sonra `db/test/canli_yoxla.sql`-də 910 sətri `true` olmalıdır.
-2. **VAPID açarları:** `tools/vapid.html` faylını brauzerdə açın, «Yeni açarlar yarat». İki açarı kopyalayın.
+2. **Açarlar:** `bil10.az/tools/vapid.html` səhifəsini açın, «Yeni açarlar yarat». Üç dəyər çıxır: açıq açar, gizli açar, gizli söz (`PUSH_SECRET`).
 3. **Açıq açar:** `sagird/config.js` və `valideyn/config.js`-də `VAPID_PUBLIC: "..."` sətrinə yazın (gizli açar YOX).
 4. **Edge Function:** Supabase → Edge Functions → **Deploy a new function** → adı `push-send` → `index.ts` məzmununu yapışdırın.
    - **Verify JWT** seçimini **söndürün** (çağıranın JWT-si yoxdur; qapı `PUSH_SECRET`-dir).
@@ -15,7 +15,7 @@ Növbədəki bildirişləri (`push_outbox`, `db/910`) göndərir. Cron hər dəq
    | `VAPID_PUBLIC` | açıq açar (3-cü addımdakı ilə eyni) |
    | `VAPID_PRIVATE` | gizli açar |
    | `VAPID_SUBJECT` | `mailto:sizin-poçt@...` (yalnız push xidmətləri görür) |
-   | `PUSH_SECRET` | özünüzün uydurduğunuz uzun təsadüfi söz |
+   | `PUSH_SECRET` | səhifədəki «Gizli söz» (cron SQL-ində də eyni söz yazılır) |
 6. **Planlayıcı** (Database → Extensions-da `pg_cron` və `pg_net` aktiv olmalıdır). SQL Editor-da (yer tutucuları dəyişin):
 
 ```sql

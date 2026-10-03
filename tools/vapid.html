@@ -26,7 +26,7 @@
 <main>
   <h1>Bildiriş açarları (VAPID)</h1>
   <p>Bu səhifə açarları <b>yalnız sizin brauzerinizdə</b> yaradır. Heç bir yerə göndərmir, heç bir xarici sorğu yoxdur.</p>
-  <div class="warn"><b>Gizli açarı</b> heç kimə göndərməyin, chat-a, GitHub-a və ya saytın fayllarına yazmayın. Yalnız Supabase → Edge Functions → Secrets-ə yazın. Açıq açar isə <code>config.js</code>-də durur.</div>
+  <div class="warn"><b>Gizli açarı və gizli sözü</b> heç kimə göndərməyin, chat-a, GitHub-a və ya saytın fayllarına yazmayın. Yalnız Supabase → Edge Functions → Secrets-ə yazın. Açıq açar isə <code>config.js</code>-də durur.</div>
 
   <div class="box">
     <button id="gen">Yeni açarlar yarat</button>
@@ -45,6 +45,12 @@
     <div class="row"><button class="ghost" data-copy="priv">Kopyala</button></div>
   </div>
 
+  <div class="box">
+    <label for="sec">Gizli söz (PUSH_SECRET) — Supabase sirlərinə VƏ cron SQL-inə</label>
+    <textarea id="sec" rows="2" readonly placeholder="Hələ yaradılmayıb"></textarea>
+    <div class="row"><button class="ghost" data-copy="sec">Kopyala</button></div>
+  </div>
+
 <script>
 (function () {
   function b64u(buf) {
@@ -60,6 +66,8 @@
     }).then(function (r) {
       document.getElementById("pub").value = b64u(r[0]);          // 65 bayt, sıxılmamış nöqtə
       document.getElementById("priv").value = r[1].d;             // 32 bayt, base64url
+      var rnd = new Uint8Array(32); crypto.getRandomValues(rnd);   // 64 simvollu təsadüfi gizli söz
+      document.getElementById("sec").value = Array.prototype.map.call(rnd, function (x) { return ("0" + x.toString(16)).slice(-2); }).join("");
       msg.textContent = "Yaradıldı. İndi hər iki açarı kopyalayın. Səhifəni bağlayanda açarlar itir, yenidən yaratsanız köhnə abunəliklər keçərsiz olur.";
     }).catch(function (e) { msg.textContent = "Xəta: " + (e && e.message || e); });
   });
