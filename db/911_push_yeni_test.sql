@@ -7,6 +7,7 @@
 --  QAYDALAR
 --   * Trigger STATEMENT seviyyelidir: bir sorgu ile bir nece test/sinif teyin olunsa,
 --     her sagirde BIR bildiris gedir («3 yeni test verildi»).
+--   * Ferdi teyinat (assignments.student_id) yalniz hemin sagirde/valideynine gedir, sinfe yox.
 --   * Sagirde ad yazilmir; valideynde usagin qisa adi yazilir (iki usagi ola biler).
 --   * Qapali hesab (905) ve nümune hesab (abunesi olmur) ucun yazilmir.
 --   * Vaxti hele gelmeyen / artıq bitmis teyinat: gelmeyen vaxta saxlanir, bitmis yazilmir.
@@ -36,6 +37,7 @@ begin
       from new_rows a
       join public.tests t    on t.id = a.test_id
       join public.students st on st.class_id = a.class_id and st.is_active
+                              and (a.student_id is null or a.student_id = st.id)   -- ferdi teyinat YALNIZ hemin sagirde
      where a.closes_at is null or a.closes_at > now()
      group by st.id, st.display_name, st.account_id
   loop

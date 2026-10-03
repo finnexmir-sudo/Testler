@@ -70,6 +70,18 @@ begin
   assert not exists (select 1 from public.push_outbox where student_id = '5555000a-0000-0000-0000-00000000f6a3'), 'basqa sinif almamalidir';
 end $$;
 
+-- ------------------------------------------------ 2b · FERDI teyinat: yalniz hemin sagird (sinif yox)
+insert into public.assignments (class_id, test_id, student_id) values
+  ('cccc0000-0000-0000-0000-00000000f6a1', '7e570000-0000-0000-0000-00000000f6b4', '5555000a-0000-0000-0000-00000000f6a2');
+do $$ begin
+  assert exists (select 1 from public.push_outbox where role = 'student' and student_id = '5555000a-0000-0000-0000-00000000f6a2'
+                    and body like '%Smoke test 4%'), 'ferdi: hedef sagirde var';
+  assert not exists (select 1 from public.push_outbox where student_id = '5555000a-0000-0000-0000-00000000f6a1'
+                        and body like '%Smoke test 4%'), 'ferdi: sinif yoldasina getmir';
+end $$;
+delete from public.assignments where test_id = '7e570000-0000-0000-0000-00000000f6b4';
+delete from public.push_outbox where body like '%Smoke test 4%';
+
 -- ------------------------------------------------ 3 · eyni sorguda iki test: BIR bildiris
 insert into public.assignments (class_id, test_id) values
   ('cccc0000-0000-0000-0000-00000000f6a1', '7e570000-0000-0000-0000-00000000f6b2'),
