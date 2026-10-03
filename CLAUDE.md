@@ -333,6 +333,34 @@ sütunundadır; ən dar yerlər Fizika 9 (1.9), Coğrafiya 7 (2.7),
 (`db/13_generator.sql` təsadüfi seçir).
 
 
+### 11. Valideyn: bütün uşaqlar bir ekranda (2026-10-05, «yadda saxla, sonra edərik»)
+
+**İndi:** valideynin bir neçə uşağı ola bilər (`KIDS`, «+ uşaq»), amma
+yuxarıdakı düymələrlə uşaq **bir-bir** dəyişilir. Bildirişlər isə artıq
+hamısı üçün gəlir (bir düymə, hər uşağa ayrı abunə, mətndə uşağın adı).
+
+**Ediləcək:** «Hər iki uşaq» ümumi xülasə kartı — hər uşağın adı, bu
+həftəki testləri və gözləyən tapşırıqları bir ekranda. Real valideynlər
+bunu istəyəndə (və ya iki uşaqlı valideyn şikayət edəndə) başlanır; əvvəl
+real istifadəyə baxmaq lazımdır.
+
+### 12. Push bildirişlər — qalan işlər (2026-10-05)
+
+Hazırdır: 910 (altlıq), 911 («yeni test», gündəlik hədd 5), 912 (son tarix +
+gündəlik 5 sual, saatlıq `push_tick`). Çıxışda həmin cihazın abunəsi
+silinir (paylaşılan telefonda başqa uşaq əvvəlkinin xəbərini görməsin);
+kartda bu yazılıb.
+
+**Qalır:**
+- Valideynə «bu gün çalışmayıb» bildirişi — AYRI açarla, susmaya görə
+  söndürülü (`push_subs.prefs`), valideyn kartında açar.
+- Chrome «Mümkün spam» xəbərdarlığı (yeni sayt, sınaq bildirişləri)
+  real istifadəçilərdə çox görünsə: başlığa «Bil10 ·», daha konkret mətn.
+- Sınaqdan sonra sakit saat açarını geri yandırmaq:
+  `update public.app_state set val = val || '{"quiet": true}' where key = 'push';`
+- Planşetdə (Android Chrome) «Bildirişləri aç» düyməsi cavab vermirdi —
+  telefonda işləyir; diaqnostika əlavə olunub (v713), səbəb təsdiqlənməyib.
+
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 
 **İstifadəçinin sualı:** «Ən zəif yerimiz testləri tərtib etməkdir. Test
