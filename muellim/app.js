@@ -7971,9 +7971,9 @@
         '<h2 class="ch">Hesablar</h2>' +
         //  Uzun izah bir defe oxunur, sonra hemise mane olur - yigilir.
         '<details class="fold"><summary>Necə işləyir?</summary>' +
-          '<p class="muted">«+1 ay / +6 ay» seçilmiş planı həmin hesaba ' +
-          "<b>ödənişli</b> açır, «Sınaq» eyni paketi pulsuz verir (gəlirə " +
-          "düşmür; sonra ödəyəndə «+1 ay» ödənişliyə çevirir). Eyni plan " +
+          '<p class="muted">«Sınaq 1 ay · pulsuz» seçilmiş planı həmin hesaba pulsuz verir (gəlirə ' +
+          "düşmür). «+1 ay / +6 ay · ödənişli» eyni planı <b>ödənişli</b> açır və <b>gəlirə düşür</b> " +
+          "(sınaq sonra ödəyəndə «+1 ay · ödənişli» ilə ödənişliyə çevrilir). Eyni plan " +
           "aktivdirsə, müddət üstünə əlavə olunur. Nümunə nüsxələri " +
           "saylarda yoxdur, «Nümunə» süzgəcindədir; 24 saat sonra özü " +
           "silinir.</p>" +
@@ -8291,9 +8291,12 @@
             3. abune duymeleri oz setrinde qalir.  */
       var ops = (a.admin || a.demo) ? "" :
         '<div class="rops">' +
-          '<button class="btn sm" data-m="1">+1 ay</button>' +
-          '<button class="btn sm" data-m="6">+6 ay</button>' +
-          '<button class="btn sm ghost" data-m="1" data-trial="1">Sınaq 1 ay</button>' +
+          //  03.10 (Samir test): «+1 ay» tund, «Sinaq» solgun idi - pulsuz ay vermek isteyen odenisliye basdi,
+          //  panel «ayliq gelir»de 3 AZN gosterdi.  Indi SINAQ birinci ve tund, ODENISLI duymeler solgun
+          //  ve adlarinda «odenisli» yazir.
+          '<button class="btn sm" data-m="1" data-trial="1">Sınaq 1 ay · pulsuz</button>' +
+          '<button class="btn sm ghost" data-m="1">+1 ay · ödənişli</button>' +
+          '<button class="btn sm ghost" data-m="6">+6 ay · ödənişli</button>' +
         "</div>" +
         //  199: muellime mesaj - Icmalinin ustunde kart kimi cixir
         '<div class="rmsg"><b class="rmsgh">' + esc(a.name || a.email || "") +
@@ -8407,7 +8410,7 @@
           (v.beta_until
             ? esc(v.beta_until) + "-dən sonra qeydiyyatdan keçənə hədiyyə verilmir."
             : "boşdursa təklif müddətsizdir.") +
-          " Lazım olsa ayrıca «+1 ay» ilə özünüz uzada bilərsiniz.</p>";
+          " Lazım olsa ayrıca «Sınaq 1 ay · pulsuz» ilə özünüz uzada bilərsiniz.</p>";
       on("hedSave", "click", function () {
         if (busy) return;
         var beta = ($("hedBeta") || {}).value || "";
@@ -8460,7 +8463,7 @@
           ? sel.options[sel.selectedIndex].text : "";
         var trial = !!b.getAttribute("data-trial");
         if (!confirm(em + " → " + ad + " (+" + ay + " ay" +
-                     (trial ? ", SINAQ — pulsuz" : ", ödənişli") + "). Açılsın?")) return;
+                     (trial ? ", SINAQ — pulsuz, gəlirə düşmür" : ", ÖDƏNİŞLİ — gəlirə düşür") + "). Açılsın?")) return;
         call = "rpc_admin_grant";
         args = { p_email: em, p_plan: (sel || {}).value || "sagird-basi",
                  p_months: ay, p_trial: trial };
