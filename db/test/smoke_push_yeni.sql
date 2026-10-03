@@ -156,5 +156,19 @@ do $$ begin
   assert (select count(*) from public.assignments) = 1, 'xeta olsa da teyinat qalir';
 end $$;
 
+-- ------------------------------------------------ 9 · sakit saat acari
+do $$
+declare t timestamptz := '2026-10-05 23:30:00+04';
+begin
+  update public.app_state set val = '{"on": true}' where key = 'push';
+  assert app.push_quiet_next(t) = '2026-10-06 10:00:00+04'::timestamptz, 'acar yoxdur: sakit saat isleyir';
+  update public.app_state set val = '{"on": true, "quiet": true}' where key = 'push';
+  assert app.push_quiet_next(t) = '2026-10-06 10:00:00+04'::timestamptz, 'quiet=true: sakit saat isleyir';
+  update public.app_state set val = '{"on": true, "quiet": false}' where key = 'push';
+  assert app.push_quiet_next(t) = t, 'quiet=false: sakit saat sonuk';
+  assert app.push_quiet_next('2026-10-05 04:00:00+04') = '2026-10-05 04:00:00+04'::timestamptz, 'quiet=false: seher de olduğu kimi';
+  assert app.push_on(), 'quiet=false push_on-u pozmur';
+end $$;
+
 rollback;
 \echo smoke_push_yeni: HAMISI KECDI

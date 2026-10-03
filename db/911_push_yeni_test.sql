@@ -76,3 +76,24 @@ create trigger trg_asg_push
   after insert on public.assignments
   referencing new table as new_rows
   for each statement execute function app.trg_asg_push();
+
+-- ---------------------------------------------------------------------
+--  SAKIT SAAT ACARI (yoxlama ucun).  Gece 21:00-10:00 qaydasi hele de ilkin vezyyetdir.
+--  Yoxlayanda sondurmek ucun:   update public.app_state set val = val || '{"quiet": false}' where key = 'push';
+--  Geri yandirmaq ucun:         update public.app_state set val = val || '{"quiet": true}'  where key = 'push';
+--  (acar yoxdursa ve ya «true»-dursa sakit saat ISLEYIR.)
+--  910-daki funksiya immutable idi - indi cedvele baxdigi ucun stable-dir.
+-- ---------------------------------------------------------------------
+create or replace function app.push_quiet_next(p_ts timestamptz) returns timestamptz
+language sql stable security definer
+set search_path = public, extensions, pg_temp as $$
+  select case
+    when not coalesce((select (val->>'quiet')::boolean from public.app_state where key = 'push'), true)
+      then p_ts
+    when extract(hour from (p_ts at time zone 'Asia/Baku')) >= 21
+      then (((p_ts at time zone 'Asia/Baku')::date + 1) + time '10:00') at time zone 'Asia/Baku'
+    when extract(hour from (p_ts at time zone 'Asia/Baku')) < 10
+      then (((p_ts at time zone 'Asia/Baku')::date) + time '10:00') at time zone 'Asia/Baku'
+    else p_ts end
+$$;
+revoke all on function app.push_quiet_next(timestamptz) from public, anon, authenticated;
