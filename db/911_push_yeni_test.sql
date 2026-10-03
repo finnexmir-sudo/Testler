@@ -11,7 +11,8 @@
 --   * Sagirde ad yazilmir; valideynde usagin qisa adi yazilir (iki usagi ola biler).
 --   * Qapali hesab (905) ve nümune hesab (abunesi olmur) ucun yazilmir.
 --   * Vaxti hele gelmeyen / artıq bitmis teyinat: gelmeyen vaxta saxlanir, bitmis yazilmir.
---   * Gece 21:00-10:00 - sabaha (910 qaydasi).  Gunde en cox 2 bildiris (910 qaydasi).
+--   * Gece 21:00-10:00 - sabaha (910 qaydasi).
+--   * Gunluk hedd: «yeni test» ucun 5 (muellim ozu verir, sagird bilmelidir); xatirlatmalar 912-de 2 ile qalir.
 --   * Bildiris novbeye yazilarkən nese xeta olsa, TEYINAT YARADILMASI POZULMUR (xeta udulur).
 --   * Oldurme duymesi (app_state.push) sonukdurse hec ne edilmir.
 --
@@ -48,7 +49,7 @@ begin
       v_id := app.push_enqueue('student', r.sid, 'yeni_test', 'yeni:s:' || r.sid || ':' || r.aid,
         'Yeni test',
         case when r.n = 1 then '«' || v_t || '» testi verildi.' else r.n || ' yeni test verildi.' end,
-        './');
+        './', 5);
       if v_id is not null and r.opens > now() then
         update public.push_outbox set send_after = greatest(send_after, app.push_quiet_next(r.opens)) where id = v_id;
       end if;
@@ -57,7 +58,7 @@ begin
         'Yeni test',
         case when r.n = 1 then r.nm || ' üçün yeni test verildi: «' || v_t || '».'
              else r.nm || ' üçün ' || r.n || ' yeni test verildi.' end,
-        './');
+        './', 5);
       if v_id is not null and r.opens > now() then
         update public.push_outbox set send_after = greatest(send_after, app.push_quiet_next(r.opens)) where id = v_id;
       end if;

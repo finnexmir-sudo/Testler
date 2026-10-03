@@ -37,7 +37,7 @@ insert into public.push_subs (role, student_id, endpoint, p256dh, auth) values
 --  testler
 insert into public.tests (id, program_id, subject_id, title)
 select ('7e570000-0000-0000-0000-00000000f6b' || i)::uuid, pr.id, sb.id, 'Smoke test ' || i
-  from generate_series(1, 4) i,
+  from generate_series(1, 9) i,
        (select id from public.programs limit 1) pr,
        (select id from public.subjects limit 1) sb;
 update public.app_state set val = '{"on": false}' where key = 'hesab_bagli';
@@ -98,12 +98,17 @@ begin
   assert (select count(*) from public.push_outbox where role = 'student' and student_id = '5555000a-0000-0000-0000-00000000f6a1') = 2, 'sagird: cemi 2 bildiris';
 end $$;
 
--- ------------------------------------------------ 4 · gundelik hedd (2): ucuncu yazilmir, teyinat ise yaranir
-insert into public.assignments (class_id, test_id) values
-  ('cccc0000-0000-0000-0000-00000000f6a1', '7e570000-0000-0000-0000-00000000f6b4');
+-- ------------------------------------------------ 4 · gundelik hedd «yeni test» ucun 5: 3,4,5-ci yazilir, 6-ci yox, teyinat ise yaranir
+insert into public.assignments (class_id, test_id) values ('cccc0000-0000-0000-0000-00000000f6a1', '7e570000-0000-0000-0000-00000000f6b4');
 do $$ begin
-  assert (select count(*) from public.assignments where test_id = '7e570000-0000-0000-0000-00000000f6b4') = 1, 'teyinat yaranib';
-  assert (select count(*) from public.push_outbox where role = 'student' and student_id = '5555000a-0000-0000-0000-00000000f6a1') = 2, 'gunluk hedd: 3-cu yazilmir';
+  assert (select count(*) from public.push_outbox where role = 'student' and student_id = '5555000a-0000-0000-0000-00000000f6a1') = 3, '3-cu yazilir';
+end $$;
+insert into public.assignments (class_id, test_id) values ('cccc0000-0000-0000-0000-00000000f6a1', '7e570000-0000-0000-0000-00000000f6b5');
+insert into public.assignments (class_id, test_id) values ('cccc0000-0000-0000-0000-00000000f6a1', '7e570000-0000-0000-0000-00000000f6b6');
+insert into public.assignments (class_id, test_id) values ('cccc0000-0000-0000-0000-00000000f6a1', '7e570000-0000-0000-0000-00000000f6b7');
+do $$ begin
+  assert (select count(*) from public.assignments where test_id = '7e570000-0000-0000-0000-00000000f6b7') = 1, 'teyinat yaranib';
+  assert (select count(*) from public.push_outbox where role = 'student' and student_id = '5555000a-0000-0000-0000-00000000f6a1') = 5, 'gunluk hedd 5: 6-ci yazilmir';
 end $$;
 
 -- ------------------------------------------------ 5 · qapali hesab: teyinat 905 ile bloklanir, bildiris de yoxdur
