@@ -38,7 +38,7 @@ STUB = """
     return { endpoint: ep, toJSON() { return { endpoint: this.endpoint, keys: { p256dh: 'B'.repeat(87), auth: 'c'.repeat(22) } }; } };
   }
   const st = { perm: window.__PERM || (saved && saved.perm) || 'default', next: 'granted',
-               sub: saved && saved.sub ? mk(saved.sub) : null, asked: 0, subOpts: null };
+               sub: saved && saved.sub ? mk(saved.sub) : null, asked: 0, subOpts: null, shown: [] };
   function persist() {
     try { localStorage.setItem('__stub_push', JSON.stringify({ perm: st.perm, sub: st.sub && st.sub.endpoint })); } catch (e) {}
   }
@@ -48,7 +48,7 @@ STUB = """
   FakeN.requestPermission = () => { st.asked++; if (window.__HANG_PERM) return new Promise(() => {}); st.perm = st.next; persist(); return Promise.resolve(st.perm); };
   window.Notification = FakeN;
   window.PushManager = function () {};
-  const reg = { pushManager: {
+  const reg = { scope: location.origin + '/', showNotification: async (t, o) => { st.shown.push(t); }, pushManager: {
     getSubscription: async () => st.sub,
     subscribe: async (o) => {
       if (window.__SUB_FAIL) { const e = new Error('push service error'); e.name = 'AbortError'; throw e; }
@@ -152,6 +152,15 @@ with sync_playwright() as pw:
         ok(row["endpoint"].startswith("https://fcm.googleapis.com/") and row["ua"], "endpoint + ua yazılıb")
         ok("açıqdır" in p.locator("#pushBox").inner_text(), "kart «açıqdır» göstərir")
         ok("Çıxış" in p.locator("#pushBox").inner_text() and "gəlməyəcək" in p.locator("#pushBox").inner_text(), "açıq kartda: «Çıxış etsən bildiriş gəlməyəcək» qeydi")
+        p.wait_for_selector("#pushYes", timeout=8000)
+        ok(p.evaluate("window.__push.shown") == ["Bil10 · Sınaq"], "açılan kimi telefondan SINAQ bildirişi göstərilir", p.evaluate("window.__push.shown"))
+        ok("görürsən" not in p.locator("#pushTest").inner_text() and "gördün" in p.locator("#pushTest").inner_text(), "«Gördün?» sualı (qeyri-rəsmi)")
+        p.click("#pushNo"); p.wait_for_selector("#pushTest .pc-steps", timeout=5000)
+        ok(p.locator("#pushTest .pc-steps li").count() >= 2 and "Bildiriş görünmür" in p.locator("#pushTest").inner_text(), "«Görmədim»: telefonun sistem ayarı addımları")
+        p.screenshot(path="%s/sagird_%s_gormedim.png" % (OUT, tag), full_page=True)
+        p.click("#pushChk"); p.wait_for_selector("#pushYes", timeout=5000); p.click("#pushYes")
+        ok("işləyir" in p.locator("#pushTest").inner_text(), "«Gəlmir? Yoxla» yenidən işləyir, «Gördüm» təsdiqləyir")
+        ok(p.evaluate("window.__push.shown.length") == 2, "yoxla düyməsi yeni sınaq göstərir")
         p.screenshot(path="%s/sagird_%s_aciq.png" % (OUT, tag), full_page=True)
 
         print("3 · yeniden acanda: abune 1 setir qalir (sinxron), «Sondur» silir ve cihazda yadda qalir")
@@ -245,6 +254,10 @@ with sync_playwright() as pw:
         ok(db("select count(distinct endpoint) n from public.push_subs", one=True)["n"] == 1, "eyni telefon: eyni endpoint")
         ok({r["student_id"] for r in db("select student_id::text from public.push_subs")} == {S1, S2}, "hər iki uşağa bağlıdır")
         ok("Çıxış" in p.locator("#pushBox").inner_text() and "gəlməyəcək" in p.locator("#pushBox").inner_text(), "açıq kartda: «Çıxış etsəniz bildiriş gəlməyəcək» qeydi")
+        p.wait_for_selector("#pushYes", timeout=8000)
+        ok("gördünüz" in p.locator("#pushTest").inner_text(), "valideyn: «Gördünüz?» (rəsmi)")
+        p.click("#pushNo"); p.wait_for_selector("#pushTest .pc-steps", timeout=5000)
+        ok("basın" in p.locator("#pushTest").inner_text() or "baxın" in p.locator("#pushTest").inner_text(), "valideyn: sistem addımları rəsmi formadadır")
         p.screenshot(path="%s/valideyn_%s_aciq.png" % (OUT, tag), full_page=True)
         p.click("#pushOff"); p.wait_for_selector("#pushOn", timeout=10000)
         n = wait_db("select count(*) n from public.push_subs", 0)

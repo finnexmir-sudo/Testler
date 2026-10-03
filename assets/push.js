@@ -154,5 +154,38 @@
     return '<ol class="pc-steps">' + steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + "</ol>";
   }
 
-  window.B10Push = { state: state, enable: enable, disable: disable, sync: sync, leave: leave, help: help, why: why };
+
+  //  Telefonun OZUNDEN dərhal sınaq bildirişi (server/cron gozlenmir).  Brauzer icazesi verilse de telefonun
+  //  SISTEM ayarinda (Android: Ayarlar > Tetbiqler > Chrome > Bildirisler) bildiris baglidirsa, hec ne gorunmur -
+  //  sehife bunu birbaşa bilmir; istifadeci «gordum / gormedim» deyir.
+  function test() {
+    return ready().then(function (reg) {
+      var sc = reg.scope || "";
+      return reg.showNotification("Bil10 · Sınaq", {
+        body: "Bunu görürsənsə, bildirişlər düzgün işləyir ✓",
+        icon: sc + "assets/icons/icon-192.png", badge: sc + "assets/icons/icon-192.png",
+        tag: "b10-local-test", data: { url: "" }
+      });
+    });
+  }
+
+  //  «Gormedim» halinda: telefonun SISTEM ayarlari (help() brauzer icazesi ucundur)
+  function fixHelp(formal) {
+    var f = !!formal, ua = navigator.userAgent || "", steps;
+    if (isIos()) {
+      steps = ["«Ayarlar» → «Bildirişlər» → «Bil10» bölməsində bildirişlərə icazə " + (f ? "verin" : "ver") + ".",
+               "«Fokus» / «Narahat etmə» rejimini " + (f ? "söndürün" : "söndür") + "."];
+    } else if (/Android/i.test(ua)) {
+      steps = ["«Ayarlar» → «Tətbiqlər» → «Chrome» → «Bildirişlər» bölməsində bildirişlərin AÇIQ olduğuna " + (f ? "baxın" : "bax") + ".",
+               "«Narahat etmə» rejimini " + (f ? "söndürün" : "söndür") + ".",
+               "Chrome üçün batareya qənaətini «Məhdudiyyətsiz» " + (f ? "edin" : "et") + ".",
+               "Sonra «Gəlmir? Yoxla»-ya yenidən " + (f ? "basın" : "bas") + "."];
+    } else {
+      steps = ["Kompüterin bildiriş ayarlarında brauzer üçün bildirişlərin açıq olduğuna " + (f ? "baxın" : "bax") + " (Windows: Ayarlar → Sistem → Bildirişlər).",
+               "«Fokus» / «Narahat etmə» rejimini " + (f ? "söndürün" : "söndür") + "."];
+    }
+    return '<ol class="pc-steps">' + steps.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ol>";
+  }
+
+  window.B10Push = { state: state, enable: enable, disable: disable, sync: sync, leave: leave, help: help, why: why, test: test, fixHelp: fixHelp };
 })();

@@ -453,6 +453,29 @@
 
   /*  910: telefona bildiris.  Ortaq klient assets/push.js-dir; burada yalniz kart ve servere yazma.
       Abunelik sagirdin ozune baglidir (sessiya 12 saatdir, bildiris ise sessiyadan sonra da gelmelidir). */
+  var autoChk = false;
+  function pushCheck() {
+    var m = document.getElementById("pushTest");
+    if (!m || !window.B10Push) return;
+    window.B10Push.test().then(function () {
+      var m2 = document.getElementById("pushTest"); if (!m2) return;
+      m2.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Sınaq bildirişi göndərildi</b>' +
+        "<i>Telefonda «Bil10 · Sınaq» bildirişini gördün?</i></div>" +
+        '<div class="pc-a"><button type="button" class="btn sm go" id="pushYes">Gördüm</button>' +
+        '<button type="button" class="btn sm ghost" id="pushNo">Görmədim</button></div></div>';
+      on("pushYes", "click", function () { var x = document.getElementById("pushTest"); if (x) x.innerHTML = '<p class="note pushon">Əla, bildirişlər işləyir ✓</p>'; });
+      on("pushNo", "click", function () {
+        var x = document.getElementById("pushTest");
+        if (x) x.innerHTML = '<div class="card pushcard pushblk"><div class="pc-t"><b>Bildiriş görünmür</b>' +
+          "<i>Brauzer icazə verib, amma telefonun özündə bildirişlər bağlı ola bilər. Yoxla:</i>" + window.B10Push.fixHelp(false) + "</div></div>";
+      });
+    }, function () {
+      var x = document.getElementById("pushTest");
+      if (x) x.innerHTML = '<div class="card pushcard pushblk"><div class="pc-t"><b>Sınaq göstərilə bilmədi</b>' +
+        "<i>Səhifəni yeniləyib yenidən cəhd et.</i>" + window.B10Push.fixHelp(false) + "</div></div>";
+    });
+  }
+
   function drawPush() {
     var box = document.getElementById("pushBox");
     if (!box || !window.B10Push || DEMO || !ME) return;
@@ -467,8 +490,11 @@
       if (st === "off") { box.innerHTML = ""; return; }
       if (st === "on") {
         window.B10Push.sync("student", scope, reg);          // sessiya yenilenib - abuneni tazele
-        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="pushOff">Söndür</button>' +
-          '<small class="pc-n">«Çıxış» etsən, bu telefona bildiriş gəlməyəcək.</small></p>';
+        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="pushOff">Söndür</button> · ' +
+          '<button type="button" class="linkbtn" id="pushChk">Gəlmir? Yoxla</button>' +
+          '<small class="pc-n">«Çıxış» etsən, bu telefona bildiriş gəlməyəcək.</small></p><div id="pushTest"></div>';
+        on("pushChk", "click", pushCheck);
+        if (autoChk) { autoChk = false; pushCheck(); }
         on("pushOff", "click", function () {
           window.B10Push.disable("student", scope, unreg).then(drawPush, drawPush);
         });
@@ -496,7 +522,7 @@
           //  4 saniyedir cavab yoxdur: brauzer icaze penceresini gostermeyib ola biler
           var m0 = document.getElementById("pushMsg");
           if (m0 && !m0.innerHTML) m0.innerHTML = '<p class="note pushon">İcazə pəncərəsi görünmürsə:</p>' + window.B10Push.help(false);
-        }).then(drawPush, function (e) {
+        }).then(function () { autoChk = true; drawPush(); }, function (e) {
           if (e && e.message === "denied") { drawPush(); return; }     // artıq bloklanıb: addımlarla kart
           var m = document.getElementById("pushMsg");
           var t = e && e.message === "dismissed" ? "İcazə verilmədi. Yenidən basıb «İcazə ver» seç."

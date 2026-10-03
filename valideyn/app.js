@@ -227,6 +227,29 @@
 
   /*  910: telefona bildiris.  Bir duyme BUTUN usaqlar ucun abune edir (eyni telefon).  Cari usagin
       sessiyasi islemirse xeta verir; qalan usaqlarin bitmis sessiyasi hec neyi pozmur.  */
+  var autoChk = false;
+  function pushCheck() {
+    var m = $("pushTest");
+    if (!m || !window.B10Push) return;
+    window.B10Push.test().then(function () {
+      var m2 = $("pushTest"); if (!m2) return;
+      m2.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Sınaq bildirişi göndərildi</b>' +
+        "<i>Telefonda «Bil10 · Sınaq» bildirişini gördünüz?</i></div>" +
+        '<div class="pc-a"><button type="button" class="btn sm go" id="pushYes">Gördüm</button>' +
+        '<button type="button" class="btn sm ghost" id="pushNo">Görmədim</button></div></div>';
+      on("pushYes", "click", function () { var x = $("pushTest"); if (x) x.innerHTML = '<p class="note pushon">Əla, bildirişlər işləyir ✓</p>'; });
+      on("pushNo", "click", function () {
+        var x = $("pushTest");
+        if (x) x.innerHTML = '<div class="card pushcard pushblk"><div class="pc-t"><b>Bildiriş görünmür</b>' +
+          "<i>Brauzer icazə verib, amma telefonun özündə bildirişlər bağlı ola bilər. Yoxla:</i>" + window.B10Push.fixHelp(true) + "</div></div>";
+      });
+    }, function () {
+      var x = $("pushTest");
+      if (x) x.innerHTML = '<div class="card pushcard pushblk"><div class="pc-t"><b>Sınaq göstərilə bilmədi</b>' +
+        "<i>Səhifəni yeniləyib yenidən cəhd edin.</i>" + window.B10Push.fixHelp(true) + "</div></div>";
+    });
+  }
+
   function drawPush() {
     var box = $("pushBox");
     if (!box || !window.B10Push || DEMO || !TOKEN) return;
@@ -252,8 +275,11 @@
       if (st === "off") { box.innerHTML = ""; return; }
       if (st === "on") {
         window.B10Push.sync("parent", scope, reg);           // yeni usaq elave olunubsa / sessiya yenilenibse tazele
-        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="pushOff">Söndür</button>' +
-          '<small class="pc-n">«Çıxış» etsəniz, bu telefona bildiriş gəlməyəcək.</small></p>';
+        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="pushOff">Söndür</button> · ' +
+          '<button type="button" class="linkbtn" id="pushChk">Gəlmir? Yoxla</button>' +
+          '<small class="pc-n">«Çıxış» etsəniz, bu telefona bildiriş gəlməyəcək.</small></p><div id="pushTest"></div>';
+        on("pushChk", "click", pushCheck);
+        if (autoChk) { autoChk = false; pushCheck(); }
         on("pushOff", "click", function () {
           window.B10Push.disable("parent", scope, unreg).then(drawPush, drawPush);
         });
@@ -280,7 +306,7 @@
         window.B10Push.enable("parent", scope, reg, function () {
           var m0 = $("pushMsg");
           if (m0 && !m0.innerHTML) m0.innerHTML = '<p class="note pushon">İcazə pəncərəsi görünmürsə:</p>' + window.B10Push.help(true);
-        }).then(drawPush, function (e) {
+        }).then(function () { autoChk = true; drawPush(); }, function (e) {
           if (e && e.message === "denied") { drawPush(); return; }     // artıq bloklanıb: addımlarla kart
           var m = $("pushMsg");
           var t = e && e.message === "dismissed" ? "İcazə verilmədi. Yenidən basıb «İcazə ver» seçin."
