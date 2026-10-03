@@ -101,6 +101,10 @@ select * from (values
  ('911 yeni test bildirişi (assignments trigger-i)',
     (select exists (select 1 from f where proname='trg_asg_push')
         and exists (select 1 from pg_trigger where tgname='trg_asg_push' and not tgisinternal))),
+ ('912 push xatırlatmalar (son tarix, gündəlik 5 sual, saatlıq planlayıcı)',
+    (select exists (select 1 from f where proname='push_tick')
+        and exists (select 1 from f where proname='push_scan_deadlines')
+        and exists (select 1 from f where proname='push_scan_daily'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')
