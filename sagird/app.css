@@ -267,6 +267,7 @@ body{background:
 .fp-d{flex:1;max-width:38px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--n-100);color:var(--fg-3)}
 .fp-d.on{background:var(--brand);color:#fff}
 .fp-d.t{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--brand)}
+.fp-goal{font-size:13.5px;color:var(--fg-2);margin:0 0 8px}.fp-goal.done{color:var(--ok);font-weight:700}
 .fp-r{font-size:14.5px}.fp-r b{font-size:20px;font-weight:700;margin-right:4px}
 .fp-c{margin-top:6px;font-size:13px;color:var(--fg-2)}
 .nl-tag{display:block;font-size:11px;font-weight:600;letter-spacing:.03em;

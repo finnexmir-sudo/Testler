@@ -501,6 +501,36 @@ begin
 end $$;
 reset role;
 
+-- ------------------------------------------------ 4g · hefteli hedef (921)
+do $$
+begin
+  assert app.family_goal(5, null) = 5 and app.family_goal(10, null) = 5 and app.family_goal(15, null) = 4
+     and app.family_goal(20, null) = 4 and app.family_goal(30, null) = 3, 'standart hedef';
+  assert app.family_goal(30, 6::smallint) = 6, 'valideynin hedefi ustundur';
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid; r jsonb; k jsonb;
+begin
+  begin perform public.rpc_family_set_plan(v_sid, 7, 4); assert false, 'yalan deqiqe';
+  exception when others then if sqlerrm like '%vaxtı seçin%' then null; else raise; end if; end;
+  begin perform public.rpc_family_set_plan(v_sid, 10, 9); assert false, 'yalan hedef';
+  exception when others then if sqlerrm like '%2–7%' then null; else raise; end if; end;
+  r := public.rpc_family_set_plan(v_sid, 15, 6);
+  assert (r->>'ok')::boolean, 'plan deyisdi';
+  select e into k from jsonb_array_elements(public.rpc_family_progress()) e where (e->>'id')::uuid = v_sid;
+  assert (k->>'goal')::int = 6 and (k->>'minutes')::int = 15, 'progress: hedef 6, 15 deq: ' || k::text;
+end $$;
+set role anon;
+do $$
+declare d jsonb;
+begin
+  d := public.rpc_student_family(current_setting('smoke.tok'));
+  assert (d->>'goal')::int = 6 and (d->>'minutes')::int = 15, 'usaq: hedef 6, 15 deq: ' || d::text;
+end $$;
+reset role;
+
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';
 set role authenticated;
@@ -514,6 +544,8 @@ begin
   begin perform public.rpc_family_diag(current_setting('smoke.sid')::uuid, 'riyaziyyat'); assert false, 'basqa ailenin usagina yoxlama';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
   begin perform public.rpc_family_chapters(current_setting('smoke.sid')::uuid, current_setting('smoke.subj')); assert false, 'basqa usagin fesilleri';
+  exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
+  begin perform public.rpc_family_set_plan(current_setting('smoke.sid')::uuid, 10, 4); assert false, 'basqa usagin plani';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
   begin perform public.rpc_family_praise(current_setting('smoke.sid')::uuid, 1); assert false, 'basqa usaga afarin';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;

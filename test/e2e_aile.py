@@ -207,6 +207,18 @@ with sync_playwright() as pw:
             ok("(hazırda)" in p.locator(".fk-cur .fk-ch option:checked").inner_text(), "yenilənəndən sonra cari fəsil «(hazırda)» göstərilir")
             p.screenshot(path="%s/5c_cari_fesil_%s.png" % (OUT, tag), full_page=True)
 
+        print("-- hedef + gundelik vaxt (921)")
+        ok("/ 3 gün" in p.locator(".fk").inner_text(), "standart hədəf: 30 dəq → 3 gün", p.locator(".fk").inner_text()[:200])
+        p.click("[data-plan]"); p.wait_for_selector(".fk-pl [data-pm]", timeout=10000)
+        p.locator(".fk-pl [data-pm='20']").click()
+        ok(p.locator(".fk-pl [data-pg].on").inner_text().startswith("4"), "vaxtı 20 dəq seçəndə hədəf 4 gün təklif olunur")
+        p.locator(".fk-pl [data-pg='6']").click()
+        p.screenshot(path="%s/5f_hedef_%s.png" % (OUT, tag), full_page=True)
+        p.click(".fk-pl [data-ps]"); p.wait_for_function("document.querySelectorAll('.fk-pl').length === 0", timeout=15000)
+        pl = db("select minutes, goal_days from public.family_kids where student_id = %s", (st["i"],), one=True)
+        ok(pl["minutes"] == 20 and pl["goal_days"] == 6, "bazada: 20 dəq, 6 gün", pl)
+        ok("/ 6 gün" in p.locator(".fk").inner_text() and "20 dəq" in p.locator(".fk").inner_text(), "kartda yeni hədəf və vaxt")
+
         print("-- «Aferin gonder» (918)")
         p.click("[data-praise]"); p.wait_for_selector(".fk-pr [data-pi]", timeout=10000)
         ok(p.locator(".fk-pr [data-pi]").count() == 3, "3 hazır mesaj (sərbəst yazı yoxdur)")
@@ -248,6 +260,7 @@ with sync_playwright() as pw:
         sp.screenshot(path="%s/7_sagird_%s.png" % (OUT, tag), full_page=True)
         if pick is not None:
             print("-- usagin gundelik mesqi (917)")
+            ok("/ 6" in sp.locator(".famprog").inner_text(), "uşaq: «Bu həftə: X / 6 gün»", sp.locator(".famprog").inner_text())
             sp.wait_for_selector(".dpraise", timeout=15000)
             ok("Səninlə fəxr" in sp.locator(".dpraise").inner_text(), "uşağın kartında valideynin «Afərin»i görünür")
             try:

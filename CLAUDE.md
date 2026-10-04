@@ -579,7 +579,10 @@ Nəticə hissələr üzrə «Diqqət»də (915, mövzu üzrə cavablar) öz-öz�
 Ailə uşağında `screenTests` `FAM` ilə: «Mənim həftəm» bloku (7 gün + «N mövzu mənimsədin» + «Hazırda»), nəticə tile-ları/«Növbəti dərs»/«Keçdiyi dərslər» gizli,
 «Tapşırıqlar» → «Başlanğıc yoxlama», «Zəif mövzular» → «Təkrar edək» (faizsiz, ≤3), gündəlik kartda seçilmiş dəqiqə. Giriş/footer mətni neytral
 («Müəllimin və ya valideynin verdiyi kod»). Anon whitelist 30 RPC (05_grants + smoke_huquq).
-Hələ yox: «Hədəf 4 gün»in dəyişməsi, abituriyent.
+(921, v750) həftəlik hədəf: `family_kids.goal_days` (2–7, null = standart: 5 dəq→5, 10→5, 15→4, 20→4, 30→3 gün), `app.family_goal`; valideyn «Gündəlik məşq → dəyiş» ilə
+vaxtı və hədəfi birlikdə dəyişir (`rpc_family_set_plan`; yeni vaxt sabahkı paketdən). Gün «çalışdı» = ≥1 cavab. Uşaq «Bu həftə: X / Y gün» + hədəf dolanda təbrik;
+həftəlik push «Lale: 3/4 gün, 40 sual (71 % düz)…».
+Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi.
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 

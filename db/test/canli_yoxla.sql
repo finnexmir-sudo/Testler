@@ -134,6 +134,9 @@ select * from (values
         and exists (select 1 from f where proname='rpc_family_children' and def like '%family_diag_state%'))),
  ('920 ailə yolu: uşağın öz səhifəsi',
     (select exists (select 1 from f where proname='rpc_student_family'))),
+ ('921 ailə yolu: həftəlik hədəf',
+    (select exists (select 1 from f where proname='rpc_family_set_plan')
+        and exists (select 1 from f where proname='family_goal'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

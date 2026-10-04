@@ -618,6 +618,12 @@
           wk.map(function (v, i) {
             return '<span class="fp-d' + (v ? " on" : "") + (i === FAM.today_i ? " t" : "") + '">' + WDN[i] + "</span>";
           }).join("") + "</div>" +
+          (function () {
+            var wd = wk.reduce(function (a, b) { return a + b; }, 0), gl = Number(FAM.goal) || 4;
+            return wd >= gl
+              ? '<div class="fp-goal done">🎉 Bu həftənin hədəfi tamamlandı! (' + wd + " / " + gl + " gün)</div>"
+              : '<div class="fp-goal">Bu həftə: <b>' + wd + " / " + gl + "</b> gün</div>";
+          })() +
           '<div class="fp-r"><b>' + (Number(FAM.mastered) || 0) + "</b> mövzu mənimsədin</div>" +
           ((FAM.cur || []).length
             ? '<div class="fp-c">Hazırda: <b>' + esc(FAM.cur[0].subject) + " — " + esc(FAM.cur[0].chapter) + "</b>" +

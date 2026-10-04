@@ -275,6 +275,12 @@ a.btn{text-decoration:none}
 .fk-cbox{display:grid;gap:8px}
 .fk-cb select{margin:0}
 .fk-cb select{width:100%;min-height:42px;border:1px solid var(--n-150);border-radius:10px;padding:0 10px;font:inherit;font-size:14px;background:var(--surface);color:var(--fg)}
+.fk-plan:empty{display:none}
+.fk-pl{display:grid;gap:8px;margin:0 0 12px;padding:12px;border:1px solid var(--n-150);border-radius:10px;background:var(--surface)}
+.fk-pl i{font-style:normal;font-size:13px;color:var(--fg-2)}
+.fk-pl .chips{display:flex;flex-wrap:wrap;gap:6px}
+.fk-pb{display:flex;align-items:center;gap:12px}
+.fk-st .linkbtn{margin-left:6px;font-size:12.5px;font-weight:600}
 .fk-praise{margin:0 0 10px}
 .fk-pr{display:grid;gap:6px}
 .fk-pr i{font-style:normal;font-size:13px;color:var(--fg-2)}
