@@ -122,7 +122,7 @@ with sync_playwright() as pw:
             p.locator("#cSubj .chip:not(.on)").first.click()          # BUTUN fennler secilir (limit yoxdur)
         n_all = p.locator("#cSubj .chip.on").count()
         ok(n_all >= 5, "bütün fənləri seçmək olur (%d fənn)" % n_all)
-        ok("ilk 3 fənn" in p.locator("#cSubjHint").inner_text(), "3-dən çox fənn: «yoxlama ilk 3 fənn üçün» izahı")
+        ok("yalnız ilk fənn" in p.locator("#cSubjHint").inner_text(), "birdən çox fənn: «yoxlama yalnız ilk fənn üçün» izahı", p.locator("#cSubjHint").inner_text())
         ok(p.locator("#cLvl .chip[disabled]").count() == 1, "«Abituriyent» hələ qeyri-aktivdir")
         p.click("#cGo"); wait_text(p, "#cErr", "Razıyam")
         ok(db("select count(*) n from public.students", one=True)["n"] == 0, "razılıqsız uşaq yaranmır")
@@ -142,7 +142,7 @@ with sync_playwright() as pw:
         ok(st and st["login_code"] == code and st["minutes"] == 30 and st["k"] == "self_study", "baza: şagird, 30 dəq, gizli self_study qrup", st)
         ok(db("select count(*) n from public.consents where student_id = %s and kind = 'parental'", (st["i"],), one=True)["n"] == 1, "razılıq yazılıb")
         nd = db("select count(*) n from public.assignments a join public.tests t on t.id = a.test_id where a.student_id = %s and t.is_diagnostic", (st["i"],), one=True)["n"]
-        ok(nd == 3, "yalnız İLK 3 fənn üçün başlanğıc diaqnostika verilib (%d)" % nd)
+        ok(nd == 1, "yalnız İLK fənnin 1-ci hissəsi dərhal verilib (%d)" % nd)
         ok("Qalan" in p.locator("#main").inner_text(), "kod ekranında: qalan fənlər üçün yoxlamanı sonra verə bilərsiniz")
 
         print("-- Ailem ekrani")
@@ -156,11 +156,11 @@ with sync_playwright() as pw:
         ok("Hələ məşq başlamayıb" in p.locator(".fk-diqqet").inner_text(), "«Diqqət»: məşq hələ başlamayıb")
         p.screenshot(path="%s/5_ailem_%s.png" % (OUT, tag), full_page=True)
         rows = p.locator("[data-diag]").count()
-        ok(rows == n_all - 3, "Ailəm: qalan %d fənn üçün «Yoxlama ver» düyməsi" % (n_all - 3), rows)
+        ok(rows == n_all - 1, "Ailəm: qalan %d fənn üçün «Yoxlama ver» düyməsi" % (n_all - 1), rows)
         p.locator("[data-diag]").first.click()
         p.wait_for_function("n => document.querySelectorAll('[data-diag]').length === n", arg=rows - 1, timeout=20000)
         nd2 = db("select count(*) n from public.assignments a join public.tests t on t.id = a.test_id where a.student_id = %s and t.is_diagnostic", (st["i"],), one=True)["n"]
-        ok(nd2 == 4, "«Yoxlama ver» basıldı: 4-cü fənn üçün diaqnostika verildi", nd2)
+        ok(nd2 == 2, "«Yoxlama ver» basıldı: 2-ci fənn üçün diaqnostika verildi", nd2)
 
         print("-- seansli yoxlama: hisse yazilir, «Novbeti hisse ver» (919)")
         one = db("""select t.id::text i, t.gen_rule->>'of' ofn from public.assignments a join public.tests t on t.id = a.test_id
@@ -289,6 +289,18 @@ with sync_playwright() as pw:
         ok("Hüseyn" in body, "şagird kodla girdi: salam, Hüseyn")
         ok("iaqnostik" in body or "Diaqnostik" in body or "sual" in body, "şagirdin ekranında başlanğıc yoxlama görünür", body[:300].replace("\n", " | "))
         sp.screenshot(path="%s/7_sagird_%s.png" % (OUT, tag), full_page=True)
+        try:
+            dl = sp.locator("button.test.asg").first.inner_text()
+            ok("≈" in dl and "⏱" not in dl, "diaqnostika siyahısında real vaxt «≈ N dəq» (75 san limiti yox)", dl.replace("\n", " | "))
+            sp.locator("button.test.asg").first.click()
+            sp.wait_for_selector(".diagnote, #btnStart, .opt", timeout=15000)
+            if sp.locator("#btnStart").count(): sp.click("#btnStart")
+            sp.wait_for_selector(".diagnote", timeout=15000)
+            ok("Bilmirəm" in sp.locator(".diagnote").inner_text(), "diaqnostikanın 1-ci sualında «təxmin etmə» izahı")
+            sp.screenshot(path="%s/7d_diaq_sual_%s.png" % (OUT, tag), full_page=True)
+            sp.goto(STUDENT); sp.wait_for_selector("#dayBox, .stiles, .famprog", timeout=20000)
+        except Exception as ex:
+            ok(False, "diaqnostika başlama axını", repr(ex)[:200])
         if pick is not None:
             print("-- usagin gundelik mesqi (917)")
             ok("/ 6" in sp.locator(".famprog").inner_text(), "uşaq: «Bu həftə: X / 6 gün»", sp.locator(".famprog").inner_text())

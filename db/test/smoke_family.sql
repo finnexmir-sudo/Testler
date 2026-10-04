@@ -91,7 +91,7 @@ begin
   r := public.rpc_family_add_child('Huseyn Aliyev', '7', v_slugs, 15, true);
   assert (r->>'ok')::boolean and length(r->>'login_code') = 8, 'usaq elave olundu: ' || r::text;
   v_sid := (r->>'student_id')::uuid;
-  assert jsonb_array_length(r->'diagnostics') = array_length(v_slugs, 1), 'diaqnostika her fenn ucun';
+  assert jsonb_array_length(r->'diagnostics') = 1, 'yalniz ilk fennin 1-ci hissesi';
   assert exists (select 1 from jsonb_array_elements(r->'diagnostics') d where (d->>'ok')::boolean), 'en azi bir diaqnostika yaranib: ' || (r->'diagnostics')::text;
   ch := public.rpc_family_children();
   assert (ch->>'has_account')::boolean and jsonb_array_length(ch->'kids') = 1, 'Ailem: bir usaq';
@@ -151,21 +151,21 @@ begin
   assert n >= 4, 'sinif 7: en azi 4 fenn lazimdir: ' || n;
   r := public.rpc_family_add_child('Aysu Aliyeva', '7', v_slugs, 30, true);
   v_sid := (r->>'student_id')::uuid;
-  assert jsonb_array_length(r->'diagnostics') = 3 and (r->>'subjects_total')::int = n, 'ilk 3 yoxlama, cemi ' || n || ': ' || r::text;
+  assert jsonb_array_length(r->'diagnostics') = 1 and (r->>'subjects_total')::int = n, 'yalniz 1 yoxlama (ilk fenn), cemi ' || n || ': ' || r::text;
 
   ch := public.rpc_family_children();
   select k into kid from jsonb_array_elements(ch->'kids') k where (k->>'id')::uuid = v_sid;
   assert (kid->>'minutes')::int = 30, '30 deq';
   assert jsonb_array_length(kid->'subject_diag') = n, 'her fenn ucun veziyyet';
-  assert (select count(*) from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'open') = 3, '3 «open»';
-  assert (select count(*) from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'none') = n - 3, 'qalani «none»';
+  assert (select count(*) from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'open') = 1, '1 «open»';
+  assert (select count(*) from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'none') = n - 1, 'qalani «none»';
 
   select x->>'slug' into v_none from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'none' limit 1;
   r := public.rpc_family_diag(v_sid, v_none);
   assert (r->>'ok')::boolean, 'yoxlama verildi: ' || r::text;
   ch := public.rpc_family_children();
   select k into kid from jsonb_array_elements(ch->'kids') k where (k->>'id')::uuid = v_sid;
-  assert (select count(*) from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'open') = 4, 'indi 4 «open»';
+  assert (select count(*) from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'open') = 2, 'indi 2 «open»';
   r := public.rpc_family_diag(v_sid, v_none);
   assert (r->>'existing')::boolean, 'ikinci cagiris dublikat yaratmir';
 
@@ -437,6 +437,8 @@ begin
   assert v_t is not null, '1-ci hisse testi';
   select count(*) into n from public.test_questions where test_id = v_t;
   assert n between 3 and 15 and n % 3 = 0, 'hisse <=15 sual, movzu basina 3: ' || n;
+  assert n <= (select (gen_rule->>'per')::int * 3 from public.tests where id = v_t) and (select (gen_rule->>'per')::int from public.tests where id = v_t) in (3, 4, 5), 'olcu seriyada saxlanir (sinife gore 3/4/5)';
+  assert (select (gen_rule->>'per')::int from public.tests where id = v_t) = 4, '7-ci sinif: hisse 4 fesil';
   select jsonb_array_length(gen_rule->'topics') into v_topics from public.tests where id = v_t;
   assert v_topics > 5, 'seriya 5-den cox fesli: ' || v_topics;
   perform set_config('smoke.dt1', v_t::text, false);
@@ -662,6 +664,34 @@ do $$ begin
   assert public.rpc_student_family(current_setting('smoke.tok'))->>'reward' = 'Filmə   gedək', 'usaq: mukafat';
 end $$;
 reset role;
+
+-- ------------------------------------------------ 4j · «Bilmirem» zeif sayilmir (925)
+do $$
+declare
+  v_sid uuid := current_setting('smoke.sid')::uuid; v_att uuid; v_t uuid; v_name text;
+begin
+  select q.topic_id into v_t from public.questions q join public.topics t on t.id = q.topic_id
+   where q.status = 'published' group by q.topic_id having count(*) >= 3 order by q.topic_id desc limit 1;
+  select name into v_name from public.topics where id = v_t;
+  insert into public.attempts (student_id, test_id, class_id, status, finished_at)
+  select v_sid, (select a.test_id from public.assignments a where a.student_id = v_sid limit 1), st.class_id, 'submitted', now()
+    from public.students st where st.id = v_sid returning id into v_att;
+  insert into public.attempt_answers (attempt_id, question_id, topic_id, is_correct, answered_at)
+  select v_att, q.id, v_t, null, now() from public.questions q where q.topic_id = v_t and q.status = 'published' order by q.id limit 3;
+  perform set_config('smoke.skipname', v_name, false);
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid; k jsonb;
+begin
+  select e into k from jsonb_array_elements(public.rpc_family_summary()) e where (e->>'id')::uuid = v_sid;
+  assert (k->>'skipped_topics')::int >= 1, '«Bilmirem» deyilen movzu sayilir: ' || k::text;
+  assert not exists (select 1 from jsonb_array_elements(k->'weak') w where w->>'topic' = current_setting('smoke.skipname')), 'kecilen movzu «zeif» siyahisinda deyil: ' || k::text;
+end $$;
+reset role;
+delete from public.attempt_answers aa using public.attempts a
+ where a.id = aa.attempt_id and a.student_id = current_setting('smoke.sid')::uuid and aa.is_correct is null and aa.topic_id = (select id from public.topics where name = current_setting('smoke.skipname') limit 1);
 
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';

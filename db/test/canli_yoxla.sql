@@ -146,6 +146,9 @@ select * from (values
  ('924 ailə yolu: personaj + zəncir + nişanlar + mükafat',
     (select exists (select 1 from f where proname='rpc_family_set_reward')
         and exists (select 1 from f where proname='rpc_student_family' and def like '%badges%'))),
+ ('925 ailə yolu: yoxlama ölçüsü + «Bilmirəm»',
+    (select exists (select 1 from f where proname='family_diag_session' and def like '%c_per%')
+        and exists (select 1 from f where proname='rpc_family_summary' and def like '%skipped_topics%'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

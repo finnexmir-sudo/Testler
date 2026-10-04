@@ -596,9 +596,13 @@ HEÇ VAXT geri getmir, cəza yoxdur), gün zənciri (aralıq ≤2 gün — bir g
 (`family_kids.reward` ≤80, «Gündəlik məşq → dəyiş»dən, hədəf dolanda uşaq görür). `rpc_student_family`: days_total/streak/best_streak/answers_total/badges/reward; `rpc_family_set_reward`.
 Qərar (06.10): uşaqlar arası yarış/«Dost çağırışı» — pilotdan və hüquqşünas baxışından SONRA; formatı: dəvətlə, hər iki valideynin razılığı, nəticə səyə görə (gün sayı),
 əməkdaşlıq (komanda hədəfi) əvvəl, qalib/uduzan mesajı yox, başqa ailəyə yalnız ilk ad + gün sayı.
-`db/aile_917_924.sql` — 917–924 bir faylda (Supabase SQL Editor-ə BİR dəfə yapışdırmaq üçün; təkrar işlədilə bilər). Yeni miqrasiya əlavə olunanda bu fayl yenidən yığılmalıdır
+`db/aile_917_925.sql` — 917–925 bir faylda (Supabase SQL Editor-ə BİR dəfə yapışdırmaq üçün; təkrar işlədilə bilər). Yeni miqrasiya əlavə olunanda bu fayl yenidən yığılmalıdır
 (`cat 917…924` ardıcıl). Səbəb: sahib faylları ayrı-ayrı əl ilə işlədir, bir-ikisi atılanda «Bu imkan hələ aktiv deyil» çıxır (06.10-da 921 atılmışdı).
-Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi, mənimsəmə bildirişi (3-cü növ), Dost çağırışı.
+(925, v754) yoxlama yorğunluğu: hissənin ölçüsü sinfə görə (1–4: 3 fəsil/9 sual, 5–7: 4/12, 8+: 5/15; `gen_rule.per`-də saxlanır), yeni uşaq əlavə olunanda YALNIZ ilk fənnin
+1-ci hissəsi (qalanı valideyn gündə bir «Növbəti hissə ver»), «Bilmirəm, keç» (`is_correct` null) artıq «zəif» sayılmır (zəif yalnız cavab verilənlərdən, ≥3), ayrıca
+`skipped_topics` → «Diqqət»də «N mövzuda uşaq “Bilmirəm” dedi — hələ keçilməmiş ola bilər». Uşaq tərəfdə: 1-ci sualda «təxmin etmə» izahı, siyahıda «≈ N dəq» (75 san limiti yox).
+Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi, mənimsəmə bildirişi (3-cü növ), Dost çağırışı,
+yoxlamanın 5-ci sinif hissəsini valideynin «Hazırda hansı fəsildəsiniz?» seçiminə bağlamaq (indi «ilk üçdə bir» təxmini).
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 

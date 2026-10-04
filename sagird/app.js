@@ -354,7 +354,10 @@
           ? '<span class="solo diag">diaqnostika</span>' : "") + "</b><i>" +
         "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
         "<span>" + (t.questions || 0) + " sual</span>" +
-        (t.time_limit_sec ? "<span>·</span><span>⏱ " + Math.round(t.time_limit_sec / 60) + " dəq</span>" : "") +
+        (t.time_limit_sec
+          ? "<span>·</span><span>" + (t.diagnostic || String(t.title || "").indexOf("Diaqnostika") === 0
+              ? "≈ " + Math.max(5, Math.round((t.questions || 0) * 0.8)) + " dəq"       // diaqnostikada 75 san/sual limiti yalniz yuxari hed - gozlenilen vaxt deyil
+              : "⏱ " + Math.round(t.time_limit_sec / 60) + " dəq") + "</span>" : "") +
         //  cehdi bitmis testde "son tarix · N gun qaldi" menasizdir
         (isAsg && t.closes_at && !over ? dueSpan(t.closes_at) : "") +
         (left > 0 ? "<span>·</span><span>" + left + " cəhd qalıb</span>" : "") +
@@ -1037,6 +1040,11 @@
       rest = '<div class="ok restored">' + ic("check") + "<span>Əvvəlki " +
         S.restored + " cavabınız qaytarıldı — davam edin.</span></div>";
       S.restored = 0;
+    }
+
+    //  diaqnostikanin 1-ci sualinda: «tehmin etme» - tesadufi cavab neticeni pozur
+    if (S.i === 0 && String(S.test.title || "").indexOf("Diaqnostika") === 0) {
+      rest += '<div class="info diagnote">' + ic("info") + "<span>Bilmədiyin sualda «Bilmirəm, keç» bas — təxmin etmə. Sənə yalnız yadda qalanları göstərəcəyik.</span></div>";
     }
 
     show(

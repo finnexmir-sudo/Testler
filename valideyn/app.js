@@ -1032,6 +1032,8 @@
         attn = "Başlanğıc yoxlamaya görə gücləndirilməli: " + ws.map(function (x) { return x.subject + " — " + x.topics + " mövzu"; }).join(", ") + ".";
       }
       else attn = anyAct ? "Hələlik narahatedici bir şey yoxdur." : "Hələ məşq başlamayıb. Uşağa kodu göndərin, başlanğıc yoxlamanı həll etsin.";
+      var skp = Number(sm.skipped_topics || 0);
+      if (skp > 0 && (wl.length || ws.length || anyAct)) attn += " " + skp + " mövzuda uşaq «Bilmirəm» dedi — bunlar hələ keçilməmiş ola bilər.";
       var ask = (wl.length || ws.length) ? "Bu həftə məktəbdə nə öyrəndin? Bir misal göstər." : "";
       return '<div class="card fk">' +
         '<div class="fk-h"><div class="fk-av">' + esc(String(k.name || "?").charAt(0).toUpperCase()) + "</div>" +
@@ -1243,7 +1245,7 @@
         return '<button type="button" class="chip' + (st.subs.indexOf(a.slug) >= 0 ? " on" : "") + '" data-s="' + esc(a.slug) + '">' + esc(a.name) + "</button>";
       }).join("");
       var h = $("cSubjHint");
-      if (h) h.textContent = st.subs.length > 3 ? "Başlanğıc yoxlama ilk 3 fənn üçün dərhal hazırlanacaq, qalanını sonra «Ailəm» ekranından bir toxunuşla verə bilərsiniz." : "";
+      if (h) h.textContent = st.subs.length > 1 ? "Başlanğıc yoxlama yalnız ilk fənn üçün dərhal hazırlanacaq (uşaq yorulmasın), qalanını sonra «Ailəm» ekranından gündə bir toxunuşla verə bilərsiniz." : "";
     }
     on("cSubj", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-s]") : null;
