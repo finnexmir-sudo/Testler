@@ -128,6 +128,10 @@ select * from (values
     (select exists (select 1 from f where proname='rpc_family_praise')
         and exists (select 1 from f where proname='push_scan_weekly')
         and exists (select 1 from f where proname='rpc_family_push_subscribe'))),
+ ('919 ailə yolu: seanslı başlanğıc yoxlama',
+    (select exists (select 1 from f where proname='family_diag_session')
+        and exists (select 1 from f where proname='family_diag_state')
+        and exists (select 1 from f where proname='rpc_family_children' and def like '%family_diag_state%'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

@@ -401,6 +401,91 @@ update public.app_state set val = '{"on": false}' where key = 'push';
 delete from public.push_outbox where kind in ('afarin', 'hefte');
 delete from public.push_subs where endpoint like '%FAM-%';
 
+-- ------------------------------------------------ 4e · seansli baslangic yoxlama (919)
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare
+  v_sid uuid := current_setting('smoke.sid')::uuid;
+  kid jsonb; x jsonb; v_subj text; v_of int; r jsonb;
+begin
+  select k into kid from jsonb_array_elements(public.rpc_family_children()->'kids') k where (k->>'id')::uuid = v_sid;
+  select e into x from jsonb_array_elements(kid->'subject_diag') e
+   where e->>'state' = 'open' and (e->>'of')::int > 1 limit 1;
+  assert x is not null, 'en azi bir fennde birden cox hisseli seriya olmalidir: ' || (kid->'subject_diag')::text;
+  v_subj := x->>'slug'; v_of := (x->>'of')::int;
+  assert (x->>'done')::int = 0, '1-ci hisse hele yazilmayib';
+  perform set_config('smoke.dsubj', v_subj, false);
+  perform set_config('smoke.dof', v_of::text, false);
+  r := public.rpc_family_diag(v_sid, v_subj);
+  assert (r->>'existing')::boolean and (r->>'part')::int = 1, 'acıq hisse dublikat yaratmir: ' || r::text;
+end $$;
+reset role;
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid; v_t uuid; n int; v_topics int;
+begin
+  select t.id into v_t from public.tests t join public.assignments a on a.test_id = t.id and a.student_id = v_sid
+   where t.is_diagnostic and t.gen_rule->>'seq' = '1' and t.subject_id = (select id from public.subjects where slug = current_setting('smoke.dsubj'))
+   order by a.created_at desc limit 1;
+  assert v_t is not null, '1-ci hisse testi';
+  select count(*) into n from public.test_questions where test_id = v_t;
+  assert n between 3 and 15 and n % 3 = 0, 'hisse <=15 sual, movzu basina 3: ' || n;
+  select jsonb_array_length(gen_rule->'topics') into v_topics from public.tests where id = v_t;
+  assert v_topics > 5, 'seriya 5-den cox fesli: ' || v_topics;
+  perform set_config('smoke.dt1', v_t::text, false);
+  insert into public.attempts (student_id, test_id, class_id, status, finished_at)
+  select v_sid, v_t, st.class_id, 'submitted', now() from public.students st where st.id = v_sid;
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare
+  v_sid uuid := current_setting('smoke.sid')::uuid; kid jsonb; x jsonb; r jsonb;
+begin
+  select k into kid from jsonb_array_elements(public.rpc_family_children()->'kids') k where (k->>'id')::uuid = v_sid;
+  select e into x from jsonb_array_elements(kid->'subject_diag') e where e->>'slug' = current_setting('smoke.dsubj');
+  assert x->>'state' = 'partial' and (x->>'done')::int = 1, '1 hisse yazilib -> partial: ' || x::text;
+  r := public.rpc_family_diag(v_sid, current_setting('smoke.dsubj'));
+  assert (r->>'part')::int = 2 and not (r->>'existing')::boolean, '2-ci hisse verildi: ' || r::text;
+  select e into x from jsonb_array_elements((select k->'subject_diag' from jsonb_array_elements(public.rpc_family_children()->'kids') k where (k->>'id')::uuid = v_sid)) e
+   where e->>'slug' = current_setting('smoke.dsubj');
+  assert x->>'state' = 'open', '2-ci hisse verilib -> open: ' || x::text;
+end $$;
+reset role;
+--  qalan hisseleri ard-arda ver ve yaz -> done -> complete
+do $$
+declare
+  v_sid uuid := current_setting('smoke.sid')::uuid; r jsonb; v_t uuid; i int := 0; kid jsonb; x jsonb;
+begin
+  --  2-ci hisse (open) evvelce verilib: onu da yaz
+  for v_t in select t.id from public.tests t join public.assignments a on a.test_id = t.id and a.student_id = v_sid
+              where t.is_diagnostic and t.subject_id = (select id from public.subjects where slug = current_setting('smoke.dsubj'))
+                and t.gen_rule ? 'run' and t.id <> current_setting('smoke.dt1')::uuid loop
+    insert into public.attempts (student_id, test_id, class_id, status, finished_at)
+    select v_sid, v_t, st.class_id, 'submitted', now() from public.students st where st.id = v_sid;
+  end loop;
+  loop
+    i := i + 1;
+    assert i <= 10, 'seriya sonsuz';
+    execute 'set local role authenticated';
+    r := public.rpc_family_diag(v_sid, current_setting('smoke.dsubj'));
+    execute 'reset role';
+    exit when (r->>'complete')::boolean;
+    v_t := (select t.id from public.tests t join public.assignments a on a.test_id = t.id and a.student_id = v_sid
+             where t.is_diagnostic and t.gen_rule->>'seq' = r->>'part'
+               and t.subject_id = (select id from public.subjects where slug = current_setting('smoke.dsubj'))
+             order by a.created_at desc limit 1);
+    insert into public.attempts (student_id, test_id, class_id, status, finished_at)
+    select v_sid, v_t, st.class_id, 'submitted', now() from public.students st where st.id = v_sid;
+  end loop;
+  assert i = current_setting('smoke.dof')::int - 1, 'seriya ' || current_setting('smoke.dof') || ' hisse: ' || i;
+  execute 'set local role authenticated';
+  select k into kid from jsonb_array_elements(public.rpc_family_children()->'kids') k where (k->>'id')::uuid = v_sid;
+  execute 'reset role';
+  select e into x from jsonb_array_elements(kid->'subject_diag') e where e->>'slug' = current_setting('smoke.dsubj');
+  assert x->>'state' = 'done' and (x->>'done')::int = (x->>'of')::int, 'hamisi yazilib -> done: ' || x::text;
+end $$;
+
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';
 set role authenticated;

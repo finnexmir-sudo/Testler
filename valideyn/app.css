@@ -253,6 +253,7 @@ a.btn{text-decoration:none}
 .fk-sj{margin:0 0 10px;border:1px solid var(--n-150);border-radius:10px;overflow:hidden}
 .fk-sr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;font-size:14px;border-bottom:1px solid var(--n-150)}
 .fk-sr:last-child{border-bottom:0}
+.fk-rt{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .fk-sr i{font-style:normal;font-size:12.5px;color:var(--fg-3)}
 .fk-sr i.ok{color:var(--ok);font-weight:700}
 .fk-sr .btn{min-height:32px;font-size:13px;padding:0 10px}

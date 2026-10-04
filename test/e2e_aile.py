@@ -143,6 +143,26 @@ with sync_playwright() as pw:
         nd2 = db("select count(*) n from public.assignments a join public.tests t on t.id = a.test_id where a.student_id = %s and t.is_diagnostic", (st["i"],), one=True)["n"]
         ok(nd2 == 4, "«Yoxlama ver» basıldı: 4-cü fənn üçün diaqnostika verildi", nd2)
 
+        print("-- seansli yoxlama: hisse yazilir, «Novbeti hisse ver» (919)")
+        one = db("""select t.id::text i, t.gen_rule->>'of' ofn from public.assignments a join public.tests t on t.id = a.test_id
+                     where a.student_id = %s and t.is_diagnostic and (t.gen_rule->>'of')::int > 1 order by a.created_at limit 1""", (st["i"],), one=True)
+        ok(one is not None, "bir fənnin yoxlaması bir neçə hissəlidir (%s)" % (one and one["ofn"]))
+        if one:
+            nq = db("select count(*) n from public.test_questions where test_id = %s", (one["i"],), one=True)["n"]
+            ok(0 < nq <= 15, "hissə ≤15 sualdır (%d)" % nq)
+            db("""insert into public.attempts (student_id, test_id, class_id, status, finished_at)
+                  select %s, %s, class_id, 'submitted', now() from public.students where id = %s""", (st["i"], one["i"], st["i"]))
+            p.reload(); p.wait_for_selector(".fk", timeout=15000)
+            p.evaluate("document.querySelectorAll('details.fk-dd:not(.fk-cur)').forEach(function (d) { d.open = true; })")
+            p.wait_for_selector(".fk-rt", timeout=10000)
+            ok("1 / %s hissə" % one["ofn"] in p.locator(".fk-rt").first.inner_text(), "«1 / N hissə ✓» yazılır", p.locator(".fk-rt").first.inner_text())
+            ok("Növbəti hissə ver" in p.locator(".fk-rt").first.inner_text(), "«Növbəti hissə ver» düyməsi")
+            p.screenshot(path="%s/5e_seansli_%s.png" % (OUT, tag), full_page=True)
+            p.locator(".fk-rt [data-diag]").first.click()
+            p.wait_for_function("document.querySelectorAll('.fk-rt').length === 0", timeout=20000)
+            n2 = db("select count(*) n from public.tests t join public.assignments a on a.test_id = t.id where a.student_id = %s and t.is_diagnostic and t.gen_rule->>'seq' = '2'", (st["i"],), one=True)["n"]
+            ok(n2 == 1, "2-ci hissə verildi (%d)" % n2)
+
         print("-- xulase: diaqnostika cavablari (movzu basina 3) «Diqqet»de gorunur")
         a_test = db("select a.test_id::text t from public.assignments a where a.student_id = %s limit 1", (st["i"],), one=True)["t"]
         a_cls = db("select class_id::text c from public.students where id = %s", (st["i"],), one=True)["c"]

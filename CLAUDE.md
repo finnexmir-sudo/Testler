@@ -570,7 +570,12 @@ canlıda real nəticəyə görə düzəldilməlidir.
 hesab başına BİR push, `hefte:<hesab>:<bazar ertəsi>` dedupe; `push_tick` onu da çağırır). Valideyn cihazı «Ailəm»dən bir toxunuşla bütün uşaqlar üçün yazılır
 (`rpc_family_push_subscribe/unsubscribe`, scope `fam`; «Çıxış»da silinir; cihaz hər açılışda sinxronlaşır). Gündəlik push başlığı ailədə «Bu günün məşqi hazırdır».
 DİQQƏT: ailə push qutusu e2e-də YOXDUR (e2e-də VAPID açarı boşdur) — real telefonda yoxlanmalıdır.
-Hələ yox: seanslı diaqnostika, «Hədəf 4 gün»in dəyişməsi, abituriyent.
+(919, v747) seanslı başlanğıc yoxlama: bir fənn = bir SERİYA (`gen_rule.run`) = bir neçə HİSSƏ (≤5 fəsil × 3 sual = 15 sual). Fəsillər: əvvəlki sinfin (N-1)
+HAMISI + bu sinfin ilk üçdə biri (≥2), seriya ilk hissədə `gen_rule.topics`-də saxlanır. Valideyn hər hissəni «Növbəti hissə ver» ilə özü verir
+(`app.family_diag_session`; `rpc_family_diag` indi onu çağırır, `rpc_family_children.subject_diag[].state` = none|open|partial|done + done/of).
+Nəticə hissələr üzrə «Diqqət»də (915, mövzu üzrə cavablar) öz-özünə birləşir. Müəllim yolu (`rpc_diagnostic_create`) dəyişməyib. Hələ yox: «bir sinif aşağı yoxla» təklifi
+(N-2), plan seçiləndə N sinfi fəsillərinin planla uyğunlaşması.
+Hələ yox: «Hədəf 4 gün»in dəyişməsi, abituriyent.
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 

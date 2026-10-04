@@ -926,9 +926,12 @@
       var done = sd.length > 0 && doneN === sd.length;
       var diag = sd.length ? "Başlanğıc yoxlama: " + doneN + " / " + sd.length + " fənn" + (done ? " ✓" : "") : "Başlanğıc yoxlama hazırlanır";
       var rows = sd.map(function (x) {
-        var right = x.state === "done" ? '<i class="ok">tamamlandı ✓</i>'
-          : x.state === "open" ? "<i>uşağa verilib</i>"
-          : '<button type="button" class="btn sm ghost" data-diag="' + esc(x.slug) + '" data-kid="' + esc(k.id) + '">Yoxlama ver</button>';
+        var xo = Number(x.of || 1), xd = Number(x.done || 0);
+        var btn = function (t) { return '<button type="button" class="btn sm ghost" data-diag="' + esc(x.slug) + '" data-kid="' + esc(k.id) + '" data-t="' + esc(t) + '">' + t + "</button>"; };
+        var right = x.state === "done" ? '<i class="ok">tamamlandı ✓' + (xo > 1 ? " · " + xo + " hissə" : "") + "</i>"
+          : x.state === "open" ? "<i>uşağa verilib" + (xo > 1 ? " · " + (xd + 1) + "/" + xo + "-ci hissə" : "") + "</i>"
+          : x.state === "partial" ? '<span class="fk-rt"><i>' + xd + " / " + xo + " hissə ✓</i>" + btn("Növbəti hissə ver") + "</span>"
+          : btn("Yoxlama ver");
         return '<div class="fk-sr"><span>' + esc(x.name) + "</span>" + right + "</div>";
       }).join("");
       var sm = byId[k.id] || {};
@@ -1080,7 +1083,7 @@
     sb.rpc("rpc_family_diag", { p_student: btn.getAttribute("data-kid"), p_subject: btn.getAttribute("data-diag") })
       .then(function () { busy = false; screenFamily(); })
       .catch(function (e) {
-        busy = false; btn.disabled = false; btn.textContent = "Yoxlama ver";
+        busy = false; btn.disabled = false; btn.textContent = btn.getAttribute("data-t") || "Yoxlama ver";
         if (famExpired(e)) { screenFamily(); return; }
         var m = document.createElement("div"); m.innerHTML = msg("err", famErr(e));
         main.insertBefore(m.firstChild, main.firstChild); window.scrollTo(0, 0);
