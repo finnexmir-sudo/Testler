@@ -906,10 +906,18 @@
         Array.prototype.forEach.call(all, function (x) { x.disabled = true; });
         sb.rpc("rpc_family_praise", { p_student: kid, p_kind: Number(b.getAttribute("data-pi")) }).then(function (r) {
           busy = false;
-          box.innerHTML = '<p class="fk-ok">Göndərildi ✓</p><p class="fk-cm">' +
-            (r && r.push ? "Uşağın telefonuna bildiriş gedəcək (gecə 21:00–10:00 arası səhərə qalır). " : "") +
+          //  Bakı saatı: 21:00–10:00 arası bildiriş səhərə qalır (sakit saat)
+          var hr = 12;
+          try { hr = Number(new Date().toLocaleString("en-GB", { timeZone: "Asia/Baku", hour: "numeric", hour12: false })) % 24; } catch (x) {}
+          var night = hr >= 21 || hr < 10;
+          var note = r && r.push
+            ? (night ? "Hazırda gecədir — bildiriş səhər saat 10:00-da gedəcək. " : "Uşağın telefonuna bildiriş gedəcək. ")
+            : (r && Number(r.count) <= 2
+                ? "Uşağın telefonunda bildiriş açılmayıb, ona görə push getmədi. Uşaq öz səhifəsində «Bildirişləri aç» düyməsini basmalıdır. "
+                : "");
+          box.innerHTML = '<p class="fk-ok">Göndərildi ✓</p><p class="fk-cm">' + note +
             "Uşaq bunu gündəlik məşq kartında da görəcək.</p>";
-          setTimeout(function () { if (document.body.contains(box)) screenFamily(); }, 2500);
+          setTimeout(function () { if (document.body.contains(box)) screenFamily(); }, 6000);
         }).catch(function (e) {
           busy = false;
           if (famExpired(e)) { screenFamily(); return; }
