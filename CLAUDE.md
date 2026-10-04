@@ -596,6 +596,8 @@ HEÇ VAXT geri getmir, cəza yoxdur), gün zənciri (aralıq ≤2 gün — bir g
 (`family_kids.reward` ≤80, «Gündəlik məşq → dəyiş»dən, hədəf dolanda uşaq görür). `rpc_student_family`: days_total/streak/best_streak/answers_total/badges/reward; `rpc_family_set_reward`.
 Qərar (06.10): uşaqlar arası yarış/«Dost çağırışı» — pilotdan və hüquqşünas baxışından SONRA; formatı: dəvətlə, hər iki valideynin razılığı, nəticə səyə görə (gün sayı),
 əməkdaşlıq (komanda hədəfi) əvvəl, qalib/uduzan mesajı yox, başqa ailəyə yalnız ilk ad + gün sayı.
+`db/aile_917_924.sql` — 917–924 bir faylda (Supabase SQL Editor-ə BİR dəfə yapışdırmaq üçün; təkrar işlədilə bilər). Yeni miqrasiya əlavə olunanda bu fayl yenidən yığılmalıdır
+(`cat 917…924` ardıcıl). Səbəb: sahib faylları ayrı-ayrı əl ilə işlədir, bir-ikisi atılanda «Bu imkan hələ aktiv deyil» çıxır (06.10-da 921 atılmışdı).
 Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi, mənimsəmə bildirişi (3-cü növ), Dost çağırışı.
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
