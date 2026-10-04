@@ -733,7 +733,10 @@
       setBusy("fGo", true, label);
       var p = up
         ? sb.signUp(mail, pass, name).then(function (d) {
-            if (d && d.access_token) return famStart(name);
+            if (d && d.access_token) {
+              //  hesab (auth) yarandi, amma xidmet bu e-poct ucun hele acilmayib - «Daxil ol» ile cehd etmeye mecbur qalmasin
+              return famStart(name).catch(function (e2) { screenFamName(); var fe = $("fErr"); if (fe) fe.innerHTML = msg("err", famErr(e2)); });
+            }
             //  e-poct tesdiqi aciqdir
             screenFamAuth("in", msg("ok", "Poçtunuza təsdiq linki göndərildi. Linkə basın, sonra buradan daxil olun."));
           })
@@ -751,7 +754,9 @@
     show(famHero("Son addım", "Adınızı yazın, 30 günlük sınaq başlasın.") +
       '<div class="card fam" style="margin-top:18px"><div id="fErr"></div>' +
         '<label for="fName">Adınız</label><input id="fName" maxlength="80" autocomplete="name" placeholder="Ad Soyad">' +
-        '<button class="btn go wide" id="fGo" style="margin-top:14px">Davam et</button></div>');
+        '<button class="btn go wide" id="fGo" style="margin-top:14px">Davam et</button></div>' +
+      '<p class="note" style="text-align:center;margin-top:14px"><a href="#" id="fOut">Başqa e-poçtla daxil olun</a></p>');
+    on("fOut", "click", function (e) { e.preventDefault(); logout(false); });
     $("fName").focus();
     function go() {
       if (busy) return;
