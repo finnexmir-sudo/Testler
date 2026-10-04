@@ -117,6 +117,9 @@ select * from (values
     (select exists (select 1 from f where proname='rpc_family_summary')
         and exists (select 1 from f where proname='rpc_family_delete_child')
         and exists (select 1 from f where proname='rpc_family_delete_account'))),
+ ('916 ailə yolu: cari fəsil',
+    (select exists (select 1 from f where proname='rpc_family_chapters')
+        and exists (select 1 from f where proname='rpc_family_set_current'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

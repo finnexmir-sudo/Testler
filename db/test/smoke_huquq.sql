@@ -117,7 +117,7 @@ do $$
 declare v_say int;
 begin
   select count(*) into v_say from t_anon where ac;
-  if v_say <> 26 then raise exception 'tekrar isletmek sayi deyisdi: %', v_say; end if;
+  if v_say <> 29 then raise exception 'tekrar isletmek sayi deyisdi: %', v_say; end if;
 end $$;
 \echo 'OK  6 · berpa idempotentdir - ikinci defe hec ne deyismir'
 

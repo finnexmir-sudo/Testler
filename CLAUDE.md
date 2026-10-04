@@ -554,7 +554,10 @@ saxlanır, heç nəyi idarə etmir); razılıq mətni `aile-v3` («Uşağın ad�
 Razıyam.»). (915) `rpc_family_summary` — «Bu gün N sual·M düz», həftə nöqtələri (B.e–B, Bakı vaxtı), «Hədəf x/4 gün» (4 sabit),
 «Diqqət» (ən zəif mövzu: ≥4 cavab, <70 %, 45 gün), «Evdə soruşun»; `rpc_family_delete_child`, `rpc_family_delete_account`
 (cascade + auth.users silinir; müəllim hesabı bu yolla silinmir); `mexfilik/` səhifəsi ailə yolunu əks etdirir.
-Hələ yox: «Afərin göndər», seanslı diaqnostika, mənimsəmə/cari fəsil, gündəlik məşq hədəfi, həftəlik xülasə push, abituriyent.
+(916, v743) «Hazırda hansı fəsildəsiniz?»: `rpc_family_chapters` (fəsil siyahısı + cari = keçilmiş son fəsil), `rpc_family_set_current`
+(plan yoxdursa `rpc_plan_create` ilə yaranır; seçilən fəslə QƏDƏR bütün mövzular `done_at` alır, sonrakılar açılır) — beləliklə
+`app.daily_topics` və gündəlik paket mövcud müəllim plan mexanizminə söykənir. «Diqqət» mətni yumşaldıldı (<6 cavab → «gücləndirmək faydalı olar»).
+Hələ yox: «Afərin göndər», seanslı diaqnostika, mənimsəmə qaydası (8/10, 3-7-21 gün), gündəlik məşq hədəfi/dəqiqə, həftəlik xülasə push, abituriyent.
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 

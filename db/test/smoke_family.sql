@@ -175,6 +175,42 @@ begin
 end $$;
 reset role;
 
+-- ------------------------------------------------ 4b · cari fesil (916)
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare
+  v_sid uuid := current_setting('smoke.sid')::uuid;
+  v_subj text; r jsonb; ch jsonb; v_c2 uuid; v_c1 uuid; n1 int; n2 int;
+begin
+  select x->>'slug' into v_subj
+    from jsonb_array_elements((select k->'subject_diag' from jsonb_array_elements(public.rpc_family_children()->'kids') k
+                                where (k->>'id')::uuid = v_sid)) x
+   where jsonb_array_length(public.rpc_family_chapters(v_sid, x->>'slug')->'chapters') >= 2 limit 1;
+  assert v_subj is not null, '916: en azi 2 fesilli fenn lazimdir';
+  r := public.rpc_family_chapters(v_sid, v_subj);
+  assert r->'current' = 'null'::jsonb or r->>'current' is null, 'evvelce cari fesil yoxdur: ' || r::text;
+  v_c1 := (r->'chapters'->0->>'id')::uuid;
+  v_c2 := (r->'chapters'->1->>'id')::uuid;
+  r := public.rpc_family_set_current(v_sid, v_subj, v_c2);
+  n2 := (r->>'done_topics')::int;
+  assert n2 > 0, 'ikinci fesile qeder kecildi';
+  assert (public.rpc_family_chapters(v_sid, v_subj)->>'current')::uuid = v_c2, 'cari = 2-ci fesil';
+  r := public.rpc_family_set_current(v_sid, v_subj, v_c1);
+  n1 := (r->>'done_topics')::int;
+  assert n1 > 0 and n1 < n2, 'geri qayitmaq: ' || n1 || ' < ' || n2;
+  assert (public.rpc_family_chapters(v_sid, v_subj)->>'current')::uuid = v_c1, 'cari = 1-ci fesil';
+  begin perform public.rpc_family_set_current(v_sid, v_subj, gen_random_uuid()); assert false, 'yalan fesil';
+  exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
+  begin perform public.rpc_family_set_current(v_sid, 'yoxdur', v_c1); assert false, 'yalan fenn';
+  exception when others then if sqlerrm like '%seçilməyib%' then null; else raise; end if; end;
+  perform set_config('smoke.subj', v_subj, false);
+end $$;
+reset role;
+do $$ begin
+  assert exists (select 1 from app.daily_topics(current_setting('smoke.sid')::uuid) where src = 'plan'), 'gundelik movzular planin kecilenlerinden gelir';
+end $$;
+
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';
 set role authenticated;
@@ -186,6 +222,8 @@ begin
   ch := public.rpc_family_children();
   assert jsonb_array_length(ch->'kids') = 0, 'basqa ailənin usagi gorunmur';
   begin perform public.rpc_family_diag(current_setting('smoke.sid')::uuid, 'riyaziyyat'); assert false, 'basqa ailenin usagina yoxlama';
+  exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
+  begin perform public.rpc_family_chapters(current_setting('smoke.sid')::uuid, current_setting('smoke.subj')); assert false, 'basqa usagin fesilleri';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
   begin perform public.rpc_family_open(current_setting('smoke.sid')::uuid); assert false, 'basqa usagin tokeni';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;

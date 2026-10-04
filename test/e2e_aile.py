@@ -158,6 +158,35 @@ with sync_playwright() as pw:
         ok("6 sual" in p.locator(".fk-st").first.inner_text(), "bu gün 6 sual", p.locator(".fk-st").first.inner_text())
         p.screenshot(path="%s/5b_ailem_xulase_%s.png" % (OUT, tag), full_page=True)
 
+        print("-- cari fesil: «Hazirda hansi fesildesiniz?»")
+        det = p.locator(".fk-cur").first
+        ok(det.count() == 1, "kartda «Hazırda hansı fəsildəsiniz?» bölməsi var")
+        det.locator("summary").click()
+        p.wait_for_selector(".fk-cur .fk-ch, .fk-cur .fk-cm", timeout=15000)
+        subs = det.locator("select.fk-subj option").count()
+        pick = None
+        for i in range(subs):
+            det.locator("select.fk-subj").select_option(index=i)
+            p.wait_for_timeout(700)
+            if p.locator(".fk-cur .fk-ch option[value]:not([value=''])").count() >= 2:
+                pick = i; break
+        ok(pick is not None, "fəsli olan fənn tapıldı (%d fənndən)" % subs)
+        if pick is not None:
+            vals = p.locator(".fk-cur .fk-ch option[value]:not([value=''])")
+            second = vals.nth(1).get_attribute("value")
+            p.locator(".fk-cur .fk-ch").select_option(second)
+            p.click(".fk-cur .fk-save"); p.wait_for_selector(".fk-cur .fk-ok", timeout=15000)
+            ok(True, "«Yadda saxlandı ✓»")
+            dn = db("""select count(*) n from public.class_plan_items i join public.class_plans pl on pl.id = i.plan_id
+                        join public.students s on s.class_id = pl.class_id where s.id = %s and i.done_at is not null""", (st["i"],), one=True)["n"]
+            ok(dn > 0, "bazada: keçilmiş mövzular yazıldı (%d)" % dn)
+            p.reload(); p.wait_for_selector(".fk", timeout=15000)
+            p.locator(".fk-cur summary").first.click()
+            p.wait_for_selector(".fk-cur .fk-ch", timeout=15000)
+            p.locator(".fk-cur select.fk-subj").select_option(index=pick); p.wait_for_timeout(700)
+            ok("(hazırda)" in p.locator(".fk-cur .fk-ch option:checked").inner_text(), "yenilənəndən sonra cari fəsil «(hazırda)» göstərilir")
+            p.screenshot(path="%s/5c_cari_fesil_%s.png" % (OUT, tag), full_page=True)
+
         print("-- usagin movcud valideyn ekrani")
         p.click("[data-open]"); p.wait_for_selector("#famBack", timeout=15000)
         ok("Keçilən dərslər" not in p.locator("#main").inner_text() or True, "valideyn ekranı açıldı")

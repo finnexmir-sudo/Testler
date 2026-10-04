@@ -161,6 +161,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 912_push_xatirlatma.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 913_aile.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 914_aile_fennler.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 915_aile_xulase.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 916_aile_cari_fesil.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

@@ -869,6 +869,9 @@
         '<div class="fk-st"><span>Hədəf</span><b>' + wn + " / 4 gün</b></div>" +
         '<div class="fk-diqqet"><b>Diqqət</b>' + esc(attn) + "</div>" +
         (ask ? '<div class="fk-ask">💬 Evdə soruşun: ' + esc(ask) + "</div>" : "") +
+        (sd.length ? '<details class="fk-dd fk-cur" data-curkid="' + esc(k.id) + '"><summary>Hazırda hansı fəsildəsiniz?</summary>' +
+          '<div class="fk-cb"><select class="fk-subj" aria-label="Fənn">' + sd.map(function (x) { return '<option value="' + esc(x.slug) + '">' + esc(x.name) + "</option>"; }).join("") + "</select>" +
+          '<div class="fk-cbox"></div></div></details>' : "") +
         '<details class="fk-dd"' + (!doneN && !anyAct ? " open" : "") + "><summary>" + esc(diag) + "</summary>" +
           (rows ? '<div class="fk-sj">' + rows + "</div>" : "") + "</details>" +
         '<div class="fk-code"><i>Uşağın giriş kodu</i><b>' + esc(k.login_code) + "</b>" +
@@ -891,6 +894,7 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-diag]"), function (b) {
       b.addEventListener("click", function () { famDiag(b); });
     });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-curkid]"), famCurWire);
     Array.prototype.forEach.call(document.querySelectorAll("[data-del]"), function (b) {
       b.addEventListener("click", function () { famAskDelChild(b); });
     });
@@ -930,6 +934,43 @@
         function done() { screenFamAuth("up", msg("ok", "Hesabınız və bütün məlumat silindi.")); }
       }).catch(function (e) { busy = false; box.innerHTML = msg("err", famErr(e)); });
     });
+  }
+
+  //  «Hazirda hansi fesildesiniz?» - fenn secilir, fesil siyahisi yuklenir, cari fesil saxlanir
+  function famCurWire(det) {
+    var kid = det.getAttribute("data-curkid");
+    var sel = det.querySelector("select.fk-subj"), box = det.querySelector(".fk-cbox");
+    var loaded = false;
+    function load() {
+      box.innerHTML = '<p class="fk-cm">Yüklənir…</p>';
+      sb.rpc("rpc_family_chapters", { p_student: kid, p_subject: sel.value }).then(function (d) {
+        var chs = (d && d.chapters) || [];
+        if (!chs.length) { box.innerHTML = '<p class="fk-cm">Bu fənn üçün mövzu siyahısı hələ hazır deyil.</p>'; return; }
+        var opts = chs.map(function (c, i) {
+          return '<option value="' + esc(c.id) + '"' + (c.id === d.current ? " selected" : "") + ">" + (i + 1) + ". " + esc(c.name) + (c.id === d.current ? " (hazırda)" : "") + "</option>";
+        }).join("");
+        box.innerHTML = '<select class="fk-ch" aria-label="Fəsil">' + (d.current ? "" : '<option value="">— fəsil seçin —</option>') + opts + "</select>" +
+          '<button type="button" class="btn sm go fk-save">Yadda saxla</button>' +
+          '<p class="fk-cm">Gündəlik suallar bu fəslə qədər keçilmiş mövzulardan seçiləcək.</p><div class="fk-cres"></div>';
+        var save = box.querySelector(".fk-save"), cs = box.querySelector(".fk-ch"), res = box.querySelector(".fk-cres");
+        save.addEventListener("click", function () {
+          if (!cs.value || busy) { if (!cs.value) res.innerHTML = msg("err", "Fəsil seçin."); return; }
+          busy = true; save.disabled = true;
+          sb.rpc("rpc_family_set_current", { p_student: kid, p_subject: sel.value, p_chapter: cs.value }).then(function () {
+            busy = false; save.disabled = false; res.innerHTML = '<p class="fk-ok">Yadda saxlandı ✓</p>';
+          }).catch(function (e) {
+            busy = false; save.disabled = false;
+            if (famExpired(e)) { screenFamily(); return; }
+            res.innerHTML = msg("err", famErr(e));
+          });
+        });
+      }).catch(function (e) {
+        if (famExpired(e)) { screenFamily(); return; }
+        box.innerHTML = msg("err", famErr(e));
+      });
+    }
+    det.addEventListener("toggle", function () { if (det.open && !loaded) { loaded = true; load(); } });
+    sel.addEventListener("change", load);
   }
 
   //  Secilmis, amma hele yoxlamasi verilmemis fenn ucun bir toxunusla yoxlama ver
