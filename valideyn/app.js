@@ -852,11 +852,13 @@
       var wl = Array.isArray(sm.weak) ? sm.weak : [], wt = Number(sm.weak_total || wl.length);
       var anyAct = wn > 0 || tq > 0;
       var attn;
-      if (wl.length === 1 && wt === 1) attn = "«" + wl[0].topic + "» mövzusunda çətinlik çəkir (" + wl[0].percent + " % düz). Təkrar məşq faydalı olar.";
-      else if (wl.length >= 2 && wt === 2) attn = "«" + wl[0].topic + "» və «" + wl[1].topic + "» mövzularında çətinlik çəkir. Təkrar məşq faydalı olar.";
-      else if (wl.length >= 2) attn = "«" + wl[0].topic + "», «" + wl[1].topic + "» və daha " + (wt - 2) + " mövzuda çətinlik çəkir. Təkrar məşq faydalı olar.";
+      var solid = wl.length > 0 && Number(wl[0].n || 0) >= 6;
+      var tail = solid ? " mövzusunda çətinlik çəkir. Təkrar məşq faydalı olar." : " mövzusunu gücləndirmək faydalı olar.";
+      if (wl.length === 1 && wt === 1) attn = "«" + wl[0].topic + "»" + tail;
+      else if (wl.length >= 2 && wt === 2) attn = "«" + wl[0].topic + "» və «" + wl[1].topic + "» mövzularını gücləndirmək faydalı olar.";
+      else if (wl.length >= 2) attn = "«" + wl[0].topic + "», «" + wl[1].topic + "» və daha " + (wt - 2) + " mövzunu gücləndirmək faydalı olar.";
       else attn = anyAct ? "Hələlik narahatedici bir şey yoxdur." : "Hələ məşq başlamayıb. Uşağa kodu göndərin, başlanğıc yoxlamanı həll etsin.";
-      var ask = wl.length ? "«" + wl[0].topic + "» mövzusunu mənə bir misalla izah edə bilərsən?" : "";
+      var ask = wl.length ? "Bu həftə məktəbdə nə öyrəndin? Bir misal göstər." : "";
       return '<div class="card fk">' +
         '<div class="fk-h"><div class="fk-av">' + esc(String(k.name || "?").charAt(0).toUpperCase()) + "</div>" +
           "<div><b>" + esc(k.name) + "</b><span>" + esc(k.sinif ? (ORD[k.sinif] || (k.sinif + "-ci")) + " sinif" : "") +
