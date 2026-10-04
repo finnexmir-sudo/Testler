@@ -557,7 +557,15 @@ Razıyam.»). (915) `rpc_family_summary` — «Bu gün N sual·M düz», həftə
 (916, v743) «Hazırda hansı fəsildəsiniz?»: `rpc_family_chapters` (fəsil siyahısı + cari = keçilmiş son fəsil), `rpc_family_set_current`
 (plan yoxdursa `rpc_plan_create` ilə yaranır; seçilən fəslə QƏDƏR bütün mövzular `done_at` alır, sonrakılar açılır) — beləliklə
 `app.daily_topics` və gündəlik paket mövcud müəllim plan mexanizminə söykənir. «Diqqət» mətni yumşaldıldı (<6 cavab → «gücləndirmək faydalı olar»).
-Hələ yox: «Afərin göndər», seanslı diaqnostika, mənimsəmə qaydası (8/10, 3-7-21 gün), gündəlik məşq hədəfi/dəqiqə, həftəlik xülasə push, abituriyent.
+(917, v745) gündəlik məşq + mənimsəmə: paketin ölçüsü seçilmiş dəqiqədən (5/10/15/20/30 → 5/10/14/18/24 sual; `app.daily_build` indi yönləndiricidir:
+ailə uşağı → `daily_build_family`, qalanı → `daily_build_classic`, müəllim yolu dəyişmir). Hər cavab `topic_events` jurnalına yazılır
+(`app.mastery_note`, yalnız `family_kids`-də olan şagirdlər üçün; vahid = FƏSİL, yəni `coalesce(parent_id, id)` — suallar fəslə bağlıdır).
+**Mənimsəmə:** son 10 cavabdan ≥8 düz, ≥2 fərqli gündə, ≥6 fərqli sualla. **Təkrar:** 3→7→21→45 gün; təkrarda 2 sualdan ikisi düz → növbəti
+mərhələ, biri düz → eyni mərhələ +3 gün, ikisi səhv → bir mərhələ geri (1-ci mərhələdə → yenidən «öyrənilir»). **Paket:** təkrar (≤n/4 mövzu×2) +
+səhv dəftəri (≤2) + cari fəsil/öyrənilən mövzular (növbə ilə, bir mövzudan ≤3; çətinlik cavab sayına görə 1→2→3). Mənbə etiketləri: `cari`, `mesq`.
+`rpc_family_progress()` valideynə «Mənimsənilib N mövzu», «Hazırda: fənn — fəsil» göstərir. DİQQƏT: bu qaydalar uşaqlar üzərində yoxlanmayıb (§13a) —
+canlıda real nəticəyə görə düzəldilməlidir.
+Hələ yox: «Afərin göndər», seanslı diaqnostika, həftəlik xülasə push, «Hədəf 4 gün»in dəyişməsi, abituriyent.
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 

@@ -215,6 +215,21 @@ with sync_playwright() as pw:
         ok("Hüseyn" in body, "şagird kodla girdi: salam, Hüseyn")
         ok("iaqnostik" in body or "Diaqnostik" in body or "sual" in body, "şagirdin ekranında başlanğıc yoxlama görünür", body[:300].replace("\n", " | "))
         sp.screenshot(path="%s/7_sagird_%s.png" % (OUT, tag), full_page=True)
+        if pick is not None:
+            print("-- usagin gundelik mesqi (917)")
+            try:
+                sp.wait_for_selector("#btnDay", timeout=15000)
+                dtxt = sp.locator(".dcard").inner_text()
+                ok("Keçdiyin mövzular üzrə" in dtxt, "gündəlik kart: «Keçdiyin mövzular üzrə» (müəllim yazısı yoxdur)", dtxt)
+                sp.screenshot(path="%s/7b_gundelik_kart_%s.png" % (OUT, tag), full_page=True)
+                sp.click("#btnDay"); sp.wait_for_selector("#opts .opt", timeout=15000)
+                ok(sp.locator(".dwhy").inner_text().strip() != "", "sual mənbəyi yazılır (dwhy)")
+                sp.locator("#opts .opt").first.click(); sp.wait_for_selector("#btnDNext", timeout=15000)
+                ne = db("select count(*) n from public.topic_events where student_id = %s", (st["i"],), one=True)["n"]
+                ok(ne == 1, "cavab mənimsəmə jurnalına yazıldı (%d)" % ne)
+                sp.screenshot(path="%s/7c_gundelik_sual_%s.png" % (OUT, tag), full_page=True)
+            except Exception as ex:
+                ok(False, "gündəlik məşq axını", repr(ex)[:200])
         ctx.close()
 
         print("-- silme: usagi, sonra butun hesabi")

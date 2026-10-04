@@ -211,6 +211,132 @@ do $$ begin
   assert exists (select 1 from app.daily_topics(current_setting('smoke.sid')::uuid) where src = 'plan'), 'gundelik movzular planin kecilenlerinden gelir';
 end $$;
 
+-- ------------------------------------------------ 4c · gundelik paket + menimseme (917)
+do $$
+declare
+  v_sid uuid := current_setting('smoke.sid')::uuid;
+  r jsonb; n5 int; n30 int;
+begin
+  update public.family_kids set minutes = 5 where student_id = v_sid;
+  r := app.daily_build(v_sid); n5 := jsonb_array_length(r);
+  assert n5 between 3 and 5, '5 deq -> <=5 sual: ' || n5;
+  update public.family_kids set minutes = 30 where student_id = v_sid;
+  r := app.daily_build(v_sid); n30 := jsonb_array_length(r);
+  assert n30 > n5 and n30 <= 24, '30 deq daha cox sual: ' || n30 || ' > ' || n5;
+  assert not exists (select 1 from jsonb_array_elements(r) e where e->>'tid' is null), 'her elementde tid var';
+  assert (select count(distinct e->>'q') from jsonb_array_elements(r) e) = n30, 'suallar tekrarlanmir';
+  assert not exists (select 1 from jsonb_array_elements(r) e where e->>'src' not in ('cari','mesq','sehv','tekrar','elave')), 'yalniz aile menbeleri';
+end $$;
+
+--  menimseme: 8/10 duz, 2 ferqli gunde, 10 ferqli sual
+select set_config('smoke.mt', (select q.topic_id::text from public.questions q where q.status = 'published' and q.topic_id is not null
+                                group by q.topic_id having count(*) >= 12 limit 1), false);
+select set_config('smoke.mq', (select string_agg(id::text, ',' order by id) from (select q.id from public.questions q
+                                where q.topic_id = current_setting('smoke.mt')::uuid and q.status = 'published' order by q.id limit 12) z), false);
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid; v_t uuid := current_setting('smoke.mt')::uuid;
+        qs uuid[] := string_to_array(current_setting('smoke.mq'), ',')::uuid[]; i int;
+begin
+  for i in 1..5 loop perform app.mastery_note(v_sid, v_t, qs[i], true, 'cari'); end loop;
+  update public.topic_events set at = at - interval '2 days' where student_id = v_sid and topic_id = v_t;
+  for i in 6..8 loop perform app.mastery_note(v_sid, v_t, qs[i], true, 'cari'); end loop;
+  assert (select state from public.topic_mastery where student_id = v_sid and topic_id = v_t) = 'learning', '9 cavabdan evvel menimsenilmir';
+  perform app.mastery_note(v_sid, v_t, qs[9], false, 'cari');
+  assert (select state from public.topic_mastery where student_id = v_sid and topic_id = v_t) = 'learning', '9 cavab: hele menimsenilmir';
+  perform app.mastery_note(v_sid, v_t, qs[10], false, 'cari');
+  assert (select state from public.topic_mastery where student_id = v_sid and topic_id = v_t) = 'mastered', '8/10, 2 gun, 10 sual -> menimsenildi';
+  assert (select stage from public.topic_mastery where student_id = v_sid and topic_id = v_t) = 1, '1-ci merhele';
+  assert (select due_at from public.topic_mastery where student_id = v_sid and topic_id = v_t) between now() + interval '2 days 23 hours' and now() + interval '3 days 1 hour', '3 gun sonra tekrar';
+end $$;
+--  tekrar: ikisi duz -> 2-ci merhele (7 gun)
+update public.topic_events set at = at - interval '10 days' where student_id = current_setting('smoke.sid')::uuid and topic_id = current_setting('smoke.mt')::uuid;
+update public.topic_mastery set due_at = now() - interval '1 minute' where student_id = current_setting('smoke.sid')::uuid and topic_id = current_setting('smoke.mt')::uuid;
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid; v_t uuid := current_setting('smoke.mt')::uuid;
+        qs uuid[] := string_to_array(current_setting('smoke.mq'), ',')::uuid[];
+begin
+  perform app.mastery_note(v_sid, v_t, qs[1], true, 'tekrar');
+  assert (select stage from public.topic_mastery where student_id = v_sid and topic_id = v_t) = 1, 'bir cavabla qerar verilmir';
+  perform app.mastery_note(v_sid, v_t, qs[2], true, 'tekrar');
+  assert (select stage from public.topic_mastery where student_id = v_sid and topic_id = v_t) = 2, 'iki duz -> 2-ci merhele';
+  assert (select due_at from public.topic_mastery where student_id = v_sid and topic_id = v_t) between now() + interval '6 days 23 hours' and now() + interval '7 days 1 hour', '7 gun';
+end $$;
+--  yarimciq: biri duz, biri sehv -> merhele eyni, 3 gun
+update public.topic_events set at = at - interval '10 days' where student_id = current_setting('smoke.sid')::uuid and topic_id = current_setting('smoke.mt')::uuid;
+update public.topic_mastery set due_at = now() - interval '1 minute' where student_id = current_setting('smoke.sid')::uuid and topic_id = current_setting('smoke.mt')::uuid;
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid; v_t uuid := current_setting('smoke.mt')::uuid;
+        qs uuid[] := string_to_array(current_setting('smoke.mq'), ',')::uuid[];
+begin
+  perform app.mastery_note(v_sid, v_t, qs[3], true, 'tekrar');
+  perform app.mastery_note(v_sid, v_t, qs[4], false, 'tekrar');
+  assert (select stage from public.topic_mastery where student_id = v_sid and topic_id = v_t) = 2, 'yarimciq: merhele eyni';
+  assert (select due_at from public.topic_mastery where student_id = v_sid and topic_id = v_t) < now() + interval '3 days 1 hour', 'yarimciq: 3 gun';
+end $$;
+--  ikisi sehv: 2 -> 1 -> yeniden oyrenilir
+update public.topic_events set at = at - interval '10 days' where student_id = current_setting('smoke.sid')::uuid and topic_id = current_setting('smoke.mt')::uuid;
+update public.topic_mastery set due_at = now() - interval '1 minute' where student_id = current_setting('smoke.sid')::uuid and topic_id = current_setting('smoke.mt')::uuid;
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid; v_t uuid := current_setting('smoke.mt')::uuid;
+        qs uuid[] := string_to_array(current_setting('smoke.mq'), ',')::uuid[];
+begin
+  perform app.mastery_note(v_sid, v_t, qs[5], false, 'tekrar');
+  perform app.mastery_note(v_sid, v_t, qs[6], false, 'tekrar');
+  assert (select stage from public.topic_mastery where student_id = v_sid and topic_id = v_t) = 1, 'ikisi sehv: bir merhele geri';
+end $$;
+update public.topic_events set at = at - interval '10 days' where student_id = current_setting('smoke.sid')::uuid and topic_id = current_setting('smoke.mt')::uuid;
+update public.topic_mastery set due_at = now() - interval '1 minute' where student_id = current_setting('smoke.sid')::uuid and topic_id = current_setting('smoke.mt')::uuid;
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid; v_t uuid := current_setting('smoke.mt')::uuid;
+        qs uuid[] := string_to_array(current_setting('smoke.mq'), ',')::uuid[];
+begin
+  perform app.mastery_note(v_sid, v_t, qs[7], false, 'tekrar');
+  perform app.mastery_note(v_sid, v_t, qs[8], false, 'tekrar');
+  assert (select state from public.topic_mastery where student_id = v_sid and topic_id = v_t) = 'learning', '1-ci merhelede ikisi sehv: yeniden oyrenilir';
+end $$;
+
+--  sagird cavabi: rpc_student_daily_answer jurnala yazir (anon, token ile)
+select set_config('smoke.tok', public.rpc_student_login(current_setting('smoke.scode'))->>'token', false);
+set role anon;
+do $$
+declare d jsonb; a jsonb; i int; v_ok uuid;
+begin
+  d := public.rpc_student_daily(current_setting('smoke.tok'));
+  assert (d->>'family')::boolean, 'rpc_student_daily: family bayragi';
+  assert (d->>'total')::int >= 3, 'paket var: ' || d::text;
+  perform set_config('smoke.dq', d->'question'->>'id', false);
+  perform set_config('smoke.do', (select o->>'id' from jsonb_array_elements(d->'question'->'options') o limit 1), false);
+end $$;
+reset role;
+do $$
+declare v_opt uuid; v_n0 int;
+begin
+  select o.id into v_opt from public.question_options o where o.question_id = current_setting('smoke.dq')::uuid and o.is_correct limit 1;
+  select count(*) into v_n0 from public.topic_events where student_id = current_setting('smoke.sid')::uuid;
+  perform set_config('smoke.n0', v_n0::text, false);
+  perform set_config('smoke.opt', v_opt::text, false);
+end $$;
+set role anon;
+select (public.rpc_student_daily_answer(current_setting('smoke.tok'), current_setting('smoke.dq')::uuid, current_setting('smoke.opt')::uuid))->>'correct' as dogru;
+reset role;
+do $$ begin
+  assert (select count(*) from public.topic_events where student_id = current_setting('smoke.sid')::uuid) = current_setting('smoke.n0')::int + 1, 'cavab menimseme jurnalina yazildi';
+end $$;
+delete from public.daily_packs where student_id = current_setting('smoke.sid')::uuid;   -- novbeti bolme oz paketini yazir
+
+--  valideyn: irelileyis
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare r jsonb; k jsonb;
+begin
+  r := public.rpc_family_progress();
+  select e into k from jsonb_array_elements(r) e where (e->>'id')::uuid = current_setting('smoke.sid')::uuid;
+  assert k is not null and jsonb_array_length(k->'cur') >= 1, 'progress: cari fesil gorunur: ' || r::text;
+  assert (k->>'learning')::int >= 1, 'progress: oyrenilen movzu sayi';
+end $$;
+reset role;
+
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';
 set role authenticated;

@@ -120,6 +120,10 @@ select * from (values
  ('916 ailə yolu: cari fəsil',
     (select exists (select 1 from f where proname='rpc_family_chapters')
         and exists (select 1 from f where proname='rpc_family_set_current'))),
+ ('917 ailə yolu: gündəlik məşq + mənimsəmə',
+    (select exists (select 1 from f where proname='daily_build_family')
+        and exists (select 1 from f where proname='mastery_note')
+        and exists (select 1 from f where proname='rpc_family_progress'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

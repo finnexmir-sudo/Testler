@@ -1384,7 +1384,9 @@
       if (!total && (!paid ? !tps.length : true)) { box.innerHTML = ""; return; }
 
       var dun = d.yesterday;
-      var sub = tps.length
+      var sub = d.family
+        ? "Keçdiyin mövzular üzrə"
+        : tps.length
         ? "Müəllimin keçdiyi " +
           tps.map(function (x) { return "«" + esc(x) + "»"; }).join(" və ") + " üzrə"
         : "Keçdiyin mövzular üzrə";
@@ -1408,7 +1410,7 @@
       }
       box.innerHTML = '<div class="card dcard">' +
         '<div class="dhead"><b>Bu günün ' + total + " sualı</b>" +
-          '<span class="dmin">≈' + Math.max(2, Math.round(total * 0.7)) + " dəq</span></div>" +
+          '<span class="dmin">≈' + Math.max(2, Math.round(total * 0.8)) + " dəq</span></div>" +
         '<p class="note" style="margin:6px 0 10px">' + sub + " fərdi təkrar." +
           (dun ? " Dünən: " + (Number(dun.ok) || 0) + "/" + (Number(dun.total) || 0) + "." : "") +
           "</p>" +
@@ -1438,7 +1440,9 @@
     sehv:    "Bu mövzuda əvvəl səhvin olmuşdu. Gəl onu bağlayaq.",
     eyni:    "Eyni mövzu — bu dəfə başqa sual.",
     tekrar:  "Bir müddət əvvəl bunu bacarırdın. Yoxlayaq.",
-    yeni:    "Müəllimin son dərsdə keçdiyi mövzudan."
+    yeni:    "Müəllimin son dərsdə keçdiyi mövzudan.",
+    cari:    "Hazırda keçdiyin mövzudan.",
+    mesq:    "Əvvəl keçdiyin mövzunu möhkəmləndirək."
   };
   function drawDaily() {
     var q = DQ.question, n = Number(DQ.total) || 0, i = Number(DQ.i) || 0;

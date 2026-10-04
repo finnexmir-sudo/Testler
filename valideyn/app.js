@@ -775,11 +775,12 @@
   function famEnter() {
     return Promise.all([
       sb.rpc("rpc_family_children", {}),
-      sb.rpc("rpc_family_summary", {}).catch(function () { return []; })   // xulase alinmasa «Ailem» yene acilsin
+      sb.rpc("rpc_family_summary", {}).catch(function () { return []; }),   // xulase alinmasa «Ailem» yene acilsin
+      sb.rpc("rpc_family_progress", {}).catch(function () { return []; })
     ]).then(function (r) {
       var d = r[0];
       if (!d || !d.has_account) { screenFamName(); return; }
-      drawFamily(d, r[1] || []);
+      drawFamily(d, r[1] || [], r[2] || []);
     });
   }
   function screenFamily() {
@@ -816,9 +817,10 @@
     return "https://wa.me/?text=" + encodeURIComponent(t);
   }
 
-  function drawFamily(d, sums) {
+  function drawFamily(d, sums, prog) {
     var kids = d.kids || [], acc = d.account || {};
     var byId = {}; (sums || []).forEach(function (x) { if (x && x.id) byId[x.id] = x; });
+    var pById = {}; (prog || []).forEach(function (x) { if (x && x.id) pById[x.id] = x; });
     var WD = ["B", "Ç", "Ç", "C", "C", "Ş", "B"];
     topBar.classList.remove("hide");
     topTitle.textContent = "Ailəm";
@@ -844,6 +846,9 @@
         return '<div class="fk-sr"><span>' + esc(x.name) + "</span>" + right + "</div>";
       }).join("");
       var sm = byId[k.id] || {};
+      var pg = pById[k.id] || {}, cur = Array.isArray(pg.cur) ? pg.cur : [];
+      var QN = { 5: 5, 10: 10, 15: 14, 20: 18, 30: 24 }, mins = Number(k.minutes) || 10;
+      var curSum = cur.length ? "Hazırda: " + cur[0].subject + " — " + cur[0].chapter + (cur.length > 1 ? " və daha " + (cur.length - 1) : "") : "Hazırda hansı fəsildəsiniz?";
       var wk = sm.week || [0, 0, 0, 0, 0, 0, 0], wn = wk.reduce(function (a, b) { return a + b; }, 0);
       var tq = Number(sm.today_q || 0), tok = Number(sm.today_ok || 0);
       var dots = wk.map(function (v, i) {
@@ -868,9 +873,11 @@
         '<div class="fk-st"><span>Bu gün</span><b>' + (tq > 0 ? tq + " sual · " + tok + " düz" : "hələ çalışmayıb") + "</b></div>" +
         '<div class="fk-st"><span>Bu həftə</span><div class="fk-dots">' + dots + "</div></div>" +
         '<div class="fk-st"><span>Hədəf</span><b>' + wn + " / 4 gün</b></div>" +
+        '<div class="fk-st"><span>Gündəlik məşq</span><b>' + mins + " dəq · " + (QN[mins] || 10) + " sual</b></div>" +
+        '<div class="fk-st"><span>Mənimsənilib</span><b>' + Number(pg.mastered || 0) + " mövzu" + (Number(pg.due || 0) > 0 ? " · " + pg.due + " təkrara hazır" : "") + "</b></div>" +
         '<div class="fk-diqqet"><b>Diqqət</b>' + esc(attn) + "</div>" +
         (ask ? '<div class="fk-ask">💬 Evdə soruşun: ' + esc(ask) + "</div>" : "") +
-        (sd.length ? '<details class="fk-dd fk-cur" data-curkid="' + esc(k.id) + '"><summary>Hazırda hansı fəsildəsiniz?</summary>' +
+        (sd.length ? '<details class="fk-dd fk-cur" data-curkid="' + esc(k.id) + '"><summary>' + esc(curSum) + '</summary>' +
           '<div class="fk-cb"><select class="fk-subj" aria-label="Fənn">' + sd.map(function (x) { return '<option value="' + esc(x.slug) + '">' + esc(x.name) + "</option>"; }).join("") + "</select>" +
           '<div class="fk-cbox"></div></div></details>' : "") +
         '<details class="fk-dd"' + (!doneN && !anyAct ? " open" : "") + "><summary>" + esc(diag) + "</summary>" +
