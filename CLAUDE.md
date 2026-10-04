@@ -548,6 +548,14 @@ məşq nəticələri Bil10-da saxlanır, silinməsi istənilə bilər) — «ad 
 istifadə olunmur). Açıq: fənn seçimi hazırda ən çox 5-dir və başlanğıc yoxlama yalnız ilk 3 fənn üçün avtomatik yaranır
 (ekranda yazılmayıb); bütün fənləri açıb yoxlamanı mərhələli vermək təklif olunub, cavab gözlənilir.
 
+**Yeniləmə (06.10, db/914–915, v739):** (914) bütün fənlər seçilə bilir (≤12), başlanğıc yoxlama ilk 3 fənn üçün dərhal, qalanı
+«Ailəm»-dən `rpc_family_diag` ilə; gündəlik vaxt 5/10/15/20/30 dəq (tövsiyə: 1–4→10, 5–8→15, 9–11→20; dəyər hələ YALNIZ
+saxlanır, heç nəyi idarə etmir); razılıq mətni `aile-v3` («Uşağın adı və nəticələri yalnız sizə görünür, heç yerdə paylaşılmır.
+Razıyam.»). (915) `rpc_family_summary` — «Bu gün N sual·M düz», həftə nöqtələri (B.e–B, Bakı vaxtı), «Hədəf x/4 gün» (4 sabit),
+«Diqqət» (ən zəif mövzu: ≥4 cavab, <70 %, 45 gün), «Evdə soruşun»; `rpc_family_delete_child`, `rpc_family_delete_account`
+(cascade + auth.users silinir; müəllim hesabı bu yolla silinmir); `mexfilik/` səhifəsi ailə yolunu əks etdirir.
+Hələ yox: «Afərin göndər», seanslı diaqnostika, mənimsəmə/cari fəsil, gündəlik məşq hədəfi, həftəlik xülasə push, abituriyent.
+
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 
 **İstifadəçinin sualı:** «Ən zəif yerimiz testləri tərtib etməkdir. Test
