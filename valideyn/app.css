@@ -271,6 +271,8 @@ a.btn{text-decoration:none}
 .fk-ask{background:var(--brand-tint);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.45;margin-bottom:10px;color:var(--ink)}
 .fk-dd{margin:0 0 10px}
 .fk-cb{display:grid;gap:8px;padding:2px 0 4px}
+.fk-cbox{display:grid;gap:8px}
+.fk-cb select{margin:0}
 .fk-cb select{width:100%;min-height:42px;border:1px solid var(--n-150);border-radius:10px;padding:0 10px;font:inherit;font-size:14px;background:var(--surface);color:var(--fg)}
 .fk-cm{margin:0;font-size:12.5px;color:var(--fg-3)}
 .fk-ok{margin:0;font-size:13.5px;font-weight:700;color:var(--ok)}

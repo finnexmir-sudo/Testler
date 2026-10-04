@@ -153,7 +153,7 @@ with sync_playwright() as pw:
                   select %s::uuid, q.id, %s::uuid, false, now() from public.questions q where q.topic_id = %s::uuid and q.status = 'published' order by q.id limit 3""", (att, tp["t"], tp["t"]))
         p.reload(); p.wait_for_selector(".fk", timeout=15000); p.wait_for_timeout(500)
         dq = p.locator(".fk-diqqet").inner_text()
-        ok("gücləndirmək" in dq, "«Diqqət»: 3 cavabdan ibarət zəif mövzular da görünür (diaqnostika)", dq)
+        ok("gücləndirilməli" in dq, "«Diqqət»: 3 cavabdan ibarət zəif mövzular da görünür (diaqnostika)", dq)
         ok("Bu gün ✓" in p.locator(".fk-chip").inner_text(), "«Bu gün ✓»: test cavabı sayılır")
         ok("6 sual" in p.locator(".fk-st").first.inner_text(), "bu gün 6 sual", p.locator(".fk-st").first.inner_text())
         p.screenshot(path="%s/5b_ailem_xulase_%s.png" % (OUT, tag), full_page=True)

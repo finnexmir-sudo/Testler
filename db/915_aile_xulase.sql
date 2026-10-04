@@ -66,6 +66,20 @@ begin
                                      and count(*) filter (where aa.is_correct) * 100.0 / count(*) < 70
                                    order by count(*) filter (where aa.is_correct) * 100.0 / count(*), count(*) desc
                                    limit 3) z), '[]'::jsonb),
+             'weak_subj', coalesce((select jsonb_agg(jsonb_build_object('subject', y.sname, 'topics', y.c) order by y.c desc, y.sname)
+                              from (select sb.name as sname, count(*)::int c
+                                      from (select t.subject_id sid
+                                              from public.attempt_answers aa
+                                              join public.attempts at on at.id = aa.attempt_id and at.student_id = k.id and at.status = 'submitted'
+                                              join public.topics t on t.id = aa.topic_id
+                                             where aa.answered_at > now() - interval '45 days'
+                                             group by t.id, t.subject_id
+                                            having count(*) >= 3
+                                               and count(*) filter (where aa.is_correct) * 100.0 / count(*) < 70) w
+                                      join public.subjects sb on sb.id = w.sid
+                                     group by sb.id, sb.name
+                                     order by count(*) desc, sb.name
+                                     limit 3) y), '[]'::jsonb),
              'weak_total', (select count(*)::int
                               from (select 1 from public.attempt_answers aa
                                       join public.attempts at on at.id = aa.attempt_id and at.student_id = k.id and at.status = 'submitted'
