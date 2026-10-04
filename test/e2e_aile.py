@@ -143,6 +143,21 @@ with sync_playwright() as pw:
         nd2 = db("select count(*) n from public.assignments a join public.tests t on t.id = a.test_id where a.student_id = %s and t.is_diagnostic", (st["i"],), one=True)["n"]
         ok(nd2 == 4, "«Yoxlama ver» basıldı: 4-cü fənn üçün diaqnostika verildi", nd2)
 
+        print("-- xulase: diaqnostika cavablari (movzu basina 3) «Diqqet»de gorunur")
+        a_test = db("select a.test_id::text t from public.assignments a where a.student_id = %s limit 1", (st["i"],), one=True)["t"]
+        a_cls = db("select class_id::text c from public.students where id = %s", (st["i"],), one=True)["c"]
+        tops = db("select q.topic_id::text t from public.questions q where q.topic_id is not null and q.status = 'published' group by q.topic_id having count(*) >= 3 limit 2")
+        att = db("insert into public.attempts (student_id, test_id, class_id, status, finished_at) values (%s, %s, %s, 'submitted', now()) returning id::text i", (st["i"], a_test, a_cls), one=True)["i"]
+        for tp in tops:
+            db("""insert into public.attempt_answers (attempt_id, question_id, topic_id, is_correct, answered_at)
+                  select %s::uuid, q.id, %s::uuid, false, now() from public.questions q where q.topic_id = %s::uuid and q.status = 'published' order by q.id limit 3""", (att, tp["t"], tp["t"]))
+        p.reload(); p.wait_for_selector(".fk", timeout=15000); p.wait_for_timeout(500)
+        dq = p.locator(".fk-diqqet").inner_text()
+        ok("çətinlik çəkir" in dq, "«Diqqət»: 3 cavabdan ibarət zəif mövzular da görünür (diaqnostika)", dq)
+        ok("Bu gün ✓" in p.locator(".fk-chip").inner_text(), "«Bu gün ✓»: test cavabı sayılır")
+        ok("6 sual" in p.locator(".fk-st").first.inner_text(), "bu gün 6 sual", p.locator(".fk-st").first.inner_text())
+        p.screenshot(path="%s/5b_ailem_xulase_%s.png" % (OUT, tag), full_page=True)
+
         print("-- usagin movcud valideyn ekrani")
         p.click("[data-open]"); p.wait_for_selector("#famBack", timeout=15000)
         ok("Keçilən dərslər" not in p.locator("#main").inner_text() or True, "valideyn ekranı açıldı")

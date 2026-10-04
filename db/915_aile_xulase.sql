@@ -4,7 +4,7 @@
 --  1. rpc_family_summary : «Ailem» ekranindaki her usaq ucun «bu gun / bu hefte / diqqet»
 --       bu gun    : neçə sual cavablandi, neçəsi duz (testler + gundelik paket)
 --       bu hefte  : Bazar ertesi-Bazar, hansı gunlerde calisib (Baki vaxti)
---       diqqet    : en zeif movzu (en azi 4 cavab, duz faizi 70-den asagi) - yalniz atamli test cavablarindan
+--       diqqet    : en zeif movzular (en azi 3 cavab - diaqnostika movzu basina 3 sual verir; duz faizi 70-den asagi), en cox 3 + umumi say
 --  2. rpc_family_delete_child   : usagi ve BUTUN melumatini (cavablar, razilik, kod, abune, diaqnostika testleri) siler
 --  3. rpc_family_delete_account : butun aileni ve valideyn hesabini siler (geri qaytarilmir)
 --
@@ -54,7 +54,7 @@ begin
              'week',     (select jsonb_agg(case when exists (select 1 from ev where ev.student_id = k.id and ev.d = v_mon + g and ev.q > 0) then 1 else 0 end order by g)
                             from generate_series(0, 6) g),
              'today_i',  v_today - v_mon,
-             'weak',     (select jsonb_build_object('topic', z.name, 'percent', z.p, 'n', z.n)
+             'weak',     coalesce((select jsonb_agg(jsonb_build_object('topic', z.name, 'percent', z.p, 'n', z.n) order by z.p, z.n desc)
                             from (select t.name, count(*)::int n,
                                          round(count(*) filter (where aa.is_correct) * 100.0 / count(*))::int p
                                     from public.attempt_answers aa
@@ -62,10 +62,18 @@ begin
                                     join public.topics t on t.id = aa.topic_id
                                    where aa.answered_at > now() - interval '45 days'
                                    group by t.id, t.name
-                                  having count(*) >= 4
+                                  having count(*) >= 3
                                      and count(*) filter (where aa.is_correct) * 100.0 / count(*) < 70
                                    order by count(*) filter (where aa.is_correct) * 100.0 / count(*), count(*) desc
-                                   limit 1) z)
+                                   limit 3) z), '[]'::jsonb),
+             'weak_total', (select count(*)::int
+                              from (select 1 from public.attempt_answers aa
+                                      join public.attempts at on at.id = aa.attempt_id and at.student_id = k.id and at.status = 'submitted'
+                                      join public.topics t on t.id = aa.topic_id
+                                     where aa.answered_at > now() - interval '45 days'
+                                     group by t.id
+                                    having count(*) >= 3
+                                       and count(*) filter (where aa.is_correct) * 100.0 / count(*) < 70) y)
            ))
       from kids k), '[]'::jsonb);
 end $$;

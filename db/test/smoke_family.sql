@@ -247,7 +247,7 @@ begin
   assert (k->>'today_q')::int = 7 and (k->>'today_ok')::int = 2, 'bu gun 7 sual, 2 duz: ' || k::text;
   assert jsonb_array_length(k->'week') = 7, 'hefte 7 gun';
   assert (k->'week'->>((k->>'today_i')::int))::int = 1, 'bu gun «calisib»';
-  assert k->'weak' is not null and (k->'weak'->>'percent')::int = 20 and (k->'weak'->>'n')::int = 5, 'zeif movzu: ' || (k->>'weak');
+  assert jsonb_array_length(k->'weak') = 1 and (k->'weak'->0->>'percent')::int = 20 and (k->'weak'->0->>'n')::int = 5 and (k->>'weak_total')::int = 1, 'zeif movzu: ' || (k->>'weak');
   assert jsonb_array_length(s) = 7, 'butun aktiv usaqlar xulasede: Huseyn + Aysu + 5 sinaq usagi, alindi ' || jsonb_array_length(s);
 end $$;
 reset role;
