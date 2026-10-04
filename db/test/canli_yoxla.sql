@@ -105,6 +105,11 @@ select * from (values
     (select exists (select 1 from f where proname='push_tick')
         and exists (select 1 from f where proname='push_scan_deadlines')
         and exists (select 1 from f where proname='push_scan_daily'))),
+ ('913 ailə yolu (valideyn hesabı, uşaq əlavə, Ailəm)',
+    (select exists (select 1 from f where proname='rpc_family_add_child')
+        and exists (select 1 from f where proname='rpc_family_children')
+        and exists (select 1 from public.app_state where key='family')
+        and exists (select 1 from public.plans where slug='aile-usaq'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

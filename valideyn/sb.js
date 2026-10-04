@@ -6,7 +6,7 @@
 (function () {
   "use strict";
 
-  var KEY = "sagird_session";
+  var KEY = "valideyn_auth";   // 913: sagird tetbiqinin acari ile toqqusmasin (eyni origin)
   var S = null;
 
   function cfg() {

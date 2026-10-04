@@ -22,18 +22,18 @@ create temporary view t_anon as
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
    where n.nspname = 'public' and p.prokind = 'f';
 
---  1 · susmaya gore tam olaraq 26 funksiya aciqdir
---      (212: +2 gundelik tekrar · 901: +rpc_demo_gc)
+--  1 · susmaya gore tam olaraq 29 funksiya aciqdir
+--      (212: +2 gundelik tekrar · 901: +rpc_demo_gc · 910: +2 push abune · 913: +rpc_family_status)
 do $$
 declare v_say int; v_ad text;
 begin
   select count(*), string_agg(distinct proname, ', ' order by proname)
     into v_say, v_ad from t_anon where ac;
-  if v_say <> 26 then
-    raise exception 'anon % funksiya gorur (26 gozlenilir): %', v_say, v_ad;
+  if v_say <> 29 then
+    raise exception 'anon % funksiya gorur (29 gozlenilir): %', v_say, v_ad;
   end if;
 end $$;
-\echo 'OK  1 · anon tam olaraq 26 RPC gorur'
+\echo 'OK  1 · anon tam olaraq 29 RPC gorur'
 
 --  2 · siyahinin OZU dogrudur - ad-ad
 do $$
@@ -47,7 +47,7 @@ begin
       'rpc_student_feedback','rpc_parent_feedback',
       'rpc_student_mistakes','rpc_student_mistake_answer',
       'rpc_student_practice_topics','rpc_student_practice_next','rpc_student_practice_answer',
-      'rpc_demo_reset']) x
+      'rpc_demo_reset','rpc_push_subscribe','rpc_push_unsubscribe','rpc_family_status']) x
    where not exists (select 1 from t_anon where proname = x and ac);
   if v_yox is not null then
     raise exception 'bu RPC-ler anon-a baglidir: %', v_yox;

@@ -171,6 +171,7 @@
     inp.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
     on("btnIn", "click", go);
     on("btnAddCancel", "click", function () { ADD_MODE = false; screenHome(); });
+    if (!ADD_MODE) famLoginLink();
 
     function go() {
       if (busy) return;
@@ -320,7 +321,7 @@
 
   function drawHome(d) {
     var s   = d.summary || {};
-    var out = "";
+    var out = famSession() ? '<p style="margin:0 0 10px"><a href="#" class="btn sm ghost" id="famBack">← Ailəm</a></p>' : "";
 
     /* ---- usaq secimi: bir nece usaq varsa ---- */
     if (KIDS.length > 1) {
@@ -338,7 +339,7 @@
         '<span class="muted">' +
           //  Adi bos olan muellimde "müəllim: " yazib bos qoymuruq
           [ (d.child && d.child.class) || "",
-            (d.teacher || "").trim() ? "müəllim: " + d.teacher.trim() : "" ]
+            (d.teacher || "").trim() && !famSession() ? "müəllim: " + d.teacher.trim() : "" ]
             .filter(Boolean).map(esc).join(" · ") +
         "</span>" +
       "</div>");
@@ -526,7 +527,9 @@
 
     /* ---- kecilen dersler ---- */
     var les = d.lessons || [];
-    if (!les.length) {
+    if (!les.length && famSession()) {
+      //  913: muellimsiz yol - «muellim planini islətmir» yazisi orada menasizdir
+    } else if (!les.length) {
       out += "<h2>Keçilən dərslər</h2>" +
         '<div class="card muted">Müəllim hələ dərs planını işlətmir — ' +
         "keçilən mövzular burada görünəcək.</div>";
@@ -541,8 +544,8 @@
     }
 
     out += '<p class="note" style="text-align:center;margin:18px 0 4px">' +
-      "Uşağınızla bağlı suallarınızı müəllimə verin — bu ekran yalnız baxmaq üçündür.</p>" +
-      (KIDS.length > 1 ? "" :
+      (famSession() ? "Bu ekran yalnız baxmaq üçündür." : "Uşağınızla bağlı suallarınızı müəllimə verin — bu ekran yalnız baxmaq üçündür.") + "</p>" +
+      (KIDS.length > 1 || famSession() ? "" :
         '<p class="note" style="text-align:center;margin:0 0 4px">Başqa uşağınız da bu müəllimdədirsə: ' +
         '<a href="#" id="kidAdd">uşaq əlavə et</a></p>');
 
@@ -571,6 +574,7 @@
     show(out);
     drawPush();
     on("kidAdd", "click", function (e) { e.preventDefault(); ADD_MODE = true; screenLogin(""); });
+    on("famBack", "click", function (e) { e.preventDefault(); screenFamily(); });
     on("kids", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-k]") : null;
       if (!b || b.getAttribute("data-k") === TOKEN) return;
@@ -641,6 +645,326 @@
     }
   }
 
+
+  /* ================================================================
+     AILE YOLU (db/913) - e-poctla hesab, usaq elave et, «Ailem»
+     Muellimsiz yol: valideyn oz hesabini acir, usagi OZU elave edir, usaq kodla girir.
+     Movcud «muellimin verdiyi kod» yolu TOXUNULMUR.  Bayraq (app_state.family) sonukdurse bu yol
+     yalniz icazeli e-poctlar ucundur (server yoxlayir) - sehifede ?aile=1 ile gorunur.
+     Butun serverden gelen metn esc() ile yazilir; usaq adi innerHTML-e xam dusmur.
+     ================================================================ */
+  var LOGO = '<div class="hero"><div class="mark"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lgF" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4acb"/><stop offset="1" stop-color="#0e9384"/></linearGradient></defs><path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="url(#lgF)"/><g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/></g><path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#ffc94d"/><path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#1a2233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+  function famHero(h, p) { return LOGO + "<h1>" + esc(h) + "</h1><p>" + esc(p) + "</p></div>"; }
+  function famSession() {
+    var s = window.sb && sb.session && sb.session();
+    return !!(s && s.access_token);
+  }
+  function famUrlOn() { return /[?&]aile=1/.test(location.search); }
+  var ORD = { 1: "1-ci", 2: "2-ci", 3: "3-cü", 4: "4-cü", 5: "5-ci", 6: "6-cı", 7: "7-ci", 8: "8-ci", 9: "9-cu", 10: "10-cu", 11: "11-ci" };
+  function famErr(e) {
+    var t = (e && e.message) ? e.message : String(e);
+    if (/already registered|already been registered|User already/i.test(t)) return "Bu e-poçt artıq qeydiyyatdadır. «Daxil ol» seçin.";
+    if (/Invalid login|invalid_credentials|parol yanlis/i.test(t)) return "E-poçt və ya parol yanlışdır.";
+    if (/not confirmed/i.test(t)) return "E-poçtunuz təsdiqlənməyib. Poçtunuza göndərilən linkə basın.";
+    if (/Password should|weak/i.test(t)) return "Parol çox zəifdir. Ən azı 8 simvol yazın.";
+    if (/rate limit|too many/i.test(t)) return "Çox cəhd oldu. Bir az sonra yenidən yoxlayın.";
+    return fail(e);
+  }
+  function famExpired(e) {
+    var t = (e && e.message) || "";
+    return /Sessiya bitib|Daxil olmamisiniz|JWT|401/i.test(t);
+  }
+  //  Giris ekraninda kicik kecid: bayraq aciqdirsa (ve ya ?aile=1)
+  function famLoginLink() {
+    function add() {
+      var m = $("main");
+      if (!m || $("famLink")) return;
+      var p = document.createElement("p");
+      p.id = "famLink"; p.className = "note famlink";
+      p.innerHTML = 'Müəllimsiz, özünüz istifadə etmək istəyirsiniz? <a href="#" id="famGo">E-poçtla daxil olun / yeni hesab</a>';
+      m.appendChild(p);
+      on("famGo", "click", function (e) { e.preventDefault(); screenFamAuth("up"); });
+    }
+    if (famUrlOn()) { add(); return; }
+    sb.rpc("rpc_family_status", {}).then(function (d) { if (d && d.on === true) add(); }).catch(function () {});
+  }
+
+  function screenFamAuth(mode, note) {
+    var up = mode === "up";
+    topBar.classList.add("hide");
+    show(famHero(up ? "Yeni valideyn hesabı" : "Valideyn girişi",
+                 up ? "30 gün pulsuz, kart tələb olunmur." : "E-poçt və parolla daxil olun.") +
+      '<div class="card fam" style="margin-top:18px">' + (note || "") +
+        '<div class="fseg" id="fSeg"><button type="button" data-m="in" class="' + (up ? "" : "on") + '">Daxil ol</button>' +
+          '<button type="button" data-m="up" class="' + (up ? "on" : "") + '">Yeni hesab</button></div>' +
+        '<div id="fErr"></div>' +
+        (up ? '<label for="fName">Adınız</label><input id="fName" maxlength="80" autocomplete="name" placeholder="Ad Soyad">' : "") +
+        '<label for="fMail">E-poçt</label><input id="fMail" type="email" maxlength="120" autocomplete="email" inputmode="email" ' +
+          'autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="ad@mail.az">' +
+        '<label for="fPass">Parol</label><input id="fPass" type="password" maxlength="72" ' +
+          'autocomplete="' + (up ? "new-password" : "current-password") + '" placeholder="' + (up ? "Ən azı 8 simvol" : "Parol") + '">' +
+        '<button class="btn go wide" id="fGo" style="margin-top:14px">' + (up ? "Hesab yarat — 30 gün pulsuz" : "Daxil ol") + "</button>" +
+      "</div>" +
+      (up ? '<p class="note" style="text-align:center;margin-top:12px">Kart tələb olunmur. İstədiyiniz vaxt hesabı silə bilərsiniz.</p>' : "") +
+      '<p class="note" style="text-align:center;margin-top:14px"><a href="#" id="fCode">Müəllimin verdiyi kodla daxil olun</a></p>' +
+      '<a class="btn wide ghost bak" href="../">← Bil10 ana səhifəsi</a>');
+    on("fSeg", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-m]") : null;
+      if (b && b.getAttribute("data-m") !== mode) screenFamAuth(b.getAttribute("data-m"));
+    });
+    on("fCode", "click", function (e) { e.preventDefault(); screenLogin(""); });
+    var label = up ? "Hesab yarat — 30 gün pulsuz" : "Daxil ol";
+    var first = $(up ? "fName" : "fMail"); if (first) first.focus();
+    ["fName", "fMail", "fPass"].forEach(function (id) {
+      var el = $(id); if (el) el.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
+    });
+    on("fGo", "click", go);
+
+    function go() {
+      if (busy) return;
+      var name = up ? ($("fName").value || "").replace(/\s+/g, " ").trim() : "";
+      var mail = ($("fMail").value || "").trim().toLowerCase();
+      var pass = $("fPass").value || "";
+      function bad(t) { $("fErr").innerHTML = msg("err", t); }
+      if (up && name.length < 2) return bad("Adınızı yazın.");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) return bad("E-poçtu düzgün yazın.");
+      if (pass.length < 8) return bad("Parol ən azı 8 simvol olmalıdır.");
+      $("fErr").innerHTML = "";
+      setBusy("fGo", true, label);
+      var p = up
+        ? sb.signUp(mail, pass, name).then(function (d) {
+            if (d && d.access_token) return famStart(name);
+            //  e-poct tesdiqi aciqdir
+            screenFamAuth("in", msg("ok", "Poçtunuza təsdiq linki göndərildi. Linkə basın, sonra buradan daxil olun."));
+          })
+        : sb.signIn(mail, pass).then(famEnter);
+      p.catch(function (e) {
+        setBusy("fGo", false, label);
+        bad(famErr(e));
+      });
+    }
+  }
+
+  //  Hesabi yoxdur (qeydiyyat tamamlanmayib / e-poct tesdiqinden sonra ilk giris): yalniz ad
+  function screenFamName() {
+    topBar.classList.add("hide");
+    show(famHero("Son addım", "Adınızı yazın, 30 günlük sınaq başlasın.") +
+      '<div class="card fam" style="margin-top:18px"><div id="fErr"></div>' +
+        '<label for="fName">Adınız</label><input id="fName" maxlength="80" autocomplete="name" placeholder="Ad Soyad">' +
+        '<button class="btn go wide" id="fGo" style="margin-top:14px">Davam et</button></div>');
+    $("fName").focus();
+    function go() {
+      if (busy) return;
+      var name = ($("fName").value || "").replace(/\s+/g, " ").trim();
+      if (name.length < 2) { $("fErr").innerHTML = msg("err", "Adınızı yazın."); return; }
+      setBusy("fGo", true, "Davam et");
+      famStart(name).catch(function (e) { setBusy("fGo", false, "Davam et"); $("fErr").innerHTML = msg("err", famErr(e)); });
+    }
+    on("fGo", "click", go);
+    $("fName").addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
+  }
+
+  function famStart(name) {
+    return sb.rpc("rpc_family_start", { p_name: name }).then(famEnter);
+  }
+  function famEnter() {
+    return sb.rpc("rpc_family_children", {}).then(function (d) {
+      if (!d || !d.has_account) { screenFamName(); return; }
+      drawFamily(d);
+    });
+  }
+  function screenFamily() {
+    topBar.classList.remove("hide");
+    topTitle.textContent = "Ailəm";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    famEnter().catch(function (e) {
+      if (famExpired(e)) {
+        sb.signOut().then(function () { screenFamAuth("in", msg("warn", "Giriş vaxtı bitib. Yenidən daxil olun.")); },
+                          function () { screenFamAuth("in", msg("warn", "Giriş vaxtı bitib. Yenidən daxil olun.")); });
+        return;
+      }
+      show(msg("err", famErr(e)) + '<button class="btn wide" id="btnRetry" style="margin-top:12px">Yenidən cəhd et</button>');
+      on("btnRetry", "click", screenFamily);
+    });
+  }
+
+  function copyText(text, btn, done) {
+    function ok() { if (btn) { var old = btn.textContent; btn.textContent = done || "Kopyalandı ✓"; setTimeout(function () { btn.textContent = old; }, 1600); } }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(ok, fallback); return; }
+    } catch (e) {}
+    fallback();
+    function fallback() {
+      try {
+        var ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly", "");
+        ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta); ok();
+      } catch (e) {}
+    }
+  }
+  function waLink(code) {
+    var t = "Salam! Bil10 proqramına giriş: bil10.az/sagird ünvanında bu kodu yazın: " + code;
+    return "https://wa.me/?text=" + encodeURIComponent(t);
+  }
+
+  function drawFamily(d) {
+    var kids = d.kids || [], acc = d.account || {};
+    topBar.classList.remove("hide");
+    topTitle.textContent = "Ailəm";
+    var out = "";
+    if (acc.active === false) {
+      out += msg("warn", "Sınaq müddəti bitib. Davam etmək üçün info@bil10.az ünvanına yazın — uşaqlarınızın məlumatları saxlanılır.");
+    } else if (acc.trial_end) {
+      out += '<div class="ftrial"><span>Sınaq: ' + esc(qalan(acc.trial_end)) + "</span><i>kart tələb olunmur</i></div>";
+    }
+    if (!kids.length) {
+      out += '<div class="card ftxt"><b>Hələ uşaq əlavə etməmisiniz</b>' +
+        "<p>Uşağın adını və sinfini yazın — ona uyğun başlanğıc yoxlama avtomatik hazırlanacaq.</p></div>";
+    }
+    out += kids.map(function (k) {
+      var diag = !k.diag_total ? "Başlanğıc yoxlama hazırlanır"
+        : (k.diag_done >= k.diag_total ? "Başlanğıc yoxlama tamamlandı ✓" : "Başlanğıc yoxlama: " + k.diag_done + " / " + k.diag_total);
+      var done = k.diag_total && k.diag_done >= k.diag_total;
+      return '<div class="card fk">' +
+        '<div class="fk-h"><div class="fk-av">' + esc(String(k.name || "?").charAt(0).toUpperCase()) + "</div>" +
+          "<div><b>" + esc(k.name) + "</b><span>" + esc(k.sinif ? (ORD[k.sinif] || (k.sinif + "-ci")) + " sinif" : "") +
+            ((k.subject_names || []).length ? " · " + esc((k.subject_names || []).join(", ")) : "") + "</span></div></div>" +
+        '<div class="fk-d' + (done ? " ok" : "") + '">' + esc(diag) + "</div>" +
+        '<div class="fk-code"><i>Uşağın giriş kodu</i><b>' + esc(k.login_code) + "</b>" +
+          "<span>bil10.az/sagird ünvanında bu kodla daxil olur</span></div>" +
+        '<div class="fk-btns">' +
+          '<button type="button" class="btn sm ghost" data-copy="' + esc(k.login_code) + '">Kopyala</button>' +
+          '<a class="btn sm ghost" target="_blank" rel="noopener" href="' + esc(waLink(k.login_code)) + '">WhatsApp</a>' +
+          '<button type="button" class="btn sm go" data-open="' + esc(k.id) + '">Ətraflı</button></div></div>';
+    }).join("");
+    out += (kids.length >= 6 ? "" : '<button class="btn wide ' + (kids.length ? "ghost" : "go") + '" id="famAdd">+ Uşaq əlavə et</button>') +
+      '<p class="note" style="text-align:center;margin:16px 0 4px">Uşağın adı, sinfi və məşq nəticələri yalnız sizin hesabınızda görünür. ' +
+      '<a href="../mexfilik/">Məxfilik</a></p>';
+    show(out);
+    on("famAdd", "click", screenAddChild);
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (b) {
+      b.addEventListener("click", function () { copyText(b.getAttribute("data-copy"), b); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-open]"), function (b) {
+      b.addEventListener("click", function () { famOpen(b.getAttribute("data-open"), b); });
+    });
+  }
+
+  //  Usagin movcud valideyn ekranini ac (rpc_parent_home) - hesab sahibine usagin valideyn tokeni verilir
+  function famOpen(id, btn) {
+    if (busy) return;
+    busy = true; if (btn) { btn.disabled = true; btn.textContent = "Gözləyin…"; }
+    sb.rpc("rpc_family_open", { p_student: id }).then(function (d) {
+      KIDS = []; TOKEN = null; CHILD = null;
+      kidAdd(d.token, d.child);
+      busy = false; ADD_MODE = false;
+      screenHome();
+    }).catch(function (e) {
+      busy = false; if (btn) { btn.disabled = false; btn.textContent = "Ətraflı"; }
+      if (famExpired(e)) { screenFamily(); return; }
+      var m = document.createElement("div"); m.innerHTML = msg("err", famErr(e));
+      main.insertBefore(m.firstChild, main.firstChild);
+    });
+  }
+
+  //  Defolt fenn dəsti: ibtidai - riyaziyyat + Az. dili; yuxari - + Ingilis dili (movcud olanlardan)
+  function famDefaults(level, avail) {
+    var want = level <= 4 ? ["riyaziyyat", "az-dili"] : ["riyaziyyat", "az-dili", "ingilis-dili"];
+    var have = avail.map(function (a) { return a.slug; });
+    var pick = want.filter(function (w) { return have.indexOf(w) >= 0; });
+    if (!pick.length) pick = have.slice(0, 2);
+    return pick;
+  }
+
+  function screenAddChild() {
+    topBar.classList.remove("hide");
+    topTitle.textContent = "Uşaq əlavə et";
+    var st = { sinif: null, avail: [], subs: [], min: 10 };
+    var lv = "";
+    for (var i = 1; i <= 11; i++) lv += '<button type="button" class="chip" data-l="' + i + '">' + i + "</button>";
+    show('<div class="card fam"><div id="cErr"></div>' +
+      '<label for="cName">Uşağın adı</label><input id="cName" maxlength="60" autocomplete="off" placeholder="Məsələn: Hüseyn">' +
+      "<label>Sinif</label><div class=\"chips\" id=\"cLvl\">" + lv +
+        '<button type="button" class="chip" disabled style="opacity:.55" title="Tezliklə">Abituriyent · tezliklə</button></div>' +
+      '<label>Hansı fənlər? <span class="fhint">(sinfə görə seçilir, dəyişə bilərsiniz)</span></label>' +
+      '<div class="chips" id="cSubj"><span class="fhint">Əvvəl sinfi seçin.</span></div>' +
+      "<label>Gündə nə qədər vaxt?</label><div class=\"chips\" id=\"cMin\">" +
+        [5, 10, 15].map(function (m) { return '<button type="button" class="chip' + (m === 10 ? " on" : "") + '" data-m="' + m + '">' + m + " dəq</button>"; }).join("") + "</div>" +
+      '<label class="fchk"><input type="checkbox" id="cOk"><span>Uşağımın adı, sinfi və məşq nəticələrinin Bil10-da saxlanmasına <b>razıyam</b>. ' +
+        'İstədiyim vaxt silinməsini istəyə bilərəm. <a href="../mexfilik/" target="_blank" rel="noopener">Ətraflı</a></span></label>' +
+      '<button class="btn go wide" id="cGo">Əlavə et</button>' +
+      '<button class="btn ghost wide" id="cBack" style="margin-top:8px">Ləğv et</button></div>');
+    $("cName").focus();
+    on("cBack", "click", screenFamily);
+
+    on("cLvl", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-l]") : null;
+      if (!b) return;
+      st.sinif = Number(b.getAttribute("data-l"));
+      Array.prototype.forEach.call(document.querySelectorAll("#cLvl [data-l]"), function (x) { x.classList.toggle("on", x === b); });
+      $("cSubj").innerHTML = '<span class="fhint">Yüklənir…</span>';
+      sb.rpc("rpc_family_subjects", { p_level_code: String(st.sinif) }).then(function (list) {
+        if (st.sinif !== Number(b.getAttribute("data-l"))) return;
+        st.avail = list || [];
+        st.subs = famDefaults(st.sinif, st.avail);
+        drawSubj();
+      }).catch(function (er) { $("cSubj").innerHTML = msg("err", famErr(er)); });
+    });
+    function drawSubj() {
+      if (!st.avail.length) { $("cSubj").innerHTML = '<span class="fhint">Bu sinif üçün hələ fənn yoxdur.</span>'; return; }
+      $("cSubj").innerHTML = st.avail.map(function (a) {
+        return '<button type="button" class="chip' + (st.subs.indexOf(a.slug) >= 0 ? " on" : "") + '" data-s="' + esc(a.slug) + '">' + esc(a.name) + "</button>";
+      }).join("");
+    }
+    on("cSubj", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-s]") : null;
+      if (!b) return;
+      var s = b.getAttribute("data-s"), ix = st.subs.indexOf(s);
+      if (ix >= 0) st.subs.splice(ix, 1); else if (st.subs.length < 5) st.subs.push(s);
+      drawSubj();
+    });
+    on("cMin", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-m]") : null;
+      if (!b) return;
+      st.min = Number(b.getAttribute("data-m"));
+      Array.prototype.forEach.call(document.querySelectorAll("#cMin [data-m]"), function (x) { x.classList.toggle("on", x === b); });
+    });
+    on("cGo", "click", function () {
+      if (busy) return;
+      var name = ($("cName").value || "").replace(/\s+/g, " ").trim();
+      function bad(t) { $("cErr").innerHTML = msg("err", t); window.scrollTo(0, 0); }
+      if (name.length < 2) return bad("Uşağın adını yazın.");
+      if (!st.sinif) return bad("Sinfi seçin.");
+      if (!st.subs.length) return bad("Ən azı bir fənn seçin.");
+      if (!$("cOk").checked) return bad("Davam etmək üçün razılıq qutusunu işarələyin.");
+      $("cErr").innerHTML = "";
+      setBusy("cGo", true, "Əlavə et");
+      sb.rpc("rpc_family_add_child", { p_name: name, p_level_code: String(st.sinif), p_subjects: st.subs, p_minutes: st.min, p_consent: true })
+        .then(function (r) { busy = false; screenChildDone(r, st.avail); })
+        .catch(function (er) { setBusy("cGo", false, "Əlavə et"); bad(famExpired(er) ? "Giriş vaxtı bitib. Səhifəni yeniləyib yenidən daxil olun." : famErr(er)); });
+    });
+  }
+
+  function screenChildDone(r, avail) {
+    topBar.classList.remove("hide");
+    topTitle.textContent = "Uşaq əlavə olundu";
+    var names = {}; (avail || []).forEach(function (a) { names[a.slug] = a.name; });
+    var diag = r.diagnostics || [];
+    var okN = diag.filter(function (x) { return x && x.ok; }).map(function (x) { return names[x.subject] || x.subject; });
+    var badN = diag.filter(function (x) { return x && !x.ok; }).length;
+    show('<div class="card ctr fam"><div class="fok">✓</div><h2 class="fdone">' + esc(r.name) + " üçün hazırdır</h2>" +
+      '<p class="note">Uşağınız <b>bil10.az/sagird</b> ünvanında bu kodla daxil olur:</p>' +
+      '<div class="fcode2">' + esc(r.login_code) + "</div>" +
+      '<a class="btn wide go" target="_blank" rel="noopener" href="' + esc(waLink(r.login_code)) + '" style="margin-bottom:8px">WhatsApp-a göndər</a>' +
+      '<button class="btn wide ghost" id="dCopy" type="button" data-copy="' + esc(r.login_code) + '">Kodu kopyala</button></div>' +
+      '<div class="card fam"><b>Növbəti addım</b><p class="note" style="margin:6px 0 0">' +
+        (okN.length ? "Başlanğıc yoxlama hazırdır: <b>" + esc(okN.join(", ")) + "</b>. Uşaq ilk dəfə daxil olanda «Yeni test» kimi görəcək; 14 gün müddəti var." : "Başlanğıc yoxlama hələ hazırlanmayıb.") +
+        (badN ? " Bəzi fənlər üçün yoxlama hazırlanmadı — sonra «Ətraflı» ekranından yenidən cəhd olunacaq." : "") + "</p></div>" +
+      '<button class="btn wide go" id="dHome" style="margin-top:6px">Ailəm ekranına keç</button>');
+    on("dCopy", "click", function () { copyText(r.login_code, $("dCopy")); });
+    on("dHome", "click", screenFamily);
+  }
+
   /* ================================================================
      CIXIS
      ================================================================ */
@@ -659,6 +983,7 @@
     var all = KIDS.map(function (k) { return k.t; });
     if (TOKEN && all.indexOf(TOKEN) < 0) all.push(TOKEN);
     var wasDemo = DEMO;
+    var wasFam = famSession();
     TOKEN = null; CHILD = null; KIDS = []; ADD_MODE = false; DEMO = false;
     try { localStorage.removeItem(LS); } catch (e) {}
     markDemo();
@@ -676,6 +1001,7 @@
     } else {
       serverLogout();
     }
+    if (wasFam) { try { sb.signOut().catch(function () {}); } catch (e) {} }
     if (sayta) { location.href = "../"; return; }
     screenLogin(expired ? msg("warn", "Giriş vaxtı bitib. Kodu yenidən yazın.") : "");
   }
@@ -688,7 +1014,10 @@
   function boot() {
     kidsLoad();
     markDemo();
-    if (TOKEN) screenHome(); else screenLogin("");
+    if (famSession()) { screenFamily(); return; }          // 913: e-poct sessiyasi - «Ailem»
+    if (TOKEN) { screenHome(); return; }
+    if (famUrlOn()) { screenFamAuth("in"); return; }       // ?aile=1: birbasa e-poct girisi
+    screenLogin("");
   }
 
   boot();
