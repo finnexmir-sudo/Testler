@@ -219,5 +219,109 @@ do $$ begin
 end $$;
 reset role;
 
+-- ------------------------------------------------ 8 · valideyn xulasesi (bu gun / hefte / diqqet)
+do $$
+declare
+  v_sid uuid := current_setting('smoke.sid')::uuid;
+  v_test uuid; v_att uuid; v_topic uuid;
+begin
+  select a.test_id into v_test from public.assignments a where a.student_id = v_sid limit 1;
+  select q.topic_id into v_topic from public.questions q where q.topic_id is not null and q.status = 'published'
+   group by q.topic_id having count(*) >= 5 limit 1;
+  insert into public.attempts (student_id, test_id, class_id, status, finished_at)
+  values (v_sid, v_test, (select class_id from public.students where id = v_sid), 'submitted', now()) returning id into v_att;
+  insert into public.attempt_answers (attempt_id, question_id, topic_id, is_correct, answered_at)
+  select v_att, q.id, v_topic, (row_number() over (order by q.id) = 1), now()
+    from public.questions q where q.topic_id = v_topic and q.status = 'published' order by q.id limit 5;
+  insert into public.daily_packs (student_id, day, items, answers)
+  values (v_sid, (now() at time zone 'Asia/Baku')::date, '[{"q":"x"},{"q":"y"}]', '[{"ok":true},{"ok":false}]');
+end $$;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare s jsonb; k jsonb;
+begin
+  s := public.rpc_family_summary();
+  select x into k from jsonb_array_elements(s) x where x->>'id' = current_setting('smoke.sid');
+  assert k is not null, 'xulase usagi tapir';
+  assert (k->>'today_q')::int = 7 and (k->>'today_ok')::int = 2, 'bu gun 7 sual, 2 duz: ' || k::text;
+  assert jsonb_array_length(k->'week') = 7, 'hefte 7 gun';
+  assert (k->'week'->>((k->>'today_i')::int))::int = 1, 'bu gun «calisib»';
+  assert k->'weak' is not null and (k->'weak'->>'percent')::int = 20 and (k->'weak'->>'n')::int = 5, 'zeif movzu: ' || (k->>'weak');
+  assert jsonb_array_length(s) = 7, 'butun aktiv usaqlar xulasede: Huseyn + Aysu + 5 sinaq usagi, alindi ' || jsonb_array_length(s);
+end $$;
+reset role;
+
+-- ------------------------------------------------ 9 · silme
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a2';
+do $$
+declare s jsonb;
+begin
+  s := public.rpc_family_summary();
+  assert jsonb_array_length(s) = 0, 'basqa ailenin xulasesi bos';
+  begin perform public.rpc_family_delete_child(current_setting('smoke.sid')::uuid); assert false, 'basqasinin usagini silmək';
+  exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
+end $$;
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+begin
+  perform public.rpc_family_delete_child(current_setting('smoke.sid')::uuid);
+end $$;
+reset role;
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid;
+begin
+  assert not exists (select 1 from public.students where id = v_sid), 'usaq silinib';
+  assert not exists (select 1 from public.consents where student_id = v_sid), 'razilig silinib';
+  assert not exists (select 1 from public.family_kids where student_id = v_sid), 'parametrler silinib';
+  assert not exists (select 1 from public.attempts where student_id = v_sid), 'cehdler silinib';
+  assert not exists (select 1 from public.daily_packs where student_id = v_sid), 'gundelik paket silinib';
+  assert not exists (select 1 from public.parent_sessions where student_id = v_sid), 'valideyn sessiyalari silinib';
+  assert not exists (select 1 from public.tests where gen_rule->>'student' = v_sid::text), 'diaqnostika testleri silinib';
+  assert exists (select 1 from public.students where account_id = app.family_account('11110000-0000-0000-0000-0000000008a1') and display_name = 'Aysu'), 'ikinci usaq yerindedir';
+end $$;
+--  hesabi sil (ikinci valideyn: usaqsiz)
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a2';
+do $$ begin perform public.rpc_family_delete_account(); end $$;
+reset role;
+do $$ begin
+  assert not exists (select 1 from auth.users where id = '11110000-0000-0000-0000-0000000008a2'), 'istifadeci silinib';
+  assert not exists (select 1 from public.accounts where owner_id = '11110000-0000-0000-0000-0000000008a2'), 'hesab silinib';
+  assert not exists (select 1 from public.profiles where id = '11110000-0000-0000-0000-0000000008a2'), 'profil silinib';
+end $$;
+--  birinci valideyn: usaqlari ile birlikde
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$ begin perform public.rpc_family_delete_account(); end $$;
+reset role;
+do $$ begin
+  assert not exists (select 1 from auth.users where id = '11110000-0000-0000-0000-0000000008a1'), 'valideyn 1 silinib';
+  assert not exists (select 1 from public.students where created_by = '11110000-0000-0000-0000-0000000008a1'), 'butun usaqlar silinib';
+  assert not exists (select 1 from public.classes where teacher_id = '11110000-0000-0000-0000-0000000008a1'), 'qruplar silinib';
+  assert not exists (select 1 from public.consents c join public.students s on s.id = c.student_id where s.created_by = '11110000-0000-0000-0000-0000000008a1'), 'razilqlar silinib';
+end $$;
+--  muellim bu yolla hesabini sile bilmez
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a3';
+do $$ begin
+  begin perform public.rpc_family_delete_account(); assert false, 'muellim hesabi silinmemeli';
+  exception when others then if sqlerrm like '%müəllim hesabı%' then null; else raise; end if; end;
+end $$;
+reset role;
+set role anon;
+do $$ begin
+  begin perform public.rpc_family_summary(); assert false, 'anon: summary';
+  exception when insufficient_privilege then null; end;
+  begin perform public.rpc_family_delete_account(); assert false, 'anon: delete account';
+  exception when insufficient_privilege then null; end;
+  begin perform public.rpc_family_delete_child(gen_random_uuid()); assert false, 'anon: delete child';
+  exception when insufficient_privilege then null; end;
+end $$;
+reset role;
+
 rollback;
 \echo smoke_family: HAMISI KECDI

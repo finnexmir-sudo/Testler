@@ -773,9 +773,13 @@
     return sb.rpc("rpc_family_start", { p_name: name }).then(famEnter);
   }
   function famEnter() {
-    return sb.rpc("rpc_family_children", {}).then(function (d) {
+    return Promise.all([
+      sb.rpc("rpc_family_children", {}),
+      sb.rpc("rpc_family_summary", {}).catch(function () { return []; })   // xulase alinmasa «Ailem» yene acilsin
+    ]).then(function (r) {
+      var d = r[0];
       if (!d || !d.has_account) { screenFamName(); return; }
-      drawFamily(d);
+      drawFamily(d, r[1] || []);
     });
   }
   function screenFamily() {
@@ -812,8 +816,10 @@
     return "https://wa.me/?text=" + encodeURIComponent(t);
   }
 
-  function drawFamily(d) {
+  function drawFamily(d, sums) {
     var kids = d.kids || [], acc = d.account || {};
+    var byId = {}; (sums || []).forEach(function (x) { if (x && x.id) byId[x.id] = x; });
+    var WD = ["B", "Ç", "Ç", "C", "C", "Ş", "B"];
     topBar.classList.remove("hide");
     topTitle.textContent = "Ailəm";
     var out = "";
@@ -837,22 +843,41 @@
           : '<button type="button" class="btn sm ghost" data-diag="' + esc(x.slug) + '" data-kid="' + esc(k.id) + '">Yoxlama ver</button>';
         return '<div class="fk-sr"><span>' + esc(x.name) + "</span>" + right + "</div>";
       }).join("");
+      var sm = byId[k.id] || {};
+      var wk = sm.week || [0, 0, 0, 0, 0, 0, 0], wn = wk.reduce(function (a, b) { return a + b; }, 0);
+      var tq = Number(sm.today_q || 0), tok = Number(sm.today_ok || 0);
+      var dots = wk.map(function (v, i) {
+        return '<span class="dot' + (v ? " d" : "") + (i === sm.today_i ? " t" : "") + '">' + WD[i] + "</span>";
+      }).join("");
+      var weak = sm.weak || null;
+      var anyAct = wn > 0 || tq > 0;
+      var attn = weak ? "«" + weak.topic + "» mövzusunda çətinlik çəkir (" + weak.percent + " % düz). Təkrar məşq faydalı olar."
+        : (anyAct ? "Hələlik narahatedici bir şey yoxdur." : "Hələ məşq başlamayıb. Uşağa kodu göndərin, başlanğıc yoxlamanı həll etsin.");
+      var ask = weak ? "«" + weak.topic + "» mövzusunu mənə bir misalla izah edə bilərsən?" : "";
       return '<div class="card fk">' +
         '<div class="fk-h"><div class="fk-av">' + esc(String(k.name || "?").charAt(0).toUpperCase()) + "</div>" +
           "<div><b>" + esc(k.name) + "</b><span>" + esc(k.sinif ? (ORD[k.sinif] || (k.sinif + "-ci")) + " sinif" : "") +
-            ((k.subject_names || []).length ? " · " + esc((k.subject_names || []).join(", ")) : "") + "</span></div></div>" +
-        '<div class="fk-d' + (done ? " ok" : "") + '">' + esc(diag) + "</div>" +
-        (rows ? '<div class="fk-sj">' + rows + "</div>" : "") +
+            ((k.subject_names || []).length ? " · " + esc((k.subject_names || []).join(", ")) : "") + "</span></div>" +
+          '<span class="fk-chip ' + (tq > 0 ? "ok" : "no") + '">' + (tq > 0 ? "Bu gün ✓" : "Bu gün ○") + "</span></div>" +
+        '<div class="fk-st"><span>Bu gün</span><b>' + (tq > 0 ? tq + " sual · " + tok + " düz" : "hələ çalışmayıb") + "</b></div>" +
+        '<div class="fk-st"><span>Bu həftə</span><div class="fk-dots">' + dots + "</div></div>" +
+        '<div class="fk-st"><span>Hədəf</span><b>' + wn + " / 4 gün</b></div>" +
+        '<div class="fk-diqqet"><b>Diqqət</b>' + esc(attn) + "</div>" +
+        (ask ? '<div class="fk-ask">💬 Evdə soruşun: ' + esc(ask) + "</div>" : "") +
+        '<details class="fk-dd"' + (!doneN && !anyAct ? " open" : "") + "><summary>" + esc(diag) + "</summary>" +
+          (rows ? '<div class="fk-sj">' + rows + "</div>" : "") + "</details>" +
         '<div class="fk-code"><i>Uşağın giriş kodu</i><b>' + esc(k.login_code) + "</b>" +
           "<span>bil10.az/sagird ünvanında bu kodla daxil olur</span></div>" +
         '<div class="fk-btns">' +
           '<button type="button" class="btn sm ghost" data-copy="' + esc(k.login_code) + '">Kopyala</button>' +
           '<a class="btn sm ghost" target="_blank" rel="noopener" href="' + esc(waLink(k.login_code)) + '">WhatsApp</a>' +
-          '<button type="button" class="btn sm go" data-open="' + esc(k.id) + '">Ətraflı</button></div></div>';
+          '<button type="button" class="btn sm go" data-open="' + esc(k.id) + '">Ətraflı</button></div>' +
+        '<div class="fk-del" data-fd="' + esc(k.id) + '"><button type="button" class="linkbtn" data-del="' + esc(k.id) + '" data-n="' + esc(k.name) + '">Uşağı sil</button></div></div>';
     }).join("");
     out += (kids.length >= 6 ? "" : '<button class="btn wide ' + (kids.length ? "ghost" : "go") + '" id="famAdd">+ Uşaq əlavə et</button>') +
-      '<p class="note" style="text-align:center;margin:16px 0 4px">Uşağın adı, sinfi və məşq nəticələri yalnız sizin hesabınızda görünür. ' +
-      '<a href="../mexfilik/">Məxfilik</a></p>';
+      '<p class="note" style="text-align:center;margin:16px 0 4px">Uşağın adı və nəticələri yalnız sizə görünür, heç yerdə paylaşılmır. ' +
+      '<a href="../mexfilik/">Məxfilik</a></p>' +
+      '<div class="fk-del" id="acctDel" style="text-align:center"><button type="button" class="linkbtn" id="acctDelBtn">Hesabı və bütün məlumatı sil</button></div>';
     show(out);
     on("famAdd", "click", screenAddChild);
     Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (b) {
@@ -861,8 +886,44 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-diag]"), function (b) {
       b.addEventListener("click", function () { famDiag(b); });
     });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-del]"), function (b) {
+      b.addEventListener("click", function () { famAskDelChild(b); });
+    });
+    on("acctDelBtn", "click", famAskDelAccount);
     Array.prototype.forEach.call(document.querySelectorAll("[data-open]"), function (b) {
       b.addEventListener("click", function () { famOpen(b.getAttribute("data-open"), b); });
+    });
+  }
+
+  //  Silme: iki addim (tesdiq), geri qaytarilmir
+  function famAskDelChild(b) {
+    var id = b.getAttribute("data-del"), nm = b.getAttribute("data-n") || "Uşaq";
+    var box = document.querySelector('[data-fd="' + id + '"]'); if (!box) return;
+    box.innerHTML = '<div class="fk-conf"><p><b>' + esc(nm) + "</b> və bütün nəticələri silinsin? Bu geri qaytarılmır.</p>" +
+      '<div class="fk-btns"><button type="button" class="btn sm ghost" data-no="1">Ləğv et</button>' +
+      '<button type="button" class="btn sm danger" data-yes="1">Bəli, sil</button></div></div>';
+    box.querySelector("[data-no]").addEventListener("click", screenFamily);
+    box.querySelector("[data-yes]").addEventListener("click", function () {
+      if (busy) return; busy = true;
+      sb.rpc("rpc_family_delete_child", { p_student: id }).then(function () { busy = false; screenFamily(); })
+        .catch(function (e) { busy = false; box.innerHTML = msg("err", famErr(e)); });
+    });
+  }
+  function famAskDelAccount() {
+    var box = $("acctDel"); if (!box) return;
+    box.innerHTML = '<div class="fk-conf"><p><b>Hesabınız, bütün uşaqlar və onların nəticələri silinsin?</b> Bu geri qaytarılmır, e-poçt ünvanı da sistemdən silinir.</p>' +
+      '<div class="fk-btns"><button type="button" class="btn sm ghost" data-no="1">Ləğv et</button>' +
+      '<button type="button" class="btn sm danger" data-yes="1">Bəli, hamısını sil</button></div></div>';
+    box.querySelector("[data-no]").addEventListener("click", screenFamily);
+    box.querySelector("[data-yes]").addEventListener("click", function () {
+      if (busy) return; busy = true;
+      sb.rpc("rpc_family_delete_account", {}).then(function () {
+        busy = false;
+        KIDS = []; TOKEN = null; CHILD = null;
+        try { localStorage.removeItem(LS); } catch (e) {}
+        sb.signOut().then(done, done);
+        function done() { screenFamAuth("up", msg("ok", "Hesabınız və bütün məlumat silindi.")); }
+      }).catch(function (e) { busy = false; box.innerHTML = msg("err", famErr(e)); });
     });
   }
 
