@@ -338,7 +338,7 @@
         "<b>" + esc((d.child && d.child.name) || "Uşağım") + "</b>" +
         '<span class="muted">' +
           //  Adi bos olan muellimde "müəllim: " yazib bos qoymuruq
-          [ (d.child && d.child.class) || "",
+          [ famSession() ? "" : ((d.child && d.child.class) || ""),     // 913: ailə qrupunun adı uşağın adıdır - təkrar yazılmasın
             (d.teacher || "").trim() && !famSession() ? "müəllim: " + d.teacher.trim() : "" ]
             .filter(Boolean).map(esc).join(" · ") +
         "</span>" +
