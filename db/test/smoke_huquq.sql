@@ -22,18 +22,18 @@ create temporary view t_anon as
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
    where n.nspname = 'public' and p.prokind = 'f';
 
---  1 · susmaya gore tam olaraq 29 funksiya aciqdir
+--  1 · susmaya gore tam olaraq 30 funksiya aciqdir
 --      (212: +2 gundelik tekrar · 901: +rpc_demo_gc · 910: +2 push abune · 913: +rpc_family_status)
 do $$
 declare v_say int; v_ad text;
 begin
   select count(*), string_agg(distinct proname, ', ' order by proname)
     into v_say, v_ad from t_anon where ac;
-  if v_say <> 29 then
-    raise exception 'anon % funksiya gorur (29 gozlenilir): %', v_say, v_ad;
+  if v_say <> 30 then
+    raise exception 'anon % funksiya gorur (30 gozlenilir): %', v_say, v_ad;
   end if;
 end $$;
-\echo 'OK  1 · anon tam olaraq 29 RPC gorur'
+\echo 'OK  1 · anon tam olaraq 30 RPC gorur'
 
 --  2 · siyahinin OZU dogrudur - ad-ad
 do $$
@@ -117,7 +117,7 @@ do $$
 declare v_say int;
 begin
   select count(*) into v_say from t_anon where ac;
-  if v_say <> 29 then raise exception 'tekrar isletmek sayi deyisdi: %', v_say; end if;
+  if v_say <> 30 then raise exception 'tekrar isletmek sayi deyisdi: %', v_say; end if;
 end $$;
 \echo 'OK  6 · berpa idempotentdir - ikinci defe hec ne deyismir'
 

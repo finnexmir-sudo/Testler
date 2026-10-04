@@ -486,6 +486,21 @@ begin
   assert x->>'state' = 'done' and (x->>'done')::int = (x->>'of')::int, 'hamisi yazilib -> done: ' || x::text;
 end $$;
 
+-- ------------------------------------------------ 4f · usagin oz sehifesi (920)
+set role anon;
+do $$
+declare d jsonb;
+begin
+  d := public.rpc_student_family(current_setting('smoke.tok'));
+  assert (d->>'family')::boolean, 'family bayragi: ' || d::text;
+  assert jsonb_array_length(d->'week') = 7, 'hefte 7 gun';
+  assert (d->>'minutes')::int in (5, 10, 15, 20, 30), 'deqiqe';
+  assert d->'mastered' is not null and jsonb_array_length(d->'cur') >= 1, 'mastered + cari fesil: ' || d::text;
+  begin perform public.rpc_student_family('yalan-token'); assert false, 'yalan token';
+  exception when others then if sqlerrm like '%Sessiya bitib%' then null; else raise; end if; end;
+end $$;
+reset role;
+
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';
 set role authenticated;

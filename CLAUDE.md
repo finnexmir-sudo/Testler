@@ -575,6 +575,10 @@ HAMISI + bu sinfin ilk üçdə biri (≥2), seriya ilk hissədə `gen_rule.topic
 (`app.family_diag_session`; `rpc_family_diag` indi onu çağırır, `rpc_family_children.subject_diag[].state` = none|open|partial|done + done/of).
 Nəticə hissələr üzrə «Diqqət»də (915, mövzu üzrə cavablar) öz-özünə birləşir. Müəllim yolu (`rpc_diagnostic_create`) dəyişməyib. Hələ yox: «bir sinif aşağı yoxla» təklifi
 (N-2), plan seçiləndə N sinfi fəsillərinin planla uyğunlaşması.
+(920, v749) uşağın öz ana ekranı: `rpc_student_family(token)` (anon, `{family,minutes,week,today_i,mastered,cur}`; müəllim yolu şagirdi üçün `{family:false}`).
+Ailə uşağında `screenTests` `FAM` ilə: «Mənim həftəm» bloku (7 gün + «N mövzu mənimsədin» + «Hazırda»), nəticə tile-ları/«Növbəti dərs»/«Keçdiyi dərslər» gizli,
+«Tapşırıqlar» → «Başlanğıc yoxlama», «Zəif mövzular» → «Təkrar edək» (faizsiz, ≤3), gündəlik kartda seçilmiş dəqiqə. Giriş/footer mətni neytral
+(«Müəllimin və ya valideynin verdiyi kod»). Anon whitelist 30 RPC (05_grants + smoke_huquq).
 Hələ yox: «Hədəf 4 gün»in dəyişməsi, abituriyent.
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)

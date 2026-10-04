@@ -261,6 +261,14 @@ body{background:
 
 /* novbeti ders - yalniz baxmaq ucun, klik olunmur */
 .nlesson{margin:0 0 16px}
+.famprog{margin:0 0 16px}
+.fp-t{font-size:13px;font-weight:700;color:var(--fg-2);margin:0 0 10px}
+.fp-dots{display:flex;gap:6px;margin:0 0 12px}
+.fp-d{flex:1;max-width:38px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--n-100);color:var(--fg-3)}
+.fp-d.on{background:var(--brand);color:#fff}
+.fp-d.t{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--brand)}
+.fp-r{font-size:14.5px}.fp-r b{font-size:20px;font-weight:700;margin-right:4px}
+.fp-c{margin-top:6px;font-size:13px;color:var(--fg-2)}
 .nl-tag{display:block;font-size:11px;font-weight:600;letter-spacing:.03em;
   text-transform:uppercase;color:var(--fg-3);margin-bottom:4px}
 .nlesson b{display:block;font-size:14.5px;font-weight:600}

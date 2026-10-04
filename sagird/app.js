@@ -26,6 +26,7 @@
       ACIQ bir duyme lazimdir.  Evvel «Çıxış» kod ekranini acirdi ve
       ziyaretci orada ilisib qalirdi.  */
   var DEMO = false;
+  var FAM = null;       // 920: ailə yolu uşağı - {minutes, week, today_i, mastered, cur}; müəllim yolunda null
 
   var LS = "sagird_ses";
 
@@ -268,7 +269,7 @@
     show(
       '<div class="hero"><div class="mark"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lgQ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4acb"/><stop offset="1" stop-color="#0e9384"/></linearGradient></defs><path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="url(#lgQ)"/><g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/></g><path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#ffc94d"/><path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#1a2233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
         "<h1>Testə başla</h1>" +
-        "<p>Müəllimin verdiyi kodu yaz.</p></div>" +
+        "<p>Müəllimin və ya valideynin verdiyi kodu yaz.</p></div>" +
       '<div class="card" style="margin-top:18px">' +
         (note || "") +
         '<div id="lErr"></div>' +
@@ -546,8 +547,12 @@
     topTitle.textContent = ME ? ME.display_name : "Testlər";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
 
-    sb.rpc("rpc_student_tests", { p_token: TOKEN }).then(function (d) {
-      d = d || {};
+    Promise.all([
+      sb.rpc("rpc_student_tests", { p_token: TOKEN }),
+      sb.rpc("rpc_student_family", { p_token: TOKEN }).catch(function () { return null; })   // 920 qurulmayıbsa adi ekran
+    ]).then(function (r) {
+      var d = r[0] || {};
+      FAM = r[1] && r[1].family ? r[1] : null;
       var asg  = d.assigned || [];
       /*  04.10 (sahibin qerari): «Serbest mesq» - butun fennlerin test siyahisi - sagirde GOSTERILMIR.
           Gelecekde bizim oz mehsulumuz (odenisli) olacaq: SERBEST_TEST = true etmek kifayetdir, kod yerindedir.
@@ -572,7 +577,7 @@
       //  salamlama marka zolagindadir; gostericiler zolagin altindan cixir
       setBand('<div class="shero">' + av(ME ? ME.display_name : "?") +
         "<div><b>Salam, " + esc(ME ? ME.display_name : "") + "! 👋</b>" +
-        (CLS ? "<i>" + esc(CLS.name) + streakTxt + "</i>" : "") + "</div></div>");
+        (CLS && !FAM ? "<i>" + esc(CLS.name) + streakTxt + "</i>" : (FAM && streakTxt ? "<i>" + streakTxt.replace(/^ · /, "") + "</i>" : "")) + "</div></div>");
       var h = "";
       /*  04.10: «Yeni test» bildirisi.  Muellim yeni tapsiriq verende sagird tetbiqi acanda yuxarida kart
           cixir.  Bu TELEFONA PUSH DEYIL - yalniz tetbiqin icinde, hec bir icaze/xarici sorgu yoxdur.
@@ -590,7 +595,7 @@
           '<div class="nt-a"><button class="btn sm go" id="ntGo">' + (one ? "Başla" : "Bax") + "</button>" +
           '<button class="btn sm ghost" id="ntX">Sonra</button></div></div>';
       }
-      if (worked.length) {
+      if (worked.length && !FAM) {
         h += '<div class="stiles">' +
           '<div class="st a"><b>' + worked.length +
             "</b><span>işlənmiş test</span></div>" +
@@ -606,7 +611,19 @@
 
       /* Novbeti ders: muellim ekranindaki "NOVBETI DERS" kartinin eynisi -
          yalniz baxmaq ucundur, klik olunmur. */
-      if (d.next_lesson) {
+      if (FAM) {
+        var WDN = ["B", "Ç", "Ç", "C", "C", "Ş", "B"];
+        var wk = FAM.week || [0, 0, 0, 0, 0, 0, 0];
+        h += '<div class="card famprog"><div class="fp-t">Mənim həftəm</div><div class="fp-dots">' +
+          wk.map(function (v, i) {
+            return '<span class="fp-d' + (v ? " on" : "") + (i === FAM.today_i ? " t" : "") + '">' + WDN[i] + "</span>";
+          }).join("") + "</div>" +
+          '<div class="fp-r"><b>' + (Number(FAM.mastered) || 0) + "</b> mövzu mənimsədin</div>" +
+          ((FAM.cur || []).length
+            ? '<div class="fp-c">Hazırda: <b>' + esc(FAM.cur[0].subject) + " — " + esc(FAM.cur[0].chapter) + "</b>" +
+              (FAM.cur.length > 1 ? " və daha " + (FAM.cur.length - 1) : "") + "</div>"
+            : "") + "</div>";
+      } else if (d.next_lesson) {
         h += '<div class="card tight nlesson"><span class="nl-tag">Növbəti dərs</span>' +
           "<b>" + esc(d.next_lesson.topic) + "</b>" +
           (d.next_lesson.subject ? "<i>" + esc(d.next_lesson.subject) + "</i>" : "") +
@@ -623,7 +640,9 @@
          Sayğac serverden ayrica gelir - rpc_student_daily doldurur. */
       h += '<div id="dayBox"></div>';
 
-      h += '<h2 id="asgH">Tapşırıqlar</h2>';
+      if (!(FAM && !(d.assigned || []).length && !(d.homework || []).length)) {
+        h += '<h2 id="asgH">' + (FAM ? "Başlanğıc yoxlama" : "Tapşırıqlar") + "</h2>";
+      }
       /* 191: muellimin METNLE yazdigi ev tapsirigi - testlerin ustunde.
          «Etdim» serverde yazilir, valideyn de gorur.  Edilenler yigilir. */
       var hw = d.homework || [];
@@ -650,7 +669,9 @@
       }
       var asgOpen = asg.filter(function (t) { return !isOver(t); });
       var asgDone = asg.filter(isOver);
-      if (!asg.length) {
+      if (!asg.length && FAM) {
+        //  ailə uşağında başlanğıc yoxlama yoxdursa bölmə göstərilmir
+      } else if (!asg.length) {
         //  191: ev tapsirigi varsa «tapsiriq yoxdur» yalan olardi - «test» deyirik
         h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
              "</div><b>" + (hw.length ? "Test tapşırığı yoxdur" : "Tapşırıq yoxdur") + "</b>" +
@@ -704,17 +725,18 @@
          siniflerini "netcelerim" siyahisindan goturur, yeni CSS lazim
          deyil.  Faiz hemise <60 oldugu ucun rengi hemise qirmizidir. */
       if (d.weak && d.weak.length) {
-        h += '<div class="spacer"></div><h2>Zəif mövzular</h2>' +
-          '<div class="card pad0">' + d.weak.map(function (w) {
+        //  ailə yolu: faiz və «zəif» sözü uşağa göstərilmir - yumşaq «Təkrar edək»
+        h += '<div class="spacer"></div><h2>' + (FAM ? "Təkrar edək" : "Zəif mövzular") + "</h2>" +
+          '<div class="card pad0">' + (FAM ? d.weak.slice(0, 3) : d.weak).map(function (w) {
             return '<div class="myr"><div class="g"><b>' + esc(w.topic) + "</b>" +
               "<i>" + esc(w.subject) + "</i></div>" +
-              '<span class="best bl">' + Math.round(w.percent) + "%</span></div>";
+              (FAM ? "" : '<span class="best bl">' + Math.round(w.percent) + "%</span>") + "</div>";
           }).join("") + "</div>";
       }
 
       /* 4. Kecdiyi dersler - "novbeti ders" hara gedirik deyir, bu
          hardan geldik.  Ən çoxu 5, ən yenisi əvvəl. */
-      if (d.lessons && d.lessons.length) {
+      if (d.lessons && d.lessons.length && !FAM) {
         h += '<div class="spacer"></div><h2>Keçdiyi dərslər</h2>' +
           '<div class="card pad0">' + d.lessons.map(function (l) {
             return '<div class="myr"><div class="g"><b>' + esc(l.topic) + "</b>" +
@@ -1412,7 +1434,7 @@
       box.innerHTML = (d.praise ? '<div class="card dpraise">💚 <b>Valideynindən:</b> ' + esc(d.praise) + "</div>" : "") +
         '<div class="card dcard">' +
         '<div class="dhead"><b>Bu günün ' + total + " sualı</b>" +
-          '<span class="dmin">≈' + Math.max(2, Math.round(total * 0.8)) + " dəq</span></div>" +
+          '<span class="dmin">≈' + (d.family && FAM ? FAM.minutes : Math.max(2, Math.round(total * 0.8))) + " dəq</span></div>" +
         '<p class="note" style="margin:6px 0 10px">' + sub + " fərdi təkrar." +
           (dun ? " Dünən: " + (Number(dun.ok) || 0) + "/" + (Number(dun.total) || 0) + "." : "") +
           "</p>" +
