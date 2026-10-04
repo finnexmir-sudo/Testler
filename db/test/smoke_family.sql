@@ -139,6 +139,42 @@ begin
 end $$;
 reset role;
 
+-- ------------------------------------------------ 4b · butun fennler: ilk 3-e yoxlama, qalani «Yoxlama ver» ile
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare s jsonb; v_slugs text[]; r jsonb; ch jsonb; kid jsonb; v_sid uuid; v_none text; v_other text; n int;
+begin
+  s := public.rpc_family_subjects('7');
+  select array_agg(x->>'slug') into v_slugs from jsonb_array_elements(s) x;
+  n := array_length(v_slugs, 1);
+  assert n >= 4, 'sinif 7: en azi 4 fenn lazimdir: ' || n;
+  r := public.rpc_family_add_child('Aysu Aliyeva', '7', v_slugs, 30, true);
+  v_sid := (r->>'student_id')::uuid;
+  assert jsonb_array_length(r->'diagnostics') = 3 and (r->>'subjects_total')::int = n, 'ilk 3 yoxlama, cemi ' || n || ': ' || r::text;
+
+  ch := public.rpc_family_children();
+  select k into kid from jsonb_array_elements(ch->'kids') k where (k->>'id')::uuid = v_sid;
+  assert (kid->>'minutes')::int = 30, '30 deq';
+  assert jsonb_array_length(kid->'subject_diag') = n, 'her fenn ucun veziyyet';
+  assert (select count(*) from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'open') = 3, '3 «open»';
+  assert (select count(*) from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'none') = n - 3, 'qalani «none»';
+
+  select x->>'slug' into v_none from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'none' limit 1;
+  r := public.rpc_family_diag(v_sid, v_none);
+  assert (r->>'ok')::boolean, 'yoxlama verildi: ' || r::text;
+  ch := public.rpc_family_children();
+  select k into kid from jsonb_array_elements(ch->'kids') k where (k->>'id')::uuid = v_sid;
+  assert (select count(*) from jsonb_array_elements(kid->'subject_diag') x where x->>'state' = 'open') = 4, 'indi 4 «open»';
+  r := public.rpc_family_diag(v_sid, v_none);
+  assert (r->>'existing')::boolean, 'ikinci cagiris dublikat yaratmir';
+
+  select sl.slug into v_other from public.subjects sl where sl.slug <> all(v_slugs) limit 1;
+  begin perform public.rpc_family_diag(v_sid, coalesce(v_other, 'yoxdur')); assert false, 'secilmeyen fenn';
+  exception when others then if sqlerrm like '%seçilməyib%' then null; else raise; end if; end;
+end $$;
+reset role;
+
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';
 set role authenticated;
@@ -149,6 +185,8 @@ begin
   assert (public.rpc_family_start('Ikinci Valideyn')->>'ok')::boolean, 'ikinci valideyn hesab acir';
   ch := public.rpc_family_children();
   assert jsonb_array_length(ch->'kids') = 0, 'basqa ailənin usagi gorunmur';
+  begin perform public.rpc_family_diag(current_setting('smoke.sid')::uuid, 'riyaziyyat'); assert false, 'basqa ailenin usagina yoxlama';
+  exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
   begin perform public.rpc_family_open(current_setting('smoke.sid')::uuid); assert false, 'basqa usagin tokeni';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
 end $$;
@@ -175,6 +213,8 @@ do $$ begin
   begin perform public.rpc_family_add_child('X Y', '7', array['riyaziyyat'], 10, true); assert false, 'anon: add';
   exception when insufficient_privilege then null; end;
   begin perform public.rpc_family_open(gen_random_uuid()); assert false, 'anon: open';
+  exception when insufficient_privilege then null; end;
+  begin perform public.rpc_family_diag(gen_random_uuid(), 'riyaziyyat'); assert false, 'anon: diag';
   exception when insufficient_privilege then null; end;
 end $$;
 reset role;

@@ -96,10 +96,18 @@ with sync_playwright() as pw:
         p.click("#cLvl [data-l='7']"); p.wait_for_selector("#cSubj [data-s]", timeout=8000)
         n_on = p.locator("#cSubj .chip.on").count()
         ok(n_on >= 2, "sinif 7: fənlər avtomatik seçilib (%d)" % n_on)
+        rec = p.locator("#cMinHint").inner_text()
+        ok("15 dəq" in rec, "sinif 7: tövsiyə olunan vaxt yazılır", rec)
+        ok(p.locator("#cMin .chip.on").inner_text().startswith("15"), "tövsiyə olunan vaxt (15 dəq) avtomatik seçilib")
+        while p.locator("#cSubj .chip:not(.on)").count():
+            p.locator("#cSubj .chip:not(.on)").first.click()          # BUTUN fennler secilir (limit yoxdur)
+        n_all = p.locator("#cSubj .chip.on").count()
+        ok(n_all >= 5, "bütün fənləri seçmək olur (%d fənn)" % n_all)
+        ok("ilk 3 fənn" in p.locator("#cSubjHint").inner_text(), "3-dən çox fənn: «yoxlama ilk 3 fənn üçün» izahı")
         ok(p.locator("#cLvl .chip[disabled]").count() == 1, "«Abituriyent» hələ qeyri-aktivdir")
         p.click("#cGo"); wait_text(p, "#cErr", "razılıq")
         ok(db("select count(*) n from public.students", one=True)["n"] == 0, "razılıqsız uşaq yaranmır")
-        p.click("#cMin [data-m='15']")
+        p.click("#cMin [data-m='30']")
         p.screenshot(path="%s/3_usaq_elave_%s.png" % (OUT, tag), full_page=True)
         p.check("#cOk"); p.click("#cGo")
         p.wait_for_selector("#dHome", timeout=30000)
@@ -112,10 +120,11 @@ with sync_playwright() as pw:
         st = db("""select s.id::text i, s.login_code, s.parent_code, fk.minutes, fk.subjects, c.kind::text k
                      from public.students s join public.family_kids fk on fk.student_id = s.id
                      join public.classes c on c.id = s.class_id where s.account_id = %s""", (acc["id"],), one=True)
-        ok(st and st["login_code"] == code and st["minutes"] == 15 and st["k"] == "self_study", "baza: şagird, 15 dəq, gizli self_study qrup", st)
+        ok(st and st["login_code"] == code and st["minutes"] == 30 and st["k"] == "self_study", "baza: şagird, 30 dəq, gizli self_study qrup", st)
         ok(db("select count(*) n from public.consents where student_id = %s and kind = 'parental'", (st["i"],), one=True)["n"] == 1, "razılıq yazılıb")
         nd = db("select count(*) n from public.assignments a join public.tests t on t.id = a.test_id where a.student_id = %s and t.is_diagnostic", (st["i"],), one=True)["n"]
-        ok(nd >= 2, "uşağa %d başlanğıc diaqnostika verilib" % nd)
+        ok(nd == 3, "yalnız İLK 3 fənn üçün başlanğıc diaqnostika verilib (%d)" % nd)
+        ok("Qalan" in p.locator("#main").inner_text(), "kod ekranında: qalan fənlər üçün yoxlamanı sonra verə bilərsiniz")
 
         print("-- Ailem ekrani")
         p.click("#dHome"); p.wait_for_selector(".fk", timeout=15000)
@@ -124,6 +133,12 @@ with sync_playwright() as pw:
         ok(code in txt and "Başlanğıc yoxlama: 0 /" in txt, "kod + diaqnostika sayı (0 / N)", txt[:200])
         ok("7-ci sinif" in txt, "sinif «7-ci sinif» yazılır")
         p.screenshot(path="%s/5_ailem_%s.png" % (OUT, tag), full_page=True)
+        rows = p.locator("[data-diag]").count()
+        ok(rows == n_all - 3, "Ailəm: qalan %d fənn üçün «Yoxlama ver» düyməsi" % (n_all - 3), rows)
+        p.locator("[data-diag]").first.click()
+        p.wait_for_function("n => document.querySelectorAll('[data-diag]').length === n", arg=rows - 1, timeout=20000)
+        nd2 = db("select count(*) n from public.assignments a join public.tests t on t.id = a.test_id where a.student_id = %s and t.is_diagnostic", (st["i"],), one=True)["n"]
+        ok(nd2 == 4, "«Yoxlama ver» basıldı: 4-cü fənn üçün diaqnostika verildi", nd2)
 
         print("-- usagin movcud valideyn ekrani")
         p.click("[data-open]"); p.wait_for_selector("#famBack", timeout=15000)

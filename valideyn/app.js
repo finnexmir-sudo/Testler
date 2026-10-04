@@ -827,14 +827,22 @@
         "<p>Uşağın adını və sinfini yazın — ona uyğun başlanğıc yoxlama avtomatik hazırlanacaq.</p></div>";
     }
     out += kids.map(function (k) {
-      var diag = !k.diag_total ? "Başlanğıc yoxlama hazırlanır"
-        : (k.diag_done >= k.diag_total ? "Başlanğıc yoxlama tamamlandı ✓" : "Başlanğıc yoxlama: " + k.diag_done + " / " + k.diag_total);
-      var done = k.diag_total && k.diag_done >= k.diag_total;
+      var sd = k.subject_diag || [];
+      var doneN = sd.filter(function (x) { return x.state === "done"; }).length;
+      var done = sd.length > 0 && doneN === sd.length;
+      var diag = sd.length ? "Başlanğıc yoxlama: " + doneN + " / " + sd.length + " fənn" + (done ? " ✓" : "") : "Başlanğıc yoxlama hazırlanır";
+      var rows = sd.map(function (x) {
+        var right = x.state === "done" ? '<i class="ok">tamamlandı ✓</i>'
+          : x.state === "open" ? "<i>uşağa verilib</i>"
+          : '<button type="button" class="btn sm ghost" data-diag="' + esc(x.slug) + '" data-kid="' + esc(k.id) + '">Yoxlama ver</button>';
+        return '<div class="fk-sr"><span>' + esc(x.name) + "</span>" + right + "</div>";
+      }).join("");
       return '<div class="card fk">' +
         '<div class="fk-h"><div class="fk-av">' + esc(String(k.name || "?").charAt(0).toUpperCase()) + "</div>" +
           "<div><b>" + esc(k.name) + "</b><span>" + esc(k.sinif ? (ORD[k.sinif] || (k.sinif + "-ci")) + " sinif" : "") +
             ((k.subject_names || []).length ? " · " + esc((k.subject_names || []).join(", ")) : "") + "</span></div></div>" +
         '<div class="fk-d' + (done ? " ok" : "") + '">' + esc(diag) + "</div>" +
+        (rows ? '<div class="fk-sj">' + rows + "</div>" : "") +
         '<div class="fk-code"><i>Uşağın giriş kodu</i><b>' + esc(k.login_code) + "</b>" +
           "<span>bil10.az/sagird ünvanında bu kodla daxil olur</span></div>" +
         '<div class="fk-btns">' +
@@ -850,9 +858,26 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (b) {
       b.addEventListener("click", function () { copyText(b.getAttribute("data-copy"), b); });
     });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-diag]"), function (b) {
+      b.addEventListener("click", function () { famDiag(b); });
+    });
     Array.prototype.forEach.call(document.querySelectorAll("[data-open]"), function (b) {
       b.addEventListener("click", function () { famOpen(b.getAttribute("data-open"), b); });
     });
+  }
+
+  //  Secilmis, amma hele yoxlamasi verilmemis fenn ucun bir toxunusla yoxlama ver
+  function famDiag(btn) {
+    if (busy) return;
+    busy = true; btn.disabled = true; btn.textContent = "Hazırlanır…";
+    sb.rpc("rpc_family_diag", { p_student: btn.getAttribute("data-kid"), p_subject: btn.getAttribute("data-diag") })
+      .then(function () { busy = false; screenFamily(); })
+      .catch(function (e) {
+        busy = false; btn.disabled = false; btn.textContent = "Yoxlama ver";
+        if (famExpired(e)) { screenFamily(); return; }
+        var m = document.createElement("div"); m.innerHTML = msg("err", famErr(e));
+        main.insertBefore(m.firstChild, main.firstChild); window.scrollTo(0, 0);
+      });
   }
 
   //  Usagin movcud valideyn ekranini ac (rpc_parent_home) - hesab sahibine usagin valideyn tokeni verilir
@@ -884,7 +909,9 @@
   function screenAddChild() {
     topBar.classList.remove("hide");
     topTitle.textContent = "Uşaq əlavə et";
-    var st = { sinif: null, avail: [], subs: [], min: 10 };
+    var st = { sinif: null, avail: [], subs: [], min: 10, minTouched: false };
+    //  Tovsiye olunan gundelik vaxt: ibtidai 10, orta 15, yuxari 20 deq (movcud suallarin tempine gore; ilk ailelerde yoxlanir)
+    function recMin(l) { return l <= 4 ? 10 : (l <= 8 ? 15 : 20); }
     var lv = "";
     for (var i = 1; i <= 11; i++) lv += '<button type="button" class="chip" data-l="' + i + '">' + i + "</button>";
     show('<div class="card fam"><div id="cErr"></div>' +
@@ -892,9 +919,10 @@
       "<label>Sinif</label><div class=\"chips\" id=\"cLvl\">" + lv +
         '<button type="button" class="chip" disabled style="opacity:.55" title="Tezliklə">Abituriyent · tezliklə</button></div>' +
       '<label>Hansı fənlər? <span class="fhint">(sinfə görə seçilir, dəyişə bilərsiniz)</span></label>' +
-      '<div class="chips" id="cSubj"><span class="fhint">Əvvəl sinfi seçin.</span></div>' +
-      "<label>Gündə nə qədər vaxt?</label><div class=\"chips\" id=\"cMin\">" +
-        [5, 10, 15].map(function (m) { return '<button type="button" class="chip' + (m === 10 ? " on" : "") + '" data-m="' + m + '">' + m + " dəq</button>"; }).join("") + "</div>" +
+      '<div class="chips" id="cSubj"><span class="fhint">Əvvəl sinfi seçin.</span></div><div class="fhint" id="cSubjHint"></div>' +
+      "<label>Gündə nə qədər vaxt? <span class=\"fhint\">(gündəlik məşq hədəfi)</span></label><div class=\"chips\" id=\"cMin\">" +
+        [5, 10, 15, 20, 30].map(function (m) { return '<button type="button" class="chip' + (m === 10 ? " on" : "") + '" data-m="' + m + '">' + m + " dəq</button>"; }).join("") +
+        '</div><div class="fhint" id="cMinHint">Sinfi seçəndə tövsiyə olunan vaxt göstərilir.</div>' +
       '<label class="fchk"><input type="checkbox" id="cOk"><span>Uşağımın adı, sinfi və məşq nəticələrinin Bil10-da saxlanmasına <b>razıyam</b>. ' +
         'İstədiyim vaxt silinməsini istəyə bilərəm. <a href="../mexfilik/" target="_blank" rel="noopener">Ətraflı</a></span></label>' +
       '<button class="btn go wide" id="cGo">Əlavə et</button>' +
@@ -907,6 +935,8 @@
       if (!b) return;
       st.sinif = Number(b.getAttribute("data-l"));
       Array.prototype.forEach.call(document.querySelectorAll("#cLvl [data-l]"), function (x) { x.classList.toggle("on", x === b); });
+      if (!st.minTouched) setMin(recMin(st.sinif));
+      $("cMinHint").textContent = "Bu sinif üçün tövsiyə: " + recMin(st.sinif) + " dəq. İstədiyinizi seçə bilərsiniz.";
       $("cSubj").innerHTML = '<span class="fhint">Yüklənir…</span>';
       sb.rpc("rpc_family_subjects", { p_level_code: String(st.sinif) }).then(function (list) {
         if (st.sinif !== Number(b.getAttribute("data-l"))) return;
@@ -920,19 +950,25 @@
       $("cSubj").innerHTML = st.avail.map(function (a) {
         return '<button type="button" class="chip' + (st.subs.indexOf(a.slug) >= 0 ? " on" : "") + '" data-s="' + esc(a.slug) + '">' + esc(a.name) + "</button>";
       }).join("");
+      var h = $("cSubjHint");
+      if (h) h.textContent = st.subs.length > 3 ? "Başlanğıc yoxlama ilk 3 fənn üçün dərhal hazırlanacaq, qalanını sonra «Ailəm» ekranından bir toxunuşla verə bilərsiniz." : "";
     }
     on("cSubj", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-s]") : null;
       if (!b) return;
       var s = b.getAttribute("data-s"), ix = st.subs.indexOf(s);
-      if (ix >= 0) st.subs.splice(ix, 1); else if (st.subs.length < 5) st.subs.push(s);
+      if (ix >= 0) st.subs.splice(ix, 1); else st.subs.push(s);
       drawSubj();
     });
+    function setMin(m) {
+      st.min = m;
+      Array.prototype.forEach.call(document.querySelectorAll("#cMin [data-m]"), function (x) { x.classList.toggle("on", Number(x.getAttribute("data-m")) === m); });
+    }
     on("cMin", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-m]") : null;
       if (!b) return;
-      st.min = Number(b.getAttribute("data-m"));
-      Array.prototype.forEach.call(document.querySelectorAll("#cMin [data-m]"), function (x) { x.classList.toggle("on", x === b); });
+      st.minTouched = true;
+      setMin(Number(b.getAttribute("data-m")));
     });
     on("cGo", "click", function () {
       if (busy) return;
@@ -964,7 +1000,8 @@
       '<button class="btn wide ghost" id="dCopy" type="button" data-copy="' + esc(r.login_code) + '">Kodu kopyala</button></div>' +
       '<div class="card fam"><b>Növbəti addım</b><p class="note" style="margin:6px 0 0">' +
         (okN.length ? "Başlanğıc yoxlama hazırdır: <b>" + esc(okN.join(", ")) + "</b>. Uşaq ilk dəfə daxil olanda «Yeni test» kimi görəcək; 14 gün müddəti var." : "Başlanğıc yoxlama hələ hazırlanmayıb.") +
-        (badN ? " Bəzi fənlər üçün yoxlama hazırlanmadı — sonra «Ətraflı» ekranından yenidən cəhd olunacaq." : "") + "</p></div>" +
+        (badN ? " Bəzi fənlər üçün yoxlama hazırlanmadı — «Ailəm» ekranından «Yoxlama ver» düyməsi ilə yenidən cəhd edin." : "") +
+        ((r.subjects_total || 0) > diag.length ? " Qalan " + ((r.subjects_total || 0) - diag.length) + " fənn üçün yoxlamanı «Ailəm» ekranından özünüz verə bilərsiniz." : "") + "</p></div>" +
       '<button class="btn wide go" id="dHome" style="margin-top:6px">Ailəm ekranına keç</button>');
     on("dCopy", "click", function () { copyText(r.login_code, $("dCopy")); });
     on("dHome", "click", screenFamily);
