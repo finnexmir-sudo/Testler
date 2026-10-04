@@ -591,7 +591,12 @@ elavə olunduğu gün yox, hesaba bir push (adlar birlikdə), `kind=bugun_yox`; 
 Düzəliş: valideyn «Afərin» göndərəndə gecədirsə «səhər 10:00-da gedəcək», uşağın push-u açıq deyilsə izah yazılır.
 Həftəlik dərs cədvəli (söhbət 06.10): indi YOX — əvvəl real valideynlər hansı addımda dayandığını göstərsin; lazım olsa yüngül «gün → fənn chips» variantı
 (paketdə sabahkı fənlər əvvəl + «Sabah … var» bildirişi).
-Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi, mənimsəmə bildirişi (3-cü növ).
+(924, v753) OYUN ELEMENTLƏRİ (yalnız uşağa özəl; reytinq/yarış YOXDUR): personaj «Tumurcuq» (SVG, mərhələ cəmi çalışdığı günlərdən: 0 toxum · 3 cücərti · 7 bitki · 14 ağac · 30 çiçəkli ağac,
+HEÇ VAXT geri getmir, cəza yoxdur), gün zənciri (aralıq ≤2 gün — bir gün buraxmaq pozmur), 7 hesablanan nişan (cədvəl yoxdur), valideynin yazdığı mükafat
+(`family_kids.reward` ≤80, «Gündəlik məşq → dəyiş»dən, hədəf dolanda uşaq görür). `rpc_student_family`: days_total/streak/best_streak/answers_total/badges/reward; `rpc_family_set_reward`.
+Qərar (06.10): uşaqlar arası yarış/«Dost çağırışı» — pilotdan və hüquqşünas baxışından SONRA; formatı: dəvətlə, hər iki valideynin razılığı, nəticə səyə görə (gün sayı),
+əməkdaşlıq (komanda hədəfi) əvvəl, qalib/uduzan mesajı yox, başqa ailəyə yalnız ilk ad + gün sayı.
+Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi, mənimsəmə bildirişi (3-cü növ), Dost çağırışı.
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 

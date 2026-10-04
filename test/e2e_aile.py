@@ -232,10 +232,15 @@ with sync_playwright() as pw:
         p.locator(".fk-pl [data-pm='20']").click()
         ok(p.locator(".fk-pl [data-pg].on").inner_text().startswith("4"), "vaxtı 20 dəq seçəndə hədəf 4 gün təklif olunur")
         p.locator(".fk-pl [data-pg='6']").click()
+        p.fill(".fk-pl .fk-rw", "Şənbə filmə gedək")
+        p.locator(".fk-pl [data-pm='15']").click()      # yenidən cizilir: yazilan mukafat itmir
+        ok(p.input_value(".fk-pl .fk-rw") == "Şənbə filmə gedək", "vaxt dəyişəndə yazılmış mükafat itmir")
+        p.locator(".fk-pl [data-pm='20']").click()
         p.screenshot(path="%s/5f_hedef_%s.png" % (OUT, tag), full_page=True)
         p.click(".fk-pl [data-ps]"); p.wait_for_function("document.querySelectorAll('.fk-pl').length === 0", timeout=15000)
         pl = db("select minutes, goal_days from public.family_kids where student_id = %s", (st["i"],), one=True)
         ok(pl["minutes"] == 20 and pl["goal_days"] == 6, "bazada: 20 dəq, 6 gün", pl)
+        ok(db("select reward from public.family_kids where student_id = %s", (st["i"],), one=True)["reward"] == "Şənbə filmə gedək", "bazada: mükafat yazılıb")
         ok("/ 6 gün" in p.locator(".fk").inner_text() and "20 dəq" in p.locator(".fk").inner_text(), "kartda yeni hədəf və vaxt")
 
         print("-- «Aferin gonder» (918)")
@@ -287,6 +292,9 @@ with sync_playwright() as pw:
         if pick is not None:
             print("-- usagin gundelik mesqi (917)")
             ok("/ 6" in sp.locator(".famprog").inner_text(), "uşaq: «Bu həftə: X / 6 gün»", sp.locator(".famprog").inner_text())
+            ok(sp.locator(".famprog svg.plant").count() == 1 and "Tumurcuq" in sp.locator(".famprog").inner_text(), "uşaq: personaj «Tumurcuq» görünür")
+            ok("Hədəfə çatsan: Şənbə filmə gedək" in sp.locator(".famprog").inner_text(), "uşaq: valideynin mükafatı görünür", sp.locator(".famprog").inner_text())
+            ok("Nişanlarım (" in sp.locator(".famprog").inner_text(), "uşaq: nişanlar bölməsi var")
             sp.wait_for_selector(".dpraise", timeout=15000)
             ok("Davam et" in sp.locator(".dpraise").inner_text(), "uşağın kartında valideynin «Afərin»i görünür")
             try:

@@ -623,6 +623,46 @@ update public.app_state set val = '{"on": false}' where key = 'push';
 delete from public.push_outbox where kind in ('bugun_yox', 'hedef');
 delete from public.push_subs where endpoint like '%FAM2-%';
 
+-- ------------------------------------------------ 4i · personaj, zencir, nisanlar, mukafat (924)
+delete from public.daily_packs where student_id = current_setting('smoke.sid')::uuid;
+delete from public.attempt_answers aa using public.attempts a where a.id = aa.attempt_id and a.student_id = current_setting('smoke.sid')::uuid;
+insert into public.daily_packs (student_id, day, items, answers)
+select current_setting('smoke.sid')::uuid, (now() at time zone 'Asia/Baku')::date - x, '[{"q":"x"}]', '[{"ok":true}]'
+  from unnest(array[6, 4, 3, 0]) x;                 -- 6 ve 4 (bosluq 2), 3 (1), 0 (bosluq 3 -> zencir qirilir)
+set role anon;
+do $$
+declare d jsonb; v_on int;
+begin
+  d := public.rpc_student_family(current_setting('smoke.tok'));
+  assert (d->>'days_total')::int = 4, 'calisdigi gun sayi 4: ' || d::text;
+  assert (d->>'best_streak')::int = 3, 'en yaxsi zencir 3 (bir gun buraxmaq pozmur): ' || d::text;
+  assert (d->>'streak')::int = 1, 'bu gunku zencir 1 (3 gunluk bosluq qirir): ' || d::text;
+  assert jsonb_array_length(d->'badges') = 7, '7 nisan';
+  select count(*) into v_on from jsonb_array_elements(d->'badges') b where (b->>'on')::boolean;
+  assert v_on = 2, 'qazanilmis nisan: ilk gun + 3 gun ardicil: ' || v_on;
+  assert (select (b->>'on')::boolean from jsonb_array_elements(d->'badges') b where b->>'k' = 's7') = false, '7 gun nisani yoxdur';
+end $$;
+reset role;
+delete from public.daily_packs where student_id = current_setting('smoke.sid')::uuid;
+
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare v_sid uuid := current_setting('smoke.sid')::uuid; r jsonb; k jsonb;
+begin
+  r := public.rpc_family_set_reward(v_sid, E'  Filmə   gedək\n ');
+  assert r->>'reward' = 'Filmə   gedək', 'mukafat temizlendi: ' || r::text;
+  begin perform public.rpc_family_set_reward(v_sid, repeat('a', 81)); assert false, '81 simvol';
+  exception when others then if sqlerrm like '%80 simvol%' then null; else raise; end if; end;
+  select e into k from jsonb_array_elements(public.rpc_family_progress()) e where (e->>'id')::uuid = v_sid;
+  assert k->>'reward' = 'Filmə   gedək', 'progress: mukafat: ' || k::text;
+end $$;
+set role anon;
+do $$ begin
+  assert public.rpc_student_family(current_setting('smoke.tok'))->>'reward' = 'Filmə   gedək', 'usaq: mukafat';
+end $$;
+reset role;
+
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';
 set role authenticated;
@@ -636,6 +676,8 @@ begin
   begin perform public.rpc_family_diag(current_setting('smoke.sid')::uuid, 'riyaziyyat'); assert false, 'basqa ailenin usagina yoxlama';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
   begin perform public.rpc_family_chapters(current_setting('smoke.sid')::uuid, current_setting('smoke.subj')); assert false, 'basqa usagin fesilleri';
+  exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
+  begin perform public.rpc_family_set_reward(current_setting('smoke.sid')::uuid, 'x'); assert false, 'basqa usagin mukafati';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
   begin perform public.rpc_family_set_plan(current_setting('smoke.sid')::uuid, 10, 4); assert false, 'basqa usagin plani';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;

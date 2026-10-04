@@ -539,6 +539,23 @@
   var SERBEST_TEST = false;      // 04.10: serbest mesq (test siyahisi) gizli - gelecekde odenisli mehsul
   //  04.10 (sahibin qerari): «Movzu mesqi» (adaptiv, gunluk limitli) de sagirde GOSTERILMIR - sonra ozumuz
   //  «jest» (hediyye) kimi verecayik.  Kod ve server RPC-leri yerindedir; MOVZU_MESQ = true etmek kifayetdir.
+  //  924: personaj «Tumurcuq» - cəmi çalışdığı günlərdən böyüyür, HEÇ VAXT geri getmir (cəza yoxdur)
+  var PL_STAGES = [[0, "Toxum"], [3, "Cücərti"], [7, "Bitki"], [14, "Ağac"], [30, "Çiçəkli ağac"]];
+  function plStage(days) {
+    var i = 0;
+    for (var k = 0; k < PL_STAGES.length; k++) if (days >= PL_STAGES[k][0]) i = k;
+    return i;
+  }
+  function plantSvg(st) {
+    var pot = '<path class="pl-pot" d="M26 60h28l-3 16H29z"/><rect class="pl-rim" x="23" y="56" width="34" height="6" rx="3"/>';
+    var body = "";
+    if (st === 0) body = '<ellipse class="pl-soil" cx="40" cy="55" rx="12" ry="3"/><ellipse class="pl-seed" cx="40" cy="51" rx="4" ry="5"/>';
+    else if (st === 1) body = '<path class="pl-stem" d="M40 56V44"/><ellipse class="pl-leaf" cx="34" cy="44" rx="6" ry="3.4" transform="rotate(-25 34 44)"/><ellipse class="pl-leaf2" cx="46" cy="43" rx="6" ry="3.4" transform="rotate(25 46 43)"/>';
+    else if (st === 2) body = '<path class="pl-stem" d="M40 56V30"/><ellipse class="pl-leaf" cx="32" cy="44" rx="8" ry="4" transform="rotate(-25 32 44)"/><ellipse class="pl-leaf2" cx="48" cy="40" rx="8" ry="4" transform="rotate(25 48 40)"/><ellipse class="pl-leaf" cx="33" cy="33" rx="7" ry="3.6" transform="rotate(-30 33 33)"/><ellipse class="pl-leaf2" cx="47" cy="29" rx="7" ry="3.6" transform="rotate(30 47 29)"/>';
+    else body = '<rect class="pl-trunk" x="37" y="34" width="6" height="24" rx="2"/><circle class="pl-leaf" cx="40" cy="26" r="15"/><circle class="pl-leaf2" cx="29" cy="33" r="9"/><circle class="pl-leaf2" cx="51" cy="33" r="9"/>' +
+      (st >= 4 ? '<circle class="pl-fl" cx="34" cy="22" r="2.6"/><circle class="pl-fl" cx="46" cy="20" r="2.6"/><circle class="pl-fl" cx="40" cy="30" r="2.6"/><circle class="pl-fl" cx="28" cy="34" r="2.4"/><circle class="pl-fl" cx="52" cy="33" r="2.4"/>' : "");
+    return '<svg class="plant" viewBox="0 0 80 80" aria-hidden="true">' + pot + body + "</svg>";
+  }
   var MOVZU_MESQ = false;
   function screenTests() {
     markScreen(true);
@@ -614,21 +631,35 @@
       if (FAM) {
         var WDN = ["B", "Ç", "Ç", "C", "C", "Ş", "B"];
         var wk = FAM.week || [0, 0, 0, 0, 0, 0, 0];
-        h += '<div class="card famprog"><div class="fp-t">Mənim həftəm</div><div class="fp-dots">' +
+        var dt = Number(FAM.days_total) || 0, ps = plStage(dt);
+        var nxt = PL_STAGES[ps + 1];
+        var studiedToday = !!wk[FAM.today_i];
+        var wd = wk.reduce(function (a2, b2) { return a2 + b2; }, 0), gl = Number(FAM.goal) || 4;
+        var reached = wd >= gl, rw = FAM.reward ? esc(FAM.reward) : "";
+        var bd = FAM.badges || [], bdOn = bd.filter(function (x) { return x.on; }).length;
+        h += '<div class="card famprog"><div class="fp-hero">' + plantSvg(ps) +
+          '<div class="fp-ht"><b>Tumurcuq · ' + PL_STAGES[ps][1] + "</b>" +
+            "<span>" + (studiedToday ? "Bu gün məni suladın 💧" : "Səni gözləyirəm 🌱") + "</span>" +
+            "<i>" + (nxt ? "Növbəti mərhələyə " + Math.max(1, nxt[0] - dt) + " gün qalıb" : "Ən böyük mərhələdəsən 🌸") + "</i></div></div>" +
+          '<div class="fp-t">Mənim həftəm' + (Number(FAM.streak) >= 2 ? ' <em>🔥 ' + Number(FAM.streak) + " gün ardıcıl</em>" : "") + '</div><div class="fp-dots">' +
           wk.map(function (v, i) {
             return '<span class="fp-d' + (v ? " on" : "") + (i === FAM.today_i ? " t" : "") + '">' + WDN[i] + "</span>";
           }).join("") + "</div>" +
-          (function () {
-            var wd = wk.reduce(function (a, b) { return a + b; }, 0), gl = Number(FAM.goal) || 4;
-            return wd >= gl
-              ? '<div class="fp-goal done">🎉 Bu həftənin hədəfi tamamlandı! (' + wd + " / " + gl + " gün)</div>"
-              : '<div class="fp-goal">Bu həftə: <b>' + wd + " / " + gl + "</b> gün</div>";
-          })() +
+          (reached
+            ? '<div class="fp-goal done">🎉 Bu həftənin hədəfi tamamlandı! (' + wd + " / " + gl + " gün)</div>" + (rw ? '<div class="fp-rw done">🎁 Mükafatın: <b>' + rw + "</b></div>" : "")
+            : '<div class="fp-goal">Bu həftə: <b>' + wd + " / " + gl + "</b> gün</div>" + (rw ? '<div class="fp-rw">🎁 Hədəfə çatsan: <b>' + rw + "</b></div>" : "")) +
           '<div class="fp-r"><b>' + (Number(FAM.mastered) || 0) + "</b> mövzu mənimsədin</div>" +
           ((FAM.cur || []).length
             ? '<div class="fp-c">Hazırda: <b>' + esc(FAM.cur[0].subject) + " — " + esc(FAM.cur[0].chapter) + "</b>" +
               (FAM.cur.length > 1 ? " və daha " + (FAM.cur.length - 1) : "") + "</div>"
-            : "") + "</div>";
+            : "") +
+          (bd.length
+            ? '<details class="fp-bd"><summary>Nişanlarım (' + bdOn + " / " + bd.length + ")</summary><div class=\"fp-bl\">" +
+              bd.map(function (x) {
+                return '<span class="fp-b' + (x.on ? " on" : "") + '" title="' + esc(x.d) + '">' + (x.on ? "🏅 " : "🔒 ") + esc(x.t) + "</span>";
+              }).join("") + "</div></details>"
+            : "") +
+          "</div>";
       } else if (d.next_lesson) {
         h += '<div class="card tight nlesson"><span class="nl-tag">Növbəti dərs</span>' +
           "<b>" + esc(d.next_lesson.topic) + "</b>" +

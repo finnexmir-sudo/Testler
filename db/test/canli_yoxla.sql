@@ -143,6 +143,9 @@ select * from (values
     (select exists (select 1 from f where proname='push_scan_family_nostudy')
         and exists (select 1 from f where proname='push_scan_family_goal')
         and exists (select 1 from f where proname='rpc_family_push_prefs_set'))),
+ ('924 ailə yolu: personaj + zəncir + nişanlar + mükafat',
+    (select exists (select 1 from f where proname='rpc_family_set_reward')
+        and exists (select 1 from f where proname='rpc_student_family' and def like '%badges%'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

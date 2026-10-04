@@ -873,6 +873,7 @@
     if (!box) return;
     if (box.innerHTML) { box.innerHTML = ""; return; }
     var m = Number(btn.getAttribute("data-m")) || 10, g = Number(btn.getAttribute("data-g")) || 4, gTouched = false;
+    var rw = btn.getAttribute("data-r") || "";
     var QN = { 5: 5, 10: 10, 15: 14, 20: 18, 30: 24 };
     function chips(vals, cur, attr, fmt) {
       return vals.map(function (v) { return '<button type="button" class="chip' + (v === cur ? " on" : "") + '" ' + attr + '="' + v + '">' + fmt(v) + "</button>"; }).join("");
@@ -881,8 +882,12 @@
       box.innerHTML = '<div class="fk-pl"><i>Gündə nə qədər?</i><div class="chips">' + chips([5, 10, 15, 20, 30], m, "data-pm", function (v) { return v + " dəq"; }) + "</div>" +
         '<p class="fk-cm">≈ ' + (QN[m] || 10) + " sual</p>" +
         "<i>Həftədə neçə gün?</i><div class=\"chips\">" + chips([2, 3, 4, 5, 6, 7], g, "data-pg", function (v) { return v + " gün"; }) + "</div>" +
+        "<i>Mükafat (istəyə görə) — hədəf dolanda uşaq görəcək</i>" +
+        '<input type="text" class="fk-rw" maxlength="80" placeholder="Məsələn: Şənbə filmə gedək" value="' + esc(rw) + '" aria-label="Mükafat">' +
         '<div class="fk-pb"><button type="button" class="btn sm go" data-ps="1">Yadda saxla</button><button type="button" class="linkbtn" data-pc="1">Ləğv et</button></div>' +
         '<p class="fk-cm">Yeni vaxt sabahkı paketdən başlayır.</p><div class="fk-pr2"></div></div>';
+      var rwi = box.querySelector(".fk-rw");
+      if (rwi) rwi.addEventListener("input", function () { rw = rwi.value; });
       Array.prototype.forEach.call(box.querySelectorAll("[data-pm]"), function (c) {
         c.addEventListener("click", function () { m = Number(c.getAttribute("data-pm")); if (!gTouched) g = PLAN_G[m] || 4; draw(); });
       });
@@ -893,7 +898,10 @@
       box.querySelector("[data-ps]").addEventListener("click", function () {
         if (busy) return;
         busy = true;
-        sb.rpc("rpc_family_set_plan", { p_student: kid, p_minutes: m, p_days: g }).then(function () { busy = false; screenFamily(); })
+        var rwv = box.querySelector(".fk-rw") ? box.querySelector(".fk-rw").value : "";
+        sb.rpc("rpc_family_set_plan", { p_student: kid, p_minutes: m, p_days: g })
+          .then(function () { return sb.rpc("rpc_family_set_reward", { p_student: kid, p_text: rwv }).catch(function () { return null; }); })
+          .then(function () { busy = false; screenFamily(); })
           .catch(function (e) {
             busy = false;
             if (famExpired(e)) { screenFamily(); return; }
@@ -1034,7 +1042,7 @@
         '<div class="fk-st"><span>Bu həftə</span><div class="fk-dots">' + dots + "</div></div>" +
         '<div class="fk-st"><span>Həftəlik hədəf</span><b>' + wn + " / " + goal + " gün" + (wn >= goal ? " ✓" : "") + "</b></div>" +
         '<div class="fk-st"><span>Gündəlik məşq</span><b>' + mins + " dəq · " + (QN[mins] || 10) + " sual" +
-          ' <button type="button" class="linkbtn" data-plan="' + esc(k.id) + '" data-m="' + mins + '" data-g="' + goal + '">dəyiş</button></b></div>' +
+          ' <button type="button" class="linkbtn" data-plan="' + esc(k.id) + '" data-m="' + mins + '" data-g="' + goal + '" data-r="' + esc(pg.reward || "") + '">dəyiş</button></b></div>' +
         '<div class="fk-plan" data-pl="' + esc(k.id) + '"></div>' +
         '<div class="fk-st"><span>Mənimsənilib</span><b>' + Number(pg.mastered || 0) + " mövzu" + (Number(pg.due || 0) > 0 ? " · " + pg.due + " təkrara hazır" : "") + "</b></div>" +
         '<div class="fk-diqqet"><b>Diqqət</b>' + esc(attn) + "</div>" +
