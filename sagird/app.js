@@ -1401,14 +1401,16 @@
         return;
       }
       if (d.done) {
-        box.innerHTML = '<div class="card dcard done">' +
+        box.innerHTML = (d.praise ? '<div class="card dpraise">💚 <b>Valideynindən:</b> ' + esc(d.praise) + "</div>" : "") +
+          '<div class="card dcard done">' +
           '<div class="dhead"><b>Bu gün bitdi 🎉</b>' +
             '<span class="dsc">' + (Number(d.ok) || 0) + " / " + total + "</span></div>" +
           '<p class="note" style="margin:6px 0 0">Sabah sənə ' + total +
             " yeni sual hazırlayacağıq.</p></div>";
         return;
       }
-      box.innerHTML = '<div class="card dcard">' +
+      box.innerHTML = (d.praise ? '<div class="card dpraise">💚 <b>Valideynindən:</b> ' + esc(d.praise) + "</div>" : "") +
+        '<div class="card dcard">' +
         '<div class="dhead"><b>Bu günün ' + total + " sualı</b>" +
           '<span class="dmin">≈' + Math.max(2, Math.round(total * 0.8)) + " dəq</span></div>" +
         '<p class="note" style="margin:6px 0 10px">' + sub + " fərdi təkrar." +

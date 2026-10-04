@@ -187,6 +187,17 @@ with sync_playwright() as pw:
             ok("(hazırda)" in p.locator(".fk-cur .fk-ch option:checked").inner_text(), "yenilənəndən sonra cari fəsil «(hazırda)» göstərilir")
             p.screenshot(path="%s/5c_cari_fesil_%s.png" % (OUT, tag), full_page=True)
 
+        print("-- «Aferin gonder» (918)")
+        p.click("[data-praise]"); p.wait_for_selector(".fk-pr [data-pi]", timeout=10000)
+        ok(p.locator(".fk-pr [data-pi]").count() == 3, "3 hazır mesaj (sərbəst yazı yoxdur)")
+        p.screenshot(path="%s/5d_afarin_%s.png" % (OUT, tag), full_page=True)
+        p.locator(".fk-pr [data-pi]").nth(1).click(); p.wait_for_selector(".fk-praise .fk-ok", timeout=10000)
+        ok(db("select count(*) n from public.family_praise where msg like 'Səninlə fəxr%%'", one=True)["n"] == 1, "«Afərin» bazaya yazıldı")
+        p.reload(); p.wait_for_selector(".fk", timeout=15000)
+        p.click("[data-praise]"); p.wait_for_selector(".fk-pr [data-pi]", timeout=10000)
+        p.locator(".fk-pr [data-pi]").first.click(); p.wait_for_selector(".fk-praise .alert, .fk-praise .err, .fk-praise [class*=err], .fk-praise .msg", timeout=10000)
+        ok("artıq" in p.locator(".fk-praise").inner_text(), "gündə ikinci «Afərin» olmur", p.locator(".fk-praise").inner_text())
+
         print("-- usagin movcud valideyn ekrani")
         p.click("[data-open]"); p.wait_for_selector("#famBack", timeout=15000)
         ok("Keçilən dərslər" not in p.locator("#main").inner_text() or True, "valideyn ekranı açıldı")
@@ -217,6 +228,8 @@ with sync_playwright() as pw:
         sp.screenshot(path="%s/7_sagird_%s.png" % (OUT, tag), full_page=True)
         if pick is not None:
             print("-- usagin gundelik mesqi (917)")
+            sp.wait_for_selector(".dpraise", timeout=15000)
+            ok("Səninlə fəxr" in sp.locator(".dpraise").inner_text(), "uşağın kartında valideynin «Afərin»i görünür")
             try:
                 sp.wait_for_selector("#btnDay", timeout=15000)
                 dtxt = sp.locator(".dcard").inner_text()

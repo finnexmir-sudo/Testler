@@ -274,6 +274,10 @@ a.btn{text-decoration:none}
 .fk-cbox{display:grid;gap:8px}
 .fk-cb select{margin:0}
 .fk-cb select{width:100%;min-height:42px;border:1px solid var(--n-150);border-radius:10px;padding:0 10px;font:inherit;font-size:14px;background:var(--surface);color:var(--fg)}
+.fk-praise{margin:0 0 10px}
+.fk-pr{display:grid;gap:6px}
+.fk-pr i{font-style:normal;font-size:13px;color:var(--fg-2)}
+.fk-pr .btn{justify-content:flex-start;text-align:left;height:auto;min-height:38px;padding:8px 12px}
 .fk-cm{margin:0;font-size:12.5px;color:var(--fg-3)}
 .fk-ok{margin:0;font-size:13.5px;font-weight:700;color:var(--ok)}
 .fk-dd summary{cursor:pointer;font-size:13.5px;font-weight:700;color:var(--fg-2);padding:6px 0;list-style:none}

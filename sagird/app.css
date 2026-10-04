@@ -494,6 +494,7 @@ details.fbd summary .fbdot::before{content:"";width:6px;height:6px;border-radius
 /* ---- 212: «Bu günün 5 sualı» — şagirdin fərdi gündəlik təkrarı ------
    Kart tapşırıqların üstündədir: uşağın tətbiqi hər gün açmasının
    yeganə şəxsi səbəbi budur. Bir düymə, seçim yoxdur. */
+.dpraise{margin:0 0 10px;background:var(--ok-tint);border-color:var(--ok-line);font-size:14.5px}
 .dcard{margin:0 0 16px;border-color:var(--brand-line, var(--n-150))}
 .dhead{display:flex;align-items:baseline;gap:10px}
 .dhead b{flex:1;font-size:16px;font-weight:660;letter-spacing:-.01em}

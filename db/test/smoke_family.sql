@@ -337,6 +337,70 @@ begin
 end $$;
 reset role;
 
+-- ------------------------------------------------ 4d · «Afərin» + həftəlik xülasə + valideyn cihazı (918)
+update public.app_state set val = '{"on": true, "quiet": false}' where key = 'push';
+insert into public.push_subs (role, student_id, endpoint, p256dh, auth)
+values ('student', current_setting('smoke.sid')::uuid, 'https://fcm.googleapis.com/fcm/send/FAM-student-aaaaaaaaaaaa', repeat('B', 87), repeat('c', 22));
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare r jsonb;
+begin
+  begin perform public.rpc_family_push_subscribe('https://evil.example.com/x/aaaaaaaaaaaaaaaa', repeat('B', 87), repeat('c', 22), 'ua'); assert false, 'yalan host';
+  exception when others then if sqlerrm like '%tanınmadı%' then null; else raise; end if; end;
+  r := public.rpc_family_push_subscribe('https://fcm.googleapis.com/fcm/send/FAM-parent-aaaaaaaaaaaa', repeat('B', 87), repeat('c', 22), 'ua');
+  assert (r->>'kids')::int >= 1, 'valideyn cihazi usaqlara yazildi: ' || r::text;
+
+  r := public.rpc_family_praise(current_setting('smoke.sid')::uuid, 1);
+  assert (r->>'ok')::boolean and (r->>'push')::boolean, 'afarin gonderildi, push novbede: ' || r::text;
+  begin perform public.rpc_family_praise(current_setting('smoke.sid')::uuid, 2); assert false, 'gunde bir';
+  exception when others then if sqlerrm like '%artıq%' then null; else raise; end if; end;
+  begin perform public.rpc_family_praise(current_setting('smoke.sid')::uuid, 9); assert false, 'yalan mesaj';
+  exception when others then if sqlerrm like '%Mesaj seçin%' then null; else raise; end if; end;
+end $$;
+reset role;
+do $$
+begin
+  assert (select count(*) from public.push_outbox where kind = 'afarin' and role = 'student' and student_id = current_setting('smoke.sid')::uuid) = 1, 'outbox: afarin';
+  assert (select count(*) from public.push_subs where role = 'parent' and student_id = current_setting('smoke.sid')::uuid and endpoint like '%FAM-parent%') = 1, 'parent abune yazilib';
+end $$;
+set role anon;
+do $$
+declare d jsonb;
+begin
+  d := public.rpc_student_daily(current_setting('smoke.tok'));
+  assert d->>'praise' like 'Afərin%', 'usagin kartinda afarin gorunur: ' || coalesce(d->>'praise', 'NULL');
+end $$;
+reset role;
+delete from public.daily_packs where student_id = current_setting('smoke.sid')::uuid;
+
+--  heftelik xulase: yalniz Bazar 18-21 (Baki), hefte basina bir defe
+do $$
+declare v_sun timestamptz; v_mon timestamptz; n int; v_body text;
+begin
+  v_sun := (date_trunc('week', now() at time zone 'Asia/Baku') + interval '6 days 19 hours') at time zone 'Asia/Baku';
+  v_mon := (date_trunc('week', now() at time zone 'Asia/Baku') + interval '19 hours') at time zone 'Asia/Baku';
+  assert app.push_scan_weekly(v_mon) = 0, 'bazar ertesi gonderilmir';
+  assert app.push_scan_weekly(v_sun - interval '2 hours') = 0, 'bazar 17:00 gonderilmir';
+  n := app.push_scan_weekly(v_sun);
+  assert n >= 1, 'bazar 19:00: gonderildi (' || n || ')';
+  select body into v_body from public.push_outbox where kind = 'hefte' and student_id in
+    (select student_id from public.push_subs where endpoint like '%FAM-parent%') order by id desc limit 1;
+  assert v_body is not null and v_body like '%:%', 'xulase metni: ' || coalesce(v_body, 'NULL');
+  assert app.push_scan_weekly(v_sun + interval '30 minutes') = 0, 'eyni hefte ikinci defe yazilmir';
+end $$;
+
+--  cihazi sondur
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$ begin
+  assert (public.rpc_family_push_unsubscribe('https://fcm.googleapis.com/fcm/send/FAM-parent-aaaaaaaaaaaa')->>'removed')::int >= 1, 'abune silindi';
+end $$;
+reset role;
+update public.app_state set val = '{"on": false}' where key = 'push';
+delete from public.push_outbox where kind in ('afarin', 'hefte');
+delete from public.push_subs where endpoint like '%FAM-%';
+
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';
 set role authenticated;
@@ -350,6 +414,8 @@ begin
   begin perform public.rpc_family_diag(current_setting('smoke.sid')::uuid, 'riyaziyyat'); assert false, 'basqa ailenin usagina yoxlama';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
   begin perform public.rpc_family_chapters(current_setting('smoke.sid')::uuid, current_setting('smoke.subj')); assert false, 'basqa usagin fesilleri';
+  exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
+  begin perform public.rpc_family_praise(current_setting('smoke.sid')::uuid, 1); assert false, 'basqa usaga afarin';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;
   begin perform public.rpc_family_open(current_setting('smoke.sid')::uuid); assert false, 'basqa usagin tokeni';
   exception when others then if sqlerrm like '%tapılmadı%' then null; else raise; end if; end;

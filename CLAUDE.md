@@ -565,7 +565,12 @@ mərhələ, biri düz → eyni mərhələ +3 gün, ikisi səhv → bir mərhəl�
 səhv dəftəri (≤2) + cari fəsil/öyrənilən mövzular (növbə ilə, bir mövzudan ≤3; çətinlik cavab sayına görə 1→2→3). Mənbə etiketləri: `cari`, `mesq`.
 `rpc_family_progress()` valideynə «Mənimsənilib N mövzu», «Hazırda: fənn — fəsil» göstərir. DİQQƏT: bu qaydalar uşaqlar üzərində yoxlanmayıb (§13a) —
 canlıda real nəticəyə görə düzəldilməlidir.
-Hələ yox: «Afərin göndər», seanslı diaqnostika, həftəlik xülasə push, «Hədəf 4 gün»in dəyişməsi, abituriyent.
+(918, v746) «Afərin göndər»: `rpc_family_praise(usaq, 1..3)` — 3 hazır mesaj (sərbəst yazı YOXDUR), gündə 1 dəfə, `family_praise` cədvəli; uşağa push
+(`kind='afarin'`) + `rpc_student_daily.praise` ilə gündəlik kartda 2 gün görünür (push açıq olmasa da). Həftəlik xülasə: `app.push_scan_weekly` (bazar 18–21 Bakı,
+hesab başına BİR push, `hefte:<hesab>:<bazar ertəsi>` dedupe; `push_tick` onu da çağırır). Valideyn cihazı «Ailəm»dən bir toxunuşla bütün uşaqlar üçün yazılır
+(`rpc_family_push_subscribe/unsubscribe`, scope `fam`; «Çıxış»da silinir; cihaz hər açılışda sinxronlaşır). Gündəlik push başlığı ailədə «Bu günün məşqi hazırdır».
+DİQQƏT: ailə push qutusu e2e-də YOXDUR (e2e-də VAPID açarı boşdur) — real telefonda yoxlanmalıdır.
+Hələ yox: seanslı diaqnostika, «Hədəf 4 gün»in dəyişməsi, abituriyent.
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 

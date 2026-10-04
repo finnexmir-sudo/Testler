@@ -798,6 +798,92 @@
     });
   }
 
+  //  918: «Ailəm»də bir toxunuşla həftəlik xülasə bildirişi (bütün uşaqlar üçün bu cihaz)
+  function drawFamPush() {
+    var box = $("famPushBox");
+    if (!box || !window.B10Push) return;
+    var scope = "fam";
+    function reg(s) {
+      return sb.rpc("rpc_family_push_subscribe", { p_endpoint: s.endpoint, p_p256dh: s.p256dh, p_auth: s.auth,
+        p_ua: (navigator.userAgent || "").slice(0, 200) });
+    }
+    function unreg(ep) { return sb.rpc("rpc_family_push_unsubscribe", { p_endpoint: ep }); }
+    window.B10Push.state("parent", scope).then(function (st) {
+      if (!$("famPushBox")) return;
+      if (st === "off") { box.innerHTML = ""; return; }
+      if (st === "on") {
+        window.B10Push.sync("parent", scope, reg);          // yeni uşaq əlavə olunubsa cihazı yenidən yaz
+        box.innerHTML = '<p class="note pushon">🔔 Həftəlik xülasə bildirişi açıqdır · <button type="button" class="linkbtn" id="fpOff">Söndür</button>' +
+          '<small class="pc-n">«Çıxış» etsəniz, bu telefona bildiriş gəlməyəcək.</small></p>';
+        on("fpOff", "click", function () { window.B10Push.disable("parent", scope, unreg).then(drawFamPush, drawFamPush); });
+        return;
+      }
+      if (st === "denied") {
+        box.innerHTML = '<div class="card pushcard pushblk"><div class="pc-t"><b>Bildirişlər bloklanıb</b>' +
+          "<i>Brauzer bu saytın bildirişini bağlayıb. Açmaq üçün:</i>" + window.B10Push.help(true) + "</div></div>";
+        return;
+      }
+      if (st === "ios") {
+        box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Həftəlik xülasə gəlsin?</b>' +
+          "<i>iPhone-da əvvəl tətbiqi ana ekrana əlavə edin: «Paylaş» → «Ana ekrana əlavə et». Sonra buradan aça bilərsiniz.</i></div></div>";
+        return;
+      }
+      box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Həftəlik xülasə telefonunuza gəlsin</b>' +
+        "<i>Hər bazar axşamı uşağınızın həftəsi barədə qısa mesaj. İstədiyiniz vaxt söndürə bilərsiniz.</i>" +
+        '<i class="pc-h">Brauzer soruşanda «İcazə ver» seçin.</i></div>' +
+        '<div class="pc-a"><button type="button" class="btn sm go" id="fpOn">Bildirişləri aç</button></div></div><div id="fpMsg"></div>';
+      on("fpOn", "click", function () {
+        var b = $("fpOn");
+        if (b) { b.disabled = true; b.textContent = "Açılır…"; }
+        window.B10Push.enable("parent", scope, reg, function () {
+          var m0 = $("fpMsg");
+          if (m0 && !m0.innerHTML) m0.innerHTML = '<p class="note pushon">İcazə pəncərəsi görünmürsə:</p>' + window.B10Push.help(true);
+        }).then(function () { drawFamPush(); }, function (e) {
+          if (e && e.message === "denied") { drawFamPush(); return; }
+          var m = $("fpMsg");
+          var t = e && e.message === "dismissed" ? "İcazə verilmədi. Yenidən basıb «İcazə ver» seçin."
+                : "Bildiriş açıla bilmədi (" + window.B10Push.why(e) + "). Bir az sonra yenidən yoxlayın.";
+          if (m) m.innerHTML = msg("warn", t);
+          if (b) { b.disabled = false; b.textContent = "Bildirişləri aç"; }
+        });
+      });
+    });
+  }
+
+  //  918: «Afərin göndər» — 3 hazır mesaj (sərbəst yazı yoxdur)
+  var PRAISE = ["Afərin! Bu gün yaxşı çalışdın 👏", "Səninlə fəxr edirəm 💚", "Davam et, çox yaxşı gedir!"];
+  function famPraise(box) {
+    var kid = box.getAttribute("data-pk");
+    box.innerHTML = '<div class="fk-pr"><i>Uşağa hansı mesaj getsin?</i>' +
+      PRAISE.map(function (t, i) { return '<button type="button" class="btn sm ghost" data-pi="' + (i + 1) + '">' + esc(t) + "</button>"; }).join("") +
+      '<button type="button" class="linkbtn" data-pc="1">Ləğv et</button></div>';
+    box.querySelector("[data-pc]").addEventListener("click", function () { famPraiseReset(box); });
+    Array.prototype.forEach.call(box.querySelectorAll("[data-pi]"), function (b) {
+      b.addEventListener("click", function () {
+        if (busy) return;
+        busy = true;
+        Array.prototype.forEach.call(box.querySelectorAll("button"), function (x) { x.disabled = true; });
+        sb.rpc("rpc_family_praise", { p_student: kid, p_kind: Number(b.getAttribute("data-pi")) }).then(function (r) {
+          busy = false;
+          box.innerHTML = '<p class="fk-ok">Göndərildi ✓</p><p class="fk-cm">' +
+            (r && r.push ? "Uşağın telefonuna bildiriş gedəcək (gecə 21:00–10:00 arası səhərə qalır). " : "") +
+            "Uşaq bunu gündəlik məşq kartında da görəcək.</p>";
+        }).catch(function (e) {
+          busy = false;
+          if (famExpired(e)) { screenFamily(); return; }
+          var m = famErr(e);
+          box.innerHTML = msg("err", m);
+          setTimeout(function () { famPraiseReset(box); }, 3500);
+        });
+      });
+    });
+  }
+  function famPraiseReset(box) {
+    var kid = box.getAttribute("data-pk");
+    box.innerHTML = '<button type="button" class="btn sm ghost" data-praise="' + esc(kid) + '">💚 Afərin göndər</button>';
+    box.querySelector("[data-praise]").addEventListener("click", function () { famPraise(box); });
+  }
+
   function copyText(text, btn, done) {
     function ok() { if (btn) { var old = btn.textContent; btn.textContent = done || "Kopyalandı ✓"; setTimeout(function () { btn.textContent = old; }, 1600); } }
     try {
@@ -877,6 +963,7 @@
         '<div class="fk-st"><span>Mənimsənilib</span><b>' + Number(pg.mastered || 0) + " mövzu" + (Number(pg.due || 0) > 0 ? " · " + pg.due + " təkrara hazır" : "") + "</b></div>" +
         '<div class="fk-diqqet"><b>Diqqət</b>' + esc(attn) + "</div>" +
         (ask ? '<div class="fk-ask">💬 Evdə soruşun: ' + esc(ask) + "</div>" : "") +
+        '<div class="fk-praise" data-pk="' + esc(k.id) + '"><button type="button" class="btn sm ghost" data-praise="' + esc(k.id) + '">💚 Afərin göndər</button></div>' +
         (sd.length ? '<details class="fk-dd fk-cur" data-curkid="' + esc(k.id) + '"><summary>' + esc(curSum) + '</summary>' +
           '<div class="fk-cb"><select class="fk-subj" aria-label="Fənn">' + sd.map(function (x) { return '<option value="' + esc(x.slug) + '">' + esc(x.name) + "</option>"; }).join("") + "</select>" +
           '<div class="fk-cbox"></div></div></details>' : "") +
@@ -890,6 +977,7 @@
           '<button type="button" class="btn sm go" data-open="' + esc(k.id) + '">Ətraflı</button></div>' +
         '<div class="fk-del" data-fd="' + esc(k.id) + '"><button type="button" class="linkbtn" data-del="' + esc(k.id) + '" data-n="' + esc(k.name) + '">Uşağı sil</button></div></div>';
     }).join("");
+    out += '<div id="famPushBox"></div>';
     out += (kids.length >= 6 ? "" : '<button class="btn wide ' + (kids.length ? "ghost" : "go") + '" id="famAdd">+ Uşaq əlavə et</button>') +
       '<p class="note" style="text-align:center;margin:16px 0 4px">Uşağın adı və nəticələri yalnız sizə görünür, heç yerdə paylaşılmır. ' +
       '<a href="../mexfilik/">Məxfilik</a></p>' +
@@ -903,6 +991,10 @@
       b.addEventListener("click", function () { famDiag(b); });
     });
     Array.prototype.forEach.call(document.querySelectorAll("[data-curkid]"), famCurWire);
+    Array.prototype.forEach.call(document.querySelectorAll(".fk-praise"), function (box) {
+      box.querySelector("[data-praise]").addEventListener("click", function () { famPraise(box); });
+    });
+    drawFamPush();
     Array.prototype.forEach.call(document.querySelectorAll("[data-del]"), function (b) {
       b.addEventListener("click", function () { famAskDelChild(b); });
     });
@@ -1158,7 +1250,13 @@
     } else {
       serverLogout();
     }
-    if (wasFam) { try { sb.signOut().catch(function () {}); } catch (e) {} }
+    if (wasFam) {
+      //  918: bu cihazin ailə bildirişi EVVEL silinir (sessiya hele aktivdir), SONRA çıxılır
+      var famOut = function () { try { sb.signOut().catch(function () {}); } catch (e) {} };
+      if (window.B10Push && !wasDemo) {
+        window.B10Push.leave(function (ep) { return sb.rpc("rpc_family_push_unsubscribe", { p_endpoint: ep }); }).then(famOut, famOut);
+      } else famOut();
+    }
     if (sayta) { location.href = "../"; return; }
     screenLogin(expired ? msg("warn", "Giriş vaxtı bitib. Kodu yenidən yazın.") : "");
   }
