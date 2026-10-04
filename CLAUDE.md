@@ -582,6 +582,8 @@ Ailə uşağında `screenTests` `FAM` ilə: «Mənim həftəm» bloku (7 gün + 
 (921, v750) həftəlik hədəf: `family_kids.goal_days` (2–7, null = standart: 5 dəq→5, 10→5, 15→4, 20→4, 30→3 gün), `app.family_goal`; valideyn «Gündəlik məşq → dəyiş» ilə
 vaxtı və hədəfi birlikdə dəyişir (`rpc_family_set_plan`; yeni vaxt sabahkı paketdən). Gün «çalışdı» = ≥1 cavab. Uşaq «Bu həftə: X / Y gün» + hədəf dolanda təbrik;
 həftəlik push «Lale: 3/4 gün, 40 sual (71 % düz)…».
+(922, v751) «Afərin» gündə 3-ə qədər (eyni mesaj gündə bir dəfə; push yalnız ilk ikisinə, 3-cü uşağın gündəlik kartında). Kart vəziyyəti: «Afərin göndər» /
+«Bu gün N dəfə göndərilib ✓ · sonuncu HH:MM · Yenə göndər» / «Bu günlük limit doldu ✓ (3 / 3)»; xəta panelin içində çıxır (`rpc_family_progress.praise_n/praise_last`).
 Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi.
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)

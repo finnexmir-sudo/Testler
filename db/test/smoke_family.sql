@@ -353,15 +353,22 @@ begin
 
   r := public.rpc_family_praise(current_setting('smoke.sid')::uuid, 1);
   assert (r->>'ok')::boolean and (r->>'push')::boolean, 'afarin gonderildi, push novbede: ' || r::text;
-  begin perform public.rpc_family_praise(current_setting('smoke.sid')::uuid, 2); assert false, 'gunde bir';
-  exception when others then if sqlerrm like '%artıq%' then null; else raise; end if; end;
+  begin perform public.rpc_family_praise(current_setting('smoke.sid')::uuid, 1); assert false, 'eyni mesaj gunde bir defe';
+  exception when others then if sqlerrm like '%göndərmisiniz%' then null; else raise; end if; end;
+  r := public.rpc_family_praise(current_setting('smoke.sid')::uuid, 2);
+  assert (r->>'push')::boolean and (r->>'count')::int = 2, '2-ci afarin: push gedir: ' || r::text;
+  r := public.rpc_family_praise(current_setting('smoke.sid')::uuid, 3);
+  assert not (r->>'push')::boolean and (r->>'count')::int = 3 and (r->>'left')::int = 0, '3-cu afarin: push YOXDUR: ' || r::text;
+  begin perform public.rpc_family_praise(current_setting('smoke.sid')::uuid, 1); assert false, 'gunde 3';
+  exception when others then if sqlerrm like '%limiti doldu%' then null; else raise; end if; end;
+  assert ((select e from jsonb_array_elements(public.rpc_family_progress()) e where (e->>'id')::uuid = current_setting('smoke.sid')::uuid)->>'praise_n')::int = 3, 'progress: praise_n';
   begin perform public.rpc_family_praise(current_setting('smoke.sid')::uuid, 9); assert false, 'yalan mesaj';
   exception when others then if sqlerrm like '%Mesaj seçin%' then null; else raise; end if; end;
 end $$;
 reset role;
 do $$
 begin
-  assert (select count(*) from public.push_outbox where kind = 'afarin' and role = 'student' and student_id = current_setting('smoke.sid')::uuid) = 1, 'outbox: afarin';
+  assert (select count(*) from public.push_outbox where kind = 'afarin' and role = 'student' and student_id = current_setting('smoke.sid')::uuid) = 2, 'outbox: afarin yalniz ilk ikisi';
   assert (select count(*) from public.push_subs where role = 'parent' and student_id = current_setting('smoke.sid')::uuid and endpoint like '%FAM-parent%') = 1, 'parent abune yazilib';
 end $$;
 set role anon;
@@ -369,7 +376,7 @@ do $$
 declare d jsonb;
 begin
   d := public.rpc_student_daily(current_setting('smoke.tok'));
-  assert d->>'praise' like 'Afərin%', 'usagin kartinda afarin gorunur: ' || coalesce(d->>'praise', 'NULL');
+  assert d->>'praise' like 'Davam et%', 'usagin kartinda son afarin gorunur: ' || coalesce(d->>'praise', 'NULL');
 end $$;
 reset role;
 delete from public.daily_packs where student_id = current_setting('smoke.sid')::uuid;

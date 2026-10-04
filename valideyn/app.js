@@ -896,31 +896,39 @@
     var kid = box.getAttribute("data-pk");
     box.innerHTML = '<div class="fk-pr"><i>Uşağa hansı mesaj getsin?</i>' +
       PRAISE.map(function (t, i) { return '<button type="button" class="btn sm ghost" data-pi="' + (i + 1) + '">' + esc(t) + "</button>"; }).join("") +
-      '<button type="button" class="linkbtn" data-pc="1">Ləğv et</button></div>';
+      '<div class="fk-pres"></div><button type="button" class="linkbtn" data-pc="1">Ləğv et</button></div>';
     box.querySelector("[data-pc]").addEventListener("click", function () { famPraiseReset(box); });
     Array.prototype.forEach.call(box.querySelectorAll("[data-pi]"), function (b) {
       b.addEventListener("click", function () {
         if (busy) return;
         busy = true;
-        Array.prototype.forEach.call(box.querySelectorAll("button"), function (x) { x.disabled = true; });
+        var all = box.querySelectorAll("[data-pi]");
+        Array.prototype.forEach.call(all, function (x) { x.disabled = true; });
         sb.rpc("rpc_family_praise", { p_student: kid, p_kind: Number(b.getAttribute("data-pi")) }).then(function (r) {
           busy = false;
           box.innerHTML = '<p class="fk-ok">Göndərildi ✓</p><p class="fk-cm">' +
             (r && r.push ? "Uşağın telefonuna bildiriş gedəcək (gecə 21:00–10:00 arası səhərə qalır). " : "") +
             "Uşaq bunu gündəlik məşq kartında da görəcək.</p>";
+          setTimeout(function () { if (document.body.contains(box)) screenFamily(); }, 2500);
         }).catch(function (e) {
           busy = false;
           if (famExpired(e)) { screenFamily(); return; }
-          var m = famErr(e);
-          box.innerHTML = msg("err", m);
-          setTimeout(function () { famPraiseReset(box); }, 3500);
+          Array.prototype.forEach.call(all, function (x) { x.disabled = false; });
+          var res = box.querySelector(".fk-pres");
+          if (res) res.innerHTML = msg("err", famErr(e));
         });
       });
     });
   }
+  //  vəziyyətə görə sakit görünüş: göndərilməyib / N dəfə göndərilib / limit doldu
   function famPraiseReset(box) {
-    var kid = box.getAttribute("data-pk");
-    box.innerHTML = '<button type="button" class="btn sm ghost" data-praise="' + esc(kid) + '">💚 Afərin göndər</button>';
+    var kid = box.getAttribute("data-pk"), n = Number(box.getAttribute("data-pn")) || 0, last = box.getAttribute("data-pl") || "";
+    if (n >= 3) {
+      box.innerHTML = '<p class="fk-ok">💚 Bu günlük limit doldu ✓ (3 / 3)</p>' + (last ? '<p class="fk-cm">Sonuncu: ' + esc(last) + "</p>" : "");
+      return;
+    }
+    box.innerHTML = (n > 0 ? '<p class="fk-cm fk-sent">Bu gün ' + n + " dəfə göndərilib ✓" + (last ? " · sonuncu " + esc(last) : "") + "</p>" : "") +
+      '<button type="button" class="btn sm ghost" data-praise="' + esc(kid) + '">💚 ' + (n > 0 ? "Yenə göndər" : "Afərin göndər") + "</button>";
     box.querySelector("[data-praise]").addEventListener("click", function () { famPraise(box); });
   }
 
@@ -1009,7 +1017,7 @@
         '<div class="fk-st"><span>Mənimsənilib</span><b>' + Number(pg.mastered || 0) + " mövzu" + (Number(pg.due || 0) > 0 ? " · " + pg.due + " təkrara hazır" : "") + "</b></div>" +
         '<div class="fk-diqqet"><b>Diqqət</b>' + esc(attn) + "</div>" +
         (ask ? '<div class="fk-ask">💬 Evdə soruşun: ' + esc(ask) + "</div>" : "") +
-        '<div class="fk-praise" data-pk="' + esc(k.id) + '"><button type="button" class="btn sm ghost" data-praise="' + esc(k.id) + '">💚 Afərin göndər</button></div>' +
+        '<div class="fk-praise" data-pk="' + esc(k.id) + '" data-pn="' + Number(pg.praise_n || 0) + '" data-pl="' + esc(pg.praise_last || "") + '"></div>' +
         (sd.length ? '<details class="fk-dd fk-cur" data-curkid="' + esc(k.id) + '"><summary>' + esc(curSum) + '</summary>' +
           '<div class="fk-cb"><select class="fk-subj" aria-label="Fənn">' + sd.map(function (x) { return '<option value="' + esc(x.slug) + '">' + esc(x.name) + "</option>"; }).join("") + "</select>" +
           '<div class="fk-cbox"></div></div></details>' : "") +
@@ -1040,9 +1048,7 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-plan]"), function (b) {
       b.addEventListener("click", function () { famPlan(b); });
     });
-    Array.prototype.forEach.call(document.querySelectorAll(".fk-praise"), function (box) {
-      box.querySelector("[data-praise]").addEventListener("click", function () { famPraise(box); });
-    });
+    Array.prototype.forEach.call(document.querySelectorAll(".fk-praise"), famPraiseReset);
     drawFamPush();
     Array.prototype.forEach.call(document.querySelectorAll("[data-del]"), function (b) {
       b.addEventListener("click", function () { famAskDelChild(b); });
