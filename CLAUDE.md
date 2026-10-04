@@ -541,6 +541,13 @@ valideyn kartı, həftəlik xülasə push, **özünəxidmət silmə və razılı
 (`mexfilik/` hələ «razılıq müəllimin öhdəliyidir» deyir), uşaq kodunu yeniləmə, ödəniş (admin əl ilə aktivləşdirir).
 Məlum xırda: hər «Ətraflı» basılışı yeni 30 günlük valideyn sessiyası yaradır (təmizləmə yoxdur).
 
+**Qərar (06.10, canlı sınaqdan sonra): uşaq məlumatı GİZLİ qalır.** Razılıq mətni yalnız xidmət üçündür (ad, sinif,
+məşq nəticələri Bil10-da saxlanır, silinməsi istənilə bilər) — «ad çıxarılmaqla ümumi statistika» cümləsi
+**əlavə EDİLMİR**. Sual keyfiyyəti statistikası uşağa bağlı olmadan (sual üzrə) aparılır. Gələcəkdə kiminsə nəticəsi
+əla olsa və saytda paylaşmaq istəsək — **ayrıca, konkret, yazılı icazə** soruşulur (hər hal üçün; ümumi razılıqdan
+istifadə olunmur). Açıq: fənn seçimi hazırda ən çox 5-dir və başlanğıc yoxlama yalnız ilk 3 fənn üçün avtomatik yaranır
+(ekranda yazılmayıb); bütün fənləri açıb yoxlamanı mərhələli vermək təklif olunub, cavab gözlənilir.
+
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 
 **İstifadəçinin sualı:** «Ən zəif yerimiz testləri tərtib etməkdir. Test
