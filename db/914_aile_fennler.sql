@@ -73,7 +73,7 @@ begin
 
   insert into public.consents (student_id, granted_by, kind, evidence)
   values (v_sid, v_uid, 'parental',
-          jsonb_build_object('version', 'aile-v2', 'text', 'Usagin melumatlarinin (ad, sinif, mesq neticeleri) yalniz Bil10 xidmetinin islemesi ucun saxlanmasina raziyam; hec yerde paylasilmir; istenilen vaxt silinmesini isteye bilerem.',
+          jsonb_build_object('version', 'aile-v3', 'text', 'Usagin adi ve neticeleri yalniz valideyne gorunur, hec yerde paylasilmir. Raziyam.',
                              'at', now(), 'source', 'family_add_child'));
 
   insert into public.family_kids (student_id, subjects, minutes) values (v_sid, v_subs, p_minutes);

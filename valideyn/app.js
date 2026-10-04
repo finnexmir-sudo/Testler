@@ -923,8 +923,8 @@
       "<label>Gündə nə qədər vaxt? <span class=\"fhint\">(gündəlik məşq hədəfi)</span></label><div class=\"chips\" id=\"cMin\">" +
         [5, 10, 15, 20, 30].map(function (m) { return '<button type="button" class="chip' + (m === 10 ? " on" : "") + '" data-m="' + m + '">' + m + " dəq</button>"; }).join("") +
         '</div><div class="fhint" id="cMinHint">Sinfi seçəndə tövsiyə olunan vaxt göstərilir.</div>' +
-      '<label class="fchk"><input type="checkbox" id="cOk"><span>Uşağımın məlumatlarının (ad, sinif, məşq nəticələri) yalnız Bil10 xidmətinin işləməsi üçün saxlanmasına <b>razıyam</b>. ' +
-        '<b>Heç yerdə paylaşılmır.</b> İstədiyim vaxt silinməsini istəyə bilərəm. <a href="../mexfilik/" target="_blank" rel="noopener">Ətraflı</a></span></label>' +
+      '<label class="fchk"><input type="checkbox" id="cOk"><span>Uşağın adı və nəticələri yalnız sizə görünür, heç yerdə paylaşılmır. ' +
+        '<b>Razıyam.</b> <a href="../mexfilik/" target="_blank" rel="noopener">Ətraflı</a></span></label>' +
       '<button class="btn go wide" id="cGo">Əlavə et</button>' +
       '<button class="btn ghost wide" id="cBack" style="margin-top:8px">Ləğv et</button></div>');
     $("cName").focus();
@@ -977,7 +977,7 @@
       if (name.length < 2) return bad("Uşağın adını yazın.");
       if (!st.sinif) return bad("Sinfi seçin.");
       if (!st.subs.length) return bad("Ən azı bir fənn seçin.");
-      if (!$("cOk").checked) return bad("Davam etmək üçün razılıq qutusunu işarələyin.");
+      if (!$("cOk").checked) return bad("Davam etmək üçün «Razıyam» qutusunu işarələyin.");
       $("cErr").innerHTML = "";
       setBusy("cGo", true, "Əlavə et");
       sb.rpc("rpc_family_add_child", { p_name: name, p_level_code: String(st.sinif), p_subjects: st.subs, p_minutes: st.min, p_consent: true })

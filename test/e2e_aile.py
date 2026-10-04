@@ -105,7 +105,7 @@ with sync_playwright() as pw:
         ok(n_all >= 5, "bütün fənləri seçmək olur (%d fənn)" % n_all)
         ok("ilk 3 fənn" in p.locator("#cSubjHint").inner_text(), "3-dən çox fənn: «yoxlama ilk 3 fənn üçün» izahı")
         ok(p.locator("#cLvl .chip[disabled]").count() == 1, "«Abituriyent» hələ qeyri-aktivdir")
-        p.click("#cGo"); wait_text(p, "#cErr", "razılıq")
+        p.click("#cGo"); wait_text(p, "#cErr", "Razıyam")
         ok(db("select count(*) n from public.students", one=True)["n"] == 0, "razılıqsız uşaq yaranmır")
         p.click("#cMin [data-m='30']")
         p.screenshot(path="%s/3_usaq_elave_%s.png" % (OUT, tag), full_page=True)
