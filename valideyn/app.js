@@ -814,9 +814,23 @@
       if (st === "off") { box.innerHTML = ""; return; }
       if (st === "on") {
         window.B10Push.sync("parent", scope, reg);          // yeni uşaq əlavə olunubsa cihazı yenidən yaz
-        box.innerHTML = '<p class="note pushon">🔔 Həftəlik xülasə bildirişi açıqdır · <button type="button" class="linkbtn" id="fpOff">Söndür</button>' +
-          '<small class="pc-n">«Çıxış» etsəniz, bu telefona bildiriş gəlməyəcək.</small></p>';
+        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="fpOff">Söndür</button>' +
+          '<small class="pc-n">«Çıxış» etsəniz, bu telefona bildiriş gəlməyəcək.</small></p><div id="fpPrefs"></div>';
         on("fpOff", "click", function () { window.B10Push.disable("parent", scope, unreg).then(drawFamPush, drawFamPush); });
+        //  923: hansı xəbərlər gəlsin (hesab səviyyəsində; miqrasiya yoxdursa bölmə görünmür)
+        sb.rpc("rpc_family_push_prefs_get", {}).then(function (pf) {
+          var pb = $("fpPrefs"); if (!pb || !pf) return;
+          pb.innerHTML = '<div class="card fp-prefs"><b>Hansı xəbərlər gəlsin?</b>' +
+            '<label class="fp-opt"><input type="checkbox" id="fpNo"' + (pf.nostudy ? " checked" : "") + '> Uşaq bu gün çalışmayıbsa (axşam)</label>' +
+            '<label class="fp-opt"><input type="checkbox" id="fpGoal"' + (pf.goal ? " checked" : "") + '> Həftəlik hədəf tamamlananda</label>' +
+            '<small class="pc-n">Həftəlik xülasə hər bazar axşamı gəlir.</small><div id="fpPm"></div></div>';
+          function save() {
+            sb.rpc("rpc_family_push_prefs_set", { p_nostudy: $("fpNo").checked, p_goal: $("fpGoal").checked })
+              .then(function () { var m = $("fpPm"); if (m) m.innerHTML = '<p class="fk-ok">Yadda saxlandı ✓</p>'; })
+              .catch(function (e) { var m = $("fpPm"); if (m) m.innerHTML = msg("err", famErr(e)); });
+          }
+          on("fpNo", "change", save); on("fpGoal", "change", save);
+        }).catch(function () {});
         return;
       }
       if (st === "denied") {
@@ -825,12 +839,12 @@
         return;
       }
       if (st === "ios") {
-        box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Həftəlik xülasə gəlsin?</b>' +
+        box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Vacib xəbərlər gəlsin?</b>' +
           "<i>iPhone-da əvvəl tətbiqi ana ekrana əlavə edin: «Paylaş» → «Ana ekrana əlavə et». Sonra buradan aça bilərsiniz.</i></div></div>";
         return;
       }
-      box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Həftəlik xülasə telefonunuza gəlsin</b>' +
-        "<i>Hər bazar axşamı uşağınızın həftəsi barədə qısa mesaj. İstədiyiniz vaxt söndürə bilərsiniz.</i>" +
+      box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Vacib xəbərlər telefonunuza gəlsin</b>' +
+        "<i>Uşaq çalışmayanda və hədəf tamamlananda xəbər, hər bazar axşamı həftənin xülasəsi. İstədiyiniz vaxt söndürə bilərsiniz.</i>" +
         '<i class="pc-h">Brauzer soruşanda «İcazə ver» seçin.</i></div>' +
         '<div class="pc-a"><button type="button" class="btn sm go" id="fpOn">Bildirişləri aç</button></div></div><div id="fpMsg"></div>';
       on("fpOn", "click", function () {

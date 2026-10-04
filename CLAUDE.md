@@ -584,7 +584,14 @@ vaxtı və hədəfi birlikdə dəyişir (`rpc_family_set_plan`; yeni vaxt sabahk
 həftəlik push «Lale: 3/4 gün, 40 sual (71 % düz)…».
 (922, v751) «Afərin» gündə 3-ə qədər (eyni mesaj gündə bir dəfə; push yalnız ilk ikisinə, 3-cü uşağın gündəlik kartında). Kart vəziyyəti: «Afərin göndər» /
 «Bu gün N dəfə göndərilib ✓ · sonuncu HH:MM · Yenə göndər» / «Bu günlük limit doldu ✓ (3 / 3)»; xəta panelin içində çıxır (`rpc_family_progress.praise_n/praise_last`).
-Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi.
+(923, v752) valideynə İSTİSNA bildirişləri (hər gün xülasə YOX — yorğunluq): (1) `push_scan_family_nostudy` — axşam 19:05/20:05 tick-i, YALNIZ uşaq o gün 0 sual cavablayıbsa,
+elavə olunduğu gün yox, hesaba bir push (adlar birlikdə), `kind=bugun_yox`; (2) `push_scan_family_goal` — həftəlik hədəfə çatanda, uşaq başına həftədə bir dəfə, `kind=hedef`
+(«Afərin göndər» təklifi, url `./valideyn/?aile=1`). Hər ikisi `family_prefs` (hesab səviyyəsində, defolt açıq) ilə «Ailəm»dən söndürülür; sakit saatlar dəyişməyib.
+«Ailəm» push qutusu: «Vacib xəbərlər telefonunuza gəlsin» + «Hansı xəbərlər gəlsin?» (e2e-də saxta Notification/PushManager ilə yoxlanır, real push yox).
+Düzəliş: valideyn «Afərin» göndərəndə gecədirsə «səhər 10:00-da gedəcək», uşağın push-u açıq deyilsə izah yazılır.
+Həftəlik dərs cədvəli (söhbət 06.10): indi YOX — əvvəl real valideynlər hansı addımda dayandığını göstərsin; lazım olsa yüngül «gün → fənn chips» variantı
+(paketdə sabahkı fənlər əvvəl + «Sabah … var» bildirişi).
+Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi, mənimsəmə bildirişi (3-cü növ).
 
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 

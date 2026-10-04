@@ -16,6 +16,25 @@ BLOCK = "**://*.supabase.co/**"
 CFG = """window.CFG = {SUPABASE_URL:"http://127.0.0.1:54321", SUPABASE_ANON_KEY:"test-anon-key",
   STUDENT_URL:"http://127.0.0.1:8010/sagird/", PARENT_URL:"http://127.0.0.1:8010/valideyn/", SHOW_PLANS:false};"""
 
+import base64
+VAPID = base64.urlsafe_b64encode(b"\x04" + os.urandom(64)).decode().rstrip("=")
+CFG_V = CFG.replace("SHOW_PLANS:false}", "SHOW_PLANS:false, VAPID_PUBLIC:\"%s\"}" % VAPID)
+#  saxta Notification / PushManager / service worker (headless-de real push yoxdur) - yalniz bizim mentiq yoxlanir
+PUSH_STUB = """
+(() => {
+  let sub = null, perm = 'default';
+  const mk = ep => ({ endpoint: ep, toJSON() { return { endpoint: this.endpoint, keys: { p256dh: 'B'.repeat(87), auth: 'c'.repeat(22) } }; } });
+  function FakeN() {}
+  Object.defineProperty(FakeN, 'permission', { get() { return perm; } });
+  FakeN.requestPermission = () => { perm = 'granted'; return Promise.resolve(perm); };
+  window.Notification = FakeN; window.PushManager = function () {};
+  const reg = { scope: location.origin + '/', showNotification: async () => {}, pushManager: {
+    getSubscription: async () => sub,
+    subscribe: async () => { sub = mk('https://fcm.googleapis.com/fcm/send/E2EFAM-' + Math.random().toString(36).slice(2) + '-aaaaaaaa'); return sub; } } };
+  Object.defineProperty(navigator, 'serviceWorker', { value: { ready: Promise.resolve(reg), register: () => Promise.resolve(reg) }, configurable: true });
+})();
+"""
+
 fails = []
 def ok(cond, label, extra=""):
     print(("  OK   " if cond else "  FAIL ") + label + (("  " + str(extra)) if (extra != "" and not cond) else ""), flush=True)
@@ -39,9 +58,9 @@ def reset():
     delete from public.user_roles; delete from public.profiles; delete from auth.users;""")
     db("update public.app_state set val = '{\"on\": false}' where key = 'hesab_bagli'")
 
-def page(ctx):
+def page(ctx, cfg=None):
     p = ctx.new_page()
-    p.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
+    p.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=cfg or CFG))
     p.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)))
     p.route(BLOCK, lambda r: (fails.append("XARICI SORGU: " + r.request.url), r.abort()))
     return p
@@ -284,6 +303,28 @@ with sync_playwright() as pw:
             except Exception as ex:
                 ok(False, "gündəlik məşq axını", repr(ex)[:200])
         ctx.close()
+
+        print("-- ailə bildirişi qutusu: aç, xəbər növləri, söndür (918/923)")
+        ctxp = br.new_context(viewport={"width": w, "height": h})
+        ctxp.add_init_script(PUSH_STUB)
+        pp = page(ctxp, CFG_V); pp.goto(PARENT + "?aile=1"); pp.wait_for_selector("#fMail", timeout=15000)
+        pp.fill("#fMail", mail); pp.fill("#fPass", "parol12345"); pp.click("#fGo"); pp.wait_for_selector(".fk", timeout=15000)
+        pp.wait_for_selector("#fpOn", timeout=10000)
+        ok("Vacib xəbərlər" in pp.locator("#famPushBox").inner_text(), "qutu: «Vacib xəbərlər telefonunuza gəlsin»")
+        ok(db("select count(*) n from public.push_subs where role = 'parent'", one=True)["n"] == 0, "düyməyə basılana qədər abunə yoxdur")
+        pp.click("#fpOn"); pp.wait_for_selector("#fpOff", timeout=10000)
+        nk = db("select count(*) n from public.family_kids", one=True)["n"]
+        ok(db("select count(*) n from public.push_subs where role = 'parent' and student_id in (select student_id from public.family_kids)", one=True)["n"] == nk, "cihaz bütün uşaqlar üçün yazıldı (%d)" % nk)
+        pp.wait_for_selector("#fpNo", timeout=10000)
+        ok(pp.locator("#fpNo").is_checked() and pp.locator("#fpGoal").is_checked(), "iki xəbər növü defolt açıqdır")
+        pp.screenshot(path="%s/5h_bildiris_%s.png" % (OUT, tag), full_page=True)
+        pp.locator("#fpNo").uncheck(); pp.wait_for_selector("#fpPm .fk-ok", timeout=10000)
+        fp = db("select nostudy, goal from public.family_prefs", one=True)
+        ok(fp and fp["nostudy"] is False and fp["goal"] is True, "«çalışmayıb» söndürüldü, hədəf qaldı", fp)
+        pp.click("#fpOff"); pp.wait_for_selector("#fpOn", timeout=10000)
+        ok(db("select count(*) n from public.push_subs where role = 'parent'", one=True)["n"] == 0, "«Söndür»: abunə silindi")
+        db("delete from public.family_prefs")
+        ctxp.close()
 
         print("-- silme: usagi, sonra butun hesabi")
         ctx = br.new_context(viewport={"width": w, "height": h})

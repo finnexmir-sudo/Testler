@@ -139,6 +139,10 @@ select * from (values
         and exists (select 1 from f where proname='family_goal'))),
  ('922 ailə yolu: «Afərin» gündə 3',
     (select exists (select 1 from f where proname='rpc_family_praise' and def like '%limiti doldu%'))),
+ ('923 ailə yolu: «bu gün çalışmayıb» + hədəf bildirişi',
+    (select exists (select 1 from f where proname='push_scan_family_nostudy')
+        and exists (select 1 from f where proname='push_scan_family_goal')
+        and exists (select 1 from f where proname='rpc_family_push_prefs_set'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

@@ -538,6 +538,91 @@ begin
 end $$;
 reset role;
 
+-- ------------------------------------------------ 4h · istisna bildirisleri (923)
+update public.app_state set val = '{"on": true, "quiet": false}' where key = 'push';
+insert into public.push_subs (role, student_id, endpoint, p256dh, auth)
+values ('parent', current_setting('smoke.sid')::uuid, 'https://fcm.googleapis.com/fcm/send/FAM2-parent-aaaaaaaaaaaa', repeat('B', 87), repeat('c', 22));
+delete from public.daily_packs where student_id = current_setting('smoke.sid')::uuid;
+delete from public.attempt_answers aa using public.attempts a
+ where a.id = aa.attempt_id and a.student_id = current_setting('smoke.sid')::uuid;
+
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare r jsonb;
+begin
+  r := public.rpc_family_push_prefs_get();
+  assert (r->>'nostudy')::boolean and (r->>'goal')::boolean, 'defolt: ikisi de acıq';
+end $$;
+reset role;
+
+do $$
+declare
+  v_sid uuid := current_setting('smoke.sid')::uuid;
+  v_tom timestamptz := (((now() at time zone 'Asia/Baku')::date + 1)::timestamp + interval '19 hours 10 minutes') at time zone 'Asia/Baku';
+  v_acc uuid; v_body text;
+begin
+  select account_id into v_acc from public.students where id = v_sid;
+  assert app.push_scan_family_nostudy(v_tom - interval '7 hours') = 0, 'saat 12:10: gonderilmir';
+  assert app.push_scan_family_nostudy(v_tom) = 1, 'axsam 19:10: «calismayib» gonderildi';
+  select body into v_body from public.push_outbox where kind = 'bugun_yox' order by id desc limit 1;
+  assert v_body like '%bu gün hələ çalışmay%', 'metn: ' || coalesce(v_body, 'NULL');
+  assert app.push_scan_family_nostudy(v_tom) = 0, 'eyni gun ikinci defe yazilmir';
+  delete from public.push_outbox where kind = 'bugun_yox';
+
+  --  valideyn sondurub: gonderilmir
+  insert into public.family_prefs (account_id, nostudy, goal) values (v_acc, false, true)
+    on conflict (account_id) do update set nostudy = false;
+  assert app.push_scan_family_nostudy(v_tom) = 0, 'sondurulub: gonderilmir';
+  update public.family_prefs set nostudy = true where account_id = v_acc;
+
+  --  usaq o gun calisib: gonderilmir
+  insert into public.daily_packs (student_id, day, items, answers)
+  values (v_sid, ((now() at time zone 'Asia/Baku')::date + 1), '[{"q":"x"}]', '[{"ok":true}]');
+  delete from public.push_outbox where kind = 'bugun_yox';
+  perform app.push_scan_family_nostudy(v_tom);      -- ailenin basqa usaqlari ucun ola biler
+  select body into v_body from public.push_outbox where kind = 'bugun_yox' order by id desc limit 1;
+  assert v_body is null or v_body not like '%' || (select display_name from public.students where id = v_sid) || '%', 'calisan usagin adi yazilmir: ' || coalesce(v_body, 'NULL');
+  delete from public.daily_packs where student_id = v_sid;
+  delete from public.push_outbox where kind = 'bugun_yox';
+end $$;
+
+--  hedef: 2 gun calisdi, hedef 2
+do $$
+declare
+  v_sid uuid := current_setting('smoke.sid')::uuid;
+  v_mon date := (now() at time zone 'Asia/Baku')::date - (extract(isodow from (now() at time zone 'Asia/Baku'))::int - 1);
+  v_body text;
+begin
+  update public.family_kids set goal_days = 2 where student_id = v_sid;
+  insert into public.daily_packs (student_id, day, items, answers) values
+    (v_sid, v_mon + 4, '[{"q":"x"}]', '[{"ok":true}]'), (v_sid, v_mon + 5, '[{"q":"x"}]', '[{"ok":false}]');
+  assert app.push_scan_family_goal() = 1, 'hedef tamamlandi: gonderildi';
+  select body into v_body from public.push_outbox where kind = 'hedef' order by id desc limit 1;
+  assert v_body like '%hədəfini tamamladı%' and v_body like '%2 / 2%', 'hedef metni: ' || coalesce(v_body, 'NULL');
+  assert app.push_scan_family_goal() = 0, 'hefte basina bir defe';
+  update public.family_kids set goal_days = 6 where student_id = v_sid;
+  delete from public.push_outbox where kind = 'hedef';
+  assert app.push_scan_family_goal() = 0, 'hedef 6: hele catmayib';
+  delete from public.daily_packs where student_id = v_sid;
+end $$;
+
+set role authenticated;
+set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
+do $$
+declare r jsonb;
+begin
+  r := public.rpc_family_push_prefs_set(false, true);
+  assert not (r->>'nostudy')::boolean, 'prefs yazildi';
+  r := public.rpc_family_push_prefs_get();
+  assert not (r->>'nostudy')::boolean and (r->>'goal')::boolean, 'prefs oxundu';
+  perform public.rpc_family_push_prefs_set(true, true);
+end $$;
+reset role;
+update public.app_state set val = '{"on": false}' where key = 'push';
+delete from public.push_outbox where kind in ('bugun_yox', 'hedef');
+delete from public.push_subs where endpoint like '%FAM2-%';
+
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';
 set role authenticated;
