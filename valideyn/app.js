@@ -668,6 +668,7 @@
     if (/not confirmed/i.test(t)) return "E-poçtunuz təsdiqlənməyib. Poçtunuza göndərilən linkə basın.";
     if (/Password should|weak/i.test(t)) return "Parol çox zəifdir. Ən azı 8 simvol yazın.";
     if (/rate limit|too many/i.test(t)) return "Çox cəhd oldu. Bir az sonra yenidən yoxlayın.";
+    if (/schema cache|Could not find the function/i.test(t)) return "Bu imkan hələ aktiv deyil. Bir az sonra yenidən yoxlayın.";
     return fail(e);
   }
   function famExpired(e) {
