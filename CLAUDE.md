@@ -523,6 +523,24 @@ P16-1174) · meclis.gov.az (qanun mətni, id=1201) · DLA Piper AZ · Supabase
 phone-login & regions · ClassDojo/Seesaw/Khan parent-login səhifələri ·
 azedu.az/news/34410 (növbələr) · teston.az (II növbə sayı).
 
+#### 13b. Ailə yolu — 1-ci hissə QURULDU (2026-10-06, db/913, bayraqla bağlı)
+
+**Nə var:** valideyn e-poçtla hesab açır (`valideyn/` səhifəsi, `rpc_family_start`, 30 gün kartsız sınaq,
+plan `aile-usaq` — **9,90 AZN/uşaq yer tutucusu**) → «Uşaq əlavə et» (ad, sinif 1–11, fənlər sinfə görə
+`rpc_family_subjects`, gündə 5/10/15 dəq, **razılıq qutusu** → `consents`) → gizli `self_study` qrup + şagird + giriş
+kodu + seçilən ilk 3 fənndən **başlanğıc diaqnostika** (mövcud `rpc_diagnostic_create`, 14 gün) → «Ailəm» ekranı (kod,
+WhatsApp, diaqnostika sayı) → «Ətraflı» mövcud valideyn ekranını `rpc_family_open` tokeni ilə açır (dəyişməyib).
+Uşaq mövcud şagird girişi ilə kodla girir. **Bayraq:** `app_state.family = {"on": false, "emails": []}`; sönükdə yalnız
+`emails` siyahısındakılar işləyir (server `app.family_ok()` yoxlayır). Girişdə «e-poçtla» keçidi yalnız bayraq açıqdırsa
+və ya `?aile=1` ilə görünür. `valideyn/sb.js` açarı `valideyn_auth`-a dəyişdi (şagird tətbiqi ilə toqquşmasın).
+Testlər: `db/test/smoke_family.sql`, `test/e2e_aile.py` (390 və 1280 px).
+
+**Hələ YOXDUR (sonrakı hissələr):** abituriyent (düymə «tezliklə»), seanslı diaqnostika (N-1 + N-in Q1-i; indi
+mövcud tək-sinif diaqnostika), `answer_log`/`topic_mastery`, cari fəsil seçimi, gündəlik 5 sualın yeni mənbəyi, «bu gün ✓»
+valideyn kartı, həftəlik xülasə push, **özünəxidmət silmə və razılığı geri götürmə**, məxfilik səhifəsinin yenilənməsi
+(`mexfilik/` hələ «razılıq müəllimin öhdəliyidir» deyir), uşaq kodunu yeniləmə, ödəniş (admin əl ilə aktivləşdirir).
+Məlum xırda: hər «Ətraflı» basılışı yeni 30 günlük valideyn sessiyası yaradır (təmizləmə yoxdur).
+
 ### 8. Sual keyfiyyəti — «DİM səviyyəsi»nə necə çatırıq (2026-09-12)
 
 **İstifadəçinin sualı:** «Ən zəif yerimiz testləri tərtib etməkdir. Test
