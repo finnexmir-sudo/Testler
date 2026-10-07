@@ -1520,6 +1520,16 @@ Nə qorunur:
 Praktikada: silmək əvəzinə **adı yeniləmək** demək olar həmişə
 düzgündür — slug qalır, tarixçə qalır.
 
+**Yoxlama üsulu (2026-10-07 sınandı, ~3 dəqiqə):** `bil10-bank/tools/mundericat.py`
+nüsxəsini `OUT` başqa qovluğa yönəldilmiş halda işlət, 111 kitabın yeni
+mündəricatını `bil10-bank/mundericat/` ilə `diff` et (`#` sətirləri çıxmaqla).
+2026-10-07: 111/111 eyni (baza 25–27.08.2026); 7-ci sinif riyaziyyatı
+2024–25 müəllim planı ilə də eyni çıxdı. Nəticə: dərslik ildən-ilə az
+dəyişir, hər il yalnız dəyişən dərslərə sual yazılır.
+**Qalsın (istifadəçi, 2026-10-07):** bunu skriptə çevirmək və 2027
+avqust sonuna xatırlatma qoymaq təklif edildi, hələ edilmir — avqust
+yaxınlaşanda xatırlat.
+
 ## Cavabsız qalan sual «səhv» deyil
 
 `rpc_submit_attempt` **iki faylda** yazılıb: `03_rpc.sql` (doğru,
