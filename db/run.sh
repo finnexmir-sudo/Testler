@@ -395,6 +395,7 @@ bank 345_bank_riy10_triq_tenlik_cetinlik.sql
 bank 333_bank_riy10_ders_sinus_kosinus.sql
 bank 360_bank_riy10_sinus_kosinus_nisan.sql
 bank 361_bank_riy10_sinus_kosinus_duzelis.sql
+bank 338_bank_riy10_ders_ustlu_loqarifm_a.sql
 bank 390_bank_riy7_ders_tamamlama.sql
 bank 391_bank_riy9_ders_tamamlama.sql
 bank 400_bank_inf10_ders_sebeke.sql
