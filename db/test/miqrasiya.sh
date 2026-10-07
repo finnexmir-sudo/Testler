@@ -212,6 +212,13 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          340_bank_riy10_ders_nisan.sql \
          341_bank_riy10_triq_ifade_duzelis.sql \
          342_bank_riy10_triq_ifade_cetinlik.sql \
+         336_bank_riy10_ders_triq_tenlik.sql \
+         343_bank_riy10_triq_tenlik_ders_nisan.sql \
+         344_bank_riy10_triq_tenlik_duzelis.sql \
+         345_bank_riy10_triq_tenlik_cetinlik.sql \
+         333_bank_riy10_ders_sinus_kosinus.sql \
+         360_bank_riy10_sinus_kosinus_nisan.sql \
+         361_bank_riy10_sinus_kosinus_duzelis.sql \
          390_bank_riy7_ders_tamamlama.sql \
          391_bank_riy9_ders_tamamlama.sql \
          400_bank_inf10_ders_sebeke.sql \
