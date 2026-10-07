@@ -4906,8 +4906,9 @@ tapşırığı DÜZLÜYÜ yoxlayırdı, QURULUŞU yox. Yanaşmalar dörd yerə s
 - **Hər fənn öz sessiyasında** (istifadəçi qərarı). Protokol və fənn üzrə nömrə aralıqları:
   `bil10-bank/CLAUDE.md` — riyaziyyat 307–399, informatika 400–449, fizika 450–499, kimya 500–549,
   biologiya 550–599, coğrafiya 600–649, Az dili 650–699, ingilis 700–749, tarix 750–799, ədəbiyyat
-  800–849, qalanı 850–899. **Kod sessiyası yeni miqrasiyanı 900-dən yazır** — `db/` siyahısındakı son
-  nömrədən sonrakını götürmə, 226–899 bank aralığıdır.
+  800–849, qalanı 850–899. **Kod sessiyası yeni miqrasiyanı 900–999 aralığında yazır** — `db/` siyahısındakı son
+  nömrədən sonrakını götürmə, 226–899 və **1000+** bank aralığıdır (2026-10-07: riyaziyyat 1/3/4-cü sinif
+  1000–1049, 11-ci sinif 1100–1149).
 
 ## Çətinlik səviyyəsi — ölçülür, təxmin edilmir
 
