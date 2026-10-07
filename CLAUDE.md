@@ -601,6 +601,9 @@ Qərar (06.10): uşaqlar arası yarış/«Dost çağırışı» — pilotdan və
 (925, v754) yoxlama yorğunluğu: hissənin ölçüsü sinfə görə (1–4: 3 fəsil/9 sual, 5–7: 4/12, 8+: 5/15; `gen_rule.per`-də saxlanır), yeni uşaq əlavə olunanda YALNIZ ilk fənnin
 1-ci hissəsi (qalanı valideyn gündə bir «Növbəti hissə ver»), «Bilmirəm, keç» (`is_correct` null) artıq «zəif» sayılmır (zəif yalnız cavab verilənlərdən, ≥3), ayrıca
 `skipped_topics` → «Diqqət»də «N mövzuda uşaq “Bilmirəm” dedi — hələ keçilməmiş ola bilər». Uşaq tərəfdə: 1-ci sualda «təxmin etmə» izahı, siyahıda «≈ N dəq» (75 san limiti yox).
+Məktəb elektron gündəliyi (07.10, sahibin dostunun telefonundan): cədvəl, formativ (hər dərsin «Mövzu»su), ev tapşırığı (kitab səhifəsi/nömrə), davamiyyət, menyu — YALNIZ məlumat,
+məşq/öyrənmə yoxdur; 130 oxunmamış bildiriş. Qərarlar: (1) fərqimiz «uşaq bu gün nəyi təkrar etsin + çalışdımı»; (2) cədvəl/ev tapşırığı TƏKRARLANMIR (gündəlikdə var);
+(3) «məktəb mövzusunu yapışdır» funksiyası LAZIM DEYİL — valideyn fəsli özü seçir (sahib, 07.10); (4) yalnız Azərbaycan bölməsi (suallar Azərbaycan dilindədir; rus bölməsi ayrıca qərar, tərcümə lazım).
 Hələ yox: abituriyent, «bir sinif aşağı yoxla» (N-2), «Afərin»in oxunduğunun görünməsi, mənimsəmə bildirişi (3-cü növ), Dost çağırışı,
 yoxlamanın 5-ci sinif hissəsini valideynin «Hazırda hansı fəsildəsiniz?» seçiminə bağlamaq (indi «ilk üçdə bir» təxmini).
 
