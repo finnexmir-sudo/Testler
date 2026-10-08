@@ -6953,7 +6953,7 @@
     var hwOn = hw !== null && hw !== undefined;
 
     bandHead({
-      back: { id: "btnBack", label: ASG_PRE ? "Şagird hesabatı" : (Y && view ? "Tapşırıqlar" : backLabel(g.name)) },
+      back: { id: "btnBack", label: ASG_PRE ? "Şagird hesabatı" : (Y && view ? "Geri" : backLabel(g.name)) },
       eye: g.name,
       title: Y && view === "t" ? "Test ver" : (Y && view === "h" ? "Ev tapşırığı yaz" : "Tapşırıqlar"),
       sub: Y && view === "t" ? "Hazır testi seçin, kimə və nə vaxta qədər — şagirdin siyahısına düşür."

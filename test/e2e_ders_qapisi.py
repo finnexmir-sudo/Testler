@@ -378,6 +378,12 @@ with sync_playwright() as pw:
     p.wait_for_timeout(800)
     yox(p.locator('#plm-%s .asgwa, #plm-%s [data-wacopy], #plm-%s textarea' % (pid, pid, pid)).count() >= 1 or "WhatsApp" in p.locator('#plwa-%s' % pid).inner_text(), "WhatsApp mətni çıxdı", p.locator('#plwa-%s' % pid).inner_text()[:80])
     yox(p.locator('.plan details #plm-%s' % pid).count() == 0 and p.locator('#plm-%s' % pid).is_visible(), "nəticə qutusu <details>-dən kənardadır, görünür")
+    print("\n=== 08.10 · «Ev tapşırığı yaz» ekranında geri düyməsi «Geri» yazır ===")
+    p.goto(PANEL + "?yeni=1#/a/" + str(gid) + "/h"); p.wait_for_selector("#btnBack", timeout=30000)
+    yox("Geri" in p.inner_text("#btnBack") and "Tapşırıqlar" not in p.inner_text("#btnBack"), "geri düyməsi «Geri»", p.inner_text("#btnBack"))
+    p.goto(PANEL + "?yeni=1#/a/" + str(gid) + "/t"); p.wait_for_selector("#btnBack", timeout=30000)
+    yox("Geri" in p.inner_text("#btnBack"), "«Test ver» ekranında da «Geri»", p.inner_text("#btnBack"))
+
     print("\n=== 08.10 · «Həmkarına göndər» Profildədir, test səhifəsində yox ===")
     p.goto(PANEL + "?yeni=1#/me"); p.wait_for_selector("#btnHemkar", timeout=30000)
     with p.context.expect_page(timeout=8000) as pop:
