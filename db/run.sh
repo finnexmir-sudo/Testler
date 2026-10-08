@@ -441,6 +441,9 @@ bank 367_bank_riy10_coxuzlu_duzelis.sql
 bank 332_bank_riy10_ders_feza.sql
 bank 368_bank_riy10_feza_nisan.sql
 bank 369_bank_riy10_feza_duzelis.sql
+bank 370_bank_riy10_ders_dar370.sql
+bank 371_bank_riy10_ders_dar371.sql
+bank 372_bank_riy10_ders_dar372.sql
 bank 390_bank_riy7_ders_tamamlama.sql
 bank 391_bank_riy9_ders_tamamlama.sql
 bank 400_bank_inf10_ders_sebeke.sql

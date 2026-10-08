@@ -245,6 +245,9 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          332_bank_riy10_ders_feza.sql \
          368_bank_riy10_feza_nisan.sql \
          369_bank_riy10_feza_duzelis.sql \
+         370_bank_riy10_ders_dar370.sql \
+         371_bank_riy10_ders_dar371.sql \
+         372_bank_riy10_ders_dar372.sql \
          390_bank_riy7_ders_tamamlama.sql \
          391_bank_riy9_ders_tamamlama.sql \
          400_bank_inf10_ders_sebeke.sql \
