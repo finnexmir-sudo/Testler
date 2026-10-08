@@ -10549,7 +10549,11 @@
           ? (given.length || verildi
               //  Verilmis qrup varsa forma BASQA qrup ucundur - yoxsa
               //  muellim «hara verirem?» sorusunda qalir (29.09)
-              ? '<p class="muted" style="margin:0 0 10px"><b>Başqa qrupa da vermək üçün:</b></p>'
+              //  08.10 (istifadeci): tapsiriq artiq verilibse forma «casdirici» idi - indi BAGLI «Başqa qrupa da ver»
+              //  (xeta halinda aciq qalir: muellim ozu vermeli olur)
+              ? (!xeta
+                  ? '<details class="fold pother"><summary>Başqa qrupa da ver</summary>'
+                  : '<p class="muted" style="margin:0 0 10px"><b>Başqa qrupa da vermək üçün:</b></p>')
               : "") +
             '<div><label for="pWho">Kimə</label>' +
               '<select id="pWho"></select></div>' +
@@ -10575,7 +10579,8 @@
               "testi neçə dəfə işləyə biləcəyidir; hesabatda həm orta, həm də " +
               "ən yaxşı nəticə görünür.</p>" +
             '<div id="pAsgMsg"></div>' +
-            '<button class="btn go" id="btnPAsg">' + ic("plus") + asgBtnLabel() + "</button>"
+            '<button class="btn go" id="btnPAsg">' + ic("plus") + asgBtnLabel() + "</button>" +
+            ((given.length || verildi) && !xeta ? "</details>" : "")
           : (classes.length
               ? ""
               /*  Muellimi basqa ekrana gondermek dalan idi - orada test
