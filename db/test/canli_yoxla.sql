@@ -149,6 +149,10 @@ select * from (values
  ('925 ailə yolu: yoxlama ölçüsü + «Bilmirəm»',
     (select exists (select 1 from f where proname='family_diag_session' and def like '%c_per%')
         and exists (select 1 from f where proname='rpc_family_summary' and def like '%skipped_topics%'))),
+ ('926 şablon sual dərs qapısında 2 sayılır',
+    (select exists (select 1 from f where proname='ders_sual_sayi' and def like '%params is not null%')
+        and exists (select 1 from f where proname='ders_sual_setir')
+        and exists (select 1 from f where proname='rpc_plan_test' and def like '%ders_sual_setir%'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

@@ -640,3 +640,12 @@ ekranda render olunmur, ona görə real frontend işi tələb edir; hələ
 başlanmayıb.
 
 ---
+
+## db/926 — şablon (parametrik) sual dərs qapısında 2 sual sayılır (2026-10-08, istifadəçi razıdır)
+
+Riyaziyyatda şablon suallar bank fayllarına gəlir. `app.ders_sual_sayi` artıq `sum(case when q.params is not null then 2 else 1 end)` sayır
+(qapı + `rpc_plan_get.ders_n/ders_hazir`; hədd `app.ders_min()` = 20 dəyişmir). Yeni `app.ders_sual_setir` FƏRQLİ sətir sayını verir:
+bir testdə bir sual bir dəfə çıxır, ona görə `rpc_plan_test`-də dərs testinin ölçüsü `least(app.ders_test_count(), SƏTİR sayı)`-dır, çəkili say yox
+(çəkili say sətirdən böyükdür — ona əsaslansaq generator «kifayət sual yoxdur» xətası atardı). Qapı keçəndə sətir ≥ 10 = test ölçüsü (hədd 20, çəki ≤ 2).
+Yoxlama: `db/test/smoke_ders_sablon.sql` (D1 10 şablon = 20 hazır, D2 9 şablon = 18 yox, D3 5+10 = 20 hazır, D4 19 adi = 19 yox; köhnə `count(*)` ilə D1 uğursuz olur).
+`canli_yoxla.sql`: «926». **Bank sessiyasının ilk şablonlu faylı canlıya çıxmazdan ƏVVƏL canlıda işlədilməlidir.**
