@@ -395,6 +395,17 @@ with sync_playwright() as pw:
     p.click("#qFold > summary"); p.wait_for_timeout(300)
     yox(p.locator(".paper .pq").first.is_visible(), "başlığa basanda suallar açılır")
 
+    print("\n=== 08.10 · tapşırığı götürmək təsdiq soruşur ===")
+    p.goto(PANEL + "?yeni=1#/a/" + str(gid)); p.wait_for_selector(".asg [data-del]", timeout=30000)
+    nasg = q("select count(*) n from public.assignments where class_id=%s", (gid,), one=True)["n"]
+    mesaj = {}
+    def _no(d): mesaj["t"] = d.message; d.dismiss()
+    p.once("dialog", _no); p.click(".asg [data-del]"); p.wait_for_timeout(500)
+    yox("götürülsün" in mesaj.get("t", "") and "nəticələri qalır" in mesaj.get("t", "") or "heç kim bitirməyib" in mesaj.get("t", "").lower(), "təsdiq mətni çıxdı (nəticələr qalır / kim görmür)", mesaj.get("t", "")[:100])
+    yox(q("select count(*) n from public.assignments where class_id=%s", (gid,), one=True)["n"] == nasg, "«Xeyr» basanda tapşırıq QALIR")
+    p.once("dialog", lambda d: d.accept()); p.click(".asg [data-del]"); p.wait_for_timeout(1500)
+    yox(q("select count(*) n from public.assignments where class_id=%s", (gid,), one=True)["n"] == nasg - 1, "«Bəli» basanda tapşırıq götürülür")
+
     print("\n=== 08.10 · «Ev tapşırığı yaz» ekranında geri düyməsi «Geri» yazır ===")
     p.goto(PANEL + "?yeni=1#/a/" + str(gid) + "/h"); p.wait_for_selector("#btnBack", timeout=30000)
     yox("Geri" in p.inner_text("#btnBack") and "Tapşırıqlar" not in p.inner_text("#btnBack"), "geri düyməsi «Geri»", p.inner_text("#btnBack"))

@@ -7244,7 +7244,7 @@
             : "") +
           '<span class="pill' + (open ? " on" : "") + '">' +
             (open ? "Aktiv" : "Bağlı") + "</span>" +
-          '<button class="btn sm ghost icon" data-del="' + esc(a.id) + '" ' +
+          '<button class="btn sm ghost icon" data-del="' + esc(a.id) + '" data-n="' + done + '" data-t="' + tot + '" ' +
             'title="Tapşırığı götür — yazılmış nəticələr qalır" aria-label="Tapşırığı götür">' + ic("x") + "</button>" +
         "</div>" +
         '<div class="l2">' + esc(a.subject || "") + " · " +
@@ -7271,6 +7271,16 @@
       var b = ev.target.closest ? ev.target.closest("[data-del]") : null;
       if (!b || busy) return;
       var id = b.getAttribute("data-del");
+      //  08.10: tesdiq - evvel basan kimi silirdi.  Yazilmis neticeler qalir (assignments-e baglı deyil);
+      //  bitirmeyenler testi gormur, yarimciq qoyan davam ede bilmir (rpc_start_attempt aciq teyinat teleb edir).
+      var row = b.closest ? b.closest(".asg") : null;
+      var ttl = row && row.querySelector(".l1 b") ? row.querySelector(".l1 b").textContent : "Tapşırıq";
+      var dn = Number(b.getAttribute("data-n")) || 0, tt = Number(b.getAttribute("data-t")) || 0;
+      if (!confirm("«" + ttl + "» tapşırığı götürülsün?\n\n" +
+          (dn ? dn + (tt ? " / " + tt : "") + " şagird bitirib — onların nəticələri qalır (hesabatda görünür).\n"
+              : "Hələ heç kim bitirməyib.\n") +
+          "Bitirməyənlər testi artıq görməyəcək; yarımçıq qoyan şagird davam edə bilməyəcək.\n\n" +
+          "Sonradan qaytarmaq üçün testi yenidən qrupa verməlisiniz.")) return;
       busy = true; b.disabled = true;
       sb.rpc("rpc_unassign_test", { p_assignment_id: id })
         .then(function () { busy = false; screenAssign(g.id); })
