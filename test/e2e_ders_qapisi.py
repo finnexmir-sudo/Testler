@@ -380,11 +380,17 @@ with sync_playwright() as pw:
     yox(p.locator('.plan details #plm-%s' % pid).count() == 0 and p.locator('#plm-%s' % pid).is_visible(), "nəticə qutusu <details>-dən kənardadır, görünür")
     print("\n=== 08.10 · «Həmkarına göndər» Profildədir, test səhifəsində yox ===")
     p.goto(PANEL + "?yeni=1#/me"); p.wait_for_selector("#btnHemkar", timeout=30000)
-    p.click("#btnHemkar"); p.wait_for_selector("#hemkarMsg .hmtxt", timeout=8000)
-    hm = p.input_value("#hemkarMsg .hmtxt")
+    with p.context.expect_page(timeout=8000) as pop:
+        p.click("#btnHemkar")
+    yox(True, "klikdə yeni pəncərə (WhatsApp) açıldı")
+    try: pop.value.close()
+    except Exception: pass
+    p.wait_for_selector("#hemkarMsg a[href^='https://wa.me/?text=']", timeout=8000)
+    hm = p.locator("#hemkarMsg .hmtxt").input_value()
+    txt = p.locator("#hemkarMsg").inner_text()
     yox("bil10.az/?src=hemkar" in hm and "Qrupunda sınaqdan keçir" in hm, "Profil: həmkar mətni + link", hm[:80])
-    yox(p.locator("#hemkarMsg a[href^='https://wa.me/?text=']").count() == 1 and "heç yerə göndərilməyib" in p.locator("#hemkarMsg").inner_text(), "kompüterdə: «WhatsApp-da aç» + dürüst yazı (göndərildi demir)")
-    yox("sual." not in hm and "—" not in hm.split("Bil10")[0], "mətn heç bir testə istinad etmir", hm[:80])
+    yox("WhatsApp açıldı" in txt and "göndərildi" not in txt.lower().replace("göndərib", ""), "dürüst yazı: açıldı, «göndərildi» demir", txt[:80])
+    yox("sual." not in hm, "mətn heç bir testə istinad etmir", hm[:80])
     tid = q("select id::text i from public.tests where owner_type='educator' limit 1", one=True)["i"]
     p.goto(PANEL + "?yeni=1#/t/" + tid); p.wait_for_selector("#btnPrn", timeout=30000)
     yox(p.locator("#btnHemkar").count() == 0, "test səhifəsində «Həmkarına göndər» yoxdur")

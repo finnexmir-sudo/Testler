@@ -10237,42 +10237,38 @@
     var box = $("hemkarMsg");
     function said(h) { if (box) box.innerHTML = h; }
     said('<p class="muted" style="margin:8px 0 0">Link hazırlanır…</p>');
+    //  08.10: birbaşa WhatsApp (wa.me) açılır, mətn hazır yazılır, kontaktı orada seçirsiniz.
+    //  Pəncərə klikin İÇİNDƏ açılmalıdır (kod serverdən gələndən sonra açsaq brauzer bloklayır).
+    var w = null;
+    try { w = window.open("about:blank", "_blank"); } catch (e) { w = null; }
     sb.rpc("rpc_ref_link", {}).catch(function () { return null; })
-      .then(function (r) { hemkarPaylas(r || {}); });
+      .then(function (r) { hemkarPaylas(r || {}, w); });
   }
-  function hemkarPaylas(r) {
+  function hemkarPaylas(r, w) {
     var url = "https://bil10.az/?src=hemkar" + (r.code ? "&r=" + r.code : "");
     var say = Number(r.n) || 0;
     //  Link ana səhifəyə aparır (həmkar sualları görmür) - mətn heç bir testə istinad etmir
     var txt = "Bil10 ilə tanış oldum: hazır sual bankından bir dəqiqəyə test yığıram, " +
       "şagird telefonda işləyir, nəticə və zəif mövzular özü gəlir. " +
       "Qrupunda sınaqdan keçir: " + url;
+    var wa = "https://wa.me/?text=" + encodeURIComponent(txt);
     var box = $("hemkarMsg");
     //  Neçə həmkar gəlib - paylaşmağın qarşılığı görünsün
     var alt = say ? '<p class="muted" style="margin:8px 0 0">Bu linklə indiyə qədər <b>' +
         say + "</b> həmkar qeydiyyatdan keçib.</p>" : "";
-    function said(h) { if (box) box.innerHTML = h + alt; }
-    //  08.10: sistem paylaşma pəncərəsi YALNIZ telefonda (orada WhatsApp çıxır).  Kompüterdə (Windows)
-    //  o pəncərə OneNote/Skype göstərirdi və «Göndərildi» yalan idi - brauzer mətnin HARA getdiyini bilmir.
-    var telefon = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") ||
-                  (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
-    if (navigator.share && telefon) {
-      navigator.share({ text: txt }).then(function () {
-        said(msg("ok", "Paylaşma pəncərəsindən seçdiyiniz yerə mətn verildi. Həmkarınız linkə keçəndə sizin adınıza yazılır."));
-      }).catch(function () { said(""); });
-      return;
+    var acildi = false;
+    if (w) {
+      try { w.opener = null; w.location.href = wa; acildi = true; } catch (e) { try { w.close(); } catch (e2) {} }
     }
-    //  kompüter: mətn kopyalanır + WhatsApp-da aç (kontakt orada seçilir)
-    var wa = "https://wa.me/?text=" + encodeURIComponent(txt);
-    var done = function (ok) {
-      said(msg("ok", (ok ? "Mətn kopyalandı. " : "") + "WhatsApp-da həmkarınıza yapışdırın — hələ heç yerə göndərilməyib.") +
-        '<textarea class="hmtxt" readonly rows="4">' + esc(txt) + "</textarea>" +
-        '<p style="margin:8px 0 0"><a class="btn sm" target="_blank" rel="noopener" href="' + esc(wa) + '">' +
-          ic("send") + "WhatsApp-da aç</a></p>");
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); });
-    } else done(false);
+    //  WhatsApp-ı hesab edirik ki, açıldı; amma GÖNDƏRİLDİ demirik - mesajı özünüz göndərirsiniz.
+    //  Açılmadısa (pəncərə bloklandı) düymə + mətn qalır.
+    box.innerHTML = (acildi
+        ? msg("ok", "WhatsApp açıldı — mətn hazırdır, kontaktı seçib göndərin.")
+        : msg("warn", "WhatsApp avtomatik açılmadı — aşağıdakı düyməni basın.")) +
+      '<p style="margin:8px 0 0"><a class="btn sm" target="_blank" rel="noopener" href="' + esc(wa) + '">' +
+        ic("send") + "WhatsApp-da aç</a></p>" +
+      '<details class="fold"><summary>Mətn</summary><textarea class="hmtxt" readonly rows="4">' + esc(txt) +
+      "</textarea></details>" + alt;
   }
 
   function paperPrint(t, withKey) {
