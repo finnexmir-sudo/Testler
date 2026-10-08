@@ -3202,7 +3202,10 @@
         f.topics = ls.topic_id ? [ls.topic_id] : []; f.remNames = [];
         f.difficulty = []; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = "";
         f.count = 10;
-        f.back = g.id; f.backName = g.name || "";
+        //  08.10: qrupdan gelende tapsiriq ekranina qayitmaq YOXDUR - test yigilan kimi hemin qrupa verilir
+        //  (son tarix 7 gun, 1 cehd).  Niyyet bir defelikdir: screenGen oxuyub silir.
+        f.back = ""; f.backName = "";
+        GEN_ENTRY = { id: g.id, name: g.name || "" };
         nav("#/gen");
       });
     }).catch(function () {});   /* kart yardimcidir - xetasi ekrani pozmasin */
@@ -9255,7 +9258,9 @@
                     asgStu: "", asgStuName: "",
                     cls: "", remNames: [],
                     //  tapsiriq ekranindan gelmisiksa hara qayidaq
-                    back: "", backName: "" };
+                    back: "", backName: "",
+                    //  08.10: qrupun kartindan gelmisikse - test yigilan kimi HEMIN qrupa verilir (ekran yoxdur)
+                    fromG: "", fromName: "" };
     return GF;
   }
 
@@ -9377,9 +9382,13 @@
     }).catch(function () {});
   }
 
+  var GEN_ENTRY = null;
   function screenGen() {
     var live = guard();
     var f = genFilter();
+    //  08.10: qrup kartindan gelis bir defelikdir; menyudan gelende kohne niyyet daşınmasın
+    if (GEN_ENTRY) { f.asg = GEN_ENTRY.id; f.fromG = GEN_ENTRY.id; f.fromName = GEN_ENTRY.name; f.asgStu = ""; GEN_ENTRY = null; }
+    else if (f.fromG) { f.asg = ""; f.fromG = ""; f.fromName = ""; }
     topTitle.textContent = "Test yığ";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     //  Facets tek sinif qebul edir - movzu nisanlari onsuz da
@@ -9540,7 +9549,7 @@
   function drawGen() {
     var f = genFilter();
     bandHead({
-      back: { id: "btnBack", label: f.back ? (f.backName || "Tapşırıqlar") : "Əsas səhifə" },
+      back: { id: "btnBack", label: f.back ? (f.backName || "Tapşırıqlar") : (f.fromG ? "Geri" : "Əsas səhifə") },
       eye: "Test yığ", title: "Avtomatik test",
       sub: "Süzgəci seçin — sistem hovuzdan balanslı test yığacaq: mövzular arasında bərabər, təkrarsız."
     });
@@ -9609,6 +9618,9 @@
           ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi «' +
             esc(f.backName || "qrup") + "» tapşırıq ekranına " +
             "qayıdacaqsınız — test orada seçilmiş gələcək.</p>"
+          : f.fromG
+          ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi test <b>«' + esc(f.fromName || "qrup") +
+            "»</b> qrupuna dərhal veriləcək (son tarix 7 gün, 1 cəhd).</p>"
           : f.asgStu
           ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi test <b>yalnız «' + esc(f.asgStuName) +
             "»</b> şagirdinə veriləcək — qrupun qalanı görmür (son tarix 7 gün, 1 cəhd).</p>"
@@ -9625,6 +9637,7 @@
     on("btnBack", "click", function () {
       //  imtina: geri qayidis niyyetini de temizleyirik
       if (f.back) { var gid = f.back; f.back = ""; f.backName = ""; goTo("#/a/" + gid + (YENI ? "/t" : "")); return; }
+      if (f.fromG) { var g0 = f.fromG; f.asg = ""; f.fromG = ""; f.fromName = ""; goTo("#/g/" + g0); return; }
       nav("#/");
     });
     on("gRemOff", "click", function (e) {
@@ -9703,7 +9716,7 @@
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
     //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin
-    if (!f.back && !f.asgStu) sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
+    if (!f.back && !f.asgStu && !f.fromG) sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
                            order: "name" })
       .then(function (rows) {
         var sel = $("gAsg");
@@ -9820,7 +9833,10 @@
           ff.difficulty = []; ff.cls = ""; ff.remNames = []; ff.asg = ""; ff.asgStu = "";
           ff.count = 10;
           ff.title = (x.d.last.group || x.d.last.topic) + " — ev tapşırığı";
-          ff.back = x.c.id; ff.backName = x.c.name;
+          //  08.10: qrupun kartindan gelibse (fromG) hemin qrupun tovsiyesi - tapsiriq ekranina getmeden
+          //  birbasa verilir; menyudan gelende kohne yol (tapsiriq ekraninda son tarix/cehd secilir)
+          if (ff.fromG && ff.fromG === x.c.id) { ff.asg = x.c.id; ff.back = ""; ff.backName = ""; ff.fromName = x.c.name; }
+          else { ff.fromG = ""; ff.fromName = ""; ff.back = x.c.id; ff.backName = x.c.name; }
           b.disabled = true; b.textContent = "Yığılır…";
           makeTest();
         });
@@ -9842,7 +9858,7 @@
     var qadSel = $("gAsg"), qad = "";
     if (f.asg && qadSel && qadSel.selectedIndex >= 0) {
       qad = qadSel.options[qadSel.selectedIndex].textContent;
-    }
+    } else if (f.fromG) qad = f.fromName;
     var qid = f.asg, qstu = f.asgStu, qstuName = f.asgStuName;
     ASG = null; ASG_ERR = null;
     sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: (f.title || "").trim() || genAutoTitle(f) })
@@ -9866,7 +9882,7 @@
         busy = false;
         //  yigim bitdi - «qrupa/sagirde ver» niyyeti bir defelikdir: sonraki «Test yig»
         //  ozunden avvelki niyyeti (ve ya sagirdi) daşımasın
-        f.asg = ""; f.asgStu = ""; f.asgStuName = "";
+        f.asg = ""; f.asgStu = ""; f.asgStuName = ""; f.fromG = ""; f.fromName = "";
         //  Tapsiriq ekranindan gelmisiksa ora qayidiriq - teze test
         //  siyahida secili gelsin deye id-ni otururuk.
         if (f.back) {
