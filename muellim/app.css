@@ -2788,3 +2788,7 @@ details.styd{margin-top:14px}
   margin:8px 10px 0;border-color:var(--brand);background:var(--brand-tint);
   box-shadow:inset 3px 0 0 var(--brand)}
 .plan .plgrp>.plrow:hover{border-color:var(--brand-line)}
+/*  08.10: plan səviyyəsində «Keçilən dərslərdən test yığ»  */
+.plan .plexam{display:flex;align-items:center;gap:10px;margin-top:10px}
+.plan .plexam .btn{min-height:38px}
+.plan .plexam .muted{font-size:12px}

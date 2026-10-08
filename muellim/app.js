@@ -3379,6 +3379,12 @@
         if (!items[i].done && !cur) cur = items[i];
         if (items[i].done) lastDone = items[i];
       }
+      /*  08.10: sətirdə «test yığ» yalnız SON hazır keçilmiş dərsdə (dərsin öz testi);
+          qalanı üçün plan səviyyəsində «Keçilən dərslərdən test yığ».  */
+      var lastReady = null;
+      for (var li = 0; li < items.length; li++) {
+        if (items[li].done && items[li].ders_hazir) lastReady = items[li];
+      }
       var pct = p.total ? Math.round(p.done * 100 / p.total) : 0;
       /*  Alt movzular varsa setirler artiq FESIL deyil, DERSDIR -
           "2 / 47 ders" demek "2 / 11 movzu"dan durustdur.  */
@@ -3435,6 +3441,16 @@
             (lastDone.test_id
               ? '<a href="#/t/' + esc(lastDone.test_id) + '" class="pltest">vərəq</a>' : "") +
             "</div>"
+          : "") +
+        /*  08.10: «Keçilən dərslərdən test» - plan səviyyəsində BİR düymə (sətirlərdə
+            təkrarlanan «test yığ» əvəzinə).  Yol hazırdır: rpc_pack_exam (p_all) -
+            planın bütün keçilmiş dərslərini götürür.  Təsdiq qutusu #plm-<plan>-dədir.  */
+        (items.some(function (x) { return x.done; })
+          ? '<div class="plexam"><button class="btn sm" data-plexam="' + esc(p.id) + '"' +
+              (d.paid ? "" : ' disabled title="Abunə paketi ilə"') + ">" + ic("doc") +
+              "Keçilən dərslərdən test yığ</button>" +
+              '<span class="muted">' + items.filter(function (x) { return x.done; }).length +
+              " dərs</span></div>"
           : "") +
         "<details><summary>Bütün mövzular</summary>" +
           '<div class="pllist">' + (function () {
@@ -3569,7 +3585,7 @@
                   öz testi hələ yoxdursa: «test yığ» (yalnız BU dərsdən).  Fəsil testi
                   ayrıdır - başlıqdakı düymə, «fəsil vərəqi» dərsin öz testi sayılmır.
                   Hazır olmayan dərsdə yuxarıdakı «fəsil sonunda» izahı qalır.  */
-              (it.done && it.ders_hazir && !planOwnTest(it)
+              (it.done && it.ders_hazir && !planOwnTest(it) && lastReady && it.id === lastReady.id
                 ? '<button class="plmk plds" data-plmk="' + esc(it.id) + '" data-sc="ders"' +
                   (d.paid ? ' title="Yalnız bu dərsdən test yığır"' : ' disabled title="Abunə paketi ilə"') +
                   ">test yığ</button>"
@@ -3612,6 +3628,40 @@
         sb.rpc("rpc_plan_delete", { p_plan_id: id })
           .then(function () { busy = false; loadPlan(g); })
           .catch(function () { busy = false; });
+        return;
+      }
+      id = b.getAttribute("data-plexam");
+      if (id) {
+        var nd = box.querySelector('[data-p="' + id + '"] .plexam .muted');
+        var mm = $("plm-" + id);
+        if (mm) {
+          mm.innerHTML = '<div class="ploffer"><b>Keçilən dərslərdən test yığılsın?</b>' +
+            '<p class="muted" style="margin:4px 0 10px">Planın keçilmiş bütün dərslərindən (' +
+            esc(nd ? nd.textContent : "") + ') sual yığılır və qrupa dərhal tapşırılır ' +
+            '(son tarix 7 gün, 1 cəhd).</p><div class="plbtns">' +
+            '<input id="plExN" type="number" min="5" max="50" value="20">' +
+            '<button class="btn go sm" data-plexgo="' + esc(id) + '">Yığ və tapşırıq ver</button>' +
+            '<button class="btn sm ghost" data-plexno="' + esc(id) + '">Sonra</button></div></div>';
+          mm.scrollIntoView({ block: "nearest" });
+        }
+        return;
+      }
+      id = b.getAttribute("data-plexno");
+      if (id) { var m5 = $("plm-" + id); if (m5) m5.innerHTML = ""; return; }
+      id = b.getAttribute("data-plexgo");
+      if (id) {
+        var cnt = Number(($("plExN") || {}).value) || 20;
+        busy = true; b.disabled = true; b.textContent = "Yığılır…";
+        sb.rpc("rpc_pack_exam", { p_plan_id: id, p_count: cnt, p_all: true }).then(function (r) {
+          busy = false;
+          var m6 = $("plm-" + id);
+          if (m6) m6.innerHTML = msg("ok", "Test yığıldı və tapşırıldı: " + r.items + " dərs, " + r.count +
+            " sual, 7 gün. ") + '<a class="btn sm" href="#/t/' + esc(r.test_id) + '">Testə bax</a>';
+        }).catch(function (e) {
+          busy = false; b.disabled = false; b.textContent = "Yığ və tapşırıq ver";
+          var m7 = $("plm-" + id);
+          if (m7) m7.insertAdjacentHTML("afterbegin", msg("err", fail(e)));
+        });
         return;
       }
       id = b.getAttribute("data-pltest");

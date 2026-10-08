@@ -257,6 +257,9 @@ with sync_playwright() as pw:
     poolA = set(r["i"] for r in q("select id::text i from public.questions where tags @> array['ders:dq-a']"))
     unseen = len(poolA - used)
     q("update public.class_plan_items set test_id=null where id=%s", (ITEM["Dərs A"],))
+    #  08.10: sətirdə «test yığ» yalnız SON hazır keçilmiş dərsdədir - A son olsun deyə C müvəqqəti keçilməmiş
+    cdone = q("select done_at from public.class_plan_items where id=%s", (ITEM["Dərs C"],), one=True)["done_at"]
+    q("update public.class_plan_items set done_at=null where id=%s", (ITEM["Dərs C"],))
     ac()
     setir("Dərs A").locator('[data-plmk][data-sc="ders"]').click(); p.wait_for_timeout(600)
     p.locator('[data-pltest="%s"]' % ITEM["Dərs A"]).click(); p.wait_for_timeout(6000)
@@ -268,6 +271,7 @@ with sync_playwright() as pw:
             "ikinci test fərqlidir: kəsişmə %d ≤ %d (yeni suallar: %d)" % (len(s1 & s2), beklenen, unseen))
     else:
         yox(False, "ikinci test yığılmadı")
+    q("update public.class_plan_items set done_at=%s where id=%s", (cdone, ITEM["Dərs C"]))
 
     print("\n=== server: p_scope qoruyucusu ===")
     def rpc(sql, args):
@@ -324,6 +328,8 @@ with sync_playwright() as pw:
     q("update public.class_plan_items set done_at=null, test_id=null, fesil_test_id=null where id=%s", (ITEM["Dərs D"],))
     print("\n=== telefon (390 px) ===")
     kecdi("Dərs A", 3)
+    #  08.10: sətirdə «test yığ» yalnız SON hazır keçilmiş dərsdə - telefonda A tək keçilmiş olsun
+    q("update public.class_plan_items set done_at=null where plan_id=%s and id<>%s", (pid, ITEM["Dərs A"]))
     q("update public.class_plan_items set test_id=null, fesil_test_id=null where plan_id=%s", (pid,))
     ctx2 = br.new_context(viewport={"width": 390, "height": 900})
     p2 = ctx2.new_page()
@@ -342,6 +348,17 @@ with sync_playwright() as pw:
     yox(p2.evaluate("document.documentElement.scrollWidth <= window.innerWidth") and p2.locator(".ploffer").is_visible(), "telefonda təklif qutusu ekrana sığır")
     p2.locator(".ploffer").scroll_into_view_if_needed()
     p2.locator(".card.plan").screenshot(path=OUT + "/6-qutu-ders-telefon.png")
+    print("\n=== 08.10 · plan səviyyəsində «Keçilən dərslərdən test yığ» ===")
+    kecdi("Dərs A", 3); kecdi("Dərs C", 1)
+    ac()
+    yox(p.locator("[data-plexam]").count() == 1, "plan səviyyəsində bir «Keçilən dərslərdən test yığ» düyməsi var")
+    yox("2 dərs" in p.locator(".plexam").inner_text(), "düymənin yanında keçilən dərs sayı: 2", p.locator(".plexam").inner_text().replace("\n", " "))
+    p.locator("[data-plexam]").click(); p.wait_for_timeout(400)
+    yox(p.locator("[data-plexgo]").count() == 1 and "Keçilən dərslərdən" in p.locator(".ploffer").inner_text(), "təsdiq qutusu açıldı")
+    p.locator("[data-plexgo]").click(); p.wait_for_timeout(6000)
+    pe = q("select count(*) n, max(array_length(item_ids,1)) k from public.plan_exams where plan_id=%s", (pid,), one=True)
+    yox(pe["n"] >= 1 and (pe["k"] or 0) >= 2, "plan_exams-də sınaq yazıldı, ≥2 dərs", pe)
+    yox(p.locator('#plm-%s a[href^="#/t/"]' % pid).count() == 1, "«Testə bax» linki çıxdı")
     br.close()
 
 temizle(); movzu_sil()
