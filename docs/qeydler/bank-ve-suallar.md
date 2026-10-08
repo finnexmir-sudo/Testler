@@ -649,3 +649,6 @@ bir testdə bir sual bir dəfə çıxır, ona görə `rpc_plan_test`-də dərs t
 (çəkili say sətirdən böyükdür — ona əsaslansaq generator «kifayət sual yoxdur» xətası atardı). Qapı keçəndə sətir ≥ 10 = test ölçüsü (hədd 20, çəki ≤ 2).
 Yoxlama: `db/test/smoke_ders_sablon.sql` (D1 10 şablon = 20 hazır, D2 9 şablon = 18 yox, D3 5+10 = 20 hazır, D4 19 adi = 19 yox; köhnə `count(*)` ilə D1 uğursuz olur).
 `canli_yoxla.sql`: «926». **Bank sessiyasının ilk şablonlu faylı canlıya çıxmazdan ƏVVƏL canlıda işlədilməlidir.**
+
+- **db/927 (08.10)**: `app.pq_seed` cehd sayi 40 -> 200 (sert shertli sablon yukleme/render zamani sinmasin; 40-da `a=b` tipli shertde 400-den 34 pozulma idi). Smoke: `smoke_pq_cehd.sql`.
+- **db/test/miqrasiya.sh (08.10)**: siyahi ikiye bolunub — SABIT (kohne commitde olan, bank fayllari 100-den evvel) + DINAMIK (run.sh-de olub kohnede/sabitde olmayan, run.sh sirasi ile). Yeni fayl run.sh-e elave olunanda miqrasiya.sh-e toxunmaq lazim deyil (188 ve 9xx evvel yox idi, 240 188-i gozleyib sinirdi).

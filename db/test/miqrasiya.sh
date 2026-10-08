@@ -19,229 +19,240 @@ dropdb --if-exists miq_test 2>/dev/null || true; createdb miq_test
 ( cd "$WT/db" && ./run.sh miq_test >/dev/null 2>&1 )
 echo "kohne baza quruldu ($OLD)"
 
-for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
-         15_movzular_ederslik.sql \
-         07_seed_tests.sql 16_bank_riy4.sql 17_bank_sinif4.sql 19_bank_riy3.sql \
-         20_bank_sinif3.sql 75_bank_sinif1.sql 76_bank_sinif2.sql \
-         77_movzular_orta5.sql 78_bank_riy5.sql 79_bank_sinif5.sql \
-         80_bank_ing.sql 81_movzular_orta6.sql 30_bank_riy6.sql \
-         31_bank_sinif6.sql 32_bank_fenn6.sql 33_movzular_orta7.sql \
-         34_bank_riy7.sql 35_bank_sinif7.sql 36_bank_fenn7.sql \
-         37_movzular_orta8.sql 38_bank_riy8.sql 39_bank_sinif8.sql \
-         40_bank_fenn8.sql 41_movzular_orta9.sql 42_bank_riy9.sql 43_bank_sinif9.sql \
-         44_bank_fenn9.sql 45_movzular_orta10.sql 46_bank_riy10.sql \
-         47_bank_sinif10.sql 48_bank_fenn10.sql 49_movzular_orta11.sql \
-         50_bank_riy11.sql 51_bank_sinif11.sql 52_bank_fenn11.sql \
-         53_movzular_umumi_tarix.sql 54_bank_tarix_umumi.sql \
-         55_movzular_edebiyyat11.sql 56_bank_edebiyyat11.sql \
-         57_sinif_dubli.sql 58_movzular_edebiyyat9_10.sql \
-         59_bank_edebiyyat10.sql 60_bank_edebiyyat9.sql \
-         61_movzular_edebiyyat5_8.sql 62_bank_edebiyyat5.sql \
-         63_bank_edebiyyat6.sql 64_bank_edebiyyat7.sql \
-         65_bank_edebiyyat8.sql 66_movzular_umumi_tarix6_8.sql \
-         67_bank_tarix_umumi6_8.sql 68_movzular_umumi_tarix10.sql \
-         69_bank_tarix_umumi10.sql 70_movzular_umumi_tarix7.sql \
-         71_bank_tarix_umumi7.sql 72_bos_fennler.sql \
-         73_buraxilis_proqrami.sql 74_alt_movzular_riy8.sql \
-         82_alt_movzular_riy5_11.sql 83_alt_movzular_riy1_4.sql \
-         84_alt_movzular_hb1_4.sql 85_alt_movzular_inf1_11.sql \
-         86_alt_movzular_fizika6_11.sql \
-         87_alt_movzular_kimya7_11.sql \
-         88_alt_movzular_biologiya6_11.sql \
-         98_cografiya11_enerji_erzaq_duzelis.sql \
-         90_alt_movzular_cografiya6_11.sql \
-         91_alt_movzular_edebiyyat5_11.sql \
-         92_alt_movzular_tarix5_8_9_11.sql \
-         93_alt_movzular_utarix6.sql \
-         94_umumi_tarix_8_9_11_restruktur.sql \
-         95_alt_movzular_utarix7.sql \
-         96_alt_movzular_utarix8_9_11.sql \
-         97_alt_movzular_utarix10.sql \
-         99_bank_ingilis8_788.sql \
-         89_alt_movzular_ingilis6_11.sql \
-         118_bank_umumi_tarix_bosluqlar.sql \
-         112_bank_cetin_birlesme.sql \
-         141_bank_cografiya6_dunya_ictimai.sql \
-         142_bank_bio11_insan_muhit_duzelis.sql \
-         143_bank_tarix11_mustemleke_cenub.sql \
-         144_bank_inf11_komputer_veb_duzelis.sql \
-         145_bank_kim11_aldehid_izomer.sql \
-         146_bank_fiz7_skalyar_vektorial.sql \
-         147_bank_hey4_dini_deyerler.sql \
-         148_bank_utarix8_qafqaz_medeniyyet.sql \
-         149_bank_inf4_kompyuter_duzelis.sql \
-         150_bank_inf3_alqoritm_obyekt.sql \
-         151_bank_inf3_metn_duzelis.sql \
-         152_bank_inf8_kompyuter_tetbiqi_duzelis.sql \
-         153_bank_inf8_internet_sebeke.sql \
-         154_bank_inf11_sistemler_bosluqlar.sql \
-         155_bank_inf3_informasiya_bosluqlar.sql \
-         156_bank_inf3_kompyuter_is_masasi_qovluq.sql \
-         157_bank_inf10_informasiya_miqdari.sql \
-         158_bank_inf11_modellesdirme_bosluqlar.sql \
-         201_bank_cog8_hidrosfer_biosfer.sql \
-         202_bank_hey4_alt_movzu_temizlik.sql \
-         203_bank_tarix_cetin_norma.sql \
-         204_bank_riy1_cetin_norma.sql \
-         205_bank_riy5_10_cetin_norma.sql \
-         206_bank_informatika1_4_cetin_norma.sql \
-         207_bank_informatika5_8_cetin_norma.sql \
-         208_bank_informatika9_11_cetin_norma.sql \
-         209_bank_azdili1_cetin_norma.sql \
-         210_bank_azdili2_cetin_norma.sql \
-         211_bank_azdili3_cetin_norma.sql \
-         212_bank_azdili4_cetin_norma.sql \
-         213_bank_azdili5_cetin_norma.sql \
-         214_bank_azdili6_cetin_norma.sql \
-         215_bank_azdili7_cetin_norma.sql \
-         216_bank_azdili8_cetin_norma.sql \
-         217_bank_azdili9_cetin_norma.sql \
-         218_bank_azdili10_cetin_norma.sql \
-         219_bank_azdili11_cetin_norma.sql \
-         220_bank_ingilis1_cetin_norma.sql \
-         221_bank_ingilis2_cetin_norma.sql \
-         222_bank_ingilis3_cetin_norma.sql \
-         223_bank_ingilis4_cetin_norma.sql \
-         224_bank_ingilis5_cetin_norma.sql \
-         225_bank_ingilis6_cetin_norma.sql \
-         226_bank_ingilis7_cetin_norma.sql \
-         227_bank_ingilis8_cetin_norma.sql \
-         228_bank_ingilis9_cetin_norma.sql \
-         229_bank_ingilis10_cetin_norma.sql \
-         230_bank_ingilis11_cetin_norma.sql \
-         231_bank_riy2_4_cetin_norma.sql \
-         232_bank_cografiya_cetin_norma.sql \
-         233_bank_biologiya_cetin_norma.sql \
-         234_bank_fizika_cetin_norma.sql \
-         235_bank_kimya_cetin_norma.sql \
-         236_movzular_zefer_ortaq_turk.sql \
-         237_bank_zefer_tarixi.sql \
-         238_bank_ortaq_turk_tarixi.sql \
-         239_bank_sekil_bosluq_duzelis.sql \
-         240_bank_sekil_pilot_riy10_triq.sql \
-         241_bank_sekil_fiz7_dovre.sql \
-         242_bank_riy_movzu_zenginlesdirme.sql \
-         243_bank_inf_derinlik_metn.sql \
-         244_bank_inf_plan_partiya1.sql \
-         245_bank_inf_plan_partiya3_kod.sql \
-         246_bank_inf_plan_partiya2_ibtidai.sql \
-         247_bank_inf_plan_partiya2_orta.sql \
-         248_bank_inf_plan_partiya4_sekil.sql \
-         249_bank_inf_dublikat_yeniden.sql \
-         250_bank_riy_qusur_duzelis.sql \
-         251_bank_riy_sablon_pilot.sql \
-         252_bank_riy_plan_partiya1_hesablama.sql \
-         253_bank_riy_plan_partiya2_tehlil.sql \
-         254_bank_cixma_termin_duzelis.sql \
-         255_bank_riy_plan_partiya3_sinif9.sql \
-         256_bank_riy_plan_partiya4_sinif8.sql \
-         257_bank_riy_plan_partiya5_sinif7.sql \
-         258_bank_riy_plan_partiya6_sinif6.sql \
-         259_bank_riy_plan_partiya7_sinif5.sql \
-         260_bank_riy3_cixma16_sablon_berpa.sql \
-         261_bank_riy_plan_partiya8_sinif4.sql \
-         262_bank_riy_plan_partiya9_sinif3.sql \
-         263_bank_riy_plan_partiya10_sinif2.sql \
-         264_bank_riy_plan_partiya11_sinif1.sql \
-         265_bank_riy8_ders_nisan.sql \
-         266_bank_riy8_ders_kvadrat_kok.sql \
-         267_bank_riy8_ders_pifaqor.sql \
-         268_bank_riy8_ders_kvadrat_tenlik.sql \
-         269_bank_riy8_ders_dordbucaqlilar.sql \
-         270_bank_riy8_ders_rasional_ifade.sql \
-         271_bank_riy8_ders_sahe.sql \
-         272_bank_riy8_ders_rasional_tenlik.sql \
-         273_bank_riy8_ders_oxsarliq.sql \
-         274_bank_riy8_ders_berabersizlik.sql \
-         275_bank_riy8_ders_triqonometrik.sql \
-         276_bank_riy8_ders_ehtimal.sql \
-         277_bank_riy5_ders_nisan.sql \
-         278_bank_riy5_ders_natural.sql \
-         279_bank_riy5_ders_adi_kesrler.sql \
-         280_bank_riy5_ders_onluq_kesrler.sql \
-         281_bank_riy5_ders_faiz.sql \
-         282_bank_riy5_ders_ifade_tenlik.sql \
-         283_bank_riy5_ders_mustevi.sql \
-         284_bank_riy5_ders_feza.sql \
-         285_bank_riy5_ders_statistika.sql \
-         286_bank_riy6_ders_nisan.sql \
-         287_bank_riy6_ders_natural.sql \
-         288_bank_riy6_ders_nisbet.sql \
-         289_bank_riy6_ders_tam.sql \
-         290_bank_riy6_ders_koordinat.sql \
-         291_bank_riy6_ders_coxluqlar.sql \
-         292_bank_riy6_ders_ifade.sql \
-         293_bank_riy6_ders_ucbucaqlar.sql \
-         294_bank_riy6_ders_sahe.sql \
-         295_bank_riy6_ders_statistika.sql \
-         296_bank_riy9_ders_nisan.sql \
-         297_bank_riy9_ders_kok.sql \
-         298_bank_riy9_ders_cevre.sql \
-         299_bank_riy9_ders_funksiya.sql \
-         300_bank_riy9_ders_cevre_tenliyi.sql \
-         301_bank_riy9_ders_tenlikler.sql \
-         302_bank_riy9_ders_coxbucaqli.sql \
-         303_bank_riy9_ders_berabersizlik.sql \
-         304_bank_riy9_ders_vektorlar.sql \
-         305_bank_riy9_ders_silsile.sql \
-         306_bank_riy9_ders_ehtimal.sql \
-         08_reports.sql 18_siqnal.sql 21_paket.sql 22_esas.sql \
-         23_bildiris.sql 24_admin_2fa.sql 25_ders_plani.sql 26_fenn.sql \
-         27_hesabat.sql 28_ferdi_tapsiriq.sql 29_bank_katalog.sql \
-         100_seviyye_modeli.sql 101_ders_plani_alt.sql 102_movzu_qoruyucu.sql \
-         103_cox_sinif.sql 104_cavabsiz_sual.sql \
-         105_alt_movzu_duzelisleri.sql 106_bank_siyahi_variantlar.sql \
-         107_valideyn.sql 108_valideyn_duzelis.sql \
-         109_duzelis_nisani.sql 110_valideyn_duzelis_nisani.sql \
-         111_admin_test_sayi.sql 112_asagi_sinif_testleri.sql \
-         113_valideyn_huquq_berpa.sql \
-         114_sagird_paneli_zenginlesdirme.sql \
-         115_sagird_kecdiyi_dersler.sql \
-         116_sagird_tam_netice.sql \
-         117_sagird_tam_netice_submit.sql \
-         118_diaqnostika.sql \
-         119_diaqnostika_qoruyucu.sql \
-         120_icmal_diaqnostikasiz.sql \
-         121_numune_test_gizli.sql \
-         122_bize_yaz.sql \
-         123_teyinat_ikili.sql \
-         124_qisa_ad_tekrar.sql \
-         125_admin_giris.sql \
-         126_bu_gunun_dersi.sql \
-         127_ad_sirasi.sql \
-         128_cavab_terzi.sql \
-         129_sehv_defteri.sql \
-         130_davamiyyet.sql \
-         131_ferdi_plan.sql \
-         132_parametrik_sual.sql \
-         133_adaptiv_mesq.sql \
-         134_sual_keyfiyyeti.sql \
-         135_kurikulum_paketi.sql \
-         136_numune_hesab.sql \
-         137_mesq_limit.sql \
-         138_sinaq_abune.sql \
-         139_numune_admin_gizli.sql \
-         140_numune_bize_yaz_gizli.sql \
-         159_demo_hedd.sql \
-         160_hediyye_paket.sql \
-         161_ziyaret.sql \
-         162_ziyaret_huni.sql \
-         163_icmal_liderler.sql \
-         164_sagird_sessiya_30gun.sql \
-         165_sagird_basi_qiymet.sql \
-         166_baki_vaxti.sql \
-         167_liderler_qrup_uzre.sql \
-         168_hediyye_bir_ay.sql \
-         169_sagird_basi_hediyye.sql \
-         170_hediyye_uzun_duzelis.sql \
-         171_kohne_sinaqlar_sagird_basi.sql \
-         172_odenis_baslangici.sql \
-         173_admin_ekrani.sql \
-         174_valideyn_abune.sql \
-         175_oz_girisim.sql \
-         176_qiymet_metni.sql \
-         177_cedvel.sql \
-         05_grants.sql; do
+#  MIQRASIYA SIYAHISI IKI HISSEDIR (2026-10-08):
+#
+#  1) SABIT hisse = kohne bazanin kecdiyi yol: evvel bank fayllari (11-239), SONRA kod fayllari (08..177).
+#     Sira ONEMLIDIR: bank fayllari seviyyeleri yaradir, 100_seviyye_modeli.sql ise sinif kodunu TEK edir
+#     (levels_sinif_kodu_tek) - bank 100-den SONRA gelse kohne bazada "duplicate key" verir (41_movzular_orta9).
+#  2) DINAMIK hisse = run.sh-de olub yuxaridakilarda OLMAYAN HER SEY, run.sh SIRASI ile (178..927, bank 240+).
+#     Evvel burada hamisi elle yazilirdi: 188_sual_sekli.sql ve butun 9xx fayllari yox idi, 240_bank_sekil_pilot_
+#     riy10_triq.sql ise 188-i gozleyirdi -> miqrasiya 240-da sinirdi.  Yeni fayl run.sh-e elave olunanda
+#     burada is gormek LAZIM DEYIL.   (--local-a bagli setirler atlanir: skript run.sh-i --local-siz isledir.)
+FIXED='
+         11_sual_banki.sql
+         12_bank_rpc.sql
+         13_generator.sql
+         14_movzular.sql
+         15_movzular_ederslik.sql
+         07_seed_tests.sql
+         16_bank_riy4.sql
+         17_bank_sinif4.sql
+         19_bank_riy3.sql
+         20_bank_sinif3.sql
+         75_bank_sinif1.sql
+         76_bank_sinif2.sql
+         77_movzular_orta5.sql
+         78_bank_riy5.sql
+         79_bank_sinif5.sql
+         80_bank_ing.sql
+         81_movzular_orta6.sql
+         30_bank_riy6.sql
+         31_bank_sinif6.sql
+         32_bank_fenn6.sql
+         33_movzular_orta7.sql
+         34_bank_riy7.sql
+         35_bank_sinif7.sql
+         36_bank_fenn7.sql
+         37_movzular_orta8.sql
+         38_bank_riy8.sql
+         39_bank_sinif8.sql
+         40_bank_fenn8.sql
+         41_movzular_orta9.sql
+         42_bank_riy9.sql
+         43_bank_sinif9.sql
+         44_bank_fenn9.sql
+         45_movzular_orta10.sql
+         46_bank_riy10.sql
+         47_bank_sinif10.sql
+         48_bank_fenn10.sql
+         49_movzular_orta11.sql
+         50_bank_riy11.sql
+         51_bank_sinif11.sql
+         52_bank_fenn11.sql
+         53_movzular_umumi_tarix.sql
+         54_bank_tarix_umumi.sql
+         55_movzular_edebiyyat11.sql
+         56_bank_edebiyyat11.sql
+         57_sinif_dubli.sql
+         58_movzular_edebiyyat9_10.sql
+         59_bank_edebiyyat10.sql
+         60_bank_edebiyyat9.sql
+         61_movzular_edebiyyat5_8.sql
+         62_bank_edebiyyat5.sql
+         63_bank_edebiyyat6.sql
+         64_bank_edebiyyat7.sql
+         65_bank_edebiyyat8.sql
+         66_movzular_umumi_tarix6_8.sql
+         67_bank_tarix_umumi6_8.sql
+         68_movzular_umumi_tarix10.sql
+         69_bank_tarix_umumi10.sql
+         70_movzular_umumi_tarix7.sql
+         71_bank_tarix_umumi7.sql
+         72_bos_fennler.sql
+         73_buraxilis_proqrami.sql
+         74_alt_movzular_riy8.sql
+         82_alt_movzular_riy5_11.sql
+         83_alt_movzular_riy1_4.sql
+         84_alt_movzular_hb1_4.sql
+         85_alt_movzular_inf1_11.sql
+         86_alt_movzular_fizika6_11.sql
+         87_alt_movzular_kimya7_11.sql
+         88_alt_movzular_biologiya6_11.sql
+         98_cografiya11_enerji_erzaq_duzelis.sql
+         90_alt_movzular_cografiya6_11.sql
+         91_alt_movzular_edebiyyat5_11.sql
+         92_alt_movzular_tarix5_8_9_11.sql
+         93_alt_movzular_utarix6.sql
+         94_umumi_tarix_8_9_11_restruktur.sql
+         95_alt_movzular_utarix7.sql
+         96_alt_movzular_utarix8_9_11.sql
+         97_alt_movzular_utarix10.sql
+         99_bank_ingilis8_788.sql
+         89_alt_movzular_ingilis6_11.sql
+         118_bank_umumi_tarix_bosluqlar.sql
+         112_bank_cetin_birlesme.sql
+         141_bank_cografiya6_dunya_ictimai.sql
+         142_bank_bio11_insan_muhit_duzelis.sql
+         143_bank_tarix11_mustemleke_cenub.sql
+         144_bank_inf11_komputer_veb_duzelis.sql
+         145_bank_kim11_aldehid_izomer.sql
+         146_bank_fiz7_skalyar_vektorial.sql
+         147_bank_hey4_dini_deyerler.sql
+         148_bank_utarix8_qafqaz_medeniyyet.sql
+         149_bank_inf4_kompyuter_duzelis.sql
+         150_bank_inf3_alqoritm_obyekt.sql
+         151_bank_inf3_metn_duzelis.sql
+         152_bank_inf8_kompyuter_tetbiqi_duzelis.sql
+         153_bank_inf8_internet_sebeke.sql
+         154_bank_inf11_sistemler_bosluqlar.sql
+         155_bank_inf3_informasiya_bosluqlar.sql
+         156_bank_inf3_kompyuter_is_masasi_qovluq.sql
+         157_bank_inf10_informasiya_miqdari.sql
+         158_bank_inf11_modellesdirme_bosluqlar.sql
+         201_bank_cog8_hidrosfer_biosfer.sql
+         202_bank_hey4_alt_movzu_temizlik.sql
+         203_bank_tarix_cetin_norma.sql
+         204_bank_riy1_cetin_norma.sql
+         205_bank_riy5_10_cetin_norma.sql
+         206_bank_informatika1_4_cetin_norma.sql
+         207_bank_informatika5_8_cetin_norma.sql
+         208_bank_informatika9_11_cetin_norma.sql
+         209_bank_azdili1_cetin_norma.sql
+         210_bank_azdili2_cetin_norma.sql
+         211_bank_azdili3_cetin_norma.sql
+         212_bank_azdili4_cetin_norma.sql
+         213_bank_azdili5_cetin_norma.sql
+         214_bank_azdili6_cetin_norma.sql
+         215_bank_azdili7_cetin_norma.sql
+         216_bank_azdili8_cetin_norma.sql
+         217_bank_azdili9_cetin_norma.sql
+         218_bank_azdili10_cetin_norma.sql
+         219_bank_azdili11_cetin_norma.sql
+         220_bank_ingilis1_cetin_norma.sql
+         221_bank_ingilis2_cetin_norma.sql
+         222_bank_ingilis3_cetin_norma.sql
+         223_bank_ingilis4_cetin_norma.sql
+         224_bank_ingilis5_cetin_norma.sql
+         225_bank_ingilis6_cetin_norma.sql
+         226_bank_ingilis7_cetin_norma.sql
+         227_bank_ingilis8_cetin_norma.sql
+         228_bank_ingilis9_cetin_norma.sql
+         229_bank_ingilis10_cetin_norma.sql
+         230_bank_ingilis11_cetin_norma.sql
+         231_bank_riy2_4_cetin_norma.sql
+         232_bank_cografiya_cetin_norma.sql
+         233_bank_biologiya_cetin_norma.sql
+         234_bank_fizika_cetin_norma.sql
+         235_bank_kimya_cetin_norma.sql
+         236_movzular_zefer_ortaq_turk.sql
+         237_bank_zefer_tarixi.sql
+         238_bank_ortaq_turk_tarixi.sql
+         239_bank_sekil_bosluq_duzelis.sql
+         08_reports.sql
+         18_siqnal.sql
+         21_paket.sql
+         22_esas.sql
+         23_bildiris.sql
+         24_admin_2fa.sql
+         25_ders_plani.sql
+         26_fenn.sql
+         27_hesabat.sql
+         28_ferdi_tapsiriq.sql
+         29_bank_katalog.sql
+         100_seviyye_modeli.sql
+         101_ders_plani_alt.sql
+         102_movzu_qoruyucu.sql
+         103_cox_sinif.sql
+         104_cavabsiz_sual.sql
+         105_alt_movzu_duzelisleri.sql
+         106_bank_siyahi_variantlar.sql
+         107_valideyn.sql
+         108_valideyn_duzelis.sql
+         109_duzelis_nisani.sql
+         110_valideyn_duzelis_nisani.sql
+         111_admin_test_sayi.sql
+         112_asagi_sinif_testleri.sql
+         113_valideyn_huquq_berpa.sql
+         114_sagird_paneli_zenginlesdirme.sql
+         115_sagird_kecdiyi_dersler.sql
+         116_sagird_tam_netice.sql
+         117_sagird_tam_netice_submit.sql
+         118_diaqnostika.sql
+         119_diaqnostika_qoruyucu.sql
+         120_icmal_diaqnostikasiz.sql
+         121_numune_test_gizli.sql
+         122_bize_yaz.sql
+         123_teyinat_ikili.sql
+         124_qisa_ad_tekrar.sql
+         125_admin_giris.sql
+         126_bu_gunun_dersi.sql
+         127_ad_sirasi.sql
+         128_cavab_terzi.sql
+         129_sehv_defteri.sql
+         130_davamiyyet.sql
+         131_ferdi_plan.sql
+         132_parametrik_sual.sql
+         133_adaptiv_mesq.sql
+         134_sual_keyfiyyeti.sql
+         135_kurikulum_paketi.sql
+         136_numune_hesab.sql
+         137_mesq_limit.sql
+         138_sinaq_abune.sql
+         139_numune_admin_gizli.sql
+         140_numune_bize_yaz_gizli.sql
+         159_demo_hedd.sql
+         160_hediyye_paket.sql
+         161_ziyaret.sql
+         162_ziyaret_huni.sql
+         163_icmal_liderler.sql
+         164_sagird_sessiya_30gun.sql
+         165_sagird_basi_qiymet.sql
+         166_baki_vaxti.sql
+         167_liderler_qrup_uzre.sql
+         168_hediyye_bir_ay.sql
+         169_sagird_basi_hediyye.sql
+         170_hediyye_uzun_duzelis.sql
+         171_kohne_sinaqlar_sagird_basi.sql
+         172_odenis_baslangici.sql
+         173_admin_ekrani.sql
+         174_valideyn_abune.sql
+         175_oz_girisim.sql
+         176_qiymet_metni.sql
+         177_cedvel.sql
+'
+files_of() {
+  awk '/^[[:space:]]*#/ {next}
+       /--local" \] &&/ {next}
+       /^bank / {print $2; next}
+       { if (match($0, /-f [A-Za-z0-9_.\/]+\.sql/)) print substr($0, RSTART + 3, RLENGTH - 3) }' "$1" | awk '!seen[$0]++'
+}
+files_of "$WT/db/run.sh" > /tmp/miq_old_list.txt                      # kohne bazada ARTIQ var
+echo "$FIXED" | tr -s ' \n' '\n\n' | sed '/^$/d' > /tmp/miq_fixed.txt
+cat /tmp/miq_old_list.txt /tmp/miq_fixed.txt > /tmp/miq_skip.txt
+DYN=$(files_of run.sh | grep -vxF -f /tmp/miq_skip.txt | grep -vE '^(test/|05_grants\.sql$)' | tr '\n' ' ')
+FILES="$(echo $FIXED | tr -s ' ' ) $DYN"
+echo "miqrasiya fayllari: sabit $(wc -l < /tmp/miq_fixed.txt) + dinamik $(echo $DYN | wc -w)"
+for f in $FILES 05_grants.sql; do
   printf "  %-22s" "$f"
   #  Bank fayllari (16,17,19,20,30-99) bu repoda YOXDUR - private
   #  bil10-bank repo-suna kocurulub (2026-09-03, public repo-dan
