@@ -562,3 +562,5 @@ edilib → kart yox; «Bağla» (`localStorage bil10_onb_off`, yalnız 3-cü add
 e2e `#onb #gForm` gözləyir). Bank SAYI yazılmır (qayda). `e2e_panel` «İlk
 testinizi yığın» + `#onbGen` + `#onbNames`; şəkil `test/_v2_onb2.py`
 (qeydiyyat → quruluş → SQL ilə test → adlar yapışdır → 3-cü addım).
+
+- **Ders plani seliqesi (08.10)**: fesil = nomreli kart (acilanda brend rengli nomre + «2/7» + chevron), ders = ad + 2-ci setirde tarix / «fesil sonunda · n/N», kecilen ders dolu yasil ✓, «test yig» dolu, «vereq»/«geri al» cerciveli; «Son kecilen» ayri kart (etiket / ad / tarix). Yalniz CSS blogu (app.css sonu) + plRow-da tarixdeki «· » ve fesil nomresi; DOM/data-* eyni. Onbaxis: `test/tek.sh _plan_sekil2.py` (telefon sekli /tmp/claude-0/plansekil2). Qeyd: `e2e_plan.py` bu deyisiklikden evvel de `#gForm` timeout ile yiqilir (kohne test, ayrica baxilmali).

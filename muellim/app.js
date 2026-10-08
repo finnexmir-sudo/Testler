@@ -3458,7 +3458,7 @@
               var tam = nd === bl.items.length && bl.items.length > 0;
               var son = tam ? bl.items[bl.items.length - 1] : null;
               return '<details class="plgrp"' + (i === ci ? " open" : "") + ">" +
-                "<summary><b>" + esc(bl.name) + "</b>" +
+                "<summary><em class=\"plgn0\">" + (blocks.indexOf(bl) + 1) + "</em><b>" + esc(bl.name) + "</b>" +
                 '<span class="plgc' + (tam ? " full" : "") + '">' +
                   nd + "/" + bl.items.length + "</span>" +
                 /*  23.09: fesil testi ARTIQ BURADADIR - ders setrinde
@@ -3531,7 +3531,7 @@
               "<i>" + (it.done ? "✓" : it.ord) + "</i>" +
               "<span>" + esc(it.topic) +
                 (it.done && it.done_at
-                  ? ' <s class="pldate">· ' + dateAz(it.done_at) + "</s>" : "") +
+                  ? '<s class="pldate">' + dateAz(it.done_at) + "</s>" : "") +
                 //  siyahida novbeti ders secilmirdi (istifadeci: «bugünün
                 //  dərsi açıq-aydın bilinmir») - nisan + fon
                 (cur && it.id === cur.id ? ' <em class="plnext">bu gün</em>' : "") +

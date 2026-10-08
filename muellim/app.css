@@ -2718,3 +2718,62 @@ details.styd{margin-top:14px}
   transform:rotate(45deg) translateY(-2px);transition:transform .15s}
 .qtg.on::after{transform:rotate(225deg) translateY(-2px)}
 .qtg:hover{background:var(--n-25)}
+
+/* =========================== ders plani: seliqeli gorunus (08.10)
+   Istifadeci: «ders planini seliqeye sal, bizdeki hecde aydin deyil».
+   Fesil = nomreli kart; ders = ad (1-ci setir) + tarix/izah (2-ci setir);
+   sagda duymeler.  Yalniz gorunus - DOM ve data-* eyni qalir.  */
+.card.plan>details>summary{font-size:14px;font-weight:650;color:var(--fg);padding:4px 0}
+.plan .pllist{margin-top:10px}
+.plan .plprev{padding:12px 14px;gap:4px 8px;border-radius:12px;background:var(--surface);
+  box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.plan .plprev>s{flex:1 0 100%}
+.plan .plprev>b{flex:1 1 0;font-size:14px;white-space:normal}
+.plan .plgrp{border:1px solid var(--n-150);border-radius:12px;background:var(--surface);
+  margin-top:8px;overflow:hidden}
+.plan .plgrp:last-child{border-bottom:1px solid var(--n-150)}
+.plan .plgrp[open]{border-color:var(--brand-line)}
+.plan .plgrp>summary{padding:12px 14px;gap:10px;font-size:14px;position:relative;padding-right:34px}
+.plan .plgrp[open]>summary{background:var(--brand-tint);border-bottom:1px solid var(--brand-line)}
+.plan .plgrp>summary::before{display:none}
+.plan .plgrp>summary::after{content:"";position:absolute;right:15px;top:50%;width:7px;height:7px;
+  border-right:1.8px solid var(--fg-3);border-bottom:1.8px solid var(--fg-3);
+  transform:translateY(-70%) rotate(45deg);transition:transform .15s}
+.plan .plgrp[open]>summary::after{transform:translateY(-30%) rotate(225deg)}
+.plan .plgn0{flex:0 0 26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-style:normal;font-size:12px;font-weight:650;background:var(--brand-tint);color:var(--brand);
+  border:1px solid var(--brand-line)}
+.plan .plgrp[open] .plgn0{background:var(--brand);color:#fff;border-color:var(--brand)}
+.plan .plgrp>summary b{font-weight:620;line-height:1.3}
+.plan .plgrp .plgc{font-size:12px;padding:2px 10px;border-radius:999px}
+.plan .plgrp .plrow{padding:10px 14px;gap:4px 10px;border-bottom:1px solid var(--n-100);align-items:center}
+.plan .plgrp .plrow:last-of-type{border-bottom:0}
+.plan .plrow>i{flex:0 0 26px;height:26px;font-size:12px;font-weight:600}
+.plan .plrow.done>i{background:var(--ok);color:#fff;border-color:var(--ok)}
+.plan .plrow{flex-wrap:wrap}
+.plan .plrow>span{flex:1 1 0;min-width:0;line-height:1.35;font-weight:520}
+.plan .plrow.done>span{color:var(--fg)}
+.plan .plrow .pldate{display:block;margin-top:2px;font-size:11.5px;color:var(--fg-3)}
+.plan .plrow.cur{margin:0;box-shadow:inset 3px 0 0 var(--brand)}
+.plan .plrow .plnext{margin-left:8px;white-space:nowrap}
+.plan .plrow .plwait{flex:1 0 100%;margin:0 0 0 36px;order:1;font-size:11.5px;margin-top:-2px}
+.plan .plrow .plmk,.plan .plrow .pltest,.plan .plrow .plundo,.plan .plrow .plavg{order:2}
+.plan .plrow .plck+.plwait{margin-left:36px}
+/*  duymeler: «test yig» dolu, «vereq» / «geri al» cerciveli  */
+.plan .plrow .plmk,.plan .plrow .pltest,.plan .plrow .plundo{
+  display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;text-decoration:none;
+  padding:6px 11px;border-radius:9px;min-height:30px;white-space:nowrap}
+.plan .plrow .plmk.plds{background:var(--brand);color:#fff;border:1px solid var(--brand)}
+.plan .plrow .plmk.plds:disabled{background:var(--n-50);color:var(--fg-3);border-color:var(--n-100)}
+.plan .plrow .plmk.plre{background:var(--surface);color:var(--err);border:1px solid var(--err)}
+.plan .plrow .pltest{background:var(--surface);color:var(--brand);border:1px solid var(--brand-line)}
+.plan .plrow .plundo{background:var(--surface);color:var(--fg-2);border:1px solid var(--n-150)}
+@media (max-width:520px){
+  .plan .plrow.acts>span{flex:1 1 calc(100% - 40px)}
+  .plan .plrow .plavg,.plan .plrow .plavg+.pltest,.plan .plrow .plavg+.plmk,
+  .plan .plrow>span+.pltest,.plan .plrow>span+.plmk,.plan .plrow>span+.plundo,.plan .plrow>span+.plck{margin-left:36px}
+  .plan .plrow .plavg~*{margin-left:0}
+  .plan .plrow .plck,.plan .plrow .plavg~.plck,.plan .plrow>span+.plck{margin-left:auto}
+  .plan .plrow .plundo,.plan .plrow .plmk,.plan .plrow .pltest{margin-left:36px}
+  .plan .plrow .plmk~.plundo,.plan .plrow .pltest~.plundo,.plan .plrow .plavg~.pltest,.plan .plrow .plmk~.plmk,.plan .plrow .pltest~.plmk{margin-left:0}
+}
