@@ -220,6 +220,31 @@ for f in 11_sual_banki.sql 12_bank_rpc.sql 13_generator.sql 14_movzular.sql \
          360_bank_riy10_sinus_kosinus_nisan.sql \
          361_bank_riy10_sinus_kosinus_duzelis.sql \
          338_bank_riy10_ders_ustlu_loqarifm_a.sql \
+         331_bank_riy10_ders_funksiya_a.sql \
+         381_bank_riy10_ders_funksiya_b.sql \
+         350_bank_riy10_funksiya_ders_nisan.sql \
+         351_bank_riy10_funksiya_duzelis.sql \
+         352_bank_riy10_funksiya_cetinlik.sql \
+         334_bank_riy10_ders_triq_qrafik.sql \
+         353_bank_riy10_triq_qrafik_ders_nisan.sql \
+         354_bank_riy10_triq_qrafik_duzelis.sql \
+         355_bank_riy10_triq_qrafik_cetinlik.sql \
+         380_bank_riy10_ders_ustlu_loqarifm_b.sql \
+         346_bank_riy10_ustlu_loqarifm_ders_nisan.sql \
+         347_bank_riy10_ustlu_loqarifm_duzelis.sql \
+         348_bank_riy10_ustlu_loqarifm_cetinlik.sql \
+         339_bank_riy10_ders_statistika.sql \
+         362_bank_riy10_statistika_nisan.sql \
+         363_bank_riy10_statistika_duzelis.sql \
+         337_bank_riy10_ders_hecm.sql \
+         364_bank_riy10_hecm_nisan.sql \
+         365_bank_riy10_hecm_duzelis.sql \
+         335_bank_riy10_ders_coxuzlu.sql \
+         366_bank_riy10_coxuzlu_nisan.sql \
+         367_bank_riy10_coxuzlu_duzelis.sql \
+         332_bank_riy10_ders_feza.sql \
+         368_bank_riy10_feza_nisan.sql \
+         369_bank_riy10_feza_duzelis.sql \
          390_bank_riy7_ders_tamamlama.sql \
          391_bank_riy9_ders_tamamlama.sql \
          400_bank_inf10_ders_sebeke.sql \
