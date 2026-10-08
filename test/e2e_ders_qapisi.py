@@ -370,7 +370,11 @@ with sync_playwright() as pw:
     p.locator("[data-plexgo]").click(); p.wait_for_timeout(6000)
     pe = q("select count(*) n from public.tests where gen_rule->>'pack'='done' and gen_rule->>'plan'=%s", (str(pid),), one=True)
     yox(pe["n"] == 1, "seçilmiş dərslərdən test yığıldı", pe)
-    yox(p.locator('#plm-%s a[href^="#/t/"]' % pid).count() == 1, "«Testə bax» linki çıxdı")
+    yox(p.locator('#plm-%s a[href^="#/t/"]' % pid).count() == 1, "«Vərəqə bax» linki çıxdı")
+    yox(p.locator('#plwa-%s' % pid).count() == 1, "WhatsApp mətni üçün yer var")
+    p.wait_for_timeout(800)
+    yox(p.locator('#plm-%s .asgwa, #plm-%s [data-wacopy], #plm-%s textarea' % (pid, pid, pid)).count() >= 1 or "WhatsApp" in p.locator('#plwa-%s' % pid).inner_text(), "WhatsApp mətni çıxdı", p.locator('#plwa-%s' % pid).inner_text()[:80])
+    yox(p.locator('.plan details:not(.plgrp):not(.plnext) #plm-%s' % pid).count() == 1, "nəticə qutusu siyahının altındadır (Planı sildən əvvəl)")
     br.close()
 
 temizle(); movzu_sil()

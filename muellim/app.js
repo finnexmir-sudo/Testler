@@ -3501,12 +3501,13 @@
             }
             return h;
           })() + "</div>" +
+          //  08.10: nəticə / təsdiq qutusu siyahının ALTINDA, «Planı sil»dən əvvəl (əvvəl ən dibdə idi)
+          '<div id="plm-' + esc(p.id) + '"></div>' +
           //  16.09 (istifadeci): «Planı sil» test duymesinin dibinde idi -
           //  el deye bilerdi.  Indi ayri setirde, sag kenarda, kicik link.
           '<div class="pldelrow"><button class="lnk del" data-pldel="' + esc(p.id) +
             '">Planı sil</button></div>' +
         "</details>" +
-        '<div id="plm-' + esc(p.id) + '"></div>' +
       "</div>";
 
     
@@ -3647,9 +3648,23 @@
         sb.rpc("rpc_plan_test_done", { p_plan_id: id, p_count: cnt, p_item_ids: pick }).then(function (r) {
           busy = false;
           var m6 = $("plm-" + id);
-          if (m6) m6.innerHTML = msg("ok", "Test yığıldı və tapşırıldı: " + r.lessons + " dərsdən " + r.count +
-            " sual, 7 gün." + (r.skipped ? " " + r.skipped + " seçilmiş dərsdə hazır sual olmadığı üçün daxil edilmədi." : "") + " ") +
-            '<a class="btn sm" href="#/t/' + esc(r.test_id) + '">Testə bax</a>';
+          if (m6) {
+            m6.innerHTML = '<div class="ok">' + ic("check") + "<span>Test yığıldı və qrupa tapşırıldı: " +
+              r.lessons + " dərsdən " + r.count + " sual, son tarix 7 gün." +
+              (r.skipped ? " " + r.skipped + " seçilmiş dərsdə hazır sual olmadığı üçün daxil edilmədi." : "") + " " +
+              '<a href="#/t/' + esc(r.test_id) + '">Vərəqə bax</a></span></div>' +
+              '<div id="plwa-' + esc(id) + '"></div>';
+            //  dərsin öz testində olduğu kimi: şagirdlərə hazır WhatsApp mətni
+            sb.select("tests", { select: "title", eq: { id: r.test_id } }).then(function (rows) {
+              var w = $("plwa-" + id);
+              if (!w) return;
+              var ttl = (rows && rows[0] && rows[0].title) || "Test";
+              w.innerHTML = asgShareBox(ttl, new Date(Date.now() + 7 * 864e5).toISOString(), "")
+                .replace(/^<div class="ok asgok">[\s\S]*?<\/div>/, "");
+              bindWaCopy(w);
+            }).catch(function () {});
+            m6.scrollIntoView({ block: "center", behavior: "smooth" });
+          }
         }).catch(function (e) {
           busy = false; b.disabled = false; b.textContent = "Yığ və tapşırıq ver";
           var m7 = $("plm-" + id);
