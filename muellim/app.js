@@ -10252,19 +10252,27 @@
     var alt = say ? '<p class="muted" style="margin:8px 0 0">Bu linklə indiyə qədər <b>' +
         say + "</b> həmkar qeydiyyatdan keçib.</p>" : "";
     function said(h) { if (box) box.innerHTML = h + alt; }
-    if (navigator.share) {
+    //  08.10: sistem paylaşma pəncərəsi YALNIZ telefonda (orada WhatsApp çıxır).  Kompüterdə (Windows)
+    //  o pəncərə OneNote/Skype göstərirdi və «Göndərildi» yalan idi - brauzer mətnin HARA getdiyini bilmir.
+    var telefon = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") ||
+                  (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+    if (navigator.share && telefon) {
       navigator.share({ text: txt }).then(function () {
-        said(msg("ok", "Göndərildi. Həmkarınız linkə keçəndə sizin adınıza yazılır."));
+        said(msg("ok", "Paylaşma pəncərəsindən seçdiyiniz yerə mətn verildi. Həmkarınız linkə keçəndə sizin adınıza yazılır."));
       }).catch(function () { said(""); });
       return;
     }
-    var done = function () {
-      said(msg("ok", "Mətn kopyalandı — WhatsApp-da həmkarınıza yapışdırın.") +
-        '<textarea class="hmtxt" readonly rows="4">' + esc(txt) + "</textarea>");
+    //  kompüter: mətn kopyalanır + WhatsApp-da aç (kontakt orada seçilir)
+    var wa = "https://wa.me/?text=" + encodeURIComponent(txt);
+    var done = function (ok) {
+      said(msg("ok", (ok ? "Mətn kopyalandı. " : "") + "WhatsApp-da həmkarınıza yapışdırın — hələ heç yerə göndərilməyib.") +
+        '<textarea class="hmtxt" readonly rows="4">' + esc(txt) + "</textarea>" +
+        '<p style="margin:8px 0 0"><a class="btn sm" target="_blank" rel="noopener" href="' + esc(wa) + '">' +
+          ic("send") + "WhatsApp-da aç</a></p>");
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(txt).then(done, done);
-    } else done();
+      navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); });
+    } else done(false);
   }
 
   function paperPrint(t, withKey) {
