@@ -46,9 +46,9 @@ do $$
 declare bad boolean;
 begin
   assert app.pq_eval('a+b', '{"a":245,"b":138}') = '383', 'toplama';
-  assert app.pq_eval('a/b', '{"a":7,"b":2}') = '3.5', 'bolme deqiq';
+  assert app.pq_eval('a/b', '{"a":7,"b":2}') = '3,5', 'bolme deqiq (926: vergul)';
   assert app.pq_eval('a%b', '{"a":7,"b":2}') = '1', 'qaliq';
-  assert app.pq_eval('(a-b)*2', '{"a":3,"b":5}') = '-4', 'menfi';
+  assert app.pq_eval('(a-b)*2', '{"a":3,"b":5}') = '−4', 'menfi (926: −)';
   assert app.pq_render('{a} + {b} = ?', '{"a":245,"b":138}') = '245 + 138 = ?', 'render';
   assert app.pq_render('{a} + {b} = ?', null) = '{a} + {b} = ?', 'adi sualda { } toxunulmur';
   assert app.pq_cond('a>b and a%b=0', '{"a":9,"b":3}'), 'sert';
@@ -266,5 +266,25 @@ begin
   assert (q1->>'tpl')::boolean and q1->>'body' !~ '\{' and (q1->'options'->0->>'body') ~ '^[0-9]+$', 'vereqde sablon render olunmali: ' || (q1->>'body');
 end $$;
 \echo 'OK  5 · yeni cehdde basqa reqemler; defter ve vereq render olunur'
+
+--  6 · 926: vergul, menfi isare, uzun kesr redd; seed metni de yoxlayir
+do $$
+declare ok boolean;
+begin
+  assert app.pq_render('{a/b}', '{"a":7,"b":2}') = '3,5', 'onluq kesr vergulle olmali';
+  assert app.pq_render('{a-b}', '{"a":2,"b":5}') = '−3', 'menfi "−" ile olmali';
+  assert app.pq_render('{a*b}', '{"a":12,"b":34}') = '408', 'tam eded deyismemeli';
+  begin
+    perform app.pq_check('{"vars":{"a":[1,20],"b":[2,9]}}'::jsonb, '{a} : {b} = ?',
+                         '[{"body":"{a/b}"},{"body":"{a/b+1}"}]'::jsonb);
+    ok := false;
+  exception when sqlstate '22023' then ok := true;
+  end;
+  assert ok, 'uzun kesr veren sablon saxlanmamali';
+  --  sertle eyni sablon kecir
+  perform app.pq_check('{"vars":{"a":[1,20],"b":[2,9]},"cond":"a%b=0"}'::jsonb, '{a} : {b} = ?',
+                       '[{"body":"{a/b}"},{"body":"{a/b+1}"}]'::jsonb);
+end $$;
+\echo 'OK  6 · 926: 3,5 · −3 · 1/3 redd · sertle kecir'
 
 \echo 'SABLON: BUTUN YOXLAMALAR KECDI'

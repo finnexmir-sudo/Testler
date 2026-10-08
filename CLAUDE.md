@@ -2880,7 +2880,12 @@ dəyişən, tam ədəd aralığı ≤ 1 000 000, şərt ≤ 120 simvol.
   `#qparTry/#qparOut`), siyahıda və vərəqdə «şablon» nişanı
   (`rpc_bank_list.tpl`). Şagird tətbiqi dəyişmir — hər şey serverdə
   render olunur.
-- Yoxlama: `smoke_parametrik.sql` (5), `test/e2e_parametrik.py`;
+- **Rəqəm formatı (db/926, 2026-10-08):** `3,5` (vergül), `−3` (bankdakı kimi «−»),
+  4 onluq rəqəmdən uzun nəticə (1/3) **xəta** — `pq_check` 12 nümunədə tutur, müəllif
+  şərt yazır (`a%b=0`); `pq_seed` sualın mətnini də render edib uyğunsuz qiyməti atır.
+  Yazılı (`text`) şablonda cavab mənfi və ya kəsr olmasın — şagird «-3», «3.5» yazar,
+  müqayisə hərfi-hərfidir.
+- Yoxlama: `smoke_parametrik.sql` (6), `test/e2e_parametrik.py`;
   bələdçi addım 10, şəkil `m13_sablon`.
 
 ## Tapşırıq ekranında test seçimi (canlı şikayət: «qarışıq»)
