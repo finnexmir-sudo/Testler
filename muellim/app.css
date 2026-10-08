@@ -2777,3 +2777,14 @@ details.styd{margin-top:14px}
   .plan .plrow .plundo,.plan .plrow .plmk,.plan .plrow .pltest{margin-left:36px}
   .plan .plrow .plmk~.plundo,.plan .plrow .pltest~.plundo,.plan .plrow .plavg~.pltest,.plan .plrow .plmk~.plmk,.plan .plrow .pltest~.plmk{margin-left:0}
 }
+/*  08.10: derslər bir-birindən aralı — hər biri ayrıca kiçik kart  */
+.plan .plgrp>.plrow,.plan .pllist>.plrow,.plan .plnext>.plrow{
+  margin:8px 10px 0;padding:11px 12px;border:1px solid var(--n-150);border-radius:11px;
+  background:var(--surface)}
+.plan .plgrp>.plrow:last-child{margin-bottom:10px}
+.plan .plgrp>.plrow:last-of-type{border-bottom:1px solid var(--n-150)}
+.plan .plgrp .plrow.done{border-color:var(--ok-line);background:var(--surface)}
+.plan .plgrp>.plrow.cur,.plan .pllist>.plrow.cur,.plan .plnext>.plrow.cur{
+  margin:8px 10px 0;border-color:var(--brand);background:var(--brand-tint);
+  box-shadow:inset 3px 0 0 var(--brand)}
+.plan .plgrp>.plrow:hover{border-color:var(--brand-line)}
