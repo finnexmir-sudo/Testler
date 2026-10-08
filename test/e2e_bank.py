@@ -614,8 +614,8 @@ with sync_playwright() as pw:
         pg.wait_for_function(
             "document.querySelectorAll('.qrow').length > %d" % n1, timeout=15000)
         n2 = pg.locator(".qrow").count()
-        ok(n2 > n1, "novbeti 50 elave olunur", "%d -> %d" % (n1, n2))
-        ok(n2 == min(total, n1 + 50), "elave olunan say duzdur", n2)
+        ok(n2 > n1, "novbeti 10 elave olunur", "%d -> %d" % (n1, n2))
+        ok(n2 == min(total, n1 + 10), "elave olunan say duzdur", n2)
     else:
         ok(pg.locator("#bMore").count() == 0,
            "hamisi gorunurse duyme cixmir", "%d/%d" % (n1, total))

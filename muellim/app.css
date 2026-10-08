@@ -2696,3 +2696,25 @@ details.styd{margin-top:14px}
 .card.lockcard h2{margin:0 0 8px}
 .card.lockcard p{margin:0 0 12px;line-height:1.5}
 .card.lockcard .btn{margin-top:4px}
+
+/* 908: movzu axtarisi neticesi (sual banki + Test yig) */
+.thits .thh{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-3);padding:4px 0 2px}
+.thit{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--n-100)}
+.thits .thh + .thit{border-top:0}
+.thits.in{margin:10px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:2px 12px}
+.thits.in .thit:first-child{border-top:0}
+.thit .tn{flex:1;min-width:0}
+.thit .tn b{display:block;color:var(--fg);font-weight:570;overflow-wrap:anywhere}
+.thit .tn i{display:block;font-style:normal;font-size:13px;color:var(--fg-2)}
+.thit .ta{display:flex;gap:8px;flex:0 0 auto}
+@media(max-width:560px){.thit{flex-wrap:wrap}.thit .ta{flex:1 1 100%}.thit .ta .btn{flex:1}}
+
+/* siyahida variantlar default baglidir: «Variantlar · 4» ve «Variantlari ac» */
+.bcount{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.qall{border:0;background:none;color:var(--brand);font:inherit;font-weight:560;cursor:pointer;padding:4px 0;white-space:nowrap}
+.qtg{display:inline-flex;align-items:center;gap:6px;margin:0 16px 12px;padding:3px 10px;border:1px solid var(--n-100);
+  border-radius:999px;background:var(--surface);color:var(--fg-2);font:inherit;font-size:12.5px;cursor:pointer}
+.qtg::after{content:"";width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
+  transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+.qtg.on::after{transform:rotate(225deg) translateY(-2px)}
+.qtg:hover{background:var(--n-25)}

@@ -152,6 +152,25 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 903_ders_qapisi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 904_sagird_aktivlik.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 905_hesab_bagli.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 906_cehd_vereqi_sekil.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 907_bank_axtaris_movzu.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 908_movzu_axtaris.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 909_sinaq_kohne_active.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 910_push.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 911_push_yeni_test.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 912_push_xatirlatma.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 913_aile.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 914_aile_fennler.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 915_aile_xulase.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 916_aile_cari_fesil.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 917_aile_mesq.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 918_aile_afarin_xulase.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 919_aile_seansli_yoxlama.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 920_aile_usaq_sehife.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 921_aile_hedef.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 922_aile_afarin_3.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 923_aile_xeberdarliq.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 924_aile_personaj.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 925_aile_yoxlama_olcu.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

@@ -26,6 +26,7 @@
       ACIQ bir duyme lazimdir.  Evvel «Çıxış» kod ekranini acirdi ve
       ziyaretci orada ilisib qalirdi.  */
   var DEMO = false;
+  var FAM = null;       // 920: ailə yolu uşağı - {minutes, week, today_i, mastered, cur}; müəllim yolunda null
 
   var LS = "sagird_ses";
 
@@ -268,7 +269,7 @@
     show(
       '<div class="hero"><div class="mark"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lgQ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4acb"/><stop offset="1" stop-color="#0e9384"/></linearGradient></defs><path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="url(#lgQ)"/><g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/></g><path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#ffc94d"/><path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#1a2233" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
         "<h1>Testə başla</h1>" +
-        "<p>Müəllimin verdiyi kodu yaz.</p></div>" +
+        "<p>Müəllimin və ya valideynin verdiyi kodu yaz.</p></div>" +
       '<div class="card" style="margin-top:18px">' +
         (note || "") +
         '<div id="lErr"></div>' +
@@ -353,7 +354,10 @@
           ? '<span class="solo diag">diaqnostika</span>' : "") + "</b><i>" +
         "<span>" + esc(t.subject || "") + "</span><span>·</span>" +
         "<span>" + (t.questions || 0) + " sual</span>" +
-        (t.time_limit_sec ? "<span>·</span><span>⏱ " + Math.round(t.time_limit_sec / 60) + " dəq</span>" : "") +
+        (t.time_limit_sec
+          ? "<span>·</span><span>" + (t.diagnostic || String(t.title || "").indexOf("Diaqnostika") === 0
+              ? "≈ " + Math.max(5, Math.round((t.questions || 0) * 0.8)) + " dəq"       // diaqnostikada 75 san/sual limiti yalniz yuxari hed - gozlenilen vaxt deyil
+              : "⏱ " + Math.round(t.time_limit_sec / 60) + " dəq") + "</span>" : "") +
         //  cehdi bitmis testde "son tarix · N gun qaldi" menasizdir
         (isAsg && t.closes_at && !over ? dueSpan(t.closes_at) : "") +
         (left > 0 ? "<span>·</span><span>" + left + " cəhd qalıb</span>" : "") +
@@ -421,7 +425,141 @@
     return d.getDate() + " " + ay[d.getMonth()];
   }
 
+  //  «Yeni test» bildirisi: gorulen tapsiriq id-leri bu cihazda.  localStorage ola da bilmeyebilir
+  //  (gizli pencere / bloklanib) - onda bildiris sadece cixmir, tetbiq isleyir.
+  function seenKey() { return "b10_seen_asg_" + (ME ? ME.id : ""); }
+  function seenGet() {
+    try {
+      var v = localStorage.getItem(seenKey());
+      var a = v == null ? null : JSON.parse(v);
+      return Array.isArray(a) ? a : null;
+    } catch (e) { return null; }
+  }
+  function seenSet(ids) {
+    try { localStorage.setItem(seenKey(), JSON.stringify(ids.slice(-200))); } catch (e) {}
+  }
+  function markSeen(list) {
+    var seen = seenGet() || [];
+    list.forEach(function (t) { if (seen.indexOf(t.id) < 0) seen.push(t.id); });
+    seenSet(seen);
+  }
+  //  Yeni = muellimin verdiyi, acilmis (kilidsiz), hele islenmeyen ve bu cihazda gorulmeyen tapsiriq.
+  function newAssignments(asg) {
+    var seen = seenGet();
+    if (seen === null) {                       // ilk acilis: movcudlari «gorulmus» say, bildiris yoxdur
+      seenSet(asg.map(function (t) { return t.id; }));
+      return [];
+    }
+    return asg.filter(function (t) {
+      return !t.locked && !(Number(t.done) > 0) && seen.indexOf(t.id) < 0;
+    });
+  }
+
+  /*  910: telefona bildiris.  Ortaq klient assets/push.js-dir; burada yalniz kart ve servere yazma.
+      Abunelik sagirdin ozune baglidir (sessiya 12 saatdir, bildiris ise sessiyadan sonra da gelmelidir). */
+  var autoChk = false;
+  function pushCheck() {
+    var m = document.getElementById("pushTest");
+    if (!m || !window.B10Push) return;
+    window.B10Push.test().then(function () {
+      var m2 = document.getElementById("pushTest"); if (!m2) return;
+      m2.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Sınaq bildirişi göndərildi</b>' +
+        "<i>Telefonda «Bil10 · Sınaq» bildirişini gördün?</i></div>" +
+        '<div class="pc-a"><button type="button" class="btn sm go" id="pushYes">Gördüm</button>' +
+        '<button type="button" class="btn sm ghost" id="pushNo">Görmədim</button></div></div>';
+      on("pushYes", "click", function () { var x = document.getElementById("pushTest"); if (x) x.innerHTML = '<p class="note pushon">Əla, bildirişlər işləyir ✓</p>'; });
+      on("pushNo", "click", function () {
+        var x = document.getElementById("pushTest");
+        if (x) x.innerHTML = '<div class="card pushcard pushblk"><div class="pc-t"><b>Bildiriş görünmür</b>' +
+          "<i>Brauzer icazə verib, amma telefonun özündə bildirişlər bağlı ola bilər. Yoxla:</i>" + window.B10Push.fixHelp(false) + "</div></div>";
+      });
+    }, function () {
+      var x = document.getElementById("pushTest");
+      if (x) x.innerHTML = '<div class="card pushcard pushblk"><div class="pc-t"><b>Sınaq göstərilə bilmədi</b>' +
+        "<i>Səhifəni yeniləyib yenidən cəhd et.</i>" + window.B10Push.fixHelp(false) + "</div></div>";
+    });
+  }
+
+  function drawPush() {
+    var box = document.getElementById("pushBox");
+    if (!box || !window.B10Push || DEMO || !ME) return;
+    var scope = ME.id, tok = TOKEN;
+    function reg(s) {
+      return sb.rpc("rpc_push_subscribe", { p_token: tok, p_role: "student", p_endpoint: s.endpoint,
+        p_p256dh: s.p256dh, p_auth: s.auth, p_ua: (navigator.userAgent || "").slice(0, 200) });
+    }
+    function unreg(ep) { return sb.rpc("rpc_push_unsubscribe", { p_token: tok, p_role: "student", p_endpoint: ep }); }
+    window.B10Push.state("student", scope).then(function (st) {
+      if (!document.getElementById("pushBox")) return;
+      if (st === "off") { box.innerHTML = ""; return; }
+      if (st === "on") {
+        window.B10Push.sync("student", scope, reg);          // sessiya yenilenib - abuneni tazele
+        box.innerHTML = '<p class="note pushon">🔔 Bildirişlər açıqdır · <button type="button" class="linkbtn" id="pushOff">Söndür</button> · ' +
+          '<button type="button" class="linkbtn" id="pushChk">Gəlmir? Yoxla</button>' +
+          '<small class="pc-n">«Çıxış» etsən, bu telefona bildiriş gəlməyəcək.</small></p><div id="pushTest"></div>';
+        on("pushChk", "click", pushCheck);
+        if (autoChk) { autoChk = false; pushCheck(); }
+        on("pushOff", "click", function () {
+          window.B10Push.disable("student", scope, unreg).then(drawPush, drawPush);
+        });
+        return;
+      }
+      if (st === "denied") {
+        box.innerHTML = '<div class="card pushcard pushblk"><div class="pc-t"><b>Bildirişlər bloklanıb</b>' +
+          "<i>Brauzer bu saytın bildirişini bağlayıb. Açmaq üçün:</i>" + window.B10Push.help(false) + "</div></div>";
+        return;
+      }
+      if (st === "ios") {
+        box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Bildiriş almaq istəyirsən?</b>' +
+          "<i>iPhone-da əvvəl tətbiqi ana ekrana əlavə et: «Paylaş» → «Ana ekrana əlavə et». Sonra buradan aça bilərsən.</i></div></div>";
+        return;
+      }
+      box.innerHTML = '<div class="card pushcard"><div class="pc-t"><b>Yeni test gələndə xəbər tut</b>' +
+        "<i>Telefonuna qısa bildiriş gələcək. İstəyəndə söndürə bilərsən.</i>" +
+        '<i class="pc-h">Brauzer soruşanda «İcazə ver» seç.</i></div>' +
+        '<div class="pc-a"><button type="button" class="btn sm go" id="pushOn">Bildirişləri aç</button></div></div>' +
+        '<div id="pushMsg"></div>';
+      on("pushOn", "click", function () {
+        var b = document.getElementById("pushOn");
+        if (b) { b.disabled = true; b.textContent = "Açılır…"; }
+        window.B10Push.enable("student", scope, reg, function () {
+          //  4 saniyedir cavab yoxdur: brauzer icaze penceresini gostermeyib ola biler
+          var m0 = document.getElementById("pushMsg");
+          if (m0 && !m0.innerHTML) m0.innerHTML = '<p class="note pushon">İcazə pəncərəsi görünmürsə:</p>' + window.B10Push.help(false);
+        }).then(function () { autoChk = true; drawPush(); }, function (e) {
+          if (e && e.message === "denied") { drawPush(); return; }     // artıq bloklanıb: addımlarla kart
+          var m = document.getElementById("pushMsg");
+          var t = e && e.message === "dismissed" ? "İcazə verilmədi. Yenidən basıb «İcazə ver» seç."
+                : "Bildiriş açıla bilmədi (" + window.B10Push.why(e) + "). Bir az sonra yenidən yoxla.";
+          if (m) m.innerHTML = msg("warn", t);
+          if (b) { b.disabled = false; b.textContent = "Bildirişləri aç"; }
+        });
+      });
+    });
+  }
+
   var PSUB = "", PEXP = false;   // serbest mesq: fenn suzgeci, "daha" acildi
+  var SERBEST_TEST = false;      // 04.10: serbest mesq (test siyahisi) gizli - gelecekde odenisli mehsul
+  //  04.10 (sahibin qerari): «Movzu mesqi» (adaptiv, gunluk limitli) de sagirde GOSTERILMIR - sonra ozumuz
+  //  «jest» (hediyye) kimi verecayik.  Kod ve server RPC-leri yerindedir; MOVZU_MESQ = true etmek kifayetdir.
+  //  924: personaj «Tumurcuq» - cəmi çalışdığı günlərdən böyüyür, HEÇ VAXT geri getmir (cəza yoxdur)
+  var PL_STAGES = [[0, "Toxum"], [3, "Cücərti"], [7, "Bitki"], [14, "Ağac"], [30, "Çiçəkli ağac"]];
+  function plStage(days) {
+    var i = 0;
+    for (var k = 0; k < PL_STAGES.length; k++) if (days >= PL_STAGES[k][0]) i = k;
+    return i;
+  }
+  function plantSvg(st) {
+    var pot = '<path class="pl-pot" d="M26 60h28l-3 16H29z"/><rect class="pl-rim" x="23" y="56" width="34" height="6" rx="3"/>';
+    var body = "";
+    if (st === 0) body = '<ellipse class="pl-soil" cx="40" cy="55" rx="12" ry="3"/><ellipse class="pl-seed" cx="40" cy="51" rx="4" ry="5"/>';
+    else if (st === 1) body = '<path class="pl-stem" d="M40 56V44"/><ellipse class="pl-leaf" cx="34" cy="44" rx="6" ry="3.4" transform="rotate(-25 34 44)"/><ellipse class="pl-leaf2" cx="46" cy="43" rx="6" ry="3.4" transform="rotate(25 46 43)"/>';
+    else if (st === 2) body = '<path class="pl-stem" d="M40 56V30"/><ellipse class="pl-leaf" cx="32" cy="44" rx="8" ry="4" transform="rotate(-25 32 44)"/><ellipse class="pl-leaf2" cx="48" cy="40" rx="8" ry="4" transform="rotate(25 48 40)"/><ellipse class="pl-leaf" cx="33" cy="33" rx="7" ry="3.6" transform="rotate(-30 33 33)"/><ellipse class="pl-leaf2" cx="47" cy="29" rx="7" ry="3.6" transform="rotate(30 47 29)"/>';
+    else body = '<rect class="pl-trunk" x="37" y="34" width="6" height="24" rx="2"/><circle class="pl-leaf" cx="40" cy="26" r="15"/><circle class="pl-leaf2" cx="29" cy="33" r="9"/><circle class="pl-leaf2" cx="51" cy="33" r="9"/>' +
+      (st >= 4 ? '<circle class="pl-fl" cx="34" cy="22" r="2.6"/><circle class="pl-fl" cx="46" cy="20" r="2.6"/><circle class="pl-fl" cx="40" cy="30" r="2.6"/><circle class="pl-fl" cx="28" cy="34" r="2.4"/><circle class="pl-fl" cx="52" cy="33" r="2.4"/>' : "");
+    return '<svg class="plant" viewBox="0 0 80 80" aria-hidden="true">' + pot + body + "</svg>";
+  }
+  var MOVZU_MESQ = false;
   function screenTests() {
     markScreen(true);
     stopTimer();
@@ -429,13 +567,21 @@
     topTitle.textContent = ME ? ME.display_name : "Testlər";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
 
-    sb.rpc("rpc_student_tests", { p_token: TOKEN }).then(function (d) {
-      d = d || {};
+    Promise.all([
+      sb.rpc("rpc_student_tests", { p_token: TOKEN }),
+      sb.rpc("rpc_student_family", { p_token: TOKEN }).catch(function () { return null; })   // 920 qurulmayıbsa adi ekran
+    ]).then(function (r) {
+      var d = r[0] || {};
+      FAM = r[1] && r[1].family ? r[1] : null;
       var asg  = d.assigned || [];
-      var prac = d.practice || [];
+      /*  04.10 (sahibin qerari): «Serbest mesq» - butun fennlerin test siyahisi - sagirde GOSTERILMIR.
+          Gelecekde bizim oz mehsulumuz (odenisli) olacaq: SERBEST_TEST = true etmek kifayetdir, kod yerindedir.
+          Gizli olsa da kecmis neticeler «ishlenmis test / ortalama» saylarina DAXILDIR (pracAll). */
+      var pracAll = d.practice || [];
+      var prac = SERBEST_TEST ? pracAll : [];
 
       /* Salamlama + kicik gostericiler - "ireliledigimi gorurem" hissi */
-      var worked = asg.concat(prac).filter(function (t) {
+      var worked = asg.concat(pracAll).filter(function (t) {
         return Number(t.done) > 0;
       });
       var avg = 0;
@@ -451,9 +597,25 @@
       //  salamlama marka zolagindadir; gostericiler zolagin altindan cixir
       setBand('<div class="shero">' + av(ME ? ME.display_name : "?") +
         "<div><b>Salam, " + esc(ME ? ME.display_name : "") + "! 👋</b>" +
-        (CLS ? "<i>" + esc(CLS.name) + streakTxt + "</i>" : "") + "</div></div>");
+        (CLS && !FAM ? "<i>" + esc(CLS.name) + streakTxt + "</i>" : (FAM && streakTxt ? "<i>" + streakTxt.replace(/^ · /, "") + "</i>" : "")) + "</div></div>");
       var h = "";
-      if (worked.length) {
+      /*  04.10: «Yeni test» bildirisi.  Muellim yeni tapsiriq verende sagird tetbiqi acanda yuxarida kart
+          cixir.  Bu TELEFONA PUSH DEYIL - yalniz tetbiqin icinde, hec bir icaze/xarici sorgu yoxdur.
+          Gorulen tapsiriq id-leri bu cihazda (localStorage, sagirdin id-si ile; token saxlanmir) durur.
+          Ilk acilis: movcud tapsiriqlar «gorulmus» sayilir - kohne tapsiriqlar «yeni» kimi gelmesin. */
+      var fresh = DEMO ? [] : newAssignments(asg);
+      if (fresh.length) {
+        var one = fresh.length === 1 ? fresh[0] : null;
+        h += '<div class="card newtest" id="newBox"><div class="nt-t"><span class="nt-tag">Yeni test</span>' +
+          "<b>" + (one ? esc(one.title) : fresh.length + " yeni test") + "</b>" +
+          "<i>" + (one
+            ? esc(one.subject || "") + (one.subject ? " · " : "") + (one.questions || 0) + " sual" +
+              (one.closes_at ? " · son tarix " + esc(dateAz(one.closes_at)) : "")
+            : "Müəllimin yeni tapşırıqları var") + "</i></div>" +
+          '<div class="nt-a"><button class="btn sm go" id="ntGo">' + (one ? "Başla" : "Bax") + "</button>" +
+          '<button class="btn sm ghost" id="ntX">Sonra</button></div></div>';
+      }
+      if (worked.length && !FAM) {
         h += '<div class="stiles">' +
           '<div class="st a"><b>' + worked.length +
             "</b><span>işlənmiş test</span></div>" +
@@ -469,7 +631,39 @@
 
       /* Novbeti ders: muellim ekranindaki "NOVBETI DERS" kartinin eynisi -
          yalniz baxmaq ucundur, klik olunmur. */
-      if (d.next_lesson) {
+      if (FAM) {
+        var WDN = ["B", "Ç", "Ç", "C", "C", "Ş", "B"];
+        var wk = FAM.week || [0, 0, 0, 0, 0, 0, 0];
+        var dt = Number(FAM.days_total) || 0, ps = plStage(dt);
+        var nxt = PL_STAGES[ps + 1];
+        var studiedToday = !!wk[FAM.today_i];
+        var wd = wk.reduce(function (a2, b2) { return a2 + b2; }, 0), gl = Number(FAM.goal) || 4;
+        var reached = wd >= gl, rw = FAM.reward ? esc(FAM.reward) : "";
+        var bd = FAM.badges || [], bdOn = bd.filter(function (x) { return x.on; }).length;
+        h += '<div class="card famprog"><div class="fp-hero">' + plantSvg(ps) +
+          '<div class="fp-ht"><b>Tumurcuq · ' + PL_STAGES[ps][1] + "</b>" +
+            "<span>" + (studiedToday ? "Bu gün məni suladın 💧" : "Səni gözləyirəm 🌱") + "</span>" +
+            "<i>" + (nxt ? "Növbəti mərhələyə " + Math.max(1, nxt[0] - dt) + " gün qalıb" : "Ən böyük mərhələdəsən 🌸") + "</i></div></div>" +
+          '<div class="fp-t">Mənim həftəm' + (Number(FAM.streak) >= 2 ? ' <em>🔥 ' + Number(FAM.streak) + " gün ardıcıl</em>" : "") + '</div><div class="fp-dots">' +
+          wk.map(function (v, i) {
+            return '<span class="fp-d' + (v ? " on" : "") + (i === FAM.today_i ? " t" : "") + '">' + WDN[i] + "</span>";
+          }).join("") + "</div>" +
+          (reached
+            ? '<div class="fp-goal done">🎉 Bu həftənin hədəfi tamamlandı! (' + wd + " / " + gl + " gün)</div>" + (rw ? '<div class="fp-rw done">🎁 Mükafatın: <b>' + rw + "</b></div>" : "")
+            : '<div class="fp-goal">Bu həftə: <b>' + wd + " / " + gl + "</b> gün</div>" + (rw ? '<div class="fp-rw">🎁 Hədəfə çatsan: <b>' + rw + "</b></div>" : "")) +
+          '<div class="fp-r"><b>' + (Number(FAM.mastered) || 0) + "</b> mövzu mənimsədin</div>" +
+          ((FAM.cur || []).length
+            ? '<div class="fp-c">Hazırda: <b>' + esc(FAM.cur[0].subject) + " — " + esc(FAM.cur[0].chapter) + "</b>" +
+              (FAM.cur.length > 1 ? " və daha " + (FAM.cur.length - 1) : "") + "</div>"
+            : "") +
+          (bd.length
+            ? '<details class="fp-bd"><summary>Nişanlarım (' + bdOn + " / " + bd.length + ")</summary><div class=\"fp-bl\">" +
+              bd.map(function (x) {
+                return '<span class="fp-b' + (x.on ? " on" : "") + '" title="' + esc(x.d) + '">' + (x.on ? "🏅 " : "🔒 ") + esc(x.t) + "</span>";
+              }).join("") + "</div></details>"
+            : "") +
+          "</div>";
+      } else if (d.next_lesson) {
         h += '<div class="card tight nlesson"><span class="nl-tag">Növbəti dərs</span>' +
           "<b>" + esc(d.next_lesson.topic) + "</b>" +
           (d.next_lesson.subject ? "<i>" + esc(d.next_lesson.subject) + "</i>" : "") +
@@ -486,7 +680,9 @@
          Sayğac serverden ayrica gelir - rpc_student_daily doldurur. */
       h += '<div id="dayBox"></div>';
 
-      h += "<h2>Tapşırıqlar</h2>";
+      if (!(FAM && !(d.assigned || []).length && !(d.homework || []).length)) {
+        h += '<h2 id="asgH">' + (FAM ? "Başlanğıc yoxlama" : "Tapşırıqlar") + "</h2>";
+      }
       /* 191: muellimin METNLE yazdigi ev tapsirigi - testlerin ustunde.
          «Etdim» serverde yazilir, valideyn de gorur.  Edilenler yigilir. */
       var hw = d.homework || [];
@@ -513,7 +709,9 @@
       }
       var asgOpen = asg.filter(function (t) { return !isOver(t); });
       var asgDone = asg.filter(isOver);
-      if (!asg.length) {
+      if (!asg.length && FAM) {
+        //  ailə uşağında başlanğıc yoxlama yoxdursa bölmə göstərilmir
+      } else if (!asg.length) {
         //  191: ev tapsirigi varsa «tapsiriq yoxdur» yalan olardi - «test» deyirik
         h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
              "</div><b>" + (hw.length ? "Test tapşırığı yoxdur" : "Tapşırıq yoxdur") + "</b>" +
@@ -558,6 +756,8 @@
 
       /* 2b. Sehv defteri (db/129): sayğac serverden ayrica gelir - yer
          tutucu; rpc_student_mistakes yuklenende dolur.  */
+      //  910: «Bildirisleri ac» karti (CFG.VAPID_PUBLIC bos olanda hec ne cixmir)
+      h += '<div id="pushBox"></div>';
       h += '<div id="adBox"></div>';
       h += '<div id="mistBox"></div>';
 
@@ -565,17 +765,18 @@
          siniflerini "netcelerim" siyahisindan goturur, yeni CSS lazim
          deyil.  Faiz hemise <60 oldugu ucun rengi hemise qirmizidir. */
       if (d.weak && d.weak.length) {
-        h += '<div class="spacer"></div><h2>Zəif mövzular</h2>' +
-          '<div class="card pad0">' + d.weak.map(function (w) {
+        //  ailə yolu: faiz və «zəif» sözü uşağa göstərilmir - yumşaq «Təkrar edək»
+        h += '<div class="spacer"></div><h2>' + (FAM ? "Təkrar edək" : "Zəif mövzular") + "</h2>" +
+          '<div class="card pad0">' + (FAM ? d.weak.slice(0, 3) : d.weak).map(function (w) {
             return '<div class="myr"><div class="g"><b>' + esc(w.topic) + "</b>" +
               "<i>" + esc(w.subject) + "</i></div>" +
-              '<span class="best bl">' + Math.round(w.percent) + "%</span></div>";
+              (FAM ? "" : '<span class="best bl">' + Math.round(w.percent) + "%</span>") + "</div>";
           }).join("") + "</div>";
       }
 
       /* 4. Kecdiyi dersler - "novbeti ders" hara gedirik deyir, bu
          hardan geldik.  Ən çoxu 5, ən yenisi əvvəl. */
-      if (d.lessons && d.lessons.length) {
+      if (d.lessons && d.lessons.length && !FAM) {
         h += '<div class="spacer"></div><h2>Keçdiyi dərslər</h2>' +
           '<div class="card pad0">' + d.lessons.map(function (l) {
             return '<div class="myr"><div class="g"><b>' + esc(l.topic) + "</b>" +
@@ -715,9 +916,20 @@
         drawPrac(); bindRows();
       });
       on("btnMyRes", "click", screenMyResults);
+      on("ntX", "click", function () {
+        markSeen(fresh);
+        var nb = document.getElementById("newBox"); if (nb && nb.parentNode) nb.parentNode.removeChild(nb);
+      });
+      on("ntGo", "click", function () {
+        markSeen(fresh);
+        if (fresh.length === 1) { startTest(fresh[0].id); return; }
+        var nb = document.getElementById("newBox"); if (nb && nb.parentNode) nb.parentNode.removeChild(nb);
+        var ah = document.getElementById("asgH"); if (ah && ah.scrollIntoView) ah.scrollIntoView({ block: "start" });
+      });
       loadDaily();
       loadMistakes();
-      loadPractice();
+      drawPush();
+      if (MOVZU_MESQ) loadPractice();
       bindRows();
     }).catch(function (e) {
       if (e && (e.status === 403 || /Sessiya/i.test(e.message || ""))) {
@@ -828,6 +1040,11 @@
       rest = '<div class="ok restored">' + ic("check") + "<span>Əvvəlki " +
         S.restored + " cavabınız qaytarıldı — davam edin.</span></div>";
       S.restored = 0;
+    }
+
+    //  diaqnostikanin 1-ci sualinda: «tehmin etme» - tesadufi cavab neticeni pozur
+    if (S.i === 0 && String(S.test.title || "").indexOf("Diaqnostika") === 0) {
+      rest += '<div class="info diagnote">' + ic("info") + "<span>Bilmədiyin sualda «Bilmirəm, keç» bas — təxmin etmə. Sənə yalnız yadda qalanları göstərəcəyik.</span></div>";
     }
 
     show(
@@ -1234,7 +1451,9 @@
       if (!total && (!paid ? !tps.length : true)) { box.innerHTML = ""; return; }
 
       var dun = d.yesterday;
-      var sub = tps.length
+      var sub = d.family
+        ? "Keçdiyin mövzular üzrə"
+        : tps.length
         ? "Müəllimin keçdiyi " +
           tps.map(function (x) { return "«" + esc(x) + "»"; }).join(" və ") + " üzrə"
         : "Keçdiyin mövzular üzrə";
@@ -1249,16 +1468,18 @@
         return;
       }
       if (d.done) {
-        box.innerHTML = '<div class="card dcard done">' +
+        box.innerHTML = (d.praise ? '<div class="card dpraise">💚 <b>Valideynindən:</b> ' + esc(d.praise) + "</div>" : "") +
+          '<div class="card dcard done">' +
           '<div class="dhead"><b>Bu gün bitdi 🎉</b>' +
             '<span class="dsc">' + (Number(d.ok) || 0) + " / " + total + "</span></div>" +
           '<p class="note" style="margin:6px 0 0">Sabah sənə ' + total +
             " yeni sual hazırlayacağıq.</p></div>";
         return;
       }
-      box.innerHTML = '<div class="card dcard">' +
+      box.innerHTML = (d.praise ? '<div class="card dpraise">💚 <b>Valideynindən:</b> ' + esc(d.praise) + "</div>" : "") +
+        '<div class="card dcard">' +
         '<div class="dhead"><b>Bu günün ' + total + " sualı</b>" +
-          '<span class="dmin">≈' + Math.max(2, Math.round(total * 0.7)) + " dəq</span></div>" +
+          '<span class="dmin">≈' + (d.family && FAM ? FAM.minutes : Math.max(2, Math.round(total * 0.8))) + " dəq</span></div>" +
         '<p class="note" style="margin:6px 0 10px">' + sub + " fərdi təkrar." +
           (dun ? " Dünən: " + (Number(dun.ok) || 0) + "/" + (Number(dun.total) || 0) + "." : "") +
           "</p>" +
@@ -1288,7 +1509,9 @@
     sehv:    "Bu mövzuda əvvəl səhvin olmuşdu. Gəl onu bağlayaq.",
     eyni:    "Eyni mövzu — bu dəfə başqa sual.",
     tekrar:  "Bir müddət əvvəl bunu bacarırdın. Yoxlayaq.",
-    yeni:    "Müəllimin son dərsdə keçdiyi mövzudan."
+    yeni:    "Müəllimin son dərsdə keçdiyi mövzudan.",
+    cari:    "Hazırda keçdiyin mövzudan.",
+    mesq:    "Əvvəl keçdiyin mövzunu möhkəmləndirək."
   };
   function drawDaily() {
     var q = DQ.question, n = Number(DQ.total) || 0, i = Number(DQ.i) || 0;
@@ -1794,6 +2017,13 @@
       try { localStorage.removeItem(LS); } catch (e) {}
       location.href = "../";
       return;
+    }
+    //  910: bu cihazdaki bildiris abunesi silinsin (basqa usaq girerse ona gelmesin)
+    if (TOKEN && window.B10Push) {
+      var tkOut = TOKEN;
+      window.B10Push.leave(function (ep) {
+        return sb.rpc("rpc_push_unsubscribe", { p_token: tkOut, p_role: "student", p_endpoint: ep });
+      });
     }
     TOKEN = null; ME = null; CLS = null; S = null; DEMO = false;
     try { localStorage.removeItem(LS); } catch (e) {}

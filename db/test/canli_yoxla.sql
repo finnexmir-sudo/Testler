@@ -87,6 +87,68 @@ select * from (values
       where proname in ('rpc_start_attempt','rpc_student_daily','rpc_student_mistakes','rpc_student_practice_next',
                         'rpc_test_preview','rpc_submit_attempt','rpc_test_result','rpc_attempt_sheet')
         and def like '%media_url%')),
+ ('907 bank axtarışı mövzu adına da baxır (rpc_bank_list: topics.name + ders: alt mövzu)',
+    (select exists (select 1 from f where proname='rpc_bank_list' and def like '%ders:%%' and def like '%parent_id%'))),
+ ('908 mövzu axtarışı (rpc_topic_search)',
+    (select exists (select 1 from f where proname='rpc_topic_search'))),
+ ('909 vaxtı keçmiş active + sınaq = trialing (rpc_admin_grant)',
+    (select exists (select 1 from f where proname='rpc_admin_grant' and def like '%v_expired%'))),
+ ('910 push bildirişlər (abunəlik, növbə, göndərici RPC-ləri, push ayarı)',
+    (select exists (select 1 from f where proname='rpc_push_subscribe')
+        and exists (select 1 from f where proname='rpc_push_claim')
+        and exists (select 1 from f where proname='rpc_push_done')
+        and exists (select 1 from public.app_state where key='push'))),
+ ('911 yeni test bildirişi (assignments trigger-i)',
+    (select exists (select 1 from f where proname='trg_asg_push')
+        and exists (select 1 from pg_trigger where tgname='trg_asg_push' and not tgisinternal))),
+ ('912 push xatırlatmalar (son tarix, gündəlik 5 sual, saatlıq planlayıcı)',
+    (select exists (select 1 from f where proname='push_tick')
+        and exists (select 1 from f where proname='push_scan_deadlines')
+        and exists (select 1 from f where proname='push_scan_daily'))),
+ ('913 ailə yolu (valideyn hesabı, uşaq əlavə, Ailəm)',
+    (select exists (select 1 from f where proname='rpc_family_add_child')
+        and exists (select 1 from f where proname='rpc_family_children')
+        and exists (select 1 from public.app_state where key='family')
+        and exists (select 1 from public.plans where slug='aile-usaq'))),
+ ('914 ailə yolu: bütün fənlər + yoxlamanın mərhələli verilməsi',
+    (select exists (select 1 from f where proname='rpc_family_diag')
+        and exists (select 1 from f where proname='rpc_family_children' and def like '%subject_diag%'))),
+ ('915 ailə yolu: valideyn xülasəsi + silmə',
+    (select exists (select 1 from f where proname='rpc_family_summary')
+        and exists (select 1 from f where proname='rpc_family_delete_child')
+        and exists (select 1 from f where proname='rpc_family_delete_account'))),
+ ('916 ailə yolu: cari fəsil',
+    (select exists (select 1 from f where proname='rpc_family_chapters')
+        and exists (select 1 from f where proname='rpc_family_set_current'))),
+ ('917 ailə yolu: gündəlik məşq + mənimsəmə',
+    (select exists (select 1 from f where proname='daily_build_family')
+        and exists (select 1 from f where proname='mastery_note')
+        and exists (select 1 from f where proname='rpc_family_progress'))),
+ ('918 ailə yolu: «Afərin» + həftəlik xülasə push',
+    (select exists (select 1 from f where proname='rpc_family_praise')
+        and exists (select 1 from f where proname='push_scan_weekly')
+        and exists (select 1 from f where proname='rpc_family_push_subscribe'))),
+ ('919 ailə yolu: seanslı başlanğıc yoxlama',
+    (select exists (select 1 from f where proname='family_diag_session')
+        and exists (select 1 from f where proname='family_diag_state')
+        and exists (select 1 from f where proname='rpc_family_children' and def like '%family_diag_state%'))),
+ ('920 ailə yolu: uşağın öz səhifəsi',
+    (select exists (select 1 from f where proname='rpc_student_family'))),
+ ('921 ailə yolu: həftəlik hədəf',
+    (select exists (select 1 from f where proname='rpc_family_set_plan')
+        and exists (select 1 from f where proname='family_goal'))),
+ ('922 ailə yolu: «Afərin» gündə 3',
+    (select exists (select 1 from f where proname='rpc_family_praise' and def like '%limiti doldu%'))),
+ ('923 ailə yolu: «bu gün çalışmayıb» + hədəf bildirişi',
+    (select exists (select 1 from f where proname='push_scan_family_nostudy')
+        and exists (select 1 from f where proname='push_scan_family_goal')
+        and exists (select 1 from f where proname='rpc_family_push_prefs_set'))),
+ ('924 ailə yolu: personaj + zəncir + nişanlar + mükafat',
+    (select exists (select 1 from f where proname='rpc_family_set_reward')
+        and exists (select 1 from f where proname='rpc_student_family' and def like '%badges%'))),
+ ('925 ailə yolu: yoxlama ölçüsü + «Bilmirəm»',
+    (select exists (select 1 from f where proname='family_diag_session' and def like '%c_per%')
+        and exists (select 1 from f where proname='rpc_family_summary' and def like '%skipped_topics%'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

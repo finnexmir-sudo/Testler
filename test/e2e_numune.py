@@ -46,9 +46,17 @@ delete from auth.users u using demo_old_e2e o where u.id = o.owner_id
 db("delete from public.app_state where key='demo_reset'")
 db("select public.rpc_demo_reset()")
 
+#  04.10: «Mövzu məşqi» şagirdə GİZLİDİR (sagird/app.js: MOVZU_MESQ = false; esbuild sabiti silir).
+#  Bu test funksiyanın ÖZÜNÜ yoxlayır - şagird səhifəsi minifikasiya olunmamış mənbə ilə, sabit true olaraq açılır.
+import os as _os
+SAG_SRC = open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "sagird", "app.js"), encoding="utf-8").read()
+assert "var MOVZU_MESQ = false;" in SAG_SRC
+SAG_SRC = SAG_SRC.replace("var MOVZU_MESQ = false;", "var MOVZU_MESQ = true;")
+
 def page(ctx, w, h):
     pg = ctx.new_page(); pg.set_viewport_size({"width": w, "height": h})
     pg.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=TEST_CFG))
+    pg.route("**/sagird/app.min.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=SAG_SRC))
     pg.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)))
     pg.route(BLOCK, lambda r: (fails.append("XARICI SORGU: " + r.request.url), r.abort()))
     pg.on("dialog", lambda d: (fails.append("DIALOQ: " + d.message), d.dismiss()))

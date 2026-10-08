@@ -4035,7 +4035,8 @@
     } else if (bol === "x") {
       /*  QRUP AYARLARI: «Sərbəst məşq» tapsiriq deyil, qrup ayaridir - evvel
           tapsiriq ekraninin en altinda idi (29.09).  Ad deyismek de burada.  */
-      show('<div class="card tight" id="fpBox"><div class="skel">Yüklənir…</div></div>' +
+      //  04.10: «Serbest mesq» sagirde gizlidir - ayar da gizlenir (gelecekde SERBEST_AYAR = true).
+      show('<div class="card tight' + (SERBEST_AYAR ? "" : " hide") + '" id="fpBox"><div class="skel">Yüklənir…</div></div>' +
         '<div class="spacer"></div>' +
         '<button class="btn sm ghost" id="btnRen">' + ic("pen") + "Qrupun adını dəyiş</button>" +
         '<div class="card tight hide" id="gCard"></div>');
@@ -6936,8 +6937,8 @@
           '<div id="hwList" class="card pad0" style="margin-top:10px"></div>' +
           '<div class="spacer"></div>'
         : "") +
-      /*  Ayar isin ozu deyil - ekranin altinda durur.  */
-      '<div class="card tight">' +
+      /*  Ayar isin ozu deyil - ekranin altinda durur.  04.10: serbest mesq gizli - ayar da gizlidir.  */
+      '<div class="card tight' + (SERBEST_AYAR ? "" : " hide") + '">' +
         '<div class="swrap"><label class="switch" for="fp">' +
           '<input type="checkbox" id="fp"' + (free ? " checked" : "") + ">" +
           '<span class="track"><i></i></span>' +
@@ -7971,9 +7972,9 @@
         '<h2 class="ch">Hesablar</h2>' +
         //  Uzun izah bir defe oxunur, sonra hemise mane olur - yigilir.
         '<details class="fold"><summary>Necə işləyir?</summary>' +
-          '<p class="muted">«+1 ay / +6 ay» seçilmiş planı həmin hesaba ' +
-          "<b>ödənişli</b> açır, «Sınaq» eyni paketi pulsuz verir (gəlirə " +
-          "düşmür; sonra ödəyəndə «+1 ay» ödənişliyə çevirir). Eyni plan " +
+          '<p class="muted">«Sınaq 1 ay · pulsuz» seçilmiş planı həmin hesaba pulsuz verir (gəlirə ' +
+          "düşmür). «+1 ay / +6 ay · ödənişli» eyni planı <b>ödənişli</b> açır və <b>gəlirə düşür</b> " +
+          "(sınaq sonra ödəyəndə «+1 ay · ödənişli» ilə ödənişliyə çevrilir). Eyni plan " +
           "aktivdirsə, müddət üstünə əlavə olunur. Nümunə nüsxələri " +
           "saylarda yoxdur, «Nümunə» süzgəcindədir; 24 saat sonra özü " +
           "silinir.</p>" +
@@ -8291,9 +8292,12 @@
             3. abune duymeleri oz setrinde qalir.  */
       var ops = (a.admin || a.demo) ? "" :
         '<div class="rops">' +
-          '<button class="btn sm" data-m="1">+1 ay</button>' +
-          '<button class="btn sm" data-m="6">+6 ay</button>' +
-          '<button class="btn sm ghost" data-m="1" data-trial="1">Sınaq 1 ay</button>' +
+          //  03.10 (Samir test): «+1 ay» tund, «Sinaq» solgun idi - pulsuz ay vermek isteyen odenisliye basdi,
+          //  panel «ayliq gelir»de 3 AZN gosterdi.  Indi SINAQ birinci ve tund, ODENISLI duymeler solgun
+          //  ve adlarinda «odenisli» yazir.
+          '<button class="btn sm" data-m="1" data-trial="1">Sınaq 1 ay · pulsuz</button>' +
+          '<button class="btn sm ghost" data-m="1">+1 ay · ödənişli</button>' +
+          '<button class="btn sm ghost" data-m="6">+6 ay · ödənişli</button>' +
         "</div>" +
         //  199: muellime mesaj - Icmalinin ustunde kart kimi cixir
         '<div class="rmsg"><b class="rmsgh">' + esc(a.name || a.email || "") +
@@ -8407,7 +8411,7 @@
           (v.beta_until
             ? esc(v.beta_until) + "-dən sonra qeydiyyatdan keçənə hədiyyə verilmir."
             : "boşdursa təklif müddətsizdir.") +
-          " Lazım olsa ayrıca «+1 ay» ilə özünüz uzada bilərsiniz.</p>";
+          " Lazım olsa ayrıca «Sınaq 1 ay · pulsuz» ilə özünüz uzada bilərsiniz.</p>";
       on("hedSave", "click", function () {
         if (busy) return;
         var beta = ($("hedBeta") || {}).value || "";
@@ -8460,7 +8464,7 @@
           ? sel.options[sel.selectedIndex].text : "";
         var trial = !!b.getAttribute("data-trial");
         if (!confirm(em + " → " + ad + " (+" + ay + " ay" +
-                     (trial ? ", SINAQ — pulsuz" : ", ödənişli") + "). Açılsın?")) return;
+                     (trial ? ", SINAQ — pulsuz, gəlirə düşmür" : ", ÖDƏNİŞLİ — gəlirə düşür") + "). Açılsın?")) return;
         call = "rpc_admin_grant";
         args = { p_email: em, p_plan: (sel || {}).value || "sagird-basi",
                  p_months: ay, p_trial: trial };
@@ -9472,6 +9476,9 @@
             "<span>Hazır suallar abunə paketinə daxildir. " +
             "Öz suallarınızdan yığa bilərsiniz.</span></div>"
           : "") +
+        '<div style="margin-top:12px"><label for="gTq">Mövzu axtar</label>' +
+          '<input id="gTq" autocomplete="off" placeholder="məs. frazeoloji birləşmə, kəsr, zərf…">' +
+          '<div id="gTqHits"></div></div>' +
         '<div style="margin-top:12px"><label for="gsub">Fənn</label>' +
           '<select id="gsub">' + genSubOpts(f) + "</select></div>" +
         /*  SINIF - COX SECIM.  Repetitor 8-ci sinfi hazirlayarken
@@ -9562,6 +9569,27 @@
       var i = f.topics.indexOf(t);
       if (i >= 0) f.topics.splice(i, 1); else f.topics.push(t);
       genSync();
+    });
+    //  908: movzunu adla tap - fenn ve sinif ozu secilir, movzu nisani yanir
+    var tq = null;
+    on("gTq", "input", function () {
+      clearTimeout(tq);
+      tq = setTimeout(function () { topicSearch("gTqHits", $("gTq").value, f.pool, "gen"); }, 350);
+    });
+    on("gTqHits", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-th]") : null;
+      if (!b) return;
+      var tp = THITS[Number(b.getAttribute("data-i"))];
+      if (!tp) return;
+      f.subject = tp.subject_slug; f.levels = tp.level ? [tp.level] : [];
+      f.topics = [tp.id]; f.cls = ""; f.remNames = [];
+      var inp = $("gTq"); if (inp) inp.value = "";
+      var hb = $("gTqHits");
+      if (hb) hb.innerHTML = '<div class="ok" style="margin:10px 0 0">' + ic("check") +
+        "<span>Seçildi: <b>" + esc(tp.name) + "</b> — " +
+        esc([tp.subject, tp.level_name].filter(Boolean).join(", ")) + ".</span></div>";
+      var sel = $("gsub"); if (sel) sel.value = f.subject;
+      genSync(); genFacets();
     });
     on("gsub", "change", function () {
       //  Sinif nisanlari ile eyni yol - ekran silinmir
@@ -10701,6 +10729,8 @@
   /*  Movzu nisanlarinin heddi: bundan cox olanda sinif teleb olunur.
       Telefonda ~20 nisan iki-uc setirdir, 60 nisan ekrani udur.  */
   var TOPCAP = 20;
+  //  04.10: «Serbest mesq» sagirde gizlidir -> muellimde bu ayarin menasi yoxdur (kod yerindedir).
+  var SERBEST_AYAR = false;
 
   /*  SORGU NESLI.  guard() yalniz UNVANI tutusdurur - bank ekraninda
       hovuz/suzgec deyisende unvan ("#/b") DEYISMIR, ona gore kohne
@@ -10709,12 +10739,15 @@
       qalirdi.  Her sorgu oz neslini goturur; cavab gelende nesil
       hele de sonuncudursa yazilir.  */
   var BFSEQ = 0;   // suzgec (rpc_bank_facets)
+  var BOPTS = false;   // siyahida variantlar hamisi aciqdir?  default - baglidir
   var BSEQ  = 0;   // netice sahesi (rpc_bank_list / rpc_bank_coverage)
 
   /*  Siyahida nece sual atlanir.  rpc_bank_list offset-i onsuz da
       desteklyirdi - ekran hemise 0 gonderirdi, ona gore 51-ci suala
       catmaq MUMKUN DEYILDI.  Suzgec deyisende sifirlanir.  */
   var BOFF = 0;
+  //  Siyahi sehifesi: 50 sual telefonda ~8000 px idi (istifadeci: «50 coxdur») - 10-10 artir.
+  var BPAGE = 10;
 
   /*  KATALOG REJIMI.  Platforma hovuzunda duz 50 sual tokmek menasiz
       idi: setirler disabled gelir (muellim platforma sualini ne acir,
@@ -10730,6 +10763,56 @@
   }
 
   /* Suzgeci RPC-nin gozledi formaya salir - bos sahələr getmir */
+  /* ---------------------------------------------------------------
+     908: MOVZU AXTARISI.  Muellim movzunun ADINI yazir («frazeoloji
+     birlesme»).  Bank siyahisi ve Test yig ekrani eyni RPC-ni cagirir
+     (rpc_topic_search): fenn/sinifden asili olmadan movzunu fenni, sinfi
+     ve sual sayi ile verir.  RPC canlida yoxdursa (908 isledilmeyib)
+     sakitce bos siyahi qayidir - ekran sinmir, sadece kart cixmir.
+     --------------------------------------------------------------- */
+  var THITS = [];      // son netice (dugmeler indeksle bu siyahiya baxir)
+  var TSSEQ = 0;       // gec gelen kohne cavab tezesini ezmesin
+
+  function topicHitsHtml(list, mode) {
+    THITS = list || [];
+    if (!THITS.length) return "";
+    var rows = THITS.map(function (t, i) {
+      var meta = [t.subject, t.level_name, (Number(t.n) || 0) + " sual"]
+        .filter(Boolean).map(esc).join(" · ");
+      return '<div class="thit"><div class="tn"><b>' + esc(t.name) + "</b><i>" + meta + "</i></div>" +
+        '<div class="ta">' + (mode === "gen"
+          ? '<button class="btn sm go" type="button" data-th="sec" data-i="' + i + '">Seç</button>'
+          : '<button class="btn sm go" type="button" data-th="gen" data-i="' + i + '">' + ic("gen") + "Test yığ</button>" +
+            '<button class="btn sm ghost" type="button" data-th="q" data-i="' + i + '">Suallar</button>') +
+        "</div></div>";
+    }).join("");
+    return mode === "gen"
+      ? '<div class="thits in">' + rows + "</div>"
+      : '<div class="card tight thits"><div class="thh">Mövzular</div>' + rows + "</div>" +
+        '<div class="spacer"></div>';
+  }
+
+  function topicSearch(boxId, q, pool, mode) {
+    var box = $(boxId);
+    if (!box) return;
+    var my = ++TSSEQ;
+    q = (q || "").trim();
+    if (q.length < 2) { box.innerHTML = ""; THITS = []; return; }
+    sb.rpc("rpc_topic_search", { p_q: q, p_pool: pool || "platform", p_limit: 6 })
+      .then(function (r) {
+        if (my !== TSSEQ || !$(boxId)) return;
+        $(boxId).innerHTML = topicHitsHtml(Array.isArray(r) ? r : [], mode);
+      })
+      .catch(function () { if (my === TSSEQ && $(boxId)) $(boxId).innerHTML = ""; });
+  }
+
+  //  bir sualin variantlarini ac / bagla (class .hide - «hidden» atributu CSS-e uduzur)
+  function setQOpts(item, open) {
+    var ul = item.querySelector(".qopts"), b = item.querySelector(".qtg");
+    if (ul) { if (open) ul.classList.remove("hide"); else ul.classList.add("hide"); }
+    if (b) { b.classList.toggle("on", !!open); b.setAttribute("aria-expanded", open ? "true" : "false"); }
+  }
+
   function bankRule(f) {
     var r = { pool: f.pool };
     if (f.subject) r.subject = f.subject;
@@ -10800,7 +10883,7 @@
           seg("all", "Hamısı", f.pool) +
         "</div>" +
         '<div class="spacer"></div>' +
-        '<input id="bq" placeholder="Sual mətnində axtar…" value="' + esc(f.q) + '">' +
+        '<input id="bq" placeholder="Mövzu və ya sual mətnində axtar…" value="' + esc(f.q) + '">' +
         /* Telefonda 10 nisan siyahini ekrandan qovurdu.  Hovuz secicisi
            ve axtaris hemise gorunur, qalani yigilir. */
         '<details class="more filt"' + (nFilt(f) ? " open" : "") + ">" +
@@ -10858,6 +10941,7 @@
         "</details>" +
       "</div>" +
       '<div class="spacer"></div>' +
+      '<div id="bTopHit"></div>' +
       '<div id="bList" class="card pad0"><div class="skel">Yüklənir…</div></div>'
     );
 
@@ -10898,10 +10982,32 @@
     var t = null;
     on("bq", "input", function () {
       clearTimeout(t);
-      t = setTimeout(function () { f.q = ($("bq").value || "").trim(); loadBank(); }, 350);
+      t = setTimeout(function () {
+        f.q = ($("bq").value || "").trim(); loadBank();
+        topicSearch("bTopHit", f.q, f.pool, "bank");
+      }, 350);
+    });
+    //  movzu kartindan: «Test yig» (generator bu movzu secili) ve ya «Suallar» (siyahi bu movzuya daralir)
+    on("bTopHit", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-th]") : null;
+      if (!b) return;
+      var tp = THITS[Number(b.getAttribute("data-i"))];
+      if (!tp) return;
+      if (b.getAttribute("data-th") === "gen") {
+        var g = genFilter();
+        g.pool = f.pool; g.subject = tp.subject_slug; g.levels = tp.level ? [tp.level] : [];
+        g.topics = [tp.id]; g.difficulty = []; g.cls = ""; g.remNames = [];
+        g.title = ""; g.count = 10; g.asg = ""; g.asgStu = ""; g.asgStuName = "";
+        g.back = ""; g.backName = "";
+        nav("#/gen");
+      } else {
+        f.subject = tp.subject_slug; f.level = tp.level || ""; f.topics = [tp.id]; f.q = "";
+        screenBank();
+      }
     });
 
     loadBank();
+    topicSearch("bTopHit", f.q, f.pool, "bank");
   }
 
   /* Nece suzgec aciqdir - yigilanda da gorunsun deye */
@@ -11134,7 +11240,7 @@
     }
     if (!append) BOFF = 0;
     var my = ++BSEQ;
-    sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: 50, p_offset: BOFF })
+    sb.rpc("rpc_bank_list", { p_filters: bankRule(f), p_limit: BPAGE, p_offset: BOFF })
       .then(function (d) {
         if (!live() || my !== BSEQ) return;
         var box = $("bList");
@@ -11181,8 +11287,13 @@
               "</i></div>" +
               (mine ? '<span class="arrow">' + ic("right") + "</span>" : "") +
             "</button>" +
+            /*  908-den sonra: 50 sual x 4 variant sehifeni cox uzadirdi (istifadeci).
+                Variantlar DEFAULT BAGLIDIR, «Variantlar · 4» ile acilir; yuxaridaki
+                «Hamisini ac» hamisina aiddir.  Variantlar DOM-dadir - yalniz gizlidir.  */
             (opts.length
-              ? '<ul class="qopts">' + opts.map(function (o) {
+              ? '<button class="qtg' + (BOPTS ? " on" : "") + '" type="button" data-qtg="1" aria-expanded="' +
+                  (BOPTS ? "true" : "false") + '">Variantlar · ' + opts.length + "</button>" +
+                '<ul class="qopts' + (BOPTS ? "" : " hide") + '">' + opts.map(function (o) {
                   return '<li' + (o.correct ? ' class="c"' : "") + ">" +
                     qt(o.body) + "</li>";
                 }).join("") + "</ul>"
@@ -11192,7 +11303,7 @@
 
         var more = shown < total
           ? '<button class="morebtn" id="bMore">Daha ' +
-            Math.min(50, total - shown) + " sual göstər (" + shown + "/" + total + ")</button>"
+            Math.min(BPAGE, total - shown) + " sual göstər (" + shown + "/" + total + ")</button>"
           : "";
 
         if (append) {
@@ -11201,17 +11312,34 @@
           box.insertAdjacentHTML("beforeend", rows + more);
         } else {
           box.innerHTML =
-            '<div class="bcount">' +
+            '<div class="bcount"><span>' +
               (f.pool === "mine" || showBankN()
                 ? total + " sual" + (shown < total ? " · " + shown + "-i göstərilir" : "")
-                : (shown < total ? "İlk " + shown + " sual göstərilir" : "Tapılan suallar")) + "</div>" +
+                : (shown < total ? "İlk " + shown + " sual göstərilir" : "Tapılan suallar")) + "</span>" +
+              '<button class="qall" type="button" id="bAll">' + (BOPTS ? "Variantları bağla" : "Variantları aç") + "</button></div>" +
             rows + more;
         }
 
+        //  variantlari ac/bagla: tek sual ve hamisi (dinleyici qutuya BIR defe baglanir)
+        if (!box.dataset.qtgBound) {
+          box.dataset.qtgBound = "1";
+          box.addEventListener("click", function (e) {
+            var t = e.target.closest ? e.target.closest("[data-qtg], #bAll") : null;
+            if (!t) return;
+            if (t.id === "bAll") {
+              BOPTS = !BOPTS;
+              Array.prototype.forEach.call(box.querySelectorAll(".qitem"), function (it) { setQOpts(it, BOPTS); });
+              t.textContent = BOPTS ? "Variantları bağla" : "Variantları aç";
+              return;
+            }
+            var it = t.closest(".qitem"), ul = it && it.querySelector(".qopts");
+            if (ul) setQOpts(it, ul.classList.contains("hide"));
+          });
+        }
         on("bMore", "click", function () {
           var mb = $("bMore");
           if (mb) { mb.disabled = true; mb.textContent = "Yüklənir…"; }
-          BOFF += 50;
+          BOFF += BPAGE;
           loadBank(true);
         });
         Array.prototype.forEach.call(box.querySelectorAll("[data-q]"), function (b) {

@@ -261,6 +261,27 @@ body{background:
 
 /* novbeti ders - yalniz baxmaq ucun, klik olunmur */
 .nlesson{margin:0 0 16px}
+.famprog{margin:0 0 16px}
+.fp-hero{display:flex;align-items:center;gap:14px;margin:0 0 14px}
+.plant{width:76px;height:76px;flex:0 0 76px}
+.pl-pot{fill:var(--yellow-dark)}.pl-rim{fill:var(--yellow)}.pl-soil{fill:var(--n-700)}.pl-seed{fill:var(--n-500)}
+.pl-stem{stroke:var(--green);stroke-width:3;stroke-linecap:round;fill:none}
+.pl-leaf{fill:var(--green)}.pl-leaf2{fill:var(--mint-bright)}.pl-trunk{fill:var(--n-500)}.pl-fl{fill:var(--coral)}
+.fp-ht{min-width:0}.fp-ht b{display:block;font-size:15px}.fp-ht span{display:block;font-size:13.5px;color:var(--fg-2);margin-top:2px}.fp-ht i{display:block;font-style:normal;font-size:12px;color:var(--fg-3);margin-top:2px}
+.fp-t em{font-style:normal;color:var(--warn);margin-left:6px}
+.fp-rw{font-size:13.5px;color:var(--fg-2);margin:0 0 8px}.fp-rw.done{color:var(--ok);font-weight:700}
+.fp-bd{margin-top:10px}.fp-bd summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--fg-2)}
+.fp-bl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.fp-b{font-size:12.5px;padding:4px 10px;border-radius:999px;background:var(--n-100);color:var(--fg-3)}
+.fp-b.on{background:var(--yellow-soft);color:var(--ink);font-weight:700}
+.fp-t{font-size:13px;font-weight:700;color:var(--fg-2);margin:0 0 10px}
+.fp-dots{display:flex;gap:6px;margin:0 0 12px}
+.fp-d{flex:1;max-width:38px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--n-100);color:var(--fg-3)}
+.fp-d.on{background:var(--brand);color:#fff}
+.fp-d.t{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--brand)}
+.fp-goal{font-size:13.5px;color:var(--fg-2);margin:0 0 8px}.fp-goal.done{color:var(--ok);font-weight:700}
+.fp-r{font-size:14.5px}.fp-r b{font-size:20px;font-weight:700;margin-right:4px}
+.fp-c{margin-top:6px;font-size:13px;color:var(--fg-2)}
 .nl-tag{display:block;font-size:11px;font-weight:600;letter-spacing:.03em;
   text-transform:uppercase;color:var(--fg-3);margin-bottom:4px}
 .nlesson b{display:block;font-size:14.5px;font-weight:600}
@@ -494,6 +515,7 @@ details.fbd summary .fbdot::before{content:"";width:6px;height:6px;border-radius
 /* ---- 212: «Bu günün 5 sualı» — şagirdin fərdi gündəlik təkrarı ------
    Kart tapşırıqların üstündədir: uşağın tətbiqi hər gün açmasının
    yeganə şəxsi səbəbi budur. Bir düymə, seçim yoxdur. */
+.dpraise{margin:0 0 10px;background:var(--ok-tint);border-color:var(--ok-line);font-size:14.5px}
 .dcard{margin:0 0 16px;border-color:var(--brand-line, var(--n-150))}
 .dhead{display:flex;align-items:baseline;gap:10px}
 .dhead b{flex:1;font-size:16px;font-weight:660;letter-spacing:-.01em}
@@ -518,3 +540,26 @@ details.fbd summary .fbdot::before{content:"";width:6px;height:6px;border-radius
     brauzerde metn burada gorunur, sagird kopyalayir.  */
 .shtxt{width:100%;box-sizing:border-box;margin-bottom:10px;font-size:13px;
   padding:8px;border:1px solid var(--n-300);border-radius:8px}
+
+/* 04.10: «Yeni test» bildirisi (tetbiqin icinde, push deyil) */
+.newtest{display:flex;align-items:center;gap:12px;margin:0 0 16px;border-color:var(--brand-line);background:var(--brand-tint)}
+.nt-t{flex:1;min-width:0}
+.nt-tag{display:block;font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--brand)}
+.newtest b{display:block;font-size:14.5px;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
+.newtest i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-2);margin-top:2px}
+.nt-a{display:flex;gap:8px;flex:0 0 auto}
+@media(max-width:420px){.newtest{flex-wrap:wrap}.nt-a{flex:1 1 100%}.nt-a .btn{flex:1}}
+
+/* 910: telefona bildiris karti */
+.pushcard{display:flex;align-items:center;gap:12px;margin:16px 0}
+.pc-t{flex:1;min-width:0}
+.pc-t b{display:block;font-size:14.5px;font-weight:600}
+.pc-t i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-2);margin-top:2px}
+.pc-a{flex:0 0 auto}
+.note.pushon{margin:12px 0}
+.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--brand);text-decoration:underline;cursor:pointer}
+@media(max-width:420px){.pushcard{flex-wrap:wrap}.pc-a{flex:1 1 100%}.pc-a .btn{width:100%}}
+.pc-h{color:var(--fg-3) !important}
+.pc-n{display:block;margin-top:4px;font-size:12px;color:var(--fg-3)}
+.pc-steps{margin:8px 0 0;padding-left:20px;font-size:12.5px;color:var(--fg-2);line-height:1.5}
+.pc-steps li{margin:2px 0}
