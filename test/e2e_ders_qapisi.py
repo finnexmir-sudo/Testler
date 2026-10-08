@@ -396,6 +396,15 @@ with sync_playwright() as pw:
     p.goto(PANEL + "?yeni=1#/a/" + str(gid) + "/t"); p.wait_for_selector("#btnBack", timeout=30000)
     yox("Geri" in p.inner_text("#btnBack"), "«Test ver» ekranında da «Geri»", p.inner_text("#btnBack"))
 
+    print("\n=== 08.10 · bütün geri düymələri «Geri» yazır və goBack işləyir ===")
+    for h in ("#/me", "#/gs", "#/gen", "#/n"):
+        p.goto(PANEL + "?yeni=1" + h); p.wait_for_selector("#btnBack", timeout=30000)
+        yox(p.inner_text("#btnBack").strip() == "Geri", "%s: düymə «Geri»" % h, p.inner_text("#btnBack"))
+    p.goto(PANEL + "?yeni=1#/gs"); p.wait_for_selector("#btnBack", timeout=30000)
+    p.goto(PANEL + "?yeni=1#/me"); p.wait_for_selector("#btnBack", timeout=30000)
+    p.click("#btnBack"); p.wait_for_timeout(600)
+    yox(p.evaluate("location.hash") == "#/gs", "Profil → Geri: gəldiyi yerə (Qruplar) qayıdır", p.evaluate("location.hash"))
+
     print("\n=== 08.10 · «Həmkarına göndər» Profildədir, test səhifəsində yox ===")
     p.goto(PANEL + "?yeni=1#/me"); p.wait_for_selector("#btnHemkar", timeout=30000)
     with p.context.expect_page(timeout=8000) as pop:

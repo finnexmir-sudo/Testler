@@ -79,7 +79,7 @@ with sync_playwright() as p:
     t.locator("#aList .tgo").first.click(); t.wait_for_selector("#btnTDel", timeout=15000)
     ok("vurma" in t.inner_text("h1"), "kecid dogru testin vereqini acir")
     #  194: geri HARADAN gelibse ora - Tapsiriqlardan gelmisik, «Test yig»a yox
-    ok("Tapşırıqlar" in t.inner_text("#btnBack"), "geri duymesi «Tapsiriqlar» yazir", t.inner_text("#btnBack"))
+    ok("Geri" in t.inner_text("#btnBack"), "geri duymesi «Geri» yazir", t.inner_text("#btnBack"))
     t.evaluate("window.scrollTo(0,0)"); t.wait_for_timeout(200); t.screenshot(path=SHOT + "/geri_vereq.png")
     t.click("#btnBack"); t.wait_for_selector("#hwText", timeout=15000)
     ok(t.url.find("#/a/") >= 0, "geri Tapsiriqlar ekranina qaytardi")
@@ -91,7 +91,7 @@ with sync_playwright() as p:
     t.click("#btnBack"); t.wait_for_selector("#groups .gcard", timeout=15000)
     ok(t.url.endswith("#/") or t.url.endswith("index.html") or "#/" in t.url, "qrupdan geri - Icmal")
     t.evaluate("location.hash = '#/t/%s'" % t1); t.wait_for_selector("#btnTDel", timeout=15000)
-    ok("Əsas səhifə" in t.inner_text("#btnBack"), "Icmaldan birbasa vereqe: geri «Esas sehife»", t.inner_text("#btnBack"))
+    ok("Geri" in t.inner_text("#btnBack"), "Icmaldan birbasa vereqe: geri «Geri»", t.inner_text("#btnBack"))
 
     print("C · Sil")
     t.once("dialog", lambda d: d.accept())

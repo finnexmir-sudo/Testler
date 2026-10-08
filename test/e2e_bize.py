@@ -90,7 +90,7 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#btnFb:not(.hide)", timeout=15000)
     pg.click("#btnFb"); pg.wait_for_selector("#fbCard", timeout=15000)
     ok("#/bize" in pg.url, "ust zolaqdaki «Bizə yaz» oz ekranini acir", pg.url)
-    ok(pg.inner_text("#btnBack").strip().endswith("Qrup"), "Geri: geldiyi ekrana (Qrup)", pg.inner_text("#btnBack"))
+    ok(pg.inner_text("#btnBack").strip().endswith("Geri"), "Geri: duymenin adi «Geri» (geldiyi ekrana qaytarir)", pg.inner_text("#btnBack"))
     pg.evaluate("location.hash = '#/me'"); pg.wait_for_selector("#btnMeFb", timeout=15000)
     ok(pg.locator("#fbCard").count() == 0, "Profilde forma yoxdur, kecid var")
     pg.click("#btnMeFb"); pg.wait_for_selector("#fbCard", timeout=15000)

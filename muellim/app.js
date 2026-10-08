@@ -150,8 +150,10 @@
       solda avatar, sagda duyme.  show()-dan bir addim EVVEL cagirilir.  */
   function bandHead(o) {
     setBand(
+      //  08.10 (istifadeci): geri duymesi HEMISE «Geri» yazir ve goBack() isledir - qrup/ekran adi yazmir,
+      //  basqa yere aparmir.  Kohne gorunusde (YENI=false) evvelki adlar qalir.
       (o.back ? '<button class="btn sm ghost bback" id="' + o.back.id + '">' +
-        ic("back") + esc(o.back.label) + "</button>" : "") +
+        ic("back") + esc(YENI ? "Geri" : o.back.label) + "</button>" : "") +
       '<div class="bh">' + (o.av || "") +
         '<div class="bt">' +
           (o.eye ? '<span class="beye">' + esc(o.eye) + "</span>" : "") +
@@ -708,7 +710,7 @@
       show(h);
       bindAlerts($("nAl"));
       notifMsg();
-      on("btnBack", "click", function () { nav("#/"); });
+      on("btnBack", "click", function () { goBack("#/"); });
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
   }
 
@@ -1013,7 +1015,7 @@
           "addım-addım, ekran şəkilləri ilə. " +
           '<a href="../komek/#muellim" target="_blank" rel="noopener">Bələdçini aç →</a></p>' +
       "</div>");
-    on("btnBack", "click", function () { nav("#/"); });
+    on("btnBack", "click", function () { goBack("#/"); });
     on("btnMeBank", "click", function () { nav("#/b"); });
     on("btnMeFb", "click", function () { nav("#/bize"); });
     on("btnHemkar", "click", function () { hemkarShare(); });
@@ -2041,7 +2043,7 @@
       '<div id="groups" class="gcards"><div class="skel">Yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
       groupFormHtml());
-    on("btnBack", "click", function () { nav("#/"); });
+    on("btnBack", "click", function () { goBack("#/"); });
     bindGroupForm();
     var lvReady = loadLevels().then(function () {
       var sel = $("glevel");
@@ -4241,7 +4243,7 @@
     });
     on("btnStuOpen", "click", function () { openStuForm(true); });
 
-    on("btnBack", "click", function () { nav("#/"); });
+    on("btnBack", "click", function () { goBack("#/"); });
     on("btnRep", "click", function () { nav("#/r/" + g.id); });
     on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
     loadPrep(g);
@@ -7832,7 +7834,7 @@
       sub: "Ödəniş hər şagird üçün — nə qədər şagird, o qədər."
     });
     show(h);
-    on("btnBack", "click", function () { nav("#/"); });
+    on("btnBack", "click", function () { goBack("#/"); });
   }
 
   /* ---------------------------------------------------------- admin */
@@ -8135,7 +8137,7 @@
     if (sel0 && sel0.querySelector('option[value="sagird-basi"]')) {
       sel0.value = "sagird-basi";
     }
-    on("btnBack", "click", function () { nav("#/"); });
+    on("btnBack", "click", function () { goBack("#/"); });
     function admQuery() {
       var fb = document.querySelector("#admF .chip.on");
       sb.rpc("rpc_admin_accounts", {
@@ -9638,7 +9640,7 @@
       //  imtina: geri qayidis niyyetini de temizleyirik
       if (f.back) { var gid = f.back; f.back = ""; f.backName = ""; goTo("#/a/" + gid + (YENI ? "/t" : "")); return; }
       if (f.fromG) { var g0 = f.fromG; f.asg = ""; f.fromG = ""; f.fromName = ""; goTo("#/g/" + g0); return; }
-      nav("#/");
+      goBack("#/");
     });
     on("gRemOff", "click", function (e) {
       e.preventDefault();
@@ -11050,7 +11052,7 @@
       '<div id="bList" class="card pad0"><div class="skel">Yüklənir…</div></div>'
     );
 
-    on("btnBack", "click", function () { nav("#/"); });
+    on("btnBack", "click", function () { goBack("#/"); });
     on("btnNewQ", "click", function () { nav("#/q/new"); });
 
     on("bPool", "click", function (e) {

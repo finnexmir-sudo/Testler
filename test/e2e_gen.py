@@ -695,8 +695,8 @@ with sync_playwright() as pw:
        "ipucu hazir sinfi tekrar istemir")
     ok("Mövzu seçmək üçün fənn seçin" in pg.inner_text("#main"),
        "ipucu yalniz fenni isteyir")
-    ok(pg.locator("#btnBack").inner_text().strip() == "4-A qrupu",
-       "geri duymesi qrupun adini gosterir", pg.locator("#btnBack").inner_text())
+    ok(pg.locator("#btnBack").inner_text().strip() == "Geri",
+       "geri duymesi «Geri» yazir", pg.locator("#btnBack").inner_text())
 
     pg.select_option("#gsub", "riyaziyyat")
     pg.wait_for_selector("#gsub", timeout=8000); pg.wait_for_timeout(400)
