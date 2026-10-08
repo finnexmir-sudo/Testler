@@ -5477,3 +5477,34 @@ süzgəclərin arxasındadır.
 
 Yoxlama: `test/e2e_tovsiye.py` (uçdan-uca: paylaş → gəl → qeydiyyat →
 say), `test/_v2_tovsiye.py` (idarəetmə bölməsinin şəkli).
+
+## QƏRAR (08.10.2026): ödəniş VALİDEYNDƏDİR, müəllim ödəmir
+
+**Köhnə qərarları əvəz edir:** «şagird və valideyn həmişə pulsuzdur» və «müəllim şagird başına 1,50 ₼» (bax yuxarıda, 3220/3340-cı sətirlər).
+
+**Niyə:** sahibin bazar müşahidəsi — müəllimlər ödəmək istəmir («niyə mən ödəyim, uşaq test edəcək»). Hələ real istifadəçi yoxdur, ona görə
+modeli dəyişmək pulsuzdur. Sahib müəllimlərə artıq deyəcək: «hər uşaq özü ödəyir» — bu, onları cəlb edir.
+
+**Model (plan, hələ kodlanmır):**
+- **Müəllim və şagird üçün əsas hissə PULSUZDUR:** qrup, tapşırıq, test, nəticə. Müəllimin qrupu heç vaxt «kim ödədi, kim ödəmədi» ucbatından pozulmur —
+  ödəməyən şagird müəllimin testlərini yenə həll edir.
+- **Valideyn uşaq başına ödəyir (öz səhifəsində):** «ev qatı» — gündəlik məşq, həftəlik xülasə, bildirişlər, mənimsəmə, zəif mövzular, personaj
+  (ailə yolunda artıq qurulub: `aile-usaq` planı, 1 ay kartsız sınaq).
+- **Müəllim siyahıda yalnız vəziyyəti görür:** «Valideyn: qoşulub ✓ / qoşulmayıb». Heç kimə xəbərdarlıq getmir. Müəllimə izah: «Siz heç nə ödəmirsiniz,
+  valideynlərə bir link göndərirsiniz.»
+- **Birdəfəlik müəllim ödənişi RƏD edildi:** gəlir bir dəfə, xərc (dəstək, server, sual) hər ay; müəllim yenə «niyə mən» deyir.
+
+**Qiymət (AÇIQ sual):** sahib 2–3 ₼/uşaq/ay düşünür; ailə yolunda hazırda 9,90 ₼ yazılıb (`aile-usaq`). Ev qatı eynidir — fərqi qiymətləndirmək lazımdır.
+Rəqəm yoxlaması: 8 şagirdli qrupda müəllim indi 12 ₼ (1,50 × 8) verərdi; valideyn 3 ₼ ödəsə hamı qoşulanda 24 ₼, yarısı qoşulanda 12 ₼ — yəni müəllim
+modelindən pis deyil və daha çox müəllim gəlir. Diqqət: Epoint/bank komissiyasının sabit hissəsi 2–3 ₼-lik ödənişdə nisbətən böyükdür — 3 aylıq paket
+(məs. 3 ay = 7 ₼) yumşaldır.
+
+**Sıra:**
+1. Ödəniş kodu YAZILMIR (Epoint yoxdur; abunə admin paneldən əl ilə verilir).
+2. Pilot müddətində (≈3 ay) hamı pulsuzdur; ilk istifadəçilərə «pilot güzəşti» vədi.
+3. 3 aydan sonra real valideynlərlə qiymət: 3 ₼ / 5 ₼ / 9,9 ₼.
+4. Müəllimlərlə söhbət: «hər uşaq özü ödəyir» — və əlavə sual: «valideynə təklif edərdinizmi?».
+
+**Kod tərəfi (sonra):** müəllim hesabında şagird başına «valideyn qoşulub» göstəricisi; müəllim yolundakı şagirdin valideyni «ev qatı»na necə əlavə olunur
+(ailə yolu hazırda ayrıdır: gizli `self_study` qrup) — ayrıca dizayn lazımdır. Müəllim hesabının `has_active_subscription` qapıları (test yığma, plan,
+diaqnostika) pulsuz müəllim üçün yenidən düşünülməlidir.
