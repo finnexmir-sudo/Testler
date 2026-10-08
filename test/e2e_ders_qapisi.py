@@ -389,6 +389,11 @@ with sync_playwright() as pw:
     p.wait_for_function("document.querySelector('#gPrev') && document.querySelector('#gPrev').textContent.indexOf('yığılacaq') >= 0", timeout=15000)
     p.click("#btnMake"); p.wait_for_function("location.hash.indexOf('#/t/') === 0", timeout=20000)
     yox(q("select count(*) n from public.assignments where class_id=%s", (gid,), one=True)["n"] == 1, "test həmin qrupa tapşırılıb (tapşırıq ekranı olmadan)")
+    p.wait_for_selector("#qFold", state="attached", timeout=20000)
+    yox(not p.evaluate("document.getElementById('qFold').open") and not p.locator(".paper .pq").first.is_visible(), "vərəqdə suallar BAĞLI gəlir")
+    yox("sual" in p.inner_text("#qFold > summary"), "başlıq «Suallar · N sual»", p.inner_text("#qFold > summary"))
+    p.click("#qFold > summary"); p.wait_for_timeout(300)
+    yox(p.locator(".paper .pq").first.is_visible(), "başlığa basanda suallar açılır")
 
     print("\n=== 08.10 · «Ev tapşırığı yaz» ekranında geri düyməsi «Geri» yazır ===")
     p.goto(PANEL + "?yeni=1#/a/" + str(gid) + "/h"); p.wait_for_selector("#btnBack", timeout=30000)

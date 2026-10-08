@@ -137,7 +137,7 @@ with sync_playwright() as pw:
         tp.wait_for_selector("#adminMsg, #yMenu .mrow", state="attached", timeout=30000)
 
         print("\n1 · Müəllimin kağız vərəqi (%d px)" % W)
-        tp.goto(PANEL + "#/t/" + TID); tp.wait_for_selector(".paper", timeout=20000); tp.wait_for_timeout(500)
+        tp.goto(PANEL + "#/t/" + TID); tp.wait_for_selector(".paper", state="attached", timeout=20000); tp.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true"); tp.wait_for_timeout(500)
         sekil_var(tp, ".paper", "vərəq (%d px)" % W, minn=NQ, maxw=W)
         tp.screenshot(path=OUT + "/1-vereq-%d.png" % W, full_page=True)
 

@@ -170,7 +170,7 @@ with sync_playwright() as pw:
     gen_qrupla(pg, "Düzəliş B1", GA)
     pg.click("#btnMake")
     try:
-        pg.wait_for_selector(".paper", timeout=25000)
+        pg.wait_for_selector(".paper", state="attached", timeout=25000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     except Exception:
         print("   gErr:", pg.inner_text("#gErr")[:200], "| prev:", pg.inner_text("#gPrev")[:120]); raise
     pg.wait_for_timeout(1500)
@@ -185,7 +185,7 @@ with sync_playwright() as pw:
     for i in range(3):
         pg.goto(PANEL + "#/gen"); pg.reload()
         gen_qrupla(pg, "Düzəliş C%d" % i, GA)
-        pg.click("#btnMake"); pg.wait_for_selector(".paper", timeout=25000); pg.wait_for_timeout(600)
+        pg.click("#btnMake"); pg.wait_for_selector(".paper", state="attached", timeout=25000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true"); pg.wait_for_timeout(600)
     print("   -- baxis ekrani (#/a/<qrup>): siyahi + iki dugme")
     pg.goto(PANEL + "#/a/" + GA); pg.reload()
     pg.wait_for_selector("#asgList .asg", timeout=20000); pg.wait_for_timeout(500)
@@ -287,7 +287,7 @@ with sync_playwright() as pw:
     pg.screenshot(path="/tmp/claude-0/is_A_menyu_tel.png", full_page=True)
     pg.goto(PANEL + "#/gen"); pg.reload()
     gen_qrupla(pg, "Düzəliş D", GA)
-    pg.click("#btnMake"); pg.wait_for_selector(".paper", timeout=25000); pg.wait_for_timeout(600)
+    pg.click("#btnMake"); pg.wait_for_selector(".paper", state="attached", timeout=25000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true"); pg.wait_for_timeout(600)
     pg.goto(PANEL + "#/a/" + GA); pg.reload()
     pg.wait_for_selector("#asgList .asg", timeout=20000)
     ok(scroll_x(pg) <= 1, "baxis ekrani telefonda yana surusmur", scroll_x(pg))

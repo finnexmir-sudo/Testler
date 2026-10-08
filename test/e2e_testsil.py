@@ -52,7 +52,7 @@ with sync_playwright() as p:
         t.evaluate("location.hash = '#/gen'"); t.wait_for_selector("#gsub", timeout=15000)
         t.wait_for_function("[...document.querySelectorAll('#gsub option')].some(o => o.value === 'riyaziyyat')", timeout=20000)
         t.select_option("#gsub", "riyaziyyat"); t.wait_for_timeout(900); t.fill("#gCnt", "5"); t.fill("#gTitle", title)
-        t.click("#btnMake"); t.wait_for_selector(".paper", timeout=20000); t.wait_for_timeout(300)
+        t.click("#btnMake"); t.wait_for_selector(".paper", state="attached", timeout=20000); t.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true"); t.wait_for_timeout(300)
         return db("select id::text i from public.tests where owner_type='educator' order by created_at desc limit 1", one=True)["i"]
 
     print("A · Adı dəyiş")

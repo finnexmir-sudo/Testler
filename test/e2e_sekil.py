@@ -176,7 +176,7 @@ with sync_playwright() as pw:
                 returning id::text i""", (uid, QIDS[0]), one=True)["i"]
     db("insert into public.test_questions (test_id, question_id, ord) values (%s::uuid, %s::uuid, 1)",
        (tid, QIDS[0]))
-    mp.goto(PANEL + "#/t/" + tid); mp.wait_for_selector(".paper", timeout=20000)
+    mp.goto(PANEL + "#/t/" + tid); mp.wait_for_selector(".paper", state="attached", timeout=20000); mp.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(mp.locator(".paper .qfig img").count() == 1, "kagiz vereqde sekil var",
        mp.locator(".paper .qfig img").count())
     ok(mp.evaluate("() => document.querySelectorAll('.paper .qfig svg').length") == 0,

@@ -91,7 +91,7 @@ def yig(pg, ad, qrup=None):
         "document.querySelector('#gPrev') && document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 "
         "&& document.querySelector('#gPrev').innerText.length > 5", timeout=15000)
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper, #pAsgH", timeout=20000)
+    pg.wait_for_selector(".paper, #pAsgH", state="attached", timeout=20000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     pg.wait_for_timeout(1500)
 
 with sync_playwright() as pw:

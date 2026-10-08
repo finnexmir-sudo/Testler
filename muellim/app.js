@@ -10599,7 +10599,9 @@
                   "Qrup yarat və testi ver</button>")) +
       "</div>") +
       '<div class="spacer"></div>' +
-      "<h2>Suallar</h2>" +
+      /*  08.10 (istifadeci): suallar BAGLI gelir, «Suallar · N» basanda acilir - 30-50 sualli vereq
+          sehifeni cox uzadirdi.  Cap / PDF ayri nusxe qurur (printBox), bu DOM-a baxmir.  */
+      '<details class="qfold" id="qFold"><summary><h2>Suallar</h2><span class="fn">' + qs.length + " sual</span></summary>" +
       '<div class="card pad0 paper">' +
         qs.map(function (q) {
           return '<div class="pq">' +
@@ -10625,7 +10627,7 @@
               ? '<div class="pex">' + qt(q.explanation) + "</div>" : "") +
           "</div>";
         }).join("") +
-      "</div>"
+      "</div></details>"
     );
 
     on("btnBack", "click", function () { goBack("#/gen"); });

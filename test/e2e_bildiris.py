@@ -107,7 +107,7 @@ with sync_playwright() as pw:
     pg.fill("#gCnt", "5"); pg.wait_for_timeout(700)
     pg.fill("#gTitle", "Bildiris testi")
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(pg.locator(".pq .rlink").count() == 5, "her sualda bildir duymesi var",
        pg.locator(".pq .rlink").count())
     pg.locator(".pq .rlink").first.click()

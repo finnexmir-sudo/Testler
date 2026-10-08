@@ -186,7 +186,7 @@ with sync_playwright() as pw:
     pg.fill("#gCnt", "8"); pg.wait_for_timeout(700)
     pg.fill("#gTitle", "Sınaq — öz suallarım")
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(pg.evaluate("getComputedStyle(document.querySelector('.paper .qh b')).whiteSpace") == "pre-wrap",
        "vereqde sual metni setir sonlarini qoruyur (pre-wrap)")
     ok("/t/" in pg.url, "veraq ekranina kecid", pg.url.split("#")[-1][:20])
@@ -224,7 +224,7 @@ with sync_playwright() as pw:
     before = sorted(r["q"] for r in db(
         "select question_id::text q from public.test_questions where test_id=%s", (TID,)))
     pg.click("#btnRegen")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     pg.wait_for_timeout(300)
     ok(pg.locator(".paper .pq").count() == 8, "yeniden yigilan testde de 8 sual")
     after = sorted(r["q"] for r in db(
@@ -296,7 +296,7 @@ with sync_playwright() as pw:
           select %s, s.id, 'submitted', now() from public.students s limit 1""", (TID,))
     # Unvan onsuz da #/t/<id>-dir - goto hec ne etmir, reload lazimdir
     pg.goto(PANEL + "#/t/" + TID); pg.reload()
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(pg.locator("#btnRegen").count() == 0, "yenile duymesi gizlenir")
     ok("yeniləmək olmaz" in pg.inner_text("#main"), "sebeb yazilir")
 
@@ -328,7 +328,7 @@ with sync_playwright() as pw:
        "platforma hovuzunda riy-4 suallari tapilir")
     pg.fill("#gTitle", "Riyaziyyat 4 — platforma sınağı")
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(pg.locator(".paper .pq").count() == 12, "12 sualliq platforma testi yigildi")
     ok("hazır bank" in pg.inner_text(".paper"), "hazır bank nisani gorunur")
     # movzular arasinda beraberlik: 12 movzudan 12 sual - hersinden 1
@@ -424,7 +424,7 @@ with sync_playwright() as pw:
         "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
     ok("kifayət qədər" in pg.inner_text("#gPrev"), "duzelis hovuzu kifayetdir")
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(pg.locator(".paper .rem").count() >= 1,
        "veraqda «səhvə bənzər» nisani var", pg.locator(".paper .rem").count())
     ok("səhvə bənzər" in pg.inner_text(".paper"), "nisan metni duzgundur")
@@ -518,7 +518,7 @@ with sync_playwright() as pw:
         "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
     pg.fill("#gTitle", "Qrupla birge test")
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     NID = pg.url.split("/t/")[1]
     ok(bool(db("select 1 ok from public.assignments "
                "where test_id = %s and class_id = %s", (NID, GID), one=True)),
@@ -654,7 +654,7 @@ with sync_playwright() as pw:
         "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
         "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=10000)
+    pg.wait_for_selector(".paper", state="attached", timeout=10000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     MID = pg.url.split("/t/")[1]
     #  Qayda massiv kimi yazilmalidir - "yenile" duymesi onu tekrar isledir
     rule = db("select gen_rule from public.tests where id = %s", (MID,), one=True)["gen_rule"]

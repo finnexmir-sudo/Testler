@@ -2801,3 +2801,13 @@ details.styd{margin-top:14px}
 .plan .plrow:has(.plsel)>span{flex:1 1 calc(100% - 76px)}
 @media (max-width:520px){.plan .plrow:has(.plsel)>span{flex:1 1 calc(100% - 76px)}
   .plan .plrow .plsel{margin-left:auto}}
+/*  08.10: vərəqdə «Suallar» bağlı gəlir, basanda açılır  */
+.qfold{margin-top:6px}
+.qfold>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;padding:4px 0}
+.qfold>summary::-webkit-details-marker{display:none}
+.qfold>summary h2{margin:0}
+.qfold>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--fg-3);
+  border-bottom:2px solid var(--fg-3);transform:rotate(45deg);transition:transform .15s;margin-right:6px}
+.qfold[open]>summary::after{transform:rotate(225deg)}
+.qfold>summary .fn{font-size:12px;font-weight:600;background:var(--brand-tint);color:var(--brand);padding:2px 9px;border-radius:999px}
+.qfold>.paper{margin-top:10px}

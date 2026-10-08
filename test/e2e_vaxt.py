@@ -64,11 +64,11 @@ with sync_playwright() as p:
     code = db("select login_code c from public.students limit 1", one=True)["c"]
     t.goto(PANEL + "#/gen"); t.wait_for_selector("#gsub", timeout=15000); t.wait_for_timeout(600)
     t.select_option("#gsub", "riyaziyyat"); t.wait_for_timeout(900); t.fill("#gCnt", "5"); t.wait_for_timeout(400)
-    t.click("#btnMake"); t.wait_for_selector(".paper", timeout=20000)
+    t.click("#btnMake"); t.wait_for_selector(".paper", state="attached", timeout=20000); t.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(t.locator("#pLim").count() == 1, "vereqde vaxt limiti secimi var")
     ok("vaxtsız" in t.inner_text("#pLim summary"), "susmaya gore vaxtsiz")
     t.click("#pLim summary"); t.wait_for_selector(".plimm button[data-min='5']", state="visible", timeout=5000)
-    t.click(".plimm button[data-min='5']"); t.wait_for_selector(".paper", timeout=15000); t.wait_for_timeout(600)
+    t.click(".plimm button[data-min='5']"); t.wait_for_selector(".paper", state="attached", timeout=15000); t.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true"); t.wait_for_timeout(600)
     tid = db("select id::text i, time_limit_sec s from public.tests where owner_type='educator' order by created_at desc limit 1", one=True)
     ok(tid["s"] == 300, "limit bazaya yazildi (5 deq = 300 s)", tid["s"])
     ok("⏱ 5 dəq" in t.inner_text("#main"), "vereq basliginda ⏱ 5 deq")
