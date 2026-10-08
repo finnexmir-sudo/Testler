@@ -5508,3 +5508,7 @@ modelindən pis deyil və daha çox müəllim gəlir. Diqqət: Epoint/bank komis
 **Kod tərəfi (sonra):** müəllim hesabında şagird başına «valideyn qoşulub» göstəricisi; müəllim yolundakı şagirdin valideyni «ev qatı»na necə əlavə olunur
 (ailə yolu hazırda ayrıdır: gizli `self_study` qrup) — ayrıca dizayn lazımdır. Müəllim hesabının `has_active_subscription` qapıları (test yığma, plan,
 diaqnostika) pulsuz müəllim üçün yenidən düşünülməlidir.
+
+**Gələcək fikir (sahib, 08.10): ödəməyən valideyn üçün «gözləmə jesti».** Hələ edilmir. Yumşaq olmalıdır: əlavə pulsuz günlər / bir dəfəlik xatırlatma /
+«Lale bu həftə 3 gün çalışdı — ev qatını açsanız həftəlik xülasə də gələr» kimi dəvət; müəllimə «ödəməyib» xəbərdarlığı GETMİR, heç kimə utandırıcı
+görünüş yoxdur, qrup və uşağın müəllim testləri bloklanmır.
