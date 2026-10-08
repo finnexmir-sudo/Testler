@@ -194,6 +194,9 @@ with sync_playwright() as pw:
     yox(p.locator("#plCnt").count() == 0, "dərs testində sual sayı sahəsi yoxdur (ölçünü server qoyur)")
     p.locator(".card.plan").screenshot(path=OUT + "/4-qutu-ders-masaustu.png")
     p.locator('[data-pltest="%s"]' % ITEM["Dərs A"]).click(); p.wait_for_timeout(6000)
+    #  08.10: «göndərildi» nəticəsi siyahı bağlı olsa da görünür; yığılandan sonra «Bütün mövzular» bağlanmır
+    yox(p.locator(".plan #plm-%s a[href^='#/t/']" % pid).first.is_visible(), "tək dərs testi: «Vərəqə bax» nəticəsi görünür")
+    yox(p.evaluate("document.querySelector('.card.plan > details').open"), "yığılandan sonra «Bütün mövzular» açıq qalır")
     ra = item_row("Dərs A")
     yox(bool(ra["t"]) and ra["f"] is None, "A: test_id yazıldı, fesil_test_id boş")
     if ra["t"]:
@@ -374,7 +377,7 @@ with sync_playwright() as pw:
     yox(p.locator('#plwa-%s' % pid).count() == 1, "WhatsApp mətni üçün yer var")
     p.wait_for_timeout(800)
     yox(p.locator('#plm-%s .asgwa, #plm-%s [data-wacopy], #plm-%s textarea' % (pid, pid, pid)).count() >= 1 or "WhatsApp" in p.locator('#plwa-%s' % pid).inner_text(), "WhatsApp mətni çıxdı", p.locator('#plwa-%s' % pid).inner_text()[:80])
-    yox(p.locator('.plan details:not(.plgrp):not(.plnext) #plm-%s' % pid).count() == 1, "nəticə qutusu siyahının altındadır (Planı sildən əvvəl)")
+    yox(p.locator('.plan details #plm-%s' % pid).count() == 0 and p.locator('#plm-%s' % pid).is_visible(), "nəticə qutusu <details>-dən kənardadır, görünür")
     br.close()
 
 temizle(); movzu_sil()

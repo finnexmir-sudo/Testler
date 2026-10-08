@@ -3372,6 +3372,12 @@
       return;
     }
 
+    //  08.10: yenidən çəkiləndə «Bütün mövzular» bağlanmasın (test yığandan sonra səhifə yığılırdı)
+    var wasOpen = {};
+    Array.prototype.forEach.call(box.querySelectorAll(".card.plan"), function (c) {
+      var d0 = c.querySelector(":scope > details");
+      if (d0 && d0.open) wasOpen[c.getAttribute("data-p")] = true;
+    });
     box.innerHTML = plans.map(function (p) {
       var items = p.items || [];
       var cur = null, lastDone = null;
@@ -3436,6 +3442,9 @@
               ? '<a href="#/t/' + esc(lastDone.test_id) + '" class="pltest">vərəq</a>' : "") +
             "</div>"
           : "") +
+        /*  08.10: nəticə / təsdiq qutusu «Bütün mövzular»dan ƏVVƏL - siyahı bağlı olanda da görünür
+            (əvvəl <details>-in içində idi: yığılandan sonra səhifə bağlanır, «göndərildi» görünmürdü).  */
+        '<div id="plm-' + esc(p.id) + '"></div>' +
         "<details><summary>Bütün mövzular</summary>" +
           '<div class="pllist">' + (function () {
             /*  Gelecek fesiller gizli: 8-ci sinifde 11 fesil siyahini
@@ -3501,8 +3510,6 @@
             }
             return h;
           })() + "</div>" +
-          //  08.10: nəticə / təsdiq qutusu siyahının ALTINDA, «Planı sil»dən əvvəl (əvvəl ən dibdə idi)
-          '<div id="plm-' + esc(p.id) + '"></div>' +
           //  16.09 (istifadeci): «Planı sil» test duymesinin dibinde idi -
           //  el deye bilerdi.  Indi ayri setirde, sag kenarda, kicik link.
           '<div class="pldelrow"><button class="lnk del" data-pldel="' + esc(p.id) +
@@ -3590,6 +3597,12 @@
             "</div>";
       }
     }).join("");
+    Array.prototype.forEach.call(box.querySelectorAll(".card.plan"), function (c) {
+      if (wasOpen[c.getAttribute("data-p")]) {
+        var d1 = c.querySelector(":scope > details");
+        if (d1) d1.open = true;
+      }
+    });
     bindPlan(g);
   }
 
@@ -10222,9 +10235,11 @@
   function hemkarPaylas(t, n, r) {
     var url = "https://bil10.az/?src=hemkar" + (r.code ? "&r=" + r.code : "");
     var say = Number(r.n) || 0;
-    var txt = "«" + (t.title || "Test") + "» — " + (t.subject || "") + (t.level ? ", " + t.level : "") +
-      ", " + n + " sual. Bil10-da hazır bankdan bir dəqiqəyə yığdım, şagird telefonda işləyir, " +
-      "nəticə və zəif mövzular özü gəlir. Öz qrupunda yoxla: " + url;
+    //  08.10: link TESTƏ yox, ana səhifəyə aparır (həmkar sualları görmür) - mətn testə istinad etmir
+    var fenn = (t.subject || "") + (t.level ? ", " + t.level : "");
+    var txt = "Bil10 ilə tanış oldum: hazır sual bankından bir dəqiqəyə test yığıram" +
+      (fenn ? " (" + fenn + " üçün hazır suallar var)" : "") + ", şagird telefonda işləyir, " +
+      "nəticə və zəif mövzular özü gəlir. Qrupunda sınaqdan keçir: " + url;
     var box = $("hemkarMsg");
     //  Neçə həmkar gəlib - paylaşmağın qarşılığı görünsün
     var alt = say ? '<p class="muted" style="margin:8px 0 0">Bu linklə indiyə qədər <b>' +

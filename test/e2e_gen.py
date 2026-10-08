@@ -254,7 +254,7 @@ with sync_playwright() as pw:
     ok(pg.locator("#btnHemkar").count() == 1, "«Həmkarına göndər» duymesi var (204)")
     pg.click("#btnHemkar"); pg.wait_for_selector("#hemkarMsg .hmtxt", timeout=8000)
     hm = pg.input_value("#hemkarMsg .hmtxt")
-    ok("bil10.az/?src=hemkar" in hm and "Öz qrupunda yoxla" in hm, "hemkar metni: link + cagiris", hm[:90])
+    ok("bil10.az/?src=hemkar" in hm and "Qrupunda sınaqdan keçir" in hm, "hemkar metni: link + cagiris", hm[:90])
     pg.click("#btnPrn")
     ok(pg.evaluate("window.__prn") == 1, "cap pencersi cagirilir",
        pg.evaluate("window.__prn"))
