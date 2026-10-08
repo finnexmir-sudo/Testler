@@ -173,6 +173,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 924_aile_personaj.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 925_aile_yoxlama_olcu.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 926_ders_sablon_sayi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 927_pq_seed_200.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 928_plan_kecilen_test.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

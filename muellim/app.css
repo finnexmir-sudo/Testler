@@ -2788,7 +2788,16 @@ details.styd{margin-top:14px}
   margin:8px 10px 0;border-color:var(--brand);background:var(--brand-tint);
   box-shadow:inset 3px 0 0 var(--brand)}
 .plan .plgrp>.plrow:hover{border-color:var(--brand-line)}
-/*  08.10: plan səviyyəsində «Keçilən dərslərdən test yığ»  */
-.plan .plexam{display:flex;align-items:center;gap:10px;margin-top:10px}
-.plan .plexam .btn{min-height:38px}
-.plan .plexam .muted{font-size:12px}
+/*  08.10: seçim — hazır keçilmiş dərsdə checkbox, seçiləndə küncdə «Test yığ»  */
+.plan .plrow .plsel{width:22px;height:22px;margin-left:auto;order:3;flex:0 0 22px;cursor:pointer}
+.plan .plrow:has(.plsel:checked){border-color:var(--brand);background:var(--brand-tint)}
+.plan .plsb{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));display:flex;justify-content:flex-end;
+  pointer-events:none;margin-top:8px;z-index:5}
+.plan .plsb:empty{display:none}
+.plan .plsb .plsgo{pointer-events:auto;box-shadow:0 6px 18px rgba(16,24,40,.22);border-radius:999px;padding:0 18px;min-height:44px}
+@media (min-width:900px){.plan .plsb{bottom:16px}}
+/*  checkbox adın yanında, ilk sətirdə (ayrıca sətrə düşməsin)  */
+.plan .plrow .plsel{order:0;margin-left:auto}
+.plan .plrow:has(.plsel)>span{flex:1 1 calc(100% - 76px)}
+@media (max-width:520px){.plan .plrow:has(.plsel)>span{flex:1 1 calc(100% - 76px)}
+  .plan .plrow .plsel{margin-left:auto}}

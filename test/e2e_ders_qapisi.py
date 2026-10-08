@@ -155,6 +155,12 @@ with sync_playwright() as pw:
         #  planTest/planDone siyahini yeniden cizir, <details> baglanir - hər oxumadan evvel ac
         pg.evaluate("document.querySelectorAll('.card.plan details').forEach(function(d){d.open=true})")
         return pg.locator(".plrow", has_text=ad).first
+    def sec(ad, page=None):
+        #  08.10: sətirdə «test yığ» düyməsi yoxdur - checkbox seçilir, küncdəki «Test yığ» basılır
+        pg = page or p
+        setir(ad, pg).locator("[data-plsel]").check()
+    def yig_bas(page=None):
+        (page or p).locator("[data-plsgo]").click()
     def yaz(ad):
         return setir(ad).inner_text().replace("\n", " ")
     def item_row(ad):
@@ -170,19 +176,19 @@ with sync_playwright() as pw:
     print("\n=== 1-3 · A, B keçilib, C keçilməyib ===")
     kecdi("Dərs A", 3); kecdi("Dərs B", 2)
     ac()
-    yox(setir("Dərs A").locator('[data-plmk][data-sc="ders"]').count() == 1, "A (hazır, keçilib): «test yığ» görünür")
-    yox("test yığ" in yaz("Dərs A"), "A sətrində yazı «test yığ»", yaz("Dərs A")[:70])
+    yox(setir("Dərs A").locator("[data-plsel]").count() == 1, "A (hazır, keçilib): «test yığ» görünür")
+    yox(setir("Dərs A").locator("[data-plsel]").count() == 1 and p.locator("[data-plsgo]").count() == 0, "A: checkbox var, seçilməyibsə küncdə düymə yoxdur")
     yox("fəsil sonunda" not in yaz("Dərs A"), "A (hazır): «fəsil sonunda» izahı YOXDUR — dərsin öz düyməsi var")
-    yox(setir("Dərs B").locator("[data-plmk]").count() == 0 and "test yığ" not in yaz("Dərs B"),
+    yox(setir("Dərs B").locator("[data-plsel]").count() == 0 and "test yığ" not in yaz("Dərs B"),
         "B (hazır deyil): «test yığ» YOXDUR")
     yox("fəsil sonunda" in yaz("Dərs B") and "2/3" in yaz("Dərs B"), "B: «fəsil sonunda · 2/3» qalır", yaz("Dərs B")[:80])
-    yox(setir("Dərs C").locator("[data-plmk]").count() == 0 and "fəsil sonunda" not in yaz("Dərs C") and "test yığ" not in yaz("Dərs C"),
+    yox(setir("Dərs C").locator("[data-plsel]").count() == 0 and "fəsil sonunda" not in yaz("Dərs C") and "test yığ" not in yaz("Dərs C"),
         "C (keçilməyib): nə düymə, nə izah", yaz("Dərs C")[:60])
     yox(p.locator(".plgrp > summary .plgm").count() == 0, "fəsil bitməyib: başlıqda «fəsildən test yığ» yoxdur")
     p.screenshot(path=OUT + "/1-masaustu.png", full_page=True)
 
     print("\n=== 1 · A: «test yığ» → dərs testi ===")
-    setir("Dərs A").locator('[data-plmk][data-sc="ders"]').click(); p.wait_for_timeout(700)
+    sec("Dərs A"); yig_bas(); p.wait_for_timeout(700)
     box = p.locator(".ploffer").inner_text()
     yox("yalnız bu dərsdən" in box and "bu fəsildən" not in box, "qutu «yalnız bu dərsdən» deyir", box.replace("\n", " ")[:120])
     yox(p.locator("#plCnt").count() == 0, "dərs testində sual sayı sahəsi yoxdur (ölçünü server qoyur)")
@@ -206,7 +212,7 @@ with sync_playwright() as pw:
     p.locator("[data-plskip]").first.click(); p.wait_for_timeout(300)
     setir("Dərs B")
     yox(p.locator(".plgrp > summary .plgm").count() == 1, "fəsil bitdi: başlıqda «fəsildən test yığ» var")
-    yox(setir("Dərs C").locator('[data-plmk][data-sc="ders"]').count() == 1, "C sətrində də «test yığ» (dərs) var — ikisi ayrıdır")
+    yox(setir("Dərs C").locator("[data-plsel]").count() == 1, "C sətrində də «test yığ» (dərs) var — ikisi ayrıdır")
     yox("fəsil sonunda" in yaz("Dərs B"), "B hələ də hazır deyil: izah qalır")
     p.evaluate("document.querySelectorAll('.card.plan details').forEach(function(d){d.open=true})")
     p.screenshot(path=OUT + "/2-masaustu-fesil-bitdi.png", full_page=True)
@@ -230,11 +236,11 @@ with sync_playwright() as pw:
         yox(t["title"] == FES + " — yoxlama", "fəsil vərəqinin başlığı fəslin adıdır", t["title"])
         yox(n["nis"] < n["n"], "fəsil testi nişansız / başqa dərsin sualını da alır", "%d/%d C-dən" % (n["nis"], n["n"]))
     yox(p.locator(".plgrp > summary .plgm").count() == 0, "fəsil testi yığılandan sonra başlıq düyməsi yox olur")
-    yox("fəsil vərəqi" in yaz("Dərs C") and setir("Dərs C").locator('[data-plmk][data-sc="ders"]').count() == 1,
+    yox("fəsil vərəqi" in yaz("Dərs C") and setir("Dərs C").locator("[data-plsel]").count() == 1,
         "C sətri: «fəsil vərəqi» dərsin öz testi sayılmır — «test yığ» qalır", yaz("Dərs C")[:80])
 
     print("\n=== C: dərsin öz testi fəsil testini pozmur ===")
-    setir("Dərs C").locator('[data-plmk][data-sc="ders"]').click(); p.wait_for_timeout(600)
+    sec("Dərs C"); yig_bas(); p.wait_for_timeout(600)
     p.locator('[data-pltest="%s"][data-sc="ders"]' % ITEM["Dərs C"]).click(); p.wait_for_timeout(6000)
     rc2 = item_row("Dərs C")
     yox(rc2["f"] == rc["f"] and rc2["t"] and rc2["t"] != rc2["f"], "fesil_test_id toxunulmaz, test_id dərs testidir")
@@ -244,7 +250,7 @@ with sync_playwright() as pw:
 
     print("\n=== 5 · «geri al» ===")
     p.locator('[data-plundo="%s"]' % ITEM["Dərs C"]).click(); p.wait_for_timeout(1500)
-    yox(setir("Dərs C").locator("[data-plmk]").count() == 0 and "fəsil sonunda" not in yaz("Dərs C"), "geri alınan dərsdə düymə də yoxdur", yaz("Dərs C")[:60])
+    yox(setir("Dərs C").locator("[data-plsel]").count() == 0 and "fəsil sonunda" not in yaz("Dərs C"), "geri alınan dərsdə düymə də yoxdur", yaz("Dərs C")[:60])
     yox(p.locator(".plgrp > summary .plgm").count() == 0, "fəsil yenə bitməyib: başlıq düyməsi yoxdur")
     kecdi("Dərs C", 1)
 
@@ -257,11 +263,8 @@ with sync_playwright() as pw:
     poolA = set(r["i"] for r in q("select id::text i from public.questions where tags @> array['ders:dq-a']"))
     unseen = len(poolA - used)
     q("update public.class_plan_items set test_id=null where id=%s", (ITEM["Dərs A"],))
-    #  08.10: sətirdə «test yığ» yalnız SON hazır keçilmiş dərsdədir - A son olsun deyə C müvəqqəti keçilməmiş
-    cdone = q("select done_at from public.class_plan_items where id=%s", (ITEM["Dərs C"],), one=True)["done_at"]
-    q("update public.class_plan_items set done_at=null where id=%s", (ITEM["Dərs C"],))
     ac()
-    setir("Dərs A").locator('[data-plmk][data-sc="ders"]').click(); p.wait_for_timeout(600)
+    sec("Dərs A"); yig_bas(); p.wait_for_timeout(600)
     p.locator('[data-pltest="%s"]' % ITEM["Dərs A"]).click(); p.wait_for_timeout(6000)
     ra2 = item_row("Dərs A")
     if ra2["t"] and TA1:
@@ -271,7 +274,6 @@ with sync_playwright() as pw:
             "ikinci test fərqlidir: kəsişmə %d ≤ %d (yeni suallar: %d)" % (len(s1 & s2), beklenen, unseen))
     else:
         yox(False, "ikinci test yığılmadı")
-    q("update public.class_plan_items set done_at=%s where id=%s", (cdone, ITEM["Dərs C"]))
 
     print("\n=== server: p_scope qoruyucusu ===")
     def rpc(sql, args):
@@ -328,8 +330,6 @@ with sync_playwright() as pw:
     q("update public.class_plan_items set done_at=null, test_id=null, fesil_test_id=null where id=%s", (ITEM["Dərs D"],))
     print("\n=== telefon (390 px) ===")
     kecdi("Dərs A", 3)
-    #  08.10: sətirdə «test yığ» yalnız SON hazır keçilmiş dərsdə - telefonda A tək keçilmiş olsun
-    q("update public.class_plan_items set done_at=null where plan_id=%s and id<>%s", (pid, ITEM["Dərs A"]))
     q("update public.class_plan_items set test_id=null, fesil_test_id=null where plan_id=%s", (pid,))
     ctx2 = br.new_context(viewport={"width": 390, "height": 900})
     p2 = ctx2.new_page()
@@ -339,25 +339,37 @@ with sync_playwright() as pw:
     p2.wait_for_selector("#yMenu .mrow", timeout=30000)
     ac(p2)
     yox(p2.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "telefonda yana sürüşmə yoxdur")
-    b = setir("Dərs A", p2).locator("[data-plmk]").first
+    b = setir("Dərs A", p2).locator("[data-plsel]").first
     yox(b.count() == 1 and b.is_visible(), "A: «test yığ» telefonda görünür")
     bb = b.bounding_box()
     yox(bb and bb["x"] >= 0 and bb["x"] + bb["width"] <= 390, "düymə ekranın içindədir", bb)
     p2.screenshot(path=OUT + "/3-telefon.png", full_page=True)
-    b.click(); p2.wait_for_timeout(600)
+    b.check(); p2.wait_for_timeout(300)
+    gb = p2.locator("[data-plsgo]")
+    yox(gb.count() == 1 and gb.is_visible(), "telefonda küncdə «Test yığ» düyməsi çıxdı")
+    gbb = gb.bounding_box()
+    yox(gbb and gbb["x"] + gbb["width"] <= 390 and gbb["y"] + gbb["height"] <= 900, "düymə ekranın içindədir (kunc)", gbb)
+    p2.screenshot(path=OUT + "/7-telefon-secim.png")
+    gb.click(); p2.wait_for_timeout(600)
     yox(p2.evaluate("document.documentElement.scrollWidth <= window.innerWidth") and p2.locator(".ploffer").is_visible(), "telefonda təklif qutusu ekrana sığır")
     p2.locator(".ploffer").scroll_into_view_if_needed()
     p2.locator(".card.plan").screenshot(path=OUT + "/6-qutu-ders-telefon.png")
-    print("\n=== 08.10 · plan səviyyəsində «Keçilən dərslərdən test yığ» ===")
+    print("\n=== 08.10 · checkbox + küncdə «Test yığ» (2+ dərs → rpc_plan_test_done) ===")
+    q("update public.class_plan_items set test_id=null, fesil_test_id=null where plan_id=%s", (pid,))
     kecdi("Dərs A", 3); kecdi("Dərs C", 1)
     ac()
-    yox(p.locator("[data-plexam]").count() == 1, "plan səviyyəsində bir «Keçilən dərslərdən test yığ» düyməsi var")
-    yox("2 dərs" in p.locator(".plexam").inner_text(), "düymənin yanında keçilən dərs sayı: 2", p.locator(".plexam").inner_text().replace("\n", " "))
-    p.locator("[data-plexam]").click(); p.wait_for_timeout(400)
-    yox(p.locator("[data-plexgo]").count() == 1 and "Keçilən dərslərdən" in p.locator(".ploffer").inner_text(), "təsdiq qutusu açıldı")
+    yox(p.locator("[data-plexam]").count() == 0, "plan səviyyəsində köhnə düymə yoxdur")
+    yox(p.locator("[data-plsgo]").count() == 0, "heç nə seçilməyib: küncdə düymə yoxdur")
+    sec("Dərs A"); sec("Dərs C"); p.wait_for_timeout(300)
+    yox(p.locator("[data-plsgo]").count() == 1 and "2 dərs" in p.locator("[data-plsgo]").inner_text(), "2 seçim: «Test yığ · 2 dərs»", p.locator("[data-plsgo]").inner_text())
+    p.locator("[data-plsel]:checked").first.uncheck(); p.wait_for_timeout(200)
+    yox("dərs" not in p.locator("[data-plsgo]").inner_text(), "1 seçim: sadəcə «Test yığ»")
+    setir("Dərs A").locator("[data-plsel]").check(); p.wait_for_timeout(200)
+    yig_bas(); p.wait_for_timeout(400)
+    yox(p.locator("[data-plexgo]").count() == 1 and "Seçilmiş 2 dərsdən" in p.locator(".ploffer").inner_text(), "təsdiq qutusu: seçilmiş 2 dərs")
     p.locator("[data-plexgo]").click(); p.wait_for_timeout(6000)
-    pe = q("select count(*) n, max(array_length(item_ids,1)) k from public.plan_exams where plan_id=%s", (pid,), one=True)
-    yox(pe["n"] >= 1 and (pe["k"] or 0) >= 2, "plan_exams-də sınaq yazıldı, ≥2 dərs", pe)
+    pe = q("select count(*) n from public.tests where gen_rule->>'pack'='done' and gen_rule->>'plan'=%s", (str(pid),), one=True)
+    yox(pe["n"] == 1, "seçilmiş dərslərdən test yığıldı", pe)
     yox(p.locator('#plm-%s a[href^="#/t/"]' % pid).count() == 1, "«Testə bax» linki çıxdı")
     br.close()
 

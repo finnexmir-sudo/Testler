@@ -3379,12 +3379,6 @@
         if (!items[i].done && !cur) cur = items[i];
         if (items[i].done) lastDone = items[i];
       }
-      /*  08.10: sətirdə «test yığ» yalnız SON hazır keçilmiş dərsdə (dərsin öz testi);
-          qalanı üçün plan səviyyəsində «Keçilən dərslərdən test yığ».  */
-      var lastReady = null;
-      for (var li = 0; li < items.length; li++) {
-        if (items[li].done && items[li].ders_hazir) lastReady = items[li];
-      }
       var pct = p.total ? Math.round(p.done * 100 / p.total) : 0;
       /*  Alt movzular varsa setirler artiq FESIL deyil, DERSDIR -
           "2 / 47 ders" demek "2 / 11 movzu"dan durustdur.  */
@@ -3442,16 +3436,6 @@
               ? '<a href="#/t/' + esc(lastDone.test_id) + '" class="pltest">vərəq</a>' : "") +
             "</div>"
           : "") +
-        /*  08.10: «Keçilən dərslərdən test» - plan səviyyəsində BİR düymə (sətirlərdə
-            təkrarlanan «test yığ» əvəzinə).  Yol hazırdır: rpc_pack_exam (p_all) -
-            planın bütün keçilmiş dərslərini götürür.  Təsdiq qutusu #plm-<plan>-dədir.  */
-        (items.some(function (x) { return x.done; })
-          ? '<div class="plexam"><button class="btn sm" data-plexam="' + esc(p.id) + '"' +
-              (d.paid ? "" : ' disabled title="Abunə paketi ilə"') + ">" + ic("doc") +
-              "Keçilən dərslərdən test yığ</button>" +
-              '<span class="muted">' + items.filter(function (x) { return x.done; }).length +
-              " dərs</span></div>"
-          : "") +
         "<details><summary>Bütün mövzular</summary>" +
           '<div class="pllist">' + (function () {
             /*  Gelecek fesiller gizli: 8-ci sinifde 11 fesil siyahini
@@ -3504,7 +3488,8 @@
             }
             //  secim duymesi ("Seçilən mövzudan test yığ") siyahinin
             //  bilavasite altinda - secilen setirlerin yaninda
-            h += '<div class="plmbar" id="plmb-' + esc(p.id) + '"></div>';
+            h += '<div class="plmbar" id="plmb-' + esc(p.id) + '"></div>' +
+                 '<div class="plsb" id="plsb-' + esc(p.id) + '"></div>';
             if (next.length) {
               var nn = next.reduce(function (a, b) { return a + b.items.length; }, 0);
               h += '<details class="plnext"><summary>Növbətilərə bax ' +
@@ -3585,10 +3570,12 @@
                   öz testi hələ yoxdursa: «test yığ» (yalnız BU dərsdən).  Fəsil testi
                   ayrıdır - başlıqdakı düymə, «fəsil vərəqi» dərsin öz testi sayılmır.
                   Hazır olmayan dərsdə yuxarıdakı «fəsil sonunda» izahı qalır.  */
-              (it.done && it.ders_hazir && !planOwnTest(it) && lastReady && it.id === lastReady.id
-                ? '<button class="plmk plds" data-plmk="' + esc(it.id) + '" data-sc="ders"' +
-                  (d.paid ? ' title="Yalnız bu dərsdən test yığır"' : ' disabled title="Abunə paketi ilə"') +
-                  ">test yığ</button>"
+              /*  08.10: sətirdə «test yığ» düyməsi YOXDUR.  Hazır (ders_hazir) keçilmiş dərsdə
+                  checkbox; seçiləndə planın küncündə bir «Test yığ» düyməsi çıxır və seçilmiş
+                  dərslərə uyğun test yığır (tək dərs - dərsin öz testi, 2+ - rpc_plan_test_done).  */
+              (it.done && it.ders_hazir && d.paid
+                ? '<input type="checkbox" class="plck plsel" data-plsel="' + esc(p.id) +
+                  '" value="' + esc(it.id) + '" aria-label="Test üçün seç: ' + esc(it.topic) + '">'
                 : "") +
               (weak && d.paid
                 ? '<button class="plmk plre" data-plmk="' + esc(it.id) + '" data-sc="' + planScope(it) +
@@ -3630,17 +3617,21 @@
           .catch(function () { busy = false; });
         return;
       }
-      id = b.getAttribute("data-plexam");
+      id = b.getAttribute("data-plsgo");
       if (id) {
-        var nd = box.querySelector('[data-p="' + id + '"] .plexam .muted');
-        var mm = $("plm-" + id);
+        var cks = box.querySelectorAll('[data-plsel="' + id + '"]:checked'), ids = [];
+        Array.prototype.forEach.call(cks, function (c) { ids.push(c.value); });
+        if (!ids.length) return;
+        //  tək dərs: dərsin öz testi (mövcud yol, «vərəq» sətirdə qalır)
+        if (ids.length === 1) return planOfferLate(ids[0], "ders");
+        var mm = $("plm-" + id), s2m = $("pls-" + id); if (s2m) s2m.innerHTML = "";
         if (mm) {
-          mm.innerHTML = '<div class="ploffer"><b>Keçilən dərslərdən test yığılsın?</b>' +
-            '<p class="muted" style="margin:4px 0 10px">Planın keçilmiş bütün dərslərindən (' +
-            esc(nd ? nd.textContent : "") + ') sual yığılır və qrupa dərhal tapşırılır ' +
-            '(son tarix 7 gün, 1 cəhd).</p><div class="plbtns">' +
+          mm.innerHTML = '<div class="ploffer"><b>Seçilmiş ' + ids.length + ' dərsdən test yığılsın?</b>' +
+            '<p class="muted" style="margin:4px 0 10px">Yalnız seçdiyiniz dərslərin öz suallarından yığılır; ' +
+            'başqa dərsin sualı düşmür. Test qrupa dərhal tapşırılır (son tarix 7 gün, 1 cəhd).</p>' +
+            '<div class="plbtns">' +
             '<input id="plExN" type="number" min="5" max="50" value="20">' +
-            '<button class="btn go sm" data-plexgo="' + esc(id) + '">Yığ və tapşırıq ver</button>' +
+            '<button class="btn go sm" data-plexgo="' + esc(id) + '" data-ids="' + esc(ids.join(",")) + '">Yığ və tapşırıq ver</button>' +
             '<button class="btn sm ghost" data-plexno="' + esc(id) + '">Sonra</button></div></div>';
           mm.scrollIntoView({ block: "nearest" });
         }
@@ -3651,12 +3642,14 @@
       id = b.getAttribute("data-plexgo");
       if (id) {
         var cnt = Number(($("plExN") || {}).value) || 20;
+        var pick = (b.getAttribute("data-ids") || "").split(",").filter(Boolean);
         busy = true; b.disabled = true; b.textContent = "Yığılır…";
-        sb.rpc("rpc_pack_exam", { p_plan_id: id, p_count: cnt, p_all: true }).then(function (r) {
+        sb.rpc("rpc_plan_test_done", { p_plan_id: id, p_count: cnt, p_item_ids: pick }).then(function (r) {
           busy = false;
           var m6 = $("plm-" + id);
-          if (m6) m6.innerHTML = msg("ok", "Test yığıldı və tapşırıldı: " + r.items + " dərs, " + r.count +
-            " sual, 7 gün. ") + '<a class="btn sm" href="#/t/' + esc(r.test_id) + '">Testə bax</a>';
+          if (m6) m6.innerHTML = msg("ok", "Test yığıldı və tapşırıldı: " + r.lessons + " dərsdən " + r.count +
+            " sual, 7 gün." + (r.skipped ? " " + r.skipped + " seçilmiş dərsdə hazır sual olmadığı üçün daxil edilmədi." : "") + " ") +
+            '<a class="btn sm" href="#/t/' + esc(r.test_id) + '">Testə bax</a>';
         }).catch(function (e) {
           busy = false; b.disabled = false; b.textContent = "Yığ və tapşırıq ver";
           var m7 = $("plm-" + id);
@@ -3696,6 +3689,16 @@
     //  birge test: 2+ movzu secilende duyme cixir
     box.addEventListener("change", function (ev) {
       var c = ev.target;
+      var sp = c && c.getAttribute ? c.getAttribute("data-plsel") : null;
+      if (sp) {
+        var sn = box.querySelectorAll('[data-plsel="' + sp + '"]:checked').length;
+        var sbar = $("plsb-" + sp);
+        if (sbar) sbar.innerHTML = sn
+          ? '<button class="btn go plsgo" data-plsgo="' + esc(sp) + '">' + ic("doc") +
+            "Test yığ" + (sn > 1 ? " · " + sn + " dərs" : "") + "</button>"
+          : "";
+        return;
+      }
       var pid = c && c.getAttribute ? c.getAttribute("data-plck") : null;
       if (!pid) return;
       var n = box.querySelectorAll('[data-plck="' + pid + '"]:checked').length;
