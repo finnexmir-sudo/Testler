@@ -998,7 +998,14 @@
         '<button class="item" id="btnMeBank">' +
           '<div class="ic">' + ic("doc") + "</div>" +
           '<div class="g"><b>Sual bankı</b><i>öz suallarınız və hazır suallar</i></div>' +
+          '<span class="arrow">' + ic("right") + "</span></button>" +
+        //  08.10: «Həmkarına göndər» test səhifəsindən (suallar) buraya köçdü - orada testə aid deyildi,
+        //  link ana səhifəyə aparır.  Hazır mətn + özünün tövsiyə kodu.
+        '<button class="item" id="btnHemkar">' +
+          '<div class="ic">' + ic("send") + "</div>" +
+          '<div class="g"><b>Həmkarınıza göndərin</b><i>Bil10 haqqında hazır mətn + sizin tövsiyə linkiniz</i></div>' +
           '<span class="arrow">' + ic("right") + "</span></button></div>" +
+      '<div id="hemkarMsg"></div>' +
       '<div class="spacer"></div>' +
       '<div class="card tight">' +
         "<b>Necə işləyir?</b>" +
@@ -1009,6 +1016,7 @@
     on("btnBack", "click", function () { nav("#/"); });
     on("btnMeBank", "click", function () { nav("#/b"); });
     on("btnMeFb", "click", function () { nav("#/bize"); });
+    on("btnHemkar", "click", function () { hemkarShare(); });
     subChips("meSubs", mySubs());
     on("btnMeSave", "click", function () {
       if (busy) return;
@@ -10225,21 +10233,20 @@
   /*  217: linkde muellimin OZ tovsiye kodu gedir - «kim getirdi»
       bilinsin.  Kod serverden alinir (rpc_ref_link); alinmasa link
       kodsuz gedir - paylasma dayanmir.  */
-  function hemkarShare(t, n) {
+  function hemkarShare() {
     var box = $("hemkarMsg");
     function said(h) { if (box) box.innerHTML = h; }
     said('<p class="muted" style="margin:8px 0 0">Link hazırlanır…</p>');
     sb.rpc("rpc_ref_link", {}).catch(function () { return null; })
-      .then(function (r) { hemkarPaylas(t, n, r || {}); });
+      .then(function (r) { hemkarPaylas(r || {}); });
   }
-  function hemkarPaylas(t, n, r) {
+  function hemkarPaylas(r) {
     var url = "https://bil10.az/?src=hemkar" + (r.code ? "&r=" + r.code : "");
     var say = Number(r.n) || 0;
-    //  08.10: link TESTƏ yox, ana səhifəyə aparır (həmkar sualları görmür) - mətn testə istinad etmir
-    var fenn = (t.subject || "") + (t.level ? ", " + t.level : "");
-    var txt = "Bil10 ilə tanış oldum: hazır sual bankından bir dəqiqəyə test yığıram" +
-      (fenn ? " (" + fenn + " üçün hazır suallar var)" : "") + ", şagird telefonda işləyir, " +
-      "nəticə və zəif mövzular özü gəlir. Qrupunda sınaqdan keçir: " + url;
+    //  Link ana səhifəyə aparır (həmkar sualları görmür) - mətn heç bir testə istinad etmir
+    var txt = "Bil10 ilə tanış oldum: hazır sual bankından bir dəqiqəyə test yığıram, " +
+      "şagird telefonda işləyir, nəticə və zəif mövzular özü gəlir. " +
+      "Qrupunda sınaqdan keçir: " + url;
     var box = $("hemkarMsg");
     //  Neçə həmkar gəlib - paylaşmağın qarşılığı görünsün
     var alt = say ? '<p class="muted" style="margin:8px 0 0">Bu linklə indiyə qədər <b>' +
@@ -10396,9 +10403,6 @@
           "</div>" +
           //  3. SAKIT - hamisi ag, eyni cekide; vaxt limiti de buradadir
           '<div class="tact3">' +
-            //  204: reklam - muellim hemkarina hazir metn + link gonderir
-            '<button class="btn sm ghost" id="btnHemkar" title="Həmkarınıza göndərin">' +
-              ic("send") + "Həmkarına göndər</button>" +
             (t.gen_rule && !done && !diag
               ? '<button class="btn sm ghost" id="btnRegen">' + ic("gen") +
                 "Yenidən yığ</button>"
@@ -10437,7 +10441,6 @@
           ? '<p class="muted" style="margin:8px 0 0">Bu testi artıq şagird ' +
             "işlədiyi üçün yeniləmək olmaz — yeni test yığın.</p>"
           : "") +
-        '<div id="hemkarMsg"></div>' +
         '<div id="pErr"></div>' +
       "</div>" +
       '<div class="spacer"></div>' +
@@ -10670,7 +10673,6 @@
     on("btnPrn",  "click", function () {
       paperPrint(t, !!($("prnK") && $("prnK").checked));
     });
-    on("btnHemkar", "click", function () { hemkarShare(t, qs.length); });
 
     /* "Kime" siyahisi secilen qrupa baglidir - qrup deyisende yenilenir.
        Artiq ferdi teyinat almis sagird tekrar teklif olunmur. */

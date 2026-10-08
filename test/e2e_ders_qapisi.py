@@ -378,6 +378,15 @@ with sync_playwright() as pw:
     p.wait_for_timeout(800)
     yox(p.locator('#plm-%s .asgwa, #plm-%s [data-wacopy], #plm-%s textarea' % (pid, pid, pid)).count() >= 1 or "WhatsApp" in p.locator('#plwa-%s' % pid).inner_text(), "WhatsApp mətni çıxdı", p.locator('#plwa-%s' % pid).inner_text()[:80])
     yox(p.locator('.plan details #plm-%s' % pid).count() == 0 and p.locator('#plm-%s' % pid).is_visible(), "nəticə qutusu <details>-dən kənardadır, görünür")
+    print("\n=== 08.10 · «Həmkarına göndər» Profildədir, test səhifəsində yox ===")
+    p.goto(PANEL + "?yeni=1#/me"); p.wait_for_selector("#btnHemkar", timeout=30000)
+    p.click("#btnHemkar"); p.wait_for_selector("#hemkarMsg .hmtxt", timeout=8000)
+    hm = p.input_value("#hemkarMsg .hmtxt")
+    yox("bil10.az/?src=hemkar" in hm and "Qrupunda sınaqdan keçir" in hm, "Profil: həmkar mətni + link", hm[:80])
+    yox("sual." not in hm and "—" not in hm.split("Bil10")[0], "mətn heç bir testə istinad etmir", hm[:80])
+    tid = q("select id::text i from public.tests where owner_type='educator' limit 1", one=True)["i"]
+    p.goto(PANEL + "?yeni=1#/t/" + tid); p.wait_for_selector("#btnPrn", timeout=30000)
+    yox(p.locator("#btnHemkar").count() == 0, "test səhifəsində «Həmkarına göndər» yoxdur")
     br.close()
 
 temizle(); movzu_sil()
