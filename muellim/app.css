@@ -2859,3 +2859,34 @@ details.styd{margin-top:14px}
 .card.pad0>.item:active{transform:translateY(1px)}
 .card.pad0>.item .ic{border-radius:12px;background:linear-gradient(180deg,var(--brand-tint),#fff);
   border:1px solid var(--brand-line);box-shadow:0 2px 0 var(--brand-line)}
+
+/* =========================== Qrup səhifəsi «Dərsdən əvvəl»: səliqəli, yığcam (09.10)
+   İstifadəçi: «bu hissə dağınıq və səliqəsiz gəlir».  Dörd rəngli sol zolaq, hər kartda fərqli boşluq,
+   ad «həb»ləri və böyük boş sahələr.  İndi: bir ölçü, rəngli yalnız ikon, sol zolaq yalnız «Bu günün dərsi»
+   və xəbərdarlıqda; adlar sadə sətir; boş vəziyyətdə nişan + keçid bir sətirdə.  */
+.dkgrid{gap:10px}
+.card.prep.dk{padding:14px 16px 15px;border-radius:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 3px 0 -1px var(--n-100),0 10px 20px -12px rgba(16,24,40,.26)}
+.card.prep.dk::before{display:none}
+.card.prep.dk.k-ders::before,.card.prep.dk.pwarn::before{display:block}
+.dkh{margin-bottom:9px;gap:9px}
+.dki{flex:0 0 30px;height:30px;border-radius:9px}
+.dkt{font-size:14.5px}
+.dkm1{font-size:17px;margin:0 0 6px}
+.dkp{margin:0 0 10px;font-size:13px}
+.dkres{margin:0 0 9px}
+.dk .btn.sm{margin-top:0;max-width:100%;white-space:normal;text-align:left;line-height:1.3}
+/*  Test / Yazılı: nişan solda, keçid sağda (bir sətir); mətn və adlar tam enlə  */
+.hwl.tam{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 10px}
+.hwl.tam .hwh{flex:0 1 auto}
+.hwl.tam .hwb,.hwl.tam .hwn{flex:1 1 100%;margin-top:0}
+.hwl.tam .hwf{flex:0 0 auto;margin:0 0 0 auto}
+.hwl.tam .hwst{padding:4px 11px;font-size:12.5px}
+.hwl.tam .hwb{font-size:14.5px}
+.hwl.tam .hwn{font-size:13px;color:var(--fg-3);line-height:1.5}
+.hwl.tam .hwn a,.hwl.tam .hwn .nm{display:inline;padding:0;margin:0;background:none;border-radius:0;font-weight:620;color:var(--fg-2)}
+.hwl.tam .cm{display:inline;color:var(--fg-3)}
+@media (max-width:520px){
+  .msec.dkm{margin:18px 2px 8px}
+  .card.prep.dk{padding:13px 14px 14px}
+}
