@@ -1775,8 +1775,13 @@
         h = '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
           "</div><b>Açıq tapşırıq yoxdur</b>Bu qrupa hələ test və ya yazılı tapşırıq verilməyib.</div></div>";
       }
-      h += '<div class="card pad0 menu">' + yRow({ ic: "clip", href: "#/a/" + esc(gid),
-        ad: "Tapşırıqlara bax", alt: "verilmiş testlər və yazılı tapşırıqlar" }) + "</div>";
+      //  09.10 (istifadeci): Tapsiriqlar ekranindaki «etməyənlər →»-dan gelibse bu setir ELE ORAYA qaytarirdi (dovr).
+      //  Yalniz basqa yerden (Icmal) gelende lazimdir.
+      var prevH = HIST.length ? String(HIST[HIST.length - 1] || "") : "";
+      if (prevH.indexOf("#/a/" + gid) !== 0) {
+        h += '<div class="card pad0 menu">' + yRow({ ic: "clip", href: "#/a/" + esc(gid),
+          ad: "Tapşırıqlara bax", alt: "verilmiş testlər və yazılı tapşırıqlar" }) + "</div>";
+      }
       $("htBox").innerHTML = h;
       Array.prototype.forEach.call($("htBox").querySelectorAll("[data-ud]"), function (b) {
         b.addEventListener("click", function () { copyText(msgs[Number(b.getAttribute("data-ud"))], b); });
