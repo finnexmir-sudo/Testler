@@ -2816,32 +2816,46 @@ details.styd{margin-top:14px}
    İstifadəçi: «qruplar, test yığ olan hissəni ayır bir-birindən, bir az 3D effekti olsun».
    İcmal (#yMenu, #yDiq «Bu həftə») və qrup menyusu (#gMenu): hər sətir ayrıca kart, yumşaq qat-qat kölgə + üst işıq xətti + alt «qalınlıq»,
    toxunanda/üzərinə gələndə azca qalxır, basanda çökür.  Başqa ekranların .menu-su dəyişmir.  */
-#yMenu.menu,#yMenu .menu,#yDiq .menu,#gMenu.menu,#stu.menu{background:none;border:0;box-shadow:none;padding:0;overflow:visible;
+.card.menu,.menu,#yMenu.menu{background:none;border:0;box-shadow:none;padding:0;overflow:visible;
   display:flex;flex-direction:column;gap:12px}
-:is(#yMenu,#yDiq,#gMenu,#stu) .mrow{position:relative;background:var(--surface);border:1px solid var(--n-150);border-radius:16px;
+.menu .mrow{position:relative;background:var(--surface);border:1px solid var(--n-150);border-radius:16px;
   padding:15px 16px;border-bottom:1px solid var(--n-150);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
              0 1px 0 var(--n-150),
              0 3px 0 -1px var(--n-100),
              0 10px 20px -10px rgba(16,24,40,.28);
   transition:transform .14s ease,box-shadow .14s ease}
-:is(#yMenu,#yDiq,#gMenu,#stu) .mrow:last-child{border-bottom:1px solid var(--n-150)}
-:is(#yMenu,#yDiq,#gMenu,#stu) .mrow .mi{width:38px;height:38px;flex:0 0 38px;padding:9px;border-radius:12px;
+.menu .mrow:last-child{border-bottom:1px solid var(--n-150)}
+.menu .mrow .mi{width:38px;height:38px;flex:0 0 38px;padding:9px;border-radius:12px;
   background:linear-gradient(180deg,var(--brand-tint),#fff);border:1px solid var(--brand-line);
   box-shadow:0 2px 0 var(--brand-line)}
 @media (hover:hover){
-  :is(#yMenu,#yDiq,#gMenu,#stu) .mrow:hover{transform:translateY(-2px);background:var(--surface);
+  .menu .mrow:hover{transform:translateY(-2px);background:var(--surface);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 4px 0 -1px var(--n-100),
                0 16px 26px -12px rgba(16,24,40,.34)}
 }
-:is(#yMenu,#yDiq,#gMenu,#stu) .mrow:active{transform:translateY(1px);
+.menu .mrow:active{transform:translateY(1px);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 4px 8px -6px rgba(16,24,40,.3)}
-:is(#yMenu,#yDiq,#gMenu,#stu) .mrow.dq{background:var(--err-tint);border-color:var(--err-line,var(--err));box-shadow:inset 3px 0 0 var(--err),0 10px 20px -10px rgba(180,35,24,.3)}
-:is(#yMenu,#yDiq,#gMenu,#stu) .mrow.dq .mi{background:#fff;border-color:var(--err);box-shadow:0 2px 0 var(--err-tint);color:var(--err)}
-@media (min-width:721px){:is(#yMenu,#yDiq,#gMenu,#stu) .mrow{padding:16px 20px}}
+.menu .mrow.dq{background:var(--err-tint);border-color:var(--err-line,var(--err));box-shadow:inset 3px 0 0 var(--err),0 10px 20px -10px rgba(180,35,24,.3)}
+.menu .mrow.dq .mi{background:#fff;border-color:var(--err);box-shadow:0 2px 0 var(--err-tint);color:var(--err)}
+@media (min-width:721px){.menu .mrow{padding:16px 20px}}
 /*  Şagirdlər siyahısı (#stu): xülasə zolağı ayrıca kart, hər şagird ayrıca kart  */
 #stu.menu .stsum{background:var(--surface);border:1px solid var(--n-150);border-radius:14px;padding:11px 16px;
   box-shadow:0 8px 16px -10px rgba(16,24,40,.22)}
 #stu.menu .stu,#stu.menu .mrow.stuy{margin:0}
 #stu.menu .arxiv{display:flex;flex-direction:column;gap:12px}
 #stu.menu .arxiv>summary{cursor:pointer;padding:6px 4px}
+/*  09.10: eyni üslub HƏR YERDƏ (.menu siyahıları) + köhnə .item sətirləri (Profil, Qruplar siyahısı və s.)  */
+.menu .mrow.udr{border-radius:16px}
+.card.pad0:has(>.item){background:none;border:0;box-shadow:none;padding:0;overflow:visible;
+  display:flex;flex-direction:column;gap:12px}
+.card.pad0>.item{background:var(--surface);border:1px solid var(--n-150);border-radius:16px;border-bottom:1px solid var(--n-150);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 3px 0 -1px var(--n-100),0 10px 20px -10px rgba(16,24,40,.28);
+  transition:transform .14s ease,box-shadow .14s ease}
+@media (hover:hover){
+  .card.pad0>.item:hover{transform:translateY(-2px);background:var(--surface);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 4px 0 -1px var(--n-100),0 16px 26px -12px rgba(16,24,40,.34)}
+}
+.card.pad0>.item:active{transform:translateY(1px)}
+.card.pad0>.item .ic{border-radius:12px;background:linear-gradient(180deg,var(--brand-tint),#fff);
+  border:1px solid var(--brand-line);box-shadow:0 2px 0 var(--brand-line)}
