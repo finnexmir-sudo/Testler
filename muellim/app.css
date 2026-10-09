@@ -2811,3 +2811,31 @@ details.styd{margin-top:14px}
 .qfold[open]>summary::after{transform:rotate(225deg)}
 .qfold>summary .fn{font-size:12px;font-weight:600;background:var(--brand-tint);color:var(--brand);padding:2px 9px;border-radius:999px}
 .qfold>.paper{margin-top:10px}
+
+/* =========================== İcmal menyusu: sətirlər ayrı, yüngül 3D (09.10)
+   İstifadəçi: «qruplar, test yığ olan hissəni ayır bir-birindən, bir az 3D effekti olsun».
+   Yalnız İcmal (#yMenu): hər sətir ayrıca kart, yumşaq qat-qat kölgə + üst işıq xətti + alt «qalınlıq»,
+   toxunanda/üzərinə gələndə azca qalxır, basanda çökür.  Başqa ekranların .menu-su dəyişmir.  */
+#yMenu.menu,#yMenu .menu{background:none;border:0;box-shadow:none;padding:0;overflow:visible;
+  display:flex;flex-direction:column;gap:12px}
+#yMenu .mrow{position:relative;background:var(--surface);border:1px solid var(--n-150);border-radius:16px;
+  padding:15px 16px;border-bottom:1px solid var(--n-150);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+             0 1px 0 var(--n-150),
+             0 3px 0 -1px var(--n-100),
+             0 10px 20px -10px rgba(16,24,40,.28);
+  transition:transform .14s ease,box-shadow .14s ease}
+#yMenu .mrow:last-child{border-bottom:1px solid var(--n-150)}
+#yMenu .mrow .mi{width:38px;height:38px;flex:0 0 38px;padding:9px;border-radius:12px;
+  background:linear-gradient(180deg,var(--brand-tint),#fff);border:1px solid var(--brand-line);
+  box-shadow:0 2px 0 var(--brand-line)}
+@media (hover:hover){
+  #yMenu .mrow:hover{transform:translateY(-2px);background:var(--surface);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 4px 0 -1px var(--n-100),
+               0 16px 26px -12px rgba(16,24,40,.34)}
+}
+#yMenu .mrow:active{transform:translateY(1px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 4px 8px -6px rgba(16,24,40,.3)}
+#yMenu .mrow.dq{background:var(--err-tint);border-color:var(--err-line,var(--err));box-shadow:inset 3px 0 0 var(--err),0 10px 20px -10px rgba(180,35,24,.3)}
+#yMenu .mrow.dq .mi{background:#fff;border-color:var(--err);box-shadow:0 2px 0 var(--err-tint);color:var(--err)}
+@media (min-width:721px){#yMenu .mrow{padding:16px 20px}}
