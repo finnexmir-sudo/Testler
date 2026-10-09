@@ -10338,12 +10338,16 @@
       box.id = "printBox";
       document.body.appendChild(box);
     }
-    var h = '<div class="pph">' +
+    //  09.10 (istifadeci): PDF/cap vereqinde Bil10 loqosu + adi ayrica baslıqda.  Inline SVG (xarici sorgu YOXDUR),
+    //  duz reng (cap gradienti itirmesin deye - bayaqkı «tpG» gradient id-si ile de toqquşmur).
+    var brand = '<div class="ppbrand"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12.5 3.5 H18 A8.4 8.4 0 0 1 26.4 11.9 A8.4 8.4 0 0 1 18 20.3 H13.1 L8.3 24.6 Q7.1 25.6 7.1 24 V19.1 A8.4 8.4 0 0 1 4.1 11.9 A8.4 8.4 0 0 1 12.5 3.5 Z" fill="#087f75"/><g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M10.2 10.2 12.5 8.4 V16"/><ellipse cx="18.4" cy="12" rx="3.1" ry="4.1"/></g><path d="M22.5 19.5 h4.2 a3.6 3.6 0 0 1 3.6 3.6 a3.6 3.6 0 0 1-3.6 3.6 h-1 l2 3.4 -4.6-3.5 a3.6 3.6 0 0 1-4.2-3.5 a3.6 3.6 0 0 1 3.6-3.6 Z" fill="#f4c94f"/><path d="M23.4 23.2 l1.5 1.5 2.6-3" fill="none" stroke="#173b50" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      "<b>Bil10</b><span>onlayn test sistemi</span><em>bil10.az</em></div>";
+    var h = brand + '<div class="pph">' +
       "<h1>" + esc(t.title || "") + "</h1>" +
       '<div class="ppm">' + esc(t.subject || "") +
         (t.level ? " · " + esc(t.level) : "") + " · " + qs.length +
         " sual" + (t.time_limit_sec ? " · vaxt: " + Math.round(t.time_limit_sec / 60) + " dəq" : "") +
-        " · Bil10</div>" +
+        "</div>" +
       '<div class="ppf"><span>Ad, soyad: ________________________</span>' +
         "<span>Tarix: ____________</span><span>Bal: ______</span></div>" +
       "</div>" +

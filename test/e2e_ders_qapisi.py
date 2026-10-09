@@ -398,6 +398,12 @@ with sync_playwright() as pw:
     p.wait_for_selector("#qFold", state="attached", timeout=20000)
     yox(not p.evaluate("document.getElementById('qFold').open") and not p.locator(".paper .pq").first.is_visible(), "vərəqdə suallar BAĞLI gəlir")
     yox("sual" in p.inner_text("#qFold > summary"), "başlıq «Suallar · N sual»", p.inner_text("#qFold > summary"))
+    #  09.10: çap vərəqində Bil10 loqosu + adı ayrıca başlıqda
+    p.evaluate("window.print = function(){}")
+    p.click("#btnPrn"); p.emulate_media(media="print"); p.wait_for_timeout(300)
+    yox(p.locator("#printBox .ppbrand svg").count() == 1 and "Bil10" in p.inner_text("#printBox .ppbrand") and "bil10.az" in p.inner_text("#printBox .ppbrand"), "çap vərəqində loqo + «Bil10» + bil10.az başlığı var")
+    p.locator("#printBox").screenshot(path=OUT + "/10-cap-vereq.png")
+    p.emulate_media(media="screen")
     p.set_viewport_size({"width": 400, "height": 900}); p.evaluate("window.scrollTo(0,0)"); p.wait_for_timeout(400)
     p.screenshot(path=OUT + "/9-vereq-telefon.png")
     p.set_viewport_size({"width": 1280, "height": 900})

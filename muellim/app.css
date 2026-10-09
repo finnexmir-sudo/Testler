@@ -1185,6 +1185,14 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
     font:12.5px/1.5 Georgia,"Times New Roman",serif}
   #printBox h1{font-size:18px;margin:0 0 4px;color:#000}
   #printBox .pph{border-bottom:2px solid #000;padding:0 0 8px;margin:0 0 14px}
+  #printBox .ppbrand{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:0 0 6px;border-bottom:1px solid #999;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printBox .ppbrand svg{width:28px;height:28px;flex:0 0 28px}
+  #printBox .ppbrand b{font-size:17px;letter-spacing:-.01em;color:#087f75}
+  #printBox .ppbrand span{font-size:10.5px;color:#555}
+  #printBox .ppbrand em{margin-left:auto;font-style:normal;font-size:11px;color:#333}
+  #printBox.compact .ppbrand{margin:0 0 6px;padding-bottom:4px}
+  #printBox.compact .ppbrand svg{width:22px;height:22px;flex-basis:22px}
   #printBox .ppm{font-size:11px;color:#333;margin:0 0 10px}
   #printBox .ppf{display:flex;gap:20px;flex-wrap:wrap;font-size:12px}
   #printBox .ppq{break-inside:avoid;page-break-inside:avoid;margin:0 0 12px}
