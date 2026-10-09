@@ -452,6 +452,9 @@ bank 391_bank_riy9_ders_tamamlama.sql
 bank 1000_bank_riy1_ders_elamet_ededler10.sql
 bank 1001_bank_riy1_ders_muqayise.sql
 bank 1002_bank_riy1_ders_toplama10.sql
+bank 1100_bank_riy11_ders_coxhedli.sql
+bank 1120_bank_riy11_ders_nisan.sql
+bank 1121_bank_riy11_coxhedli_duzelis.sql
 bank 400_bank_inf10_ders_sebeke.sql
 bank 401_bank_inf11_ders_modellesdirme.sql
 bank 402_bank_inf11_ders_modellesdirme_a.sql
