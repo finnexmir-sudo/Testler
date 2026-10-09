@@ -658,3 +658,31 @@ diaqnostika) pulsuz müəllim üçün yenidən düşünülməlidir.
 **Gələcək fikir (sahib, 08.10): ödəməyən valideyn üçün «gözləmə jesti».** Hələ edilmir. Yumşaq olmalıdır: əlavə pulsuz günlər / bir dəfəlik xatırlatma /
 «Lale bu həftə 3 gün çalışdı — ev qatını açsanız həftəlik xülasə də gələr» kimi dəvət; müəllimə «ödəməyib» xəbərdarlığı GETMİR, heç kimə utandırıcı
 görünüş yoxdur, qrup və uşağın müəllim testləri bloklanmır.
+
+## Valideyn ödənişi: aylıq uşaq qiyməti — TƏKLİF (09.10, təsdiqlənməyib)
+
+**Status:** yalnız təklif. Qərar bank/şlüz tarifi və valideyn sorğusundan sonra. Ödəniş kodu hələ yazılmayıb.
+
+**Fakt (istifadəçi, 09.10):** repetitorun aylıq haqqı **ən azı 50 ₼-dən** başlayır və yuxarı gedir. Deməli valideynin repetitora verdiyi aylıq məbləğin yanında 4 ₼ ≈ **≤ 8 %** (50 ₼-də), daha bahalı repetitorda daha az. Əvvəlki «bir dərsin altıda biri» arqumenti (15–25 ₼) bu faktla əvəz olundu: ölçü **aylıq repetitor haqqının ~5–10 %-i** olmalıdır.
+
+**Qiymət təklifi (birinci uşaq):**
+
+| Paket | Qiymət | Aylıq | Endirim |
+|---|---|---|---|
+| 1 ay | 4 ₼ | 4,00 | — |
+| 3 ay | 10 ₼ | 3,33 | ~17 % |
+| 6 ay | 18 ₼ | 3,00 | 25 % |
+
+- İkinci uşaq: −30 % (≈ 2,80 ₼/ay), ailəyə **bir ödəniş** (bank sabit haqqı bir dəfə).
+- Uzun paket əsas yoldur: aylıq kiçik ödənişdə bank itkisi sabit haqqa görə ~6–9 %-ə çata bilər (3 ₼ + 0,10–0,20 ₼ sabit), 3–6 aylıqda ~3–4,5 %.
+- **Yuxarı hədd boşluğu:** 50+ ₼ aylıq haqla müqayisədə **5 ₼ də** (≈ 10 %) məqbul ola bilər — valideyn sorğusu göstərməlidir; 4 ₼ ehtiyatlı başlanğıcdır.
+- **Qurucu qiyməti:** pilotda (≈3 ay pulsuz) olan ailələrə «bu qiymət həmişə qalır» — ilk ailələri bağlayır, sonrakı qiymət artımı narazılıq yaratmır.
+- Minimum ödəniş məbləği (məs. 5 ₼-dən aşağı yox), kart yadda saxlama / avtomatik yenilənmə — şlüzdən asılıdır.
+
+**Valideyn sorğusu (10 valideyn, 5 dəqiqə):** (1) ayda neçə ₼ düşünmədən verərdiniz; (2) neçə ₼-dən sonra «baha olar»; (3) neçə ₼-dən aşağı olsa «keyfiyyətsizdir» deyə şübhələnərdiniz.
+
+**Bank/şlüzdən soruşulacaq (istifadəçi özü soruşur):** faiz, **sabit haqq**, minimum məbləğ, hesaba çıxarma haqqı, hüquqi şəxs tələbi.
+
+**Blok qaydası (təklif):** ödənişi valideyn öz səhifəsindən edir; sistem **hansı uşağın ödəmədiyini** bilir və **yalnız həmin uşağın** girişini bağlayır (yumşaq blok: «ödəniş gözlənilir» + valideynə göndərmə linki; 3–5 gün tolerantlıq; nəticələr və mastery silinmir; qrupun qalanı normal işləyir; müəllim yanında «ödəniş gözləyir» nişanı görür). **Məktəb qrupu** (valideyn ödəmir) heç vaxt bloklanmır — qrupun «ödənişli/pulsuz» işarəsi lazım olacaq. Texniki: hazırda abunə **hesaba** bağlıdır (`has_active_subscription(account_id)`), uşaq səviyyəsində abunə ayrı cədvəl tələb edir. Pilotda blok YOXDUR, yalnız status göstərilir.
+
+**Ödəyən dəyişə bilsin (sonrakı seçim):** abunə uşağa bağlı, ödəyən valideyn (əsas) və ya müəllim (sonradan «bütün şagirdlərim üçün ödəyirəm»). Müəllim birdən ödəmə yolu müəllimin avans və valideyn gecikməsi riskini ona keçirir — əsas yol olmasın.
