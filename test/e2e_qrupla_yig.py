@@ -91,7 +91,7 @@ def yig(pg, ad, qrup=None):
         "document.querySelector('#gPrev') && document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 "
         "&& document.querySelector('#gPrev').innerText.length > 5", timeout=15000)
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper, #pAsgH", timeout=20000)
+    pg.wait_for_selector(".paper, #pAsgH", state="attached", timeout=20000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     pg.wait_for_timeout(1500)
 
 with sync_playwright() as pw:
@@ -146,7 +146,7 @@ with sync_playwright() as pw:
             ok(QRUP_A in box and "Tapşırıq verildi" in box, "tesdiqde qrupun ADI yazilir", box[:60])
             ok("İndi onu qrupa verin" not in t,
                "«Indi onu qrupa verin» emri YOXDUR (artiq verilib)")
-            ok("Başqa qrupa da vermək üçün" in t, "forma «Basqa qrupa da» deyir")
+            ok("Başqa qrupa da ver" in t and not pg.evaluate("document.querySelector('details.pother').open"), "08.10: forma BAGLI «Başqa qrupa da ver» altındadır")
             opts = pg.locator("#pCls option").all_inner_texts()
             ok(all(QRUP_A not in o.split(" · ")[0] for o in opts),
                "verilmis qrup siyahida YOXDUR (basqa qrup ucun forma)", opts)

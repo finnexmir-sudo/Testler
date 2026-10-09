@@ -152,6 +152,14 @@ select * from (values
  ('926 şablon rəqəmi: 3,5 (vergül), −3, sonsuz kəsr rədd',
     (select exists (select 1 from f where proname='pq_eval' and def like '%round(v, 4)%')
         and exists (select 1 from f where proname='pq_num' and def like '%''.'', '',''%'))),
+ ('926 şablon sual dərs qapısında 2 sayılır',
+    (select exists (select 1 from f where proname='ders_sual_sayi' and def like '%params is not null%')
+        and exists (select 1 from f where proname='ders_sual_setir')
+        and exists (select 1 from f where proname='rpc_plan_test' and def like '%ders_sual_setir%'))),
+ ('927 pq_seed 200 cəhd',
+    (select exists (select 1 from f where proname='pq_seed' and def like '%1..200%'))),
+ ('928 plan: keçilən dərslərdən test (fəsil hovuzu yox)',
+    (select exists (select 1 from f where proname='rpc_plan_test_done' and def like '%ders_tag%'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')

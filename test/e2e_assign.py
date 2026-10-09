@@ -283,6 +283,7 @@ with sync_playwright() as pw:
 
     print("I · Tapşırığı götürmək")
     pg.reload(); pg.wait_for_selector(".asg [data-del]", timeout=8000)
+    pg.once("dialog", lambda d: d.accept())   #  08.10: götürmə təsdiqi
     pg.click(".asg [data-del]")
     pg.wait_for_selector("#asgList .empty", timeout=8000)
     ok(db("select count(*) n from public.assignments", one=True)["n"] == 0,

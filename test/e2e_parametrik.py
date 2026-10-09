@@ -151,7 +151,7 @@ with sync_playwright() as pw:
     ok(body2.strip() != body.strip() and re.search(r"^\d+ \+ \d+ neçə edər\?$", body2.strip()), "ikinci cehdde basqa reqemler", body2)
 
     print("E · Müəllimin vərəqi: şablon nişanı və rəqəmlər")
-    pg.goto(PANEL + "#/t/a1b20000-0000-0000-0000-0000000000e1"); pg.reload(); pg.wait_for_selector(".pq", timeout=15000)
+    pg.goto(PANEL + "#/t/a1b20000-0000-0000-0000-0000000000e1"); pg.reload(); pg.wait_for_selector(".pq", state="attached", timeout=15000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     pt = pg.inner_text(".pq")
     ok("şablon" in pt and re.search(r"\d+ \+ \d+ neçə edər\?", pt) is not None, "vereqde nisan ve reqemler", pt[:80])
 

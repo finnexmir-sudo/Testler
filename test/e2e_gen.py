@@ -186,7 +186,7 @@ with sync_playwright() as pw:
     pg.fill("#gCnt", "8"); pg.wait_for_timeout(700)
     pg.fill("#gTitle", "Sınaq — öz suallarım")
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(pg.evaluate("getComputedStyle(document.querySelector('.paper .qh b')).whiteSpace") == "pre-wrap",
        "vereqde sual metni setir sonlarini qoruyur (pre-wrap)")
     ok("/t/" in pg.url, "veraq ekranina kecid", pg.url.split("#")[-1][:20])
@@ -224,7 +224,7 @@ with sync_playwright() as pw:
     before = sorted(r["q"] for r in db(
         "select question_id::text q from public.test_questions where test_id=%s", (TID,)))
     pg.click("#btnRegen")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     pg.wait_for_timeout(300)
     ok(pg.locator(".paper .pq").count() == 8, "yeniden yigilan testde de 8 sual")
     after = sorted(r["q"] for r in db(
@@ -249,12 +249,8 @@ with sync_playwright() as pw:
     #  cap pencersi headless-de acilmir - print() saxta funksiya ile evezlenir
     #  (setir () => {} ile sarilir - yoxsa playwright onu ozu bir defe cagirir)
     pg.evaluate("() => { window.print = function(){ window.__prn = (window.__prn||0)+1 } }")
-    #  204: «Həmkarına göndər» - hazir metn + ?src=hemkar linki (masaustunde
-    #  bufere kopyalanir, metn qutuda da gorunur)
-    ok(pg.locator("#btnHemkar").count() == 1, "«Həmkarına göndər» duymesi var (204)")
-    pg.click("#btnHemkar"); pg.wait_for_selector("#hemkarMsg .hmtxt", timeout=8000)
-    hm = pg.input_value("#hemkarMsg .hmtxt")
-    ok("bil10.az/?src=hemkar" in hm and "Öz qrupunda yoxla" in hm, "hemkar metni: link + cagiris", hm[:90])
+    #  08.10: «Həmkarına göndər» test sehifesinden Profile kocdu (e2e_ders_qapisi.py yoxlayir)
+    ok(pg.locator("#btnHemkar").count() == 0, "test sehifesinde «Həmkarına göndər» yoxdur (Profildedir)")
     pg.click("#btnPrn")
     ok(pg.evaluate("window.__prn") == 1, "cap pencersi cagirilir",
        pg.evaluate("window.__prn"))
@@ -300,7 +296,7 @@ with sync_playwright() as pw:
           select %s, s.id, 'submitted', now() from public.students s limit 1""", (TID,))
     # Unvan onsuz da #/t/<id>-dir - goto hec ne etmir, reload lazimdir
     pg.goto(PANEL + "#/t/" + TID); pg.reload()
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(pg.locator("#btnRegen").count() == 0, "yenile duymesi gizlenir")
     ok("yeniləmək olmaz" in pg.inner_text("#main"), "sebeb yazilir")
 
@@ -332,7 +328,7 @@ with sync_playwright() as pw:
        "platforma hovuzunda riy-4 suallari tapilir")
     pg.fill("#gTitle", "Riyaziyyat 4 — platforma sınağı")
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(pg.locator(".paper .pq").count() == 12, "12 sualliq platforma testi yigildi")
     ok("hazır bank" in pg.inner_text(".paper"), "hazır bank nisani gorunur")
     # movzular arasinda beraberlik: 12 movzudan 12 sual - hersinden 1
@@ -428,7 +424,7 @@ with sync_playwright() as pw:
         "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
     ok("kifayət qədər" in pg.inner_text("#gPrev"), "duzelis hovuzu kifayetdir")
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     ok(pg.locator(".paper .rem").count() >= 1,
        "veraqda «səhvə bənzər» nisani var", pg.locator(".paper .rem").count())
     ok("səhvə bənzər" in pg.inner_text(".paper"), "nisan metni duzgundur")
@@ -522,7 +518,7 @@ with sync_playwright() as pw:
         "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
     pg.fill("#gTitle", "Qrupla birge test")
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=8000)
+    pg.wait_for_selector(".paper", state="attached", timeout=8000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     NID = pg.url.split("/t/")[1]
     ok(bool(db("select 1 ok from public.assignments "
                "where test_id = %s and class_id = %s", (NID, GID), one=True)),
@@ -658,7 +654,7 @@ with sync_playwright() as pw:
         "document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && "
         "document.querySelector('#gPrev').innerText.length > 5", timeout=8000)
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper", timeout=10000)
+    pg.wait_for_selector(".paper", state="attached", timeout=10000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     MID = pg.url.split("/t/")[1]
     #  Qayda massiv kimi yazilmalidir - "yenile" duymesi onu tekrar isledir
     rule = db("select gen_rule from public.tests where id = %s", (MID,), one=True)["gen_rule"]
@@ -699,8 +695,8 @@ with sync_playwright() as pw:
        "ipucu hazir sinfi tekrar istemir")
     ok("Mövzu seçmək üçün fənn seçin" in pg.inner_text("#main"),
        "ipucu yalniz fenni isteyir")
-    ok(pg.locator("#btnBack").inner_text().strip() == "4-A qrupu",
-       "geri duymesi qrupun adini gosterir", pg.locator("#btnBack").inner_text())
+    ok(pg.locator("#btnBack").inner_text().strip() == "Geri",
+       "geri duymesi «Geri» yazir", pg.locator("#btnBack").inner_text())
 
     pg.select_option("#gsub", "riyaziyyat")
     pg.wait_for_selector("#gsub", timeout=8000); pg.wait_for_timeout(400)

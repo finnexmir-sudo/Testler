@@ -162,6 +162,13 @@ with sync_playwright() as pw:
     ok(pg.url.endswith("#/a/" + GA), "«Tapsiriqlara bax» tapsiriqlar ekranina aparir", pg.url[-20:])
     pg.go_back(); pg.wait_for_selector("#htBox .udr", timeout=15000)
 
+    #  09.10: Tapsiriqlar ekranindan «etməyənlər →» ile gelibse «Tapsiriqlara bax» YOXDUR (ele ora qaytarirdi)
+    pg.goto(PANEL + "#/a/" + GA); pg.wait_for_selector(".asg a.asgn", timeout=15000)
+    pg.locator(".asg a.asgn").first.click(); pg.wait_for_selector("#htBox .udr", timeout=15000)
+    ok(pg.locator("#htBox a.mrow", has_text="Tapşırıqlara bax").count() == 0, "Tapsiriqlar ekranindan gelende «Tapsiriqlara bax» yoxdur (dovr yoxdur)")
+    pg.goto(PANEL + "#/ht/" + GA); pg.wait_for_selector("#htBox .udr", timeout=15000)
+    yaz = pg.locator("#htBox .menu").first.locator(".udr")
+
     print("\nC · «Mesajı kopyala»")
     yaz.first.locator("[data-ud]").click(); pg.wait_for_timeout(500)
     ok("Kopyalandı" in yaz.first.locator("[data-ud]").inner_text(), "düymə «Kopyalandı» deyir", yaz.first.locator("[data-ud]").inner_text())

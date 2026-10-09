@@ -2718,3 +2718,175 @@ details.styd{margin-top:14px}
   transform:rotate(45deg) translateY(-2px);transition:transform .15s}
 .qtg.on::after{transform:rotate(225deg) translateY(-2px)}
 .qtg:hover{background:var(--n-25)}
+
+/* =========================== ders plani: seliqeli gorunus (08.10)
+   Istifadeci: «ders planini seliqeye sal, bizdeki hecde aydin deyil».
+   Fesil = nomreli kart; ders = ad (1-ci setir) + tarix/izah (2-ci setir);
+   sagda duymeler.  Yalniz gorunus - DOM ve data-* eyni qalir.  */
+.card.plan>details>summary{font-size:14px;font-weight:650;color:var(--fg);padding:4px 0}
+.plan .pllist{margin-top:10px}
+.plan .plprev{padding:12px 14px;gap:4px 8px;border-radius:12px;background:var(--surface);
+  box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.plan .plprev>s{flex:1 0 100%}
+.plan .plprev>b{flex:1 1 0;font-size:14px;white-space:normal}
+.plan .plgrp{border:1px solid var(--n-150);border-radius:12px;background:var(--surface);
+  margin-top:8px;overflow:hidden}
+.plan .plgrp:last-child{border-bottom:1px solid var(--n-150)}
+.plan .plgrp[open]{border-color:var(--brand-line)}
+.plan .plgrp>summary{padding:12px 14px;gap:10px;font-size:14px;position:relative;padding-right:34px}
+.plan .plgrp[open]>summary{background:var(--brand-tint);border-bottom:1px solid var(--brand-line)}
+.plan .plgrp>summary::before{display:none}
+.plan .plgrp>summary::after{content:"";position:absolute;right:15px;top:50%;width:7px;height:7px;
+  border-right:1.8px solid var(--fg-3);border-bottom:1.8px solid var(--fg-3);
+  transform:translateY(-70%) rotate(45deg);transition:transform .15s}
+.plan .plgrp[open]>summary::after{transform:translateY(-30%) rotate(225deg)}
+.plan .plgn0{flex:0 0 26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-style:normal;font-size:12px;font-weight:650;background:var(--brand-tint);color:var(--brand);
+  border:1px solid var(--brand-line)}
+.plan .plgrp[open] .plgn0{background:var(--brand);color:#fff;border-color:var(--brand)}
+.plan .plgrp>summary b{font-weight:620;line-height:1.3}
+.plan .plgrp .plgc{font-size:12px;padding:2px 10px;border-radius:999px}
+.plan .plgrp .plrow{padding:10px 14px;gap:4px 10px;border-bottom:1px solid var(--n-100);align-items:center}
+.plan .plgrp .plrow:last-of-type{border-bottom:0}
+.plan .plrow>i{flex:0 0 26px;height:26px;font-size:12px;font-weight:600}
+.plan .plrow.done>i{background:var(--ok);color:#fff;border-color:var(--ok)}
+.plan .plrow{flex-wrap:wrap}
+.plan .plrow>span{flex:1 1 0;min-width:0;line-height:1.35;font-weight:520}
+.plan .plrow.done>span{color:var(--fg)}
+.plan .plrow .pldate{display:block;margin-top:2px;font-size:11.5px;color:var(--fg-3)}
+.plan .plrow.cur{margin:0;box-shadow:inset 3px 0 0 var(--brand)}
+.plan .plrow .plnext{margin-left:8px;white-space:nowrap}
+.plan .plrow .plwait{flex:1 0 100%;margin:0 0 0 36px;order:1;font-size:11.5px;margin-top:-2px}
+.plan .plrow .plmk,.plan .plrow .pltest,.plan .plrow .plundo,.plan .plrow .plavg{order:2}
+.plan .plrow .plck+.plwait{margin-left:36px}
+/*  duymeler: «test yig» dolu, «vereq» / «geri al» cerciveli  */
+.plan .plrow .plmk,.plan .plrow .pltest,.plan .plrow .plundo{
+  display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;text-decoration:none;
+  padding:6px 11px;border-radius:9px;min-height:30px;white-space:nowrap}
+.plan .plrow .plmk.plds{background:var(--brand);color:#fff;border:1px solid var(--brand)}
+.plan .plrow .plmk.plds:disabled{background:var(--n-50);color:var(--fg-3);border-color:var(--n-100)}
+.plan .plrow .plmk.plre{background:var(--surface);color:var(--err);border:1px solid var(--err)}
+.plan .plrow .pltest{background:var(--surface);color:var(--brand);border:1px solid var(--brand-line)}
+.plan .plrow .plundo{background:var(--surface);color:var(--fg-2);border:1px solid var(--n-150)}
+@media (max-width:520px){
+  .plan .plrow.acts>span{flex:1 1 calc(100% - 40px)}
+  .plan .plrow .plavg,.plan .plrow .plavg+.pltest,.plan .plrow .plavg+.plmk,
+  .plan .plrow>span+.pltest,.plan .plrow>span+.plmk,.plan .plrow>span+.plundo,.plan .plrow>span+.plck{margin-left:36px}
+  .plan .plrow .plavg~*{margin-left:0}
+  .plan .plrow .plck,.plan .plrow .plavg~.plck,.plan .plrow>span+.plck{margin-left:auto}
+  .plan .plrow .plundo,.plan .plrow .plmk,.plan .plrow .pltest{margin-left:36px}
+  .plan .plrow .plmk~.plundo,.plan .plrow .pltest~.plundo,.plan .plrow .plavg~.pltest,.plan .plrow .plmk~.plmk,.plan .plrow .pltest~.plmk{margin-left:0}
+}
+/*  08.10: derslər bir-birindən aralı — hər biri ayrıca kiçik kart  */
+.plan .plgrp>.plrow,.plan .pllist>.plrow,.plan .plnext>.plrow{
+  margin:8px 10px 0;padding:11px 12px;border:1px solid var(--n-150);border-radius:11px;
+  background:var(--surface)}
+.plan .plgrp>.plrow:last-child{margin-bottom:10px}
+.plan .plgrp>.plrow:last-of-type{border-bottom:1px solid var(--n-150)}
+.plan .plgrp .plrow.done{border-color:var(--ok-line);background:var(--surface)}
+.plan .plgrp>.plrow.cur,.plan .pllist>.plrow.cur,.plan .plnext>.plrow.cur{
+  margin:8px 10px 0;border-color:var(--brand);background:var(--brand-tint);
+  box-shadow:inset 3px 0 0 var(--brand)}
+.plan .plgrp>.plrow:hover{border-color:var(--brand-line)}
+/*  08.10: seçim — hazır keçilmiş dərsdə checkbox, seçiləndə küncdə «Test yığ»  */
+.plan .plrow .plsel{width:22px;height:22px;margin-left:auto;order:3;flex:0 0 22px;cursor:pointer}
+.plan .plrow:has(.plsel:checked){border-color:var(--brand);background:var(--brand-tint)}
+.plan .plsb{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));display:flex;justify-content:flex-end;
+  pointer-events:none;margin-top:8px;z-index:5}
+.plan .plsb:empty{display:none}
+.plan .plsb .plsgo{pointer-events:auto;box-shadow:0 6px 18px rgba(16,24,40,.22);border-radius:999px;padding:0 18px;min-height:44px}
+@media (min-width:900px){.plan .plsb{bottom:16px}}
+/*  checkbox adın yanında, ilk sətirdə (ayrıca sətrə düşməsin)  */
+.plan .plrow .plsel{order:0;margin-left:auto}
+.plan .plrow:has(.plsel)>span{flex:1 1 calc(100% - 76px)}
+@media (max-width:520px){.plan .plrow:has(.plsel)>span{flex:1 1 calc(100% - 76px)}
+  .plan .plrow .plsel{margin-left:auto}}
+/*  08.10: vərəqdə «Suallar» bağlı gəlir, basanda açılır  */
+.qfold{margin-top:6px}
+.qfold>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;padding:4px 0}
+.qfold>summary::-webkit-details-marker{display:none}
+.qfold>summary h2{margin:0}
+.qfold>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--fg-3);
+  border-bottom:2px solid var(--fg-3);transform:rotate(45deg);transition:transform .15s;margin-right:6px}
+.qfold[open]>summary::after{transform:rotate(225deg)}
+.qfold>summary .fn{font-size:12px;font-weight:600;background:var(--brand-tint);color:var(--brand);padding:2px 9px;border-radius:999px}
+.qfold>.paper{margin-top:10px}
+
+/* =========================== İcmal menyusu: sətirlər ayrı, yüngül 3D (09.10)
+   İstifadəçi: «qruplar, test yığ olan hissəni ayır bir-birindən, bir az 3D effekti olsun».
+   İcmal (#yMenu, #yDiq «Bu həftə») və qrup menyusu (#gMenu): hər sətir ayrıca kart, yumşaq qat-qat kölgə + üst işıq xətti + alt «qalınlıq»,
+   toxunanda/üzərinə gələndə azca qalxır, basanda çökür.  Başqa ekranların .menu-su dəyişmir.  */
+.card.menu,.menu,#yMenu.menu{background:none;border:0;box-shadow:none;padding:0;overflow:visible;
+  display:flex;flex-direction:column;gap:12px}
+.menu .mrow{position:relative;background:var(--surface);border:1px solid var(--n-150);border-radius:16px;
+  padding:15px 16px;border-bottom:1px solid var(--n-150);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
+             0 1px 0 var(--n-150),
+             0 3px 0 -1px var(--n-100),
+             0 10px 20px -10px rgba(16,24,40,.28);
+  transition:transform .14s ease,box-shadow .14s ease}
+.menu .mrow:last-child{border-bottom:1px solid var(--n-150)}
+.menu .mrow .mi{width:38px;height:38px;flex:0 0 38px;padding:9px;border-radius:12px;
+  background:linear-gradient(180deg,var(--brand-tint),#fff);border:1px solid var(--brand-line);
+  box-shadow:0 2px 0 var(--brand-line)}
+@media (hover:hover){
+  .menu .mrow:hover{transform:translateY(-2px);background:var(--surface);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 4px 0 -1px var(--n-100),
+               0 16px 26px -12px rgba(16,24,40,.34)}
+}
+.menu .mrow:active{transform:translateY(1px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 4px 8px -6px rgba(16,24,40,.3)}
+.menu .mrow.dq{background:var(--err-tint);border-color:var(--err-line,var(--err));box-shadow:inset 3px 0 0 var(--err),0 10px 20px -10px rgba(180,35,24,.3)}
+.menu .mrow.dq .mi{background:#fff;border-color:var(--err);box-shadow:0 2px 0 var(--err-tint);color:var(--err)}
+@media (min-width:721px){.menu .mrow{padding:16px 20px}}
+/*  Şagirdlər siyahısı (#stu): xülasə zolağı ayrıca kart, hər şagird ayrıca kart  */
+#stu.menu .stsum{background:var(--surface);border:1px solid var(--n-150);border-radius:14px;padding:11px 16px;
+  box-shadow:0 8px 16px -10px rgba(16,24,40,.22)}
+#stu.menu .stu,#stu.menu .mrow.stuy{margin:0}
+#stu.menu .arxiv{display:flex;flex-direction:column;gap:12px}
+#stu.menu .arxiv>summary{cursor:pointer;padding:6px 4px}
+/*  09.10: eyni üslub HƏR YERDƏ (.menu siyahıları) + köhnə .item sətirləri (Profil, Qruplar siyahısı və s.)  */
+.menu .mrow.udr{border-radius:16px}
+.card.pad0:has(>.item){background:none;border:0;box-shadow:none;padding:0;overflow:visible;
+  display:flex;flex-direction:column;gap:12px}
+.card.pad0>.item{background:var(--surface);border:1px solid var(--n-150);border-radius:16px;border-bottom:1px solid var(--n-150);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 3px 0 -1px var(--n-100),0 10px 20px -10px rgba(16,24,40,.28);
+  transition:transform .14s ease,box-shadow .14s ease}
+@media (hover:hover){
+  .card.pad0>.item:hover{transform:translateY(-2px);background:var(--surface);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 4px 0 -1px var(--n-100),0 16px 26px -12px rgba(16,24,40,.34)}
+}
+.card.pad0>.item:active{transform:translateY(1px)}
+.card.pad0>.item .ic{border-radius:12px;background:linear-gradient(180deg,var(--brand-tint),#fff);
+  border:1px solid var(--brand-line);box-shadow:0 2px 0 var(--brand-line)}
+
+/* =========================== Qrup səhifəsi «Dərsdən əvvəl»: səliqəli, yığcam (09.10)
+   İstifadəçi: «bu hissə dağınıq və səliqəsiz gəlir».  Dörd rəngli sol zolaq, hər kartda fərqli boşluq,
+   ad «həb»ləri və böyük boş sahələr.  İndi: bir ölçü, rəngli yalnız ikon, sol zolaq yalnız «Bu günün dərsi»
+   və xəbərdarlıqda; adlar sadə sətir; boş vəziyyətdə nişan + keçid bir sətirdə.  */
+.dkgrid{gap:10px}
+.card.prep.dk{padding:14px 16px 15px;border-radius:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 var(--n-150),0 3px 0 -1px var(--n-100),0 10px 20px -12px rgba(16,24,40,.26)}
+.card.prep.dk::before{display:none}
+.card.prep.dk.k-ders::before,.card.prep.dk.pwarn::before{display:block}
+.dkh{margin-bottom:9px;gap:9px}
+.dki{flex:0 0 30px;height:30px;border-radius:9px}
+.dkt{font-size:14.5px}
+.dkm1{font-size:17px;margin:0 0 6px}
+.dkp{margin:0 0 10px;font-size:13px}
+.dkres{margin:0 0 9px}
+.dk .btn.sm{margin-top:0;max-width:100%;white-space:normal;text-align:left;line-height:1.3}
+/*  Test / Yazılı: nişan solda, keçid sağda (bir sətir); mətn və adlar tam enlə  */
+.hwl.tam{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 10px}
+.hwl.tam .hwh{flex:0 1 auto}
+.hwl.tam .hwb,.hwl.tam .hwn{flex:1 1 100%;margin-top:0}
+.hwl.tam .hwf{flex:0 0 auto;margin:0 0 0 auto}
+.hwl.tam .hwst{padding:4px 11px;font-size:12.5px}
+.hwl.tam .hwb{font-size:14.5px}
+.hwl.tam .hwn{font-size:13px;color:var(--fg-3);line-height:1.5}
+.hwl.tam .hwn a,.hwl.tam .hwn .nm{display:inline;padding:0;margin:0;background:none;border-radius:0;font-weight:620;color:var(--fg-2)}
+.hwl.tam .cm{display:inline;color:var(--fg-3)}
+@media (max-width:520px){
+  .msec.dkm{margin:18px 2px 8px}
+  .card.prep.dk{padding:13px 14px 14px}
+}

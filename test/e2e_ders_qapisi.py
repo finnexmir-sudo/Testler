@@ -155,6 +155,12 @@ with sync_playwright() as pw:
         #  planTest/planDone siyahini yeniden cizir, <details> baglanir - hər oxumadan evvel ac
         pg.evaluate("document.querySelectorAll('.card.plan details').forEach(function(d){d.open=true})")
         return pg.locator(".plrow", has_text=ad).first
+    def sec(ad, page=None):
+        #  08.10: sətirdə «test yığ» düyməsi yoxdur - checkbox seçilir, küncdəki «Test yığ» basılır
+        pg = page or p
+        setir(ad, pg).locator("[data-plsel]").check()
+    def yig_bas(page=None):
+        (page or p).locator("[data-plsgo]").click()
     def yaz(ad):
         return setir(ad).inner_text().replace("\n", " ")
     def item_row(ad):
@@ -170,24 +176,27 @@ with sync_playwright() as pw:
     print("\n=== 1-3 · A, B keçilib, C keçilməyib ===")
     kecdi("Dərs A", 3); kecdi("Dərs B", 2)
     ac()
-    yox(setir("Dərs A").locator('[data-plmk][data-sc="ders"]').count() == 1, "A (hazır, keçilib): «test yığ» görünür")
-    yox("test yığ" in yaz("Dərs A"), "A sətrində yazı «test yığ»", yaz("Dərs A")[:70])
+    yox(setir("Dərs A").locator("[data-plsel]").count() == 1, "A (hazır, keçilib): «test yığ» görünür")
+    yox(setir("Dərs A").locator("[data-plsel]").count() == 1 and p.locator("[data-plsgo]").count() == 0, "A: checkbox var, seçilməyibsə küncdə düymə yoxdur")
     yox("fəsil sonunda" not in yaz("Dərs A"), "A (hazır): «fəsil sonunda» izahı YOXDUR — dərsin öz düyməsi var")
-    yox(setir("Dərs B").locator("[data-plmk]").count() == 0 and "test yığ" not in yaz("Dərs B"),
+    yox(setir("Dərs B").locator("[data-plsel]").count() == 0 and "test yığ" not in yaz("Dərs B"),
         "B (hazır deyil): «test yığ» YOXDUR")
     yox("fəsil sonunda" in yaz("Dərs B") and "2/3" in yaz("Dərs B"), "B: «fəsil sonunda · 2/3» qalır", yaz("Dərs B")[:80])
-    yox(setir("Dərs C").locator("[data-plmk]").count() == 0 and "fəsil sonunda" not in yaz("Dərs C") and "test yığ" not in yaz("Dərs C"),
+    yox(setir("Dərs C").locator("[data-plsel]").count() == 0 and "fəsil sonunda" not in yaz("Dərs C") and "test yığ" not in yaz("Dərs C"),
         "C (keçilməyib): nə düymə, nə izah", yaz("Dərs C")[:60])
     yox(p.locator(".plgrp > summary .plgm").count() == 0, "fəsil bitməyib: başlıqda «fəsildən test yığ» yoxdur")
     p.screenshot(path=OUT + "/1-masaustu.png", full_page=True)
 
     print("\n=== 1 · A: «test yığ» → dərs testi ===")
-    setir("Dərs A").locator('[data-plmk][data-sc="ders"]').click(); p.wait_for_timeout(700)
+    sec("Dərs A"); yig_bas(); p.wait_for_timeout(700)
     box = p.locator(".ploffer").inner_text()
     yox("yalnız bu dərsdən" in box and "bu fəsildən" not in box, "qutu «yalnız bu dərsdən» deyir", box.replace("\n", " ")[:120])
     yox(p.locator("#plCnt").count() == 0, "dərs testində sual sayı sahəsi yoxdur (ölçünü server qoyur)")
     p.locator(".card.plan").screenshot(path=OUT + "/4-qutu-ders-masaustu.png")
     p.locator('[data-pltest="%s"]' % ITEM["Dərs A"]).click(); p.wait_for_timeout(6000)
+    #  08.10: «göndərildi» nəticəsi siyahı bağlı olsa da görünür; yığılandan sonra «Bütün mövzular» bağlanmır
+    yox(p.locator(".plan #plm-%s a[href^='#/t/']" % pid).first.is_visible(), "tək dərs testi: «Vərəqə bax» nəticəsi görünür")
+    yox(p.evaluate("document.querySelector('.card.plan > details').open"), "yığılandan sonra «Bütün mövzular» açıq qalır")
     ra = item_row("Dərs A")
     yox(bool(ra["t"]) and ra["f"] is None, "A: test_id yazıldı, fesil_test_id boş")
     if ra["t"]:
@@ -206,7 +215,7 @@ with sync_playwright() as pw:
     p.locator("[data-plskip]").first.click(); p.wait_for_timeout(300)
     setir("Dərs B")
     yox(p.locator(".plgrp > summary .plgm").count() == 1, "fəsil bitdi: başlıqda «fəsildən test yığ» var")
-    yox(setir("Dərs C").locator('[data-plmk][data-sc="ders"]').count() == 1, "C sətrində də «test yığ» (dərs) var — ikisi ayrıdır")
+    yox(setir("Dərs C").locator("[data-plsel]").count() == 1, "C sətrində də «test yığ» (dərs) var — ikisi ayrıdır")
     yox("fəsil sonunda" in yaz("Dərs B"), "B hələ də hazır deyil: izah qalır")
     p.evaluate("document.querySelectorAll('.card.plan details').forEach(function(d){d.open=true})")
     p.screenshot(path=OUT + "/2-masaustu-fesil-bitdi.png", full_page=True)
@@ -230,11 +239,11 @@ with sync_playwright() as pw:
         yox(t["title"] == FES + " — yoxlama", "fəsil vərəqinin başlığı fəslin adıdır", t["title"])
         yox(n["nis"] < n["n"], "fəsil testi nişansız / başqa dərsin sualını da alır", "%d/%d C-dən" % (n["nis"], n["n"]))
     yox(p.locator(".plgrp > summary .plgm").count() == 0, "fəsil testi yığılandan sonra başlıq düyməsi yox olur")
-    yox("fəsil vərəqi" in yaz("Dərs C") and setir("Dərs C").locator('[data-plmk][data-sc="ders"]').count() == 1,
+    yox("fəsil vərəqi" in yaz("Dərs C") and setir("Dərs C").locator("[data-plsel]").count() == 1,
         "C sətri: «fəsil vərəqi» dərsin öz testi sayılmır — «test yığ» qalır", yaz("Dərs C")[:80])
 
     print("\n=== C: dərsin öz testi fəsil testini pozmur ===")
-    setir("Dərs C").locator('[data-plmk][data-sc="ders"]').click(); p.wait_for_timeout(600)
+    sec("Dərs C"); yig_bas(); p.wait_for_timeout(600)
     p.locator('[data-pltest="%s"][data-sc="ders"]' % ITEM["Dərs C"]).click(); p.wait_for_timeout(6000)
     rc2 = item_row("Dərs C")
     yox(rc2["f"] == rc["f"] and rc2["t"] and rc2["t"] != rc2["f"], "fesil_test_id toxunulmaz, test_id dərs testidir")
@@ -244,7 +253,7 @@ with sync_playwright() as pw:
 
     print("\n=== 5 · «geri al» ===")
     p.locator('[data-plundo="%s"]' % ITEM["Dərs C"]).click(); p.wait_for_timeout(1500)
-    yox(setir("Dərs C").locator("[data-plmk]").count() == 0 and "fəsil sonunda" not in yaz("Dərs C"), "geri alınan dərsdə düymə də yoxdur", yaz("Dərs C")[:60])
+    yox(setir("Dərs C").locator("[data-plsel]").count() == 0 and "fəsil sonunda" not in yaz("Dərs C"), "geri alınan dərsdə düymə də yoxdur", yaz("Dərs C")[:60])
     yox(p.locator(".plgrp > summary .plgm").count() == 0, "fəsil yenə bitməyib: başlıq düyməsi yoxdur")
     kecdi("Dərs C", 1)
 
@@ -258,7 +267,7 @@ with sync_playwright() as pw:
     unseen = len(poolA - used)
     q("update public.class_plan_items set test_id=null where id=%s", (ITEM["Dərs A"],))
     ac()
-    setir("Dərs A").locator('[data-plmk][data-sc="ders"]').click(); p.wait_for_timeout(600)
+    sec("Dərs A"); yig_bas(); p.wait_for_timeout(600)
     p.locator('[data-pltest="%s"]' % ITEM["Dərs A"]).click(); p.wait_for_timeout(6000)
     ra2 = item_row("Dərs A")
     if ra2["t"] and TA1:
@@ -333,15 +342,101 @@ with sync_playwright() as pw:
     p2.wait_for_selector("#yMenu .mrow", timeout=30000)
     ac(p2)
     yox(p2.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "telefonda yana sürüşmə yoxdur")
-    b = setir("Dərs A", p2).locator("[data-plmk]").first
+    b = setir("Dərs A", p2).locator("[data-plsel]").first
     yox(b.count() == 1 and b.is_visible(), "A: «test yığ» telefonda görünür")
     bb = b.bounding_box()
     yox(bb and bb["x"] >= 0 and bb["x"] + bb["width"] <= 390, "düymə ekranın içindədir", bb)
     p2.screenshot(path=OUT + "/3-telefon.png", full_page=True)
-    b.click(); p2.wait_for_timeout(600)
+    b.check(); p2.wait_for_timeout(300)
+    gb = p2.locator("[data-plsgo]")
+    yox(gb.count() == 1 and gb.is_visible(), "telefonda küncdə «Test yığ» düyməsi çıxdı")
+    gbb = gb.bounding_box()
+    yox(gbb and gbb["x"] + gbb["width"] <= 390 and gbb["y"] + gbb["height"] <= 900, "düymə ekranın içindədir (kunc)", gbb)
+    p2.screenshot(path=OUT + "/7-telefon-secim.png")
+    gb.click(); p2.wait_for_timeout(600)
     yox(p2.evaluate("document.documentElement.scrollWidth <= window.innerWidth") and p2.locator(".ploffer").is_visible(), "telefonda təklif qutusu ekrana sığır")
     p2.locator(".ploffer").scroll_into_view_if_needed()
     p2.locator(".card.plan").screenshot(path=OUT + "/6-qutu-ders-telefon.png")
+    print("\n=== 08.10 · checkbox + küncdə «Test yığ» (2+ dərs → rpc_plan_test_done) ===")
+    q("update public.class_plan_items set test_id=null, fesil_test_id=null where plan_id=%s", (pid,))
+    kecdi("Dərs A", 3); kecdi("Dərs C", 1)
+    ac()
+    yox(p.locator("[data-plexam]").count() == 0, "plan səviyyəsində köhnə düymə yoxdur")
+    yox(p.locator("[data-plsgo]").count() == 0, "heç nə seçilməyib: küncdə düymə yoxdur")
+    sec("Dərs A"); sec("Dərs C"); p.wait_for_timeout(300)
+    yox(p.locator("[data-plsgo]").count() == 1 and "2 dərs" in p.locator("[data-plsgo]").inner_text(), "2 seçim: «Test yığ · 2 dərs»", p.locator("[data-plsgo]").inner_text())
+    p.locator("[data-plsel]:checked").first.uncheck(); p.wait_for_timeout(200)
+    yox("dərs" not in p.locator("[data-plsgo]").inner_text(), "1 seçim: sadəcə «Test yığ»")
+    setir("Dərs A").locator("[data-plsel]").check(); p.wait_for_timeout(200)
+    yig_bas(); p.wait_for_timeout(400)
+    yox(p.locator("[data-plexgo]").count() == 1 and "Seçilmiş 2 dərsdən" in p.locator(".ploffer").inner_text(), "təsdiq qutusu: seçilmiş 2 dərs")
+    p.locator("[data-plexgo]").click(); p.wait_for_timeout(6000)
+    pe = q("select count(*) n from public.tests where gen_rule->>'pack'='done' and gen_rule->>'plan'=%s", (str(pid),), one=True)
+    yox(pe["n"] == 1, "seçilmiş dərslərdən test yığıldı", pe)
+    yox(p.locator('#plm-%s a[href^="#/t/"]' % pid).count() == 1, "«Vərəqə bax» linki çıxdı")
+    yox(p.locator('#plwa-%s' % pid).count() == 1, "WhatsApp mətni üçün yer var")
+    p.wait_for_timeout(800)
+    yox(p.locator('#plm-%s .asgwa, #plm-%s [data-wacopy], #plm-%s textarea' % (pid, pid, pid)).count() >= 1 or "WhatsApp" in p.locator('#plwa-%s' % pid).inner_text(), "WhatsApp mətni çıxdı", p.locator('#plwa-%s' % pid).inner_text()[:80])
+    yox(p.locator('.plan details #plm-%s' % pid).count() == 0 and p.locator('#plm-%s' % pid).is_visible(), "nəticə qutusu <details>-dən kənardadır, görünür")
+    print("\n=== 08.10 · qrupun kartından «testi yığ»: ara ekran yoxdur, test birbaşa həmin qrupa verilir ===")
+    q("delete from public.assignments where class_id=%s", (gid,))
+    p.goto(PANEL + "?yeni=1#/g/" + str(gid)); p.wait_for_selector("#prepGen", timeout=30000)
+    p.click("#prepGen"); p.wait_for_selector("#btnMake", timeout=30000)
+    yox("qrupa ver" in p.inner_text("#btnMake"), "düymə «Testi yığ və qrupa ver»", p.inner_text("#btnMake"))
+    yox("qayıdacaqsınız" not in p.inner_text("#main"), "«tapşırıq ekranına qayıdacaqsınız» yazısı yoxdur")
+    yox(p.locator("#gAsg").count() == 0, "qrup seçimi yoxdur (qrup artıq bəllidir)")
+    yox("8-ci sinif" in p.inner_text("#main") and "dərhal veriləcək" in p.inner_text("#main"), "qrup adı + «dərhal veriləcək»")
+    p.wait_for_function("document.querySelector('#gPrev') && document.querySelector('#gPrev').textContent.indexOf('yığılacaq') >= 0", timeout=15000)
+    p.click("#btnMake"); p.wait_for_function("location.hash.indexOf('#/t/') === 0", timeout=20000)
+    yox(q("select count(*) n from public.assignments where class_id=%s", (gid,), one=True)["n"] == 1, "test həmin qrupa tapşırılıb (tapşırıq ekranı olmadan)")
+    p.wait_for_selector("#qFold", state="attached", timeout=20000)
+    yox(not p.evaluate("document.getElementById('qFold').open") and not p.locator(".paper .pq").first.is_visible(), "vərəqdə suallar BAĞLI gəlir")
+    yox("sual" in p.inner_text("#qFold > summary"), "başlıq «Suallar · N sual»", p.inner_text("#qFold > summary"))
+    p.click("#qFold > summary"); p.wait_for_timeout(300)
+    yox(p.locator(".paper .pq").first.is_visible(), "başlığa basanda suallar açılır")
+
+    print("\n=== 08.10 · tapşırığı götürmək təsdiq soruşur ===")
+    p.goto(PANEL + "?yeni=1#/a/" + str(gid)); p.wait_for_selector(".asg [data-del]", timeout=30000)
+    nasg = q("select count(*) n from public.assignments where class_id=%s", (gid,), one=True)["n"]
+    mesaj = {}
+    def _no(d): mesaj["t"] = d.message; d.dismiss()
+    p.once("dialog", _no); p.click(".asg [data-del]"); p.wait_for_timeout(500)
+    yox("götürülsün" in mesaj.get("t", "") and "nəticələri qalır" in mesaj.get("t", "") or "heç kim bitirməyib" in mesaj.get("t", "").lower(), "təsdiq mətni çıxdı (nəticələr qalır / kim görmür)", mesaj.get("t", "")[:100])
+    yox(q("select count(*) n from public.assignments where class_id=%s", (gid,), one=True)["n"] == nasg, "«Xeyr» basanda tapşırıq QALIR")
+    p.once("dialog", lambda d: d.accept()); p.click(".asg [data-del]"); p.wait_for_timeout(1500)
+    yox(q("select count(*) n from public.assignments where class_id=%s", (gid,), one=True)["n"] == nasg - 1, "«Bəli» basanda tapşırıq götürülür")
+
+    print("\n=== 08.10 · «Ev tapşırığı yaz» ekranında geri düyməsi «Geri» yazır ===")
+    p.goto(PANEL + "?yeni=1#/a/" + str(gid) + "/h"); p.wait_for_selector("#btnBack", timeout=30000)
+    yox("Geri" in p.inner_text("#btnBack") and "Tapşırıqlar" not in p.inner_text("#btnBack"), "geri düyməsi «Geri»", p.inner_text("#btnBack"))
+    p.goto(PANEL + "?yeni=1#/a/" + str(gid) + "/t"); p.wait_for_selector("#btnBack", timeout=30000)
+    yox("Geri" in p.inner_text("#btnBack"), "«Test ver» ekranında da «Geri»", p.inner_text("#btnBack"))
+
+    print("\n=== 08.10 · bütün geri düymələri «Geri» yazır və goBack işləyir ===")
+    for h in ("#/me", "#/gs", "#/gen", "#/n"):
+        p.goto(PANEL + "?yeni=1" + h); p.wait_for_selector("#btnBack", timeout=30000)
+        yox(p.inner_text("#btnBack").strip() == "Geri", "%s: düymə «Geri»" % h, p.inner_text("#btnBack"))
+    p.goto(PANEL + "?yeni=1#/gs"); p.wait_for_selector("#btnBack", timeout=30000)
+    p.goto(PANEL + "?yeni=1#/me"); p.wait_for_selector("#btnBack", timeout=30000)
+    p.click("#btnBack"); p.wait_for_timeout(600)
+    yox(p.evaluate("location.hash") == "#/gs", "Profil → Geri: gəldiyi yerə (Qruplar) qayıdır", p.evaluate("location.hash"))
+
+    print("\n=== 08.10 · «Həmkarına göndər» Profildədir, test səhifəsində yox ===")
+    p.goto(PANEL + "?yeni=1#/me"); p.wait_for_selector("#btnHemkar", timeout=30000)
+    with p.context.expect_page(timeout=8000) as pop:
+        p.click("#btnHemkar")
+    yox(True, "klikdə yeni pəncərə (WhatsApp) açıldı")
+    try: pop.value.close()
+    except Exception: pass
+    p.wait_for_selector("#hemkarMsg a[href^='https://wa.me/?text=']", timeout=8000)
+    hm = p.locator("#hemkarMsg .hmtxt").input_value()
+    txt = p.locator("#hemkarMsg").inner_text()
+    yox("bil10.az/?src=hemkar" in hm and "Qrupunda sınaqdan keçir" in hm, "Profil: həmkar mətni + link", hm[:80])
+    yox("WhatsApp açıldı" in txt and "göndərildi" not in txt.lower().replace("göndərib", ""), "dürüst yazı: açıldı, «göndərildi» demir", txt[:80])
+    yox("sual." not in hm, "mətn heç bir testə istinad etmir", hm[:80])
+    tid = q("select id::text i from public.tests where owner_type='educator' limit 1", one=True)["i"]
+    p.goto(PANEL + "?yeni=1#/t/" + tid); p.wait_for_selector("#btnPrn", timeout=30000)
+    yox(p.locator("#btnHemkar").count() == 0, "test səhifəsində «Həmkarına göndər» yoxdur")
     br.close()
 
 temizle(); movzu_sil()

@@ -172,6 +172,9 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 923_aile_xeberdarliq.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 924_aile_personaj.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 925_aile_yoxlama_olcu.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 926_sablon_reqem.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 926_ders_sablon_sayi.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 927_pq_seed_200.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 928_plan_kecilen_test.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql
@@ -446,6 +449,9 @@ bank 371_bank_riy10_ders_dar371.sql
 bank 372_bank_riy10_ders_dar372.sql
 bank 390_bank_riy7_ders_tamamlama.sql
 bank 391_bank_riy9_ders_tamamlama.sql
+bank 1000_bank_riy1_ders_elamet_ededler10.sql
+bank 1001_bank_riy1_ders_muqayise.sql
+bank 1002_bank_riy1_ders_toplama10.sql
 bank 400_bank_inf10_ders_sebeke.sql
 bank 401_bank_inf11_ders_modellesdirme.sql
 bank 402_bank_inf11_ders_modellesdirme_a.sql

@@ -154,7 +154,7 @@ with sync_playwright() as pw:
           values (%s::uuid, %s::uuid, %s::uuid, now() - interval '1 hour')""", (tid, cls, uid))
 
     print("B · Vərəq (test önizləmə) — .paper .qh b")
-    pg.goto(PANEL + "#/t/" + tid); pg.wait_for_selector(".paper .pq", timeout=20000)
+    pg.goto(PANEL + "#/t/" + tid); pg.wait_for_selector(".paper .pq", state="attached", timeout=20000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     setirli(pg, ".paper .pq .qh b", "vereq")
     pg.screenshot(path="/tmp/claude-0/kod/vereq_masaustu.png", full_page=True)
 
@@ -251,7 +251,7 @@ with sync_playwright() as pw:
     m.goto(PANEL); m.wait_for_timeout(600)
     m.fill("#email", "kod@t.az"); m.fill("#pass", "kodparol123"); m.click("#btnAuth")
     m.wait_for_timeout(2500)
-    m.goto(PANEL + "#/t/" + tid); m.wait_for_selector(".paper .pq", timeout=20000)
+    m.goto(PANEL + "#/t/" + tid); m.wait_for_selector(".paper .pq", state="attached", timeout=20000); m.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
     setirli(m, ".paper .pq .qh b", "vereq (telefon)")
     w = m.evaluate("() => { const e = document.querySelector('.paper .pq .qh b');"
                    " return e ? e.getBoundingClientRect().width : 0; }")

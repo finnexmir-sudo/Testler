@@ -161,7 +161,7 @@ with sync_playwright() as pw:
         pg.goto(PANEL); pg.wait_for_timeout(700)
         pg.fill("#email", MAIL); pg.fill("#pass", "ksparol123"); pg.click("#btnAuth"); pg.wait_for_timeout(3500)
         pg.goto(PANEL + "#/t/" + TID); pg.reload()
-        pg.wait_for_selector(".paper .pq, .paper", timeout=20000); pg.wait_for_timeout(1500)
+        pg.wait_for_selector(".paper .pq, .paper", state="attached", timeout=20000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true"); pg.wait_for_timeout(1500)
         ok(pg.locator(".paper .kesr").count() >= 3, "test vərəqində kəsr elementləri var", pg.locator(".paper .kesr").count())
         ok(pg.locator(".paper img[src='x']").count() == 0, "vərəqdə HTML sızmır")
         ok(pg.evaluate("window.__xss") is None, "vərəqdə skript işləmədi")
