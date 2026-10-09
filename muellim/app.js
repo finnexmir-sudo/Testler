@@ -3655,7 +3655,7 @@
         Array.prototype.forEach.call(cks, function (c) { ids.push(c.value); });
         if (!ids.length) return;
         //  tək dərs: dərsin öz testi (mövcud yol, «vərəq» sətirdə qalır)
-        if (ids.length === 1) return planOfferLate(ids[0], "ders");
+        if (ids.length === 1) return planOfferLate(ids[0], "ders", true);
         var mm = $("plm-" + id), s2m = $("pls-" + id); if (s2m) s2m.innerHTML = "";
         if (mm) {
           mm.innerHTML = '<div class="ploffer"><b>Seçilmiş ' + ids.length + ' dərsdən test yığılsın?</b>' +
@@ -3665,12 +3665,18 @@
             '<input id="plExN" type="number" min="5" max="50" value="20">' +
             '<button class="btn go sm" data-plexgo="' + esc(id) + '" data-ids="' + esc(ids.join(",")) + '">Yığ və tapşırıq ver</button>' +
             '<button class="btn sm ghost" data-plexno="' + esc(id) + '">Sonra</button></div></div>';
-          mm.scrollIntoView({ block: "nearest" });
+          var ce = mm.closest ? mm.closest(".card.plan") : null; if (ce) ce.classList.add("confirming");
+          var of2 = mm.querySelector(".ploffer"); if (of2) of2.classList.add("pulse");
+          mm.scrollIntoView({ block: "center", behavior: "smooth" });
         }
         return;
       }
       id = b.getAttribute("data-plexno");
-      if (id) { var m5 = $("plm-" + id); if (m5) m5.innerHTML = ""; return; }
+      if (id) {
+        var m5 = $("plm-" + id); if (m5) m5.innerHTML = "";
+        var c5 = box.querySelector('.card.plan[data-p="' + id + '"]'); if (c5) c5.classList.remove("confirming");
+        return;
+      }
       id = b.getAttribute("data-plexgo");
       if (id) {
         var cnt = Number(($("plExN") || {}).value) || 20;
@@ -3729,6 +3735,7 @@
       if (id) {
         var s2 = $("pls-" + id); if (s2) s2.innerHTML = "";
         var m2 = $("plm-" + id); if (m2) m2.innerHTML = "";
+        var c2 = box.querySelector('.card.plan[data-p="' + id + '"]'); if (c2) c2.classList.remove("confirming");
         return;
       }
     });
@@ -3871,7 +3878,7 @@
 
   /* "Sonra" deyilmis (ve ya bir nece movzu kecilmis) halda siyahidan
      istenilen KECILMIS movzu ucun teklifi yeniden acmaq */
-  function planOfferLate(itemId, scope) {
+  function planOfferLate(itemId, scope, fromSel) {
     var plan = null, topic = "", group = "";
     (PLD && PLD.plans || []).forEach(function (p) {
       (p.items || []).forEach(function (it) {
@@ -3883,10 +3890,18 @@
     if (s) s.innerHTML = "";
     var m = $("plm-" + plan.id);
     if (m) {
-      m.innerHTML = offerHtml(
-        (scope === "fesil" && group ? "«" + esc(group) + "» fəsli" : "«" + esc(topic) + "»") +
-          " — ev tapşırığı verilsinmi?", itemId, plan.id, scope);
-      m.scrollIntoView({ block: "nearest" });
+      /*  09.10 (istifadeci: «test yig vurdum, ekran yenilendi, ne bas verdi basa dusmedim»):
+          secimden gelende qutu aydin cumle deyir («test yığılsın və qrupa verilsin?»), diqqeti cekir
+          (ortaya sürüşür + bir anlıq vurğu) və küncdəki «Test yığ» düyməsi bu müddətdə gizlənir.  */
+      var ttl = (scope === "fesil" && group ? "«" + esc(group) + "» fəsli" : "«" + esc(topic) + "»");
+      m.innerHTML = offerHtml(fromSel
+        ? ttl + " dərsindən test yığılsın və qrupa verilsin?"
+        : ttl + " — ev tapşırığı verilsinmi?", itemId, plan.id, scope);
+      var cardEl = m.closest ? m.closest(".card.plan") : null;
+      if (cardEl) cardEl.classList.add("confirming");
+      var ofr = m.querySelector(".ploffer");
+      if (ofr) ofr.classList.add("pulse");
+      m.scrollIntoView({ block: "center", behavior: "smooth" });
     }
   }
 
