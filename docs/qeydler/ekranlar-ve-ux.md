@@ -596,3 +596,11 @@ testinizi yığın» + `#onbGen` + `#onbNames`; şəkil `test/_v2_onb2.py`
 - **Vərəq səhifəsinin yuxarı kartı səliqəyə salındı (09.10, istifadəçi «dağınıqdır»)**: «Qrupa ver» tam enli; çap sətri (Çap/PDF + «cavab açarı ilə» + «yığcam») bir alət zolağı (bordürlü); «Yenidən yığ / Adı dəyiş / vaxtsız» üç bərabər sütun (`.tacts>.tact3` grid); «Sil» qırıq xətdən sonra sağda kiçik; çap izahı kiçik ayrılmış qutuda. Yalnız CSS (DOM eyni). Seçimdən «Test yığ» canlıda işlədiyi təsdiqləndi (dərsdə əvvəldən test olması bloklamır - yenisi yığılır, sətirdə «vərəq» ona keçir).
 
 - **Çap/PDF vərəqində Bil10 başlığı (09.10, istifadəçi)**: vərəqin ən üstündə ayrıca zolaq - loqo (inline SVG, düz rəng, xarici sorğu yox) + «Bil10» + «onlayn test sistemi», sağda «bil10.az»; altlıqdakı «Bil10 ilə hazırlanıb · bil10.az · ad · tarix» qalır. Metaxəttdəki təkrar « · Bil10» çıxarıldı. Yığcam rejimdə zolaq kiçilir. e2e: `e2e_ders_qapisi.py` (print media ekran görüntüsü).
+
+## Ana səhifə: AZ | RU düyməsi (14.10.2026)
+
+- `assets/lang.js` — başlıqda AZ|RU düyməsi; seçim `localStorage` (`bil10_lang`) və `?lang=ru` linki ilə. Mənbə HTML azərbaycancadır; RU seçiləndə hər mətn düyünü lüğətdən əvəz olunur (açar = azərbaycanca mətn).
+- Mətn dəyişəndə lüğət açarı uyğun gəlməyə bilər — `python3 -I test/e2e_ana_dil.py` tərcümə olunmamış sətri tapır.
+- Tərcümə **mənim yazdığım**, rus dilini bilən biri oxumayıb — müəllimə göstərməzdən əvvəl yoxlatmaq lazımdır.
+- Hələ azərbaycancadır: video və onun posteri (`assets/teqdimat.*`), OG şəkli, müəllim/şagird/valideyn/bələdçi/məxfilik səhifələri. Rus müəllim "Hesab yarat"a basanda azərbaycanca panelə düşür — bu, növbəti mərhələdir (`lang`+`t()` lüğəti).
+- Brend adı `translate="no"` ilə qorunur (Chrome-un öz tərcüməsi "Bil10"u "Знайте 10" etməsin).
