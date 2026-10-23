@@ -67,6 +67,21 @@ Panel kodu SQL-dən əvvəl də canlıya gedə bilər: `trend` gəlməyəndə ka
 Əvvəl–sonra şəkilləri (390, 1280): nümunə hesab, `scratchpad/qrup/evvel_*`, `sonra_*`. Köhnə menyu testləri yeni quruluşa uyğunlaşdırıldı (`e2e_qrup_menyu_telefon`, `e2e_geri`, `e2e_kecid`, `e2e_dord_is` A).
 Əvvəldən sınıq (bu işdən asılı deyil, köhnə kodla da): `e2e_dord_is` C («Test ver» səhifəsində `#pick .trow`), `e2e_tapsiriq_bos`; köhnə görünüş seçiciləri (`#btnGroup`, `#gForm`): `e2e_bugun`, `e2e_kurikulum`, `e2e_plan`, `e2e_defter`, `e2e_tovsiye`, `e2e_cedvel`.
 
+## Şagird səhifəsi — Xülasə (23.10, GPT siyahısında 1-ci)
+
+Şərt qrup səhifəsi ilə eyni: yalnız mövcud, yoxlanmış məlumat; canlıdan əvvəl 390/1280 əvvəl–sonra.
+
+| # | Nə | Nə dəyişdi | Necə yoxlandı | Canlıda? |
+|---|---|---|---|---|
+| Ş1.1 | Rəqəmlər bir sətirdə idi, əsası «bütün dövr» | Xülasənin başında kart: **orta · son 30 gün**, gedişat (son 3 / əvvəlki 3, Siqnallar düsturu), **test · son 30 gün**; altında kiçik sətir «N test · X % orta · bütün dövr». Son 30 gün rəqəmləri valideyn mətni ilə eyni funksiyadan (`velSay`). Abunəsizdə / 30 gündə test yoxdursa köhnə sətir; heç test yoxdursa «0 test · 0 %» yazılmır | `e2e_sagird_xulase` A (sətir = valideyn cümləsi = valideyn mətni), F; `e2e_sira2` (müəllim = valideyn paneli) | yox (budaqda) |
+| Ş1.2 | Zəif mövzu, səhvlər və gözləyən tapşırıq bir qarışıq kartda idi; düymə səhvlərdən test idi | **Təkrar tövsiyəsi**: ən zəif ETİBARLI mövzu (ilkin nəticə sona), «Son nəticə: X % · N sual əsasında», **«5 suallıq təkrar ver»** → generator həmin mövzu və YALNIZ bu şagirdlə; «Daha N zəif mövzu — Mövzular»; altında səhv dəftəri və «Səhvlərdən təkrar test» (köhnə düymə). **Gözləyən tapşırıqlar** ayrı kart, boşdursa «Gözləyən tapşırıq yoxdur» | `e2e_sagird_xulase` B (mövzu və faiz Mövzular sekmesindəki sətirlə eyni; generator), D (#/ht ilə eyni); `e2e_sagird_hesabat` B, G | yox |
+| Ş1.3 | «Valideynə göndər» səhifənin ən altında böyük mətn qutusu idi | **Valideyn üçün hesabat** kartı: «Son 30 gündə N test işləyib. Orta nəticə X %.» + «Mətni kopyala» + «Mətnə bax» (mətn və şəkil kartı açılır) | `e2e_sagird_xulase` E (kopyalanan = mətn); `e2e_sagird_hesabat` C | yox |
+| Ş1.4 | Son nəticələr yalnız Tarixçədə idi | **Son nəticələr**: Tarixçənin ilk 5 sətri, «Hamısına bax» Tarixçə sekmesini açır | `e2e_sagird_xulase` C | yox |
+| Ş1.5 | Diaqnostika, fərdi plan, öyrənmə tərzi Xülasəni 3 ekran uzadırdı | **Mövzular** sekmesinin sonuna köçdü (mövzu işidir); «Test tapşır → Diaqnostik test» ora aparır | `e2e_sagird_hesabat` D; `e2e_sagird_xulase` B | yox |
+
+Hələ edilməyib (sonraya): yığcam başlıq (qrup adı · sinif · fənn), «Giriş kodu» düyməsinin başlığa keçməsi.
+Testlərdə tapılan: `e2e_tapsiriq_bos` sınanda bütün platforma testlərini `draft`-da qoyub qaytarmırdı — sonrakı testlər boş siyahı görürdü (`#pick .trow`). Bu, əvvəlki «əvvəldən sınıq» qeydlərinin bir hissəsinin səbəbidir; baza bərpa olunanda `e2e_dord_is`, `e2e_etmeyenler`, `e2e_sagird_hesabat` keçir. `e2e_dord_is` yeni qrup səhifəsinə uyğunlaşdırıldı.
+
 ## Sıra 1–5 — gözləyir
 
 1. **Testin düzgünlüyü** — 0.1, 0.2, 0.4 bağlandı (yuxarı). Qalan: tək pis sualı əvəz etmək (vərəqdə).

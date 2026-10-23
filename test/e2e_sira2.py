@@ -98,7 +98,7 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/s/" + st["i"] + "/" + st["c"]); pg.wait_for_selector(".rstat", timeout=20000); pg.wait_for_timeout(400)
     rs = rstat(pg)
     ok("orta · bütün dövr" in rs, "orta bütün dövr kimi yazılır", rs)
-    m30 = re.search(r"(\d+)%\s*son 30 gün", rs)
+    m30 = re.search(r"(\d+)%\s*(?:orta · )?son 30 gün", rs)   #  23.10: «74% orta · son 30 gün» (Xülasə kartı)
     mtr = re.search(r"son 3 test (\d+)% · əvvəlki (\d+) test (\d+)%", rs)
     pv = page(ctx)
     pv.goto(ROOT + "valideyn/?kod=" + st["p"]); pv.wait_for_selector(".card.sum", timeout=30000); pv.wait_for_timeout(500)
@@ -148,7 +148,9 @@ with sync_playwright() as pw:
 
     print("D · Valideynə gedən mətn eyni rəqəmləri yazır")
     pg.set_viewport_size({"width": 390, "height": 844})
-    pg.goto(PANEL + "#/s/" + st["i"] + "/" + st["c"]); pg.wait_for_selector(".rstat", timeout=20000); pg.wait_for_timeout(600)
+    #  23.10: reqem setri Xulase sekmesindedir - sekme sessiya boyu yadda qalir, ona gore Xulase acilir
+    pg.goto(PANEL + "#/s/" + st["i"] + "/" + st["c"]); pg.wait_for_selector("#sTabs", timeout=20000)
+    pg.locator("#sTabs [data-v='x']").click(); pg.wait_for_selector(".rstat", timeout=20000); pg.wait_for_timeout(600)
     txt = pg.evaluate("(document.getElementById('vTxt') || {}).value || (document.getElementById('vTxt') || {}).textContent || ''")
     if m30 and txt:
         ok(("Ortalama: %s%%" % m30.group(1)) in txt or ("Ortalama nəticə: %s%%" % m30.group(1)) in txt,

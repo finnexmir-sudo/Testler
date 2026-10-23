@@ -2638,10 +2638,10 @@ details.more.newasg>summary{
 .card.vdet#stuDiq{border-left-color:#d1500b}
 details.styd{margin-top:14px}
 .styl .of{font-size:11.5px;font-weight:500;color:var(--fg-3);margin-left:4px}
-.card.vsend .vsegs{margin:0 0 12px}
-.card.vsend .veltxt{font-family:inherit;font-size:14px;line-height:1.55;background:var(--brand-tint);
+.vsend .vsegs{margin:0 0 12px}
+.vsend .veltxt{font-family:inherit;font-size:14px;line-height:1.55;background:var(--brand-tint);
   border:1px solid var(--brand-line);border-radius:14px 14px 14px 4px;padding:12px 14px;margin-bottom:10px}
-.card.vsend .pcard{padding:0;box-shadow:none;border:0}
+.vsend .pcard{padding:0;box-shadow:none;border:0}
 .dgy .dgmore>summary{display:none}
 .dgy .dgmore>.card{margin-top:0}
 
@@ -3028,4 +3028,47 @@ details.styd{margin-top:14px}
   .gkd{flex-wrap:wrap}
   .gkd .g{flex-basis:calc(100% - 50px)}
   .gkd .gkm,.gkd .btn{margin-left:46px}
+}
+
+/* ---------------------------------------------- Sagird sehifesi Xulase (23.10)
+   Reqemler kartda (son 30 gun), altinda Təkrar tövsiyəsi, Gözləyən, Valideyn, Son nəticələr.
+   Kartlar qrup Icmalinin .gic/.gk qaydalarini isledir.  */
+.rstat.r30{display:flex;flex-wrap:wrap;gap:0;align-items:stretch;margin:0 0 12px;padding:14px 0 0;
+  background:var(--surface,#fff);border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.rstat.r30 > span{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:2px;padding:0 16px 12px;
+  border-left:1px solid var(--line);font-size:12.5px;line-height:1.35;color:var(--fg-3)}
+.rstat.r30 > span:first-child{border-left:0}
+.rstat.r30 > span b{font-size:21px;color:var(--fg);margin:0}
+.rstat.r30 .rtr b{color:var(--ok)} .rstat.r30 .rtr.dn b{color:#b54708}
+.rstat.r30 > span.rall{flex:1 0 100%;display:block;border-left:0;border-top:1px solid var(--line);
+  padding:9px 16px 10px;font-size:12.5px}
+.rstat.r30 > span.rall b{font-size:13px;font-weight:700;color:var(--fg-2)}
+@media (max-width:600px){
+  .rstat.r30 > span{padding:0 10px 10px}
+  .rstat.r30 > span b{font-size:18px}
+  .rstat.r30 > span.rall{padding:8px 10px 9px}
+}
+.sxg .sxwide{grid-column:1/-1}
+.sxtov{background:linear-gradient(180deg,var(--warn-tint,#fff8ec),var(--surface,#fff) 70%)}
+.sxtr{display:flex;align-items:center;gap:16px}
+.sxtr .g{flex:1;min-width:0}
+.sxtr .gkt{display:block;margin:0 0 4px}
+.sxtr .gkp{margin:6px 0 0}
+.sxb{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px}
+.sxb .btn{min-height:44px}
+.sxb s{text-decoration:none;font-size:12px;color:var(--fg-3)}
+.sxm{margin:10px 0 0;font-size:13px}
+.sxsehv{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--line);font-size:14px;color:var(--fg-2)}
+.sxsehv span{flex:1;min-width:0}
+.sxv{margin:0 0 12px;font-size:14.5px;line-height:1.45}
+.sxvb{display:flex;gap:8px;flex-wrap:wrap}
+#vBox{margin-top:12px}
+#vBox .vsegs{margin-bottom:10px}
+#stuDiq .stp{margin:0}
+#stuDiq .stp .stpr:first-child{border-top:0;padding-top:0}
+@media (max-width:600px){
+  .sxtr{flex-direction:column;align-items:stretch;gap:12px}
+  .sxb .btn{width:100%}
 }

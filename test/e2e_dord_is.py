@@ -226,7 +226,9 @@ with sync_playwright() as pw:
        "tapsiriq bazaya yazildi")
     ok(pg.url.endswith("#/a/" + GA), "verilenden sonra BAXIS ekrani acilir (unvan #/a/<qrup>)", pg.url[-20:])
     ftop = pg.evaluate("document.getElementById('asgFlash').getBoundingClientRect().top")
-    ok(pg.evaluate("document.querySelector('#main').firstElementChild.id") == "asgFlash", "tesdiq sehifenin ILK elementidir")
+    #  23.10: qrupun sekme zolagi (#gSek) her qrup ekraninin basindadir - tesdiq ondan sonraki ILK elementdir
+    ok(pg.evaluate("(function(){var e=document.querySelector('#main').firstElementChild; if(e&&e.id==='gSek') e=e.nextElementSibling; return e&&e.id;})()") == "asgFlash",
+       "tesdiq sekmelerden sonraki ILK elementdir")
     ok(ftop < 500, "tesdiq basliqdan hemen sonra gorunur", ftop)
     fl = pg.inner_text("#asgFlash .asgok")
     ok("Tapşırıq verildi" in fl and "qrupun bütün şagirdləri" in fl, "tesdiq tam oxunur", fl[:70])
@@ -251,29 +253,30 @@ with sync_playwright() as pw:
     ok("Səhifə 41" in pg.inner_text("#hwList"), "yazilan tapsirig siyahidadir")
 
     print("   -- qrup ayarlari: «Serbest mesq» burada")
-    pg.goto(PANEL + "#/g/" + GA); pg.reload(); pg.wait_for_selector("#btnSet", timeout=20000)
-    pg.click("#btnSet"); pg.wait_for_selector("#fp", timeout=15000)
+    #  23.10: «Qrup ayarları» qrupun sekmesidir (kompüterdə dişli, telefonda «Daha»)
+    pg.goto(PANEL + "#/g/" + GA); pg.reload(); pg.wait_for_selector("#gSek", timeout=20000)
+    pg.click("#gSek .gtab[data-gt='x']"); pg.wait_for_selector("#fp", state="attached", timeout=15000)
     ok(pg.url.endswith("/g/" + GA + "/x"), "unvan #/g/<qrup>/x", pg.url[-20:])
     ok(pg.locator("#btnRen").count() == 1, "«Qrupun adini deyis» burada")
     pg.screenshot(path="/tmp/claude-0/is_X_ayarlar.png", full_page=False)
     ok(db("select free_practice f from public.classes where id=%s::uuid", (GA,), one=True)["f"] is not False, "susmaya gore aciqdir")
-    pg.locator("label[for=fp]").click(); pg.wait_for_timeout(1000)
-    ok(db("select free_practice f from public.classes where id=%s::uuid", (GA,), one=True)["f"] is False, "acar baza ile uzlasir (baglandi)")
+    #  04.10-dan «Sərbəst məşq» sagirde gizlidir, ayar da gizlidir (app.js SERBEST_AYAR) - acar yalniz gorunende sinanir
+    if pg.locator("#fpBox").is_visible():
+        pg.locator("label[for=fp]").click(); pg.wait_for_timeout(1000)
+        ok(db("select free_practice f from public.classes where id=%s::uuid", (GA,), one=True)["f"] is False, "acar baza ile uzlasir (baglandi)")
+    else:
+        ok(pg.locator("#fpBox.hide").count() == 1, "«Sərbəst məşq» ayarı gizlidir (SERBEST_AYAR = false)")
 
     print("\nC2 · Menyuda etməyənlərin ADLARI görünür (Test və Yazılı kartları)")
     pg.goto(PANEL + "#/a/" + GA + "/h"); pg.reload(); pg.wait_for_selector("#hwText", timeout=20000)
     pg.fill("#hwText", "12-ci paraqrafı oxu"); pg.click("#btnHwAdd"); pg.wait_for_selector("#hwList .hwrow", timeout=15000)
+    #  23.10: «Diqqət tələb edir» kartinda (qrup Icmali) - yazili ve test etmeyenlerin adlari
     pg.goto(PANEL + "#/g/" + GA); pg.reload()
-    pg.wait_for_selector("#prep .k-yaz .hwn", timeout=20000); pg.wait_for_timeout(500)
-    ok(pg.locator("#prep .k-yaz .hwn .nm").count() == 2, "«Yazılı» kartında 2 ad var", pg.locator("#prep .k-yaz .hwn .nm").count())
-    ok(all(pg.locator("#prep .k-yaz .hwn .nm").nth(i).is_visible() and
-           pg.locator("#prep .k-yaz .hwn .nm").nth(i).bounding_box()["height"] > 8 for i in range(2)),
-       "adlar GORUNUR (hundurluk > 0)")
-    ok(pg.locator("#prep .k-test .hwn a").count() == 2 and pg.locator("#prep .k-test .hwn a").first.is_visible(),
-       "«Test» kartında 2 ad var və görünür")
-    ok(pg.inner_text("#prep .k-yaz .hwn").count("Şagird") == 2,
-       "iki şagirdin adı yazılıb (yalnız ad)", pg.inner_text("#prep .k-yaz .hwn").replace("\n", " "))
-    ok("," not in pg.inner_text("#prep .k-yaz .hwn").replace("etməyən:", ""), "kartda vergül görünmür")
+    pg.wait_for_selector("#gkHw .g i", timeout=20000); pg.wait_for_timeout(500)
+    hwt = pg.inner_text("#gkHw .g i")
+    ok(hwt.count("Şagird") == 2 and pg.locator("#gkHw .g i").is_visible(), "«Yazılı tapşırıq» sətrində 2 ad görünür", hwt)
+    ok(pg.locator("#gkPend .g i a").count() == 2 and pg.locator("#gkPend .g i a").first.is_visible(),
+       "«Testi etməyənlər» sətrində 2 ad (keçid) var və görünür")
     pg.screenshot(path="/tmp/claude-0/is_C2_adlar.png", full_page=True)
 
     print("\nD · Telefon")
@@ -281,8 +284,8 @@ with sync_playwright() as pw:
     ctx, pg = context(br, 390, 844)
     daxil(pg)
     pg.goto(PANEL + "#/g/" + GA); pg.reload()
-    pg.wait_for_selector("#prep .card.prep", timeout=20000)
-    ok(scroll_x(pg) <= 1, "menyu telefonda yana surusmur", scroll_x(pg))
+    pg.wait_for_selector("#gkNet .gkh", timeout=20000)
+    ok(scroll_x(pg) <= 1, "qrup sehifesi telefonda yana surusmur", scroll_x(pg))
     pg.screenshot(path="/tmp/claude-0/is_A_menyu_tel.png", full_page=True)
     pg.goto(PANEL + "#/gen"); pg.reload()
     gen_qrupla(pg, "Düzəliş D", GA)
@@ -298,8 +301,8 @@ with sync_playwright() as pw:
     pg.click("#pick [data-t='" + tid + "']")
     pg.click("#btnAsg"); pg.wait_for_selector("#asgFlash", timeout=20000); pg.wait_for_timeout(1200)
     ok(scroll_x(pg) <= 1, "tapsiriq sehifesi telefonda yana surusmur", scroll_x(pg))
-    ok(pg.evaluate("document.querySelector('#main').firstElementChild.id") == "asgFlash",
-       "telefonda da tesdiq ILK elementdir")
+    ok(pg.evaluate("(function(){var e=document.querySelector('#main').firstElementChild; if(e&&e.id==='gSek') e=e.nextElementSibling; return e&&e.id;})()") == "asgFlash",
+       "telefonda da tesdiq sekmelerden sonraki ILK elementdir")
     ok(pg.evaluate("document.getElementById('asgFlash').getBoundingClientRect().bottom") < 844,
        "telefonda tesdiq birinci ekrana sigir")
     pg.screenshot(path="/tmp/claude-0/is_C_sonra_telefon.png", full_page=False)
