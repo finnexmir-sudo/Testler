@@ -34,6 +34,7 @@ Bu fayl QISA saxlanılır (hər sessiyanın hər addımında yüklənir). Tarix�
 | `docs/qeydler/ekranlar-ve-ux.md` | Ekranlar və UX: valideyn/şagird/nəticə ekranları, geri düyməsi, hesabat sekmələri, kartlar, qrup ekranları |
 | `docs/qeydler/dizayn.md` | Dizayn qaydaları: marka zolağı, dizayn dili v2, kart blokları, alt zolaq, kölgə qaydası, görünüş əvvəl şəkil |
 | `docs/qeydler/texniki-teleler-ve-infra.md` | Texniki tələlər və infrastruktur: Supabase, SQL Editor, miqrasiya, ANALYZE, marker, canlıda hansı miqrasiya, domen, oyaq saxlama, sürət |
+| `docs/qeydler/ux-yoxlama-2026-10.md` | UX yoxlaması (23.10): icra siyahısı Sıra 0–5, hər bənddə «nə dəyişdi · necə yoxlandı · canlıya keçdimi» |
 | `docs/qeydler/imkanlar-tarixce.md` | Qalan imkanların tarixçəsi (db/NNN): admin, bizə yaz, nümunə hesab, ev tapşırığı, Bələdçi, ana səhifə, şagird/qrup təyinatı, sayğaclar |
 
 **Yarımçıq işlər** (`yarimciq-*.md`, `aile-yolu-ve-push.md`): istifadəçi özü istəyib — **boş vaxt olanda, yaxud mövzu yaxınlaşanda xatırlat**, hər dəfə yox, yerinə düşəndə.

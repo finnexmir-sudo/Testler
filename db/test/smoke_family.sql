@@ -679,6 +679,7 @@ begin
   insert into public.attempt_answers (attempt_id, question_id, topic_id, is_correct, answered_at)
   select v_att, q.id, v_t, null, now() from public.questions q where q.topic_id = v_t and q.status = 'published' order by q.id limit 3;
   perform set_config('smoke.skipname', v_name, false);
+  perform set_config('smoke.skiptid', v_t::text, false);
 end $$;
 set role authenticated;
 set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000008a1';
@@ -691,7 +692,9 @@ begin
 end $$;
 reset role;
 delete from public.attempt_answers aa using public.attempts a
- where a.id = aa.attempt_id and a.student_id = current_setting('smoke.sid')::uuid and aa.is_correct is null and aa.topic_id = (select id from public.topics where name = current_setting('smoke.skipname') limit 1);
+ --  movzu ID ile silinir: ad ile «limit 1» eyni adli IKINCI movzunu (basqa sinif) goture
+ --  bilirdi - 3 cavab qalirdi, 8-ci bolme «bu gun 7 sual» evezine 10 gorurdu (UUID-den asili, tesadufi)
+ where a.id = aa.attempt_id and a.student_id = current_setting('smoke.sid')::uuid and aa.is_correct is null and aa.topic_id = current_setting('smoke.skiptid')::uuid;
 
 -- ------------------------------------------------ 5 · basqa ailə baxa bilmir
 update public.app_state set val = '{"on": true, "emails": []}' where key = 'family';

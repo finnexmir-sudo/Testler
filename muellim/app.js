@@ -1442,7 +1442,9 @@
         href: "#/zm/" + esc(tp.class_id || "") + "/" + esc(tp.id || ""),
         ad: "«" + tp.name + "» zəif gedir",
         alt: wn + " şagird · təkrar testi göndərin",
-        cip: pct(tp.ratio) + "%", cipCls: "pvm" }));
+        //  23.10 (UX yoxlamasi): server bu reqemi «avg» adi ile verir (db/219),
+        //  «ratio» YOXDUR - setir hemise «0%» yazirdi, acilan #/zm ise 67% deyirdi.
+        cip: pct(tp.avg) + "%", cipCls: "pvm" }));
     }
     if (gun !== null && gun <= 7) {
       d.push(yRow({ ic: "star", cls: "dq", href: "#/me",
@@ -9727,7 +9729,10 @@
     });
     on("gsub", "change", function () {
       //  Sinif nisanlari ile eyni yol - ekran silinmir
-      f.subject = $("gsub").value; f.topics = [];
+      //  23.10 (UX yoxlamasi): fenn deyisende sinif secimi de SIFIRLANIR.  Evvel
+      //  kohne fennin sinifleri secili qalirdi: informatika 10 -> Az. dili, «4»
+      //  basanda «4, 10 siniflər» yigilirdi, muellim bunu gormurdu.
+      f.subject = $("gsub").value; f.topics = []; f.levels = [];
       genSync(); genFacets();
     });
     on("gLevs", "click", function (e) {
@@ -10319,8 +10324,34 @@
       "</textarea></details>" + alt;
   }
 
+  /*  23.10 (UX yoxlamasi): capda variantlar QARISDIRILIR.  Bankda duzgun
+      cavab sualların 97%-de BIRINCI variantdir (ord=1) - vereq bazadaki sira
+      ile cap olunanda acar «A, A, A…» cixirdi, kagiz test yararsiz idi.
+      Onlayn testde server variantlari her cehdde ozu qarisdirir
+      (rpc_start_attempt, shuffle_options) - orada problem yox idi.
+      Toxum = test + sual: eyni vereq her cap olunanda EYNI sirani verir
+      (muellim iki defe cap etse acar uygun qalir).  Sagird nusxesi ile
+      acar eyni massivden qurulur.  */
+  function ppMix(seed, arr) {
+    var h = 2166136261, a = arr.slice(), i, k, x;
+    for (i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+    h = h || 1;
+    for (i = a.length - 1; i > 0; i--) {
+      h ^= h << 13; h ^= h >>> 17; h ^= h << 5;
+      k = (h >>> 0) % (i + 1);
+      x = a[i]; a[i] = a[k]; a[k] = x;
+    }
+    return a;
+  }
+
   function paperPrint(t, withKey) {
-    var qs = t.questions || [];
+    var qs = (t.questions || []).map(function (q) {
+      if (q.kind === "text" || !(q.options || []).length) return q;
+      var c = {}, k;
+      for (k in q) c[k] = q[k];
+      c.options = ppMix(String(t.id || "") + ":" + String(q.id || q.ord), q.options);
+      return c;
+    });
     var L = "ABCDEFGH";
     //  Su nisani: veraqi CAP EDEN muellimin adi + tam tarix.  Meqsed
     //  maneе yaratmaq deyil - sual basqa yerde cixsa, kimin cixardigi
