@@ -131,11 +131,12 @@ with sync_playwright() as pw:
     #  ---- qrup menyusu
     gid = gid0
     p.goto(PANEL + "#/g/" + str(gid)); p.reload()
-    p.wait_for_selector("#gMenu .mrow", timeout=30000); p.wait_for_timeout(2000)
+    #  23.10: qrup sehifesi menyu deyil - sekmeler + Icmal kartlari (e2e_qrup_sekme.py)
+    p.wait_for_selector("#gkNet .gkh", timeout=30000); p.wait_for_timeout(2000)
     h = p.evaluate("document.body.scrollHeight")
-    print("QRUP menyusu: %d px = %.1f ekran" % (h, h / 844.0))
-    print("   diqqet:", p.locator("#gDiq").inner_text().replace("\n", " | ")[:120])
-    print("   menyu :", p.locator("#gMenu").inner_text().replace("\n", " | ")[:220])
+    print("QRUP icmali: %d px = %.1f ekran" % (h, h / 844.0))
+    print("   diqqet:", p.locator("#gkDiq").inner_text().replace("\n", " | ")[:120])
+    print("   sekme :", p.locator("#gSek").inner_text().replace("\n", " | ")[:220])
     p.screenshot(path=OUT + "/qrup.png", full_page=True)
     #  ---- sagirdler bolmesi
     p.goto(PANEL + "#/g/" + str(gid) + "/s"); p.reload()

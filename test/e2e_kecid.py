@@ -131,11 +131,12 @@ with sync_playwright() as pw:
     #  ---- qrup menyusu
     gid = gid0
     p.goto(PANEL + "#/g/" + str(gid)); p.reload()
-    p.wait_for_selector("#gMenu .mrow", timeout=30000); p.wait_for_timeout(2000)
+    #  23.10: qrup sehifesi menyu deyil - sekmeler + Icmal kartlari (e2e_qrup_sekme.py)
+    p.wait_for_selector("#gkNet .gkh", timeout=30000); p.wait_for_timeout(2000)
     h = p.evaluate("document.body.scrollHeight")
-    print("QRUP menyusu: %d px = %.1f ekran" % (h, h / 844.0))
-    print("   diqqet:", p.locator("#gDiq").inner_text().replace("\n", " | ")[:120])
-    print("   menyu :", p.locator("#gMenu").inner_text().replace("\n", " | ")[:220])
+    print("QRUP icmali: %d px = %.1f ekran" % (h, h / 844.0))
+    print("   diqqet:", p.locator("#gkDiq").inner_text().replace("\n", " | ")[:120])
+    print("   sekme :", p.locator("#gSek").inner_text().replace("\n", " | ")[:220])
     p.screenshot(path=OUT + "/qrup.png", full_page=True)
     #  ---- sagirdler bolmesi
     p.goto(PANEL + "#/g/" + str(gid) + "/s"); p.reload()
@@ -155,16 +156,16 @@ with sync_playwright() as pw:
         t = p.locator("#band h1")
         return (t.inner_text().strip() if t.count() else p.inner_text("#main")[:40]).replace("\n", " ")
 
-    def kecidler(unvan, qab):
+    def kecidler(unvan, qab, sel=".mrow"):
         """qabdaki her <a>/<button> setrini basib hara dusduyunu yazir"""
         p.goto(PANEL + unvan); p.reload()
-        p.wait_for_selector(qab + " .mrow", timeout=30000); p.wait_for_timeout(1200)
-        n = p.locator(qab + " .mrow").count()
+        p.wait_for_selector(qab + " " + sel, timeout=30000); p.wait_for_timeout(1200)
+        n = p.locator(qab + " " + sel).count()
         cix = []
         for i in range(n):
             p.goto(PANEL + unvan); p.reload()
-            p.wait_for_selector(qab + " .mrow", timeout=30000); p.wait_for_timeout(1000)
-            r = p.locator(qab + " .mrow").nth(i)
+            p.wait_for_selector(qab + " " + sel, timeout=30000); p.wait_for_timeout(1000)
+            r = p.locator(qab + " " + sel).nth(i)
             ad = r.inner_text().replace("\n", " · ")[:52]
             r.click(); p.wait_for_timeout(1400)
             h = (p.evaluate("location.hash") or "#/")
@@ -201,15 +202,16 @@ with sync_playwright() as pw:
         return cix
 
     print("\n=== KECID AUDITI ===")
-    for unvan, qab, ad in (("#/", "#yDiq", "Icmal · diqqet"),
+    for unvan, qab, ad, *sel in (("#/", "#yDiq", "Icmal · diqqet"),
                            ("#/", "#yMenu", "Icmal · menyu"),
                            ("#/sus", "#suBox", "Sessiz sagirdler"),
                            ("#/nt", "#ntQ", "Neticeler · qruplar"),
                            ("#/nt", "#ntZ", "Neticeler · zeif movzular"),
                            ("#/nt", "#ntS", "Neticeler · son cavablar"),
-                           ("#/g/" + str(gid), "#gMenu", "Qrup menyusu")):
+                           ("#/g/" + str(gid), "#gSek", "Qrup sekmeleri", "a.gtab:visible"),
+                           ("#/g/" + str(gid), "#gIcmal", "Qrup icmali · kecidler", "a.gkm")):
         print("\n-- " + ad + " (" + unvan + ")")
-        for a, h, b in kecidler(unvan, qab):
+        for a, h, b in kecidler(unvan, qab, *sel):
             print("   %-52s -> %-34s %s" % (a, h, b))
 
     #  ---- ADMIN: «Idareetme» bendi Icmalda gorunur ve isleyir
