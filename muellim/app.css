@@ -1185,6 +1185,14 @@ details.wrongbox summary{font-size:15px;font-weight:640;color:var(--fg);
     font:12.5px/1.5 Georgia,"Times New Roman",serif}
   #printBox h1{font-size:18px;margin:0 0 4px;color:#000}
   #printBox .pph{border-bottom:2px solid #000;padding:0 0 8px;margin:0 0 14px}
+  #printBox .ppbrand{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:0 0 6px;border-bottom:1px solid #999;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printBox .ppbrand svg{width:28px;height:28px;flex:0 0 28px}
+  #printBox .ppbrand b{font-size:17px;letter-spacing:-.01em;color:#087f75}
+  #printBox .ppbrand span{font-size:10.5px;color:#555}
+  #printBox .ppbrand em{margin-left:auto;font-style:normal;font-size:11px;color:#333}
+  #printBox.compact .ppbrand{margin:0 0 6px;padding-bottom:4px}
+  #printBox.compact .ppbrand svg{width:22px;height:22px;flex-basis:22px}
   #printBox .ppm{font-size:11px;color:#333;margin:0 0 10px}
   #printBox .ppf{display:flex;gap:20px;flex-wrap:wrap;font-size:12px}
   #printBox .ppq{break-inside:avoid;page-break-inside:avoid;margin:0 0 12px}
@@ -2890,3 +2898,25 @@ details.styd{margin-top:14px}
   .msec.dkm{margin:18px 2px 8px}
   .card.prep.dk{padding:13px 14px 14px}
 }
+/*  09.10: təsdiq qutusu açıqkən küncdəki «Test yığ» düyməsi gizlənir, qutu bir anlıq vurğulanır  */
+.plan.confirming .plsb{display:none}
+.ploffer{border:1px solid var(--ok);border-style:solid}
+.ploffer.pulse{animation:plpulse 1.1s ease-out 1}
+@keyframes plpulse{0%{box-shadow:0 0 0 0 rgba(15,138,122,.55)}100%{box-shadow:0 0 0 14px rgba(15,138,122,0)}}
+.ploffer>b{font-size:14px;line-height:1.35;display:block}
+
+/* =========================== Vərəq səhifəsi: yuxarı kart səliqəyə salındı (09.10)
+   İstifadəçi: «bu hissəni deyirəm, dağınıqdır».  Əvvəl: ayrı-ayrı düymələr müxtəlif eni/hündürlükdə,
+   «Sil» tək sağda qalırdı, uzun izah mətni böyük idi.  İndi: əsas düymə tam eni; çap sətri bir «alət
+   zolağı»; üç sakit düymə bərabər sütun; «Sil» ayrı xətdən sonra kiçik; izah kiçik və ayrılmış.  DOM dəyişməyib.  */
+.tacts{gap:12px}
+.tact1 .btn.go{width:100%;justify-content:center;min-height:44px;font-size:15px}
+.tact2{padding:9px 12px;border:1px solid var(--n-150);border-radius:12px;background:var(--n-25);gap:8px 14px}
+.tact2 .prnc{margin-left:0}
+.tacts>.tact3{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;align-items:stretch}
+.tact3>.btn,.tact3>.plim{min-width:0}
+.tact3 .btn.sm,.tact3 .plim>summary{width:100%;justify-content:center;padding:0 6px;white-space:nowrap;font-size:12.5px}
+.tact3 .plim{position:relative}
+.tacts>.tact4{padding-top:10px;border-top:1px dashed var(--n-150);justify-content:flex-end}
+.tacts+p.muted{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--n-25);font-size:12px;line-height:1.5}
+.tact3 .plimm{left:auto;right:0}
