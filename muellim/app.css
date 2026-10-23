@@ -2826,6 +2826,9 @@ details.styd{margin-top:14px}
    toxunanda/üzərinə gələndə azca qalxır, basanda çökür.  Başqa ekranların .menu-su dəyişmir.  */
 .card.menu,.menu,#yMenu.menu{background:none;border:0;box-shadow:none;padding:0;overflow:visible;
   display:flex;flex-direction:column;gap:12px}
+/*  display:flex [hidden]-i ustelemesin: sagird kartinda «Test tapşır» menyusu (#stuAsgMenu) hidden ile baslayir -
+    bu setir olmayanda hemise aciq gorunurdu, duyme ise onu BAGLAYIRDI (istifadeci, 23.10: «test ver isləmir»).  */
+.menu[hidden]{display:none}
 .menu .mrow{position:relative;background:var(--surface);border:1px solid var(--n-150);border-radius:16px;
   padding:15px 16px;border-bottom:1px solid var(--n-150);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.9),
