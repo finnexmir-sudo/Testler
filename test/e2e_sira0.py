@@ -7,7 +7,8 @@
   B  Çap / PDF: bir basış = BİR window.print() (əvvəl iki dəfə çağırılırdı)
   C  Çap: variantlar qarışdırılıb (açar «A, A, A…» deyil), açardakı hərf
      çap olunmuş sualda DÜZ variantın hərfidir; ikinci çap eyni açarı verir
-  D  Test yığ: fənn dəyişəndə sinif seçimi sıfırlanır
+  D  Test yığ: fənn dəyişəndə sinif seçimi sıfırlanır; iki sinifdə ipucu dəqiqdir
+  E  Çox sinifli test (9 + 10): vərəq və çap başlığında «9, 10 siniflər»
 Çox sinif süzgəci (929) SQL-dədir: db/test/smoke_cox_sinif.sql.
 """
 import re, sys
@@ -131,6 +132,23 @@ with sync_playwright() as pw:
     pg.select_option("#gsub", other); pg.wait_for_timeout(1200)
     sel2 = pg.evaluate("[...document.querySelectorAll('#gLevs [data-l].on, #gLevs [data-l][aria-pressed=true], #gLevs [data-l].sel')].length")
     ok(sel2 == 0, "başqa fənn seçiləndə heç bir sinif seçili qalmır", sel2)
+    chips = pg.locator("#gLevs [data-l]")
+    if chips.count() >= 2:
+        chips.nth(0).click(); pg.wait_for_timeout(700); chips.nth(1).click(); pg.wait_for_timeout(900)
+        hint = pg.evaluate("document.body.innerText")
+        ok("bərabər paylanır" not in hint and "mövzularından növbə ilə" in hint,
+           "iki sinifdə ipucu «bərabər paylanır» demir, mövzu növbəsini deyir")
+
+    print("E · Çox sinifli test: vərəq və çap başlığında «9, 10 siniflər»")
+    db("""update public.tests set gen_rule = coalesce(gen_rule, '{}'::jsonb) || '{"levels":["10","9"]}'::jsonb
+           where id = %s""", (TID,))
+    pg.goto(PANEL + "#/t/" + TID); pg.reload(); pg.wait_for_selector("#btnPrn", timeout=20000); pg.wait_for_timeout(800)
+    top = pg.locator(".card p.muted").first.inner_text()
+    ok("9, 10 siniflər" in top, "vərəq başlığı «9, 10 siniflər»", top[:80])
+    pg.evaluate("() => { window.print = function(){} }")
+    pg.uncheck("#prnK"); pg.click("#btnPrn"); pg.wait_for_timeout(400)
+    ppm = pg.evaluate("document.querySelector('#printBox .ppm').innerText")
+    ok("9, 10 siniflər" in ppm and "10-cu sinif" not in ppm, "çap başlığı «9, 10 siniflər»", ppm)
     br.close()
 
 print()

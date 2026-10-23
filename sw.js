@@ -62,8 +62,12 @@ self.addEventListener("fetch", function (e) {
     //  Sebeke birinci: yeni versiya derhal catsin.
     //  Internet yoxdursa kesdeki karkas acilir (sonra "baglanti yoxdur"
     //  mesajini tetbiqin ozu gosterir).
+    //  23.10: {cache: "no-cache"} - brauzerin HTTP kesi YAN KECILIR, server ile
+    //  yoxlanilir (ETag -> 304 ve ya teze fayl).  Evvel fetch(req) GitHub Pages-in
+    //  «max-age=600» basligi ile kesdeki HTML-i qaytarirdi: yayimdan sonra ~10
+    //  deqiqe kohne app.min.js?v=N acilirdi (canli yoxlamada goruldu - v=809).
     e.respondWith(
-      fetch(req).then(function (res) {
+      fetch(req, { cache: "no-cache" }).then(function (res) {
         var copy = res.clone();
         caches.open(CACHE).then(function (c) { c.put(req, copy); });
         return res;
