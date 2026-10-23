@@ -4576,9 +4576,24 @@
         q = $("stuQ");
         q.addEventListener("input", function () {
           var v = q.value.trim().toLowerCase();
-          Array.prototype.forEach.call(document.querySelectorAll("#stu .stu[data-row]"), function (r) {
-            r.classList.toggle("hide", !!v && r.textContent.toLowerCase().indexOf(v) < 0);
+          //  23.10 (UX yoxlamasi): YENI gorunusde setir <a class="mrow"> - «.stu[data-row]»
+          //  hec ne tapmirdi, axtaris suzmurdu.  Iki gorunusun setri de tutulur, YALNIZ AD
+          //  ile mueyyen edilir («gir» yazanda «hələ girməyib» setirleri uygun gelmesin).
+          var tapildi = 0;
+          Array.prototype.forEach.call(document.querySelectorAll("#stu .stu[data-row], #stu a.mrow"), function (r) {
+            var ad = (r.querySelector("b") || r).textContent.toLowerCase();
+            var yox = !!v && ad.indexOf(v) < 0;
+            r.classList.toggle("hide", yox);
+            if (!yox) tapildi++;
           });
+          //  Bos hal: hec kim tapilmadisa siyahi sadece bosalmasin - niye bos oldugu yazilsin
+          var none = $("stuQNone");
+          if (v && !tapildi) {
+            if (!none) {
+              q.insertAdjacentHTML("afterend", '<p class="muted" id="stuQNone">«' + esc(q.value.trim()) +
+                "» adlı şagird tapılmadı.</p>");
+            } else none.textContent = "«" + q.value.trim() + "» adlı şagird tapılmadı.";
+          } else if (none) none.remove();
         });
       } else if (aktiv.length <= 10 && q) { q.remove(); }
 

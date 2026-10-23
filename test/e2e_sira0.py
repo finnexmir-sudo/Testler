@@ -9,6 +9,7 @@
      çap olunmuş sualda DÜZ variantın hərfidir; ikinci çap eyni açarı verir
   D  Test yığ: fənn dəyişəndə sinif seçimi sıfırlanır; iki sinifdə ipucu dəqiqdir
   E  Çox sinifli test (9 + 10): vərəq və çap başlığında «9, 10 siniflər»
+  F  Qrupun şagird siyahısında axtarış süzür (yeni görünüşdə süzmürdü)
 Çox sinif süzgəci (929) SQL-dədir: db/test/smoke_cox_sinif.sql.
 """
 import re, sys
@@ -149,6 +150,40 @@ with sync_playwright() as pw:
     pg.uncheck("#prnK"); pg.click("#btnPrn"); pg.wait_for_timeout(400)
     ppm = pg.evaluate("document.querySelector('#printBox .ppm').innerText")
     ok("9, 10 siniflər" in ppm and "10-cu sinif" not in ppm, "çap başlığı «9, 10 siniflər»", ppm)
+
+    print("F · Qrupun şagird siyahısı: axtarış süzür")
+    g = db("""select c.id::text i from public.classes c join public.students s on s.class_id = c.id and s.is_active
+               where c.account_id = %s::uuid group by c.id having count(*) > 10 order by count(*) desc limit 1""", (acc["i"],), one=True)
+    pg.goto(PANEL + "#/g/" + g["i"] + "/s"); pg.wait_for_selector("#stuQ", timeout=20000); pg.wait_for_timeout(600)
+    def gorunen():
+        return pg.evaluate("""[...document.querySelectorAll('#stu a.mrow, #stu .stu[data-row]')]
+                               .filter(r => r.offsetParent !== null).map(r => (r.querySelector('b') || r).textContent.trim())""")
+    hamisi = gorunen()
+    adlar = [x for x in hamisi]
+    ad1 = next((x for x in adlar if x.lower().startswith("aysel")), adlar[0])
+    ad2 = next((x for x in adlar if x.lower().startswith("orxan")), adlar[-1])
+    for ad in (ad1, ad2):
+        soz = ad.split()[0]
+        pg.fill("#stuQ", soz); pg.wait_for_timeout(300)
+        g2 = gorunen()
+        ok(len(g2) >= 1 and all(soz.lower() in x.lower() for x in g2) and len(g2) < len(hamisi),
+           "«%s» yazanda yalnız uyğun adlar qalır" % soz, "%d/%d: %s" % (len(g2), len(hamisi), ", ".join(g2)))
+    pg.fill("#stuQ", "gir"); pg.wait_for_timeout(300)
+    ok(all("gir" in x.lower() for x in gorunen()), "axtarış yalnız adda gedir («gir» → «hələ girməyib» sətirləri qalmır)", len(gorunen()))
+    pg.fill("#stuQ", "Zzqw"); pg.wait_for_timeout(300)
+    ok(len(gorunen()) == 0 and pg.locator("#stuQNone").is_visible() and "tapılmadı" in pg.inner_text("#stuQNone"),
+       "heç kim tapılmayanda «… adlı şagird tapılmadı» yazılır")
+    pg.fill("#stuQ", "Ays"); pg.wait_for_timeout(300)
+    import os as _o
+    _S = _o.environ.get("SHOT_DIR")
+    if _S:
+        for w, h in ((390, 844), (1280, 900)):
+            pg.set_viewport_size({"width": w, "height": h}); pg.wait_for_timeout(300)
+            pg.locator("#stuQ").scroll_into_view_if_needed(); pg.screenshot(path="%s/axtar_%d.png" % (_S, w))
+        pg.fill("#stuQ", "Zzqw"); pg.wait_for_timeout(300); pg.screenshot(path="%s/axtar_bos_1280.png" % _S)
+        pg.set_viewport_size({"width": 390, "height": 844}); pg.wait_for_timeout(300); pg.screenshot(path="%s/axtar_bos_390.png" % _S)
+    pg.fill("#stuQ", ""); pg.wait_for_timeout(300)
+    ok(len(gorunen()) == len(hamisi) and pg.locator("#stuQNone").count() == 0, "sahə boşalanda bütün şagirdlər qayıdır, mesaj itir", len(gorunen()))
     br.close()
 
 print()
