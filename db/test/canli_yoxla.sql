@@ -159,6 +159,10 @@ select * from (values
     (select exists (select 1 from f where proname='rpc_plan_test_done' and def like '%ders_tag%'))),
  ('929 generator: çox sinif süzgəci (levels) qayıdır',
     (select exists (select 1 from f where proname='generate_pick' and def like '%929: sinif suzgeci%'))),
+ ('932 gedişat: Siqnallar, şagird kartı, valideyn bir düstur',
+    (select exists (select 1 from f where proname='student_trend')
+        and exists (select 1 from f where proname='rpc_student_report' and def like '%932:%')
+        and exists (select 1 from f where proname='rpc_parent_home' and def like '%932:%'))),
  ('931 zəif mövzu: İcmal, «Nə etməli», #/zm bir qayda',
     (select exists (select 1 from f where proname='rpc_home' and def like '%931:%')
         and exists (select 1 from f where proname='rpc_class_report' and def like '%931:%'))),

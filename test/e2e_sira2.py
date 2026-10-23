@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Sıra 2 (UX yoxlaması, 23.10) — hesabatın rəqəmləri bir mənbədən, nümunə hesabda.
+
+  A  Siqnallar «geriləyir (X% → Y%)» → həmin şagirdin kartında gedişat ↘, eyni X və Y
+  B  Şagird kartı: «orta · bütün dövr», «son 30 gün» və gedişat; valideyn paneli
+     eyni şagird üçün eyni «son 30 gün» rəqəmini və eyni gedişatı göstərir
+  C  İcmal «Nəticələr» sətri və Nəticələr ekranı həftə müqayisəsini EYNİ cümlə ilə yazır
+  D  Valideynə gedən mətn eyni «son 30 gün» ortasını və gedişatı yazır
+SQL tərəfi: db/test/smoke_zeif_movzu.sql (931), smoke_gedisat.sql (932).
+"""
+import os, re, sys
+import psycopg2, psycopg2.extras
+from playwright.sync_api import sync_playwright
+
+ROOT = "http://127.0.0.1:8010/"
+PANEL = ROOT + "muellim/index.html"
+CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
+DSN = "host=/tmp port=55432 user=postgres dbname=" + os.environ.get("DB", "panel_e2e")
+CFG = """window.CFG = {SUPABASE_URL:"http://127.0.0.1:54321",
+  SUPABASE_ANON_KEY:"test-anon-key", STUDENT_URL:"http://127.0.0.1:8010/sagird/",
+  PARENT_URL:"http://127.0.0.1:8010/valideyn/", SHOW_PLANS:false};"""
+
+fails = []
+def ok(cond, label, extra=""):
+    print(("  OK   " if cond else "  FAIL ") + label + (("  " + str(extra)) if extra else ""), flush=True)
+    if not cond: fails.append(label)
+
+def db(sql, args=None, one=False):
+    with psycopg2.connect(DSN, cursor_factory=psycopg2.extras.RealDictCursor) as c, c.cursor() as cur:
+        cur.execute(sql, args or ())
+        if cur.description:
+            r = cur.fetchall(); return (r[0] if r else None) if one else r
+
+db("""
+delete from public.classes c using public.accounts a where a.id = c.account_id and a.is_demo and a.id <> app.demo_account();
+delete from public.tests t using public.accounts a where a.owner_id = t.owner_id and a.is_demo and a.id <> app.demo_account();
+delete from public.students s using public.accounts a where a.id = s.account_id and a.is_demo and a.id <> app.demo_account();
+create temp table demo_old_e2e as select owner_id from public.accounts where is_demo and id <> app.demo_account();
+delete from public.accounts where is_demo and id <> app.demo_account();
+delete from auth.users u using demo_old_e2e o where u.id = o.owner_id
+  and not exists (select 1 from public.accounts a2 where a2.owner_id = u.id);""")
+db("delete from public.app_state where key='demo_reset'")
+db("select public.rpc_demo_reset()")
+
+def page(ctx):
+    p = ctx.new_page()
+    p.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
+    p.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)[:160]))
+    return p
+
+def rstat(pg):
+    return pg.evaluate("(document.querySelector('.rstat') || {}).innerText || ''").replace("\n", " ")
+
+with sync_playwright() as pw:
+    br = pw.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
+    ctx = br.new_context(viewport={"width": 390, "height": 844})
+    pg = page(ctx)
+    pg.goto(PANEL + "#/demo"); pg.wait_for_selector("#demoBar", timeout=60000)
+    pg.wait_for_function("document.body.innerText.indexOf('Nəticələr') >= 0", timeout=30000); pg.wait_for_timeout(600)
+    acc = db("select id::text i from public.accounts where is_demo and id <> app.demo_account() order by created_at desc limit 1", one=True)
+
+    print("C · İcmal «Nəticələr» sətri = Nəticələr ekranı")
+    ic_txt = pg.evaluate("[...document.querySelectorAll('a.mrow')].map(a => a.innerText).find(t => t.indexOf('Nəticələr') === 0) || ''").replace("\n", " ")
+    ok("keçən həftə " not in re.sub(r"keçən həftə(yə| ilə)", "", ic_txt), "İcmal bütün dövrün ortasını keçən həftənin ortası ilə yan-yana yazmır", ic_txt[:90])
+    m = re.search(r"(keçən həftəyə görə [+−]\d+ bənd|keçən həftə ilə eyni|son 7 gün: \d+%)", ic_txt)
+    pg.goto(PANEL + "#/nt"); pg.wait_for_selector("#ntUst .rstat", timeout=20000)
+    nt_txt = pg.inner_text("#ntUst")
+    ok(m is not None and m.group(1) in nt_txt, "İcmal və Nəticələr eyni həftə cümləsini yazır", (m.group(1) if m else ic_txt[:60]) + " | " + nt_txt.replace("\n", " ")[:80])
+    ok("bütün dövr" in nt_txt and re.search(r"\d+\s*test", nt_txt) and "cavab" not in nt_txt, "Nəticələr: «orta · bütün dövr», say «test» adlanır", nt_txt.replace("\n", " ")[:80])
+
+    print("A · Siqnallar «geriləyir» → şagird kartında eyni gedişat")
+    #  nüsxədə «geriləyir» olmaya bilər (təsadüfi toxum) - bir şagirdə 3 aşağı nəticə yazılır
+    gs = db("""select s.id::text i from public.students s
+                where s.account_id = %s::uuid and s.is_active
+                  and (select count(*) from public.attempts a where a.student_id = s.id and a.status = 'submitted') >= 4
+                order by s.full_name limit 1""", (acc["i"],), one=True)
+    for k in range(3):
+        db("""insert into public.attempts (test_id, student_id, class_id, status, percent, score, max_score, finished_at)
+              select a.test_id, a.student_id, a.class_id, 'submitted', 10, 1, 10, now() - (%s || ' minutes')::interval
+                from public.attempts a where a.student_id = %s::uuid order by a.finished_at desc limit 1""", (str(k + 1), gs["i"]))
+    pg.goto(PANEL + "#/n"); pg.wait_for_selector("button.al", timeout=20000); pg.wait_for_timeout(400)
+    risk = pg.locator("button.al.risk").first
+    if risk.count() == 0:
+        ok(False, "nümunədə «geriləyir» siqnalı var")
+    else:
+        rt = risk.inner_text().replace("\n", " ")
+        mm = re.search(r"\((\d+)% → (\d+)%\)", rt)
+        sid = risk.get_attribute("data-al"); cid = risk.get_attribute("data-g")
+        pg.goto(PANEL + "#/s/" + sid + "/" + cid); pg.wait_for_selector(".rstat", timeout=20000); pg.wait_for_timeout(400)
+        rs = rstat(pg)
+        ok(mm and ("son 3 test %s%%" % mm.group(2)) in rs and ("test %s%%" % mm.group(1)) in rs and "↘" in rs,
+           "kartda «↘ … son 3 test Y% · əvvəlki N test X%» — Siqnaldakı X və Y", rt[:70] + " | " + rs)
+
+    print("B · Şagird kartı və valideyn paneli: eyni «son 30 gün», eyni gedişat")
+    st = db("""select s.id::text i, s.class_id::text c, s.parent_code p from public.students s
+                where s.account_id = %s::uuid and s.parent_code is not null limit 1""", (acc["i"],), one=True)
+    pg.goto(PANEL + "#/s/" + st["i"] + "/" + st["c"]); pg.wait_for_selector(".rstat", timeout=20000); pg.wait_for_timeout(400)
+    rs = rstat(pg)
+    ok("orta · bütün dövr" in rs, "orta bütün dövr kimi yazılır", rs)
+    m30 = re.search(r"(\d+)%\s*son 30 gün", rs)
+    mtr = re.search(r"son 3 test (\d+)% · əvvəlki (\d+) test (\d+)%", rs)
+    pv = page(ctx)
+    pv.goto(ROOT + "valideyn/?kod=" + st["p"]); pv.wait_for_selector(".card.sum", timeout=30000); pv.wait_for_timeout(500)
+    vt = pv.inner_text(".card.sum").replace("\n", " ")
+    mv = re.search(r"^(\d+)%", vt.strip())
+    ok(m30 and mv and m30.group(1) == mv.group(1), "«son 30 gün» müəllimdə və valideyndə eynidir", "%s / %s" % (m30 and m30.group(1), mv and mv.group(1)))
+    if mtr:
+        ok(("Son 3 testdə %s%%" % mtr.group(1)) in vt and ("əvvəlki %s test" % mtr.group(2)) in vt,
+           "valideyn eyni gedişatı yazır (son 3 test, əvvəlki N test)", vt[:120])
+    else:
+        ok("ən azı 4 test" in vt, "az testdə valideyn də müqayisə göstərmir", vt[:120])
+    for w, h in ((390, 844), (1280, 900)):
+        pg.set_viewport_size({"width": w, "height": h}); pv.set_viewport_size({"width": w, "height": h}); pg.wait_for_timeout(300)
+        if os.environ.get("SHOT_DIR"):
+            pg.screenshot(path="%s/kart_%d.png" % (os.environ["SHOT_DIR"], w)); pv.screenshot(path="%s/valideyn_%d.png" % (os.environ["SHOT_DIR"], w))
+    pv.close()
+
+    print("D · Valideynə gedən mətn eyni rəqəmləri yazır")
+    pg.set_viewport_size({"width": 390, "height": 844})
+    txt = pg.evaluate("(document.getElementById('vTxt') || {}).value || (document.getElementById('vTxt') || {}).textContent || ''")
+    if m30 and txt:
+        ok(("Ortalama: %s%%" % m30.group(1)) in txt or ("Ortalama nəticə: %s%%" % m30.group(1)) in txt,
+           "mətndəki ortalama «son 30 gün» rəqəmidir", txt.replace("\n", " ")[:120])
+    else:
+        ok(bool(txt), "valideyn mətni var")
+    br.close()
+
+print()
+if fails:
+    print("SINDI (%d):" % len(fails))
+    for f in fails: print("  - " + f)
+    sys.exit(1)
+print("HAMISI KECDI")
