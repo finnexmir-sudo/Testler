@@ -9497,7 +9497,9 @@
 
   function genLevHint(f) {
     if (f.levels.length > 1) {
-      return "Seçilmiş " + f.levels.length + " sinif arasında bərabər paylanır.";
+      //  23.10: «siniflər arasında bərabər» DEYİL - generator mövzular arasında növbə ilə
+      //  götürür (9+10 testi 4/6 bölünə bilər).  Mətn bunu deyir.
+      return "Suallar seçilmiş " + f.levels.length + " sinfin mövzularından növbə ilə götürülür.";
     }
     if (f.levels.length === 1) {
       return levelNameByCode2(f.levels[0]) + " — başqasını da seçə bilərsiniz.";
@@ -10344,6 +10346,17 @@
     return a;
   }
 
+  /*  23.10: cox sinifli test (9 + 10) vereq basliginda «10-cu sinif» yazilirdi -
+      testin OZ sinfi en yuxari sinifdir (103: qrup siyahisinda gorunsun deye),
+      amma kagizda bu yanlis oxunur.  Baslıq testin adi kimi yazilir: «9, 10 siniflər».  */
+  function testLevel(t) {
+    var lv = t && t.gen_rule && t.gen_rule.levels;
+    if (lv && lv.length > 1) {
+      return lv.slice().sort(function (a, b) { return Number(a) - Number(b); }).join(", ") + " siniflər";
+    }
+    return (t && t.level) || "";
+  }
+
   function paperPrint(t, withKey) {
     var qs = (t.questions || []).map(function (q) {
       if (q.kind === "text" || !(q.options || []).length) return q;
@@ -10376,7 +10389,7 @@
     var h = brand + '<div class="pph">' +
       "<h1>" + esc(t.title || "") + "</h1>" +
       '<div class="ppm">' + esc(t.subject || "") +
-        (t.level ? " · " + esc(t.level) : "") + " · " + qs.length +
+        (testLevel(t) ? " · " + esc(testLevel(t)) : "") + " · " + qs.length +
         " sual" + (t.time_limit_sec ? " · vaxt: " + Math.round(t.time_limit_sec / 60) + " dəq" : "") +
         "</div>" +
       '<div class="ppf"><span>Ad, soyad: ________________________</span>' +
@@ -10460,7 +10473,7 @@
       '<div class="card">' +
         "<h1>" + esc(t.title || "") + "</h1>" +
         '<p class="muted" style="margin:8px 0 0">' +
-          esc(t.subject || "") + (t.level ? " · " + esc(t.level) : "") +
+          esc(t.subject || "") + (testLevel(t) ? " · " + esc(testLevel(t)) : "") +
           " · " + qs.length + " sual" +
           (t.time_limit_sec ? " · ⏱ " + Math.round(t.time_limit_sec / 60) + " dəq" : "") +
           (done ? " · " + done + " şagird işləyib" : "") + "</p>" +
