@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""DERS QAPISI (db/903): «test yig» dugmesi DERS-DERS acilir.
+"""QRUP SEHIFESI TELEFONDA (23.10-dan sekmeler).  Kohne bas yazi asagida - tarixce ucun.
+
+DERS QAPISI (db/903): «test yig» dugmesi DERS-DERS acilir.
 
 Server her plan setri ucun deyir: ders_hazir (app.ders_sual_sayi >= app.ders_min).
 Bir fesil, uc ders (sintetik - real bank boyudukce netice deyismesin):
@@ -81,34 +83,41 @@ with sync_playwright() as pw:
       " select %s, pl.id, 'active', now()-interval '5 days', now()+interval '25 days' from public.plans pl where pl.slug='repetitor-60'", (acc["acc"],))
     gid = q("insert into public.classes (account_id,teacher_id,kind,name,join_code,level_id)"
             " values (%s,%s,'tutor_group','Ev qrup',%s,%s) returning id", (acc["acc"], acc["own"], "QM" + str(T)[-6:], lev), one=True)["id"]
-    def ac(pg, w, h):
+    #  23.10: menyu yerine SEKMELER (e2e_qrup_sekme.py).  Bu test olcunu yoxlayir:
+    #  telefonda zolaq + sekme zolagi + ilk kartin basligi BIRINCI ekrandadir.
+    def ac(pg, w, h, yol=""):
         pg.set_viewport_size({"width": w, "height": h})
-        pg.goto(PANEL + "?yeni=1#/g/" + str(gid)); pg.reload()
-        pg.wait_for_selector("#gMenu .mrow", timeout=30000); pg.wait_for_timeout(1200)
+        pg.goto(PANEL + "?yeni=1#/g/" + str(gid) + yol); pg.reload()
+        pg.wait_for_selector("#gSek .gtab", timeout=30000); pg.wait_for_timeout(1200)
     def olcu(pg):
         #  test hesabinda e-poct tesdiqi xeberdarligi var (real hesabda yox) - olcudən evvel gizlet
         pg.evaluate("""() => { document.querySelectorAll('div,section').forEach(e => {
             if (e.children.length && /E-poçtunuz təsdiqlənməyib/.test(e.textContent) && e.textContent.length < 400) e.style.display = 'none'; }); }""")
         return pg.evaluate("""() => {
-            const r = document.querySelectorAll('#gMenu .mrow');
-            const last = r[r.length - 1].getBoundingClientRect();
+            const vis = [...document.querySelectorAll('#gSek .gtab')].filter(e => e.offsetParent);
+            const sek = document.getElementById('gSek').getBoundingClientRect();
+            const k1 = document.querySelector('#gIcmal .gkh');
             const nav = document.getElementById('bnav').getBoundingClientRect();
+            const navShown = getComputedStyle(document.getElementById('bnav')).display !== 'none';
             const bk = document.querySelector('.band .bback').getBoundingClientRect();
             const h1 = document.querySelector('.band h1').getBoundingClientRect();
-            return {n: r.length, lastBottom: last.bottom, navTop: nav.top, navShown: getComputedStyle(document.getElementById('bnav')).display !== 'none',
-                    backBottom: bk.bottom, backRight: bk.right, h1Top: h1.top, h1Left: h1.left, bandH: document.getElementById('band').getBoundingClientRect().height,
+            return {n: vis.length, sekBottom: sek.bottom, k1Bottom: k1 ? k1.getBoundingClientRect().bottom : 0,
+                    navTop: navShown ? nav.top : window.innerHeight,
+                    fit: vis.every(e => e.getBoundingClientRect().right <= sek.right + .5),
+                    backBottom: bk.bottom, backRight: bk.right, h1Top: h1.top, h1Left: h1.left,
                     sw: document.documentElement.scrollWidth, iw: window.innerWidth}; }""")
     print("\n=== telefon 375x667 (iPhone SE) ===")
     ac(p, 375, 667); o = olcu(p)
-    yox(o["n"] == 5, "menyuda 5 sətir", o["n"])
-    yox(o["lastBottom"] <= o["navTop"], "5-ci sətir (Dəftər) alt naviqasiyanın üstündə tam görünür", "%d ≤ %d" % (o["lastBottom"], o["navTop"]))
+    yox(o["n"] == 5, "telefonda 4 sekmə + «Daha»", o["n"])
+    yox(o["fit"], "sekmələr zolağa sığır")
+    yox(o["k1Bottom"] <= o["navTop"], "ilk kartın başlığı alt naviqasiyanın üstündə görünür", "%d ≤ %d" % (o["k1Bottom"], o["navTop"]))
     yox(o["h1Left"] >= o["backRight"] - 1, "«Geri» başlığın YANINDADIR (yuxarıda deyil)", "geri sağ=%d, ad sol=%d" % (o["backRight"], o["h1Left"]))
     yox(o["sw"] <= o["iw"], "yana sürüşmə yoxdur")
     yox(p.locator(".band .beye").is_hidden(), "«QRUP» yazısı telefonda gizlədilib")
     p.screenshot(path=OUT + "/1-telefon-375.png")
     print("\n=== telefon 360x640 (kiçik Android) ===")
     ac(p, 360, 640); o2 = olcu(p)
-    yox(o2["sw"] <= o2["iw"] and o2["h1Left"] >= o2["backRight"] - 1, "başlıq sığır, yana sürüşmə yoxdur")
+    yox(o2["sw"] <= o2["iw"] and o2["h1Left"] >= o2["backRight"] - 1 and o2["fit"], "başlıq və sekmələr sığır, yana sürüşmə yoxdur")
     p.screenshot(path=OUT + "/2-telefon-360.png")
     print("\n=== uzun ad ===")
     q("update public.classes set name=%s where id=%s", ("Riyaziyyat hazırlıq qrupu 9-cu sinif axşam", gid))
@@ -116,14 +125,19 @@ with sync_playwright() as pw:
     yox(o3["sw"] <= o3["iw"], "uzun adda yana sürüşmə yoxdur")
     p.screenshot(path=OUT + "/3-uzun-ad-375.png")
     q("update public.classes set name='Ev qrup' where id=%s", (gid,))
-    print("\n=== başqa ekranlara sızmır ===")
-    p.goto(PANEL + "?yeni=1#/g/" + str(gid) + "/s"); p.wait_for_timeout(1200)
-    yox("gcompact" not in (p.get_attribute("#band", "class") or ""), "şagirdlər ekranında sıxılma sinfi YOXDUR")
-    p.goto(PANEL + "?yeni=1#/a/" + str(gid)); p.wait_for_timeout(1200)
-    yox("gcompact" not in (p.get_attribute("#band", "class") or ""), "tapşırıqlar ekranında sıxılma sinfi YOXDUR")
-    print("\n=== kompüter 1280 — dəyişməyib ===")
+    print("\n=== qrupun hər sekməsində eyni başlıq, başqa ekrana sızmır ===")
+    for yol, ad in (("/s", "şagirdlər"), ("/p", "dərs planı")):
+        ac(p, 375, 667, yol)
+        yox("gcompact" in (p.get_attribute("#band", "class") or ""), ad + " sekməsində yığcam başlıq")
+    p.goto(PANEL + "?yeni=1#/a/" + str(gid)); p.wait_for_selector("#gSek", timeout=20000); p.wait_for_timeout(600)
+    yox("gcompact" in (p.get_attribute("#band", "class") or ""), "tapşırıqlar sekməsində yığcam başlıq")
+    p.goto(PANEL + "?yeni=1#/a/" + str(gid) + "/t"); p.wait_for_selector("#pick", timeout=20000); p.wait_for_timeout(800)
+    yox("gcompact" not in (p.get_attribute("#band", "class") or "") and p.locator("#gSek").count() == 0,
+        "«Test ver» ekranı sekmə deyil — sıxılma sinfi və sekmələr YOXDUR")
+    print("\n=== kompüter 1280 ===")
     ac(p, 1280, 900); o4 = olcu(p)
-    yox(o4["backBottom"] <= o4["h1Top"], "kompüterdə «Geri» yenə başlığın ÜSTÜNDƏDİR", "%d ≤ %d" % (o4["backBottom"], o4["h1Top"]))
+    yox(o4["n"] == 7, "kompüterdə 6 sekmə + ayarlar", o4["n"])
+    yox(o4["h1Left"] >= o4["backRight"] - 1, "kompüterdə də «Geri» başlığın yanındadır (yığcam başlıq)")
     yox(p.locator(".band .beye").is_visible(), "kompüterdə «QRUP» yazısı qalır")
     p.screenshot(path=OUT + "/4-kompyuter.png")
     br.close()

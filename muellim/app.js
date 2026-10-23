@@ -20,6 +20,7 @@
             '<path d="M12.4 6.1a2.3 2.3 0 0 1 0 4.5"/><path d="M13.4 12.3a4 4 0 0 1 2.2 2.8"/>',
     person: '<circle cx="9.5" cy="7" r="2.8"/><path d="M4.5 16a5 5 0 0 1 10 0"/>',
     plus:   '<path d="M9.5 4v11M4 9.5h11"/>',
+    down:   '<path d="M5.5 7.5l4 4 4-4"/>',
     x:      '<path d="M5 5l9 9M14 5l-9 9"/>',
     clip:   '<rect x="4.5" y="3.5" width="10" height="13" rx="2"/>' +
             '<path d="M7.5 3.5V2.6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v.9"/>' +
@@ -172,6 +173,7 @@
     if (!b) return;
     b.innerHTML = html ? '<div class="bandin">' + html + "</div>" : "";
     b.classList.remove("gcompact");   //  yalniz qrup menyusu telefonda sixilir - bagqa ekrana kecmesin
+    b.classList.remove("gtabb");
     b.classList.toggle("hide", !html);
     main.classList.toggle("over", !!html);
   }
@@ -4057,6 +4059,99 @@
     d: { ad: "Dəftər", ic: "doc" },
     x: { ad: "Qrup ayarları", ic: "gear" }
   };
+  /* ================================================================
+     QRUP SEHIFESI - SEKMELER (2026-10-23, UX yoxlamasi, qrup 1-ci addim)
+
+     Evvel qrup sehifesi bes setirlik MENYU idi, altinda dord kart.
+     Muellim (ve GPT/Claude reyi): «hansi bolmede oldugum gorunmur,
+     her defe geri qayidib menyudan secirem».  Indi:
+       · zolaq yigcamdir - Geri, qrupun adi, sinif · N sagird, «Test ver»;
+       · altinda SEKMELER: İcmal · Şagirdlər · Tapşırıqlar · Hesabat ·
+         Dərs planı · Dəftər (+ Qrup ayarları).  Telefonda ilk dordu +
+         «Daha» (istifadeci secdi, 23.10);
+       · sekme her qrup ekraninda eynidir - #/g/<id>[/s|p|d|x],
+         #/a/<id> (baxis), #/r/<id>.  Unvanlar DEYISMIR.
+     Sekme kecidi brauzer tarixcesine TEZE yazi yazmir (tabGo): «Geri»
+     sekmeler arasinda dolanmir, qrupa haradan gelinibse ora qaytarir.
+     ================================================================ */
+  var GTABS = [
+    { k: "",  ad: "İcmal",       h: function (id) { return "#/g/" + id; } },
+    { k: "s", ad: "Şagirdlər",   h: function (id) { return "#/g/" + id + "/s"; } },
+    { k: "a", ad: "Tapşırıqlar", h: function (id) { return "#/a/" + id; } },
+    { k: "r", ad: "Hesabat",     h: function (id) { return "#/r/" + id; } },
+    { k: "p", ad: "Dərs planı",  h: function (id) { return "#/g/" + id + "/p"; }, daha: true },
+    { k: "d", ad: "Dəftər",      h: function (id) { return "#/g/" + id + "/d"; }, daha: true },
+    { k: "x", ad: "Qrup ayarları", h: function (id) { return "#/g/" + id + "/x"; }, daha: true, ayar: true }
+  ];
+  function gTabsHtml(gid, act) {
+    var aktDaha = GTABS.filter(function (t) { return t.daha && t.k === act; })[0];
+    return '<nav class="gtabs" id="gSek" aria-label="Qrup bölmələri">' +
+      GTABS.map(function (t) {
+        return '<a class="gtab' + (t.k === act ? " on" : "") + (t.daha ? " gdaha" : "") + (t.ayar ? " gayar" : "") +
+          '" href="' + t.h(gid) + '" data-gt="' + t.k + '"' + (t.ayar ? ' title="' + esc(t.ad) + '"' : "") +
+          (t.k === act ? ' aria-current="page"' : "") + ">" +
+          (t.ayar ? ic("gear") + '<span class="gayt">' + esc(t.ad) + "</span>" : esc(t.ad)) + "</a>";
+      }).join("") +
+      //  telefon: «Daha» - aktiv bolme ordadirsa onun adini yazir (hansi bolmede oldugu bilinsin)
+      '<button type="button" class="gtab gmore' + (aktDaha ? " on" : "") + '" id="gMoreBtn" aria-haspopup="true" aria-expanded="false">' +
+        esc(aktDaha ? aktDaha.ad : "Daha") + ic("down") + "</button>" +
+      '<div class="gmenu hide" id="gMoreMenu" role="menu">' +
+        GTABS.filter(function (t) { return t.daha; }).map(function (t) {
+          return '<a role="menuitem" class="' + (t.k === act ? "on" : "") + '" href="' + t.h(gid) + '" data-gt="' + t.k + '">' +
+            ic(t.k === "p" ? "cal" : t.k === "d" ? "doc" : "gear") + esc(t.ad) + "</a>";
+        }).join("") +
+      "</div></nav>";
+  }
+  //  Qrupun her sekme ekraninda: zolaq yigcam + sekme zolagi #main-in basina
+  function gTabsMount(gid, act) {
+    var b = $("band");
+    if (b) { b.classList.add("gcompact"); b.classList.add("gtabb"); }
+    if (!$("gSek")) main.insertAdjacentHTML("afterbegin", gTabsHtml(gid, act));
+    var nav0 = $("gSek");
+    nav0.addEventListener("click", function (e) {
+      var mb = e.target.closest ? e.target.closest("#gMoreBtn") : null;
+      var mm = $("gMoreMenu");
+      if (mb) {
+        var acik = mm.classList.contains("hide");
+        mm.classList.toggle("hide", !acik);
+        mb.setAttribute("aria-expanded", acik ? "true" : "false");
+        return;
+      }
+      var a = e.target.closest ? e.target.closest("a[data-gt]") : null;
+      if (!a) return;
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;   //  yeni pencere - brauzerin isi
+      e.preventDefault();
+      mm.classList.add("hide");
+      tabGo(a.getAttribute("href"));
+    });
+  }
+  //  «Daha» menyusu kenara basanda baglanir
+  document.addEventListener("click", function (e) {
+    var mm = $("gMoreMenu");
+    if (!mm || mm.classList.contains("hide")) return;
+    if (e.target.closest && e.target.closest("#gSek")) return;
+    mm.classList.add("hide");
+    if ($("gMoreBtn")) $("gMoreBtn").setAttribute("aria-expanded", "false");
+  });
+  /*  Sekme kecidi: location.replace - brauzerin tarixcesinde TEZE yazi
+      yaranmir, HIST-e de yazilmir (route() TAB_SW-ni gorur).  Neticede
+      «Geri» (hem duyme, hem brauzer) qrupa haradan gelinibse ora gedir.  */
+  var TAB_SW = null;
+  function tabGo(h) {
+    if (location.hash === h) { route(); return; }
+    var st = null;
+    try { st = history.state; } catch (e) {}
+    TAB_SW = { i: st && typeof st.i === "number" ? st.i : CUR_I, prev: st ? st.prev : null };
+    location.replace(location.href.replace(/#.*$/, "") + h);
+  }
+
+  /*  Hesabatin «Nə etməli» setri ile qrup Icmalinin «Diqqət» setri EYNI
+      movzunu desin (Sira 2 qaydasi: bir reqem - bir sorgu).  */
+  function repTodo(rt) {
+    return (rt || []).filter(function (t) { return (t.weak_students || []).length > 0; })
+      .sort(function (a, b) { return b.weak_students.length - a.weak_students.length || Number(a.ratio) - Number(b.ratio); })[0] || null;
+  }
+
   function drawGroupYeni(g, bol) {
     if (GBOL[bol]) return drawGroupBolme(g, bol);
     topTitle.textContent = g.name;
@@ -4067,82 +4162,174 @@
           yalan olurdu (istifadeci tutdu).  */
       back: { id: "btnBack", label: "Geri" }, eye: "Qrup",
       id: "gName", title: g.name, subId: "gMeta",
-      sub: '<span id="gSub">' + esc(lv || "") + "</span>"
+      sub: '<span id="gSub">' + esc(lv || "") + "</span>",
+      right: '<button class="btn sm gtv" id="btnAsgs">' + ic("plus") + "Test ver</button>"
     });
-    //  30.09: telefonda (375x667) baslig ekranin dord birini tuturdu, menyunun 5-ci setri
-    //  yarimciq kesilirdi.  Geri duymesi basligin YANINA kecir (app.css: .band.gcompact)
-    if ($("band")) $("band").classList.add("gcompact");
-    show('<div id="gDiq"></div>' +
-      '<div class="card pad0 menu" id="gMenu">' +
-        yRow({ ic: "group", ad: "Şagirdlər", alt: "yüklənir…", href: "#/g/" + g.id + "/s" }) +
-        yRow({ ic: "clip",  ad: "Tapşırıqlar", alt: "yüklənir…", href: "#/a/" + g.id }) +
-        yRow({ ic: "chart", ad: "Hesabat", alt: "yüklənir…", href: "#/r/" + g.id }) +
-        yRow({ ic: "cal",   ad: "Dərs planı", alt: "yüklənir…", href: "#/g/" + g.id + "/p" }) +
-        yRow({ ic: "doc",   ad: "Dəftər", alt: "davamiyyət və ödəniş", href: "#/g/" + g.id + "/d" }) +
-      "</div>" +
-      '<div id="prep"></div>' +
-      '<div class="spacer"></div>' +
-      '<button class="btn go wide" id="btnAsgs">' + ic("clip") + "Test ver və ya ev tapşırığı yaz</button>" +
-      '<div class="spacer"></div>' +
-      '<button class="btn sm ghost" id="btnSet">' + ic("gear") + "Qrup ayarları</button>");
+    /*  ICMAL - dord kart, YALNIZ movcud ve yoxlanmis melumatla (istifadeci, 23.10):
+          1 Bu günün dərsi   - rpc_lesson_prep.next / .last (plan yeri ve son dersin
+                               testi AYRI gostericidir - biri digerinin faizi deyil)
+          2 Diqqət tələb edir - etməyənlər (prep.pending, #/ht ile eyni), yazili
+                               tapsiriq (prep.hw), zeif movzu (Hesabatin «Nə etməli»si)
+          3 Son tapşırıqlar  - rpc_class_assignments (Tapşırıqlar sekmesi ile eyni)
+          4 Son nəticələr    - rpc_class_report.recent (Hesabat · Fəaliyyət ile eyni)
+        Qrafik, tamamlanan tapsiriq sayi, avtomatik rey sonraya qalir.  */
+    show('<div class="gic" id="gIcmal">' +
+        '<section class="card gk" id="gkDers"><div class="skel">Yüklənir…</div></section>' +
+        '<section class="card gk" id="gkDiq"><div class="skel">Yüklənir…</div></section>' +
+        '<section class="card gk" id="gkAsg"><div class="skel">Yüklənir…</div></section>' +
+        '<section class="card gk" id="gkNet"><div class="skel">Yüklənir…</div></section>' +
+      "</div>");
+    gTabsMount(g.id, "");
     on("btnBack", "click", function () { goBack("#/gs"); });
-    on("btnAsgs", "click", function () { nav("#/a/" + g.id); });
-    on("btnSet", "click", function () { nav("#/g/" + g.id + "/x"); });
-    //  «Dərsdən əvvəl» (bu günün dərsi, son keçilən, ev tapşırığı) menyuda
-    //  qayıtdı: yalniz bu qisa sehifede, plan sehifesinde yox (dolasiq olmasin)
-    loadPrep(g, true);
+    on("btnAsgs", "click", function () { nav("#/a/" + g.id + "/t"); });
 
     var live = guard();
-    function setRow(i, alt, cip, cipCls) {
-      var r = document.querySelectorAll("#gMenu .mrow")[i];
-      if (!r) return;
-      var el = r.querySelector("i");
-      if (el) el.textContent = alt;
-      var old = r.querySelector(".pctv");
-      if (old) old.parentNode.removeChild(old);
-      if (cip) {
-        var sp = document.createElement("span");
-        sp.className = "pctv " + (cipCls || "");
-        sp.textContent = cip;
-        r.insertBefore(sp, r.querySelector(".ar"));
-      }
+    function kh(icon, t, alt) {
+      return '<div class="gkh">' + ic(icon) + "<b>" + t + "</b>" + (alt ? '<span class="gka">' + alt + "</span>" : "") + "</div>";
+    }
+    function more(href, t, id) {
+      return '<a class="gkm"' + (id ? ' id="' + id + '"' : "") + ' href="' + href + '">' + t + " " + ic("right") + "</a>";
     }
     Promise.all([
       sb.rpc("rpc_class_report", { p_class_id: g.id }).catch(function () { return null; }),
       sb.rpc("rpc_class_assignments", { p_class_id: g.id }).catch(function () { return null; }),
       sb.rpc("rpc_lesson_prep", { p_class_id: g.id }).catch(function () { return null; })
     ]).then(function (rr) {
-      if (!live() || !$("gMenu")) return;
-      var rep = rr[0] || {}, asg = rr[1] || {}, prep = rr[2] || {};
+      if (!live() || !$("gIcmal")) return;
+      var rep = rr[0] || {}, asg = rr[1] || {}, d = rr[2] || {};
       var sum = rep.summary || {};
-      var nS = Number(sum.students) || 0, aktiv = Number(sum.active) || 0;
-      var items = asg.items || [];
-      var indi = items.filter(function (a) {
-        return !a.closes_at || new Date(a.closes_at).getTime() > Date.now();
-      }).length;
-      var tp = (rep.topics || []).filter(function (t) {
-        return (Number(t.total) || 0) >= 5 && (Number(t.ratio) || 0) < 60;
-      });
-      if ($("gSub")) {
-        $("gSub").textContent = (lv ? lv + " · " : "") + nS + " şagird";
-      }
-      //  1 sagirdler
-      setRow(0, nS + " nəfər" + (nS && aktiv < nS ? " · " + (nS - aktiv) + " hələ işləməyib" : ""));
-      //  2 tapsiriqlar
-      setRow(1, indi ? indi + " aktiv tapşırıq" : "hələ tapşırıq verilməyib");
-      //  3 hesabat
-      setRow(2, Number(sum.attempts)
-        ? pct(sum.avg) + "% orta · " + sum.attempts + " test"
-        : "şagird test yazandan sonra dolur",
-        tp.length ? tp.length + " zəif mövzu" : "", "pvm");
-      //  4 ders plani
-      var nx = prep.next || null;
-      setRow(3, nx && nx.name ? "bu gün: " + nx.name
-        : (prep.has_plan ? "plan qurulub" : "plan qurulmayıb"));
+      var nS = Number(sum.students) || 0;
+      if ($("gSub")) $("gSub").textContent = (lv ? lv + " · " : "") + nS + " şagird";
 
-      //  «Bu gün» setirleri (etməyən şagird, bu günün dərsi) «Dərsdən əvvəl»
-      //  kartindadir - burada ikinci defe yazilmir.
-      $("gDiq").innerHTML = "";
+      //  ---- 1. Bu gunun dersi
+      var nx = d.next || null, ls = d.last || null, h = kh("cal", "Bu günün dərsi");
+      if (!rr[2]) {
+        h += '<p class="muted">Dərs planı yüklənmədi.</p>';
+      } else if (!d.has_plan) {
+        h += '<p class="muted gkp">Dərs planı qurulmayıb. Plan qursanız bu günün dərsi burada görünəcək.</p>' +
+          '<a class="btn sm" id="gkPlanQur" href="#/g/' + esc(g.id) + '/p">' + ic("plus") + "Planı qur</a>";
+      } else {
+        if (nx) {
+          var gp = Number(nx.gpos) || 0, gt = Number(nx.gtotal) || 0;
+          h += '<p class="gkt" id="gkNext">' + esc(nx.topic) + "</p>" +
+            (nx.group && gt
+              //  PLAN YERI: neçənci dərsdir - netice deyil (istifadeci: «81%» bura yazilmasin)
+              ? '<div class="gkplan"><span class="gkl">Plandakı yeri</span>' +
+                  '<span class="gkv" id="gkPos">«' + esc(nx.group) + "» fəsli · dərs " + gp + " / " + gt + "</span>" +
+                  '<span class="gkbar" aria-hidden="true"><i style="width:' +
+                    Math.max(4, Math.min(100, Math.round(gp * 100 / gt))) + '%"></i></span></div>'
+              : "");
+        } else {
+          h += '<p class="gkt">Plan tam keçilib 🎉</p>';
+        }
+        if (ls) {
+          var av0 = ls.test_id && ls.avg != null ? Math.round(ls.avg) : null;
+          //  SON KECILEN DERSIN TESTI - ayri blok, ayri basliq
+          h += '<div class="gklast" id="gkLast"><span class="gkl">Son keçilən dərs · ' + dateAz(ls.done_at) + "</span>" +
+            '<span class="gkv">' + esc(ls.topic) + "</span>" +
+            (ls.test_id
+              ? (av0 != null
+                  ? '<span class="gkres"><b class="' + pvCls(av0) + '">' + av0 + "%</b> bu dərsin testi · " +
+                    (ls.takers || 0) + " şagird yazıb</span>"
+                  : '<span class="gkres muted">test verilib, hələ yazan yoxdur</span>')
+              : '<span class="gkres muted">bu dərsdən test verilməyib</span>') +
+            //  evvelki kartdaki kimi: son kecilen fesilden test yig -> derhal bu qrupa verilir
+            (d.paid ? '<button type="button" class="btn sm ghost" id="prepGen">' + ic("gen") + "«" +
+              esc(ls.group || ls.topic) + "» testi yığ</button>" : "") +
+            "</div>";
+        }
+        //  isinme testi artiq yigilibsa (DERS_HAZIR baglidir - yenisi yigilmir) neticesi itmesin
+        if (nx && nx.warm_test_id) {
+          h += '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
+            '<span class="wres">' + (nx.warm_takers ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird" : "verilib") +
+            '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></div>';
+        }
+        h += '<div class="gkf">' + more("#/g/" + esc(g.id) + "/p", "Dərs planı", "gkPlan") + "</div>";
+      }
+      $("gkDers").innerHTML = h;
+      on("prepGen", "click", function () {
+        //  loadPrep-deki ile eyni: qrupun fenn/sinfi + son kecilen fesil, yigilan test bu qrupa verilir
+        var f = genFilter();
+        f.subject = d.subject || ""; f.levels = d.level ? [d.level] : [];
+        f.topics = ls.topic_id ? [ls.topic_id] : []; f.remNames = [];
+        f.difficulty = []; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = ""; f.asgStus = [];
+        f.count = 10; f.back = ""; f.backName = "";
+        GEN_ENTRY = { id: g.id, name: g.name || "" };
+        nav("#/gen");
+      });
+
+      //  ---- 2. Diqqet teleb edir
+      var pend = d.pending || [], hw = d.hw || null, und = hw ? (hw.undone || []) : [];
+      var todo = repTodo(rep.topics), sat = [];
+      function nm(list, fn) {
+        return list.slice(0, 5).map(fn).join(", ") + (list.length > 5 ? " və daha " + (list.length - 5) : "");
+      }
+      if (d.open && pend.length) {
+        sat.push('<div class="gkd" id="gkPend"><span class="gkdn w">' + pend.length + "</span>" +
+          '<div class="g"><b>Testi etməyənlər · ' + pend.length + " / " + (Number(d.students) || 0) + " şagird</b>" +
+          "<i>" + nm(pend, function (x) {
+            return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '">' + esc(firstName(x.name) || x.name) + "</a>";
+          }) + "</i></div>" + more("#/ht/" + esc(g.id), "Kim etməyib", "gkPendGo") + "</div>");
+      }
+      if (hw && und.length) {
+        sat.push('<div class="gkd" id="gkHw"><span class="gkdn w">' + und.length + "</span>" +
+          '<div class="g"><b>Yazılı tapşırıq · ' + (Number(hw.done) || 0) + " / " + (Number(hw.total) || 0) + " etdi</b>" +
+          "<i>etməyən: " + nm(und, function (n) { return esc(firstName(n) || n); }) + "</i></div>" +
+          more("#/a/" + esc(g.id), "Tapşırıqlar", "gkHwGo") + "</div>");
+      }
+      if (todo) {
+        var ws = todo.weak_students;
+        sat.push('<div class="gkd" id="gkTodo"><span class="gkdn e">' + ws.length + "</span>" +
+          '<div class="g"><b>«' + esc(todo.name) + "» — " + ws.length + " şagird zəifdir</b>" +
+          "<i>" + nm(ws, function (x) {
+            return '<a href="#/s/' + esc(x.id) + "/" + esc(g.id) + '">' + esc(firstName(x.name) || x.name) + "</a>";
+          }) + "</i></div>" +
+          '<button type="button" class="btn sm go" id="gkTodoGo">' + ic("gen") + "Təkrar ver</button></div>");
+      }
+      //  bos qrupda «hər şey qaydasındadır» yalan olardi - evvel sagird lazimdir
+      $("gkDiq").innerHTML = kh("warn", "Diqqət tələb edir") +
+        (sat.length ? sat.join("")
+          : !nS && rr[0] ? '<p class="muted gkp" id="gkNoStu">Qrupda hələ şagird yoxdur.</p>' +
+              '<a class="btn sm" href="#/g/' + esc(g.id) + '/s">' + ic("plus") + "Şagird əlavə et</a>"
+          : '<p class="gkok" id="gkOk">' + ic("check") + "Hər şey qaydasındadır — etməyən və zəif mövzu yoxdur.</p>");
+      on("gkTodoGo", "click", function () {
+        remedialGen(g.id, [todo], null, (todo.weak_students || []).map(function (x) { return { id: x.id, name: x.name }; }));
+      });
+
+      //  ---- 3. Son tapsiriqlar (Tapşırıqlar sekmesindeki kimi qruplanir)
+      var items = asgGroup(asg.items || []);
+      var acq = items.filter(function (a) { return a.open !== false; });
+      var hA = kh("clip", "Son tapşırıqlar", acq.length ? acq.length + " aktiv" : "");
+      if (!rr[1]) hA += '<p class="muted">Tapşırıqlar yüklənmədi.</p>';
+      else if (!acq.length) {
+        hA += '<p class="muted gkp">' + (items.length ? "Aktiv tapşırıq yoxdur." : "Hələ tapşırıq verilməyib.") + "</p>";
+      } else {
+        hA += acq.slice(0, 3).map(function (a) {
+          var done = Number(a.done) || 0, solo = !!a.student_id, many = solo && a.ids && a.ids.length > 1;
+          var tot = Number(a.targets) || (solo ? 1 : (Number(asg.students) || 0));
+          return '<div class="gka1"><div class="g"><b>' + (a.test_id
+              ? '<a href="#/t/' + esc(a.test_id) + '">' + esc(a.title) + "</a>" : esc(a.title)) + "</b>" +
+            "<i>" + (many ? a.ids.length + " şagirdə" : solo ? "yalnız " + esc(firstName(a.student || "") || a.student || "") : "bütün qrup") +
+              (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : "") + "</i></div>" +
+            '<span class="gkfr' + (done >= tot && tot ? " ok" : "") + '">' + done + " / " + tot + "</span></div>";
+        }).join("");
+      }
+      hA += '<div class="gkf">' + more("#/a/" + esc(g.id), items.length ? "Hamısına bax" : "Tapşırıqlar", "gkAsgAll") + "</div>";
+      $("gkAsg").innerHTML = hA;
+
+      //  ---- 4. Son neticeler (Hesabat · Fəaliyyət ile eyni siyahi, ilk 5)
+      var rec = rep.recent || [];
+      var hN = kh("chart", "Son nəticələr");
+      if (!rr[0]) hN += '<p class="muted">Nəticələr yüklənmədi.</p>';
+      else if (!rec.length) hN += '<p class="muted gkp">Hələ test yazan yoxdur.</p>';
+      else {
+        hN += rec.slice(0, 5).map(function (x) {
+          return '<div class="gkn"><div class="g"><b>' + esc(x.student) + "</b>" +
+            "<i>" + esc(x.test) + " · " + dateAz(x.at) + "</i></div>" + pctChip(x.percent) + "</div>";
+        }).join("");
+      }
+      hN += '<div class="gkf">' + more("#/r/" + esc(g.id) + "/f", rec.length ? "Hamısına bax" : "Hesabat", "gkNetAll") + "</div>";
+      $("gkNet").innerHTML = hN;
     }).catch(function () {});
   }
 
@@ -4150,9 +4337,10 @@
   function drawGroupBolme(g, bol) {
     var o = GBOL[bol];
     topTitle.textContent = o.ad;
+    //  23.10: sekme zolagi bolmenin adini deyir - zolaqda qrupun adi (Icmal ile eyni basliq)
     bandHead({
-      back: { id: "btnBack", label: "Geri" }, eye: "Qrup · " + g.name,
-      id: "gName", title: o.ad, subId: "gMeta", sub: ""
+      back: { id: "btnBack", label: "Geri" }, eye: "Qrup",
+      id: "gName", title: g.name, subId: "gMeta", sub: esc(levelName(g.level_id) || "")
     });
     if (bol === "s") {
       show('<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
@@ -4209,6 +4397,7 @@
       LED_EDIT = false;
       loadLedger(g);
     }
+    gTabsMount(g.id, bol);
     on("btnBack", "click", function () { goBack("#/g/" + g.id); });
   }
 
@@ -5234,8 +5423,7 @@
       var weakAll = rt.filter(function (t) { return Number(t.ratio) < 60; });
       /*  "Ne edim" setri (yol xeritesi 20d): en cox sagirdin zeif oldugu
           movzu, adbaad, bir duyme.  Faizler cox, tovsiye az idi.  */
-      var todo = rt.filter(function (t) { return (t.weak_students || []).length > 0; })
-        .sort(function (a, b) { return b.weak_students.length - a.weak_students.length || Number(a.ratio) - Number(b.ratio); })[0];
+      var todo = repTodo(rt);   //  qrup Icmalinin «Diqqət» karti ile eyni
       if (todo) {
         var ws = todo.weak_students;
         h += '<div class="card todo" id="rTodo">' +
@@ -5363,6 +5551,7 @@
         '<div class="stab" id="rtab-f"' + (RTAB === "f" ? "" : " hidden") + ">" + hF + "</div>";
 
       show(h);
+      if (YENI) gTabsMount(gid, "r");
       stamp();
       drawRTopics();
       on("rTabs", "click", function (e) {
@@ -7068,8 +7257,9 @@
 
     bandHead({
       back: { id: "btnBack", label: ASG_PRE ? "Şagird hesabatı" : (Y && view ? "Geri" : backLabel(g.name)) },
-      eye: g.name,
-      title: Y && view === "t" ? "Test ver" : (Y && view === "h" ? "Ev tapşırığı yaz" : "Tapşırıqlar"),
+      //  23.10: baxis ekrani qrupun sekmesidir - zolaqda qrupun adi, bolmeni sekme deyir
+      eye: Y && !view ? "Qrup" : g.name,
+      title: Y && view === "t" ? "Test ver" : (Y && view === "h" ? "Ev tapşırığı yaz" : (Y ? g.name : "Tapşırıqlar")),
       sub: Y && view === "t" ? "Hazır testi seçin, kimə və nə vaxta qədər — şagirdin siyahısına düşür."
          : (Y && view === "h" ? "Şagird siyahısında görür, «etdim» deyir; valideyn də görür."
             : "Şagird tapşırığı öz siyahısında görür; son tarix keçəndə bağlanır.")
@@ -7187,6 +7377,7 @@
       show(hwFormHtml);
     } else if (Y) {
       show(flashHtml + hwFlashHtml + actHtml + '<div id="nextBox"></div>' + listHtml + hwListHtml);
+      gTabsMount(g.id, "a");
     } else {
       show('<div id="nextBox"></div>' + pickHtml + listHtml + restHtml);
     }
@@ -12493,7 +12684,12 @@
       var st = null;
       try { st = history.state; } catch (e) {}
       var trav = !!(st && typeof st.i === "number");
-      if (BACKING) BACKING = false;
+      if (TAB_SW) {
+        //  qrup sekmesi (tabGo): yazi evezlendi - yigin ve sira nomresi KOHNE yazininkidir
+        CUR_I = TAB_SW.i;
+        try { history.replaceState({ i: TAB_SW.i, prev: TAB_SW.prev }, ""); } catch (e) {}
+        st = { i: TAB_SW.i }; trav = true; TAB_SW = null;
+      } else if (BACKING) BACKING = false;
       else if (trav && st.i < CUR_I) HIST.pop();
       else if (CUR_HASH) { HIST.push(CUR_HASH); if (HIST.length > 30) HIST.shift(); }
       //  nomre = vaxt (ms): sehife yenilenende de artan qalir - sayac

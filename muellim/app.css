@@ -2930,3 +2930,102 @@ details.styd{margin-top:14px}
   border-radius:12px;background:var(--surface);font-size:14px;cursor:pointer}
 .pwm input{width:18px;height:18px;margin:0;accent-color:var(--brand)}
 .pwm:has(input:checked){border-color:var(--brand);background:var(--brand-tint)}
+
+/* ---------------------------------------------- Qrup sekmeleri (23.10, qrup 1-ci addim)
+   Zolaq yigcam (Geri · ad · Test ver), altinda sekme zolagi, Icmalda dord kart.  */
+@media (min-width:601px){
+  .band.gtabb .bandin{display:flex;align-items:center;gap:16px;padding:16px 22px}
+  .band.gtabb .bback{margin:0;flex:none}
+  .band.gtabb .bh{flex:1;min-width:0;align-items:center}
+  .band.gtabb .beye{margin-bottom:2px}
+  .band.gtabb h1{font-size:23px;margin:0 0 2px}
+  .band.gtabb p{font-size:13.5px}
+}
+.band.gtabb .br{width:auto;flex:none;align-self:center}
+.band .bandin .btn.gtv{background:#fff;color:var(--brand);border-color:#fff;min-height:40px;white-space:nowrap;box-shadow:0 1px 2px rgba(16,24,40,.12)}
+.band .bandin .btn.gtv:hover{background:var(--n-25)}
+.band .gtv svg{width:15px;height:15px}
+@media (max-width:600px){
+  .band.gtabb .bandin{padding:10px 12px;gap:10px}
+  .band.gtabb h1{font-size:18px;line-height:1.2}
+  .band.gtabb p{font-size:12.5px}
+  .band .gtv{padding:0 11px;min-height:40px;font-size:13px}
+}
+.gtabs{position:relative;display:flex;align-items:center;gap:2px;margin:12px 0 14px;padding:4px;
+  background:var(--surface,#fff);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.gtab{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;
+  border-radius:10px;border:0;background:none;font:inherit;font-size:14.5px;font-weight:600;
+  color:var(--fg-2);text-decoration:none;white-space:nowrap;cursor:pointer}
+.gtab svg{width:16px;height:16px;flex:none}
+@media (hover:hover){ .gtab:hover{background:var(--n-25);color:var(--fg)} }
+.gtab.on{background:var(--brand-tint);color:var(--brand)}
+.gtab.gayar{margin-left:auto;padding:0 12px}
+.gtab.gayar .gayt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.gtab.gmore{display:none}
+.gmenu{position:absolute;right:4px;top:calc(100% + 6px);z-index:30;min-width:210px;padding:6px;
+  background:var(--surface,#fff);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 12px 32px -12px rgba(16,24,40,.35)}
+.gmenu a{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-radius:10px;
+  color:var(--fg);text-decoration:none;font-weight:600;font-size:14.5px}
+.gmenu a svg{width:17px;height:17px;color:var(--brand)}
+.gmenu a.on{background:var(--brand-tint);color:var(--brand)}
+@media (hover:hover){ .gmenu a:hover{background:var(--n-25)} }
+@media (max-width:720px){
+  .gtabs{gap:0;padding:3px}
+  .gtab{flex:1 1 auto;padding:0 6px;font-size:13.5px;min-width:0}
+  .gtab.gdaha{display:none}
+  .gtab.gmore{display:inline-flex;gap:3px}
+  .gtab.gmore svg{width:14px;height:14px}
+}
+/*  Icmal kartlari: telefonda alt-alta, genisde iki sutun  */
+.gic{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:900px){ .gic{grid-template-columns:1fr 1fr;align-items:start} }
+.gic .card.gk{margin:0;padding:16px 18px}
+.gkh{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.gkh svg{width:18px;height:18px;color:var(--brand);flex:none}
+.gkh b{font-size:15.5px;font-weight:650}
+.gkh .gka{margin-left:auto;font-size:12.5px;color:var(--fg-3)}
+.gkt{margin:0 0 10px;font-size:17px;font-weight:650;line-height:1.35;letter-spacing:-.01em}
+.gkp{margin:0 0 10px}
+.gkl{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-3);margin-bottom:3px}
+.gkv{display:block;font-size:14px;color:var(--fg-2)}
+.gkplan{margin:0 0 12px}
+.gkbar{display:block;height:6px;margin-top:8px;border-radius:99px;background:var(--n-100)}
+.gkbar i{display:block;height:100%;border-radius:99px;background:var(--brand)}
+.gklast{margin:0 0 10px;padding:11px 12px;border-radius:12px;background:var(--n-25);border:1px solid var(--line)}
+.gklast .gkv{font-weight:600;color:var(--fg)}
+.gkres{display:block;margin-top:4px;font-size:13.5px;color:var(--fg-2)}
+.gkres b{font-size:16px;font-weight:700}
+.gkres b.pvh{color:var(--ok)} .gkres b.pvm{color:var(--warn)} .gkres b.pvl{color:var(--err)}
+.gklast .btn{margin-top:10px}
+.gkf{display:flex;justify-content:flex-end;margin-top:8px}
+.gkm{display:inline-flex;align-items:center;gap:4px;min-height:44px;font-size:14px;font-weight:600;color:var(--brand);text-decoration:none}
+.gkm svg{width:14px;height:14px}
+.gkd{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.gkh + .gkd{border-top:0;padding-top:0}
+.gkd .g{flex:1;min-width:0}
+.gkd .g b{display:block;font-size:14.5px;font-weight:600;line-height:1.35}
+.gkd .g i{display:block;font-style:normal;font-size:13px;color:var(--fg-3);margin-top:2px}
+.gkd .g i a{color:var(--fg-2)}
+.gkd .gkm{flex:none;min-height:40px;font-size:13.5px}
+.gkd .btn{flex:none}
+.gkdn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
+  border-radius:10px;font-weight:700;font-size:14.5px}
+.gkdn.w{background:var(--warn-tint);color:var(--warn)}
+.gkdn.e{background:var(--err-tint);color:var(--err)}
+.gkok{display:flex;align-items:center;gap:8px;margin:0;color:var(--ok);font-weight:600;font-size:14px}
+.gkok svg{width:18px;height:18px;flex:none}
+.gka1,.gkn{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.gkh + .gka1,.gkh + .gkn{border-top:0;padding-top:0}
+.gka1 .g,.gkn .g{flex:1;min-width:0}
+.gka1 .g b,.gkn .g b{display:block;font-size:14.5px;font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis}
+.gka1 .g b a{color:inherit;text-decoration:none}
+.gka1 .g i,.gkn .g i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-3);margin-top:2px}
+.gkfr{flex:none;font-weight:700;font-size:14px;color:var(--fg-2);padding:4px 9px;border-radius:99px;background:var(--n-50)}
+.gkfr.ok{color:var(--ok);background:var(--ok-tint)}
+@media (max-width:600px){
+  .gkd{flex-wrap:wrap}
+  .gkd .g{flex-basis:calc(100% - 50px)}
+  .gkd .gkm,.gkd .btn{margin-left:46px}
+}

@@ -53,6 +53,20 @@ Panel kodu SQL-dən əvvəl də canlıya gedə bilər: `trend` gəlməyəndə ka
 
 Əvvəldən sınıq (bu işdən asılı deyil): `smoke_bize_yaz.sql` («boş siyahı gözlənirdi» — köhnə bazada da).
 
+## Qrup səhifəsi — 1-ci addım (23.10)
+
+İstifadəçinin şərtləri: yalnız mövcud, yoxlanmış məlumat; qrafik, tamamlanan tapşırıq sayı, avtomatik rəy cümlələri SONRA; telefonda 4 sekmə + «Daha»; «son dərsin nəticəsi» plan irəliləyişi kimi göstərilmir; canlıdan əvvəl 390/1280 əvvəl–sonra şəkilləri.
+
+| # | Nə | Nə dəyişdi | Necə yoxlandı | Canlıda? |
+|---|---|---|---|---|
+| Q1.1 | Qrup səhifəsi 5 sətirlik menyu idi — bölməyə keçəndə menyu itirdi, «hansı bölmədəyəm» görünmürdü | Zolaq yığcam (Geri · ad · «sinif · N şagird» · **Test ver**). Altında sekmələr: İcmal · Şagirdlər · Tapşırıqlar · Hesabat · Dərs planı · Dəftər · ayarlar (kompüter); telefonda ilk 4 + «Daha» (Dərs planı, Dəftər, Qrup ayarları; aktivdirsə «Daha» onun adını yazır). Sekmə qrupun bütün ekranlarındadır (`#/g/id[/s/p/d/x]`, `#/a/id`, `#/r/id`), ünvanlar dəyişmir. Sekmə keçidi tarixçəyə təzə yazı yazmır (`tabGo` + `route()` `TAB_SW`) — «Geri» və brauzerin geri düyməsi qrupa haradan gəlinibsə ora | `e2e_qrup_sekme` A, A2, B (4 sekmədən sonra «Geri» → Qruplar; brauzer geri → Qruplar; sekmənin içindən şagird kartı → «Geri» → Hesabat); `e2e_qrup_menyu_telefon` (375/360: sığır, yana sürüşmə yox, 44 px); `e2e_geri`, `e2e_kecid` | yox (budaqda) |
+| Q1.2 | İcmal: «Bu günün dərsi» | `rpc_lesson_prep.next`: mövzu + **«Plandakı yeri» — «fəsil» · dərs N / M** və zolaq (yalnız plan yeri). **Ayrı blokda** «Son keçilən dərs · tarix»: mövzu, «X % bu dərsin testi · N şagird yazıb» (`last`). Plan yoxdursa «Planı qur» | `e2e_qrup_sekme` D: «Plandakı yeri»ndə faiz yoxdur, faiz yalnız son dərs blokunda | yox |
+| Q1.3 | İcmal: «Diqqət tələb edir» | test etməyənlər (`prep.pending`, `#/ht` ilə eyni say) → «Kim etməyib»; yazılı tapşırıq etməyənlər (`prep.hw`) → Tapşırıqlar; zəif mövzu — Hesabatın «Nə etməli»si ilə EYNİ funksiya (`repTodo`) → «Təkrar ver» (Sıra 3 yolu, həmin şagirdlərə). Heç biri yoxdursa «Hər şey qaydasındadır»; şagird yoxdursa «Qrupda hələ şagird yoxdur» + «Şagird əlavə et» | `e2e_qrup_sekme` C (say `#/ht` ilə, mövzu və şagird sayı «Nə etməli» ilə), E (keçidlər), F (boş qrup) | yox |
+| Q1.4 | İcmal: «Son tapşırıqlar», «Son nəticələr» | aktiv tapşırıqlardan ilk 3 (Tapşırıqlar sekməsi kimi qruplanır, «bitirən / hədəf») → «Hamısına bax» `#/a/id`; Hesabat · Fəaliyyətin ilk 5 sətri → «Hamısına bax» `#/r/id/f` (Fəaliyyət sekməsi açıq). Qrafik, «dəyişmə» sütunu, rəy cümləsi YOXDUR | `e2e_qrup_sekme` C: «8 / 12» Tapşırıqlar sətri ilə, 5 nəticə Fəaliyyətin ilk 5-i ilə eyni | yox |
+
+Əvvəl–sonra şəkilləri (390, 1280): nümunə hesab, `scratchpad/qrup/evvel_*`, `sonra_*`. Köhnə menyu testləri yeni quruluşa uyğunlaşdırıldı (`e2e_qrup_menyu_telefon`, `e2e_geri`, `e2e_kecid`, `e2e_dord_is` A).
+Əvvəldən sınıq (bu işdən asılı deyil, köhnə kodla da): `e2e_dord_is` C («Test ver» səhifəsində `#pick .trow`), `e2e_tapsiriq_bos`; köhnə görünüş seçiciləri (`#btnGroup`, `#gForm`): `e2e_bugun`, `e2e_kurikulum`, `e2e_plan`, `e2e_defter`, `e2e_tovsiye`, `e2e_cedvel`.
+
 ## Sıra 1–5 — gözləyir
 
 1. **Testin düzgünlüyü** — 0.1, 0.2, 0.4 bağlandı (yuxarı). Qalan: tək pis sualı əvəz etmək (vərəqdə).
