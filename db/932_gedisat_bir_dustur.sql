@@ -70,6 +70,8 @@ begin
     'paid', v_paid,
     'since', case when v_paid then null else v_since end,
     'min_answers', app.min_topic_answers(),
+    --  932: bu qederden az cavabli movzu «ilkin netice» kimi isarelenir (Siqnallarin heddi)
+    'firm_answers', app.alert_weak_min(),
     'student', jsonb_build_object(
                  'id', v_st.id, 'full_name', v_st.full_name,
                  'display_name', v_st.display_name, 'login_code', v_st.login_code),
@@ -125,7 +127,9 @@ begin
          and a.finished_at >= v_since),
 
     --  932: gedisat - Siqnallar, valideyn ve sekil karti ile EYNI funksiya
-    'trend', app.student_trend(p_student_id, v_since),
+    --  Abunesiz hesabda NULL: valideyn paneli de, Siqnallar da gedisati yalniz abune ile
+    --  gosterir (174); abunesizde hesabat son 7 gundur - «son 30 gun» yalan olardi.
+    'trend', case when v_paid then app.student_trend(p_student_id) end,
 
     'attempts', coalesce((
       select jsonb_agg(x order by x->>'at' desc)
@@ -159,7 +163,9 @@ begin
                  'level',   lv.code,
                  'total',   count(*),
                  'correct', count(*) filter (where aa.is_correct),
-                 'ratio',   round(count(*) filter (where aa.is_correct) * 100.0 / count(*), 1)) as y
+                 'ratio',   round(count(*) filter (where aa.is_correct) * 100.0 / count(*), 1),
+                 --  932: son cavabin tarixi - «ilkin · 3 sual · 22 sen» ve valideyn metninin 30 gunu
+                 'last_at', max(a.finished_at)) as y
           from public.attempt_answers aa
           join public.attempts a on a.id = aa.attempt_id
                                 and a.student_id = p_student_id
