@@ -10,6 +10,11 @@ cd "$(dirname "$0")"
 ./yig.sh
 
 V=$(( $(git rev-list --count HEAD) + 1 ))
+#  23.10: nisan HECVAXT geri getmir.  Qismen (shallow) klonda commit sayi kicik cixir
+#  (814 evezine 61) - kohne ?v=61 service worker kesinde qala biler, ona gore movcud
+#  en boyuk nisandan bir artiq goturulur.
+CUR=$(grep -ho '?v=[0-9]*' index.html muellim/index.html sagird/index.html valideyn/index.html 2>/dev/null | tr -dc '0-9\n' | sort -n | tail -1)
+[ -n "${CUR:-}" ] && [ "$CUR" -ge "$V" ] && V=$((CUR + 1))
 for f in index.html muellim/index.html sagird/index.html valideyn/index.html komek/index.html mexfilik/index.html; do
   [ -f "$f" ] || continue
   sed -i -E "s|(href=\"[^\"]*\.css)(\?v=[0-9]+)?\"|\1?v=$V\"|g" "$f"
