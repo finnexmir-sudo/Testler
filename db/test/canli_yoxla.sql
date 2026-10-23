@@ -162,6 +162,8 @@ select * from (values
     (select exists (select 1 from f where proname='rpc_plan_test_done' and def like '%ders_tag%'))),
  ('929 generator: çox sinif süzgəci (levels) qayıdır',
     (select exists (select 1 from f where proname='generate_pick' and def like '%929: sinif suzgeci%'))),
+ ('934 hədəfli tapşırıq: qrupun seçilmiş şagirdlərinə',
+    (select exists (select 1 from f where proname='rpc_assign_test_many'))),
  ('933 siqnallar: növün içində ən ağır birinci',
     (select exists (select 1 from f where proname='rpc_home' and def like '%933:%')
         and exists (select 1 from f where proname='rpc_class_alerts' and def like '%933:%'))),

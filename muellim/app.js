@@ -1860,7 +1860,8 @@
         '<div class="spacer"></div>' +
         '<button class="btn go wide" id="zmGen">' + ic("gen") +
           "Bu mövzudan təkrar testi yığ</button>";
-      on("zmGen", "click", function () { remedialGen(gid, [tp]); });
+      //  Sira 3 (934): test YALNIZ bu siyahidaki sagirdlere gedir (secim generatorda deyisir)
+      on("zmGen", "click", function () { remedialGen(gid, [tp], null, (st || []).map(function (x) { return { id: x.id, name: x.name }; })); });
     }, function (e) {
       if (!live() || !$("zmBox")) return;
       $("zmBox").innerHTML = '<div class="card">' + msg("warn", fail(e)) + "</div>";
@@ -2143,7 +2144,7 @@
         Array.prototype.forEach.call(ab.querySelectorAll("[data-tt]"), function (b) {
           b.addEventListener("click", function () {
             var t = tps[Number(b.getAttribute("data-tt"))];
-            if (t) remedialGen(t.class_id, [t]);
+            if (t) remedialGen(t.class_id, [t], null, (t.weak || []).map(function (x) { return { id: x.id, name: x.name }; }));
           });
         });
         on("alMore", "click", function () { nav("#/n"); });
@@ -3230,7 +3231,7 @@
         var f = genFilter();
         f.subject = d.subject || ""; f.levels = d.level ? [d.level] : [];
         f.topics = ls.topic_id ? [ls.topic_id] : []; f.remNames = [];
-        f.difficulty = []; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = "";
+        f.difficulty = []; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = ""; f.asgStus = [];
         f.count = 10;
         //  08.10: qrupdan gelende tapsiriq ekranina qayitmaq YOXDUR - test yigilan kimi hemin qrupa verilir
         //  (son tarix 7 gun, 1 cehd).  Niyyet bir defelikdir: screenGen oxuyub silir.
@@ -5391,7 +5392,8 @@
         $("rRecMore").remove();
       });
       on("btnB", "click", function () { goBack("#/g/" + gid); });
-      on("btnTodo", "click", function () { remedialGen(gid, [todo]); });
+      //  Sira 3 (934): «N sagirde tekrar verin» - duyme HEMIN N sagirde verir (evvel butun qrupa)
+      on("btnTodo", "click", function () { remedialGen(gid, [todo], null, (todo.weak_students || []).map(function (x) { return { id: x.id, name: x.name }; })); });
       on("btnRef", "click", function () { screenReport(gid); });
       on("btnRem", "click", function () { remedialGen(gid, weakAll); });
       Array.prototype.forEach.call(main.querySelectorAll("[data-s]"), function (b) {
@@ -7311,7 +7313,35 @@
     if ($("pick")) loadPick(g, students || []);
   }
 
+  /*  Sira 3 (934): eyni test bir neçə sagirde FERDI verilibse (hedefli tapsiriq) - N setir
+      bir setir olur: «4 şagirdə: Fidan, Orxan…», bitirenler cemlenir, «×» hamisini goturur.
+      Tek ferdi teyinat evvelki kimi qalir.  */
+  function asgGroup(items) {
+    var out = [], byKey = {};
+    items.forEach(function (a) {
+      if (!a.student_id) { out.push(a); return; }
+      var k = a.test_id + "|" + (a.open !== false) + "|" + (a.closes_at || "");
+      var g = byKey[k];
+      if (!g) {
+        g = byKey[k] = {};
+        for (var x in a) g[x] = a[x];
+        g.ids = [a.id]; g.names = [a.student || ""]; g.targets = 1; g.done = Number(a.done) || 0;
+        g._sum = a.avg != null ? Number(a.avg) * (Number(a.done) || 0) : 0;
+        out.push(g);
+        return;
+      }
+      g.ids.push(a.id); g.names.push(a.student || "");
+      g.targets += 1; g.done += Number(a.done) || 0;
+      if (a.avg != null) g._sum += Number(a.avg) * (Number(a.done) || 0);
+    });
+    out.forEach(function (g) {
+      if (g.ids && g.ids.length > 1) g.avg = g.done ? Math.round(g._sum / g.done) : null;
+    });
+    return out;
+  }
+
   function asgRows(items, students, f) {
+    items = asgGroup(items);
     if (!items.length) {
       return '<div class="empty"><div class="ic">' + ic("clip") + "</div>" +
         "<b>Hələ tapşırıq verilməyib</b>" +
@@ -7341,22 +7371,27 @@
                 : (Number(a.max_attempts) || 1) + " cəhd";
       //  Ferdi teyinatda mexrec 1-dir - "0/5 sagird bitirib" yanlis olardi
       var solo = !!a.student_id;
+      var many = solo && a.ids && a.ids.length > 1;
       var tot  = Number(a.targets) || (solo ? 1 : students);
       return '<div class="asg' + (AFRESH && a === items[0] ? " fresh" : "") + '">' +
         '<div class="l1"><b>' + (YENI && a.test_id
           ? '<a class="asgt" href="#/t/' + esc(a.test_id) + '">' + esc(a.title) + "</a>" : esc(a.title)) + "</b>" +
-          (solo
+          (many
+            ? '<span class="pill solo" title="' + esc(a.names.join(", ")) + '">' + ic("person") +
+              a.ids.length + " şagirdə</span>"
+            : solo
             ? '<span class="pill solo">' + ic("person") +
               "yalnız " + esc(a.student || "bir şagird") + "</span>"
             : "") +
           '<span class="pill' + (open ? " on" : "") + '">' +
             (open ? "Aktiv" : "Bağlı") + "</span>" +
-          '<button class="btn sm ghost icon" data-del="' + esc(a.id) + '" data-n="' + done + '" data-t="' + tot + '" ' +
+          '<button class="btn sm ghost icon" data-del="' + esc(many ? a.ids.join(",") : a.id) + '" data-n="' + done + '" data-t="' + tot + '" ' +
             'title="Tapşırığı götür — yazılmış nəticələr qalır" aria-label="Tapşırığı götür">' + ic("x") + "</button>" +
         "</div>" +
         '<div class="l2">' + esc(a.subject || "") + " · " +
           (Number(a.questions) || 0) + " sual · " + tries +
           (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : "") + "</div>" +
+        (many ? '<div class="l2">' + esc(a.names.join(", ")) + "</div>" : "") +
         '<div class="l2">' + done + "/" + tot + " şagird bitirib" +
           (a.avg != null ? " · orta " + pct(a.avg) + "%" : "") +
           //  YENI: etmeyenler - adlari sadalayan sehifeye (#/ht), say-siyahi qaydasi
@@ -7389,7 +7424,10 @@
           "Bitirməyənlər testi artıq görməyəcək; yarımçıq qoyan şagird davam edə bilməyəcək.\n\n" +
           "Sonradan qaytarmaq üçün testi yenidən qrupa verməlisiniz.")) return;
       busy = true; b.disabled = true;
-      sb.rpc("rpc_unassign_test", { p_assignment_id: id })
+      //  Sira 3: hedefli tapsiriq bir neçə ferdi setirdir - hamisi novbe ile goturulur
+      id.split(",").reduce(function (p, one) {
+        return p.then(function () { return sb.rpc("rpc_unassign_test", { p_assignment_id: one }); });
+      }, Promise.resolve())
         .then(function () { busy = false; screenAssign(g.id); })
         .catch(function (e) {
           busy = false; b.disabled = false;
@@ -7430,7 +7468,7 @@
     f.title = ""; f.cls = ""; f.remNames = [];
     //  Teyinati generator DEYIL, tapsiriq ekrani verecek: orada son
     //  tarix, cehd sayi ve "tek sagird" secimi var.
-    f.asg = ""; f.asgStu = "";
+    f.asg = ""; f.asgStu = ""; f.asgStus = [];
     //  Qrupun sinfi susmaya secili gelir; muellim istese asagi
     //  sinifleri de elave edir (cox secim).
     var kod = levelCode(g.level_id);
@@ -9374,7 +9412,7 @@
                     levels: [], topics: [], difficulty: [],
                     count: 10, title: "", asg: "",
                     //  «yalniz bu sagirde»: sagird hesabatindan zeif movzulara test yigilanda
-                    asgStu: "", asgStuName: "",
+                    asgStu: "", asgStuName: "", asgStus: [], asgMode: "some",
                     cls: "", remNames: [],
                     //  tapsiriq ekranindan gelmisiksa hara qayidaq
                     back: "", backName: "",
@@ -9449,8 +9487,13 @@
      suallari one cekecek. */
   /*  stu = {id, name}: sagird hesabatindan cagirilanda test YALNIZ o sagirde verilir
       (evvel butun qrupa gedirdi - 29.09: qrup secili gelir, «qrupa ver» yazilirdi).  */
-  function remedialGen(gid, weak, stu) {
+  function remedialGen(gid, weak, stu, stus) {
     var f = genFilter();
+    //  Sira 3 (934): tovsiyenin sagirdleri.  1 nefer - tek sagird yolu; 2+ - hedefli siyahi.
+    stus = stus || [];
+    if (!stu && stus.length === 1) stu = stus[0];
+    f.asgStus = stus.length > 1 ? stus : [];
+    f.asgMode = "some";
     f.difficulty = [];
     f.topics = weak.map(function (t) { return t.id; });
     f.remNames = weak.map(function (t) { return t.name; });
@@ -9506,7 +9549,7 @@
     var live = guard();
     var f = genFilter();
     //  08.10: qrup kartindan gelis bir defelikdir; menyudan gelende kohne niyyet daşınmasın
-    if (GEN_ENTRY) { f.asg = GEN_ENTRY.id; f.fromG = GEN_ENTRY.id; f.fromName = GEN_ENTRY.name; f.asgStu = ""; GEN_ENTRY = null; }
+    if (GEN_ENTRY) { f.asg = GEN_ENTRY.id; f.fromG = GEN_ENTRY.id; f.fromName = GEN_ENTRY.name; f.asgStu = ""; f.asgStus = []; GEN_ENTRY = null; }
     else if (f.fromG) { f.asg = ""; f.fromG = ""; f.fromName = ""; }
     topTitle.textContent = "Test yığ";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
@@ -9742,6 +9785,8 @@
           : f.fromG
           ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi test <b>«' + esc(f.fromName || "qrup") +
             "»</b> qrupuna dərhal veriləcək (son tarix 7 gün, 1 cəhd).</p>"
+          : (f.asgStus || []).length
+          ? genWhoHtml(f)
           : f.asgStu
           ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi test <b>yalnız «' + esc(f.asgStuName) +
             "»</b> şagirdinə veriləcək — qrupun qalanı görmür (son tarix 7 gün, 1 cəhd).</p>"
@@ -9839,6 +9884,16 @@
       genSync(); genFacets();
     });
     on("gTitle", "input", function () { f.title = $("gTitle").value; });
+    on("gWho", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-w]") : null;
+      if (!b) return;
+      f.asgMode = b.getAttribute("data-w");
+      Array.prototype.forEach.call($("gWho").querySelectorAll("[data-w]"), function (x) {
+        x.classList.toggle("on", x === b);
+      });
+      if ($("gWhoTxt")) $("gWhoTxt").innerHTML = genWhoTxt(f);
+      if ($("btnMake") && !busy) $("btnMake").textContent = makeLabel(f);
+    });
     //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin
     if (!f.back && !f.asgStu && !f.fromG) sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
                            order: "name" })
@@ -9954,7 +10009,7 @@
           ff.pool = "all";
           ff.subject = x.d.subject; ff.levels = x.d.level ? [x.d.level] : [];
           ff.topics = x.d.last.topic_id ? [x.d.last.topic_id] : [];
-          ff.difficulty = []; ff.cls = ""; ff.remNames = []; ff.asg = ""; ff.asgStu = "";
+          ff.difficulty = []; ff.cls = ""; ff.remNames = []; ff.asg = ""; ff.asgStu = ""; ff.asgStus = [];
           ff.count = 10;
           ff.title = (x.d.last.group || x.d.last.topic) + " — ev tapşırığı";
           //  08.10: qrupun kartindan gelibse (fromG) hemin qrupun tovsiyesi - tapsiriq ekranina getmeden
@@ -9969,7 +10024,31 @@
   }
 
   //  qrup secilibse duymenin adi hemin iki isi deyir: yig VE ver
+  /*  Sira 3 (934): tovsiyeden gelen hedefli siyahi - «Kimə» iki secimdir:
+      yalniz zeif olanlar (susma) ve ya butun qrup.  Adlar gorunur - muellim
+      kime getdiyini duymeni basmazdan EVVEL bilir (alici sayi deyisirse de).  */
+  function genWhoHtml(f) {
+    var L = f.asgStus || [], all = f.asgMode === "all";
+    return '<label>Kimə</label>' +
+      '<div class="segs" id="gWho" style="margin-bottom:8px">' +
+        '<button type="button" class="seg' + (all ? "" : " on") + '" data-w="some">Yalnız zəif olanlar · ' + L.length + "</button>" +
+        '<button type="button" class="seg' + (all ? " on" : "") + '" data-w="all">Bütün qrup</button>' +
+      "</div>" +
+      '<p class="muted" id="gWhoTxt" style="margin:0 0 14px">' + genWhoTxt(f) + "</p>";
+  }
+  function genWhoTxt(f) {
+    var L = f.asgStus || [];
+    if (f.asgMode === "all") {
+      return "Hazır olan kimi test <b>bütün qrupa</b> veriləcək (son tarix 7 gün, 1 cəhd).";
+    }
+    return "Hazır olan kimi test <b>yalnız bu " + L.length + " şagirdə</b> veriləcək: " +
+      L.map(function (x) { return esc(firstName(x.name) || x.name); }).join(", ") +
+      " — qrupun qalanı görmür (son tarix 7 gün, 1 cəhd).";
+  }
   function makeLabel(f) {
+    if (f.asg && !f.back && (f.asgStus || []).length && f.asgMode !== "all") {
+      return "Testi yığ və " + f.asgStus.length + " şagirdə ver";
+    }
     return f.asg && !f.back ? (f.asgStu ? "Testi yığ və şagirdə ver" : "Testi yığ və qrupa ver") : "Testi yığ";
   }
 
@@ -9984,6 +10063,9 @@
       qad = qadSel.options[qadSel.selectedIndex].textContent;
     } else if (f.fromG) qad = f.fromName;
     var qid = f.asg, qstu = f.asgStu, qstuName = f.asgStuName;
+    //  Sira 3: hedefli siyahi (2+ sagird) - «Bütün qrup» secilmeyibse
+    var qstus = ((f.asgStus || []).length && f.asgMode !== "all") ? f.asgStus.slice() : null;
+    if (f.asgMode === "all" && (f.asgStus || []).length) { qstu = ""; qstuName = ""; }
     ASG = null; ASG_ERR = null;
     sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: (f.title || "").trim() || genAutoTitle(f) })
       .then(function (v) {
@@ -9992,6 +10074,19 @@
         //  Ikisi de vereqde YAZILIR: verildise kime, verilmediyse niye.
         if (!qid) return v;
         var closes = new Date(Date.now() + 7 * 864e5);
+        if (qstus) {
+          return sb.rpc("rpc_assign_test_many", {
+            p_class_id: qid, p_test_id: v.test_id,
+            p_student_ids: qstus.map(function (x) { return x.id; }),
+            p_closes_at: closes.toISOString(), p_max_attempts: 1
+          }).then(function (r) {
+            ASG = { hami: false, qrup: qad, n: Number(r && r.count) || qstus.length,
+                    who: ((r && r.students) || qstus.map(function (x) { return x.name; })).join(", "),
+                    son: closes.toISOString(), cehd: 1 };
+          }, function (e) {
+            ASG_ERR = { qrup: qad, cid: qid, msg: fail(e) };
+          }).then(function () { return v; });
+        }
         return sb.rpc("rpc_assign_test", {
           p_class_id: qid, p_test_id: v.test_id,
           p_closes_at: closes.toISOString(), p_max_attempts: 1,
@@ -10006,7 +10101,7 @@
         busy = false;
         //  yigim bitdi - «qrupa/sagirde ver» niyyeti bir defelikdir: sonraki «Test yig»
         //  ozunden avvelki niyyeti (ve ya sagirdi) daşımasın
-        f.asg = ""; f.asgStu = ""; f.asgStuName = ""; f.fromG = ""; f.fromName = "";
+        f.asg = ""; f.asgStu = ""; f.asgStuName = ""; f.asgStus = []; f.fromG = ""; f.fromName = "";
         //  Tapsiriq ekranindan gelmisiksa ora qayidiriq - teze test
         //  siyahida secili gelsin deye id-ni otururuk.
         if (f.back) {
@@ -10662,8 +10757,12 @@
                   ? "«" + esc(verildi.qrup) + "» — bütün şagirdlər bu testi indi görür."
                   //  «Kimə» siyahisinda ad onsuz da «yalnız Aysel M.» kimidir -
                   //  bas sozu atiriq, yoxsa «yalnız ... (yalnız o)» cixir.
-                  : "Yalnız " + esc(verildi.who.replace(/^yalnız\s+/i, "")) +
-                    " bu testi görür — qrupun qalanı yox.") +
+                  : (verildi.n > 1
+                    //  Sira 3: hedefli - say + adlar (alici siyahisi ile tapsiriq EYNI olsun)
+                    ? "Yalnız bu " + verildi.n + " şagird bu testi görür: " + esc(verildi.who) +
+                      " — qrupun qalanı yox."
+                    : "Yalnız " + esc(verildi.who.replace(/^yalnız\s+/i, "")) +
+                      " bu testi görür — qrupun qalanı yox.")) +
                 (verildi.son
                   ? " Son tarix: " + esc(dateAz(verildi.son)) + "."
                   : " Son tarix yoxdur — siz götürənə qədər açıq qalır.") +
@@ -10720,6 +10819,7 @@
               : "") +
             '<div><label for="pWho">Kimə</label>' +
               '<select id="pWho"></select></div>' +
+            '<div id="pWhoMany" class="pwmbox" style="display:none"></div>' +
             '<p class="muted" style="margin:-8px 0 14px">Tək şagird ' +
               "seçsəniz, tapşırığı yalnız o görəcək — qrupun qalanı yox.</p>" +
             '<div class="fieldrow">' +
@@ -10879,13 +10979,27 @@
       mine = mine.filter(function (st) { return !taken[st.id]; });
       sel.innerHTML = '<option value="">Bütün qrup' +
         (mine.length ? " (" + mine.length + " şagird)" : "") + "</option>" +
+        //  Sira 3 (934): qrupun bir hissesi - secilenler isarelenir
+        (mine.length > 2 ? '<option value="__many">Bir neçə şagird seçin…</option>' : "") +
         mine.map(function (st) {
           return '<option value="' + esc(st.id) + '">yalnız ' +
             esc(st.full_name || "") + "</option>";
         }).join("");
+      var box = $("pWhoMany");
+      if (box) {
+        box.innerHTML = mine.map(function (st) {
+          return '<label class="pwm"><input type="checkbox" value="' + esc(st.id) + '" data-n="' +
+            esc(st.full_name || "") + '"> ' + esc(st.full_name || "") + "</label>";
+        }).join("");
+        box.style.display = "none";
+      }
     }
     fillWho();
     on("pCls", "change", fillWho);
+    on("pWho", "change", function () {
+      var box = $("pWhoMany");
+      if (box) box.style.display = $("pWho").value === "__many" ? "" : "none";
+    });
 
     on("btnRegen", "click", function () {
       if (busy) return;
@@ -10959,14 +11073,27 @@
         }
         closes = d.toISOString();
       }
+      //  Sira 3: «Bir neçə şagird» - isarelenenler (1 nefer - tek sagird yolu)
+      var many = null;
+      if ((($("pWho") || {}).value) === "__many") {
+        many = Array.prototype.filter.call(document.querySelectorAll("#pWhoMany input:checked"), function () { return true; })
+          .map(function (c) { return { id: c.value, name: c.getAttribute("data-n") }; });
+        if (!many.length) { $("pAsgMsg").innerHTML = msg("err", "Şagirdləri seçin."); return; }
+      }
       $("pAsgMsg").innerHTML = "";
       setBusy("btnPAsg", true, asgBtnLabel());
-      sb.rpc("rpc_assign_test", {
-        p_class_id: cls, p_test_id: t.id,
-        p_closes_at: closes, p_max_attempts: Number(($("pTry") || {}).value || 1),
-        //  bos = butun qrup
-        p_student_id: (($("pWho") || {}).value || null)
-      }).then(function () {
+      var nTry = Number(($("pTry") || {}).value || 1);
+      (many && many.length > 1
+        ? sb.rpc("rpc_assign_test_many", {
+            p_class_id: cls, p_test_id: t.id, p_student_ids: many.map(function (x) { return x.id; }),
+            p_closes_at: closes, p_max_attempts: nTry })
+        : sb.rpc("rpc_assign_test", {
+            p_class_id: cls, p_test_id: t.id,
+            p_closes_at: closes, p_max_attempts: nTry,
+            //  bos = butun qrup
+            p_student_id: many ? many[0].id : ((($("pWho") || {}).value || null))
+          })
+      ).then(function (r) {
         //  sehife yenilenir - teze teyinat "verilib" siyahisinda gorunur
         busy = false;
         //  Tesdiq ucun: kime getdi, hansi qrupa, ne vaxta qeder
@@ -10974,7 +11101,9 @@
         var wtxt = wsel && wsel.selectedIndex >= 0
           ? wsel.options[wsel.selectedIndex].textContent : "";
         ASG = {
-          who:    (wsel && wsel.value) ? wtxt : "",
+          who:    many ? ((r && r.students) || many.map(function (x) { return x.name; })).join(", ")
+                       : ((wsel && wsel.value) ? wtxt : ""),
+          n:      many ? many.length : 0,
           hami:   !(wsel && wsel.value),
           qrup:   csel && csel.selectedIndex >= 0
                     ? csel.options[csel.selectedIndex].textContent.split(" · ")[0] : "",
@@ -11274,7 +11403,7 @@
         var g = genFilter();
         g.pool = f.pool; g.subject = tp.subject_slug; g.levels = tp.level ? [tp.level] : [];
         g.topics = [tp.id]; g.difficulty = []; g.cls = ""; g.remNames = [];
-        g.title = ""; g.count = 10; g.asg = ""; g.asgStu = ""; g.asgStuName = "";
+        g.title = ""; g.count = 10; g.asg = ""; g.asgStu = ""; g.asgStuName = ""; g.asgStus = [];
         g.back = ""; g.backName = "";
         nav("#/gen");
       } else {
