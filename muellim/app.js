@@ -1583,7 +1583,10 @@
       ySec("Zəif mövzular") + '<div class="card pad0">' + tz.map(function (t) {
         var r = Number(t.avg) || 0, b = topicBand(r);
         var ws = t.weak || [];
-        return '<a class="mrow tpy" href="#/r/' + esc(t.class_id || "") + '">' +
+        //  23.10 (Sira 2.2): movzu setri MOVZUNUN zeif sagirdlerine (#/zm) aparir - Icmaldaki
+        //  eyni setir kimi.  Evvel qrup hesabatina (#/r) aparirdi, orada «Ne etmeli» basqa
+        //  movzu deyirdi: «Statistika»ya basan muellim «Paralellik» gorurdu.
+        return '<a class="mrow tpy" href="#/zm/' + esc(t.class_id || "") + "/" + esc(t.id || "") + '">' +
           '<span class="g"><b>' + esc(t.name) + "</b><i>" +
           esc(t["class"] || "") +
           (ws.length

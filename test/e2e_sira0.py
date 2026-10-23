@@ -65,6 +65,7 @@ with sync_playwright() as pw:
     m = re.search(r"(\d+)\s*%", row.inner_text())
     home_pct = int(m.group(1)) if m else -1
     ok(home_pct > 0, "sətirdə faiz 0% deyil", row.inner_text().replace("\n", " ")[:90])
+    row_txt = row.inner_text()
     row.click()
     pg.wait_for_url(re.compile(r"#/zm/"), timeout=15000)
     pg.wait_for_function("document.body.innerText.indexOf('ortalama') >= 0", timeout=15000)
@@ -74,7 +75,24 @@ with sync_playwright() as pw:
     #  Iki ayri duster var: Icmal (db/219) sagirdlerin faizinin ORTASI, #/zm (db/220)
     #  butun cavablarin cemi.  Ferq 1-2 bend ola biler - tek menbeye baglamaq Sira 1-dir.
     #  Burada yalniz «0% xetasi» olculur: reqem gelir ve #/zm-e yaxindir.
-    ok(abs(home_pct - zm_pct) <= 2, "İcmaldakı faiz #/zm-dəki qrup ortalamasına yaxındır (≤ 2 bənd)", "%s / %s" % (home_pct, zm_pct))
+    #  931 (Sira 2.2): Icmal ve #/zm eyni dusturla - faiz EYNI olmalidir
+    ok(home_pct == zm_pct, "İcmaldakı faiz #/zm-dəki qrup ortalaması ilə eynidir", "%s / %s" % (home_pct, zm_pct))
+    m3 = re.search(r"(\d+) şagird", row_txt)
+    zm_n = pg.locator("#zmBox a.mrow").count()
+    ok(m3 and int(m3.group(1)) == zm_n, "İcmaldakı «N şagird» #/zm-dəki ad sayı ilə eynidir", "%s / %s" % (m3.group(1) if m3 else "?", zm_n))
+    print("A2 · Nəticələr: zəif mövzu sətri #/zm-ə aparır")
+    pg.goto(PANEL + "#/nt"); pg.wait_for_selector("#ntZ a.mrow", timeout=20000)
+    hrefs = pg.evaluate("[...document.querySelectorAll('#ntZ a.mrow')].map(a => a.getAttribute('href'))")
+    ok(hrefs and all(h.startswith("#/zm/") for h in hrefs), "bütün zəif mövzu sətirləri #/zm-ə aparır", hrefs[:2])
+    r0 = pg.locator("#ntZ a.mrow").first
+    r0_ad = r0.locator("b").first.inner_text().strip()
+    r0_txt = r0.inner_text()
+    r0.click(); pg.wait_for_url(re.compile(r"#/zm/"), timeout=15000)
+    pg.wait_for_function("document.body.innerText.indexOf('ortalama') >= 0", timeout=15000); pg.wait_for_timeout(300)
+    zt2 = pg.evaluate("document.body.innerText")
+    ok(r0_ad in zt2, "açılan səhifə həmin mövzunundur", r0_ad)
+    m4 = re.search(r"(\d+)\s*%", r0_txt); m5 = re.search(r"ortalamas[ıi]\D{0,12}(\d+)\s*%", zt2)
+    ok(m4 and m5 and m4.group(1) == m5.group(1), "Nəticələrdəki faiz açılan səhifədəki ilə eynidir", "%s / %s" % (m4 and m4.group(1), m5 and m5.group(1)))
 
     #  numune hesabinin bir hazir testi (en cox suallisi)
     acc = db("select id::text i, owner_id::text o from public.accounts where is_demo and id <> app.demo_account() order by created_at desc limit 1", one=True)
