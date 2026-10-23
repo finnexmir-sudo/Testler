@@ -157,6 +157,12 @@ select * from (values
     (select exists (select 1 from f where proname='pq_seed' and def like '%1..200%'))),
  ('928 plan: keçilən dərslərdən test (fəsil hovuzu yox)',
     (select exists (select 1 from f where proname='rpc_plan_test_done' and def like '%ders_tag%'))),
+ ('929 generator: çox sinif süzgəci (levels) qayıdır',
+    (select exists (select 1 from f where proname='generate_pick' and def like '%929: sinif suzgeci%'))),
+ ('930 sinif adlarının şəkilçisi (3-cü, 4-cü, 6-cı, 9-cu)',
+    (select not exists (select 1 from public.levels
+                         where code ~ '^[0-9]{1,2}$' and name ~ '^[0-9]{1,2}-c[iıuü] sinif$'
+                           and name <> app.ordinal_az(code::int) || ' sinif'))),
  ('900 nəticə ekranında sualın şəkli',
     (select exists (select 1 from f where proname='rpc_test_result' and def like '%media_url%')
         and exists (select 1 from f where proname='rpc_submit_attempt' and def like '%media_url%')
