@@ -116,8 +116,39 @@ with sync_playwright() as pw:
             pg.screenshot(path="%s/kart_%d.png" % (os.environ["SHOT_DIR"], w)); pv.screenshot(path="%s/valideyn_%d.png" % (os.environ["SHOT_DIR"], w))
     pv.close()
 
+    print("E · Şagird kartı: «ilkin nəticə», səhv sayı Səhvlər sekməsi ilə eyni")
+    pg.set_viewport_size({"width": 390, "height": 844})
+    xt = pg.inner_text("#tab-x") if pg.locator("#tab-x").count() else ""
+    m6 = re.search(r"(\d+) səhv düzəliş gözləyir(?: · (\d+) təkrarda)?", xt)
+    pg.locator("#sTabs [data-v='s'], #sTabs .seg").nth(2).click(); pg.wait_for_timeout(500)
+    st_txt = pg.inner_text("#tab-s")
+    m7 = re.search(r"(\d+)\s*gözləyir\s*(\d+)\s*təkrarda", st_txt.replace("\n", " "))
+    ok(m6 and m7 and m6.group(1) == m7.group(1) and (m6.group(2) or "0") == m7.group(2),
+       "Xülasədə «N gözləyir · M təkrarda» Səhvlər sekməsi ilə eynidir",
+       "%s | %s" % (m6.group(0) if m6 else xt[:60], m7.group(0) if m7 else st_txt[:60]))
+    pg.locator("#sTabs .seg").nth(1).click(); pg.wait_for_timeout(500)
+    rows = pg.evaluate("""[...document.querySelectorAll('#tab-m .trow')].map(r => r.innerText.replace(/\\n/g, ' '))""")
+    az = [x for x in rows if re.search(r"· (\d+) / ([1-4])\b", x)]
+    ok(all("ilkin nəticə" in x for x in az) and all("ilkin nəticə" not in x for x in rows if x not in az),
+       "4 və az cavablı mövzu «ilkin nəticə · N sual · tarix», qalanı yox", "%d ilkin / %d sətir" % (len(az), len(rows)))
+
+    print("F · Qrup hesabatı: Şagirdlər ən zəifdən; qrup siyahısında say «test»")
+    pg.goto(PANEL + "#/r/" + st["c"]); pg.wait_for_selector("#rTabs, .segs", timeout=20000); pg.wait_for_timeout(800)
+    pcs = pg.evaluate("""[...document.querySelectorAll('button.mrow[data-s] .pctv')].map(e => e.innerText.trim())""")
+    nums = [int(x.rstrip('%')) for x in pcs if x.rstrip('%').isdigit()]
+    ok(len(nums) >= 3 and nums == sorted(nums), "hesabatda şagirdlər faizə görə artan sıradadır", nums[:8])
+    pg.goto(PANEL + "#/g/" + st["c"] + "/s"); pg.wait_for_selector("#stu a.mrow", timeout=20000)
+    gl = pg.inner_text("#stu")
+    ok(" test" in gl and " cavab" not in gl, "qrupun şagird siyahısında «N test» (cavab yox)")
+
+    print("G · Siqnallar ekranı: «geriləyir» ən böyük düşüşdən")
+    pg.goto(PANEL + "#/n"); pg.wait_for_selector("button.al", timeout=20000); pg.wait_for_timeout(400)
+    drops = [int(a) - int(b) for a, b in re.findall(r"geriləyir \((\d+)% → (\d+)%\)", pg.inner_text("body"))]
+    ok(drops == sorted(drops, reverse=True), "«geriləyir» siqnalları düşüşə görə azalan sıradadır", drops)
+
     print("D · Valideynə gedən mətn eyni rəqəmləri yazır")
     pg.set_viewport_size({"width": 390, "height": 844})
+    pg.goto(PANEL + "#/s/" + st["i"] + "/" + st["c"]); pg.wait_for_selector(".rstat", timeout=20000); pg.wait_for_timeout(600)
     txt = pg.evaluate("(document.getElementById('vTxt') || {}).value || (document.getElementById('vTxt') || {}).textContent || ''")
     if m30 and txt:
         ok(("Ortalama: %s%%" % m30.group(1)) in txt or ("Ortalama nəticə: %s%%" % m30.group(1)) in txt,

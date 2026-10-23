@@ -1537,6 +1537,14 @@
 
   /*  Bu hefte (son 7 gun) / kecen hefte (7-14 gun) - Icmal ve Neticeler EYNI cumleni
       yazir (932).  Ferq faiz BENDI-dir.  */
+  /*  Hesabatin dovru: abuneli hesabda butun dovr, abunesizde son N gun (server «since»,
+      app.free_history_days).  «orta» yazilan her yerde bu soz yanindadir (932).  */
+  function dovrSoz(r) {
+    if (!r || !r.since) return "bütün dövr";
+    var g = Math.max(1, Math.round((Date.now() - new Date(r.since).getTime()) / 864e5));
+    return "son " + g + " gün";
+  }
+
   function haftaFerq(st) {
     var aw = st.avg_w, apw = st.avg_pw;
     if (aw !== null && aw !== undefined && apw !== null && apw !== undefined) {
@@ -1571,8 +1579,9 @@
     $("ntQ").innerHTML = !gs.length ? "" :
       ySec("Qruplar") + '<div class="card pad0 menu">' + gs.map(function (g) {
         var n = Number(g.attempts) || 0, fz = n ? pct(g.avg) : null;
+        //  932/Sira 2.4: «cavab» DEYIL - bu TEST (cehd) sayidir; «cavab» suala verilen cavabdir
         var alt = n
-          ? n + " cavab · " + (Number(g.students) || 0) + " şagird" +
+          ? n + " test · " + (Number(g.students) || 0) + " şagird" +
             (g.last_at ? " · son " + agoAz(g.last_at) : "")
           : (Number(g.students) ? "hələ test yazan yoxdur" : "şagird əlavə edin");
         return '<a class="mrow" href="#/r/' + esc(g.id) + '">' + ic("group", "mi") +
@@ -4122,7 +4131,7 @@
       setRow(1, indi ? indi + " aktiv tapşırıq" : "hələ tapşırıq verilməyib");
       //  3 hesabat
       setRow(2, Number(sum.attempts)
-        ? pct(sum.avg) + "% orta · " + sum.attempts + " cavab"
+        ? pct(sum.avg) + "% orta · " + sum.attempts + " test"
         : "şagird test yazandan sonra dolur",
         tp.length ? tp.length + " zəif mövzu" : "", "pvm");
       //  4 ders plani
@@ -4625,7 +4634,7 @@
         var n = Number(s.attempts) || 0;
         var alt = !girib
           ? '<span class="qr">hələ girməyib — kodu göndərin</span>'
-          : (n ? n + " cavab" + (s.last_at ? " · son " + agoAz(s.last_at) : "")
+          : (n ? n + " test" + (s.last_at ? " · son " + agoAz(s.last_at) : "")
                : "girib, hələ işləməyib");
         var faiz = n ? pct(s.avg) : null;
         return '<a class="mrow stuy" href="#/s/' + esc(s.id) + "/" + esc(classId) + '">' +
@@ -5162,8 +5171,8 @@
           hissi verirdi.  Eyni reqemler bir setirde oxunur.  */
       var h = YENI
         ? '<div class="rstat"><span><b>' + (Number(sm.students) || 0) + "</b>şagird</span>" +
-            '<span><b>' + pct(sm.avg) + "%</b>orta</span>" +
-            '<span><b>' + (Number(sm.attempts) || 0) + "</b>cavab</span></div>"
+            '<span><b>' + pct(sm.avg) + "%</b>orta · " + dovrSoz(r) + "</span>" +
+            '<span><b>' + (Number(sm.attempts) || 0) + "</b>test</span></div>"
         : '<div class="stats">' +
             statTile(sm.active + " / " + sm.students, "aktiv şagird", "g1") +
             statTile(pct(sm.avg) + "%", "orta nəticə", "g2") +
@@ -5175,6 +5184,15 @@
           fennlerden 30+ setir, fealiyyet 11 setir - bir sehifede
           uzanirdi (istifadeci teklifi, sagird hesabati ile eyni qayda).  */
       var st = r.students || [];
+      //  Sira 2.4 (UX yoxlamasi): HESABATDA sira «en zeifden» - 41%-li sagird 12 adin sonunda
+      //  itirdi.  Hele test yazmayanlar sonda (onlar ucun faiz yoxdur), beraberde - ad.
+      //  Qrupun adi «Şagirdlər» siyahisi ve davamiyyet ELIFBA ile qalir (orada ad axtarilir).
+      if (YENI) st = st.slice().sort(function (a, b) {
+        var na = Number(a.attempts) || 0, nb = Number(b.attempts) || 0;
+        if (!na !== !nb) return na ? -1 : 1;
+        return (Number(a.avg) || 0) - (Number(b.avg) || 0) ||
+          String(a.full_name || "").localeCompare(String(b.full_name || ""), "az");
+      });
       var hS = "";
       if (!st.length) {
         hS += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("person") +
@@ -5513,6 +5531,15 @@
     var to = pct(t.last3), from = pct(t.prev3);
     return { from: from, to: to, d: to - from, pn: Number(t.prevn) };
   }
+  /*  Sira 2.4: az cavabli movzu «ilkin netice»dir - 3 sualdan cixan 0% bir tesadufi
+      sehvle deyise biler.  Hedd Siqnallarinkidir (server firm_answers = alert_weak_min).
+      Ceki DEYISMIR, yalniz yazilir: say ve son tarix gorunsun.  */
+  function ilkinMi(t, r) {
+    return Number(t && t.total) < (Number(r && r.firm_answers) || 5);
+  }
+  function ilkinSoz(t) {
+    return "ilkin nəticə · " + Number(t.total) + " sual" + (t.last_at ? " · " + dateAz(t.last_at) : "");
+  }
   function trendSoz(ti) {
     return "son 3 test " + ti.to + "% · əvvəlki " + ti.pn + " test " + ti.from + "%";
   }
@@ -5630,7 +5657,11 @@
     if (ti) tr = ti.d >= 5 ? "up" : (ti.d <= -5 ? "down" : "flat");
 
     var tops = (r.topics || []).filter(function (t) {
-      //  1 cavabliq movzu valideyn mektubuna dusmesin - yaniltici olur
+      //  1 cavabliq movzu valideyn mektubuna dusmesin - yaniltici olur.
+      //  Sira 2.4: «ilkin netice» (az cavab) da dusmur; metn «son 30 gun» deyirse,
+      //  30 gunden kohne movzu da dusmur (evvel bir ay evvelki diaqnostikanin 0/3-u gelirdi).
+      if (ilkinMi(t, r)) return false;
+      if (dovr === "son 30 gün" && t.last_at && new Date(t.last_at).getTime() < cut) return false;
       return Number(t.total) >= 2;
     }).sort(function (a, b) {
       return Number(b.ratio) - Number(a.ratio);
@@ -6247,8 +6278,8 @@
         ? '<div class="rstat"><span><b>' + (Number(sm.attempts) || 0) + "</b>test</span>" +
             //  932: her reqemin yaninda DOVRU yazilir - valideyn «son 30 gun» gorur, muellim
             //  eyni reqemi burada da tapir (evvel 58% / 66% - «niye ferqlidir?»).
-            '<span><b>' + pct(sm.avg) + "%</b>orta · bütün dövr</span>" +
-            (Number(tr0.n30) > 0 && tr0.avg30 != null
+            '<span><b>' + pct(sm.avg) + "%</b>orta · " + dovrSoz(r) + "</span>" +
+            (!r.since && Number(tr0.n30) > 0 && tr0.avg30 != null
               ? '<span><b>' + pct(tr0.avg30) + "%</b>son 30 gün</span>" : "") +
             //  gedisat: Siqnallar ve valideynle EYNI (son 3 / evvelki 3), vahid - faiz bendi
             (tri ? '<span class="rtr ' + (tri.d >= 0 ? "up" : "dn") + '"><b>' +
@@ -6290,12 +6321,17 @@
       if (r.topics !== null && (vdT.length || vdN)) {
         vdIn = (vdT.length
             ? "<p><b>Zəif mövzu:</b> " + vdT.map(function (t) {
-                return esc(t.name) + " (" + pct(t.ratio) + "%)";
+                return esc(t.name) + " (" + pct(t.ratio) + "%" + (ilkinMi(t, r) ? " · " + esc(ilkinSoz(t)) : "") + ")";
               }).join(", ") +
               (sweakAll.length > vdT.length ? " və daha " + (sweakAll.length - vdT.length) : "") +
               "</p>"
             : "<p>Zəif mövzu yoxdur — hamısı 60%-dən yuxarı.</p>") +
-          (vdN ? "<p><b>" + vdN + " səhv</b> düzəliş gözləyir.</p>" : "") +
+          //  Sira 2.4: sehv defterinin OZ dili ile - «78 gözləyir · 3 təkrarda» (Sehvler sekmesi).
+          //  Evvel cem (81) «düzəliş gözləyir» yazilirdi, sekmede ise 78 + 3 idi.
+          (vdN ? "<p><b>" + (YENI && Number(mk0.open) + Number(mk0.review) === vdN
+                    ? (Number(mk0.open) || 0) + " səhv</b> düzəliş gözləyir" +
+                      (Number(mk0.review) ? " · " + Number(mk0.review) + " təkrarda" : "")
+                    : vdN + " səhv</b> düzəliş gözləyir") + ".</p>" : "") +
           //  YENI: «Mövzular» / «Səhvlər» düymələri çıxarıldı - eyni sekmələr yuxarıdakı zolaqda var (29.09)
           ((!YENI && (vdT.length || vdN)) || (YENI && weak.length)
             ? '<div class="row" style="gap:8px;margin-top:4px">' +
@@ -6333,7 +6369,7 @@
               «bilmeden duz» pis deyil - neytral.  */
           function sr(cls, n, ad, izah) {
             return '<div class="srow' + (n ? cls : "") + '"><b>' + n + "</b><div>" + ad +
-              ' <span class="of">' + nMeta + " cavabdan</span><i>" + izah + "</i></div></div>";
+              ' <span class="of">' + nMeta + " sualdan</span><i>" + izah + "</i></div></div>";
           }
           hX += '<details class="more styd"><summary>Öyrənmə tərzi <span class="fn">' +
               (sw ? "bildiyini sanır: " + sw : (hasty ? "tələsik: " + hasty : "nişan var")) + "</span></summary>" +
@@ -6490,7 +6526,8 @@
           (YENI ? ' data-tp-id="' + esc(t.id || "") + '"' : "") + '><div class="g"><b>' +
           (!YENI && bad ? '<span class="wdot" title="Zəif mövzu"></span>' : "") +
           esc(t.name) + "</b>" +
-          "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total + "</i>" +
+          "<i>" + esc(t.subject) + " · " + t.correct + " / " + t.total +
+            (ilkinMi(t, r) ? " · " + esc(ilkinSoz(t)) : "") + "</i>" +
           meter(t.ratio) + "</div>" +
           pctChip(t.ratio) + (YENI ? ic("right", "ar") : "") + "</div>";
         if (!YENI) return core;
@@ -6685,7 +6722,7 @@
         ? '<div class="card pad0 menu" id="stuAsgMenu" hidden>' +
             yRow({ ic: "clip", ad: "Hazır test", alt: "kitabxanadan seçin — yalnız bu şagirdə", href: "#" }).replace('<a class="mrow"', '<a data-am="t" class="mrow"') +
             yRow({ ic: "chart", ad: "Diaqnostik test", alt: "nəyi bilmir? — bütün mövzulardan", href: "#" }).replace('<a class="mrow"', '<a data-am="d" class="mrow"') +
-            (weak.length ? yRow({ ic: "gen", ad: "Səhvlərdən təkrar", alt: weak.length + " səhvdən test", href: "#" }).replace('<a class="mrow"', '<a data-am="s" class="mrow"') : "") +
+            (weak.length ? yRow({ ic: "gen", ad: "Səhvlərdən təkrar", alt: "ən çox səhv edilən " + weak.length + " sualdan test", href: "#" }).replace('<a class="mrow"', '<a data-am="s" class="mrow"') : "") +
           "</div>" : "";
       h += (YENI ? '<div id="stuKart"></div>' + asgMenu : "") +
         '<div class="segs stabs" id="sTabs">' +

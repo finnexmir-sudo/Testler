@@ -31,10 +31,22 @@ Canlı yoxlama: 929 və 930-dan sonra `db/test/canli_yoxla.sql` — «929 …» 
 - **Bank üçün:** `inf9-texnologiya#196` izahı «Birinci variantda …» yazır — onlayn testdə variantlar qarışdırıldığı üçün indidən səhvdir. Bankda variant hərfinə başqa həqiqi istinad tapılmadı (38 958 sual yoxlandı; «A və B», «Cavab: A ∪ B» kimi həndəsə/çoxluq işarələri təsirlənmir).
 - Əvvəldən sınıq testlər (bu işdən asılı deyil): `e2e_gen.py`, `e2e_assign.py`, `e2e_numune.py` — köhnə interfeys seçiciləri (`#glevel`, `#groups .gcard`), yeni (YENI) interfeysdə qeydiyyatda ilişir; `smoke_paylas.sql` — 929-suz bazada da sınır; `e2e_sagird_hesabat.py` — `panel_e2e`-də keçir, sıfırdan qurulan bazada qeydiyyatda ilişir (929-suz bazada da).
 
+## Sıra 2 — hesabatın düzgünlüyü (23.10)
+
+| # | Nə | Nə dəyişdi | Necə yoxlandı | Canlıda? |
+|---|---|---|---|---|
+| 2.2 | Zəif mövzu 3 ekranda 3 qayda ilə: İcmal «Statistika — 5», «Nə etməli» «Paralellik — 7», faiz 65/66 | `db/931`: `#/zm`-in qaydası əsas — zəif şagird ≥ 5 cavab, < 60 %; faiz = aktiv şagirdlərin bütün cavabları. `rpc_home` və `rpc_class_report` ona çəkilir. Nəticələrdə mövzu sətri `#/zm`-ə aparır (əvvəl `#/r`) | `smoke_zeif_movzu.sql` (931-suz sınır: 73/72); `e2e_sira0` A/A2: faiz, şagird sayı bərabər, keçid basılır | `main`-ə keçəndə + SQL 931 |
+| 2.3 | Gedişat 4 düsturla: Siqnallar «geriləyir», kart «↗ +10», valideyn «yaxşılaşıb», mətn | `db/932` `app.student_trend` — Siqnalların düsturu (son 3 / əvvəlki 3, 4+ test) + «son 30 gün» (valideynin böyük rəqəmi). Kart, şəkil kartı, valideynə mətn, valideyn paneli ondan. İcmal «71 % orta · keçən həftə 80 %» → Nəticələrlə eyni cümlə «keçən həftəyə görə ±N bənd». Hər ortada dövr. Abunəsizdə gedişat yoxdur (valideyn kimi) | `smoke_gedisat.sql` 1–6; `e2e_sira2` A–D; 390/1280 px | `main`-ə keçəndə + SQL 932 |
+| 2.4 | «cavab» = test, səhv sayı 81 / 78 + 3, 0/3 mövzu ən zəif kimi, Siqnallar və hesabat əlifba ilə | Say «test» (Nəticələr, qrup menyusu, şagird siyahısı, hesabat); Xülasə «78 gözləyir · 3 təkrarda»; < 5 cavablı mövzu «ilkin nəticə · N sual · tarix» (çəki dəyişmir), valideyn mətninə düşmür; hesabatın Şagirdlər sekməsi ən zəifdən; `db/933` Siqnallar növün içində ən ağırdan, «ilk 8» də eyni sıra ilə | `e2e_sira2` E–G; `smoke_gedisat` 6 (933-süz sınır) | `main`-ə keçəndə + SQL 933 |
+
+Canlı üçün SQL Editor-da ardıcıllıq: **931 → 932 → 933** (933 931-in `rpc_home` gövdəsinə əsaslanır). Sonra `canli_yoxla.sql`-da 931, 932, 933 = true.
+Panel kodu SQL-dən əvvəl də canlıya gedə bilər: `trend` gəlməyəndə kart gedişat göstərmir, valideyn köhnə «keçən ay» cümləsində qalır.
+Əvvəldən sınıq (bu işdən asılı deyil): `smoke_numune.sql` («197 tətbiq olunmayıb»), `e2e_valideyn.py` (köhnə `#btnGroup`).
+
 ## Sıra 1–5 — gözləyir
 
 1. **Testin düzgünlüyü** — 0.1, 0.2, 0.4 bağlandı (yuxarı). Qalan: tək pis sualı əvəz etmək (vərəqdə).
-2. **Hesabatın düzgünlüyü** — «zəif mövzu», «orta», «gedişat» bir sorğu və bir qayda; hər rəqəmdə dövr («bütün dövr» / «son 30 gün»); «test / sual / cavab» sözləri; az məlumatlı mövzu «ilkin nəticə · N sual · tarix» nişanı (çəki avtomatik dəyişmir); hesabat və Siqnallarda «ən zəifdən» sıra (davamiyyət və adi siyahı əlifba qalır).
+2. **Hesabatın düzgünlüyü** — **bağlandı (yuxarı, Sıra 2)**. Əvvəlki siyahı: «zəif mövzu», «orta», «gedişat» bir sorğu və bir qayda; hər rəqəmdə dövr («bütün dövr» / «son 30 gün»); «test / sual / cavab» sözləri; az məlumatlı mövzu «ilkin nəticə · N sual · tarix» nişanı (çəki avtomatik dəyişmir); hesabat və Siqnallarda «ən zəifdən» sıra (davamiyyət və adi siyahı əlifba qalır).
 3. **Alıcıların düzgünlüyü** — tövsiyədəki şagirdlərə hədəfli tapşırıq: seçim, saxlama (tapşırıq modeli indi yalnız qrup / tək şagird) və şagirdin gördüyü tapşırıqlar birlikdə; şəxsi testin səhvən qrupa verilməsinin qarşısı.
 4. **İlk istifadə** — boş qrupda «Şagird əlavə et»; yapışdırma ilə toplu əlavə; kodların toplu kopyası və çapı; başlanğıc kartı işlək yola; qrupun sinfinə uyğun test; server xəta mətnlərində diakritika.
 5. **Telefon** — başlıq bloku, şagird Xülasəsi, bölmələrarası keçidlər; təkrar yollar azalır, yerində olan «Təkrar ver» qalır.

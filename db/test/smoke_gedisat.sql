@@ -66,6 +66,38 @@ reset role;
 \echo 'OK  2 · muellimin sagird hesabatindaki gedisat eyni funksiyadandir'
 \echo 'OK  5 · «geriləyir» siqnalinda trend de dusus gosterir'
 
+--  6 (933): siqnallar novun icinde en agirdan - Icmal ve qrup sehifesi
+set role authenticated;
+select set_config('request.jwt.claim.sub', current_setting('smoke.uid'), false);
+do $$
+declare
+  lists jsonb[] := array[public.rpc_home(current_setting('smoke.acc')::uuid)->'alerts'];
+  l jsonb; i int; a jsonb; b jsonb; ka int; kb int; c record;
+begin
+  for c in select distinct (x->>'class_id')::uuid cid
+             from jsonb_array_elements(lists[1]) x loop
+    lists := lists || (public.rpc_class_alerts(c.cid)->'alerts');
+  end loop;
+  foreach l in array lists loop
+    for i in 0 .. jsonb_array_length(l) - 2 loop
+      a := l->i; b := l->(i + 1);
+      ka := case a->>'kind' when 'risk' then 1 when 'weak' then 2 else 3 end;
+      kb := case b->>'kind' when 'risk' then 1 when 'weak' then 2 else 3 end;
+      assert ka <= kb, format('6 · nov sirasi pozulub: %s sonra %s', a->>'kind', b->>'kind');
+      if ka = kb and ka = 1 then
+        assert (a->>'prev3')::numeric - (a->>'last3')::numeric >= (b->>'prev3')::numeric - (b->>'last3')::numeric,
+          format('6 · geriləyir: %s (%s) %s-dan (%s) evvel', a->>'name', (a->>'prev3')::numeric - (a->>'last3')::numeric,
+                 b->>'name', (b->>'prev3')::numeric - (b->>'last3')::numeric);
+      elsif ka = kb and ka = 2 then
+        assert (a->>'topic_ratio')::numeric <= (b->>'topic_ratio')::numeric,
+          format('6 · zeif movzu: %s (%s%%) %s-dan (%s%%) evvel', a->>'name', a->>'topic_ratio', b->>'name', b->>'topic_ratio');
+      end if;
+    end loop;
+  end loop;
+end $$;
+reset role;
+\echo 'OK  6 · siqnallar (Icmal ve qrup) novun icinde en agirdan siralanir'
+
 do $$
 declare tok text; v jsonb; t jsonb := current_setting('smoke.ptrend')::jsonb;
 begin
