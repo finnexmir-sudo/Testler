@@ -2923,3 +2923,10 @@ details.styd{margin-top:14px}
 .tacts>.tact4{padding-top:10px;border-top:1px dashed var(--n-150);justify-content:flex-end}
 .tacts+p.muted{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--n-25);font-size:12px;line-height:1.5}
 .tact3 .plimm{left:auto;right:0}
+
+/* Sira 3 (23.10): vereqde «Bir neçə şagird seçin…» - isarelenen siyahi.  Toxunma sahesi 44px. */
+.pwmbox{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin:-6px 0 14px}
+.pwm{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border:1px solid var(--n-150);
+  border-radius:12px;background:var(--surface);font-size:14px;cursor:pointer}
+.pwm input{width:18px;height:18px;margin:0;accent-color:var(--brand)}
+.pwm:has(input:checked){border-color:var(--brand);background:var(--brand-tint)}

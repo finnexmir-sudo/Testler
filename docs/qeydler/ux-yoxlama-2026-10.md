@@ -43,10 +43,20 @@ Canlı üçün SQL Editor-da ardıcıllıq: **931 → 932 → 933** (933 931-in 
 Panel kodu SQL-dən əvvəl də canlıya gedə bilər: `trend` gəlməyəndə kart gedişat göstərmir, valideyn köhnə «keçən ay» cümləsində qalır.
 Əvvəldən sınıq (bu işdən asılı deyil): `smoke_numune.sql` («197 tətbiq olunmayıb»), `e2e_valideyn.py` (köhnə `#btnGroup`).
 
+## Sıra 3 — alıcıların düzgünlüyü (23.10)
+
+| # | Nə | Nə dəyişdi | Necə yoxlandı | Canlıda? |
+|---|---|---|---|---|
+| 3.1 | «N şagirdə təkrar verin» düyməsi testi BÜTÜN qrupa verirdi | `db/934` `rpc_assign_test_many`: bir tranzaksiyada hər seçilmiş şagirdə fərdi sətir (model 28-dən var: `student_id`), hər sətir `rpc_assign_test`-in yoxlamalarından keçir; qrupa verilmiş testə rədd. «Nə etməli», `#/zm`, İcmal mövzu sətri zəif şagirdlərin siyahısını generatora ötürür; generatorda «Kimə: Yalnız zəif olanlar · N / Bütün qrup», düymə «Testi yığ və N şagirdə ver», təsdiq adları sadalayır | `smoke_hedefli.sql` 1–6 (atomik, yad müəllim, anon); `e2e_sira3` A, B (seçilən şagird görür, seçilməyən görmür), D | `main`-ə keçəndə + SQL 934 |
+| 3.2 | Tapşırıqlar siyahısında N ayrı sətir olardı | eyni testin fərdi sətirləri bir sətirdə: «N şagirdə» + adlar, bitirənlər cəmlənir, «×» hamısını götürür; «etməyənlər →» düzgün adlar | `e2e_sira3` C | `main`-ə keçəndə |
+| 3.3 | Vərəqdə «Kimə» yalnız qrup / tək şagird | «Bir neçə şagird seçin…» — işarələnən siyahı (toxunma 44 px) | `e2e_sira3` E; 390/1280 px | `main`-ə keçəndə |
+
+Əvvəldən sınıq (bu işdən asılı deyil): `smoke_bize_yaz.sql` («boş siyahı gözlənirdi» — köhnə bazada da).
+
 ## Sıra 1–5 — gözləyir
 
 1. **Testin düzgünlüyü** — 0.1, 0.2, 0.4 bağlandı (yuxarı). Qalan: tək pis sualı əvəz etmək (vərəqdə).
 2. **Hesabatın düzgünlüyü** — **bağlandı (yuxarı, Sıra 2)**. Əvvəlki siyahı: «zəif mövzu», «orta», «gedişat» bir sorğu və bir qayda; hər rəqəmdə dövr («bütün dövr» / «son 30 gün»); «test / sual / cavab» sözləri; az məlumatlı mövzu «ilkin nəticə · N sual · tarix» nişanı (çəki avtomatik dəyişmir); hesabat və Siqnallarda «ən zəifdən» sıra (davamiyyət və adi siyahı əlifba qalır).
-3. **Alıcıların düzgünlüyü** — tövsiyədəki şagirdlərə hədəfli tapşırıq: seçim, saxlama (tapşırıq modeli indi yalnız qrup / tək şagird) və şagirdin gördüyü tapşırıqlar birlikdə; şəxsi testin səhvən qrupa verilməsinin qarşısı.
+3. **Alıcıların düzgünlüyü** — **bağlandı (yuxarı, Sıra 3)**. Əvvəlki siyahı: tövsiyədəki şagirdlərə hədəfli tapşırıq: seçim, saxlama (tapşırıq modeli indi yalnız qrup / tək şagird) və şagirdin gördüyü tapşırıqlar birlikdə; şəxsi testin səhvən qrupa verilməsinin qarşısı.
 4. **İlk istifadə** — boş qrupda «Şagird əlavə et»; yapışdırma ilə toplu əlavə; kodların toplu kopyası və çapı; başlanğıc kartı işlək yola; qrupun sinfinə uyğun test; server xəta mətnlərində diakritika.
 5. **Telefon** — başlıq bloku, şagird Xülasəsi, bölmələrarası keçidlər; təkrar yollar azalır, yerində olan «Təkrar ver» qalır.
