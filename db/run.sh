@@ -178,6 +178,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 928_plan_kecilen_test.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 929_generator_cox_sinif.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 930_sinif_adi_sekilci.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 931_zeif_movzu_bir_qayda.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 932_gedisat_bir_dustur.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

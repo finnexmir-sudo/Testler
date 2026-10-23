@@ -353,7 +353,21 @@
       out +=
         '<div class="big ' + faizSinif(s.avg30) + '">' + Math.round(s.avg30) + "%</div>" +
         "<p>Son 30 gündə <b>" + s.attempts30 + "</b> test yazıb.</p>";
-      if (s.delta != null) {
+      /*  932: gedisat muellimin sagird kartindaki ve Siqnallardaki ile EYNI dusturla
+          (server app.student_trend: son 3 test / evvelki 3 test).  Evvel «keçən aya
+          görə» idi - eyni gun muellim «geriləyir», valideyn «yaxşılaşıb» gorurdu.  */
+      var tv = s.trend;
+      if (tv) {
+        if (Number(tv.n) >= 4 && Number(tv.prevn) >= 2 && tv.last3 != null && tv.prev3 != null) {
+          var l3 = Math.round(Number(tv.last3)), p3 = Math.round(Number(tv.prev3)), dt = l3 - p3;
+          out += '<p class="trend ' + (dt >= 0 ? "up" : "down") + '">Son 3 testdə ' + l3 + "% — " +
+            (dt > 0 ? "əvvəlki " + Number(tv.prevn) + " testdən " + dt + " bənd yaxşı."
+             : dt < 0 ? "əvvəlki " + Number(tv.prevn) + " testdən " + Math.abs(dt) + " bənd aşağı."
+             : "əvvəlki testlərlə eyni.") + "</p>";
+        } else {
+          out += '<p class="muted">Gedişatı görmək üçün ən azı 4 test lazımdır.</p>';
+        }
+      } else if (s.delta != null) {
         var dl = Math.round(s.delta);
         out += '<p class="trend ' + (dl >= 0 ? "up" : "down") + '">' +
           (dl > 0 ? "Keçən aya görə " + dl + "% yaxşılaşıb."

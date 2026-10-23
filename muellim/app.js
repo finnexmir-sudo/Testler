@@ -1457,9 +1457,12 @@
       : "";
 
     //  ---- ESAS SIYAHI: forma hemise eynidir, sag teref deyisir
+    //  932: «71% orta · keçən həftə 80%» butun dovrun ortasini KECEN HEFTE ile yan-yana
+    //  yazirdi - olmayan dusus kimi oxunurdu.  Indi Neticeler ekrani ile EYNI cumle:
+    //  bu hefte / kecen hefte ferqi (haftaFerq).
+    var hf = haftaFerq(st);
     var netAlt = nC
-      ? (avg + "% orta" + (aw !== null && aw !== undefined && apw !== null && apw !== undefined
-          ? " · keçən həftə " + Number(apw) + "%" : ""))
+      ? (avg + "% orta" + (hf ? " · " + hf : ""))
       : "şagird test yazandan sonra dolur";
     var m = [
       yRow({ ic: "group", ad: "Qruplar", href: "#/gs",
@@ -1532,22 +1535,28 @@
     });
   }
 
-  function ntCiz(v, gs) {
-    var st = v.stats || {}, nC = Number(st.attempts) || 0;
+  /*  Bu hefte (son 7 gun) / kecen hefte (7-14 gun) - Icmal ve Neticeler EYNI cumleni
+      yazir (932).  Ferq faiz BENDI-dir.  */
+  function haftaFerq(st) {
     var aw = st.avg_w, apw = st.avg_pw;
-    /*  ---- UST SETIR: uc reqem + bir cumlelik gedisat.  «Keçən həftə
-        53%» demek muellime hec ne demirdi - indi FERQ yazilir.  */
-    var trend = "";
     if (aw !== null && aw !== undefined && apw !== null && apw !== undefined) {
       var fr = Math.round(Number(aw) - Number(apw));
-      trend = fr === 0 ? "keçən həftə ilə eyni"
-        : "keçən həftəyə görə " + (fr > 0 ? "+" : "−") + Math.abs(fr) + "%";
-    } else if (aw !== null && aw !== undefined) {
-      trend = "son 7 gün: " + Math.round(Number(aw)) + "%";
+      return fr === 0 ? "keçən həftə ilə eyni"
+        : "keçən həftəyə görə " + (fr > 0 ? "+" : "−") + Math.abs(fr) + " bənd";
     }
+    if (aw !== null && aw !== undefined) return "son 7 gün: " + Math.round(Number(aw)) + "%";
+    return "";
+  }
+
+  function ntCiz(v, gs) {
+    var st = v.stats || {}, nC = Number(st.attempts) || 0;
+    /*  ---- UST SETIR: uc reqem + bir cumlelik gedisat.  «Keçən həftə
+        53%» demek muellime hec ne demirdi - indi FERQ yazilir.  */
+    var trend = haftaFerq(st);
     $("ntUst").innerHTML = nC
-      ? '<div class="rstat"><span><b>' + pct(st.avg) + "%</b>orta</span>" +
-        "<span><b>" + nC + "</b>cavab</span>" +
+      //  932: «orta» butun dovrdur - yazilir; «cavab» deyil, TEST (cehd) sayidir
+      ? '<div class="rstat"><span><b>' + pct(st.avg) + "%</b>orta · bütün dövr</span>" +
+        "<span><b>" + nC + "</b>test</span>" +
         "<span><b>" + (Number(st.students) || 0) + "</b>şagird</span>" +
         (trend ? '<span class="ntt">' + esc(trend) + "</span>" : "") + "</div>"
       : '<div class="card pad0"><div class="empty"><div class="ic">' + ic("chart") + "</div>" +
@@ -2090,7 +2099,7 @@
           var d = Math.round(w - pw);
           if (d === 0) return '<s class="td">əvvəlki həftə ilə eyni</s>';
           return '<s class="td ' + (d > 0 ? "up" : "dn") + '">' + (d > 0 ? "+" : "−") + Math.abs(d) +
-            "% əvvəlki həftəyə görə</s>";
+            " bənd əvvəlki həftəyə görə</s>";
         }
         var aw = Number(st.attempts_w) || 0;
         t.innerHTML =
@@ -5494,6 +5503,20 @@
   /*  Irelileyis karti melumati: ad, dovr, testler, evvel -> indi, en yaxsi,
       guclu movzular, muellim.  "evvel/indi": ilk 3 ve son 3 testin ortasi
       (4+ test), yoxsa ilk ve son.  */
+  /*  932 (Sira 2.3): GEDISAT bir dusturla - server app.student_trend (rpc_student_report.trend).
+      Siqnallardaki «geriləyir 77% → 60%» ile EYNI: son 3 testin ortasi / ondan evvelki
+      3 testin.  Muqayise yalniz 4+ testde (evvelki hissede 2+).  Evvel sagird kartinda
+      «ilk 3 / son 3 test», valideynde «kecen ay», Siqnallarda «son 3 / evvelki 3» idi -
+      eyni gunde uc ferqli istiqamet.  Yuvarlaqlasdirma Siqnallardaki pct() ile eynidir.  */
+  function trendInfo(t) {
+    if (!t || Number(t.n) < 4 || Number(t.prevn) < 2 || t.last3 == null || t.prev3 == null) return null;
+    var to = pct(t.last3), from = pct(t.prev3);
+    return { from: from, to: to, d: to - from, pn: Number(t.prevn) };
+  }
+  function trendSoz(ti) {
+    return "son 3 test " + ti.to + "% · əvvəlki " + ti.pn + " test " + ti.from + "%";
+  }
+
   function progData(r) {
     var st = r.student || {};
     var atts = (r.attempts || []).slice().sort(function (a, b) {
@@ -5507,6 +5530,9 @@
     var k = pc.length >= 4 ? 3 : 1;
     var avgOf = function (arr) { return arr.length ? Math.round(arr.reduce(function (x, y) { return x + y; }, 0) / arr.length) : 0; };
     var from = avgOf(pc.slice(0, k)), to = avgOf(pc.slice(-k));
+    //  932: 4+ testde kart da Siqnallar / valideyn paneli ile EYNI gedisati gosterir
+    var ti = trendInfo(r.trend), t30 = r.trend || {};
+    if (ti) { from = ti.from; to = ti.to; k = 3; }
     var strong = (r.topics || []).filter(function (t) { return Number(t.total) >= 2 && Number(t.ratio) >= 80; })
       .sort(function (a, b) { return Number(b.ratio) - Number(a.ratio); }).slice(0, 2)
       .map(function (t) { return t.name; });
@@ -5515,7 +5541,9 @@
       name: firstName(st.full_name) || "Şagird",
       period: dovr === "ümumi" ? "bütün dövr" : ay[new Date().getMonth()],
       n: pc.length, k: k, kisa: dovr !== "ümumi", from: from, to: to, best: Math.max.apply(null, pc.concat([0])),
-      avg: avgOf(pc), strong: strong,
+      //  932: «ORTA» = valideyn panelinin boyuk reqemi (son 30 gun, server) - eyni dustur
+      avg: (Number(t30.n30) > 0 && t30.avg30 != null && dovr !== "ümumi") ? pct(t30.avg30) : avgOf(pc),
+      strong: strong, trend: !!ti,
       teacher: (CTX && CTX.profile && CTX.profile.full_name) || ""
     };
   }
@@ -5590,15 +5618,16 @@
       sum += p; if (p > best) best = p;
     });
     var avg = n ? Math.round(sum / n) : 0;
-
-    /* Tereqqi: son 3 vs evvelki 3 - hesabatdaki qayda ile eyni */
-    var tr = "";
-    if (use.length >= 4) {
-      var la = 0, pa = 0, l3 = use.slice(0, 3), p3 = use.slice(3, 6);
-      l3.forEach(function (a) { la += (Number(a.percent) || 0) / l3.length; });
-      p3.forEach(function (a) { pa += (Number(a.percent) || 0) / p3.length; });
-      tr = la - pa >= 5 ? "up" : (pa - la >= 5 ? "down" : "flat");
+    //  932: say ve orta valideyn panelinin «son 30 gun» reqemleri ile EYNI menbeden (server)
+    var t30 = r.trend || {};
+    if (dovr === "son 30 gün" && Number(t30.n30) > 0 && t30.avg30 != null) {
+      n = Number(t30.n30); avg = pct(t30.avg30);
     }
+
+    /* Tereqqi: son 3 vs evvelki 3 - 932: Siqnallar ve valideyn paneli ile EYNI server
+       dusturu (trendInfo).  5 bendden az ferq «sabit» sayilir. */
+    var tr = "", ti = trendInfo(r.trend);
+    if (ti) tr = ti.d >= 5 ? "up" : (ti.d <= -5 ? "down" : "flat");
 
     var tops = (r.topics || []).filter(function (t) {
       //  1 cavabliq movzu valideyn mektubuna dusmesin - yaniltici olur
@@ -5617,8 +5646,8 @@
       L.push(name + " üzrə " + dovr + " nəticələri:");
       L.push("• İşlənən test: " + n);
       L.push("• Ortalama nəticə: " + avg + "% (ən yaxşısı " + best + "%)");
-      if (tr === "up")   L.push("• Son testlərdə irəliləyiş müşahidə olunur.");
-      if (tr === "down") L.push("• Son testlərdə nəticə enməyə meyllidir — birlikdə işləyirik.");
+      if (tr === "up")   L.push("• Son testlərdə irəliləyiş var: " + trendSoz(ti) + ".");
+      if (tr === "down") L.push("• Son testlərdə nəticə enib (" + trendSoz(ti) + ") — birlikdə işləyirik.");
       if (strong.length) L.push("Güclü mövzular: " + strong.map(function (t) {
         return t.name + " (" + pct(t.ratio) + "%)"; }).join(", "));
       if (weak.length) L.push("Üzərində işlədiyimiz mövzular: " + weak.map(function (t) {
@@ -5630,8 +5659,8 @@
       L.push("");
       L.push("✅ İşlənən test: " + n);
       L.push("📈 Ortalama: " + avg + "% · Ən yaxşısı: " + best + "%");
-      if (tr === "up")   L.push("↗ Son testlərdə irəliləyiş var");
-      if (tr === "down") L.push("↘ Son testlərdə enmə var — üzərində işləyirik");
+      if (tr === "up")   L.push("↗ Son testlərdə irəliləyiş: " + trendSoz(ti));
+      if (tr === "down") L.push("↘ Son testlərdə enmə: " + trendSoz(ti) + " — üzərində işləyirik");
       if (strong.length || weak.length) L.push("");
       strong.forEach(function (t) {
         L.push("💪 " + t.name + "  " + velBar(t.ratio) + " " + pct(t.ratio) + "%");
@@ -6213,17 +6242,18 @@
       });
       /*  YENI: «100% en yaxsi» faydasiz idi; en vacib reqem - GEDISAT (63% -> 67%) - sehifenin
           en asagisindaki sekil kartinda gizli idi.  Indi ustdedir.  */
-      var pdt = YENI && (r.attempts || []).length >= 2 ? progData(r) : null;
+      var tri = YENI ? trendInfo(r.trend) : null, tr0 = r.trend || {};
       var h = YENI
         ? '<div class="rstat"><span><b>' + (Number(sm.attempts) || 0) + "</b>test</span>" +
-            '<span><b>' + pct(sm.avg) + "%</b>orta</span>" +
-            //  «+40» = ILK testlerin ortasi ile SON testlerin ortasi arasinda ferq (faiz bendi):
-            //  4-den az testde ilk/son test, 4 ve cox - ilk 3 / son 3 test.  Yazi bunu deyir.
-            (pdt ? '<span class="rtr ' + (pdt.to >= pdt.from ? "up" : "dn") + '"><b>' +
-              (pdt.to >= pdt.from ? "↗ +" : "↘ ") + (pdt.to - pdt.from) + "</b>" +
-              (pdt.k > 1 ? "ilk " + pdt.k + " test " : "ilk test ") + pdt.from + "% → " +
-              (pdt.k > 1 ? "son " + pdt.k + " test " : "son test ") + pdt.to + "%" +
-              (pdt.kisa ? " · son 30 gün" : " · bütün dövr") + "</span>" : "") + "</div>"
+            //  932: her reqemin yaninda DOVRU yazilir - valideyn «son 30 gun» gorur, muellim
+            //  eyni reqemi burada da tapir (evvel 58% / 66% - «niye ferqlidir?»).
+            '<span><b>' + pct(sm.avg) + "%</b>orta · bütün dövr</span>" +
+            (Number(tr0.n30) > 0 && tr0.avg30 != null
+              ? '<span><b>' + pct(tr0.avg30) + "%</b>son 30 gün</span>" : "") +
+            //  gedisat: Siqnallar ve valideynle EYNI (son 3 / evvelki 3), vahid - faiz bendi
+            (tri ? '<span class="rtr ' + (tri.d >= 0 ? "up" : "dn") + '"><b>' +
+              (tri.d > 0 ? "↗ +" + tri.d : (tri.d < 0 ? "↘ −" + Math.abs(tri.d) : "→ 0")) + " bənd</b>" +
+              trendSoz(tri) + "</span>" : "") + "</div>"
         : '<div class="stats">' +
             statTile(sm.attempts || 0, "test", "g1") +
             statTile(pct(sm.avg) + "%", "orta", "g2") +

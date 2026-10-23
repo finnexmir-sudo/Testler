@@ -172,8 +172,13 @@ with sync_playwright() as pw:
     pg.wait_for_selector("#stuPend .stpr", timeout=25000); pg.wait_for_timeout(1500)
 
     print("\nA · Başlıq və gedişat")
-    ok("+40" in pg.inner_text(".rstat"), "gedişat yuxarıdadır (+40)", pg.inner_text(".rstat").replace("\n", " "))
-    ok("ilk test 20% → son test 60%" in pg.inner_text(".rstat"), "«+40» nəyi bildirdiyini deyir: ilk test 20% → son test 60%")
+    #  932 (23.10): gedisat Siqnallar ve valideyn paneli ile EYNI qayda - son 3 test / evvelki 3,
+    #  yalniz 4+ testde.  S0-in 3 testi var: muqayise GOSTERILMIR (evvel «ilk test 20% → son
+    #  test 60%» idi - Siqnallar ve valideyn bunu demirdi).  4+ test hali: test/e2e_sira2.py.
+    ok("↗" not in pg.inner_text(".rstat") and "↘" not in pg.inner_text(".rstat"),
+       "3 testdə gedişat göstərilmir (4+ test lazımdır, Siqnallar və valideyn kimi)", pg.inner_text(".rstat").replace("\n", " "))
+    ok("orta · bütün dövr" in pg.inner_text(".rstat") and "son 30 gün" in pg.inner_text(".rstat"),
+       "orta «bütün dövr», yanında «son 30 gün» (valideynin rəqəmi)")
     ok("bütün dövr" in pg.inner_text(".rstat") or "son 30 gün" in pg.inner_text(".rstat"), "dövr yazılıb")
     ok("ən yaxşı" not in pg.inner_text(".rstat"), "«ən yaxşı» rəqəmi çıxarılıb")
 
