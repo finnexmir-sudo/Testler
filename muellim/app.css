@@ -3072,3 +3072,72 @@ details.styd{margin-top:14px}
   .sxtr{flex-direction:column;align-items:stretch;gap:12px}
   .sxb .btn{width:100%}
 }
+
+/* ---------------------------------------------- Yigcamliq (24.10, istifadeci + GPT maketi)
+   Sriftler ve toxunma sahesi (44 px) DEYISMIR - yalniz artiq bosluq, kolge, fon.
+   Qrupun sekme ekranlari (#main.yig + .band.gtabb) ve sagird sehifesi (.band.sband).  */
+:root{--bg:#ecf5f1}                       /*  panel fonu bir ton acildi (evvel #dfeee8)  */
+.band.gtabb{padding-top:10px}
+.band.gtabb .bandin{box-shadow:0 4px 14px rgba(8,127,117,.14);border-top-width:3px}
+.band.gtabb .bandin::after{width:170px;height:170px;top:-60px;right:-40px;border-width:26px}
+@media (min-width:601px){
+  .band.gtabb .bandin{padding:12px 20px}
+  .band.gtabb h1{font-size:22px;margin:0}
+  .band.gtabb .bh{gap:12px}
+}
+@media (max-width:600px){
+  .band.gtabb{padding:8px 12px 0}
+  .band.gtabb .bandin{padding:8px 10px;border-radius:14px}
+}
+/*  sagird: avatar ve gorunen ad telefonda yer yeyirdi - ad, kod, «Test tapşır» bir setirde  */
+.band.sband .av{width:38px;height:38px;flex:0 0 38px;font-size:16px}
+.band.sband .br{flex:none}
+@media (max-width:600px){
+  .band.sband .bh > .av{display:none}
+  .band.sband h1{font-size:18px;line-height:1.2}
+  .band.sband p{font-size:12px}
+  .band.sband .br .btn{padding:0 10px}
+}
+#main.yig .card{box-shadow:0 1px 2px rgba(23,59,80,.05);border-color:#d6e6e0}
+#main.yig .gtabs{margin:8px 0 10px;box-shadow:none}
+#main.yig .gic{gap:10px}
+#main.yig .gic .card.gk{padding:12px 16px}
+#main.yig .gkh{margin-bottom:4px;min-height:32px}
+#main.yig .gkh .gkm{margin-left:auto;min-height:44px;margin-top:-6px;margin-bottom:-6px}
+#main.yig .gkh .gka + .gkm{margin-left:12px}
+#main.yig .gkt{margin-bottom:6px}
+#main.yig .gkplan{margin-bottom:8px}
+#main.yig .gkd{padding:8px 0}
+#main.yig .gka1,#main.yig .gkn{padding:7px 0}
+#main.yig .gkf{margin-top:0}
+#main.yig .rstat.r30{padding-top:10px;margin-bottom:10px;box-shadow:none}
+#main.yig .rstat.r30 > span{padding-bottom:8px}
+#main.yig .rstat.r30 > span.rall{padding-top:7px;padding-bottom:8px}
+#main.yig .segs.stabs{margin:8px 0 10px}
+#main.yig .card.stkart{margin-bottom:8px}
+#main.yig .sxsehv{margin-top:8px;padding-top:8px}
+#main.yig .sxv{margin-bottom:8px}
+#main.yig .sxm{margin-top:6px}
+#main.yig .sxtr .gkp{margin-top:4px}
+@media (max-width:600px){
+  #main.yig .gic .card.gk{padding:10px 12px}
+  #main.yig .gkd{flex-wrap:nowrap}
+  #main.yig .gkd .g{flex-basis:auto}
+  #main.yig .gkd .gkm{margin-left:0}
+  #main.yig .gkd .btn{margin-left:0}
+  #main.yig .sxtr{gap:8px}
+}
+/*  «Son keçilən dərs» acilib-baglanan  */
+details.gklast{padding:0}
+details.gklast > summary{list-style:none;display:flex;align-items:center;gap:8px;min-height:44px;
+  padding:0 12px;cursor:pointer}
+details.gklast > summary::-webkit-details-marker{display:none}
+details.gklast > summary .gkl{margin:0;flex:1;min-width:0}
+details.gklast > summary b{font-size:15px;font-weight:700}
+details.gklast > summary .gkch{width:14px;height:14px;flex:none;color:var(--fg-3);transition:transform .15s}
+details.gklast[open] > summary .gkch{transform:rotate(90deg)}
+details.gklast > :not(summary){margin-left:12px;margin-right:12px}
+details.gklast > .gkv{margin-top:-2px}
+details.gklast[open]{padding-bottom:10px}
+/*  gozleyen tapsiriq metni telefonda uc setre uzanirdi - iki setir, tam metn «Mesajı kopyala»dadir  */
+#main.yig .stp .stpr .g i{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}

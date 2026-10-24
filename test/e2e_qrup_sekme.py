@@ -141,6 +141,9 @@ with sync_playwright() as pw:
     print("D · plan yeri ≠ son dərsin nəticəsi")
     pos = pg.inner_text("#gkPos") if pg.locator("#gkPos").count() else ""
     ok(bool(re.search(r"dərs \d+ / \d+", pos)) and "%" not in pos, "«Plandakı yeri»: dərs N / M, faiz yoxdur", pos)
+    #  24.10: «Son keçilən dərs» açılıb-bağlanandır - bağlı gəlir, başlığında faiz
+    ok(pg.locator("#gkLast").count() == 1 and pg.locator("#gkLast").get_attribute("open") is None, "«Son keçilən dərs» bağlı gəlir")
+    if pg.locator("#gkLast summary").count(): pg.click("#gkLast summary"); pg.wait_for_timeout(200)
     last = pg.inner_text("#gkLast") if pg.locator("#gkLast").count() else ""
     ok("bu dərsin testi" in last and "%" in last, "son dərsin testi ayrı blokda, öz sözü ilə", last.replace("\n", " | "))
     pg.click("#gkPlan"); pg.wait_for_selector("#planBox", timeout=20000); pg.wait_for_timeout(300)

@@ -82,6 +82,17 @@ Panel kodu SQL-dən əvvəl də canlıya gedə bilər: `trend` gəlməyəndə ka
 Hələ edilməyib (sonraya): yığcam başlıq (qrup adı · sinif · fənn), «Giriş kodu» düyməsinin başlığa keçməsi.
 Testlərdə tapılan: `e2e_tapsiriq_bos` sınanda bütün platforma testlərini `draft`-da qoyub qaytarmırdı — sonrakı testlər boş siyahı görürdü (`#pick .trow`). Bu, əvvəlki «əvvəldən sınıq» qeydlərinin bir hissəsinin səbəbidir; baza bərpa olunanda `e2e_dord_is`, `e2e_etmeyenler`, `e2e_sagird_hesabat` keçir. `e2e_dord_is` yeni qrup səhifəsinə uyğunlaşdırıldı.
 
+## Yığcamlıq — qrup və şagird səhifəsi (24.10)
+
+İstifadəçi: «GPT maketindəki yığcamlıq canlıda alınmayıb — başlıq, kartların daxili boşluqları və kölgələr böyükdür; telefonda bir kart ekranın çoxunu tutur. Şrifti və toxunma düymələrini kiçiltmə, artıq boşluğu azalt.»
+
+| # | Nə dəyişdi | Necə yoxlandı | Canlıda? |
+|---|---|---|---|
+| Y1 | Yaşıl başlıq bir sətirdə (Geri · ad · əsas düymə): telefonda qrup ~140 → ~80 px, şagird ~210 → ~70 px (avatar telefonda gizlənir). Şrift və 44 px toxunma dəyişmədi | 390/1280 əvvəl–sonra; `e2e_qrup_menyu_telefon`, `e2e_qrup_sekme` A2 (44 px) | yox (budaqda) |
+| Y2 | Kartların daxili boşluğu 16→12 (telefon 12→10), aralar 12→10, «Hamısına bax» / «Dərs planı» kartın başlığına (ayrıca alt sətir yox), sekmə zolağının ara boşluğu azaldı | eyni | yox |
+| Y3 | Kölgələr zəif (yalnız 1 px), panel fonu bir ton açıq (`--bg` #dfeee8 → #ecf5f1) | gözlə: 390/1280 | yox |
+| Y4 | «Son keçilən dərs» açılıb-bağlanan: başlıqda tarix və faiz, içində mövzu və «testi yığ». Gözləyən tapşırıq mətni telefonda 2 sətir (tam mətn «Mesajı kopyala»da) | `e2e_qrup_sekme` D (bağlı gəlir, açılır) | yox |
+
 ## Sıra 1–5 — gözləyir
 
 1. **Testin düzgünlüyü** — 0.1, 0.2, 0.4 bağlandı (yuxarı). Qalan: tək pis sualı əvəz etmək (vərəqdə).
