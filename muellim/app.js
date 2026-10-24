@@ -142,6 +142,7 @@
     busy = false; main.innerHTML = html; main.scrollTop = 0;
     //  genis sutun yalniz idareetme ekranindadir - qalanlarinda sonur
     main.classList.remove("wideadm");
+    main.classList.remove("yig");   //  yigcam kartlar yalniz qrup sekmeleri ve sagird sehifesindedir (24.10)
     //  yeni ekran hemise yuxaridan baslasin - zolaq (basliq) gorunsun
     try { window.scrollTo(0, 0); } catch (e) {}
     //  bandHead() show()-dan EVVEL cagirilibsa zolaq qalir
@@ -174,6 +175,7 @@
     b.innerHTML = html ? '<div class="bandin">' + html + "</div>" : "";
     b.classList.remove("gcompact");   //  yalniz qrup menyusu telefonda sixilir - bagqa ekrana kecmesin
     b.classList.remove("gtabb");
+    b.classList.remove("sband");
     b.classList.toggle("hide", !html);
     main.classList.toggle("over", !!html);
   }
@@ -4106,6 +4108,7 @@
   function gTabsMount(gid, act) {
     var b = $("band");
     if (b) { b.classList.add("gcompact"); b.classList.add("gtabb"); }
+    main.classList.add("yig");
     if (!$("gSek")) main.insertAdjacentHTML("afterbegin", gTabsHtml(gid, act));
     var nav0 = $("gSek");
     nav0.addEventListener("click", function (e) {
@@ -4184,8 +4187,10 @@
     on("btnAsgs", "click", function () { nav("#/a/" + g.id + "/t"); });
 
     var live = guard();
-    function kh(icon, t, alt) {
-      return '<div class="gkh">' + ic(icon) + "<b>" + t + "</b>" + (alt ? '<span class="gka">' + alt + "</span>" : "") + "</div>";
+    //  24.10 (yigcamliq): «Hamısına bax» / «Dərs planı» kartin BASLIGINDA, sagda - ayrica alt setir yer tuturdu
+    function kh(icon, t, alt, sag) {
+      return '<div class="gkh">' + ic(icon) + "<b>" + t + "</b>" + (alt ? '<span class="gka">' + alt + "</span>" : "") +
+        (sag || "") + "</div>";
     }
     function more(href, t, id) {
       return '<a class="gkm"' + (id ? ' id="' + id + '"' : "") + ' href="' + href + '">' + t + " " + ic("right") + "</a>";
@@ -4202,7 +4207,8 @@
       if ($("gSub")) $("gSub").textContent = (lv ? lv + " · " : "") + nS + " şagird";
 
       //  ---- 1. Bu gunun dersi
-      var nx = d.next || null, ls = d.last || null, h = kh("cal", "Bu günün dərsi");
+      var nx = d.next || null, ls = d.last || null;
+      var h = kh("cal", "Bu günün dərsi", "", rr[2] && d.has_plan ? more("#/g/" + esc(g.id) + "/p", "Dərs planı", "gkPlan") : "");
       if (!rr[2]) {
         h += '<p class="muted">Dərs planı yüklənmədi.</p>';
       } else if (!d.has_plan) {
@@ -4224,8 +4230,10 @@
         }
         if (ls) {
           var av0 = ls.test_id && ls.avg != null ? Math.round(ls.avg) : null;
-          //  SON KECILEN DERSIN TESTI - ayri blok, ayri basliq
-          h += '<div class="gklast" id="gkLast"><span class="gkl">Son keçilən dərs · ' + dateAz(ls.done_at) + "</span>" +
+          //  SON KECILEN DERSIN TESTI - ayri blok, ayri basliq.  24.10: acilib-baglanan (istifadeci:
+          //  «əlavə detallar açılıb-bağlanan olsun») - basliqda tarix ve faiz, icinde movzu ve duyme
+          h += '<details class="gklast" id="gkLast"><summary><span class="gkl">Son keçilən dərs · ' + dateAz(ls.done_at) + "</span>" +
+            (av0 != null ? '<b class="' + pvCls(av0) + '">' + av0 + "%</b>" : "") + ic("right", "gkch") + "</summary>" +
             '<span class="gkv">' + esc(ls.topic) + "</span>" +
             (ls.test_id
               ? (av0 != null
@@ -4236,7 +4244,7 @@
             //  evvelki kartdaki kimi: son kecilen fesilden test yig -> derhal bu qrupa verilir
             (d.paid ? '<button type="button" class="btn sm ghost" id="prepGen">' + ic("gen") + "«" +
               esc(ls.group || ls.topic) + "» testi yığ</button>" : "") +
-            "</div>";
+            "</details>";
         }
         //  isinme testi artiq yigilibsa (DERS_HAZIR baglidir - yenisi yigilmir) neticesi itmesin
         if (nx && nx.warm_test_id) {
@@ -4244,7 +4252,6 @@
             '<span class="wres">' + (nx.warm_takers ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird" : "verilib") +
             '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></div>';
         }
-        h += '<div class="gkf">' + more("#/g/" + esc(g.id) + "/p", "Dərs planı", "gkPlan") + "</div>";
       }
       $("gkDers").innerHTML = h;
       on("prepGen", "click", function () {
@@ -4299,7 +4306,8 @@
       //  ---- 3. Son tapsiriqlar (Tapşırıqlar sekmesindeki kimi qruplanir)
       var items = asgGroup(asg.items || []);
       var acq = items.filter(function (a) { return a.open !== false; });
-      var hA = kh("clip", "Son tapşırıqlar", acq.length ? acq.length + " aktiv" : "");
+      var hA = kh("clip", "Son tapşırıqlar", acq.length ? acq.length + " aktiv" : "",
+        more("#/a/" + esc(g.id), items.length ? "Hamısına bax" : "Tapşırıqlar", "gkAsgAll"));
       if (!rr[1]) hA += '<p class="muted">Tapşırıqlar yüklənmədi.</p>';
       else if (!acq.length) {
         hA += '<p class="muted gkp">' + (items.length ? "Aktiv tapşırıq yoxdur." : "Hələ tapşırıq verilməyib.") + "</p>";
@@ -4314,12 +4322,11 @@
             '<span class="gkfr' + (done >= tot && tot ? " ok" : "") + '">' + done + " / " + tot + "</span></div>";
         }).join("");
       }
-      hA += '<div class="gkf">' + more("#/a/" + esc(g.id), items.length ? "Hamısına bax" : "Tapşırıqlar", "gkAsgAll") + "</div>";
       $("gkAsg").innerHTML = hA;
 
       //  ---- 4. Son neticeler (Hesabat · Fəaliyyət ile eyni siyahi, ilk 5)
       var rec = rep.recent || [];
-      var hN = kh("chart", "Son nəticələr");
+      var hN = kh("chart", "Son nəticələr", "", more("#/r/" + esc(g.id) + "/f", rec.length ? "Hamısına bax" : "Hesabat", "gkNetAll"));
       if (!rr[0]) hN += '<p class="muted">Nəticələr yüklənmədi.</p>';
       else if (!rec.length) hN += '<p class="muted gkp">Hələ test yazan yoxdur.</p>';
       else {
@@ -4328,7 +4335,6 @@
             "<i>" + esc(x.test) + " · " + dateAz(x.at) + "</i></div>" + pctChip(x.percent) + "</div>";
         }).join("");
       }
-      hN += '<div class="gkf">' + more("#/r/" + esc(g.id) + "/f", rec.length ? "Hamısına bax" : "Hesabat", "gkNetAll") + "</div>";
       $("gkNet").innerHTML = hN;
     }).catch(function () {});
   }
@@ -6673,7 +6679,7 @@
         var tov = sweakAll.slice().sort(function (a, b) {
           return (ilkinMi(a, r) ? 1 : 0) - (ilkinMi(b, r) ? 1 : 0) || Number(a.ratio) - Number(b.ratio);
         })[0] || null;
-        var kH = function (icon, t) { return '<div class="gkh">' + ic(icon) + "<b>" + t + "</b></div>"; };
+        var kH = function (icon, t, sag) { return '<div class="gkh">' + ic(icon) + "<b>" + t + "</b>" + (sag || "") + "</div>"; };
         var tovH = '<section class="card gk sxwide sxtov" id="stuTov">' + kH("gen", "Təkrar tövsiyəsi");
         if (r.topics === null) {
           tovH += '<p class="muted gkp">Mövzu üzrə təhlil abunə ilə açılır.</p>';
@@ -6710,13 +6716,14 @@
               '<button type="button" class="btn sm ghost" id="vOpen" aria-expanded="false">' + ic("doc") + "Mətnə bax</button></div>") +
             '<div id="vBox" hidden>' + vsH + "</div></section>";
         }
-        var sonH = '<section class="card gk sxwide" id="stuSon">' + kH("chart", "Son nəticələr") +
+        var sonH = '<section class="card gk sxwide" id="stuSon">' +
+          kH("chart", "Son nəticələr", at.length
+            ? '<a class="gkm" href="#" id="vdTar">' + (at.length > 5 ? "Hamısına bax" : "Tarixçə") + " " + ic("right") + "</a>" : "") +
           (at.length
             ? at.slice(0, 5).map(function (a) {
                 return '<div class="gkn"><div class="g"><b>' + esc(a.test) + "</b><i>" + dateAz(a.at) + " · " +
                   a.score + " / " + a.max + "</i></div>" + pctChip(a.percent) + "</div>";
-              }).join("") +
-              '<div class="gkf"><a class="gkm" href="#" id="vdTar">' + (at.length > 5 ? "Hamısına bax" : "Tarixçə") + " " + ic("right") + "</a></div>"
+              }).join("")
             : '<p class="muted gkp">Hələ test işləməyib.</p>') + "</section>";
         hX = rstatH + '<div class="gic sxg">' + tovH +
           '<section class="card gk" id="stuDiq">' + kH("clip", "Gözləyən tapşırıqlar") +
@@ -7016,6 +7023,11 @@
         '<div class="stab" id="tab-t"' + (STAB === "t" ? "" : " hidden") + ">" + hT + "</div>";
 
       show(h);
+      //  24.10 (yigcamliq): zolaq bir setirde (Geri · ad · Test tapşır), kartlar yigcam
+      if (YENI) {
+        main.classList.add("yig");
+        if ($("band")) { $("band").classList.add("gcompact"); $("band").classList.add("gtabb"); $("band").classList.add("sband"); }
+      }
       if (YENI) { stuKart(id, classId, live); loadStuPend(id, classId, s.full_name, live); }
       loadDiag(id, classId, at.length > 0);
       drawTopics();
