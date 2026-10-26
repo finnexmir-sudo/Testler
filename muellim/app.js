@@ -1402,8 +1402,8 @@
           '<button type="button" class="btn go" id="yGen">' + ic("plus") + "Test yığ</button></div></header>" +
       '<div id="yPkt"></div><div id="yBas"></div>' +
       '<section class="card yk" id="hWeek"><div class="skel">Yüklənir…</div></section>' +
-      '<section class="card yk" id="yQrp"><div class="ykh"><div><b>Qruplarım</b><span class="muted" id="yQrpSub"></span></div>' +
-          '<a class="gkm" href="#/nt" id="yNetAll">Nəticələr ' + ic("right") + "</a></div>" +
+      //  26.10 (istifadeci): «Nəticələr» kecidi yoxdur - neticeye QRUPUN icinden (Hesabat) kecilir
+      '<section class="card yk" id="yQrp"><div class="ykh"><div><b>Qruplarım</b><span class="muted" id="yQrpSub"></span></div></div>' +
         '<div class="ysrch hide" id="yQs"><input type="search" id="yQq" placeholder="Qrup axtar" aria-label="Qrup axtar"></div>' +
         '<div class="ytb" id="yQt"><div class="ytr yth"><span>Qrup</span><span>Sinif</span><span>Şagird</span><span></span></div>' +
           '<div id="yMenu"><div class="skel">Yüklənir…</div></div></div>' +
@@ -1463,6 +1463,20 @@
       var l = (LEVELS || []).filter(function (x) { return String(x.code) === String(code); })[0];
       return l ? l.name : "";
     };
+    /*  26.10 (istifadeci): QRUPSUZ yeni muellim - qisa izah ve bir esas duyme.  Bos cedvel, «cədvəl
+        qurulmayıb» ve 0/3 baslangic karti eyni anda cixmir: ilk addim tekdir.  */
+    var qrupsuz = !gs.length && !nQ;
+    if (qrupsuz) {
+      if ($("hWeek")) $("hWeek").classList.add("hide");
+      $("yBas").innerHTML = "";
+      if ($("yQt")) $("yQt").classList.add("hide");
+      if ($("yQrpSub")) $("yQrpSub").textContent = "";
+      $("yQrp").insertAdjacentHTML("beforeend",
+        '<div class="ybos" id="yBos"><p>Qrup — şagirdlərinizin siyahısıdır. Qrupu yaradın, şagirdləri əlavə edin: ' +
+          "hər şagird öz kodu ilə girib verdiyiniz testi işləyəcək, nəticə özü sizə gələcək.</p>" +
+          '<button type="button" class="btn go" id="yFirstG">' + ic("plus") + "İlk qrupunu yarat</button></div>");
+      on("yFirstG", "click", function () { YNEWG = true; nav("#/gs"); });
+    }
     $("yMenu").innerHTML = gs.length
       ? gs.map(function (g) {
           var sn = lvAd(g.level);
@@ -1472,7 +1486,7 @@
             '<span class="ytn">' + (Number(g.students) || 0) + "</span>" +
             '<span class="ytk">Qrupa keç ' + ic("right") + "</span></a>";
         }).join("")
-      : yRow({ ic: "plus", ad: "İlk qrupunuzu yaradın", href: "#/gs", alt: "qrup yaradın, şagirdləri bir yerə yığın" });
+      : (qrupsuz ? "" : yRow({ ic: "plus", ad: "Qruplar", href: "#/gs", alt: nQ + " qrup" }));
     if ($("yQt")) $("yQt").classList.toggle("bos", !gs.length);
     //  axtaris yalniz qrup coxdursa (5+) - az qrupda artiq secim olardi
     if ($("yQs")) $("yQs").classList.toggle("hide", gs.length < 5);
