@@ -4,7 +4,8 @@
 
 23.09 (istifadeci): «butonlar yan yana qatisiq nedir bele?»
 Bir setirde 9 element, bes gorunusde idi.  Indi:
-  1. ESAS      - tek yasil duyme
+  26.10: «Qrupa ver» (1-ci zolaq) yoxdur - forma suallardan sonradir; qalan uc zolaq
+  «Digər əməliyyatlar» altinda (bagli gelir)
   2. CAP       - duyme + IKI CHECKBOX (cavab acari, yigcam)
   3. SAKIT     - hamisi ag: hemkar, yeniden yig, adi deyis, vaxt
   4. TEHLUKELI - «Sil» ayrica, sag kenarda
@@ -68,19 +69,23 @@ with sync_playwright() as pw:
       " select %s, question_id, ord from public.test_questions where test_id=%s", (tid, src["id"]))
 
     p.goto(PANEL + "#/t/" + str(tid)); p.reload()
-    p.wait_for_selector(".tacts", timeout=30000); p.wait_for_timeout(900)
+    p.wait_for_selector(".tacts", state="attached", timeout=30000); p.wait_for_timeout(900)
 
-    print("\n1) dord zolaq")
-    for z in ("tact1", "tact2", "tact3", "tact4"):
+    print("\n1) «Digər əməliyyatlar» - bagli, ici uc zolaq")
+    yox(p.locator("#pMore .tacts").count() == 1 and not p.evaluate("document.getElementById('pMore').open"), "emeliyyatlar «Digər əməliyyatlar» altinda, bagli")
+    top = lambda s: p.evaluate("document.querySelector('%s').getBoundingClientRect().top" % s)
+    yox(top("#qFold") < top("#pAsgH") < top("#pMore"), "ardicilliq: suallar -> Qrupa təyin et -> Digər əməliyyatlar")
+    p.click("#pMore > summary"); p.wait_for_timeout(300)
+    for z in ("tact2", "tact3", "tact4"):
         yox(p.locator("." + z).count() == 1, "%s zolagi var" % z)
+    yox(p.locator(".tact1, #btnGoAsg").count() == 0, "«Qrupa ver» (formaya surusme) duymesi yoxdur")
 
     print("\n2) hansi duyme hansi zolaqda")
-    yox(p.locator(".tact1 #btnGoAsg").count() == 1, "esas duyme 1-ci zolaqda")
     yox(p.locator(".tact2 #btnPrn").count() == 1, "«Çap / PDF» 2-ci zolaqda")
     yox(p.locator(".tact2 #prnK").count() == 1, "«cavab açarı ilə» CHECKBOX-dur")
     yox(p.locator(".tact2 #prnC").count() == 1, "«yığcam» checkbox 2-ci zolaqda")
     yox(p.locator("#btnPrnK").count() == 0, "kohne sari DUYME artiq yoxdur")
-    for b in ("btnHemkar", "btnTRen"):
+    for b in ("btnTRen",):
         yox(p.locator(".tact3 #" + b).count() == 1, "%s 3-cu zolaqda" % b)
     yox(p.locator(".tact3 .plim").count() == 1, "vaxt cipi 3-cu zolaqda")
     yox(p.locator(".tact4 #btnTDel").count() == 1, "«Sil» AYRICA zolaqdadir")

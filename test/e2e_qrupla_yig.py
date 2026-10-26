@@ -191,7 +191,7 @@ with sync_playwright() as pw:
             print("\nE · Qrup SEÇİLMƏYİB   [%s · %s]" % (tag, tel))
             yig(pg, "QY E %s %s" % (tag, tel), None)
             t3 = pg.inner_text("#main")
-            ok("sonra qrupa verin" in t3, "qrupsuz yigilanda «… sonra qrupa verin» mesaji")
+            ok("aşağıda qrupa verin" in t3, "qrupsuz yigilanda «Suallara baxın, sonra aşağıda qrupa verin» mesaji")
             ok(pg.locator(".pasgok").count() == 0, "tesdiq qutusu YOXDUR (hec ne verilmeyib)")
             ok("Başqa qrupa da" not in t3, "«Basqa qrupa da» yazisi yoxdur")
             ctx.close()

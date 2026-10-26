@@ -406,7 +406,7 @@ with sync_playwright() as pw:
     yox("sual" in p.inner_text("#qFold > summary"), "başlıq «Suallar · N sual»", p.inner_text("#qFold > summary"))
     #  09.10: çap vərəqində Bil10 loqosu + adı ayrıca başlıqda
     p.evaluate("window.print = function(){}")
-    p.click("#btnPrn"); p.emulate_media(media="print"); p.wait_for_timeout(300)
+    p.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); p.click("#btnPrn"); p.emulate_media(media="print"); p.wait_for_timeout(300)
     yox(p.locator("#printBox .ppbrand svg").count() == 1 and "Bil10" in p.inner_text("#printBox .ppbrand") and "bil10.az" in p.inner_text("#printBox .ppbrand"), "çap vərəqində loqo + «Bil10» + bil10.az başlığı var")
     p.locator("#printBox").screenshot(path=OUT + "/10-cap-vereq.png")
     p.emulate_media(media="screen")
@@ -456,7 +456,7 @@ with sync_playwright() as pw:
     yox("WhatsApp açıldı" in txt and "göndərildi" not in txt.lower().replace("göndərib", ""), "dürüst yazı: açıldı, «göndərildi» demir", txt[:80])
     yox("sual." not in hm, "mətn heç bir testə istinad etmir", hm[:80])
     tid = q("select id::text i from public.tests where owner_type='educator' limit 1", one=True)["i"]
-    p.goto(PANEL + "?yeni=1#/t/" + tid); p.wait_for_selector("#btnPrn", timeout=30000)
+    p.goto(PANEL + "?yeni=1#/t/" + tid); p.wait_for_selector("#btnPrn", state="attached", timeout=30000)
     yox(p.locator("#btnHemkar").count() == 0, "test səhifəsində «Həmkarına göndər» yoxdur")
     br.close()
 

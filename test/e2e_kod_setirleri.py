@@ -164,7 +164,7 @@ with sync_playwright() as pw:
     #  gorunur) - olcu YALANCI kecerdi.  Ona gore evvel print rejimine
     #  kecirik, element heqiqeten cizilir, sonra olculur.
     pg.once("dialog", lambda d: d.dismiss())
-    pg.click("#btnPrn")
+    pg.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); pg.click("#btnPrn")
     pg.wait_for_selector("#printBox .ppb", state="attached", timeout=20000)
     pg.emulate_media(media="print")
     pg.wait_for_timeout(400)

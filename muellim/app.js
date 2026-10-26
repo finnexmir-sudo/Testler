@@ -10135,7 +10135,8 @@
     if (f.levels.length === 1) {
       return levelNameByCode2(f.levels[0]) + " — başqasını da seçə bilərsiniz.";
     }
-    return "Seçilməyib — bütün siniflərdən götürülür.";
+    //  26.10 (istifadeci): sinifsiz test yigilmir - «bütün siniflərdən» qarisiq test menasizdir
+    return "Sinfi seçin — bir və ya bir neçə.";
   }
 
   /* Movzu nisanlari yalniz FENN + TEK SINIF secilende cixir.
@@ -10252,6 +10253,8 @@
     var v = f.asgStu ? "s:" + f.asgStu : (f.asg || "");
     var opts = '<option value="">Heç kimə — yalnız test yığılsın</option>' +
       (f.asgStu ? '<option value="s:' + esc(f.asgStu) + '" selected>yalnız ' + esc(f.asgStuName || "şagird") + "</option>" : "") +
+      //  qrup siyahisi hele gelmeyib - secilmis qrup bir anliq da olsa «Heç kimə» gorunmesin
+      (!cls && f.asg && !f.asgStu ? '<option value="' + esc(f.asg) + '" selected>' + esc(f.fromName || "Seçilmiş qrup") + "</option>" : "") +
       (cls || []).map(function (c) {
         return '<option value="' + esc(c.id) + '"' + (v === c.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
       }).join("");
@@ -10422,6 +10425,10 @@
         if (v.indexOf("s:") === 0) return;
         //  basqa qrup / heç kim: sagird ve hedefli siyahi niyyeti bitir
         f.asg = v; f.asgStu = ""; f.asgStuName = ""; f.asgStus = []; f.fromG = v ? f.fromG : "";
+        //  sinif hele secilmeyibse qrupun sinfi secilir (bilinen secim - muellimden yeniden sorusulmur)
+        var c0 = v && !f.levels.length ? (CLS || []).filter(function (c) { return c.id === v; })[0] : null;
+        var lc = c0 && c0.level_id ? levelCode(c0.level_id) : "";
+        if (lc) { f.levels = [lc]; f.topics = []; genSync(); genFacets(); }
         kimDraw();
       });
       on("gWho", "click", function (e) {
@@ -10444,7 +10451,7 @@
     kimBind();
     //  qrup siyahisi + sagird saylari ayrica dolur - secim suzgec deyismelerinde itmesin
     if (!f.back) Promise.all([
-      sb.select("classes", { select: "id,name", eq: { account_id: ACC.id }, order: "name" }),
+      sb.select("classes", { select: "id,name,level_id", eq: { account_id: ACC.id }, order: "name" }),
       sb.select("students", { select: "id,class_id", eq: { account_id: ACC.id, is_active: true } }).catch(function () { return []; })
     ]).then(function (rr) {
       CLS = rr[0] || [];
@@ -10459,9 +10466,18 @@
 
   /* Onizleme durust danisir: hovuzda o suzgecle HEQIQETEN nece
      ferqli sual var.  Az cixsa, muellim duymeni basmamis bilir. */
+  //  sinif (ve ya konkret movzu) secilmeyibse test yigilmir
+  function genNeedLev(f) { return !f.levels.length && !f.topics.length; }
   function genPreview() {
     var live = guard();
     var f = genFilter();
+    var mb = $("btnMake");
+    if (genNeedLev(f)) {
+      if ($("gPrev")) $("gPrev").innerHTML = '<p class="gneed">' + ic("info") + "Əvvəl sinfi seçin — sonra suallara baxa bilərsiniz.</p>";
+      if (mb && !busy) mb.disabled = true;
+      return;
+    }
+    if (mb && !busy) mb.disabled = false;
     var my = JSON.stringify(genRule(f));
     sb.rpc("rpc_generate_preview", { p_rule: genRule(f) })
       .then(function (v) {
@@ -10588,6 +10604,7 @@
   function makeTest() {
     if (busy) return;
     var f = genFilter();
+    if (genNeedLev(f)) { genPreview(); return; }
     $("gErr").innerHTML = "";
     setBusy("btnMake", true, makeLabel(f));
     //  26.10: alici YADDA SAXLANIR, tapsiriq verilmir - vereqde secili gelir, muellim yoxlayib verir
@@ -11126,6 +11143,18 @@
     setTimeout(off, 2000);
   }
 
+  //  «2026-11-02» -> «2 noyabr 2026, bazar ertəsi» (tarix secicisinin yaninda - brauzer formati caşdirmasin)
+  function dateLongAz(v) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || "");
+    if (!m) return v || "";
+    var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    var ay = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avqust","sentyabr","oktyabr","noyabr","dekabr"];
+    return d.getDate() + " " + ay[d.getMonth()] + " " + d.getFullYear() + ", " + GUNTAM[d.getDay() || 7].toLowerCase();
+  }
+  function isoLongAz(iso) {
+    var d = new Date(iso), z = function (n) { return (n < 10 ? "0" : "") + n; };
+    return isNaN(d) ? "—" : dateLongAz(d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate()));
+  }
   function drawPaper(t, classes, asgs, students, fresh, verildi, xeta) {
     students = students || [];
     //  Yalniz QRUP teyinatlari qrupu secimden cixarir; ferdi teyinat
@@ -11157,7 +11186,188 @@
           " · " + qs.length + " sual" +
           (t.time_limit_sec ? " · ⏱ " + Math.round(t.time_limit_sec / 60) + " dəq" : "") +
           (done ? " · " + done + " şagird işləyib" : "") + "</p>" +
-        '<div class="spacer"></div>' +
+        '<div id="pErr"></div>' +
+      "</div>" +
+      /*  26.10 (istifadeci): ardicilliq - SUALLAR -> alici ve tarix -> «Testi ver»; ikinci derece
+          emeliyyatlar (cap, ad, yeniden yig, vaxt, sil) en asagida «Digər əməliyyatlar» altinda.  */
+      (diag ? "" :
+          (verildi
+            ? '<div class="ok pasgok">' + ic("check") + "<span>" +
+                "<b>Tapşırıq verildi.</b> " +
+                (verildi.hami
+                  ? "«" + esc(verildi.qrup) + "» — bütün şagirdlər bu testi indi görür."
+                  //  «Kimə» siyahisinda ad onsuz da «yalnız Aysel M.» kimidir -
+                  //  bas sozu atiriq, yoxsa «yalnız ... (yalnız o)» cixir.
+                  : (verildi.n > 1
+                    //  Sira 3: hedefli - say + adlar (alici siyahisi ile tapsiriq EYNI olsun)
+                    ? "Yalnız bu " + verildi.n + " şagird bu testi görür: " + esc(verildi.who) +
+                      " — qrupun qalanı yox."
+                    : "Yalnız " + esc(verildi.who.replace(/^yalnız\s+/i, "")) +
+                      " bu testi görür — qrupun qalanı yox.")) +
+                (verildi.son
+                  ? " Son tarix: " + esc(isoLongAz(verildi.son)) + "."
+                  : " Son tarix yoxdur — siz götürənə qədər açıq qalır.") +
+                " Cəhd sayı: " +
+                (verildi.cehd === 0 ? "limitsiz" : String(verildi.cehd)) + "." +
+                "<br>Şagird öz giriş kodu ilə " +
+                "<b>bil10.az/sagird</b> ünvanına girəndə test onun " +
+                "siyahısında olacaq — ayrıca link, fayl və ya mesaj " +
+                "göndərmək lazım deyil. Nəticə həll edən kimi bu panelə düşür." +
+              "</span></div>"
+            : "") +
+          //  Tapsiriq VERILMEDI - sebebi yazilir, forma o qrupu secili acir
+          (xeta
+            ? msg("warn", "Test yığıldı, amma «" + xeta.qrup + "» qrupuna tapşırıq " +
+                "verilə bilmədi: " + xeta.msg + " Aşağıdan özünüz verə bilərsiniz.")
+            : "") +
+          (fresh && !verildi && !xeta && (freeCls.length || !classes.length)
+            ? msg("ok", classes.length
+                ? (PSEND_T && PSEND_T.cls
+                    ? "Test hazırdır, hələ verilməyib. Suallara baxın — alıcı və son tarix aşağıda seçilib, yoxlayıb «" +
+                      asgBtnLabel() + "» basın."
+                    : "Test hazırdır. Suallara baxın, sonra aşağıda qrupa verin — şagird dərhal öz siyahısında görəcək.")
+                : "Test hazırdır. Bir qrup adı yazın — test ona veriləcək, " +
+                  "sonra şagirdləri əlavə edərsiniz.")
+            : "")
+      ) +
+      /*  08.10 (istifadeci): kohne test acilanda suallar BAGLI gelir - 30-50 sualli vereq sehifeni uzadirdi.
+          26.10: TEZE yigilmis test (Test yigdan «Suallara bax») - suallar ACIQ, alici formasi onlardan sonra.
+          Cap / PDF ayri nusxe qurur (printBox), bu DOM-a baxmir.  */
+      '<details class="qfold" id="qFold"' + (fresh ? " open" : "") + '><summary><h2>Suallar</h2><span class="fn">' + qs.length + " sual</span></summary>" +
+      '<div class="card pad0 paper">' +
+        qs.map(function (q) {
+          return '<div class="pq">' +
+            '<div class="qh"><b>' + q.ord + ". " + qt(q.body) + "</b></div>" +
+            fig(q.media_url) +
+            '<div class="qm">' +
+              (q.topic ? "<span>" + esc(q.topic) + "</span><span>·</span>" : "") +
+              '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
+                DIFF[Number(q.difficulty) || 2] + "</span>" +
+              "<span>·</span><span>" + (q.mine ? "öz sualınız" : "hazır bank") + "</span>" +
+              (q.remedial
+                ? '<span class="rem">səhvə bənzər</span>' : "") +
+              //  132: sablon sual - vereqdeki bir variantdir
+              (q.tpl ? '<span class="tpl">şablon · hər şagirdə fərqli rəqəm</span>' : "") +
+              '<button class="rlink" data-rq="' + esc(q.id) + '">Səhv bildir</button>' +
+            "</div>" +
+            '<div class="rslot" id="rs-' + esc(q.id) + '"></div>' +
+            (q.options || []).map(function (o) {
+              return '<div class="popt' + (o.correct ? " ok" : "") + '">' +
+                (o.correct ? ic("check") : "") + "<span>" + qt(o.body) + "</span></div>";
+            }).join("") +
+            (q.explanation
+              ? '<div class="pex">' + qt(q.explanation) + "</div>" : "") +
+          "</div>";
+        }).join("") +
+      "</div></details>" +
+      '<div class="spacer"></div>' +
+      (diag
+        ? "<h2>Diaqnostika</h2>" +
+          '<div class="card" id="pDiag">' +
+            '<div class="pgrow">' + ic("person") + "<span>Hər mövzudan 3 sual — " +
+              (diagStu
+                ? "yalnız <b>" + esc(diagStu.full_name || "") + "</b> üçün"
+                : "yalnız bir şagird üçün") +
+              ", bir cəhd.</span></div>" +
+            '<p class="muted" style="margin:10px 0 0">Qrupa verilmir və yenidən yığılmır: ' +
+              "nəticə, mövzu xəritəsi və «Yenidən diaqnostika» şagirdin öz ekranındadır." +
+              //  qisa ad noqte ile bitir ("Huseynov M.") - cumle sonuna ikinci noqte qoyulmur
+              (diagStu
+                ? ' <a href="#/s/' + esc(diagStu.id) + "/" + esc(diagStu.class_id || "") +
+                  '">' + esc(diagStu.full_name || "Şagird") + " → şagird ekranı</a>"
+                : "") +
+            "</p>" +
+          "</div>"
+        : '<h2 id="pAsgH">Qrupa təyin et</h2>' +
+          /*  Tapsiriq indice verildi - NE BAS VERDIYINI aciq yaziriq.
+              Evvel yalniz «verilib» setri qalirdi ve muellim testin
+              sagirde catib-catmadigini bilmirdi.  Uc sual cavablanir:
+              kime getdi · o necə gorecek · sizin elave is gorməyiniz
+              lazimdirmi.  */
+          /*  msg() metni ESCAPE edir - burada <b>/<br> lazimdir, ona gore
+              qutu elle qurulur.  Istifadeci melumati (qrup adi, sagird
+              adi) ayrica esc()-den kecir.  */
+      '<div class="card">' +
+        (given.length || Object.keys(soloN).length
+          ? '<div class="pgiven">' +
+            given.map(function (c) {
+              var a = asgMap[c.id];
+              return '<div class="pgrow">' + ic("check") +
+                "<span><b>" + esc(c.name) + "</b> — verilib" +
+                (a.closes_at ? " · son tarix " + isoLongAz(a.closes_at) : " · açıq") +
+                "</span></div>";
+            }).join("") +
+            //  ferdi teyinatlar: qrupu bloklamir, amma gorunmelidir
+            classes.filter(function (c) { return soloN[c.id]; })
+              .map(function (c) {
+                return '<div class="pgrow">' + ic("person") +
+                  "<span><b>" + esc(c.name) + "</b> — " + soloN[c.id] +
+                  " şagirdə fərdi verilib</span></div>";
+              }).join("") + "</div>"
+          : "") +
+        (classes.length && !freeCls.length
+          ? '<p class="muted" style="margin:0">Bu test bütün qruplarınıza verilib.</p>'
+          : "") +
+        (freeCls.length
+          ? (given.length || verildi
+              //  Verilmis qrup varsa forma BASQA qrup ucundur - yoxsa
+              //  muellim «hara verirem?» sorusunda qalir (29.09)
+              //  08.10 (istifadeci): tapsiriq artiq verilibse forma «casdirici» idi - indi BAGLI «Başqa qrupa da ver»
+              //  (xeta halinda aciq qalir: muellim ozu vermeli olur)
+              ? (!xeta
+                  ? '<details class="fold pother"><summary>Başqa qrupa da ver</summary>'
+                  : '<p class="muted" style="margin:0 0 10px"><b>Başqa qrupa da vermək üçün:</b></p>')
+              : "") +
+            '<div><label for="pWho">Kimə</label>' +
+              '<select id="pWho"></select></div>' +
+            '<div id="pWhoMany" class="pwmbox" style="display:none"></div>' +
+            '<p class="muted" style="margin:-8px 0 14px">Tək şagird ' +
+              "seçsəniz, tapşırığı yalnız o görəcək — qrupun qalanı yox.</p>" +
+            '<div class="fieldrow">' +
+              '<div><label for="pCls">Qrup</label><select id="pCls">' +
+                freeCls.map(function (c) {
+                  return '<option value="' + esc(c.id) + '"' +
+                    (xeta && xeta.cid === c.id ? " selected" : "") + ">" + esc(c.name) +
+                    (soloN[c.id] ? " · " + soloN[c.id] + " şagirdə verilib" : "") +
+                    "</option>";
+                }).join("") + "</select></div>" +
+              //  26.10: brauzerin «11/02/2026» yazisi caşdirirdi - sahede «2 noyabr 2026, bazar ertəsi»
+              //  yazilir, altinda hemin tarix secicisi (basanda acilir)
+              '<div><label for="pDate">Son tarix</label>' +
+                '<div class="dfld"><span id="pDateTxt">Seçilməyib — açıq qalır</span>' + ic("cal") +
+                '<input type="date" id="pDate" aria-describedby="pDateTxt"></div></div>' +
+              '<div style="flex:0 0 132px"><label for="pTry">Cəhd sayı</label>' +
+                '<select id="pTry"><option value="1">1 cəhd</option>' +
+                '<option value="2">2 cəhd</option><option value="3">3 cəhd</option>' +
+                '<option value="0">Limitsiz</option></select></div>' +
+            "</div>" +
+            '<p class="muted" style="margin:-8px 0 14px">Son tarix boş qalsa, ' +
+              "tapşırıq siz götürənə qədər açıq qalır. Cəhd sayı — şagirdin " +
+              "testi neçə dəfə işləyə biləcəyidir; hesabatda həm orta, həm də " +
+              "ən yaxşı nəticə görünür.</p>" +
+            '<div id="pAsgMsg"></div>' +
+            '<button class="btn go" id="btnPAsg">' + ic("plus") + asgBtnLabel() + "</button>" +
+            ((given.length || verildi) && !xeta ? "</details>" : "")
+          : (classes.length
+              ? ""
+              /*  Muellimi basqa ekrana gondermek dalan idi - orada test
+                  yaddan cixirdi.  Qrup buradaca yaranir ve test derhal
+                  ona verilir: bir forma, bir duyme.  */
+              : '<p class="muted" style="margin:0 0 12px">Hələ qrupunuz yoxdur. ' +
+                  "Adını yazın — qrup yaranacaq və bu test dərhal ona veriləcək.</p>" +
+                '<div class="fieldrow">' +
+                  '<div><label for="pNewG">Qrup adı</label>' +
+                    '<input id="pNewG" placeholder="məsələn: Cümə qrupu"></div>' +
+                  '<div style="flex:0 0 148px"><label for="pNewL">Sinif</label>' +
+                    '<select id="pNewL"><option value="">Sinif seçilməyib</option></select></div>' +
+                "</div>" +
+                '<div id="pNewErr"></div>' +
+                '<button class="btn go" id="btnNewG">' + ic("plus") +
+                  "Qrup yarat və testi ver</button>")) +
+      "</div>") +
+      '<div class="spacer"></div>' +
+      '<details class="fold pmore" id="pMore"><summary><span><b>Digər əməliyyatlar</b>' +
+        '<i>' + (diag ? "çap / PDF, vaxt" : "çap / PDF, adı dəyiş, yenidən yığ, vaxt, sil") + "</i></span>" + ic("right", "ar") + "</summary>" +
         /*  23.09 (istifadeci: «butonlar yan yana qatisiq nedir bele?»).
             Bir setirde 9 element, bes ayri gorunusde idi: yasil, nane,
             sari, ag, checkbox, acilan siyahi.  Uc qusur:
@@ -11170,10 +11380,7 @@
             «Cavab acari ile» ayrica duyme idi (sari) - indi capin
             AYARIDIR: bir duyme, iki checkbox.  */
         '<div class="tacts">' +
-          //  1. ESAS - tek yasil duyme, oz setrinde
-          (diag || (classes.length && !freeCls.length) ? "" :
-            '<div class="tact1"><button class="btn go" id="btnGoAsg">' + ic("clip") +
-              (classes.length ? "Qrupa ver" : "Qrup yarat və ver") + "</button></div>") +
+          //  26.10: «Qrupa ver» (formaya surusme) duymesi yoxdur - forma suallardan derhal sonradir
           //  2. CAP - duyme + ayarlari.  Ayarlar duymenin YANINDA deyil,
           //     ALTINDA qruplasir: hansi emeliyyata aid oldugu gorunsun.
           '<div class="tact2">' +
@@ -11221,178 +11428,7 @@
           ? '<p class="muted" style="margin:8px 0 0">Bu testi artıq şagird ' +
             "işlədiyi üçün yeniləmək olmaz — yeni test yığın.</p>"
           : "") +
-        '<div id="pErr"></div>' +
-      "</div>" +
-      '<div class="spacer"></div>' +
-      (diag
-        ? "<h2>Diaqnostika</h2>" +
-          '<div class="card" id="pDiag">' +
-            '<div class="pgrow">' + ic("person") + "<span>Hər mövzudan 3 sual — " +
-              (diagStu
-                ? "yalnız <b>" + esc(diagStu.full_name || "") + "</b> üçün"
-                : "yalnız bir şagird üçün") +
-              ", bir cəhd.</span></div>" +
-            '<p class="muted" style="margin:10px 0 0">Qrupa verilmir və yenidən yığılmır: ' +
-              "nəticə, mövzu xəritəsi və «Yenidən diaqnostika» şagirdin öz ekranındadır." +
-              //  qisa ad noqte ile bitir ("Huseynov M.") - cumle sonuna ikinci noqte qoyulmur
-              (diagStu
-                ? ' <a href="#/s/' + esc(diagStu.id) + "/" + esc(diagStu.class_id || "") +
-                  '">' + esc(diagStu.full_name || "Şagird") + " → şagird ekranı</a>"
-                : "") +
-            "</p>" +
-          "</div>"
-        : '<h2 id="pAsgH">Qrupa təyin et</h2>' +
-          /*  Tapsiriq indice verildi - NE BAS VERDIYINI aciq yaziriq.
-              Evvel yalniz «verilib» setri qalirdi ve muellim testin
-              sagirde catib-catmadigini bilmirdi.  Uc sual cavablanir:
-              kime getdi · o necə gorecek · sizin elave is gorməyiniz
-              lazimdirmi.  */
-          /*  msg() metni ESCAPE edir - burada <b>/<br> lazimdir, ona gore
-              qutu elle qurulur.  Istifadeci melumati (qrup adi, sagird
-              adi) ayrica esc()-den kecir.  */
-          (verildi
-            ? '<div class="ok pasgok">' + ic("check") + "<span>" +
-                "<b>Tapşırıq verildi.</b> " +
-                (verildi.hami
-                  ? "«" + esc(verildi.qrup) + "» — bütün şagirdlər bu testi indi görür."
-                  //  «Kimə» siyahisinda ad onsuz da «yalnız Aysel M.» kimidir -
-                  //  bas sozu atiriq, yoxsa «yalnız ... (yalnız o)» cixir.
-                  : (verildi.n > 1
-                    //  Sira 3: hedefli - say + adlar (alici siyahisi ile tapsiriq EYNI olsun)
-                    ? "Yalnız bu " + verildi.n + " şagird bu testi görür: " + esc(verildi.who) +
-                      " — qrupun qalanı yox."
-                    : "Yalnız " + esc(verildi.who.replace(/^yalnız\s+/i, "")) +
-                      " bu testi görür — qrupun qalanı yox.")) +
-                (verildi.son
-                  ? " Son tarix: " + esc(dateAz(verildi.son)) + "."
-                  : " Son tarix yoxdur — siz götürənə qədər açıq qalır.") +
-                " Cəhd sayı: " +
-                (verildi.cehd === 0 ? "limitsiz" : String(verildi.cehd)) + "." +
-                "<br>Şagird öz giriş kodu ilə " +
-                "<b>bil10.az/sagird</b> ünvanına girəndə test onun " +
-                "siyahısında olacaq — ayrıca link, fayl və ya mesaj " +
-                "göndərmək lazım deyil. Nəticə həll edən kimi bu panelə düşür." +
-              "</span></div>"
-            : "") +
-          //  Tapsiriq VERILMEDI - sebebi yazilir, forma o qrupu secili acir
-          (xeta
-            ? msg("warn", "Test yığıldı, amma «" + xeta.qrup + "» qrupuna tapşırıq " +
-                "verilə bilmədi: " + xeta.msg + " Aşağıdan özünüz verə bilərsiniz.")
-            : "") +
-          (fresh && !verildi && !xeta && (freeCls.length || !classes.length)
-            ? msg("ok", classes.length
-                ? (PSEND_T && PSEND_T.cls
-                    ? "Test hazırdır, hələ verilməyib. Sualları aşağıdakı «Suallar» bölməsində görürsünüz; alıcı və son tarix seçilib — yoxlayıb «" +
-                      asgBtnLabel() + "» basın."
-                    : "Test hazırdır. Sualları aşağıdakı «Suallar» bölməsində görürsünüz; sonra qrupa verin — şagird dərhal öz siyahısında görəcək.")
-                : "Test hazırdır. Bir qrup adı yazın — test ona veriləcək, " +
-                  "sonra şagirdləri əlavə edərsiniz.")
-            : "") +
-      '<div class="card">' +
-        (given.length || Object.keys(soloN).length
-          ? '<div class="pgiven">' +
-            given.map(function (c) {
-              var a = asgMap[c.id];
-              return '<div class="pgrow">' + ic("check") +
-                "<span><b>" + esc(c.name) + "</b> — verilib" +
-                (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : " · açıq") +
-                "</span></div>";
-            }).join("") +
-            //  ferdi teyinatlar: qrupu bloklamir, amma gorunmelidir
-            classes.filter(function (c) { return soloN[c.id]; })
-              .map(function (c) {
-                return '<div class="pgrow">' + ic("person") +
-                  "<span><b>" + esc(c.name) + "</b> — " + soloN[c.id] +
-                  " şagirdə fərdi verilib</span></div>";
-              }).join("") + "</div>"
-          : "") +
-        (classes.length && !freeCls.length
-          ? '<p class="muted" style="margin:0">Bu test bütün qruplarınıza verilib.</p>'
-          : "") +
-        (freeCls.length
-          ? (given.length || verildi
-              //  Verilmis qrup varsa forma BASQA qrup ucundur - yoxsa
-              //  muellim «hara verirem?» sorusunda qalir (29.09)
-              //  08.10 (istifadeci): tapsiriq artiq verilibse forma «casdirici» idi - indi BAGLI «Başqa qrupa da ver»
-              //  (xeta halinda aciq qalir: muellim ozu vermeli olur)
-              ? (!xeta
-                  ? '<details class="fold pother"><summary>Başqa qrupa da ver</summary>'
-                  : '<p class="muted" style="margin:0 0 10px"><b>Başqa qrupa da vermək üçün:</b></p>')
-              : "") +
-            '<div><label for="pWho">Kimə</label>' +
-              '<select id="pWho"></select></div>' +
-            '<div id="pWhoMany" class="pwmbox" style="display:none"></div>' +
-            '<p class="muted" style="margin:-8px 0 14px">Tək şagird ' +
-              "seçsəniz, tapşırığı yalnız o görəcək — qrupun qalanı yox.</p>" +
-            '<div class="fieldrow">' +
-              '<div><label for="pCls">Qrup</label><select id="pCls">' +
-                freeCls.map(function (c) {
-                  return '<option value="' + esc(c.id) + '"' +
-                    (xeta && xeta.cid === c.id ? " selected" : "") + ">" + esc(c.name) +
-                    (soloN[c.id] ? " · " + soloN[c.id] + " şagirdə verilib" : "") +
-                    "</option>";
-                }).join("") + "</select></div>" +
-              '<div><label for="pDate">Son tarix</label>' +
-                '<input type="date" id="pDate"></div>' +
-              '<div style="flex:0 0 132px"><label for="pTry">Cəhd sayı</label>' +
-                '<select id="pTry"><option value="1">1 cəhd</option>' +
-                '<option value="2">2 cəhd</option><option value="3">3 cəhd</option>' +
-                '<option value="0">Limitsiz</option></select></div>' +
-            "</div>" +
-            '<p class="muted" style="margin:-8px 0 14px">Son tarix boş qalsa, ' +
-              "tapşırıq siz götürənə qədər açıq qalır. Cəhd sayı — şagirdin " +
-              "testi neçə dəfə işləyə biləcəyidir; hesabatda həm orta, həm də " +
-              "ən yaxşı nəticə görünür.</p>" +
-            '<div id="pAsgMsg"></div>' +
-            '<button class="btn go" id="btnPAsg">' + ic("plus") + asgBtnLabel() + "</button>" +
-            ((given.length || verildi) && !xeta ? "</details>" : "")
-          : (classes.length
-              ? ""
-              /*  Muellimi basqa ekrana gondermek dalan idi - orada test
-                  yaddan cixirdi.  Qrup buradaca yaranir ve test derhal
-                  ona verilir: bir forma, bir duyme.  */
-              : '<p class="muted" style="margin:0 0 12px">Hələ qrupunuz yoxdur. ' +
-                  "Adını yazın — qrup yaranacaq və bu test dərhal ona veriləcək.</p>" +
-                '<div class="fieldrow">' +
-                  '<div><label for="pNewG">Qrup adı</label>' +
-                    '<input id="pNewG" placeholder="məsələn: Cümə qrupu"></div>' +
-                  '<div style="flex:0 0 148px"><label for="pNewL">Sinif</label>' +
-                    '<select id="pNewL"><option value="">Sinif seçilməyib</option></select></div>' +
-                "</div>" +
-                '<div id="pNewErr"></div>' +
-                '<button class="btn go" id="btnNewG">' + ic("plus") +
-                  "Qrup yarat və testi ver</button>")) +
-      "</div>") +
-      '<div class="spacer"></div>' +
-      /*  08.10 (istifadeci): suallar BAGLI gelir, «Suallar · N» basanda acilir - 30-50 sualli vereq
-          sehifeni cox uzadirdi.  Cap / PDF ayri nusxe qurur (printBox), bu DOM-a baxmir.  */
-      '<details class="qfold" id="qFold"><summary><h2>Suallar</h2><span class="fn">' + qs.length + " sual</span></summary>" +
-      '<div class="card pad0 paper">' +
-        qs.map(function (q) {
-          return '<div class="pq">' +
-            '<div class="qh"><b>' + q.ord + ". " + qt(q.body) + "</b></div>" +
-            fig(q.media_url) +
-            '<div class="qm">' +
-              (q.topic ? "<span>" + esc(q.topic) + "</span><span>·</span>" : "") +
-              '<span class="dif d' + (Number(q.difficulty) || 2) + '">' +
-                DIFF[Number(q.difficulty) || 2] + "</span>" +
-              "<span>·</span><span>" + (q.mine ? "öz sualınız" : "hazır bank") + "</span>" +
-              (q.remedial
-                ? '<span class="rem">səhvə bənzər</span>' : "") +
-              //  132: sablon sual - vereqdeki bir variantdir
-              (q.tpl ? '<span class="tpl">şablon · hər şagirdə fərqli rəqəm</span>' : "") +
-              '<button class="rlink" data-rq="' + esc(q.id) + '">Səhv bildir</button>' +
-            "</div>" +
-            '<div class="rslot" id="rs-' + esc(q.id) + '"></div>' +
-            (q.options || []).map(function (o) {
-              return '<div class="popt' + (o.correct ? " ok" : "") + '">' +
-                (o.correct ? ic("check") : "") + "<span>" + qt(o.body) + "</span></div>";
-            }).join("") +
-            (q.explanation
-              ? '<div class="pex">' + qt(q.explanation) + "</div>" : "") +
-          "</div>";
-        }).join("") +
-      "</div></details>"
+      "</details>"
     );
 
     on("btnBack", "click", function () { goBack("#/gen"); });
@@ -11413,10 +11449,7 @@
       goAsg(true);
       if (!classes.length && $("pNewG")) $("pNewG").focus();
     });
-    //  Teze yigilmis testde muellimi elle axtarmaga qoymuruq
-    if (fresh && (freeCls.length || !classes.length)) {
-      setTimeout(function () { goAsg(false); }, 350);
-    }
+    //  26.10: teze testde ekran SUALLARDAN baslayir (evvel formaya surusurdu) - forma onlardan sonradir
 
     /*  Qrupsuz muellim: qrup buradaca yaranir, test derhal ona gedir.  */
     if (!classes.length && !diag) {
@@ -11516,6 +11549,15 @@
       var d7 = new Date(Date.now() + 7 * 864e5), z = function (n) { return (n < 10 ? "0" : "") + n; };
       $("pDate").value = d7.getFullYear() + "-" + z(d7.getMonth() + 1) + "-" + z(d7.getDate());
     }
+    function pDateShow() {
+      var el = $("pDateTxt"), v = ($("pDate") || {}).value;
+      if (el) el.textContent = v ? dateLongAz(v) : "Seçilməyib — açıq qalır";
+    }
+    pDateShow();
+    on("pDate", "input", pDateShow);
+    on("pDate", "change", pDateShow);
+    //  masaustunde sahenin istenilen yerine basanda secici acilsin (yalniz ikon yox)
+    on("pDate", "click", function () { try { if ($("pDate").showPicker) $("pDate").showPicker(); } catch (e) {} });
     on("pCls", "change", fillWho);
     on("pWho", "change", function () {
       var box = $("pWhoMany");
