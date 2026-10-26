@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Qrup səhifəsi 1-ci addım (UX yoxlaması, 23.10) — sekmələr + İcmal, nümunə hesabda.
+"""Qrup səhifəsi (26.10, istifadəçinin son maketi) — nümunə hesabda.
 
-  A  Sekmələr: kompüterdə 6 + ayarlar, telefonda 4 + «Daha» (3 bənd); hər sekmə öz ekranını açır,
-     açılan ekranda HƏMİN sekmə seçilidir; 390 və 360 px-də yana sürüşmə yoxdur
-  B  «Geri»: Qruplar → qrup → 4 sekmə → «Geri» Qruplara qaytarır (sekmələr arasında dolanmır);
-     brauzerin geri düyməsi də
-  C  Rəqəmlər mənbə ekranla eynidir: etməyənlər = #/ht siyahısı; son tapşırıq «done / tot» =
-     Tapşırıqlar sətri; son nəticələr = Hesabat · Fəaliyyət ilk 5; zəif mövzu = «Nə etməli»
-  D  Plandakı yer və son dərsin testi AYRI blokdur: «Plandakı yeri»ndə faiz yoxdur
-  E  Keçidlər: Kim etməyib, Tapşırıqlar/Nəticələr «Hamısına bax», Dərs planı, Test ver, Təkrar ver
-  F  Boş qrup: dörd kartın boş mətni
+  A  Başlıq hər sekmədə eyni: «Geri · Qruplar / ad», ad, «sinif · N şagird», «+ Tapşırıq ver», dişli (ayarlar);
+     alt xətli sekmələr: kompüterdə 6, telefonda 4 + «Daha» (Dərs planı, Dəftər); iri zolaq yoxdur
+  B  Sekmə keçidi tarixçəyə yazılmır: 4 sekmədən sonra «Geri» və brauzer geri → Qruplar
+  C  Bugünkü dərs: mövzu, «fəsil · dərs N / M» (faiz yoxdur), «Davamiyyət» → Dəftər, «5 suallıq test ver» →
+     generator (5 sual, bu qrupa); xəbərdarlıq sətirləri #/ht ilə eyni say
+  D  Son tapşırıqlar: «done / tot» Tapşırıqlar sətri ilə eyni; «Hamısına bax» → Tapşırıqlar sekməsi;
+     nəticə və zəif mövzu bu səhifədə YOXDUR — qeyd sətri Hesabata aparır
+  E  «+ Tapşırıq ver» menyusu: Test ver / Ev tapşırığı yaz; dişli → ayarlar
+  F  Boş qrup; 360/390: yana sürüşmə yoxdur, düymə ≥ 44 px, başlıq kiçilməyib
 """
 import os, re, sys
 import psycopg2, psycopg2.extras
@@ -56,9 +56,8 @@ def page(ctx):
 
 def icmal(pg, gid):
     pg.goto(PANEL + "#/g/" + gid)
-    pg.wait_for_function("document.querySelector('#gkNet') && !document.querySelector('#gIcmal .skel')", timeout=20000)
+    pg.wait_for_function("document.querySelector('#gkAsg .ykh') && document.querySelector('#gkDers .ykh') && document.querySelector('#gMeta').textContent.length > 3", timeout=20000)
     pg.wait_for_timeout(300)
-
 def hash_(pg): return pg.evaluate("location.hash")
 def aktiv(pg):
     return pg.evaluate("""() => { const a = document.querySelector('#gSek .gtab.on'); return a ? a.textContent.trim() : ''; }""")
@@ -73,153 +72,134 @@ with sync_playwright() as pw:
     gid = db("""select c.id::text i from public.classes c where c.account_id = %s::uuid
                  and (select count(*) from public.students s where s.class_id = c.id and s.is_active) > 10
                order by c.name limit 1""", (acc["i"],), one=True)["i"]
+    G = db("""select c.name n, l.name l, (select count(*) from public.students s where s.class_id = c.id and s.is_active) k
+                from public.classes c join public.levels l on l.id = c.level_id where c.id = %s::uuid""", (gid,), one=True)
 
-    print("A · sekmələr (1280)")
+    print("A · başlıq və sekmələr (1280)")
     icmal(pg, gid)
+    ok(pg.inner_text("#gName").strip() == G["n"] and pg.inner_text("#gCrumb").strip() == G["n"], "ad və yol", pg.inner_text("#gName"))
+    ok(pg.inner_text("#gMeta").strip() == "%s · %d şagird" % (G["l"], G["k"]), "«sinif · N şagird» bazadakı ilə eyni", pg.inner_text("#gMeta"))
+    ok(pg.locator("#band").is_hidden(), "iri zolaq yoxdur")
     vis = pg.evaluate("""() => [...document.querySelectorAll('#gSek .gtab')].filter(e => e.offsetParent).map(e => e.textContent.trim())""")
-    ok(vis == ["İcmal", "Şagirdlər", "Tapşırıqlar", "Hesabat", "Dərs planı", "Dəftər", "Qrup ayarları"], "kompüterdə 6 sekmə + ayarlar", vis)
-    ok(aktiv(pg) == "İcmal", "İcmal seçilidir", aktiv(pg))
+    ok(vis == ["İcmal", "Şagirdlər", "Tapşırıqlar", "Hesabat", "Dərs planı", "Dəftər"], "kompüterdə 6 sekmə", vis)
+    ok(aktiv(pg) == "İcmal" and pg.evaluate("getComputedStyle(document.querySelector('#gSek .gtab.on')).borderBottomStyle") == "solid", "alt xətli seçili sekmə")
     for k, ad, h, sel in (("s", "Şagirdlər", "#/g/%s/s", "#stu .mrow"), ("a", "Tapşırıqlar", "#/a/%s", "#asgList"),
                           ("r", "Hesabat", "#/r/%s", "#rTabs"), ("p", "Dərs planı", "#/g/%s/p", "#planBox"),
-                          ("d", "Dəftər", "#/g/%s/d", "#ledgerBox"), ("x", "Qrup ayarları", "#/g/%s/x", "#btnRen")):
-        pg.click("#gSek .gtab[data-gt='%s']" % k); pg.wait_for_selector(sel, timeout=20000); pg.wait_for_timeout(300)
-        ok(hash_(pg) == h % gid and aktiv(pg) == ad and pg.locator("#gSek").count() == 1,
-           "«%s» → %s, sekmə seçili" % (ad, h % "…"), (hash_(pg), aktiv(pg)))
-    pg.click("#gSek .gtab[data-gt='']"); pg.wait_for_selector("#gkNet", timeout=20000)
-    ok(hash_(pg) == "#/g/" + gid, "İcmal sekməsi qrupa qaytarır")
+                          ("d", "Dəftər", "#/g/%s/d", "#ledgerBox")):
+        pg.click("#gSek .gtab[data-gt='%s']" % k); pg.wait_for_selector(sel, timeout=20000); pg.wait_for_timeout(400)
+        ok(hash_(pg) == h % gid and aktiv(pg) == ad and pg.locator("#gHd").count() == 1 and pg.inner_text("#gName").strip() == G["n"],
+           "«%s» → eyni başlıq, sekmə seçili" % ad, (hash_(pg), aktiv(pg)))
+    pg.click("#gSet"); pg.wait_for_selector("#btnRen", timeout=20000)
+    ok(hash_(pg) == "#/g/%s/x" % gid and pg.locator("#gSet.on").count() == 1, "dişli → Qrup ayarları", hash_(pg))
+    pg.click("#gSek .gtab[data-gt='']"); pg.wait_for_selector("#gkDers", timeout=20000)
 
-    print("B · Geri (1280)")
+    print("B · Geri")
     pg.goto(PANEL + "#/gs"); pg.wait_for_timeout(1200)
-    pg.goto(PANEL + "#/g/" + gid); pg.wait_for_selector("#gkNet", timeout=20000); pg.wait_for_timeout(800)
+    pg.goto(PANEL + "#/g/" + gid); pg.wait_for_selector("#gkDers .ykh", timeout=20000); pg.wait_for_timeout(800)
     for k in ("s", "a", "r", "p"):
         pg.click("#gSek .gtab[data-gt='%s']" % k); pg.wait_for_timeout(1300)
-    pg.click("#band .bback"); pg.wait_for_timeout(1300)
-    ok(hash_(pg) == "#/gs", "«Geri» 4 sekmədən sonra Qruplara qaytarır", hash_(pg))
-    pg.goto(PANEL + "#/g/" + gid); pg.wait_for_selector("#gkNet", timeout=20000); pg.wait_for_timeout(800)
+    pg.click("#gBack"); pg.wait_for_timeout(1300)
+    ok(hash_(pg) == "#/gs", "«Geri» 4 sekmədən sonra Qruplara", hash_(pg))
+    pg.goto(PANEL + "#/g/" + gid); pg.wait_for_selector("#gkDers .ykh", timeout=20000); pg.wait_for_timeout(800)
     pg.click("#gSek .gtab[data-gt='r']"); pg.wait_for_timeout(1300)
     pg.click("#gSek .gtab[data-gt='s']"); pg.wait_for_timeout(1300)
     pg.go_back(); pg.wait_for_timeout(1300)
     ok(hash_(pg) == "#/gs", "brauzerin «geri»si də Qruplara", hash_(pg))
-    #  sekmənin İÇİNDƏN dərinə keçid adi qalır: hesabat → şagird → Geri → hesabat
-    pg.goto(PANEL + "#/g/" + gid); pg.wait_for_selector("#gkNet", timeout=20000); pg.wait_for_timeout(800)
-    pg.click("#gSek .gtab[data-gt='r']"); pg.wait_for_selector("#rTabs", timeout=20000); pg.wait_for_timeout(600)
-    pg.locator("#rtab-s [data-s]").first.click(); pg.wait_for_timeout(1500)
-    pg.click("#band .bback"); pg.wait_for_timeout(1500)
-    ok(hash_(pg).startswith("#/r/" + gid), "şagird kartından «Geri» Hesabat sekməsinə", hash_(pg))
 
-    print("C · rəqəmlər mənbə ekranla eyni")
+    print("C · Bugünkü dərs")
     icmal(pg, gid)
-    pend = pg.inner_text("#gkPend b") if pg.locator("#gkPend").count() else ""
-    mP = re.search(r"(\d+) / (\d+) şagird", pend)
-    if pg.locator("#gkDqB").count(): pg.click("#gkDqB"); pg.wait_for_timeout(200)   #  26.10: ilk 2 + «Hamısına bax»
-    hwn = pg.inner_text("#gkHw .gkdn") if pg.locator("#gkHw").count() else "0"
-    pg.goto(PANEL + "#/ht/" + gid); pg.wait_for_selector("#htBox .mrow, #htBox .empty", timeout=20000); pg.wait_for_timeout(500)
+    pos = pg.inner_text("#gkPos") if pg.locator("#gkPos").count() else ""
+    ok(bool(re.search(r"dərs \d+ / \d+", pos)) and "%" not in pos, "«fəsil · dərs N / M», faiz yoxdur", pos)
+    ok(pg.locator("#gkDers").inner_text().count("%") == 0, "kartda nəticə faizi yoxdur")
+    pg.click("#gkDav"); pg.wait_for_selector("#ledgerBox", timeout=20000)
+    ok(hash_(pg) == "#/g/%s/d" % gid, "«Davamiyyət» → Dəftər", hash_(pg))
+    icmal(pg, gid)
+    pend = pg.inner_text("#gkPend") if pg.locator("#gkPend").count() else ""
+    mP = re.search(r"(\d+) şagird", pend)
+    hwt = pg.inner_text("#gkHw") if pg.locator("#gkHw").count() else ""
+    mH = re.search(r"(\d+) şagird", hwt)
+    #  26.10: setir ozunun HISSESINI acir - «N şagird testi işləməyib» -> yalniz o N ad (#/ht/<qrup>/t)
+    pg.click("#gkPend"); pg.wait_for_selector("#htBox .mrow, #htBox .empty", timeout=20000); pg.wait_for_timeout(500)
+    ok(hash_(pg) == "#/ht/%s/t" % gid, "test sətri → #/ht/…/t", hash_(pg))
     ht = pg.inner_text("#htBox")
     mT = re.search(r"Test · (\d+) şagird işləməyib", ht, re.I)
-    mH = re.search(r"Yazılı tapşırıq · (\d+) şagird etməyib", ht, re.I)
-    ok(mP is not None and mT is not None and mP.group(1) == mT.group(1), "test etməyənlər sayı #/ht ilə eyni",
-       (pend, mT.group(0) if mT else ht[:100]))
-    ok((mH.group(1) if mH else "0") == hwn, "yazılı etməyənlər sayı #/ht ilə eyni", (hwn, mH.group(0) if mH else "-"))
-    icmal(pg, gid)
-    a1 = pg.inner_text("#gkAsg .gka1 .gkfr") if pg.locator("#gkAsg .gka1").count() else ""
-    t1 = pg.inner_text("#gkAsg .gka1 .g b") if pg.locator("#gkAsg .gka1").count() else ""
-    pg.click("#gkAsgAll"); pg.wait_for_selector("#asgList .asg", timeout=20000); pg.wait_for_timeout(400)
-    ok(hash_(pg) == "#/a/" + gid, "Son tapşırıqlar «Hamısına bax» → Tapşırıqlar", hash_(pg))
-    row = pg.locator("#asgList .asg", has_text=t1).first.inner_text() if t1 else ""
-    ok(a1 and a1.replace(" ", "") + " şagird bitirib" in row.replace(" / ", "/"), "son tapşırıq «%s» Tapşırıqlar sətri ilə eyni" % a1, row[-90:].replace("\n", " | "))
-    icmal(pg, gid)
-    net = pg.evaluate("""() => [...document.querySelectorAll('#gkNet .gkn')].map(e => e.innerText.replace(/\\s+/g,' ').trim())""")
-    pg.click("#gkNetAll"); pg.wait_for_selector("#rRec", timeout=20000); pg.wait_for_timeout(400)
-    ok(hash_(pg) == "#/r/" + gid + "/f" and pg.locator("#rtab-f").is_visible(), "Son nəticələr «Hamısına bax» → Hesabat · Fəaliyyət", hash_(pg))
-    rec = pg.evaluate("""() => [...document.querySelectorAll('#rRec .trow')].slice(0,5).map(e => e.innerText.replace(/\\s+/g,' ').trim())""")
-    ok(len(net) == 5 and net == rec, "son 5 nəticə Fəaliyyətin ilk 5 sətri ilə eyni", (net[:2], rec[:2]))
-    todo_r = pg.inner_text("#rTodo") if pg.locator("#rTodo").count() else ""
-    mR = re.search(r"«(.+?)» mövzusunu (\d+) şagirdə", todo_r)
-    icmal(pg, gid)
-    td = pg.inner_text("#gkTodo b") if pg.locator("#gkTodo").count() else ""
-    ok(mR is not None and td == "«%s» — %s şagird zəifdir" % (mR.group(1), mR.group(2)), "zəif mövzu = Hesabatın «Nə etməli»si", (td, todo_r[:80]))
-
-    print("D · plan yeri ≠ son dərsin nəticəsi")
-    pos = pg.inner_text("#gkPos") if pg.locator("#gkPos").count() else ""
-    ok(bool(re.search(r"dərs \d+ / \d+", pos)) and "%" not in pos, "«Plandakı yeri»: dərs N / M, faiz yoxdur", pos)
-    #  24.10: «Son keçilən dərs» açılıb-bağlanandır - bağlı gəlir, başlığında faiz
-    ok(pg.locator("#gkLast").count() == 1 and pg.locator("#gkLast").get_attribute("open") is None, "«Son keçilən dərs» bağlı gəlir")
-    if pg.locator("#gkLast summary").count(): pg.click("#gkLast summary"); pg.wait_for_timeout(200)
-    last = pg.inner_text("#gkLast") if pg.locator("#gkLast").count() else ""
-    ok("bu dərsin testi" in last and "%" in last, "son dərsin testi ayrı blokda, öz sözü ilə", last.replace("\n", " | "))
-    pg.click("#gkPlan"); pg.wait_for_selector("#planBox", timeout=20000); pg.wait_for_timeout(300)
-    ok(hash_(pg) == "#/g/%s/p" % gid and aktiv(pg) == "Dərs planı", "«Dərs planı →» plan sekməsini açır", hash_(pg))
-
-    print("E2 · Diqqət: ən vacib 2 + «Hamısına bax»")
-    icmal(pg, gid)
-    vis = pg.evaluate("[...document.querySelectorAll('#gkDiq .gkd')].filter(e => e.offsetParent).length")
-    tot = pg.locator("#gkDiq .gkd").count()
-    ok(vis == min(2, tot), "ilk görünüşdə %d sətir (cəmi %d)" % (vis, tot))
-    if tot > 2:
-        ok("Hamısına bax (%d)" % tot in pg.inner_text("#gkDqB"), "düymə «Hamısına bax (%d)»" % tot)
-        pg.click("#gkDqB"); pg.wait_for_timeout(200)
-        ok(pg.evaluate("[...document.querySelectorAll('#gkDiq .gkd')].filter(e => e.offsetParent).length") == tot, "basanda hamısı açılır")
-
-    print("E · keçidlər")
-    icmal(pg, gid)
-    pg.click("#gkPendGo"); pg.wait_for_selector("#htBox", timeout=20000)
-    ok(hash_(pg) == "#/ht/" + gid, "«Kim etməyib» → #/ht", hash_(pg))
-    icmal(pg, gid)
-    pg.click("#btnAsgs"); pg.wait_for_selector("#pick", timeout=20000)
-    ok(hash_(pg) == "#/a/%s/t" % gid, "zolaqda «Test ver» → test ver ekranı", hash_(pg))
-    icmal(pg, gid)
-    if pg.locator("#gkDqB").count(): pg.click("#gkDqB"); pg.wait_for_timeout(200)
-    if pg.locator("#gkHwGo").count():
-        pg.click("#gkHwGo"); pg.wait_for_timeout(1200)
-        ok(hash_(pg) == "#/a/" + gid, "yazılı tapşırıq → Tapşırıqlar", hash_(pg))
+    ok(mP and mT and mP.group(1) == mT.group(1) and pg.locator("#htBox .menu").first.locator(".udr").count() == int(mP.group(1)),
+       "test sətrinin sayı = açılan səhifədəki adlar", (pend, mT.group(0) if mT else "-"))
+    ok("Yazılı tapşırıq ·" not in ht, "açılan səhifədə yalnız test hissəsi")
+    if mH:
         icmal(pg, gid)
-    pg.click("#gkTodoGo"); pg.wait_for_selector("#btnMake", timeout=20000); pg.wait_for_timeout(800)
-    ok(hash_(pg) == "#/gen" and mR is not None and mR.group(1) in pg.inner_text("#main"), "«Təkrar ver» → generator həmin mövzu ilə", hash_(pg))
-    if SHOT:
-        icmal(pg, gid); pg.screenshot(path=SHOT + "/icmal_1280.png", full_page=True)
+        pg.click("#gkHw"); pg.wait_for_selector("#htBox .mrow", timeout=20000); pg.wait_for_timeout(500)
+        ht2 = pg.inner_text("#htBox"); mY = re.search(r"Yazılı tapşırıq · (\d+) şagird etməyib", ht2, re.I)
+        ok(hash_(pg) == "#/ht/%s/h" % gid and mY and mY.group(1) == mH.group(1) and "Test ·" not in ht2,
+           "yazılı sətri → yalnız yazılı hissə, say eyni", (hwt, mY.group(0) if mY else "-"))
+    icmal(pg, gid)
+    ok(pg.locator("#gkDers .gwarn").count() <= 2, "xəbərdarlıq ən çox 2 sətir")
+    pg.click("#prepGen"); pg.wait_for_selector("#btnMake", timeout=20000); pg.wait_for_timeout(800)
+    ok(hash_(pg) == "#/gen" and "qrupa ver" in pg.inner_text("#btnMake"), "«5 suallıq test ver» → generator, «… qrupa ver»", pg.inner_text("#btnMake"))
+    ok(pg.evaluate("(document.getElementById('gCnt') || {}).value") == "5", "sual sayı 5", pg.evaluate("(document.getElementById('gCnt') || {}).value"))
 
-    print("A2 · telefon 390 / 360")
+    print("D · Son tapşırıqlar; nəticə Hesabatda")
+    icmal(pg, gid)
+    ok(pg.locator("#gkDiq, #gkNet, #gkTodo").count() == 0, "nəticə / zəif mövzu kartı yoxdur")
+    a1 = pg.inner_text("#gkAsg .gka1 .gkfr") if pg.locator("#gkAsg .gka1").count() else ""
+    t1 = pg.inner_text("#gkAsg .gka1 .ytq b") if pg.locator("#gkAsg .gka1").count() else ""
+    pg.click("#gkAsgAll"); pg.wait_for_selector("#asgList .asg", timeout=20000); pg.wait_for_timeout(400)
+    ok(hash_(pg) == "#/a/" + gid and aktiv(pg) == "Tapşırıqlar", "«Hamısına bax» → Tapşırıqlar sekməsi", hash_(pg))
+    row = pg.locator("#asgList .asg", has_text=t1).first.inner_text() if t1 else ""
+    ok(a1 and a1.replace(" ", "") + " şagird bitirib" in row.replace(" / ", "/"), "«%s» Tapşırıqlar sətri ilə eyni" % a1, row[-80:].replace("\n", " | "))
+    icmal(pg, gid)
+    pg.click("#gkRep"); pg.wait_for_selector("#rTabs", timeout=20000)
+    ok(hash_(pg) == "#/r/" + gid and aktiv(pg) == "Hesabat", "qeyd sətri → Hesabat", hash_(pg))
+    ok(pg.locator("#btnRef").count() == 1, "Hesabatda «Yenilə» qalıb")
+
+    print("E · «+ Tapşırıq ver»")
+    icmal(pg, gid)
+    pg.click("#btnAsgs"); pg.wait_for_timeout(200)
+    items = [x.strip() for x in pg.locator("#gAsgMenu a").all_inner_texts()]
+    ok(pg.locator("#gAsgMenu").is_visible() and items == ["Test ver", "Ev tapşırığı yaz"], "menyu: Test ver / Ev tapşırığı yaz", items)
+    pg.mouse.click(700, 700); pg.wait_for_timeout(200)
+    ok(pg.locator("#gAsgMenu").is_hidden(), "kənara basanda bağlanır")
+    pg.click("#btnAsgs"); pg.click("#gAsgT"); pg.wait_for_selector("#pick", timeout=20000)
+    ok(hash_(pg) == "#/a/%s/t" % gid, "Test ver → #/a/…/t", hash_(pg))
+    icmal(pg, gid)
+    pg.click("#btnAsgs"); pg.click("#gAsgH"); pg.wait_for_selector("#hwText", timeout=20000)
+    ok(hash_(pg) == "#/a/%s/h" % gid, "Ev tapşırığı yaz → #/a/…/h", hash_(pg))
+    if SHOT:
+        icmal(pg, gid); pg.screenshot(path=SHOT + "/qrup_1280.png", full_page=True)
+
+    print("F · telefon 390 / 360")
     for w in (390, 360):
         pg.set_viewport_size({"width": w, "height": 844})
         icmal(pg, gid)
         vis = pg.evaluate("""() => [...document.querySelectorAll('#gSek .gtab')].filter(e => e.offsetParent).map(e => e.textContent.trim())""")
         ok(vis == ["İcmal", "Şagirdlər", "Tapşırıqlar", "Hesabat", "Daha"], "%d: 4 sekmə + Daha" % w, vis)
-        s = sw(pg); ok(s[0] <= s[1], "%d: yana sürüşmə yoxdur" % w, s)
-        tabs_fit = pg.evaluate("""() => { const n = document.getElementById('gSek').getBoundingClientRect();
+        s2 = sw(pg); ok(s2[0] <= s2[1], "%d: yana sürüşmə yoxdur" % w, s2)
+        fit = pg.evaluate("""() => { const n = document.getElementById('gSek').getBoundingClientRect();
             return [...document.querySelectorAll('#gSek .gtab')].filter(e => e.offsetParent).every(e => e.getBoundingClientRect().right <= n.right + .5); }""")
-        ok(tabs_fit, "%d: sekmələr zolağa sığır" % w)
-        hgt = pg.evaluate("""() => Math.min(...[...document.querySelectorAll('#gSek .gtab')].filter(e => e.offsetParent).map(e => e.getBoundingClientRect().height))""")
-        ok(hgt >= 44, "%d: sekmə hündürlüyü ≥ 44" % w, hgt)
-        #  26.10: yigcamliq yazini ve duymeni kicilterek olmur - telefonda 44 px, basliq 20 px
-        hh = pg.evaluate("""() => ['#btnAsgs', '#band .bback', '#gkPendGo', '#gkTodoGo', '#gkAsgAll', '#gkNetAll']
-            .map(s => document.querySelector(s)).filter(Boolean).map(e => Math.round(e.getBoundingClientRect().height))""")
-        ok(hh and min(hh) >= 44, "%d: düymə və keçidlər ≥ 44 px" % w, hh)
-        ok(pg.evaluate("getComputedStyle(document.querySelector('#band h1')).fontSize") == "20px", "%d: başlıq 20 px (kiçilməyib)" % w)
+        ok(fit, "%d: sekmələr sığır" % w)
+        hh = pg.evaluate("""() => ['#gBack', '#btnAsgs', '#gSet', '#gSek .gtab', '#gkDav', '#prepGen', '#gkPend', '#gkAsgAll', '#gkPlan']
+            .map(s => document.querySelector(s)).filter(Boolean).map(e => [e.id || e.className, Math.round(e.getBoundingClientRect().height)])""")
+        ok(hh and min(x[1] for x in hh) >= 44, "%d: düymə və keçidlər ≥ 44 px" % w, hh)
+        ok(pg.evaluate("getComputedStyle(document.querySelector('#gName')).fontSize") == "22px", "%d: başlıq 22 px (əvvəl 20 idi — kiçilməyib)" % w)
     pg.click("#gMoreBtn"); pg.wait_for_timeout(200)
-    items = pg.evaluate("""() => [...document.querySelectorAll('#gMoreMenu a')].filter(e => e.offsetParent).map(e => e.textContent.trim())""")
-    ok(items == ["Dərs planı", "Dəftər", "Qrup ayarları"], "«Daha»: Dərs planı, Dəftər, Qrup ayarları", items)
-    pg.mouse.click(5, 500); pg.wait_for_timeout(200)
-    ok(pg.locator("#gMoreMenu").is_hidden(), "kənara basanda «Daha» bağlanır")
-    pg.click("#gMoreBtn"); pg.click("#gMoreMenu a[data-gt='d']"); pg.wait_for_selector("#ledgerBox", timeout=20000); pg.wait_for_timeout(400)
-    ok(hash_(pg) == "#/g/%s/d" % gid and pg.inner_text("#gMoreBtn").strip() == "Dəftər", "Daha → Dəftər; düymədə «Dəftər» yazılır", pg.inner_text("#gMoreBtn"))
+    items = [x.strip() for x in pg.locator("#gMoreMenu a").all_inner_texts()]
+    ok(items == ["Dərs planı", "Dəftər"], "«Daha»: Dərs planı, Dəftər", items)
+    pg.click("#gMoreMenu a[data-gt='d']"); pg.wait_for_selector("#ledgerBox", timeout=20000); pg.wait_for_timeout(300)
+    ok(pg.inner_text("#gMoreBtn").strip() == "Dəftər", "Daha düyməsində «Dəftər»")
     if SHOT:
         pg.set_viewport_size({"width": 390, "height": 844}); icmal(pg, gid)
-        pg.screenshot(path=SHOT + "/icmal_390.png", full_page=True)
+        pg.screenshot(path=SHOT + "/qrup_390.png", full_page=True)
 
-    print("F · boş qrup")
+    print("G · boş qrup")
     eg = db("""insert into public.classes (account_id, teacher_id, kind, name, join_code, level_id)
                select %s::uuid, %s::uuid, 'tutor_group', 'Boş qrup', 'BQ' || substr(md5(random()::text), 1, 6), l.id
                  from public.levels l where l.code = '7' returning id::text i""", (acc["i"], acc["o"]), one=True)["i"]
-    pg.set_viewport_size({"width": 390, "height": 844})
     icmal(pg, eg)
-    t = pg.inner_text("#gIcmal")
-    ok("Dərs planı qurulmayıb" in t and pg.locator("#gkPlanQur").count() == 1, "boş: «Dərs planı qurulmayıb» + Planı qur")
-    ok(pg.locator("#gkNoStu").count() == 1 and pg.locator("#gkOk").count() == 0,
-       "boş: «Qrupda hələ şagird yoxdur» (yalançı «qaydasındadır» yox)")
+    t = pg.inner_text("#main")
+    ok("Dərs planı qurulmayıb" in t and pg.locator("#gkPlanQur").count() == 1 and pg.locator("#gkDav").count() == 1, "boş: plan yoxdur + Planı qur + Davamiyyət")
     ok("Hələ tapşırıq verilməyib" in t, "boş: «Hələ tapşırıq verilməyib»")
-    ok("Hələ test yazan yoxdur" in t, "boş: «Hələ test yazan yoxdur»")
-    ok("0 şagird" in pg.inner_text("#gMeta"), "boş: başlıqda «0 şagird»", pg.inner_text("#gMeta"))
-    if SHOT: pg.screenshot(path=SHOT + "/bos_390.png", full_page=True)
+    ok(pg.inner_text("#gMeta").strip() == "7-ci sinif · 0 şagird", "boş: «7-ci sinif · 0 şagird»", pg.inner_text("#gMeta"))
+    if SHOT: pg.screenshot(path=SHOT + "/qrup_bos_390.png", full_page=True)
     pg.click("#gkPlanQur"); pg.wait_for_selector("#planBox", timeout=20000)
     ok(hash_(pg) == "#/g/%s/p" % eg, "«Planı qur» → plan sekməsi", hash_(pg))
     br.close()

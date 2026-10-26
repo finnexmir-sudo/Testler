@@ -77,7 +77,7 @@ with sync_playwright() as pw:
     p.fill("#aname", "Nurlan müəllim — riyaziyyat"); p.click("#btnSetup")
     #  «#main» karkasda hemise var - hesab yaranmamis kecerdi.  Icmalin
     #  ILK setrini gozleyirik: o gorunende hesab bazadadir.
-    p.wait_for_selector("#yMenu .mrow", timeout=30000)
+    p.wait_for_selector("#yBos, #yMenu .mrow", timeout=30000)   #  26.10: qrupsuz hesabda #yBos
 
     acc = q("select a.id acc, a.owner_id own from public.accounts a join auth.users u"
             " on u.id=a.owner_id where u.email=%s", (mail,), one=True)

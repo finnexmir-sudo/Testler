@@ -143,7 +143,8 @@
     //  genis sutun yalniz idareetme ekranindadir - qalanlarinda sonur
     main.classList.remove("wideadm");
     main.classList.remove("yig");
-    main.classList.remove("yh");   //  yigcam kartlar yalniz qrup sekmeleri ve sagird sehifesindedir (24.10)
+    main.classList.remove("yh");
+    main.classList.remove("gpg");   //  yigcam kartlar yalniz qrup sekmeleri ve sagird sehifesindedir (24.10)
     //  yeni ekran hemise yuxaridan baslasin - zolaq (basliq) gorunsun
     try { window.scrollTo(0, 0); } catch (e) {}
     //  bandHead() show()-dan EVVEL cagirilibsa zolaq qalir
@@ -1784,7 +1785,10 @@
       qalsın?»).  Indi setir de, sehife de EYNI sorgudan (rpc_lesson_prep)
       gelir: yazili tapsirigi etmeyenler + testi islemeyenler, her birinin
       yaninda «Xatırlat» - hazir mesaj kopyalanir (WhatsApp duymesi yox).  */
-  function screenUndone(gid) {
+  /*  hisse (26.10): «t» - yalniz test isləməyənlər, «h» - yalniz yazili tapsirigi etmeyenler.
+      Setir «4 şagird testi işləməyib» deyirse, acilan sehife ELE o 4 adla baslamalidir (CLAUDE.md
+      mexaniki siyahi 1) - evvel yazili bolme birinci idi ve basqa say gosterirdi.  Hissesiz - ikisi.  */
+  function screenUndone(gid, hisse) {
     topTitle.textContent = "Tapşırığı etməyənlər";
     show('<div id="htBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>');
     var live = guard();
@@ -1802,7 +1806,8 @@
       (((rr[1] || {}).students) || []).forEach(function (x) { ids[String(x.full_name || "")] = x.id; });
       bandHead({
         back: { id: "htBack", label: "Geri" }, eye: "Ev tapşırığı",
-        title: "Tapşırığı etməyənlər", sub: esc(cn)
+        title: hisse === "t" ? "Testi işləməyənlər" : (hisse === "h" ? "Yazılı tapşırığı etməyənlər" : "Tapşırığı etməyənlər"),
+        sub: esc(cn)
       });
       on("htBack", "click", function () { goBack("#/"); });
       var url = (window.CFG && window.CFG.STUDENT_URL) || "";
@@ -1815,7 +1820,7 @@
           '<button type="button" class="btn sm ghost" data-ud="' + (msgs.length - 1) + '">Mesajı kopyala</button></div>';
       }
       var h = "";
-      if (hw) {
+      if (hw && hisse !== "t") {
         h += ySec("Yazılı tapşırıq · " + (und.length ? und.length + " şagird etməyib" : "hamı edib"));
         h += '<div class="card udt"><div class="udb">' + esc(hw.body) + "</div>" +
           '<div class="muted">' + (hw.personal ? "yalnız " + esc(firstName(hw.student || "") || hw.student || "") : "bütün qrup") +
@@ -1832,7 +1837,7 @@
         }
         h += '<div class="spacer"></div>';
       }
-      if (d.open) {
+      if (d.open && hisse !== "h") {
         h += ySec("Test · " + (pend.length ? pend.length + " şagird işləməyib" : "hamı işləyib"));
         if (pend.length) {
           h += '<div class="card pad0 menu">' + pend.map(function (x) {
@@ -4141,17 +4146,16 @@
     { k: "a", ad: "Tapşırıqlar", h: function (id) { return "#/a/" + id; } },
     { k: "r", ad: "Hesabat",     h: function (id) { return "#/r/" + id; } },
     { k: "p", ad: "Dərs planı",  h: function (id) { return "#/g/" + id + "/p"; }, daha: true },
-    { k: "d", ad: "Dəftər",      h: function (id) { return "#/g/" + id + "/d"; }, daha: true },
-    { k: "x", ad: "Qrup ayarları", h: function (id) { return "#/g/" + id + "/x"; }, daha: true, ayar: true }
+    { k: "d", ad: "Dəftər",      h: function (id) { return "#/g/" + id + "/d"; }, daha: true }
   ];
+  //  26.10 (son maket): «Qrup ayarları» sekme deyil - basligin sagindaki disli duyme
   function gTabsHtml(gid, act) {
     var aktDaha = GTABS.filter(function (t) { return t.daha && t.k === act; })[0];
     return '<nav class="gtabs" id="gSek" aria-label="Qrup bölmələri">' +
       GTABS.map(function (t) {
-        return '<a class="gtab' + (t.k === act ? " on" : "") + (t.daha ? " gdaha" : "") + (t.ayar ? " gayar" : "") +
-          '" href="' + t.h(gid) + '" data-gt="' + t.k + '"' + (t.ayar ? ' title="' + esc(t.ad) + '"' : "") +
-          (t.k === act ? ' aria-current="page"' : "") + ">" +
-          (t.ayar ? ic("gear") + '<span class="gayt">' + esc(t.ad) + "</span>" : esc(t.ad)) + "</a>";
+        return '<a class="gtab' + (t.k === act ? " on" : "") + (t.daha ? " gdaha" : "") +
+          '" href="' + t.h(gid) + '" data-gt="' + t.k + '"' + (t.k === act ? ' aria-current="page"' : "") + ">" +
+          esc(t.ad) + "</a>";
       }).join("") +
       //  telefon: «Daha» - aktiv bolme ordadirsa onun adini yazir (hansi bolmede oldugu bilinsin)
       '<button type="button" class="gtab gmore' + (aktDaha ? " on" : "") + '" id="gMoreBtn" aria-haspopup="true" aria-expanded="false">' +
@@ -4159,16 +4163,59 @@
       '<div class="gmenu hide" id="gMoreMenu" role="menu">' +
         GTABS.filter(function (t) { return t.daha; }).map(function (t) {
           return '<a role="menuitem" class="' + (t.k === act ? "on" : "") + '" href="' + t.h(gid) + '" data-gt="' + t.k + '">' +
-            ic(t.k === "p" ? "cal" : t.k === "d" ? "doc" : "gear") + esc(t.ad) + "</a>";
+            ic(t.k === "p" ? "cal" : "doc") + esc(t.ad) + "</a>";
         }).join("") +
       "</div></nav>";
   }
-  //  Qrupun her sekme ekraninda: zolaq yigcam + sekme zolagi #main-in basina
+  /*  QRUPUN BASLIGI (26.10, son maket) - qrupun BUTUN sekmelerinde eyni: «Qruplar / ad», ad,
+      «sinif · N şagird», «+ Tapşırıq ver» (Test ver / Ev tapşırığı yaz) ve disli (ayarlar).
+      Iri yasil zolaq yoxdur.  «Geri» (08.10 qaydasi) yolun evvelindedir.  */
+  var GHEAD = {};   //  qrupun adi / sinfi / sagird sayi - sekmeler arasinda ani gorunsun
+  function gHeadHtml(gid, act) {
+    var c = GHEAD[gid] || {};
+    return '<header class="phd gph" id="gHd"><div class="phd-t">' +
+        '<nav class="crumb" aria-label="Yol"><button type="button" class="cback" id="gBack">' + ic("back") + "Geri</button>" +
+          '<a href="#/gs">Qruplar</a><span aria-hidden="true">/</span><span id="gCrumb">' + esc(c.name || "") + "</span></nav>" +
+        '<h1 id="gName">' + esc(c.name || "…") + "</h1>" +
+        '<p id="gMeta">' + esc(c.meta || "") + "</p></div>" +
+      '<div class="phd-a"><div class="gtvw"><button type="button" class="btn go" id="btnAsgs" aria-haspopup="true" aria-expanded="false">' +
+          ic("plus") + "Tapşırıq ver</button>" +
+          '<div class="gmenu hide" id="gAsgMenu" role="menu">' +
+            '<a role="menuitem" href="#/a/' + esc(gid) + '/t" id="gAsgT">' + ic("clip") + "Test ver</a>" +
+            '<a role="menuitem" href="#/a/' + esc(gid) + '/h" id="gAsgH">' + ic("pen") + "Ev tapşırığı yaz</a></div></div>" +
+        '<a class="btn icon gset' + (act === "x" ? " on" : "") + '" id="gSet" href="#/g/' + esc(gid) + '/x" aria-label="Qrup ayarları" title="Qrup ayarları">' +
+          ic("gear") + "</a></div></header>";
+  }
+  function gHeadFill(gid) {
+    var live = guard();
+    Promise.all([
+      sb.select("classes", { select: "id,name,level_id", eq: { id: gid } }),
+      sb.select("students", { select: "id", eq: { class_id: gid, is_active: true } }).catch(function () { return null; }),
+      loadLevels().catch(function () {})
+    ]).then(function (rr) {
+      if (!live()) return;
+      var c = (rr[0] || [])[0];
+      if (!c) return;
+      var lv = levelName(c.level_id), n = rr[1] ? rr[1].length : null;
+      GHEAD[gid] = { name: c.name, meta: (lv ? lv : "") + (n !== null ? (lv ? " · " : "") + n + " şagird" : "") };
+      if ($("gName")) $("gName").textContent = c.name;
+      if ($("gCrumb")) $("gCrumb").textContent = c.name;
+      if ($("gMeta")) $("gMeta").textContent = GHEAD[gid].meta;
+      topTitle.textContent = c.name;
+    }).catch(function () {});
+  }
+  //  Qrupun her sekme ekraninda: basliq + sekme zolagi #main-in basina; iri zolaq yoxdur
   function gTabsMount(gid, act) {
-    var b = $("band");
-    if (b) { b.classList.add("gcompact"); b.classList.add("gtabb"); }
-    main.classList.add("yig");
-    if (!$("gSek")) main.insertAdjacentHTML("afterbegin", gTabsHtml(gid, act));
+    setBand("");
+    main.classList.add("yig"); main.classList.add("yh"); main.classList.add("gpg");
+    if (!$("gSek")) main.insertAdjacentHTML("afterbegin", gHeadHtml(gid, act) + gTabsHtml(gid, act));
+    gHeadFill(gid);
+    on("gBack", "click", function () { goBack("#/gs"); });
+    on("btnAsgs", "click", function () {
+      var m = $("gAsgMenu"), acik = m.classList.contains("hide");
+      m.classList.toggle("hide", !acik);
+      $("btnAsgs").setAttribute("aria-expanded", acik ? "true" : "false");
+    });
     var nav0 = $("gSek");
     nav0.addEventListener("click", function (e) {
       var mb = e.target.closest ? e.target.closest("#gMoreBtn") : null;
@@ -4187,13 +4234,18 @@
       tabGo(a.getAttribute("href"));
     });
   }
-  //  «Daha» menyusu kenara basanda baglanir
+  //  «Daha» ve «Tapşırıq ver» menyulari kenara basanda baglanir
   document.addEventListener("click", function (e) {
     var mm = $("gMoreMenu");
-    if (!mm || mm.classList.contains("hide")) return;
-    if (e.target.closest && e.target.closest("#gSek")) return;
-    mm.classList.add("hide");
-    if ($("gMoreBtn")) $("gMoreBtn").setAttribute("aria-expanded", "false");
+    if (mm && !mm.classList.contains("hide") && !(e.target.closest && e.target.closest("#gSek"))) {
+      mm.classList.add("hide");
+      if ($("gMoreBtn")) $("gMoreBtn").setAttribute("aria-expanded", "false");
+    }
+    var am = $("gAsgMenu");
+    if (am && !am.classList.contains("hide") && !(e.target.closest && e.target.closest(".gtvw"))) {
+      am.classList.add("hide");
+      if ($("btnAsgs")) $("btnAsgs").setAttribute("aria-expanded", "false");
+    }
   });
   /*  Sekme kecidi: location.replace - brauzerin tarixcesinde TEZE yazi
       yaranmir, HIST-e de yazilmir (route() TAB_SW-ni gorur).  Neticede
@@ -4232,186 +4284,105 @@
   function drawGroupYeni(g, bol) {
     if (GBOL[bol]) return drawGroupBolme(g, bol);
     topTitle.textContent = g.name;
-    var lv = levelName(g.level_id);
-    bandHead({
-      /*  «Geri» - sabit ad yox.  Duyme goBack() isledir, yeni GELDIYIN
-          yere qaytarir; sabit etiket («Qruplar») basqa yerden gelende
-          yalan olurdu (istifadeci tutdu).  */
-      back: { id: "btnBack", label: "Geri" }, eye: "Qrup",
-      id: "gName", title: g.name, subId: "gMeta",
-      sub: '<span id="gSub">' + esc(lv || "") + "</span>",
-      right: '<button class="btn sm gtv" id="btnAsgs">' + ic("plus") + "Test ver</button>"
-    });
-    /*  ICMAL - dord kart, YALNIZ movcud ve yoxlanmis melumatla (istifadeci, 23.10):
-          1 Bu günün dərsi   - rpc_lesson_prep.next / .last (plan yeri ve son dersin
-                               testi AYRI gostericidir - biri digerinin faizi deyil)
-          2 Diqqət tələb edir - etməyənlər (prep.pending, #/ht ile eyni), yazili
-                               tapsiriq (prep.hw), zeif movzu (Hesabatin «Nə etməli»si)
-          3 Son tapşırıqlar  - rpc_class_assignments (Tapşırıqlar sekmesi ile eyni)
-          4 Son nəticələr    - rpc_class_report.recent (Hesabat · Fəaliyyət ile eyni)
-        Qrafik, tamamlanan tapsiriq sayi, avtomatik rey sonraya qalir.  */
-    show('<div class="gic" id="gIcmal">' +
-        '<section class="card gk" id="gkDers"><div class="skel">Yüklənir…</div></section>' +
-        '<section class="card gk" id="gkDiq"><div class="skel">Yüklənir…</div></section>' +
-        '<section class="card gk" id="gkAsg"><div class="skel">Yüklənir…</div></section>' +
-        '<section class="card gk" id="gkNet"><div class="skel">Yüklənir…</div></section>' +
-      "</div>");
+    GHEAD[g.id] = GHEAD[g.id] || { name: g.name, meta: levelName(g.level_id) || "" };
+    /*  QRUPUN ICMALI (26.10, son maket): bu dersin isi - bugünkü mövzu, davamiyyət, qısa test,
+        son tapşırıqlar.  Genis tehlil (son neticeler, zeif movzular, «Nə etməli») HESABATDADIR -
+        burada yalniz bir qeyd setri.  Xeberdarliq: en vacib 1-2 (etmeyenler, yazili).  */
+    show('<section class="card yk" id="gkDers"><div class="skel">Yüklənir…</div></section>' +
+      '<section class="card yk" id="gkAsg"><div class="skel">Yüklənir…</div></section>' +
+      '<p class="gnote" id="gkNote">' + ic("info") + "<span>Şagird nəticələri və zəif mövzular " +
+        '<a href="#/r/' + esc(g.id) + '" id="gkRep">Hesabat</a> bölməsindədir.</span></p>');
     gTabsMount(g.id, "");
-    on("btnBack", "click", function () { goBack("#/gs"); });
-    on("btnAsgs", "click", function () { nav("#/a/" + g.id + "/t"); });
+    on("gkRep", "click", function (e) { e.preventDefault(); tabGo("#/r/" + g.id); });
 
     var live = guard();
-    //  24.10 (yigcamliq): «Hamısına bax» / «Dərs planı» kartin BASLIGINDA, sagda - ayrica alt setir yer tuturdu
-    function kh(icon, t, alt, sag) {
-      return '<div class="gkh">' + ic(icon) + "<b>" + t + "</b>" + (alt ? '<span class="gka">' + alt + "</span>" : "") +
-        (sag || "") + "</div>";
-    }
-    function more(href, t, id) {
-      return '<a class="gkm"' + (id ? ' id="' + id + '"' : "") + ' href="' + href + '">' + t + " " + ic("right") + "</a>";
-    }
+    function hd(t, sag) { return '<div class="ykh"><div><b>' + t + "</b></div>" + (sag || "") + "</div>"; }
     Promise.all([
-      sb.rpc("rpc_class_report", { p_class_id: g.id }).catch(function () { return null; }),
       sb.rpc("rpc_class_assignments", { p_class_id: g.id }).catch(function () { return null; }),
       sb.rpc("rpc_lesson_prep", { p_class_id: g.id }).catch(function () { return null; })
     ]).then(function (rr) {
-      if (!live() || !$("gIcmal")) return;
-      var rep = rr[0] || {}, asg = rr[1] || {}, d = rr[2] || {};
-      var sum = rep.summary || {};
-      var nS = Number(sum.students) || 0;
-      if ($("gSub")) $("gSub").textContent = (lv ? lv + " · " : "") + nS + " şagird";
-
-      //  ---- 1. Bu gunun dersi
+      if (!live() || !$("gkDers")) return;
+      var asg = rr[0] || {}, d = rr[1] || {};
       var nx = d.next || null, ls = d.last || null;
-      var h = kh("cal", "Bu günün dərsi", "", rr[2] && d.has_plan ? more("#/g/" + esc(g.id) + "/p", "Dərs planı", "gkPlan") : "");
-      if (!rr[2]) {
-        h += '<p class="muted">Dərs planı yüklənmədi.</p>';
+
+      //  ---- 1. Bugunku ders
+      var h = hd("Bugünkü dərs", rr[1] && d.has_plan
+        ? '<a class="gkm" href="#/g/' + esc(g.id) + '/p" id="gkPlan">Dərs planına bax ' + ic("right") + "</a>" : "");
+      if (!rr[1]) {
+        h += '<p class="muted gkp">Dərs planı yüklənmədi.</p>';
       } else if (!d.has_plan) {
-        h += '<p class="muted gkp">Dərs planı qurulmayıb. Plan qursanız bu günün dərsi burada görünəcək.</p>' +
-          '<a class="btn sm" id="gkPlanQur" href="#/g/' + esc(g.id) + '/p">' + ic("plus") + "Planı qur</a>";
+        h += '<p class="muted gkp">Dərs planı qurulmayıb. Plan qursanız bugünkü mövzu burada görünəcək.</p>' +
+          '<div class="gkbt"><a class="btn" id="gkPlanQur" href="#/g/' + esc(g.id) + '/p">' + ic("plus") + "Planı qur</a>" +
+          '<a class="btn" id="gkDav" href="#/g/' + esc(g.id) + '/d">' + ic("group") + "Davamiyyət</a></div>";
       } else {
-        if (nx) {
-          var gp = Number(nx.gpos) || 0, gt = Number(nx.gtotal) || 0;
-          h += '<p class="gkt" id="gkNext">' + esc(nx.topic) + "</p>" +
-            (nx.group && gt
-              //  PLAN YERI: neçənci dərsdir - netice deyil (istifadeci: «81%» bura yazilmasin)
-              ? '<div class="gkplan"><span class="gkl">Plandakı yeri</span>' +
-                  '<span class="gkv" id="gkPos">«' + esc(nx.group) + "» fəsli · dərs " + gp + " / " + gt + "</span>" +
-                  '<span class="gkbar" aria-hidden="true"><i style="width:' +
-                    Math.max(4, Math.min(100, Math.round(gp * 100 / gt))) + '%"></i></span></div>'
-              : "");
-        } else {
-          h += '<p class="gkt">Plan tam keçilib 🎉</p>';
-        }
-        if (ls) {
-          var av0 = ls.test_id && ls.avg != null ? Math.round(ls.avg) : null;
-          //  SON KECILEN DERSIN TESTI - ayri blok, ayri basliq.  24.10: acilib-baglanan (istifadeci:
-          //  «əlavə detallar açılıb-bağlanan olsun») - basliqda tarix ve faiz, icinde movzu ve duyme
-          h += '<details class="gklast" id="gkLast"><summary><span class="gkl">Son keçilən dərs · ' + dateAz(ls.done_at) + "</span>" +
-            (av0 != null ? '<b class="' + pvCls(av0) + '">' + av0 + "%</b>" : "") + ic("right", "gkch") + "</summary>" +
-            '<span class="gkv">' + esc(ls.topic) + "</span>" +
-            (ls.test_id
-              ? (av0 != null
-                  ? '<span class="gkres"><b class="' + pvCls(av0) + '">' + av0 + "%</b> bu dərsin testi · " +
-                    (ls.takers || 0) + " şagird yazıb</span>"
-                  : '<span class="gkres muted">test verilib, hələ yazan yoxdur</span>')
-              : '<span class="gkres muted">bu dərsdən test verilməyib</span>') +
-            //  evvelki kartdaki kimi: son kecilen fesilden test yig -> derhal bu qrupa verilir
-            (d.paid ? '<button type="button" class="btn sm ghost" id="prepGen">' + ic("gen") + "«" +
-              esc(ls.group || ls.topic) + "» testi yığ</button>" : "") +
-            "</details>";
-        }
-        //  isinme testi artiq yigilibsa (DERS_HAZIR baglidir - yenisi yigilmir) neticesi itmesin
-        if (nx && nx.warm_test_id) {
-          h += '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s>' +
-            '<span class="wres">' + (nx.warm_takers ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird" : "verilib") +
-            '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></div>';
-        }
+        h += nx
+          ? '<p class="gkt" id="gkNext">' + esc(nx.topic) + "</p>" +
+            (nx.group ? '<p class="gks" id="gkPos">' + esc(nx.group) + (Number(nx.gtotal) ? " · dərs " + Number(nx.gpos) + " / " + Number(nx.gtotal) : "") + "</p>" : "")
+          : '<p class="gkt">Plan tam keçilib 🎉</p>';
+        //  qisa test: bugunku dersin (yoxdursa son kecilenin) FESLINDEN 5 sual - yigilan kimi bu qrupa verilir
+        var tf = nx && nx.topic_id ? nx : ls;
+        h += '<div class="gkbt"><a class="btn" id="gkDav" href="#/g/' + esc(g.id) + '/d">' + ic("group") + "Davamiyyət</a>" +
+          (d.paid && tf && tf.topic_id
+            ? '<button type="button" class="btn" id="prepGen" title="«' + esc(tf.group || tf.topic) + '» fəslindən, bu qrupa">' +
+              ic("doc") + "5 suallıq test ver</button>" : "") + "</div>" +
+          (nx && nx.warm_test_id
+            ? '<div class="warmline"><b>İsinmə</b> <s class="muted">dərsdən əvvəl 5 sual</s><span class="wres">' +
+              (nx.warm_takers ? Math.round(nx.warm_avg || 0) + "% · " + nx.warm_takers + " şagird" : "verilib") +
+              '</span> <a href="#/t/' + esc(nx.warm_test_id) + '">vərəq</a></div>' : "");
+      }
+      //  xeberdarliq: en vacib 1-2 - acig testi islemeyenler, yazili tapsirigi etmeyenler (#/ht adlari sadalayir)
+      var pend = d.pending || [], hw = d.hw || null, und = hw ? (hw.undone || []) : [];
+      if (d.open && pend.length) {
+        h += '<a class="gwarn" id="gkPend" href="#/ht/' + esc(g.id) + '/t">' + ic("warn") +
+          "<span><b>" + pend.length + " şagird</b> verilən testi hələ işləməyib</span><s id=\"gkPendGo\">Bax " + ic("right") + "</s></a>";
+      }
+      if (hw && und.length) {
+        h += '<a class="gwarn" id="gkHw" href="#/ht/' + esc(g.id) + '/h">' + ic("pen") +
+          "<span><b>" + und.length + " şagird</b> yazılı tapşırığı etməyib</span><s id=\"gkHwGo\">Bax " + ic("right") + "</s></a>";
       }
       $("gkDers").innerHTML = h;
       on("prepGen", "click", function () {
-        //  loadPrep-deki ile eyni: qrupun fenn/sinfi + son kecilen fesil, yigilan test bu qrupa verilir
+        //  qrupun fenn/sinfi + fesil, 5 sual; yigilan test derhal bu qrupa verilir (GEN_ENTRY)
         var f = genFilter();
         f.subject = d.subject || ""; f.levels = d.level ? [d.level] : [];
-        f.topics = ls.topic_id ? [ls.topic_id] : []; f.remNames = [];
+        f.topics = tf && tf.topic_id ? [tf.topic_id] : []; f.remNames = [];
         f.difficulty = []; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = ""; f.asgStus = [];
-        f.count = 10; f.back = ""; f.backName = "";
+        f.count = 5; f.back = ""; f.backName = "";
         GEN_ENTRY = { id: g.id, name: g.name || "" };
         nav("#/gen");
       });
 
-      //  ---- 2. Diqqet teleb edir
-      var pend = d.pending || [], hw = d.hw || null, und = hw ? (hw.undone || []) : [];
-      var todo = repTodo(rep.topics), sat = [];
-      function nm(list, fn) {
-        return list.slice(0, 5).map(fn).join(", ") + (list.length > 5 ? " və daha " + (list.length - 5) : "");
-      }
-      if (d.open && pend.length) {
-        sat.push('<div class="gkd" id="gkPend"><span class="gkdn w">' + pend.length + "</span>" +
-          '<div class="g"><b>Testi etməyənlər · ' + pend.length + " / " + (Number(d.students) || 0) + " şagird</b>" +
-          "<i>" + nm(pend, function (x) {
-            return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '">' + esc(firstName(x.name) || x.name) + "</a>";
-          }) + "</i></div>" + more("#/ht/" + esc(g.id), "Kim etməyib", "gkPendGo") + "</div>");
-      }
-      //  26.10: vaciblik sirasi - etmeyenler, zeif movzu (Təkrar ver), sonra yazili tapsiriq
-      if (todo) {
-        var ws = todo.weak_students;
-        sat.push('<div class="gkd" id="gkTodo"><span class="gkdn e">' + ws.length + "</span>" +
-          '<div class="g"><b>«' + esc(todo.name) + "» — " + ws.length + " şagird zəifdir</b>" +
-          "<i>" + nm(ws, function (x) {
-            return '<a href="#/s/' + esc(x.id) + "/" + esc(g.id) + '">' + esc(firstName(x.name) || x.name) + "</a>";
-          }) + "</i></div>" +
-          '<button type="button" class="btn sm go" id="gkTodoGo">' + ic("gen") + "Təkrar ver</button></div>");
-      }
-      if (hw && und.length) {
-        sat.push('<div class="gkd" id="gkHw"><span class="gkdn w">' + und.length + "</span>" +
-          '<div class="g"><b>Yazılı tapşırıq · ' + (Number(hw.done) || 0) + " / " + (Number(hw.total) || 0) + " etdi</b>" +
-          "<i>etməyən: " + nm(und, function (n) { return esc(firstName(n) || n); }) + "</i></div>" +
-          more("#/a/" + esc(g.id), "Tapşırıqlar", "gkHwGo") + "</div>");
-      }
-      //  bos qrupda «hər şey qaydasındadır» yalan olardi - evvel sagird lazimdir
-      $("gkDiq").innerHTML = kh("warn", "Diqqət tələb edir") +
-        (sat.length ? ilkIki(sat, "gkDq")
-          : !nS && rr[0] ? '<p class="muted gkp" id="gkNoStu">Qrupda hələ şagird yoxdur.</p>' +
-              '<a class="btn sm" href="#/g/' + esc(g.id) + '/s">' + ic("plus") + "Şagird əlavə et</a>"
-          : '<p class="gkok" id="gkOk">' + ic("check") + "Hər şey qaydasındadır — etməyən və zəif mövzu yoxdur.</p>");
-      ilkIkiBind("gkDq");
-      on("gkTodoGo", "click", function () {
-        remedialGen(g.id, [todo], null, (todo.weak_students || []).map(function (x) { return { id: x.id, name: x.name }; }));
-      });
-
-      //  ---- 3. Son tapsiriqlar (Tapşırıqlar sekmesindeki kimi qruplanir)
+      //  ---- 2. Son tapsiriqlar: acig testler (Tapşırıqlar sekmesi kimi qruplanir) + son yazili tapsiriq
       var items = asgGroup(asg.items || []);
       var acq = items.filter(function (a) { return a.open !== false; });
-      var hA = kh("clip", "Son tapşırıqlar", acq.length ? acq.length + " aktiv" : "",
-        more("#/a/" + esc(g.id), items.length ? "Hamısına bax" : "Tapşırıqlar", "gkAsgAll"));
-      if (!rr[1]) hA += '<p class="muted">Tapşırıqlar yüklənmədi.</p>';
-      else if (!acq.length) {
-        hA += '<p class="muted gkp">' + (items.length ? "Aktiv tapşırıq yoxdur." : "Hələ tapşırıq verilməyib.") + "</p>";
-      } else {
-        hA += acq.slice(0, 3).map(function (a) {
-          var done = Number(a.done) || 0, solo = !!a.student_id, many = solo && a.ids && a.ids.length > 1;
-          var tot = Number(a.targets) || (solo ? 1 : (Number(asg.students) || 0));
-          return '<div class="gka1"><div class="g"><b>' + (a.test_id
-              ? '<a href="#/t/' + esc(a.test_id) + '">' + esc(a.title) + "</a>" : esc(a.title)) + "</b>" +
-            "<i>" + (many ? a.ids.length + " şagirdə" : solo ? "yalnız " + esc(firstName(a.student || "") || a.student || "") : "bütün qrup") +
-              (a.closes_at ? " · son tarix " + dateAz(a.closes_at) : "") + "</i></div>" +
-            '<span class="gkfr' + (done >= tot && tot ? " ok" : "") + '">' + done + " / " + tot + "</span></div>";
-        }).join("");
+      var rows = acq.slice(0, 3).map(function (a) {
+        var done = Number(a.done) || 0, solo = !!a.student_id, many = solo && a.ids && a.ids.length > 1;
+        var tot = Number(a.targets) || (solo ? 1 : (Number(asg.students) || 0));
+        return '<a class="ytr ga4 gka1" href="#/a/' + esc(g.id) + '">' +
+          '<span class="ytq"><b>' + esc(a.title) + "</b><i>" +
+            (many ? a.ids.length + " şagirdə" : solo ? "yalnız " + esc(firstName(a.student || "") || a.student || "") : "bütün qrup") +
+            (a.closes_at ? " · " + dateAz(a.closes_at) : "") + " · " + done + "/" + tot + " tamamlayıb</i></span>" +
+          '<span class="yts">' + (a.closes_at ? dateAz(a.closes_at) : "—") + "</span>" +
+          '<span class="ytn gkfr">' + done + " / " + tot + "</span>" +
+          '<span class="ytk">Bax ' + ic("right") + "</span></a>";
+      });
+      if (hw) {
+        var hd0 = Number(hw.done) || 0, ht0 = Number(hw.total) || 0;
+        rows.push('<a class="ytr ga4 gkhw" href="#/a/' + esc(g.id) + '">' +
+          '<span class="ytq"><b>' + esc(String(hw.body || "").replace(/\s+/g, " ").trim().slice(0, 70)) + "</b><i>yazılı ev tapşırığı" +
+            (hw.due ? " · " + hwDayAz(hw.due) : "") + " · " + hd0 + "/" + ht0 + " etdi</i></span>" +
+          '<span class="yts">' + (hw.due ? hwDayAz(hw.due) : "—") + "</span>" +
+          '<span class="ytn">' + hd0 + " / " + ht0 + "</span>" +
+          '<span class="ytk">Bax ' + ic("right") + "</span></a>");
       }
-      $("gkAsg").innerHTML = hA;
-
-      //  ---- 4. Son neticeler (Hesabat · Fəaliyyət ile eyni siyahi, ilk 5)
-      var rec = rep.recent || [];
-      var hN = kh("chart", "Son nəticələr", "", more("#/r/" + esc(g.id) + "/f", rec.length ? "Hamısına bax" : "Hesabat", "gkNetAll"));
-      if (!rr[0]) hN += '<p class="muted">Nəticələr yüklənmədi.</p>';
-      else if (!rec.length) hN += '<p class="muted gkp">Hələ test yazan yoxdur.</p>';
-      else {
-        hN += rec.slice(0, 5).map(function (x) {
-          return '<div class="gkn"><div class="g"><b>' + esc(x.student) + "</b>" +
-            "<i>" + esc(x.test) + " · " + dateAz(x.at) + "</i></div>" + pctChip(x.percent) + "</div>";
-        }).join("");
-      }
-      $("gkNet").innerHTML = hN;
+      $("gkAsg").innerHTML = hd("Son tapşırıqlar",
+          '<a class="gkm" href="#/a/' + esc(g.id) + '" id="gkAsgAll">' + (items.length || hw ? "Hamısına bax" : "Tapşırıqlar") + " " + ic("right") + "</a>") +
+        (rr[0] === null ? '<p class="muted gkp">Tapşırıqlar yüklənmədi.</p>'
+          : rows.length
+            ? '<div class="ytb"><div class="ytr ga4 yth"><span>Tapşırıq</span><span>Son tarix</span><span>Tamamlayan</span><span></span></div>' +
+              rows.join("") + "</div>"
+            : '<p class="muted gkp">' + (items.length ? "Aktiv tapşırıq yoxdur." : "Hələ tapşırıq verilməyib.") + "</p>");
+      on("gkAsgAll", "click", function (e) { e.preventDefault(); tabGo("#/a/" + g.id); });
     }).catch(function () {});
   }
 
@@ -4667,6 +4638,8 @@
           topTitle.textContent = nm;
           if ($("gName")) $("gName").textContent = nm;
           var meta = $("gMeta");
+          //  26.10: yeni qrup basligi - ad, sinif ve sagird sayi bazadan yeniden
+          if ($("gCrumb")) { meta = null; gHeadFill(g.id); }
           if (meta) {
             meta.innerHTML =
               (levelName(newLevel)
@@ -5362,6 +5335,12 @@
 
   /*  Tarix suutunu (YYYY-MM-DD) saat qurşağına toxunmadan «17.09» yazir -
       new Date(«2026-09-17») UTC sayilir, menfi qursaqda bir gun geri gedirdi. */
+  //  «2026-10-28» -> «28 okt» (saat qursagina toxunmadan - hwDay kimi)
+  function hwDayAz(d) {
+    var p = String(d || "").split("-");
+    var ay = ["yan","fev","mar","apr","may","iyn","iyl","avq","sen","okt","noy","dek"];
+    return p.length === 3 ? Number(p[2]) + " " + ay[Number(p[1]) - 1] : hwDay(d);
+  }
   function hwDay(d) {
     if (!d) return "";
     var p = String(d).split("-");
@@ -5441,10 +5420,13 @@
       });
       /*  YENI: uc ayrica kart telefonda ~100 px yeyirdi ve «lovhe»
           hissi verirdi.  Eyni reqemler bir setirde oxunur.  */
+      //  26.10: qrupun basligi sekmelerde eynidir (iri zolaq yoxdur) - «Yenilə» ve abunesiz qeydi burada
       var h = YENI
-        ? '<div class="rstat"><span><b>' + (Number(sm.students) || 0) + "</b>şagird</span>" +
+        ? (r.paid ? "" : '<p class="muted rfree">Son 7 günün məlumatı göstərilir.</p>') +
+          '<div class="rstat"><span><b>' + (Number(sm.students) || 0) + "</b>şagird</span>" +
             '<span><b>' + pct(sm.avg) + "%</b>orta · " + dovrSoz(r) + "</span>" +
-            '<span><b>' + (Number(sm.attempts) || 0) + "</b>test</span></div>"
+            '<span><b>' + (Number(sm.attempts) || 0) + "</b>test</span>" +
+            '<button class="btn sm ghost icon rref" id="btnRef" title="Yenilə" aria-label="Yenilə">' + ic("refresh") + "</button></div>"
         : '<div class="stats">' +
             statTile(sm.active + " / " + sm.students, "aktiv şagird", "g1") +
             statTile(pct(sm.avg) + "%", "orta nəticə", "g2") +
@@ -6050,7 +6032,7 @@
     var und = Number(x.undone) || 0, tot = Number(x.total) || 0;
     //  26.10: setir «N/M etməyib» deyir - YENI-de hemin sagirdlerin ADLARI olan sehifeye (#/ht) aparir
     //  (evvel bu yol Icmaldaki setirde idi; Icmalda qrupa aid xeberdarliq artiq yoxdur)
-    return '<a class="al hw" href="#/' + (YENI ? "ht/" : "a/") + esc(x.class_id) + '" data-hwa="' + esc(x.id) + '">' + ic("clip") +
+    return '<a class="al hw" href="#/' + (YENI ? "ht/" : "a/") + esc(x.class_id) + (YENI ? "/h" : "") + '" data-hwa="' + esc(x.id) + '">' + ic("clip") +
       "<span><b>" + esc(x["class"] || "") + "</b> <span class=\"muted\">(" +
         (x.personal ? "fərdi · " : "") + "son tarix " + esc(hwDay(x.due)) + ")</span><br>" +
         esc(x.body || "") + " — <b>" + und + "/" + tot + " etməyib</b></span>" +
@@ -12898,7 +12880,7 @@
     bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", nt: "gs", sus: "gs", zm: "gs", ht: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "nt") return YENI ? screenResults() : nav("#/");
     if (m[0] === "sus") return YENI ? screenSilent() : nav("#/");
-    if (m[0] === "ht" && m[1]) return YENI ? screenUndone(m[1]) : nav("#/g/" + m[1]);
+    if (m[0] === "ht" && m[1]) return YENI ? screenUndone(m[1], m[2]) : nav("#/g/" + m[1]);
     if (m[0] === "zm" && m[1] && m[2]) return YENI ? screenTopicWeak(m[1], m[2]) : nav("#/r/" + m[1]);
     if (m[0] === "gs") return screenGroups();
     if (m[0] === "g" && m[1]) return screenGroup(m[1], m[2]);

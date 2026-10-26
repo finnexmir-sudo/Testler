@@ -132,15 +132,13 @@ with sync_playwright() as pw:
     print("\nA · Qrup İcmalında «Bu günün dərsi» (23.10: menyu yerinə sekmələr + dörd kart)")
     pg.goto(PANEL + "#/g/" + GA); pg.reload()
     pg.wait_for_selector("#gSek", timeout=20000)
-    pg.wait_for_selector("#gkDers .gkh", timeout=15000)
-    kt = pg.inner_text("#gIcmal")
-    ok("bu günün dərsi" in kt.lower(), "«Bu günün dərsi» kartı var", kt[:40].replace("\n", " "))
-    ok(pg.locator("#gIcmal .card.gk").count() == 4, "İcmalda dörd ayrı kart", pg.locator("#gIcmal .card.gk").count())
-    ok("diqqət tələb edir" in kt.lower(), "«Diqqət tələb edir» kartı var")
-    ok(pg.locator("#main button", has_text="Tapşırıq ver").count() == 0,
-       "qarisdiran «Tapsiriq ver» adi qalmayib")
-    ok(pg.locator("#btnAsgs").count() == 1 and "Test ver" in pg.inner_text("#btnAsgs"),
-       "zolaqda bir duyme: «Test ver»", pg.inner_text("#btnAsgs"))
+    pg.wait_for_selector("#gkDers .ykh", timeout=15000)
+    kt = pg.inner_text("#main")
+    #  26.10 (son maket): qrupun Icmali - «Bugünkü dərs» ve «Son tapşırıqlar»; netice Hesabatda
+    ok("Bugünkü dərs" in kt and "Son tapşırıqlar" in kt, "«Bugünkü dərs» və «Son tapşırıqlar» kartları var")
+    ok(pg.locator("#gkDiq, #gkNet").count() == 0, "nəticə/zəif mövzu kartı yoxdur (Hesabatdadır)")
+    ok(pg.locator("#btnAsgs").count() == 1 and "Tapşırıq ver" in pg.inner_text("#btnAsgs"),
+       "başlıqda bir əsas düymə: «Tapşırıq ver» (menyu: test / ev tapşırığı)", pg.inner_text("#btnAsgs"))
     ok(pg.locator("#prepAsg").count() == 0, "kartda ikinci «Tapsiriq ver» yoxdur")
     ok(pg.locator("#gkPlanQur").count() == 1, "plan yoxdursa «Plani qur» linki var")
     pg.screenshot(path="/tmp/claude-0/is_A_menyu.png", full_page=True)
@@ -227,8 +225,8 @@ with sync_playwright() as pw:
     ok(pg.url.endswith("#/a/" + GA), "verilenden sonra BAXIS ekrani acilir (unvan #/a/<qrup>)", pg.url[-20:])
     ftop = pg.evaluate("document.getElementById('asgFlash').getBoundingClientRect().top")
     #  23.10: qrupun sekme zolagi (#gSek) her qrup ekraninin basindadir - tesdiq ondan sonraki ILK elementdir
-    ok(pg.evaluate("(function(){var e=document.querySelector('#main').firstElementChild; if(e&&e.id==='gSek') e=e.nextElementSibling; return e&&e.id;})()") == "asgFlash",
-       "tesdiq sekmelerden sonraki ILK elementdir")
+    ok(pg.evaluate("(function(){var e=document.querySelector('#main').firstElementChild; while(e&&(e.id==='gSek'||e.id==='gHd')) e=e.nextElementSibling; return e&&e.id;})()") == "asgFlash",
+       "tesdiq qrup basligi ve sekmelerden sonraki ILK elementdir")
     ok(ftop < 500, "tesdiq basliqdan hemen sonra gorunur", ftop)
     fl = pg.inner_text("#asgFlash .asgok")
     ok("Tapşırıq verildi" in fl and "qrupun bütün şagirdləri" in fl, "tesdiq tam oxunur", fl[:70])
@@ -255,7 +253,7 @@ with sync_playwright() as pw:
     print("   -- qrup ayarlari: «Serbest mesq» burada")
     #  23.10: «Qrup ayarları» qrupun sekmesidir (kompüterdə dişli, telefonda «Daha»)
     pg.goto(PANEL + "#/g/" + GA); pg.reload(); pg.wait_for_selector("#gSek", timeout=20000)
-    pg.click("#gSek .gtab[data-gt='x']"); pg.wait_for_selector("#fp", state="attached", timeout=15000)
+    pg.click("#gSet"); pg.wait_for_selector("#fp", state="attached", timeout=15000)
     ok(pg.url.endswith("/g/" + GA + "/x"), "unvan #/g/<qrup>/x", pg.url[-20:])
     ok(pg.locator("#btnRen").count() == 1, "«Qrupun adini deyis» burada")
     pg.screenshot(path="/tmp/claude-0/is_X_ayarlar.png", full_page=False)
@@ -272,12 +270,13 @@ with sync_playwright() as pw:
     pg.fill("#hwText", "12-ci paraqrafı oxu"); pg.click("#btnHwAdd"); pg.wait_for_selector("#hwList .hwrow", timeout=15000)
     #  23.10: «Diqqət tələb edir» kartinda (qrup Icmali) - yazili ve test etmeyenlerin adlari
     pg.goto(PANEL + "#/g/" + GA); pg.reload()
-    pg.wait_for_selector("#gkHw .g i", state="attached", timeout=20000); pg.wait_for_timeout(500)
-    if pg.locator("#gkDqB").count(): pg.click("#gkDqB"); pg.wait_for_timeout(200)   #  26.10: ilk 2 + «Hamısına bax»
-    hwt = pg.inner_text("#gkHw .g i")
-    ok(hwt.count("Şagird") == 2 and pg.locator("#gkHw .g i").is_visible(), "«Yazılı tapşırıq» sətrində 2 ad görünür", hwt)
-    ok(pg.locator("#gkPend .g i a").count() == 2 and pg.locator("#gkPend .g i a").first.is_visible(),
-       "«Testi etməyənlər» sətrində 2 ad (keçid) var və görünür")
+    #  26.10: «Bugünkü dərs»de xeberdarliq setirleri (say) -> #/ht ADLARI sadalayir
+    pg.wait_for_selector("#gkHw", timeout=20000); pg.wait_for_timeout(500)
+    ok("2 şagird" in pg.inner_text("#gkHw") and "2 şagird" in pg.inner_text("#gkPend"), "yazılı və test sətirləri «2 şagird» deyir",
+       (pg.inner_text("#gkHw"), pg.inner_text("#gkPend")))
+    pg.click("#gkHw"); pg.wait_for_selector("#htBox .udr", timeout=15000)
+    ok(pg.locator("#htBox .udr").count() == 2 and pg.url.endswith("/h"), "açılan səhifədə yalnız yazılı tapşırığı etməyən 2 ad", pg.locator("#htBox .udr").count())
+    pg.goto(PANEL + "#/g/" + GA); pg.reload(); pg.wait_for_selector("#gkDers .ykh", timeout=20000)
     pg.screenshot(path="/tmp/claude-0/is_C2_adlar.png", full_page=True)
 
     print("\nD · Telefon")
@@ -285,7 +284,7 @@ with sync_playwright() as pw:
     ctx, pg = context(br, 390, 844)
     daxil(pg)
     pg.goto(PANEL + "#/g/" + GA); pg.reload()
-    pg.wait_for_selector("#gkNet .gkh", timeout=20000)
+    pg.wait_for_selector("#gkAsg .ykh", timeout=20000)
     ok(scroll_x(pg) <= 1, "qrup sehifesi telefonda yana surusmur", scroll_x(pg))
     pg.screenshot(path="/tmp/claude-0/is_A_menyu_tel.png", full_page=True)
     pg.goto(PANEL + "#/gen"); pg.reload()
@@ -302,8 +301,8 @@ with sync_playwright() as pw:
     pg.click("#pick [data-t='" + tid + "']")
     pg.click("#btnAsg"); pg.wait_for_selector("#asgFlash", timeout=20000); pg.wait_for_timeout(1200)
     ok(scroll_x(pg) <= 1, "tapsiriq sehifesi telefonda yana surusmur", scroll_x(pg))
-    ok(pg.evaluate("(function(){var e=document.querySelector('#main').firstElementChild; if(e&&e.id==='gSek') e=e.nextElementSibling; return e&&e.id;})()") == "asgFlash",
-       "telefonda da tesdiq sekmelerden sonraki ILK elementdir")
+    ok(pg.evaluate("(function(){var e=document.querySelector('#main').firstElementChild; while(e&&(e.id==='gSek'||e.id==='gHd')) e=e.nextElementSibling; return e&&e.id;})()") == "asgFlash",
+       "telefonda da tesdiq qrup basligi ve sekmelerden sonraki ILK elementdir")
     ok(pg.evaluate("document.getElementById('asgFlash').getBoundingClientRect().bottom") < 844,
        "telefonda tesdiq birinci ekrana sigir")
     pg.screenshot(path="/tmp/claude-0/is_C_sonra_telefon.png", full_page=False)
