@@ -104,7 +104,7 @@ with sync_playwright() as pw:
     p.wait_for_selector("#yMenu .mrow", timeout=30000); p.wait_for_timeout(1500)
     h = p.evaluate("document.body.scrollHeight")
     print("DOLU hesab: %d px = %.1f ekran" % (h, h / 844.0))
-    print("   diqqet:", p.locator("#yDiq").inner_text().replace("\n", " | ")[:140])
+    print("   dersler:", p.locator("#hWeek").inner_text().replace("\n", " | ")[:140])
     print("   menyu :", p.locator("#yMenu").inner_text().replace("\n", " | ")[:200])
     p.screenshot(path=OUT + "/dolu.png", full_page=True)
     #  ---- ders plani qururuq ki, «Bu gunun dersi» real gorunsun
@@ -203,8 +203,8 @@ with sync_playwright() as pw:
 
     print("\n=== KECID AUDITI ===")
     #  26.10: Diqqət kartinda ilk 2 setir gorunur (qalani «Hamısına bax»da) - gorunenler basilir
-    for unvan, qab, ad, *sel in (("#/", "#yDiq", "Icmal · diqqet", ".mrow:visible"),
-                           ("#/", "#yMenu", "Icmal · menyu"),
+    #  26.10: umumi Icmal - bugunku dersler ve qruplarim cedveli (xeberdarliq yoxdur)
+    for unvan, qab, ad, *sel in (("#/", "#yMenu", "Icmal · qruplarim"),
                            ("#/sus", "#suBox", "Sessiz sagirdler"),
                            ("#/nt", "#ntQ", "Neticeler · qruplar"),
                            ("#/nt", "#ntZ", "Neticeler · zeif movzular"),
@@ -222,7 +222,7 @@ with sync_playwright() as pw:
       " on conflict do nothing", (acc["own"],))
     p.goto(PANEL + "#/"); p.reload()
     p.wait_for_selector("#yMenu .mrow", timeout=30000); p.wait_for_timeout(1500)
-    adm = p.locator("#yMenu .mrow").filter(has_text="\u0130dar\u0259etm\u0259")
+    adm = p.locator("#yAdm .mrow").filter(has_text="\u0130dar\u0259etm\u0259")
     if not adm.count():
         XETA.append("#/ : admin ucun \u00abIdareetme\u00bb bendi yoxdur")
     else:

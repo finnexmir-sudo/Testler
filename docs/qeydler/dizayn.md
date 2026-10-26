@@ -194,7 +194,7 @@ telefonda İcmal və şagird 22 px, qrup 20 px (`e2e_icmal`, `e2e_qrup_sekme`, `
 
 | Səhifə | Əsas məqsəd / əsas düymə | Vəziyyət |
 |---|---|---|
-| İcmal | bu günün işi / «Test yığ» | 26.10: menyu təkrarı çıxdı; Diqqət ən vacib 2 + «Hamısına bax» |
+| İcmal | bu günün işi / «Test yığ» (+ «Qrup yarat») | 26.10 son maket: başlıq + tarix, Bugünkü dərslər və Qruplarım cədvəli; qrupa aid nəticə/xəbərdarlıq yoxdur (Siqnallar, Nəticələr) |
 | Qrup (sekmələr) | bu dərs / «Test ver» | 23–26.10: sekmələr, İcmal kartları; Diqqət ən vacib 2 + «Hamısına bax» |
 | Şagird | bu uşağa nə lazımdır / «5 suallıq təkrar ver» | 23.10: Xülasə; diaqnostika Mövzular sekmesində |
 | Test yığ | — | baxılmayıb (GPT siyahısında 3-cü) |

@@ -56,30 +56,10 @@ with sync_playwright() as pw:
     pg.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)[:160]))
     pg.goto(PANEL + "#/demo")
     pg.wait_for_selector("#demoBar", timeout=60000)
-    pg.wait_for_function("document.body.innerText.indexOf('zəif gedir') >= 0", timeout=30000)
-    pg.wait_for_timeout(600)
-
-    print("A · İcmal: zəif mövzu sətrinin faizi")
-    row = pg.locator("a.mrow", has_text="zəif gedir").first
-    chip = row.locator(".pv, [class*='pv']").last.inner_text().strip() if row.locator(".pv, [class*='pv']").count() else ""
-    m = re.search(r"(\d+)\s*%", row.inner_text())
-    home_pct = int(m.group(1)) if m else -1
-    ok(home_pct > 0, "sətirdə faiz 0% deyil", row.inner_text().replace("\n", " ")[:90])
-    row_txt = row.inner_text()
-    row.click()
-    pg.wait_for_url(re.compile(r"#/zm/"), timeout=15000)
-    pg.wait_for_function("document.body.innerText.indexOf('ortalama') >= 0", timeout=15000)
-    zt = pg.evaluate("document.body.innerText")
-    m2 = re.search(r"ortalamas[ıi]\D{0,12}(\d+)\s*%", zt)
-    zm_pct = int(m2.group(1)) if m2 else -2
-    #  Iki ayri duster var: Icmal (db/219) sagirdlerin faizinin ORTASI, #/zm (db/220)
-    #  butun cavablarin cemi.  Ferq 1-2 bend ola biler - tek menbeye baglamaq Sira 1-dir.
-    #  Burada yalniz «0% xetasi» olculur: reqem gelir ve #/zm-e yaxindir.
-    #  931 (Sira 2.2): Icmal ve #/zm eyni dusturla - faiz EYNI olmalidir
-    ok(home_pct == zm_pct, "İcmaldakı faiz #/zm-dəki qrup ortalaması ilə eynidir", "%s / %s" % (home_pct, zm_pct))
-    m3 = re.search(r"(\d+) şagird", row_txt)
-    zm_n = pg.locator("#zmBox a.mrow").count()
-    ok(m3 and int(m3.group(1)) == zm_n, "İcmaldakı «N şagird» #/zm-dəki ad sayı ilə eynidir", "%s / %s" % (m3.group(1) if m3 else "?", zm_n))
+    #  26.10: umumi Icmalda qrupa aid xeberdarliq (zeif movzu) YOXDUR - Nəticələr ve qrup sehifesindedir
+    pg.wait_for_selector("#yMenu .ytr", timeout=30000); pg.wait_for_timeout(600)
+    print("A · İcmal: qrupa aid zəif mövzu sətri yoxdur")
+    ok("zəif gedir" not in pg.inner_text("#main"), "İcmalda «… zəif gedir» sətri yoxdur (Nəticələrdədir)")
     print("A2 · Nəticələr: zəif mövzu sətri #/zm-ə aparır")
     pg.goto(PANEL + "#/nt"); pg.wait_for_selector("#ntZ a.mrow", timeout=20000)
     hrefs = pg.evaluate("[...document.querySelectorAll('#ntZ a.mrow')].map(a => a.getAttribute('href'))")

@@ -134,8 +134,9 @@ with sync_playwright() as pw:
     ok(len(rows_for(tid)) == 0, "«×» N sətrin hamısını götürdü", len(rows_for(tid)))
 
     print("D · #/zm yolu; «Bütün qrup» seçimi")
-    pg.goto(PANEL + "#/"); pg.wait_for_selector("a.mrow", timeout=20000)
-    zrow = pg.locator("a.mrow", has_text="zəif gedir").first
+    #  26.10: zeif movzu setri Nəticələrdədir (umumi Icmalda yoxdur)
+    pg.goto(PANEL + "#/nt"); pg.wait_for_selector("#ntZ a.mrow", timeout=20000)
+    zrow = pg.locator("#ntZ a.mrow").first
     zrow.click(); pg.wait_for_url(re.compile(r"#/zm/"), timeout=15000); pg.wait_for_selector("#zmGen", timeout=15000)
     zn = pg.locator("#zmBox a.mrow").count()
     pg.click("#zmGen"); gen_hazir(pg)
