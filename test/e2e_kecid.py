@@ -133,10 +133,10 @@ with sync_playwright() as pw:
     gid = gid0
     p.goto(PANEL + "#/g/" + str(gid)); p.reload()
     #  23.10: qrup sehifesi menyu deyil - sekmeler + Icmal kartlari (e2e_qrup_sekme.py)
-    p.wait_for_selector("#gkNet .gkh", timeout=30000); p.wait_for_timeout(2000)
+    p.wait_for_selector("#gkAsg .ykh", timeout=30000); p.wait_for_timeout(2000)
     h = p.evaluate("document.body.scrollHeight")
     print("QRUP icmali: %d px = %.1f ekran" % (h, h / 844.0))
-    print("   diqqet:", p.locator("#gkDiq").inner_text().replace("\n", " | ")[:120])
+    print("   ders  :", p.locator("#gkDers").inner_text().replace("\n", " | ")[:120])
     print("   sekme :", p.locator("#gSek").inner_text().replace("\n", " | ")[:220])
     p.screenshot(path=OUT + "/qrup.png", full_page=True)
     #  ---- sagirdler bolmesi
@@ -211,7 +211,8 @@ with sync_playwright() as pw:
                            ("#/nt", "#ntZ", "Neticeler · zeif movzular"),
                            ("#/nt", "#ntS", "Neticeler · son cavablar"),
                            ("#/g/" + str(gid), "#gSek", "Qrup sekmeleri", "a.gtab:visible"),
-                           ("#/g/" + str(gid), "#gIcmal", "Qrup icmali · kecidler", "a.gkm:visible")):
+                           ("#/g/" + str(gid), "#gkDers", "Qrup icmali · bugunku ders", "a:visible"),
+                           ("#/g/" + str(gid), "#gkAsg", "Qrup icmali · tapsiriqlar", "a:visible")):
         print("\n-- " + ad + " (" + unvan + ")")
         for a, h, b in kecidler(unvan, qab, *sel):
             print("   %-52s -> %-34s %s" % (a, h, b))

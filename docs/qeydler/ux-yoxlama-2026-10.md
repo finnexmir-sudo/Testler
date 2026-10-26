@@ -113,6 +113,16 @@ Testlərdə tapılan: `e2e_tapsiriq_bos` sınanda bütün platforma testlərini 
 ### Açıq iş: konsolda 1 xəta (canlı, 26.10)
 İstifadəçinin DevTools şəklində qırmızı «1» (v=818, qrup səhifəsi, 360 px). Yerli bazada eyni səhifədə konsol xətası yoxdur (`pageerror`, `console.error`, ≥ 400 cavab yoxlandı). v=819 şəklində nişan görünmür. Səbəb bilinmir — canlıda Console sekməsinin şəkli lazımdır. Bağlanmayıb.
 
+## Qrup səhifəsi — son maket (26.10)
+
+| # | Nə dəyişdi | Necə yoxlandı | Canlıda? |
+|---|---|---|---|
+| QM1 | **Başlıq qrupun bütün sekmələrində eyni**, iri yaşıl zolaq yoxdur: «‹ Geri · Qruplar / ad», ad (telefonda 22 px — əvvəl 20 idi, kiçilmədi), «sinif · N şagird» (bazadan), sağda «+ Tapşırıq ver» (menyu: Test ver / Ev tapşırığı yaz) və dişli (Qrup ayarları — artıq sekmə deyil). Sekmələr alt xətli: kompüterdə 6, telefonda 4 + «Daha» (Dərs planı, Dəftər). Hesabatın «Yenilə»si rəqəmlər sətrinin sonunda, abunəsiz qeydi səhifənin içində | `e2e_qrup_sekme` A, B, E, F; `e2e_qrup_menyu_telefon` | yox (budaqda) |
+| QM2 | **Qrupun İcmalı**: «Bugünkü dərs» — mövzu, «fəsil · dərs N / M» (faiz yoxdur), «Davamiyyət» (→ Dəftər) və «5 suallıq test ver» (bugünkü dərsin fəslindən 5 sual, yığılan kimi bu qrupa verilir); altında ən çox 2 xəbərdarlıq sətri (testi işləməyənlər, yazılı tapşırığı etməyənlər). «Son tapşırıqlar» cədvəli: Tapşırıq · Son tarix · Tamamlayan · Bax (açıq testlər + son yazılı). Son nəticələr, zəif mövzu, «Nə etməli» — Hesabatda; İcmalın sonunda «Şagird nəticələri və zəif mövzular Hesabat bölməsindədir» | `e2e_qrup_sekme` C, D, G | yox |
+| QM3 | Xəbərdarlıq sətri öz HİSSƏSİNİ açır: «N şagird testi işləməyib» → `#/ht/<qrup>/t` (yalnız o N ad), «yazılı» → `/h`. Əvvəl hər ikisi bütöv səhifəyə aparırdı və birinci yazılı hissə başqa say göstərirdi (`e2e_kecid` tutdu). Siqnallardakı ev tapşırığı sətri də `/h` | `e2e_kecid`, `e2e_qrup_sekme` C, `e2e_etmeyenler` A, `e2e_dord_is` C2 | yox |
+
+Növbəti (istifadəçi maketi): Şagirdlər sekməsi (axtarış, əlifba, son fəaliyyət, profilə keçid), sonra şagird profili.
+
 ## Sıra 1–5 — gözləyir
 
 1. **Testin düzgünlüyü** — 0.1, 0.2, 0.4 bağlandı (yuxarı). Qalan: tək pis sualı əvəz etmək (vərəqdə).

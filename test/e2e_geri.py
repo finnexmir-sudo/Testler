@@ -133,10 +133,10 @@ with sync_playwright() as pw:
     gid = gid0
     p.goto(PANEL + "#/g/" + str(gid)); p.reload()
     #  23.10: qrup sehifesi menyu deyil - sekmeler + Icmal kartlari (e2e_qrup_sekme.py)
-    p.wait_for_selector("#gkNet .gkh", timeout=30000); p.wait_for_timeout(2000)
+    p.wait_for_selector("#gkAsg .ykh", timeout=30000); p.wait_for_timeout(2000)
     h = p.evaluate("document.body.scrollHeight")
     print("QRUP icmali: %d px = %.1f ekran" % (h, h / 844.0))
-    print("   diqqet:", p.locator("#gkDiq").inner_text().replace("\n", " | ")[:120])
+    print("   ders  :", p.locator("#gkDers").inner_text().replace("\n", " | ")[:120])
     print("   sekme :", p.locator("#gSek").inner_text().replace("\n", " | ")[:220])
     p.screenshot(path=OUT + "/qrup.png", full_page=True)
     #  ---- sagirdler bolmesi
@@ -171,7 +171,8 @@ with sync_playwright() as pw:
             p.wait_for_timeout(1400)
 
     def geri_bas():
-        b = p.locator("#band .bback")
+        #  26.10: qrup sekmelerinde «Geri» basligin yolundadir (#gBack), iri zolaq yoxdur
+        b = p.locator("#gBack") if p.locator("#gBack").count() else p.locator("#band .bback")
         if not b.count():
             return None
         b.first.click(); p.wait_for_timeout(1400)

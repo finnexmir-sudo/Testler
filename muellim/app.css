@@ -3277,3 +3277,66 @@ body.bnav-on .afoot.mini .in{display:flex;padding:0 16px}
 /*  qrupsuz yeni muellim  */
 #main.yh .ybos p{margin:0 0 12px;font-size:14.5px;line-height:1.5;color:var(--fg-2)}
 #main.yh .ybos .btn{min-height:44px}
+
+/* ---------------------------------------------- Qrup sehifesi (26.10, son maket)
+   Butun qrup sekmelerinde eyni basliq (yol · ad · sinif · N sagird · «+ Tapşırıq ver» · disli),
+   alt xetli sekmeler, krem kartlar, nazik cedvel xetleri.  Yazi olculeri ve 44 px qalir.  */
+#main.gpg .gph{align-items:flex-start;margin:4px 0 6px}
+#main.gpg .crumb{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:13.5px;color:var(--fg-3);margin:0 0 4px}
+#main.gpg .crumb a{color:var(--fg-2);text-decoration:none;min-height:32px;display:inline-flex;align-items:center}
+@media (hover:hover){ #main.gpg .crumb a:hover{color:var(--brand)} }
+#main.gpg .crumb #gCrumb{color:var(--fg-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60vw}
+#main.gpg .cback{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 10px 0 4px;margin:0 4px 0 -4px;
+  border:0;border-radius:8px;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--brand);cursor:pointer}
+#main.gpg .cback svg{width:15px;height:15px}
+@media (hover:hover){ #main.gpg .cback:hover{background:var(--n-50)} }
+#main.gpg .phd-a{align-items:center;margin-top:30px}
+#main.gpg .gtvw{position:relative}
+#main.gpg .gtvw .gmenu{right:0;left:auto}
+#main.gpg .gset{width:44px;min-height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:#fff}
+#main.gpg .gset svg{width:18px;height:18px}
+#main.gpg .gset.on{border-color:var(--brand);color:var(--brand)}
+/*  alt xetli sekmeler  */
+#main.gpg .gtabs{background:none;border:0;border-bottom:1px solid #d6e3dd;border-radius:0;box-shadow:none;padding:0;margin:8px 0 14px;gap:6px}
+#main.gpg .gtab{border-radius:0;padding:0 10px;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;font-size:15px}
+#main.gpg .gtab.on{background:none;color:var(--brand);border-bottom-color:var(--brand)}
+@media (hover:hover){ #main.gpg .gtab:hover{background:none;color:var(--fg)} }
+#main.gpg .gtab.gmore{margin-left:auto}
+/*  Bugunku ders  */
+#main.gpg .gkt{margin:0 0 2px;font-size:18px;font-weight:700;line-height:1.35}
+#main.gpg .gks{margin:0 0 12px;font-size:14px;color:var(--fg-3)}
+#main.gpg .gkbt{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 10px}
+#main.gpg .gkbt .btn{min-height:44px;background:#fff}
+#main.gpg .gwarn{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;margin:8px 0 0;border-radius:10px;
+  background:var(--warn-tint);border:1px solid var(--warn-line,#f3d9a8);color:var(--fg);text-decoration:none;font-size:14.5px}
+#main.gpg .gwarn > svg{width:17px;height:17px;flex:none;color:var(--warn)}
+#main.gpg .gwarn span{flex:1;min-width:0}
+#main.gpg .gwarn s{text-decoration:none;display:inline-flex;align-items:center;gap:3px;font-weight:600;color:var(--brand);white-space:nowrap}
+#main.gpg .gwarn s svg{width:14px;height:14px}
+/*  Son tapsiriqlar cedveli  */
+#main.gpg .ytr.ga4{grid-template-columns:minmax(0,1fr) 110px 110px 80px}
+#main.gpg .ga4 .ytq i{display:none}
+#main.gpg .ga4 .ytk{border:0;background:none;padding:0}
+#main.gpg .gkfr{background:none;padding:0;font-weight:600}
+#main.gpg .gnote{display:flex;align-items:center;gap:8px;margin:2px 4px 12px;font-size:13.5px;color:var(--fg-3)}
+#main.gpg .gnote svg{width:16px;height:16px;flex:none}
+#main.gpg .gnote a{color:var(--brand);font-weight:600}
+#main.gpg .rtool{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:0 0 8px}
+#main.gpg .rtool .muted{margin-right:auto;font-size:13.5px}
+@media (max-width:600px){
+  #main.gpg .gph{display:block}
+  #main.gpg .phd-a{display:flex;margin-top:12px}
+  #main.gpg .gtvw{flex:1}
+  #main.gpg .gtvw > .btn{width:100%}
+  #main.gpg .gtabs{gap:0}
+  #main.gpg .gtab{font-size:14px;padding:0 8px}
+  #main.gpg .ytr.ga4{grid-template-columns:minmax(0,1fr) 24px}
+  #main.gpg .ga4 .yts,#main.gpg .ga4 .ytn{display:none}
+  #main.gpg .ga4 .ytq i{display:block}
+  #main.gpg .ytr.ga4.yth > span:not(:first-child){display:none}
+  #main.gpg .gkbt .btn{flex:1 1 0;justify-content:center}
+}
+#main.gpg .rstat{align-items:center}
+#main.gpg .rstat .rref{margin-left:auto;width:44px;min-height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+#main.gpg .rstat .rref svg{width:17px;height:17px}
+#main.gpg .rfree{margin:0 0 6px;font-size:13.5px}
