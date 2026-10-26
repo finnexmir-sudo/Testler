@@ -84,6 +84,7 @@ def yig(pg, ad, qrup=None):
     while pg.locator("#gLevs .chip.on").count():
         pg.locator("#gLevs .chip.on").first.click(); pg.wait_for_timeout(200)
     pg.locator('#gLevs [data-l="6"]').click(); pg.wait_for_timeout(500)
+    pg.evaluate("document.getElementById('gMore').open = true")   #  26.10: ad, deqiq say «Əlavə seçimlər»de
     pg.fill("#gCnt", "10"); pg.fill("#gTitle", ad)
     pg.wait_for_function("document.querySelectorAll('#gAsg option').length > 1", timeout=10000)
     pg.select_option("#gAsg", qrup or "")
@@ -91,8 +92,12 @@ def yig(pg, ad, qrup=None):
         "document.querySelector('#gPrev') && document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 "
         "&& document.querySelector('#gPrev').innerText.length > 5", timeout=15000)
     pg.click("#btnMake")
-    pg.wait_for_selector(".paper, #pAsgH", state="attached", timeout=20000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
-    pg.wait_for_timeout(1500)
+    pg.wait_for_selector(".paper, #pAsgH", state="attached", timeout=20000); pg.wait_for_timeout(1200)
+    #  26.10: test baxisdan sonra verilir - vereqde qrup secili gelir, «Testi ver» basilir
+    if qrup:
+        sel = pg.locator("#pCls").evaluate("e => e.value")
+        ok(sel == qrup, "vereqde secilen qrup hazir gelir", sel)
+        pg.click("#btnPAsg"); pg.wait_for_timeout(2500)
 
 with sync_playwright() as pw:
     br = pw.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
@@ -166,12 +171,10 @@ with sync_playwright() as pw:
             pg.unroute("**/rpc/rpc_assign_test")
             t2 = pg.inner_text("#main")
             print("   mətn: " + t2.replace("\n", " · ")[:330])
-            ok("verilə bilmədi" in t2 and QRUP_B in t2,
-               "tapsiriq alinmayanda SEBEB yazilir (xeta udulmur)")
-            ok("abunə paketinə daxildir" in t2 or "abune paketine daxildir" in t2,
-               "serverin real sebebi gorunur")
-            ok("İndi onu qrupa verin" not in t2 or "verilə bilmədi" in t2,
-               "«hazirdir» emri sebebi ortmur")
+            am = pg.inner_text("#pAsgMsg")
+            ok("abunə paketinə daxildir" in am or "abune paketine daxildir" in am,
+               "tapsiriq alinmayanda serverin real SEBEBI duymenin ustunde yazilir (xeta udulmur)", am[:80])
+            ok(pg.locator(".pasgok").count() == 0, "tesdiq qutusu YOXDUR (verilmeyib)")
             sel = pg.locator("#pCls").evaluate(
                 "e => e.options[e.selectedIndex] ? e.options[e.selectedIndex].textContent : ''")
             ok(sel.startswith(QRUP_B), "forma HEMIN qrupu secili acir (basqasini yox)", sel)
@@ -188,7 +191,7 @@ with sync_playwright() as pw:
             print("\nE · Qrup SEÇİLMƏYİB   [%s · %s]" % (tag, tel))
             yig(pg, "QY E %s %s" % (tag, tel), None)
             t3 = pg.inner_text("#main")
-            ok("İndi onu qrupa verin" in t3, "qrupsuz yigilanda evvelki mesaj qalir")
+            ok("sonra qrupa verin" in t3, "qrupsuz yigilanda «… sonra qrupa verin» mesaji")
             ok(pg.locator(".pasgok").count() == 0, "tesdiq qutusu YOXDUR (hec ne verilmeyib)")
             ok("Başqa qrupa da" not in t3, "«Basqa qrupa da» yazisi yoxdur")
             ctx.close()

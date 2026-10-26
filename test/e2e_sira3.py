@@ -84,8 +84,12 @@ with sync_playwright() as pw:
         pg.set_viewport_size({"width": 390, "height": 844})
     who = pg.inner_text("#gWho") if pg.locator("#gWho").count() else ""
     ok(("Yalnız zəif olanlar · %d" % N) in who, "generator «Yalnız zəif olanlar · N» (N = «Nə etməli»dəki say)", "%s | N=%d" % (who.replace("\n", " "), N))
-    ok(pg.inner_text("#btnMake").strip() == "Testi yığ və %d şagirdə ver" % N, "düymə alıcı sayını deyir", pg.inner_text("#btnMake"))
-    pg.click("#btnMake"); pg.wait_for_selector(".pasgok", timeout=30000); pg.wait_for_timeout(500)
+    #  26.10: test baxisdan sonra verilir - vereqde «Bir neçə şagird» + hemin N ad isareli gelir
+    ok(("yalnız bu %d şagirdə" % N) in pg.inner_text("#gWhoTxt") and "Suallara bax" in pg.inner_text("#btnMake"), "«Kimə» alıcı sayını deyir, düymə «Suallara bax»", pg.inner_text("#gWhoTxt")[:80])
+    pg.click("#btnMake"); pg.wait_for_selector("#btnPAsg", timeout=30000); pg.wait_for_timeout(500)
+    ok(pg.locator("#pWho").input_value() == "__many" and pg.locator("#pWhoMany input:checked").count() == N, "vərəqdə həmin N şagird işarəli gəlir",
+       pg.locator("#pWhoMany input:checked").count())
+    pg.click("#btnPAsg"); pg.wait_for_selector(".pasgok", timeout=30000); pg.wait_for_timeout(500)
     tid = pg.evaluate("location.hash").split("/")[-1]
     conf = pg.inner_text(".pasgok")
     ok(("Yalnız bu %d şagird bu testi görür" % N) in conf, "vərəqdə təsdiq: «Yalnız bu N şagird…» + adlar", conf[:140])
@@ -143,9 +147,10 @@ with sync_playwright() as pw:
     if zn > 1:
         ok(("Yalnız zəif olanlar · %d" % zn) in pg.inner_text("#gWho"), "#/zm-dən: siyahıdakı şagird sayı ötürülür", zn)
         pg.locator("#gWho [data-w='all']").click(); pg.wait_for_timeout(300)
-        ok(pg.inner_text("#btnMake").strip() == "Testi yığ və qrupa ver" and "bütün qrupa" in pg.inner_text("#gWhoTxt"),
-           "«Bütün qrup» seçiləndə düymə və mətn dəyişir")
-        pg.click("#btnMake"); pg.wait_for_selector(".pasgok", timeout=30000); pg.wait_for_timeout(400)
+        ok("bütün qrupa" in pg.inner_text("#gWhoTxt"), "«Bütün qrup» seçiləndə mətn dəyişir")
+        pg.click("#btnMake"); pg.wait_for_selector("#btnPAsg", timeout=30000); pg.wait_for_timeout(400)
+        ok(pg.locator("#pWho").input_value() == "", "vərəqdə «Bütün qrup» seçili gəlir")
+        pg.click("#btnPAsg"); pg.wait_for_selector(".pasgok", timeout=30000); pg.wait_for_timeout(400)
         tid2 = pg.evaluate("location.hash").split("/")[-1]
         r2 = rows_for(tid2)
         ok(len(r2) == 1 and r2[0]["s"] is None, "«Bütün qrup» — bir qrup sətri", r2)

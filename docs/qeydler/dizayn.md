@@ -196,6 +196,7 @@ telefonda İcmal və şagird 22 px, qrup 20 px (`e2e_icmal`, `e2e_qrup_sekme`, `
 |---|---|---|
 | İcmal | bu günün işi / «Test yığ» (+ «Qrup yarat») | 26.10 son maket: başlıq + tarix, Bugünkü dərslər və Qruplarım cədvəli; qrupa aid nəticə/xəbərdarlıq yoxdur (Siqnallar, Nəticələr) |
 | Qrup (sekmələr) | bu dərs / «Tapşırıq ver» | 26.10 son maket: eyni başlıq bütün sekmələrdə, alt xətli sekmələr; İcmal: Bugünkü dərs + Son tapşırıqlar; nəticə Hesabatda |
+| Test yığ | hansı testi kimə / «Suallara bax» | 26.10 son maket: bir forma (Fənn, Sinif, Mövzu, Sual sayı, Kimə), «Əlavə seçimlər», tövsiyə altda; test baxışdan sonra verilir |
 | Qrup → Şagirdlər | kimə baxım / «+ Şagird əlavə et» | 26.10 son maket: axtarış, əlifba sırası, Son fəaliyyət, «Profilə bax»; faiz Hesabatda |
 | Şagird | bu uşağa nə lazımdır / «5 suallıq təkrar ver» | 26.10 son maket: qrup başlığı, alt xətli sekmələr; Xülasə: Dövr cədvəli, Növbəti addım, Son nəticələr, açılan sətirlər; diaqnostika Mövzularda, səhv dəftəri Səhvlərdə |
 | Test yığ | — | baxılmayıb (GPT siyahısında 3-cü) |

@@ -130,6 +130,15 @@ Testlərdə tapılan: `e2e_tapsiriq_bos` sınanda bütün platforma testlərini 
 
 Növbəti (istifadəçi maketi): dizayn.md cədvəlindəki qalan səhifələr (Test hazırlama, Qrup hesabatı, Tapşırıqlar).
 
+## Test yığ — son maket (26.10)
+
+| # | Nə dəyişdi | Necə yoxlandı | Canlıda? |
+|---|---|---|---|
+| TY1 | Bir forma, iri zolaq yoxdur: başlıq «Test yığ · Sinfi və mövzunu seçin, suallara baxın». İlk görünüş: Fənn · Sinif (çox seçim qalır, nişanlar 44 px) · Mövzu (bir sətir — basanda siyahı + axtarış; çox mövzu seçmək qalır) · Sual sayı 5/10/15/20 · Kimə veriləcək? · «Suallara bax». «Əlavə seçimlər» (bağlı, sətirdə seçilənlərin xülasəsi): sual mənbəyi, çətinlik, testin adı, dəqiq sual sayı (1–100). Hovuz yoxlaması — hər şey qaydasındadırsa kiçik yaşıl sətir, problem varsa qutu | `e2e_test_yig` A–C, G | yox |
+| TY2 | **Test baxışdan sonra verilir** (istifadəçi: «göndərməzdən əvvəl suallara baxmaq, alıcıları və son tarixi yoxlamaq»). «Suallara bax» testi yığır, VERMİR; vərəqdə «Qrupa təyin et» formasında alıcı (qrup / yalnız şagird / bir neçə şagird) seçili, son tarix 7 gün sonra, 1 cəhd; «Testi ver». **08.10 qaydası dəyişdi:** qrup kartından «5 suallıq test ver» əvvəl ara ekransız verirdi — indi bir addım əlavə olunub. Vərəqdə suallar 08.10 qaydası ilə bağlı qalır («Suallar · N» bir toxunuşla açılır) | `e2e_test_yig` E, F; `e2e_ders_qapisi`, `e2e_dord_is`, `e2e_qrupla_yig`, `e2e_sagird_hesabat`, `e2e_sira3` yeni axınla | yox |
+| TY3 | Qrupdan / hesabatdan / şagirddən gələndə məlum seçimlər doludur (fənn, sinif, mövzu, say; Kimə = həmin qrup və ya «yalnız Ad», hədəfli siyahı «Yalnız zəif olanlar · N»). **Düzəldildi:** qrup kartından açılıb tərk edilən generator (köhnə `fromG`) sonrakı girişdə yeni alıcını silirdi | `e2e_test_yig` F | yox |
+| TY4 | Tövsiyə («Son keçilən mövzudan hazırla») formanın ALTINDADIR və formanı DOLDURUR — özü test yığmır; üstdə «Forma dolduruldu — …» qeydi | `e2e_test_yig` D | yox |
+
 ## Sıra 1–5 — gözləyir
 
 1. **Testin düzgünlüyü** — 0.1, 0.2, 0.4 bağlandı (yuxarı). Qalan: tək pis sualı əvəz etmək (vərəqdə).

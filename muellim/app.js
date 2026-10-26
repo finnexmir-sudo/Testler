@@ -7957,6 +7957,7 @@
       verilmediyini bilmirdi (29.09, istifadeci: «test yig etdim ama
       teyin ede bilmedim»).  Indi sebeb vereqde yazilir.  */
   var ASG_ERR = null;
+  var PSEND_T = null;
 
   function genForClass(g) {
     var f = genFilter();
@@ -9996,6 +9997,8 @@
     f.remNames = weak.map(function (t) { return t.name; });
     f.cls = gid;
     f.asg = gid;   //  qrupun icinden gelinib - hazir olanda hemin qrupa verilsin
+    //  26.10: qrup kartindan qalmis kohne gelis (fromG) yeni niyyeti silmesin (screenGen onu temizleyirdi)
+    f.fromG = ""; f.fromName = "";
     f.asgStu = stu ? stu.id : "";
     f.asgStuName = stu ? stu.name : "";
     f.count = Math.min(10, Math.max(5, f.topics.length * 3));
@@ -10042,11 +10045,14 @@
   }
 
   var GEN_ENTRY = null;
+  var GEN_KEEP = false;
   function screenGen() {
     var live = guard();
     var f = genFilter();
     //  08.10: qrup kartindan gelis bir defelikdir; menyudan gelende kohne niyyet daşınmasın
     if (GEN_ENTRY) { f.asg = GEN_ENTRY.id; f.fromG = GEN_ENTRY.id; f.fromName = GEN_ENTRY.name; f.asgStu = ""; f.asgStus = []; GEN_ENTRY = null; }
+    //  GEN_KEEP: eyni sehifenin icinden yeniden cizilir (tovsiye formani doldurdu) - secilen alici qalir
+    else if (GEN_KEEP) { GEN_KEEP = false; }
     else if (f.fromG) { f.asg = ""; f.fromG = ""; f.fromName = ""; }
     topTitle.textContent = "Test yığ";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
@@ -10189,6 +10195,8 @@
     if (h) h.textContent = genLevHint(f);
     var tb = $("gTopBox");
     if (tb) tb.innerHTML = genTopHtml(f);
+    if ($("gTopSum")) $("gTopSum").textContent = genTopSum(f);
+    if ($("gMoreSum")) $("gMoreSum").textContent = genMoreSum(f);
     back();
     genPreview();
   }
@@ -10207,95 +10215,113 @@
     back();
   }
 
+  /*  26.10 (son maket, istifadeci): TEST YIG bir formadir - ilk gorunusde yalniz qerar ucun lazim olan:
+      Fənn · Sinif · Mövzu · Sual sayı · Kimə veriləcək? · «Suallara bax».  Sual menbeyi, cetinlik,
+      testin adi, deqiq sual sayi - «Əlavə seçimlər» altinda.  Test DERHAL VERILMIR: yigilir, vereq
+      acilir (suallar acıq, alici / son tarix / cehd secili gelir), muellim yoxlayib «Testi ver» basir.
+      Tovsiye (son kecilen movzu) formanin ALTINDADIR ve formani doldurur - ozu test yigmir.  */
+  var GMORE = false;    //  «Əlavə seçimlər» acıqdirsa yeniden cizilende de acıq qalsin
+  var GSTU = null;      //  qrup id -> aktiv sagird sayi (Kimə setrinin altinda)
+  var PSEND = null;     //  vereqe: {test, cls, stu, stus} - bir defelik (drawPaper oxuyur)
+  var GCNTS = [5, 10, 15, 20];
+  function genTopSum(f) {
+    if (!f.topics.length) return "Bütün mövzular";
+    if (f.topics.length > 1) return f.topics.length + " mövzu seçilib";
+    var t = (FAC.topics || []).filter(function (x) { return x.id === f.topics[0]; })[0];
+    return t ? topLabel(t, f.levels[0]) : (f.remNames[0] || "1 mövzu seçilib");
+  }
+  function genCntSegs(f) {
+    return GCNTS.map(function (n) {
+      return '<button type="button" class="seg' + (f.count === n ? " on" : "") + '" data-c="' + n + '">' + n + "</button>";
+    }).join("");
+  }
+  function genMoreSum(f) {
+    var x = [];
+    x.push(f.pool === "mine" ? "öz suallarım" : (f.pool === "platform" ? "hazır suallar" : "bütün suallar"));
+    if (f.difficulty.length) x.push(f.difficulty.slice().sort().map(function (d) { return DIFF[d].toLowerCase(); }).join(", "));
+    if (f.title) x.push("«" + f.title + "»");
+    if (GCNTS.indexOf(f.count) < 0) x.push(f.count + " sual");
+    return x.join(" · ");
+  }
+  //  «Kimə veriləcək?» - qrup secimi; sagirdden gelende «yalnız Ad», tovsiyeden gelende hedefli siyahi
+  function genKimHtml(f, cls) {
+    if (f.back) {
+      return '<p class="muted gkim0">Hazır olan kimi «' + esc(f.backName || "qrup") +
+        "» tapşırıq ekranına qayıdacaqsınız — test orada seçilmiş gələcək.</p>";
+    }
+    var v = f.asgStu ? "s:" + f.asgStu : (f.asg || "");
+    var opts = '<option value="">Heç kimə — yalnız test yığılsın</option>' +
+      (f.asgStu ? '<option value="s:' + esc(f.asgStu) + '" selected>yalnız ' + esc(f.asgStuName || "şagird") + "</option>" : "") +
+      (cls || []).map(function (c) {
+        return '<option value="' + esc(c.id) + '"' + (v === c.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
+      }).join("");
+    var n = f.asg && GSTU ? GSTU[f.asg] : null;
+    var sub = f.asgStu ? "Yalnız bu şagird görəcək — qrupun qalanı yox."
+      : (f.asg ? "Bütün qrup" + (n != null ? " · " + n + " şagird" : "")
+        : "Test yığılacaq — sonra vərəqdən istədiyiniz qrupa verərsiniz.");
+    return '<label for="gAsg">Kimə veriləcək?</label><select id="gAsg">' + opts + "</select>" +
+      ((f.asgStus || []).length && f.asg && !f.asgStu ? genWhoHtml(f) : '<p class="muted gkimS" id="gAsgSub">' + sub + "</p>");
+  }
+  function genNote(f) {
+    return f.back ? "" : (f.asg || f.asgStu ? "Baxışdan sonra göndəriləcək." : "Baxışdan sonra istəsəniz qrupa verərsiniz.");
+  }
   function drawGen() {
     var f = genFilter();
-    bandHead({
-      back: { id: "btnBack", label: f.back ? (f.backName || "Tapşırıqlar") : (f.fromG ? "Geri" : "Əsas səhifə") },
-      eye: "Test yığ", title: "Avtomatik test",
-      sub: "Süzgəci seçin — sistem hovuzdan balanslı test yığacaq: mövzular arasında bərabər, təkrarsız."
-    });
-    show(
-      '<div id="gRec"></div>' +
-      '<div class="spacer"></div>' +
-      '<div class="card tight">' +
-        '<div class="segs" id="gPool">' +
-          seg("mine", "Öz suallarım", f.pool) +
-          seg("platform", "Hazır suallar", f.pool) +
-          seg("all", "Hamısı", f.pool) +
-        "</div>" +
+    show('<div class="genw">' +
+      '<header class="phd gph" id="genHd"><div class="phd-t">' +
+          '<nav class="crumb" aria-label="Yol"><button type="button" class="cback" id="btnBack">' + ic("back") + "Geri</button></nav>" +
+          "<h1>Test yığ</h1><p>Sinfi və mövzunu seçin, suallara baxın.</p></div></header>" +
+      '<div id="gFill"></div>' +
+      '<section class="card yk genf">' +
         (f.cls && f.topics.length
-          ? '<div class="ok" style="margin:12px 0 0">' + ic("check") +
-            "<span>Hesabatdan gələn zəif mövzular seçilib: " +
-            esc(f.remNames.join(", ")) +
+          ? '<div class="ok gnot">' + ic("check") +
+            "<span>Hesabatdan gələn zəif mövzular seçilib: " + esc(f.remNames.join(", ")) +
             ". Qrupun səhv etdiyi suallara bənzəyənlər önə çəkiləcək. " +
             '<a href="#" id="gRemOff">Təmizlə</a></span></div>'
           : "") +
         (f.pool !== "mine" && !(ACC && ACC.plan)
-          ? '<div class="warn" style="margin:12px 0 0">' + ic("warn") +
-            "<span>Hazır suallar abunə paketinə daxildir. " +
-            "Öz suallarınızdan yığa bilərsiniz.</span></div>"
+          ? '<div class="warn gnot">' + ic("warn") +
+            "<span>Hazır suallar abunə paketinə daxildir. Öz suallarınızdan yığa bilərsiniz.</span></div>"
           : "") +
-        '<div style="margin-top:12px"><label for="gTq">Mövzu axtar</label>' +
-          '<input id="gTq" autocomplete="off" placeholder="məs. frazeoloji birləşmə, kəsr, zərf…">' +
-          '<div id="gTqHits"></div></div>' +
-        '<div style="margin-top:12px"><label for="gsub">Fənn</label>' +
-          '<select id="gsub">' + genSubOpts(f) + "</select></div>" +
-        /*  SINIF - COX SECIM.  Repetitor 8-ci sinfi hazirlayarken
-            7-ci sinfin materialini da qatmaq isteyirdi; select tek
-            secimli oldugu ucun ya bir sinif, ya "Hamisi" idi.
-            Ceki QOYULMUR: secilen sinifler arasinda beraber paylanir,
-            cunki muellim onlari bilerekden secib.  */
-        '<label>Sinif</label>' +
-        '<div class="chips num" id="gLevs">' + genLevChips(f) + "</div>" +
-        //  Nisanlarla yazi arasi: menfi kenar onlari bir-birine
-        //  yapisdirmisdi, oxumaq cetin idi
-        '<p class="muted" id="gLevHint" style="margin:8px 0 18px">' +
-          esc(genLevHint(f)) + "</p>" +
-        /*  Cetinliyin de basligi var: iki nisan setri yan-yana
-            durende hansinin ne oldugu bilinmirdi.  */
-        '<label>Çətinlik</label>' +
-        '<div class="chips" id="gDiff">' +
-          [1, 2, 3].map(function (d) {
-            return '<button class="chip' + (f.difficulty.indexOf(d) >= 0 ? " on" : "") +
-              '" data-d="' + d + '">' + DIFF[d] + "</button>";
-          }).join("") +
-        "</div>" +
-        '<div id="gTopBox">' + genTopHtml(f) + "</div>" +
-      "</div>" +
-      '<div class="spacer"></div>' +
-      '<div class="card">' +
-        '<div class="fieldrow">' +
-          '<div><label for="gTitle">Testin adı</label>' +
-            '<input id="gTitle" maxlength="120" placeholder="boş qalsa: fənn · sinif · tarix" value="' +
-            esc(f.title) + '"></div>' +
-          '<div style="flex:0 0 140px"><label for="gCnt">Sual sayı</label>' +
-            '<input id="gCnt" type="number" min="1" max="100" inputmode="numeric" value="' +
-            f.count + '"></div>' +
-        "</div>" +
-        /* Tapsiriq ekranindan gelmisiksa bu saheye ehtiyac yoxdur:
-           teyinati ora qayidib veririk - orada son tarix, cehd sayi
-           ve "tek sagird" secimi de var. */
-        (f.back
-          ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi «' +
-            esc(f.backName || "qrup") + "» tapşırıq ekranına " +
-            "qayıdacaqsınız — test orada seçilmiş gələcək.</p>"
-          : f.fromG
-          ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi test <b>«' + esc(f.fromName || "qrup") +
-            "»</b> qrupuna dərhal veriləcək (son tarix 7 gün, 1 cəhd).</p>"
-          : (f.asgStus || []).length
-          ? genWhoHtml(f)
-          : f.asgStu
-          ? '<p class="muted" style="margin:0 0 14px">Hazır olan kimi test <b>yalnız «' + esc(f.asgStuName) +
-            "»</b> şagirdinə veriləcək — qrupun qalanı görmür (son tarix 7 gün, 1 cəhd).</p>"
-          : '<label for="gAsg">Qrupa tapşırıq ver (istəyə görə)</label>' +
-            '<select id="gAsg"><option value="">Yalnız test yığılsın</option></select>' +
-            '<p class="muted" style="margin:-8px 0 14px">Qrup seçsəniz, test yaranan ' +
-              "kimi ona tapşırıq gedəcək (son tarix 7 gün, 1 cəhd).</p>") +
-        '<div id="gPrev"><div class="skel">Hovuz yoxlanılır…</div></div>' +
+        '<label for="gsub">Fənn</label><select id="gsub">' + genSubOpts(f) + "</select>" +
+        /*  SINIF - COX SECIM (7 + 8 birlikde) - funksiya qalir, nisanlar yigcam bir setirdir  */
+        '<label>Sinif</label><div class="chips num" id="gLevs">' + genLevChips(f) + "</div>" +
+        '<p class="muted gh" id="gLevHint">' + esc(genLevHint(f)) + "</p>" +
+        //  Movzu: bir setir; basanda siyahi + axtaris acilir (cox movzu secmek qalir)
+        '<label>Mövzu</label>' +
+        '<details class="gpick" id="gTopD"><summary><span id="gTopSum">' + esc(genTopSum(f)) + "</span>" + ic("down", "ar") + "</summary>" +
+          '<div class="gpickb"><input id="gTq" autocomplete="off" placeholder="Mövzu axtar — məs. kəsr, zərf…" aria-label="Mövzu axtar">' +
+            '<div id="gTqHits"></div><div id="gTopBox">' + genTopHtml(f) + "</div></div></details>" +
+        '<label>Sual sayı</label><div class="segs gcnt" id="gCntS">' + genCntSegs(f) + "</div>" +
+        '<details class="gmore" id="gMore"' + (GMORE ? " open" : "") + '><summary><span><b>Əlavə seçimlər</b>' +
+            '<i id="gMoreSum">' + esc(genMoreSum(f)) + "</i></span>" + ic("right", "ar") + "</summary>" +
+          '<div class="gmoreb">' +
+            '<label>Sual mənbəyi</label><div class="segs" id="gPool">' +
+              seg("mine", "Öz suallarım", f.pool) + seg("platform", "Hazır suallar", f.pool) + seg("all", "Hamısı", f.pool) + "</div>" +
+            '<label>Çətinlik</label><div class="chips" id="gDiff">' +
+              [1, 2, 3].map(function (d) {
+                return '<button class="chip' + (f.difficulty.indexOf(d) >= 0 ? " on" : "") + '" data-d="' + d + '">' + DIFF[d] + "</button>";
+              }).join("") + "</div>" +
+            '<div class="fieldrow"><div><label for="gTitle">Testin adı</label>' +
+              '<input id="gTitle" maxlength="120" placeholder="boş qalsa: fənn · sinif · tarix" value="' + esc(f.title) + '"></div>' +
+              '<div style="flex:0 0 140px"><label for="gCnt">Dəqiq sual sayı</label>' +
+              '<input id="gCnt" type="number" min="1" max="100" inputmode="numeric" value="' + f.count + '"></div></div>' +
+          "</div></details>" +
+        '<div id="gKim">' + genKimHtml(f, null) + "</div>" +
+        '<div id="gPrev" class="gprev"><p class="muted">Hovuz yoxlanılır…</p></div>' +
         '<div id="gErr"></div>' +
-        '<button class="btn go" id="btnMake">' + ic("gen") + makeLabel(f) + "</button>" +
-      "</div>"
+        '<button class="btn go wide" id="btnMake">' + makeLabel(f) + ic("right") + "</button>" +
+        '<p class="muted gnote2" id="gNote">' + genNote(f) + "</p>" +
+      "</section>" +
+      '<div id="gRec"></div></div>'
     );
+    setBand("");
+    main.classList.add("yig"); main.classList.add("yh"); main.classList.add("gpg");
+    if (GREC_FILL) {
+      $("gFill").innerHTML = '<div class="ok gnot">' + ic("check") + "<span>Forma dolduruldu — " + esc(GREC_FILL) +
+        ". Yoxlayıb «Suallara bax» basın.</span></div>";
+      GREC_FILL = "";
+    }
 
     on("btnBack", "click", function () {
       //  imtina: geri qayidis niyyetini de temizleyirik
@@ -10308,11 +10334,11 @@
       f.cls = ""; f.remNames = []; f.topics = [];
       drawGen();
     });
+    on("gMore", "toggle", function () { GMORE = $("gMore").open; });
     on("gPool", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
-      //  hovuz deyisende siyahilar da deyisir - fenn/sinif/movzu
-      //  secimleri sifirdan, serverden teze suzulur
+      //  hovuz deyisende siyahilar da deyisir - fenn/sinif/movzu secimleri serverden teze suzulur
       f.pool = b.getAttribute("data-v");
       f.subject = ""; f.levels = []; f.topics = [];
       screenGen();
@@ -10325,8 +10351,7 @@
       if (i >= 0) f.difficulty.splice(i, 1); else f.difficulty.push(d);
       genSync();
     });
-    //  Dinleyici gTopBox-a baglanir, gTop-a yox: movzu qutusunun
-    //  ICI genSync-de yeniden yazilir, qutunun ozu ise yerinde qalir.
+    //  Dinleyici gTopBox-a baglanir: qutunun ICI genSync-de yeniden yazilir
     on("gTopBox", "click", function (e) {
       var b = e.target.closest ? e.target.closest("[data-t]") : null;
       if (!b) return;
@@ -10347,7 +10372,7 @@
       var tp = THITS[Number(b.getAttribute("data-i"))];
       if (!tp) return;
       f.subject = tp.subject_slug; f.levels = tp.level ? [tp.level] : [];
-      f.topics = [tp.id]; f.cls = ""; f.remNames = [];
+      f.topics = [tp.id]; f.cls = ""; f.remNames = [tp.name];
       var inp = $("gTq"); if (inp) inp.value = "";
       var hb = $("gTqHits");
       if (hb) hb.innerHTML = '<div class="ok" style="margin:10px 0 0">' + ic("check") +
@@ -10357,10 +10382,7 @@
       genSync(); genFacets();
     });
     on("gsub", "change", function () {
-      //  Sinif nisanlari ile eyni yol - ekran silinmir
-      //  23.10 (UX yoxlamasi): fenn deyisende sinif secimi de SIFIRLANIR.  Evvel
-      //  kohne fennin sinifleri secili qalirdi: informatika 10 -> Az. dili, «4»
-      //  basanda «4, 10 siniflər» yigilirdi, muellim bunu gormurdu.
+      //  23.10: fenn deyisende sinif secimi de SIFIRLANIR (kohne fennin sinifleri secili qalmasin)
       f.subject = $("gsub").value; f.topics = []; f.levels = [];
       genSync(); genFacets();
     });
@@ -10372,50 +10394,64 @@
       if (i >= 0) f.levels.splice(i, 1); else f.levels.push(k);
       //  Movzular sinife baglidir - sinif deyisdise secim menasizdir
       f.topics = [];
-      /*  Evvelce YERLI cizilir - nisan derhal yanir, sehife yerinde
-          qalir.  Suzgec siyahilari (fenn saylari, movzular) sinifden
-          asilidir, ona gore arxadan yenilenir; geldiyi anda ekran
-          sakitce tezelenir.  Ilk sinif, ikinci sinif, secimi silmek -
-          UCU DE eyni yolla gedir, yoxsa bezi klikde ekran yanib
-          sonur, bezisinde yox.  */
       genSync(); genFacets();
     });
-    on("gTitle", "input", function () { f.title = $("gTitle").value; });
-    on("gWho", "click", function (e) {
-      var b = e.target.closest ? e.target.closest("[data-w]") : null;
-      if (!b) return;
-      f.asgMode = b.getAttribute("data-w");
-      Array.prototype.forEach.call($("gWho").querySelectorAll("[data-w]"), function (x) {
-        x.classList.toggle("on", x === b);
-      });
-      if ($("gWhoTxt")) $("gWhoTxt").innerHTML = genWhoTxt(f);
-      if ($("btnMake") && !busy) $("btnMake").textContent = makeLabel(f);
-    });
-    //  qrup siyahisi ayrica dolur - secim suzgec deyismelerinde itmesin
-    if (!f.back && !f.asgStu && !f.fromG) sb.select("classes", { select: "id,name", eq: { account_id: ACC.id },
-                           order: "name" })
-      .then(function (rows) {
-        var sel = $("gAsg");
-        if (!sel) return;
-        sel.innerHTML = '<option value="">Yalnız test yığılsın</option>' +
-          (rows || []).map(function (c) {
-            return '<option value="' + esc(c.id) + '"' +
-              (f.asg === c.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
-          }).join("");
-      }).catch(function () {});
-    on("gAsg", "change", function () {
-      f.asg = $("gAsg").value;
-      var mb = $("btnMake");
-      if (mb && !busy) mb.innerHTML = ic("gen") + makeLabel(f);
-    });
-
+    on("gTitle", "input", function () { f.title = $("gTitle").value; if ($("gMoreSum")) $("gMoreSum").textContent = genMoreSum(f); });
     var t = null;
-    on("gCnt", "input", function () {
-      var n = Number($("gCnt").value);
-      if (n >= 1 && n <= 100) f.count = Math.round(n);
+    function cntSet(n, fromInput) {
+      f.count = n;
+      Array.prototype.forEach.call(document.querySelectorAll("#gCntS [data-c]"), function (x) {
+        x.classList.toggle("on", Number(x.getAttribute("data-c")) === n);
+      });
+      if (!fromInput && $("gCnt")) $("gCnt").value = n;
+      if ($("gMoreSum")) $("gMoreSum").textContent = genMoreSum(f);
       clearTimeout(t);
       t = setTimeout(genPreview, 350);
+    }
+    on("gCntS", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-c]") : null;
+      if (b) cntSet(Number(b.getAttribute("data-c")), false);
     });
+    on("gCnt", "input", function () {
+      var n = Number($("gCnt").value);
+      if (n >= 1 && n <= 100) cntSet(Math.round(n), true);
+    });
+    function kimBind() {
+      on("gAsg", "change", function () {
+        var v = $("gAsg").value;
+        if (v.indexOf("s:") === 0) return;
+        //  basqa qrup / heç kim: sagird ve hedefli siyahi niyyeti bitir
+        f.asg = v; f.asgStu = ""; f.asgStuName = ""; f.asgStus = []; f.fromG = v ? f.fromG : "";
+        kimDraw();
+      });
+      on("gWho", "click", function (e) {
+        var b = e.target.closest ? e.target.closest("[data-w]") : null;
+        if (!b) return;
+        f.asgMode = b.getAttribute("data-w");
+        Array.prototype.forEach.call($("gWho").querySelectorAll("[data-w]"), function (x) {
+          x.classList.toggle("on", x === b);
+        });
+        if ($("gWhoTxt")) $("gWhoTxt").innerHTML = genWhoTxt(f);
+      });
+    }
+    var CLS = null;
+    function kimDraw() {
+      if (!$("gKim")) return;
+      $("gKim").innerHTML = genKimHtml(f, CLS);
+      if ($("gNote")) $("gNote").textContent = genNote(f);
+      kimBind();
+    }
+    kimBind();
+    //  qrup siyahisi + sagird saylari ayrica dolur - secim suzgec deyismelerinde itmesin
+    if (!f.back) Promise.all([
+      sb.select("classes", { select: "id,name", eq: { account_id: ACC.id }, order: "name" }),
+      sb.select("students", { select: "id,class_id", eq: { account_id: ACC.id, is_active: true } }).catch(function () { return []; })
+    ]).then(function (rr) {
+      CLS = rr[0] || [];
+      GSTU = {};
+      (rr[1] || []).forEach(function (x) { GSTU[x.class_id] = (GSTU[x.class_id] || 0) + 1; });
+      kimDraw();
+    }).catch(function () {});
 
     on("btnMake", "click", makeTest);
     genPreview();
@@ -10435,9 +10471,9 @@
         if (!box || JSON.stringify(genRule(genFilter())) !== my) return;
         v = v || {};
         var found = Number(v.found) || 0, want = Number(v.want) || f.count;
+        //  26.10: hər şey qaydasindadirsa bir kicik setir (yasil qutu yox) - problem olanda qutu
         box.innerHTML = v.enough
-          ? msg("ok", "Hovuzda kifayət qədər sual var — " + want +
-                " sual yığılacaq.")
+          ? '<p class="gok">' + ic("check") + "Hovuzda kifayət qədər sual var — " + want + " sual yığılacaq.</p>"
           //  Yeni muellimin oz suali yoxdur - bu xeta deyil, yol
           //  gostermekdir (evvel ilk aciliska qirmizi xeta cixirdi)
           : (f.pool === "mine" && !(Number((FAC.usage || {}).used) || 0)
@@ -10472,6 +10508,7 @@
       10 sual: bir toxunuşla yığılır və tapşırıq ekranına keçir.  Qrupdan
       gəlmişiksə yalnız o qrup, yoxsa hesabın qrupları (5-ə qədər).  */
   var GREC_SEQ = 0;
+  var GREC_FILL = "";   //  tovsiyeden doldurulanda formanin ustunde bir defelik qeyd
   function loadGenRec(f) {
     var box = $("gRec");
     if (!box || !(ACC && ACC.plan)) return;
@@ -10490,14 +10527,13 @@
       if (seq !== GREC_SEQ || !$("gRec")) return;
       rows = (rows || []).filter(function (x) { return x && x.d.last && x.d.subject; });
       if (!rows.length) return;
-      $("gRec").innerHTML = '<div class="spacer"></div><div class="card tight grec">' +
-        '<div class="pt"><b>Tövsiyə olunan</b><span class="muted">son keçilən fəsildən · 10 sual</span></div>' +
+      //  26.10: tovsiye formanin ALTINDADIR ve formani DOLDURUR (test ozu yigilmir) - muellim baxib «Suallara bax» basir
+      $("gRec").innerHTML = '<section class="grec2"><p class="grh">Son keçilən mövzudan hazırla</p>' +
         rows.map(function (x, i) {
           var ch = x.d.last.group || x.d.last.topic;
-          return '<div class="grow"><div><b>' + esc(ch) + "</b>" +
-            '<span class="muted"> · ' + esc(x.c.name) + "</span></div>" +
-            '<button class="btn sm" data-grec="' + i + '">' + ic("gen") + "Yığ</button></div>";
-        }).join("") + "</div>";
+          return '<button type="button" class="grow2" data-grec="' + i + '"><span><b>' + esc(ch) + "</b><i>" + esc(x.c.name) +
+            " · 10 sual</i></span><s>Hazırla " + ic("right") + "</s></button>";
+        }).join("") + "</section>";
       Array.prototype.forEach.call($("gRec").querySelectorAll("[data-grec]"), function (b) {
         b.addEventListener("click", function () {
           var x = rows[Number(b.getAttribute("data-grec"))];
@@ -10506,15 +10542,16 @@
           ff.pool = "all";
           ff.subject = x.d.subject; ff.levels = x.d.level ? [x.d.level] : [];
           ff.topics = x.d.last.topic_id ? [x.d.last.topic_id] : [];
-          ff.difficulty = []; ff.cls = ""; ff.remNames = []; ff.asg = ""; ff.asgStu = ""; ff.asgStus = [];
+          ff.difficulty = []; ff.cls = ""; ff.remNames = [x.d.last.topic || ""]; ff.asgStu = ""; ff.asgStuName = ""; ff.asgStus = [];
           ff.count = 10;
           ff.title = (x.d.last.group || x.d.last.topic) + " — ev tapşırığı";
-          //  08.10: qrupun kartindan gelibse (fromG) hemin qrupun tovsiyesi - tapsiriq ekranina getmeden
-          //  birbasa verilir; menyudan gelende kohne yol (tapsiriq ekraninda son tarix/cehd secilir)
-          if (ff.fromG && ff.fromG === x.c.id) { ff.asg = x.c.id; ff.back = ""; ff.backName = ""; ff.fromName = x.c.name; }
-          else { ff.fromG = ""; ff.fromName = ""; ff.back = x.c.id; ff.backName = x.c.name; }
-          b.disabled = true; b.textContent = "Yığılır…";
-          makeTest();
+          //  tapsiriq ekranindan gelinibse (hemin qrup) ora qayidis qalir; yoxsa alici - hemin qrup
+          if (ff.back && ff.back === x.c.id) { ff.asg = ""; }
+          else { ff.back = ""; ff.backName = ""; ff.asg = x.c.id; }
+          GREC_FILL = x.c.name + ": «" + (x.d.last.group || x.d.last.topic) + "», 10 sual";
+          GEN_KEEP = true;
+          screenGen();
+          window.scrollTo({ top: 0 });
         });
       });
     }).catch(function () {});
@@ -10536,17 +10573,16 @@
   function genWhoTxt(f) {
     var L = f.asgStus || [];
     if (f.asgMode === "all") {
-      return "Hazır olan kimi test <b>bütün qrupa</b> veriləcək (son tarix 7 gün, 1 cəhd).";
+      return "Baxışdan sonra test <b>bütün qrupa</b> veriləcək.";
     }
-    return "Hazır olan kimi test <b>yalnız bu " + L.length + " şagirdə</b> veriləcək: " +
+    //  26.10: test baxisdan sonra verilir - son tarix ve cehd vereqde secilir
+    return "Baxışdan sonra test <b>yalnız bu " + L.length + " şagirdə</b> veriləcək: " +
       L.map(function (x) { return esc(firstName(x.name) || x.name); }).join(", ") +
-      " — qrupun qalanı görmür (son tarix 7 gün, 1 cəhd).";
+      " — qrupun qalanı görmür.";
   }
+  //  26.10: duyme nece oldugunu deyir - test derhal VERILMIR, evvel suallara baxilir
   function makeLabel(f) {
-    if (f.asg && !f.back && (f.asgStus || []).length && f.asgMode !== "all") {
-      return "Testi yığ və " + f.asgStus.length + " şagirdə ver";
-    }
-    return f.asg && !f.back ? (f.asgStu ? "Testi yığ və şagirdə ver" : "Testi yığ və qrupa ver") : "Testi yığ";
+    return f.back ? "Testi yığ" : "Suallara bax";
   }
 
   function makeTest() {
@@ -10554,53 +10590,17 @@
     var f = genFilter();
     $("gErr").innerHTML = "";
     setBusy("btnMake", true, makeLabel(f));
-    //  Qrupun ADI indi oxunur - yigandan sonra siyahi deyise biler
-    var qadSel = $("gAsg"), qad = "";
-    if (f.asg && qadSel && qadSel.selectedIndex >= 0) {
-      qad = qadSel.options[qadSel.selectedIndex].textContent;
-    } else if (f.fromG) qad = f.fromName;
-    var qid = f.asg, qstu = f.asgStu, qstuName = f.asgStuName;
-    //  Sira 3: hedefli siyahi (2+ sagird) - «Bütün qrup» secilmeyibse
-    var qstus = ((f.asgStus || []).length && f.asgMode !== "all") ? f.asgStus.slice() : null;
-    if (f.asgMode === "all" && (f.asgStus || []).length) { qstu = ""; qstuName = ""; }
-    ASG = null; ASG_ERR = null;
+    //  26.10: alici YADDA SAXLANIR, tapsiriq verilmir - vereqde secili gelir, muellim yoxlayib verir
+    var send = f.back ? null : {
+      cls: f.asg || "", stu: f.asgStu || "",
+      stus: ((f.asgStus || []).length && f.asgMode !== "all") ? f.asgStus.slice() : null
+    };
     sb.rpc("rpc_generate_test", { p_rule: genRule(f), p_title: (f.title || "").trim() || genAutoTitle(f) })
       .then(function (v) {
-        //  qrup secilibse test derhal tapsiriq kimi gedir; tapsiriq
-        //  alinmasa da test hazirdir - veraqde elle vermek olar.
-        //  Ikisi de vereqde YAZILIR: verildise kime, verilmediyse niye.
-        if (!qid) return v;
-        var closes = new Date(Date.now() + 7 * 864e5);
-        if (qstus) {
-          return sb.rpc("rpc_assign_test_many", {
-            p_class_id: qid, p_test_id: v.test_id,
-            p_student_ids: qstus.map(function (x) { return x.id; }),
-            p_closes_at: closes.toISOString(), p_max_attempts: 1
-          }).then(function (r) {
-            ASG = { hami: false, qrup: qad, n: Number(r && r.count) || qstus.length,
-                    who: ((r && r.students) || qstus.map(function (x) { return x.name; })).join(", "),
-                    son: closes.toISOString(), cehd: 1 };
-          }, function (e) {
-            ASG_ERR = { qrup: qad, cid: qid, msg: fail(e) };
-          }).then(function () { return v; });
-        }
-        return sb.rpc("rpc_assign_test", {
-          p_class_id: qid, p_test_id: v.test_id,
-          p_closes_at: closes.toISOString(), p_max_attempts: 1,
-          p_student_id: qstu || null
-        }).then(function () {
-          ASG = { hami: !qstu, qrup: qad, who: qstu ? qstuName : "", son: closes.toISOString(), cehd: 1 };
-        }, function (e) {
-          ASG_ERR = { qrup: qad, cid: qid, msg: fail(e) };
-        }).then(function () { return v; });
-      })
-      .then(function (v) {
         busy = false;
-        //  yigim bitdi - «qrupa/sagirde ver» niyyeti bir defelikdir: sonraki «Test yig»
-        //  ozunden avvelki niyyeti (ve ya sagirdi) daşımasın
+        //  niyyet bir defelikdir: sonraki «Test yığ» evvelki alicini daşımasın
         f.asg = ""; f.asgStu = ""; f.asgStuName = ""; f.asgStus = []; f.fromG = ""; f.fromName = "";
-        //  Tapsiriq ekranindan gelmisiksa ora qayidiriq - teze test
-        //  siyahida secili gelsin deye id-ni otururuk.
+        //  Tapsiriq ekranindan gelmisiksa ora qayidiriq - teze test siyahida secili gelsin
         if (f.back) {
           var gid = f.back;
           f.back = ""; f.backName = "";
@@ -10609,6 +10609,7 @@
           return;
         }
         MADE = v.test_id;
+        if (send) { send.test = v.test_id; PSEND = send; }
         nav("#/t/" + v.test_id);
       })
       .catch(function (e) {
@@ -10948,6 +10949,8 @@
     ]).then(function (res) {
       if (!live()) return;
       var fresh = MADE === id; MADE = "";
+      //  26.10: Test yigdan gelen alici (bir defelik) - vereqde secili gelir
+      PSEND_T = PSEND && PSEND.test === id ? PSEND : null; PSEND = null;
       var verildi = ASG; ASG = null;
       var xeta = ASG_ERR; ASG_ERR = null;
       drawPaper(res[0] || {}, res[1] || [], res[2] || [], res[3] || [], fresh, verildi, xeta);
@@ -11278,8 +11281,10 @@
             : "") +
           (fresh && !verildi && !xeta && (freeCls.length || !classes.length)
             ? msg("ok", classes.length
-                ? "Test hazırdır. İndi onu qrupa verin — şagird " +
-                  "dərhal öz siyahısında görəcək."
+                ? (PSEND_T && PSEND_T.cls
+                    ? "Test hazırdır, hələ verilməyib. Sualları aşağıdakı «Suallar» bölməsində görürsünüz; alıcı və son tarix seçilib — yoxlayıb «" +
+                      asgBtnLabel() + "» basın."
+                    : "Test hazırdır. Sualları aşağıdakı «Suallar» bölməsində görürsünüz; sonra qrupa verin — şagird dərhal öz siyahısında görəcək.")
                 : "Test hazırdır. Bir qrup adı yazın — test ona veriləcək, " +
                   "sonra şagirdləri əlavə edərsiniz.")
             : "") +
@@ -11492,6 +11497,25 @@
       }
     }
     fillWho();
+    //  26.10: Test yigda secilen alici + son tarix 7 gun (evvel tapsiriq derhal bu qayda ile verilirdi)
+    var ps = PSEND_T; PSEND_T = null;
+    if (ps && ps.cls && $("pCls") && freeCls.some(function (c) { return c.id === ps.cls; })) {
+      $("pCls").value = ps.cls; fillWho();
+      var w = $("pWho"), many = ps.stus && ps.stus.length > 1;
+      if (w && many && w.querySelector('option[value="__many"]')) {
+        w.value = "__many";
+        var ids = ps.stus.map(function (x) { return x.id; });
+        Array.prototype.forEach.call(document.querySelectorAll("#pWhoMany input"), function (c) { c.checked = ids.indexOf(c.value) >= 0; });
+        if ($("pWhoMany")) $("pWhoMany").style.display = "";
+      } else if (w) {
+        var one = ps.stu || (ps.stus && ps.stus.length === 1 ? ps.stus[0].id : "");
+        if (one && w.querySelector('option[value="' + one + '"]')) w.value = one;
+      }
+    }
+    if (fresh && $("pDate") && !$("pDate").value) {
+      var d7 = new Date(Date.now() + 7 * 864e5), z = function (n) { return (n < 10 ? "0" : "") + n; };
+      $("pDate").value = d7.getFullYear() + "-" + z(d7.getMonth() + 1) + "-" + z(d7.getDate());
+    }
     on("pCls", "change", fillWho);
     on("pWho", "change", function () {
       var box = $("pWhoMany");
