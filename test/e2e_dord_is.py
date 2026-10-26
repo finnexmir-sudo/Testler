@@ -6,8 +6,8 @@
      «Plani qur» plan sehifesine aparir; plan sehifesinde kart menyudakinin
      tekrari deyil
   B  hesabatdan «Zeif movzulardan test yig» -> generatorda qrup SECILI,
-     duymenin adi «Testi yig ve qrupa ver»; qrup silinende «Testi yig»;
-     yigilandan sonra tesdiq var, «Indi onu qrupa verin» YOX
+     duyme «Suallara bax» (26.10: test baxisdan sonra verilir), «Kimə» setri qrupu deyir;
+     vereqde qrup secili, «Testi ver» -> tesdiq var, «Indi onu qrupa verin» YOX
   C  tapsiriq verilenden sonra: tesdiq EN BASDA, WhatsApp metni baglidir,
      hazir test secimi baglidir, aktiv siyahi 3-le baslayir
   D  adlar: «Testi ver» (hazir test) ve «Ev tapsirigi yaz» (metn)
@@ -66,11 +66,17 @@ def daxil(pg):
     pg.fill("#email", MAIL); pg.fill("#pass", "isparol123"); pg.click("#btnAuth")
     pg.wait_for_timeout(3000)
 
+def ver(pg):
+    #  26.10: «Suallara bax» testi yigir, vereqde qrup secili gelir - «Testi ver» basilir
+    pg.wait_for_selector("#btnPAsg", timeout=25000); pg.wait_for_timeout(400)
+    pg.click("#btnPAsg"); pg.wait_for_selector(".pasgok", timeout=20000); pg.wait_for_timeout(400)
+
 def scroll_x(pg):
     return pg.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
 
 def gen_qrupla(pg, ad, qrup):
     pg.wait_for_selector("#gsub", timeout=20000); pg.wait_for_timeout(500)
+    pg.evaluate("document.getElementById('gMore').open = true")   #  26.10: ad «Əlavə seçimlər»dedir
     pg.fill("#gTitle", ad)
     pg.wait_for_function("document.querySelectorAll('#gAsg option').length > 1", timeout=10000)
     if qrup is not None:
@@ -159,18 +165,23 @@ with sync_playwright() as pw:
     pg.wait_for_function("document.querySelectorAll('#gAsg option').length > 1", timeout=10000)
     ok(pg.locator("#gAsg").input_value() == GA, "generatorda qrup SECILIDIR", pg.locator("#gAsg").input_value())
     mk = pg.inner_text("#btnMake")
-    ok("qrupa ver" in mk, "duymenin adi «Testi yig ve qrupa ver»", mk)
+    ok("Suallara bax" in mk and "Bütün qrup" in pg.inner_text("#gAsgSub"), "duyme «Suallara bax», «Kimə» - bütün qrup", mk)
     pg.select_option("#gAsg", "")
-    ok(pg.inner_text("#btnMake").strip() == "Testi yığ", "qrup silinende «Testi yig»", pg.inner_text("#btnMake"))
+    ok("yalnız test yığılsın" in pg.evaluate("(s => s.options[s.selectedIndex].text)(document.getElementById('gAsg'))") and "sonra" in pg.inner_text("#gAsgSub"),
+       "qrup silinende «Heç kimə» - test sonra verilir", pg.inner_text("#gAsgSub"))
     pg.select_option("#gAsg", GA)
-    ok("qrupa ver" in pg.inner_text("#btnMake"), "qrup secilende yene «...qrupa ver»")
+    ok("Baxışdan sonra göndəriləcək" in pg.inner_text("#gNote"), "qrup secilende «Baxışdan sonra göndəriləcək»")
     gen_qrupla(pg, "Düzəliş B1", GA)
     pg.click("#btnMake")
     try:
-        pg.wait_for_selector(".paper", state="attached", timeout=25000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true")
+        pg.wait_for_selector("#btnPAsg", timeout=25000)
     except Exception:
         print("   gErr:", pg.inner_text("#gErr")[:200], "| prev:", pg.inner_text("#gPrev")[:120]); raise
-    pg.wait_for_timeout(1500)
+    ok(db("select count(*) n from public.assignments where class_id=%s::uuid", (GA,), one=True)["n"] == 0,
+       "«Suallara bax» testi vermir")
+    ok(pg.locator("#pCls").input_value() == GA, "vereqde qrup secili gelir")
+    ver(pg)
+    pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true"); pg.wait_for_timeout(1000)
     t = pg.inner_text("#main")
     ok(pg.locator(".pasgok").count() == 1, "tesdiq qutusu cixdi")
     ok("İndi onu qrupa verin" not in t, "«Indi onu qrupa verin» YOXDUR")
@@ -182,7 +193,7 @@ with sync_playwright() as pw:
     for i in range(3):
         pg.goto(PANEL + "#/gen"); pg.reload()
         gen_qrupla(pg, "Düzəliş C%d" % i, GA)
-        pg.click("#btnMake"); pg.wait_for_selector(".paper", state="attached", timeout=25000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true"); pg.wait_for_timeout(600)
+        pg.click("#btnMake"); ver(pg)
     print("   -- baxis ekrani (#/a/<qrup>): siyahi + iki dugme")
     pg.goto(PANEL + "#/a/" + GA); pg.reload()
     pg.wait_for_selector("#asgList .asg", timeout=20000); pg.wait_for_timeout(500)
@@ -289,7 +300,7 @@ with sync_playwright() as pw:
     pg.screenshot(path="/tmp/claude-0/is_A_menyu_tel.png", full_page=True)
     pg.goto(PANEL + "#/gen"); pg.reload()
     gen_qrupla(pg, "Düzəliş D", GA)
-    pg.click("#btnMake"); pg.wait_for_selector(".paper", state="attached", timeout=25000); pg.evaluate("var f=document.getElementById('qFold'); if(f) f.open=true"); pg.wait_for_timeout(600)
+    pg.click("#btnMake"); ver(pg)
     pg.goto(PANEL + "#/a/" + GA); pg.reload()
     pg.wait_for_selector("#asgList .asg", timeout=20000)
     ok(scroll_x(pg) <= 1, "baxis ekrani telefonda yana surusmur", scroll_x(pg))

@@ -3438,3 +3438,67 @@ body.bnav-on .afoot.mini .in{display:flex;padding:0 16px}
   #main.gpg .sph .crumb #sCrG{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;display:block;line-height:32px}
   #main.gpg .sph .crumb #sCrS{flex:none}
 }
+
+/* ---------------------------------------------- Test yığ (26.10, son maket)
+   Bir forma: Fənn · Sinif · Mövzu · Sual sayı · Kimə · «Suallara bax».  Qalan secimler «Əlavə seçimlər»-de.  */
+#main.gpg .genf{padding:16px 18px}
+#main.gpg .genf > label,#main.gpg .gmoreb label,#main.gpg #gKim > label{display:block;margin:16px 0 6px;font-size:14px;font-weight:650;color:var(--fg)}
+#main.gpg .genf > label:first-child,#main.gpg .genf > .gnot + label{margin-top:0}
+#main.gpg .genf select,#main.gpg .genf input:not([type=checkbox]){width:100%;min-height:44px;margin:0}
+#main.gpg .genf .chips{margin:0}
+#main.gpg .genf .gh{margin:6px 0 0;font-size:13px}
+#main.gpg .gnot{margin:0 0 14px}
+/*  Mövzu - select kimi bir setir, basanda siyahi acilir  */
+#main.gpg details.gpick > summary{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;
+  padding:0 12px 0 14px;border:1px solid var(--n-200,#cfdcd6);border-radius:10px;background:#fff;cursor:pointer;list-style:none;font-size:15px}
+#main.gpg details.gpick > summary::-webkit-details-marker{display:none}
+#main.gpg details.gpick > summary .ar{width:16px;height:16px;flex:none;color:var(--fg-3);transition:transform .15s}
+#main.gpg details.gpick[open] > summary .ar{transform:rotate(180deg)}
+#main.gpg details.gpick > summary span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#main.gpg .gpickb{padding:10px 0 2px}
+#main.gpg .gpickb #gTopBox .muted{margin:10px 0 0 !important}
+#main.gpg .gpickb .chips{margin-top:10px}
+/*  Sual sayi 5 / 10 / 15 / 20  */
+#main.gpg .segs.gcnt{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+#main.gpg .segs.gcnt .seg,#main.gpg .gmoreb .segs .seg{min-height:44px}
+/*  Əlavə seçimlər  */
+#main.gpg details.gmore{margin:18px 0 0;border-top:1px solid #e3ebe7;border-bottom:1px solid #e3ebe7}
+#main.gpg details.gmore > summary{display:flex;align-items:center;gap:10px;min-height:56px;cursor:pointer;list-style:none}
+#main.gpg details.gmore > summary::-webkit-details-marker{display:none}
+#main.gpg details.gmore > summary > span{flex:1;min-width:0}
+#main.gpg details.gmore > summary b{display:block;font-size:15px;font-weight:650}
+#main.gpg details.gmore > summary i{display:block;font-style:normal;font-size:13px;color:var(--fg-3);margin-top:1px}
+#main.gpg details.gmore > summary .ar{width:16px;height:16px;flex:none;color:var(--fg-3);transition:transform .15s}
+#main.gpg details.gmore[open] > summary .ar{transform:rotate(90deg)}
+#main.gpg .gmoreb{padding:0 0 16px}
+#main.gpg .gmoreb .fieldrow{margin:0;gap:12px}
+#main.gpg .gmoreb .fieldrow label{margin-top:16px}
+/*  Kimə + duyme  */
+#main.gpg #gKim .gkimS,#main.gpg #gKim .gkim0{margin:6px 0 0;font-size:13px}
+#main.gpg #gKim .segs{margin-top:10px}
+#main.gpg .gprev{margin:14px 0 0}
+#main.gpg .gprev .gok{display:flex;align-items:center;gap:6px;margin:0;font-size:13.5px;color:var(--ok)}
+#main.gpg .gprev .gok svg{width:16px;height:16px;flex:none}
+#main.gpg .gprev > div{margin:0}
+#main.gpg #btnMake{margin-top:14px;min-height:48px;justify-content:center;gap:8px}
+#main.gpg #btnMake svg{order:2}
+#main.gpg .gnote2{margin:8px 0 0;text-align:center;font-size:13px}
+/*  Son kecilen movzudan hazirla - formanin altinda  */
+#main.gpg .grec2{margin:4px 0 12px}
+#main.gpg .grh{margin:0 2px 8px;font-size:13.5px;font-weight:650;color:var(--fg-2)}
+#main.gpg .grow2{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;margin:0 0 8px;padding:8px 14px;
+  border:1px solid #d6e3dd;border-radius:12px;background:#fcfdfb;font:inherit;text-align:left;cursor:pointer;color:var(--fg)}
+#main.gpg .grow2 > span{flex:1;min-width:0}
+#main.gpg .grow2 b{display:block;font-size:15px;font-weight:650}
+#main.gpg .grow2 i{display:block;font-style:normal;font-size:13px;color:var(--fg-3);margin-top:1px}
+#main.gpg .grow2 s{text-decoration:none;display:inline-flex;align-items:center;gap:3px;font-weight:600;font-size:14px;color:var(--brand);white-space:nowrap}
+#main.gpg .grow2 s svg{width:14px;height:14px}
+@media (hover:hover){ #main.gpg .grow2:hover{background:#f4f8f6} }
+@media (max-width:600px){
+  #main.gpg .genf{padding:14px 12px}
+  #main.gpg .gmoreb .fieldrow{display:block}
+  #main.gpg .gmoreb .fieldrow > div{flex:none !important}
+}
+#main.gpg .genw{max-width:760px}
+/*  sinif nisanlari - toxunma 44 px (yazi olcusu eyni)  */
+#main.gpg .genf #gLevs .chip{min-height:44px;min-width:44px;justify-content:center}

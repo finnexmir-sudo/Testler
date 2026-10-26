@@ -135,7 +135,9 @@ with sync_playwright() as pw:
     icmal(pg, gid)
     ok(pg.locator("#gkDers .gwarn").count() <= 2, "xəbərdarlıq ən çox 2 sətir")
     pg.click("#prepGen"); pg.wait_for_selector("#btnMake", timeout=20000); pg.wait_for_timeout(800)
-    ok(hash_(pg) == "#/gen" and "qrupa ver" in pg.inner_text("#btnMake"), "«5 suallıq test ver» → generator, «… qrupa ver»", pg.inner_text("#btnMake"))
+    pg.wait_for_selector("#gAsgSub", timeout=20000)
+    ok(hash_(pg) == "#/gen" and "Suallara bax" in pg.inner_text("#btnMake") and pg.evaluate("document.getElementById('gAsg').value") == gid,
+       "«5 suallıq test ver» → generator, «Kimə» bu qrup, «Suallara bax»", pg.inner_text("#btnMake"))
     ok(pg.evaluate("(document.getElementById('gCnt') || {}).value") == "5", "sual sayı 5", pg.evaluate("(document.getElementById('gCnt') || {}).value"))
 
     print("D · Son tapşırıqlar; nəticə Hesabatda")

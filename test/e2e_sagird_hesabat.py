@@ -71,6 +71,7 @@ def scroll_x(pg):
 
 def gen_qrupla(pg, ad, qrup):
     pg.wait_for_selector("#gsub", timeout=20000); pg.wait_for_timeout(500)
+    pg.evaluate("document.getElementById('gMore').open = true")   #  26.10: ad «Əlavə seçimlər»dedir
     pg.fill("#gTitle", ad)
     pg.wait_for_function("document.querySelectorAll('#gAsg option').length > 1", timeout=10000)
     if qrup is not None:
@@ -350,11 +351,15 @@ with sync_playwright() as pw:
     wname = wrow.locator(".g b").inner_text().strip()
     wrow.click(); pg.wait_for_timeout(200)
     pg.locator("#topicBox .tpan:visible [data-tg]").click(); pg.wait_for_selector("#gsub", timeout=20000); pg.wait_for_timeout(800)
-    ok(pg.locator("#gAsg").count() == 0 and "yalnız" in pg.locator("#main").evaluate("e => e.textContent"), "generator açılır: qrup seçimi yoxdur, «yalnız … şagirdinə veriləcək»")
+    pg.wait_for_selector("#gAsgSub", timeout=20000)
+    kim = pg.evaluate("(s => s.options[s.selectedIndex].text)(document.getElementById('gAsg'))")
+    ok(kim.startswith("yalnız ") and "Yalnız bu şagird görəcək" in pg.inner_text("#gAsgSub"), "generator açılır: «Kimə» - yalnız bu şagird", kim)
     ok(wname in pg.locator("#main").evaluate("e => e.textContent"), "yalnız «%s» mövzusu seçilib" % wname)
-    ok("şagirdə ver" in pg.inner_text("#btnMake"), "düymə «Testi yığ və şagirdə ver»", pg.inner_text("#btnMake"))
+    ok("Suallara bax" in pg.inner_text("#btnMake"), "düymə «Suallara bax»", pg.inner_text("#btnMake"))
     pg.wait_for_function("document.querySelector('#gPrev') && document.querySelector('#gPrev').innerText.indexOf('yoxlanılır') < 0 && document.querySelector('#gPrev').innerText.length > 5", timeout=15000)
-    pg.click("#btnMake"); pg.wait_for_selector(".pasgok", timeout=25000); pg.wait_for_timeout(600)
+    pg.click("#btnMake"); pg.wait_for_selector("#btnPAsg", timeout=25000); pg.wait_for_timeout(600)
+    ok(pg.locator("#pWho").input_value() == S0, "vərəqdə «Kimə» - həmin şagird seçili gəlir")
+    pg.click("#btnPAsg"); pg.wait_for_selector(".pasgok", timeout=25000); pg.wait_for_timeout(600)
     last = db("select a.student_id::text s from public.assignments a where a.class_id=%s::uuid order by a.created_at desc limit 1", (GA,), one=True)
     ok(last["s"] == S0, "tapşırıq YALNIZ bu şagirdə yazıldı", last["s"])
 

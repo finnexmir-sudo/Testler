@@ -132,8 +132,9 @@ with sync_playwright() as pw:
     pg.locator("#sTabs [data-v='x']").click(); pg.wait_for_timeout(300)
     pg.click("#vdTov"); pg.wait_for_selector("#btnMake", timeout=20000); pg.wait_for_timeout(1200)
     mt = pg.inner_text("#main")
-    ok(pg.evaluate("location.hash") == "#/gen" and mT and mT.group(1) in mt and NAME in mt and "şagirdə ver" in pg.inner_text("#btnMake"),
-       "generator həmin mövzu və şagirdlə, düymə «… şagirdə ver»", pg.inner_text("#btnMake"))
+    kim = pg.evaluate("(s => s ? s.options[s.selectedIndex].text : '')(document.getElementById('gAsg'))")
+    ok(pg.evaluate("location.hash") == "#/gen" and mT and mT.group(1) in pg.inner_text("#gTopSum") and kim == "yalnız " + NAME and "Suallara bax" in pg.inner_text("#btnMake"),
+       "generator həmin mövzu və «Kimə: yalnız %s», düymə «Suallara bax»" % NAME, (kim, pg.inner_text("#gTopSum")))
 
     print("C · Son nəticələr = Tarixçə")
     ac(pg, sid, gid)
