@@ -83,7 +83,7 @@ with sync_playwright() as pw:
     vis = pg.evaluate("""() => [...document.querySelectorAll('#gSek .gtab')].filter(e => e.offsetParent).map(e => e.textContent.trim())""")
     ok(vis == ["İcmal", "Şagirdlər", "Tapşırıqlar", "Hesabat", "Dərs planı", "Dəftər"], "kompüterdə 6 sekmə", vis)
     ok(aktiv(pg) == "İcmal" and pg.evaluate("getComputedStyle(document.querySelector('#gSek .gtab.on')).borderBottomStyle") == "solid", "alt xətli seçili sekmə")
-    for k, ad, h, sel in (("s", "Şagirdlər", "#/g/%s/s", "#stu .mrow"), ("a", "Tapşırıqlar", "#/a/%s", "#asgList"),
+    for k, ad, h, sel in (("s", "Şagirdlər", "#/g/%s/s", "#stu a.ytr"), ("a", "Tapşırıqlar", "#/a/%s", "#asgList"),
                           ("r", "Hesabat", "#/r/%s", "#rTabs"), ("p", "Dərs planı", "#/g/%s/p", "#planBox"),
                           ("d", "Dəftər", "#/g/%s/d", "#ledgerBox")):
         pg.click("#gSek .gtab[data-gt='%s']" % k); pg.wait_for_selector(sel, timeout=20000); pg.wait_for_timeout(400)
