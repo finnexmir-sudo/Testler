@@ -12,7 +12,7 @@ açılırdı, adlar aşağıdakı kartda idi (say ilə siyahı üst-üstə düş
   E  test bölməsi; boş qrup üçün boş hal
   F  telefonda yana sürüşmə yoxdur, düymə sıranın içindədir
 """
-import sys, time, json
+import sys, time, json, re
 import psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright
 
@@ -169,21 +169,22 @@ with sync_playwright() as pw:
     ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin="http://127.0.0.1:8010")
     daxil(pg)
     pg.goto(PANEL + "#/s/" + S0 + "/" + GA); pg.reload()
-    pg.wait_for_selector("#stuPend .stpr", timeout=25000); pg.wait_for_timeout(1500)
+    pg.wait_for_selector("#stuPend .stpr", state="attached", timeout=25000); pg.wait_for_timeout(1500)
 
     print("\nA · Başlıq və gedişat")
     #  932 (23.10): gedisat Siqnallar ve valideyn paneli ile EYNI qayda - son 3 test / evvelki 3,
     #  yalniz 4+ testde.  S0-in 3 testi var: muqayise GOSTERILMIR (evvel «ilk test 20% → son
     #  test 60%» idi - Siqnallar ve valideyn bunu demirdi).  4+ test hali: test/e2e_sira2.py.
-    ok("↗" not in pg.inner_text(".rstat") and "↘" not in pg.inner_text(".rstat"),
-       "3 testdə gedişat göstərilmir (4+ test lazımdır, Siqnallar və valideyn kimi)", pg.inner_text(".rstat").replace("\n", " "))
-    ok("orta · bütün dövr" in pg.inner_text(".rstat") and "son 30 gün" in pg.inner_text(".rstat"),
-       "orta «bütün dövr», yanında «son 30 gün» (valideynin rəqəmi)")
-    ok("bütün dövr" in pg.inner_text(".rstat") or "son 30 gün" in pg.inner_text(".rstat"), "dövr yazılıb")
-    ok("ən yaxşı" not in pg.inner_text(".rstat"), "«ən yaxşı» rəqəmi çıxarılıb")
+    #  26.10 (son maket): reqemler «Dövr | Orta nəticə | Test sayı» cedvelidir (#stuSt)
+    st_ = pg.inner_text("#stuSt")
+    ok("↗" not in st_ and "↘" not in st_ and "Gedişat" not in st_,
+       "3 testdə gedişat göstərilmir (4+ test lazımdır, Siqnallar və valideyn kimi)", st_.replace("\n", " "))
+    ok("Son 30 gün" in st_ and "Bütün dövr" in st_, "cədvəldə «Son 30 gün» (valideynin rəqəmi) və «Bütün dövr»")
+    ok("ən yaxşı" not in st_, "«ən yaxşı» rəqəmi çıxarılıb")
 
     print("\nB · «Diqqət» kartı — gəliş səbəbi")
-    dq = pg.inner_text("#stuDiq")
+    pg.click("#stuDiq > summary"); pg.wait_for_timeout(300)
+    ok("· 2" in pg.inner_text("#stuPendN"), "sətirdə «Gözləyən tapşırıqlar · 2» (yazılı + 1 test)", pg.inner_text("#stuPendN"))
     ok(pg.locator("#stuDiq").is_visible() and "Gözləyən tapşırıqlar" in pg.locator("#stuDiq").evaluate("e => e.textContent"), "gözləyən tapşırıqlar bloku var")
     ok("Yazılı tapşırığı etməyib" in pg.locator("#stuPend").evaluate("e => e.textContent"), "yazılı tapşırıq sırası")
     ok("1 test gözləyir" in pg.locator("#stuPend").evaluate("e => e.textContent") and "Vurma cədvəli" in pg.locator("#stuPend").evaluate("e => e.textContent"),
@@ -191,14 +192,16 @@ with sync_playwright() as pw:
     pg.locator("#stuPend [data-sp]").first.click(); pg.wait_for_timeout(500)
     clip = pg.evaluate("navigator.clipboard.readText()")
     ok(clip.startswith("Salam! ") and "ev tapşırığı gözləyir: «12-ci paraqrafı oxu»" in clip, "mesaj etməyənlər səhifəsi ilə EYNİ mətn", clip.replace("\n", " | ")[:100])
-    #  23.10: zeif movzu ve sehvler «Təkrar tövsiyəsi» kartindadir (#stuTov), gozleyenler oz kartinda
+    #  26.10: Xulasede BIR tovsiye («Növbəti addım»); sehvlerden tekrar - Sehvler sekmesinde (#btnFix)
     tv = pg.inner_text("#stuTov")
-    ok("Təkrar tövsiyəsi" in tv and "Son nəticə:" in tv, "zəif mövzu «Təkrar tövsiyəsi» kartındadır", tv[:80].replace("\n", " "))
-    ok(pg.locator("#vdF").count() == 1, "kartda «Səhvlərdən təkrar test» düyməsi var")
+    ok("Növbəti addım" in tv and "mövzusunu təkrar edin" in tv and "Son nəticə:" in tv, "zəif mövzu «Növbəti addım» kartındadır", tv[:80].replace("\n", " "))
+    ok(pg.locator("#vdF").count() == 0, "Xülasədə ikinci tövsiyə (səhvlərdən) yoxdur")
     ok(pg.locator("#vdT").count() == 0 and pg.locator("#vdS").count() == 0, "«Mövzular» / «Səhvlər» düymələri YOXDUR (sekmələr yuxarıdadır)")
-    pg.locator("#vdF").click(); pg.wait_for_timeout(2500)
-    fm = pg.locator("#vdFMsg").evaluate("e => e.textContent")
-    ok("test yığıldı" in fm and "YALNIZ bu şagirdə" in fm, "«Təkrar test ver» yalnız bu şagirdə test yığdı", fm[:80])
+    pg.locator("#sTabs [data-v='s']").click(); pg.wait_for_timeout(300)
+    pg.locator("#btnFix").click(); pg.wait_for_timeout(2500)
+    fm = pg.locator("#fixMsg").evaluate("e => e.textContent")
+    ok("test yığıldı" in fm and "YALNIZ bu şagirdə" in fm, "Səhvlər sekmesində «Bu səhvlərdən təkrar testi yığ» yalnız bu şagirdə", fm[:80])
+    pg.locator("#sTabs [data-v='x']").click(); pg.wait_for_timeout(300)
     pg.screenshot(path="/tmp/claude-0/sh_xulase_masaustu.png", full_page=True)
 
     print("\nC · Valideyn üçün hesabat — tək kart")
@@ -206,6 +209,7 @@ with sync_playwright() as pw:
     ok("Valideyn üçün xülasə" not in txt and "Nəticə kartı" not in txt, "köhnə iki bölmə yoxdur")
     ok("Valideyn üçün hesabat" in txt, "«Valideyn üçün hesabat» kartı")
     ok(not pg.locator("#vTxt").is_visible(), "mətn susmaya görə bağlıdır (kart qısa)")
+    pg.click("#stuVal > summary"); pg.wait_for_timeout(200)
     pg.click("#vOpen"); pg.wait_for_timeout(300)
     ok(pg.locator("#vTabs .seg").count() == 2, "Mətn / Şəkil kartı sekmələri")
     ok(pg.locator("#vTxt").is_visible() and not pg.locator("#pcv").is_visible(), "susmaya görə mətn görünür, şəkil gizlidir")
@@ -221,7 +225,7 @@ with sync_playwright() as pw:
     ok(not pg.locator("#diagBox summary").first.is_visible() if pg.locator("#diagBox summary").count() else True, "«+ Diaqnostik test ver» keçidi Xülasədə görünmür")
     ok(pg.locator("#tab-m #diagBox").count() == 1, "diaqnostika Mövzular sekmesindədir")
     pg.click("#btnAsgStu"); pg.wait_for_timeout(300)
-    ok(pg.locator("#stuAsgMenu").is_visible() and pg.locator("#stuAsgMenu .mrow").count() == 3, "menyuda 3 sıra", pg.locator("#stuAsgMenu .mrow").count())
+    ok(pg.locator("#stuAsgMenu").is_visible() and pg.locator("#stuAsgMenu a").count() == 3, "menyuda 3 sıra", pg.locator("#stuAsgMenu a").count())
     pg.screenshot(path="/tmp/claude-0/sh_menyu.png", full_page=False)
     pg.locator("#stuAsgMenu [data-am='d']").click(); pg.wait_for_timeout(600)
     ok(pg.locator("#dgGo").is_visible(), "«Diaqnostik test» diaqnostika formasını açır", pg.locator("#dgGo").count())
@@ -239,12 +243,8 @@ with sync_playwright() as pw:
 
     print("\nG · Səhvlər sekmesi")
     pg.goto(PANEL + "#/s/" + S0 + "/" + GA); pg.reload(); pg.wait_for_selector("#sTabs", timeout=20000); pg.wait_for_timeout(1000)
-    diq = pg.locator("#stuDiq").evaluate("e => e.textContent")
-    import re as _re
-    diq = pg.locator("#stuTov").evaluate("e => e.textContent")
-    mdiq = _re.search(r"(\d+)\s*səhv düzəliş", diq)
-    tabn = pg.locator("#sTabs [data-v='s'] .tn").inner_text().strip()
-    ok(mdiq and mdiq.group(1) == tabn, "sekmə rəqəmi = Diqqət kartındakı rəqəm (bir mənbə)", "%s / %s" % (mdiq.group(1) if mdiq else None, tabn))
+    #  26.10: sekmede say yoxdur (maket) - sehv sayi yalniz Sehvler sekmesinin «Səhv dəftəri» setrindedir
+    ok(pg.locator("#sTabs .tn").count() == 0, "sekmələrdə say nişanı yoxdur (rəqəm bir yerdə)")
     pg.locator("#sTabs [data-v='s']").click(); pg.wait_for_selector(".wq .wans", state="attached", timeout=10000); pg.wait_for_timeout(1500)
     ok("Ən çox səhv edilən suallar" in pg.locator("#tab-s").evaluate("e => e.textContent"), "başlıq «Ən çox səhv edilən suallar»")
     ok("ən çox səhv edilən" not in pg.locator("#tab-s summary").first.inner_text().lower().replace("ən çox səhv edilən suallar", ""), "eyni söz iki dəfə yazılmır")
@@ -259,17 +259,18 @@ with sync_playwright() as pw:
 
     print("\nI · Mövzular sekmesi")
     pg.locator("#sTabs [data-v='m']").click(); pg.wait_for_selector("#topicBox .trow", timeout=10000); pg.wait_for_timeout(500)
-    ok(pg.locator("#sTabs [data-v='m'] .tn.tw").count() == 1, "«Mövzular» nişanı zəif mövzu rəngindədir (narıncı)")
-    nw = pg.locator("#sTabs [data-v='m'] .tn").inner_text().strip()
+    #  26.10 (son maket): sekmede say nisani yoxdur - zeif movzu sayi bolmenin basligindadir
     sec = pg.locator("#topicBox .tsec")
+    _m = re.search(r"Zəif mövzular · (\d+)", sec.nth(0).evaluate("e => e.textContent")) if sec.count() else None
+    nw = _m.group(1) if _m else "?"
     ok(sec.count() == 2, "iki ayrı bölmə: «Zəif mövzular» və «Təkrar lazımdır»", sec.count())
-    ok(sec.nth(0).evaluate("e => e.textContent").startswith("Zəif mövzular · " + nw), "birinci bölmənin sayı = sekmə nişanı (%s)" % nw, sec.nth(0).evaluate("e => e.textContent"))
+    ok(sec.nth(0).evaluate("e => e.textContent").startswith("Zəif mövzular · " + nw), "birinci bölmənin başlığında say (%s)" % nw, sec.nth(0).evaluate("e => e.textContent"))
     ok(sec.nth(1).evaluate("e => e.textContent").startswith("Təkrar lazımdır"), "ikinci bölmə «Təkrar lazımdır»")
     c1 = pg.locator("#topicBox > .card").nth(0).locator(".trow"); c2 = pg.locator("#topicBox > .card").nth(1).locator(".trow")
     ok(c1.count() == int(nw) and all("weakrow" in (c1.nth(i).get_attribute("class") or "") for i in range(c1.count())), "birinci kartda YALNIZ zəif mövzular (sol xətli)", c1.count())
     ok(c2.count() >= 1 and all("weakrow" not in (c2.nth(i).get_attribute("class") or "") for i in range(c2.count())), "ikinci kartda zəif mövzu yoxdur", c2.count())
     pg.screenshot(path="/tmp/claude-0/sh_movzular.png", full_page=False)
-    ok(pg.locator("#sTabs [data-v='s'] .tn.tw").count() == 0, "«Səhvlər» nişanı neytral qalır")
+    ok(pg.locator("#sTabs .tn").count() == 0, "sekmələrdə say nişanı yoxdur")
     ok(pg.locator("#topicBox .wdot").count() == 0, "adın üstündə tək qalan nöqtə yoxdur")
     ok(pg.locator("#topicBox .trow.weakrow").count() >= 2, "zəif mövzu sətirləri sol xətlə", pg.locator("#topicBox .trow.weakrow").count())
     #  cubuq rengi = faiz rengi (80/60)
@@ -359,7 +360,7 @@ with sync_playwright() as pw:
 
     print("\nE · Ad təkrarı (görünən ad tam adla eynidir)")
     pg.goto(PANEL + "#/s/" + S1 + "/" + GA); pg.reload(); pg.wait_for_selector("#sTabs", timeout=20000); pg.wait_for_timeout(800)
-    bt = pg.locator("#band").evaluate("e => e.textContent")
+    bt = pg.locator("#sHd").evaluate("e => e.textContent")
     n1 = db("select full_name f from public.students where id=%s::uuid", (S1,), one=True)["f"]
     ok(bt.count(n1) == 1, "başlıqda ad bir dəfə yazılıb", bt[:70])
     ctx.close()
@@ -368,13 +369,14 @@ with sync_playwright() as pw:
     ctx, pg = context(br, 390, 844)
     daxil(pg)
     pg.goto(PANEL + "#/s/" + S0 + "/" + GA); pg.reload()
-    pg.wait_for_selector("#stuPend .stpr", timeout=25000); pg.wait_for_timeout(1500)
+    pg.wait_for_selector("#stuPend .stpr", state="attached", timeout=25000); pg.wait_for_timeout(1500)
     ok(scroll_x(pg) <= 1, "yana sürüşmə yoxdur", scroll_x(pg))
     tabs = pg.evaluate("""() => { var w = document.getElementById('sTabs').getBoundingClientRect();
         return Array.from(document.querySelectorAll('#sTabs .seg')).map(s => { var r = s.getBoundingClientRect();
           return {l: r.left >= w.left - 1, r: r.right <= w.right + 1, clip: s.scrollWidth > s.clientWidth + 1}; }); }""")
     ok(all(t["l"] and t["r"] and not t["clip"] for t in tabs), "4 sekmə telefonda sıxılmır və kəsilmir", str(tabs))
     pg.locator("#sTabs").screenshot(path="/tmp/claude-0/sh_sekmeler_telefon.png")
+    pg.click("#stuDiq > summary"); pg.wait_for_timeout(300)
     bt = pg.locator("#stuPend .stpr [data-sp]").first.bounding_box(); rw = pg.locator("#stuPend .stpr").first.bounding_box()
     ok(bt["x"] + bt["width"] <= rw["x"] + rw["width"] + 1, "«Mesajı kopyala» düyməsi sıranın içindədir")
     pg.locator("#sTabs [data-v='s']").click(); pg.wait_for_selector(".wq .wans", state="attached", timeout=10000); pg.wait_for_timeout(1200)
