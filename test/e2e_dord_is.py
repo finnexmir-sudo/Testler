@@ -272,7 +272,8 @@ with sync_playwright() as pw:
     pg.fill("#hwText", "12-ci paraqrafı oxu"); pg.click("#btnHwAdd"); pg.wait_for_selector("#hwList .hwrow", timeout=15000)
     #  23.10: «Diqqət tələb edir» kartinda (qrup Icmali) - yazili ve test etmeyenlerin adlari
     pg.goto(PANEL + "#/g/" + GA); pg.reload()
-    pg.wait_for_selector("#gkHw .g i", timeout=20000); pg.wait_for_timeout(500)
+    pg.wait_for_selector("#gkHw .g i", state="attached", timeout=20000); pg.wait_for_timeout(500)
+    if pg.locator("#gkDqB").count(): pg.click("#gkDqB"); pg.wait_for_timeout(200)   #  26.10: ilk 2 + «Hamısına bax»
     hwt = pg.inner_text("#gkHw .g i")
     ok(hwt.count("Şagird") == 2 and pg.locator("#gkHw .g i").is_visible(), "«Yazılı tapşırıq» sətrində 2 ad görünür", hwt)
     ok(pg.locator("#gkPend .g i a").count() == 2 and pg.locator("#gkPend .g i a").first.is_visible(),

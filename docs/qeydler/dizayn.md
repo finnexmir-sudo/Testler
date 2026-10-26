@@ -170,3 +170,34 @@ app.css-lərdən təmizlənib. Şrift `"PJS"` (`assets/fonts/`, base.css
   format yoxlanır («ad@gmail.com» nümunəsi), `gamil.com/gmial.com/…`
   səhvində düzəldilmiş ünvan sahəyə yazılır. Səbəb: `imani terane1982@.com`,
   `…@gamil.com` — adam «parol yanlışdır» görüb gedirdi.
+
+
+## Növbəti işi asanlaşdır — daimi qayda (2026-10-26, istifadəçi)
+
+İstifadəçinin sözü ilə: «Bil10 üçün daimi dizayn qaydası: əsas məqsəd müəllimə bütün imkanları göstərmək deyil,
+növbəti işini asanlaşdırmaqdır. Bunu layihənin qaydalarına yaz və hər səhifədə nəzərə al.»
+
+* Hər ekranın bir əsas məqsədi və aydın əsas düyməsi olsun.
+* İlk görünüşdə yalnız qərar vermək və işə başlamaq üçün lazım olan məlumat göstərilsin.
+* Əlavə statistika, izah və nadir işlənən əməliyyatlar «Ətraflı», sekmə və ya açılan bölmədə olsun.
+* Menyudakı keçidləri ayrıca iri kartlarla təkrarlama.
+* Xəbərdarlıqlardan ən vacib 1–2-ni göstər, qalanını «Hamısına bax» altında saxla.
+* Yeni müəllimə ilk addımı göstər; boş statistika və çoxlu seçimlə qarşılama.
+* Yığcamlıq üçün yazıları və düymələri kiçiltmə; artıq məlumatı və boşluğu azalt.
+
+Yoxlama sualı: «Müəllim bu ekrana ilk dəfə baxanda nə edəcəyini anlayır, yoxsa əvvəlcə ekranı öyrənməli olur?»
+
+**Ölçü (26.10-da ölçüldü, testdə saxlanır):** telefonda düymə/keçid ≥ 44 px; zolaq başlığı kompüterdə 26 px,
+telefonda İcmal və şagird 22 px, qrup 20 px (`e2e_icmal`, `e2e_qrup_sekme`, `e2e_sagird_xulase`).
+
+**Səhifələr üzrə vəziyyət** (hər yeni iş bu siyahıdan keçir):
+
+| Səhifə | Əsas məqsəd / əsas düymə | Vəziyyət |
+|---|---|---|
+| İcmal | bu günün işi / «Test yığ» | 26.10: menyu təkrarı çıxdı; Diqqət ən vacib 2 + «Hamısına bax» |
+| Qrup (sekmələr) | bu dərs / «Test ver» | 23–26.10: sekmələr, İcmal kartları; Diqqət ən vacib 2 + «Hamısına bax» |
+| Şagird | bu uşağa nə lazımdır / «5 suallıq təkrar ver» | 23.10: Xülasə; diaqnostika Mövzular sekmesində |
+| Test yığ | — | baxılmayıb (GPT siyahısında 3-cü) |
+| Qrup hesabatı | — | baxılmayıb (4-cü) |
+| Tapşırıqlar | — | baxılmayıb (5-ci) |
+| Nəticələr, Siqnallar, Sual bankı, Profil, Qruplar siyahısı | — | baxılmayıb |

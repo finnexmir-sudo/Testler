@@ -336,6 +336,20 @@ Sıxılan fayllar: `muellim|sagird|valideyn` × `app.js, sb.js, app.css` +
 `assets/base.css`. `config.js`, `ferq.js`, `pwa.js`, `visit.js` toxunulmur
 (kiçikdirlər), `s/` qovluğu da kənardadır.
 
+## DİZAYN QAYDASI: növbəti işi asanlaşdır (2026-10-26, istifadəçi)
+
+Məqsəd müəllimə bütün imkanları göstərmək deyil, **növbəti işini asanlaşdırmaqdır**. Bütün müəllim səhifələrinə aiddir:
+1. Hər ekranın bir əsas məqsədi və bir aydın əsas düyməsi var.
+2. İlk görünüşdə yalnız qərar vermək və işə başlamaq üçün lazım olan məlumat.
+3. Əlavə statistika, izah, nadir əməliyyat — «Ətraflı», sekmə və ya açılan bölmədə.
+4. Menyudakı keçidlər ayrıca iri kartlarla TƏKRARLANMIR.
+5. Xəbərdarlıqlardan ən vacib 1–2-si görünür, qalanı «Hamısına bax» altında.
+6. Yeni müəllimə ilk addım göstərilir — boş statistika və çoxlu seçimlə qarşılanmır.
+7. Yığcamlıq yazı və düyməni KİÇİLTMƏKLƏ olmur (yazı ölçüsü olduğu kimi, toxunma ≥ 44 px) — artıq məlumat və boşluq azalır.
+
+Hər dəyişiklikdə sual: **«Müəllim bu ekrana ilk dəfə baxanda nə edəcəyini anlayır, yoxsa əvvəlcə ekranı öyrənməlidir?»**
+Ətraflı və hansı səhifədə nə edildiyi: `docs/qeydler/dizayn.md` → «Növbəti işi asanlaşdır».
+
 ## Üslub
 
 - İnterfeys mətnləri Azərbaycan dilində, düzgün diakritiklərlə (ə, ş, ğ, ı, ö, ü, ç)

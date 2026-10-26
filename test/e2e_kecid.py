@@ -202,14 +202,15 @@ with sync_playwright() as pw:
         return cix
 
     print("\n=== KECID AUDITI ===")
-    for unvan, qab, ad, *sel in (("#/", "#yDiq", "Icmal · diqqet"),
+    #  26.10: Diqqət kartinda ilk 2 setir gorunur (qalani «Hamısına bax»da) - gorunenler basilir
+    for unvan, qab, ad, *sel in (("#/", "#yDiq", "Icmal · diqqet", ".mrow:visible"),
                            ("#/", "#yMenu", "Icmal · menyu"),
                            ("#/sus", "#suBox", "Sessiz sagirdler"),
                            ("#/nt", "#ntQ", "Neticeler · qruplar"),
                            ("#/nt", "#ntZ", "Neticeler · zeif movzular"),
                            ("#/nt", "#ntS", "Neticeler · son cavablar"),
                            ("#/g/" + str(gid), "#gSek", "Qrup sekmeleri", "a.gtab:visible"),
-                           ("#/g/" + str(gid), "#gIcmal", "Qrup icmali · kecidler", "a.gkm")):
+                           ("#/g/" + str(gid), "#gIcmal", "Qrup icmali · kecidler", "a.gkm:visible")):
         print("\n-- " + ad + " (" + unvan + ")")
         for a, h, b in kecidler(unvan, qab, *sel):
             print("   %-52s -> %-34s %s" % (a, h, b))
