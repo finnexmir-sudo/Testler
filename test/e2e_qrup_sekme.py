@@ -111,6 +111,7 @@ with sync_playwright() as pw:
     icmal(pg, gid)
     pend = pg.inner_text("#gkPend b") if pg.locator("#gkPend").count() else ""
     mP = re.search(r"(\d+) / (\d+) şagird", pend)
+    if pg.locator("#gkDqB").count(): pg.click("#gkDqB"); pg.wait_for_timeout(200)   #  26.10: ilk 2 + «Hamısına bax»
     hwn = pg.inner_text("#gkHw .gkdn") if pg.locator("#gkHw").count() else "0"
     pg.goto(PANEL + "#/ht/" + gid); pg.wait_for_selector("#htBox .mrow, #htBox .empty", timeout=20000); pg.wait_for_timeout(500)
     ht = pg.inner_text("#htBox")
@@ -149,6 +150,16 @@ with sync_playwright() as pw:
     pg.click("#gkPlan"); pg.wait_for_selector("#planBox", timeout=20000); pg.wait_for_timeout(300)
     ok(hash_(pg) == "#/g/%s/p" % gid and aktiv(pg) == "Dərs planı", "«Dərs planı →» plan sekməsini açır", hash_(pg))
 
+    print("E2 · Diqqət: ən vacib 2 + «Hamısına bax»")
+    icmal(pg, gid)
+    vis = pg.evaluate("[...document.querySelectorAll('#gkDiq .gkd')].filter(e => e.offsetParent).length")
+    tot = pg.locator("#gkDiq .gkd").count()
+    ok(vis == min(2, tot), "ilk görünüşdə %d sətir (cəmi %d)" % (vis, tot))
+    if tot > 2:
+        ok("Hamısına bax (%d)" % tot in pg.inner_text("#gkDqB"), "düymə «Hamısına bax (%d)»" % tot)
+        pg.click("#gkDqB"); pg.wait_for_timeout(200)
+        ok(pg.evaluate("[...document.querySelectorAll('#gkDiq .gkd')].filter(e => e.offsetParent).length") == tot, "basanda hamısı açılır")
+
     print("E · keçidlər")
     icmal(pg, gid)
     pg.click("#gkPendGo"); pg.wait_for_selector("#htBox", timeout=20000)
@@ -157,6 +168,7 @@ with sync_playwright() as pw:
     pg.click("#btnAsgs"); pg.wait_for_selector("#pick", timeout=20000)
     ok(hash_(pg) == "#/a/%s/t" % gid, "zolaqda «Test ver» → test ver ekranı", hash_(pg))
     icmal(pg, gid)
+    if pg.locator("#gkDqB").count(): pg.click("#gkDqB"); pg.wait_for_timeout(200)
     if pg.locator("#gkHwGo").count():
         pg.click("#gkHwGo"); pg.wait_for_timeout(1200)
         ok(hash_(pg) == "#/a/" + gid, "yazılı tapşırıq → Tapşırıqlar", hash_(pg))

@@ -1448,14 +1448,16 @@
       //  aparirdi, adlar asagidaki kartda idi: say ve siyahi ust-uste dusmurdu.
       d.push(yRow({ ic: "warn", cls: "dq", href: "#/ht/" + esc(h0.class_id),
         ad: un + " şagird yazılı tapşırığı etməyib",
-        alt: (h0["class"] || "") + " · ev tapşırığı", cip: "diqqət", cipCls: "pvl" }));
+        alt: (h0["class"] || "") + " · ev tapşırığı" }));
     }
     if (Number(bg.susan)) {
       //  setir ADLARI ved edir - «#/sus» onlari sadalayir (evvel
       //  «#/gs» idi: muellim «hanı 10 şagird?» deyirdi, hagli idi)
       d.push(yRow({ ic: "warn", cls: "dq", href: "#/sus",
-        ad: bg.susan + " şagird bir həftədir səssizdir",
-        alt: "test göndərin və ya xatırladın", cip: "diqqət", cipCls: "pvl" }));
+        //  26.10 (istifadeci): «səssizdir» yox - NE olmadigi ve DOVR: server sayir aktiv, 7 gunden kohne,
+        //  son 7 gunde gonderilmis testi olmayan sagirdleri (rpc_home.bugun.susan)
+        ad: bg.susan + " şagird son 7 gündə test işləməyib",
+        alt: "test göndərin və ya xatırladın" }));
     }
     if (tp && tp.name) {
       /*  Istifadeci: «ilkində say ver, açılanda həmin şagirdləri
@@ -1467,10 +1469,11 @@
       d.push(yRow({ ic: "refresh",
         href: "#/zm/" + esc(tp.class_id || "") + "/" + esc(tp.id || ""),
         ad: "«" + tp.name + "» zəif gedir",
-        alt: wn + " şagird · təkrar testi göndərin",
         //  23.10 (UX yoxlamasi): server bu reqemi «avg» adi ile verir (db/219),
         //  «ratio» YOXDUR - setir hemise «0%» yazirdi, acilan #/zm ise 67% deyirdi.
-        cip: pct(tp.avg) + "%", cipCls: "pvm" }));
+        //  26.10 (istifadeci): faiz NEYI gosterir ve HANSI qrupdur - cumlede yazilir (#/zm-in sozu ile)
+        altHtml: esc(tp["class"] || "") + " · qrupun bu mövzuda ortalaması <b>" + pct(tp.avg) + "%</b> · " +
+          wn + " şagird zəif" }));
     }
     if (gun !== null && gun <= 7) {
       d.push(yRow({ ic: "star", cls: "dq", href: "#/me",
@@ -1479,10 +1482,11 @@
     }
     //  26.10: «Bu həftə» bolmesi KART oldu - «Diqqət tələb edir» (qrup sehifesi ile eyni ad); bos hal yazilir
     $("yDiq").innerHTML = '<div class="gkh">' + ic("warn") + "<b>Diqqət tələb edir</b></div>" +
-      (d.length ? '<div class="card pad0 menu ydq">' + d.join("") + "</div>"
+      (d.length ? '<div class="card pad0 menu ydq">' + ilkIki(d, "yDq") + "</div>"
         : (nQ && nS ? '<p class="gkok" id="yDiqOk">' + ic("check") + "Hər şey qaydasındadır — səssiz şagird, etməyən tapşırıq və zəif mövzu yoxdur.</p>"
                     : '<p class="muted gkp">Şagirdlər test yazmağa başlayanda vaxtında görülməli işlər burada çıxacaq.</p>'));
 
+    ilkIkiBind("yDq");
     //  ---- YENI NETICELER: rpc_home.recent (Nəticələr · «Son cavablar» ile eyni siyahi), ilk 5
     //  932: «71% orta · keçən həftə 80%» butun dovrun ortasini KECEN HEFTE ile yan-yana
     //  yazirdi - olmayan dusus kimi oxunurdu.  Indi Neticeler ekrani ile EYNI cumle (haftaFerq).
@@ -1490,7 +1494,12 @@
     var rc = (v.recent || []).slice(0, 5);
     $("yNet").innerHTML = '<div class="gkh">' + ic("chart") + "<b>Yeni nəticələr</b>" +
         '<a class="gkm" href="#/nt" id="yNetAll">' + (nC ? "Hamısına bax" : "Nəticələr") + " " + ic("right") + "</a></div>" +
-      (nC ? '<p class="muted gkp" id="yNetSum">' + avg + "% orta · bütün dövr" + (hf ? " · " + esc(hf) : "") + "</p>" : "") +
+      //  26.10 (istifadeci): umumi orta ve heftelik deyisme AYRI setirde, her birinin dovru ile
+      (nC ? '<div class="yns" id="yNetSum"><p>Ümumi orta: <b>' + avg + "%</b> · bütün dövr</p>" +
+          (aw !== null && aw !== undefined
+            ? "<p>Son 7 gün: <b>" + pct(aw) + "%</b>" +
+              (apw !== null && apw !== undefined ? " · " + esc(hf) + " (əvvəlki 7 gün " + pct(apw) + "%)" : "") + "</p>"
+            : "<p>Son 7 gündə test yazılmayıb</p>") + "</div>" : "") +
       (rc.length
         ? rc.map(function (x) {
             return '<a class="gkn ylnk" href="#/s/' + esc(x.student_id) + "/" + esc(x.class_id) + '"><div class="g"><b>' + esc(x.student) + "</b>" +
@@ -1685,7 +1694,7 @@
     bandHead({
       back: { id: "suBack", label: "Geri" }, eye: "Şagirdlər",
       title: "Səssiz şagirdlər",
-      sub: "Bir həftədir bir dənə də test işləməyənlər."
+      sub: "Son 7 gündə bir dənə də test işləməyənlər."
     });
     show('<div id="suBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>');
     on("suBack", "click", function () { goBack("#/"); });
@@ -4176,6 +4185,21 @@
     location.replace(location.href.replace(/#.*$/, "") + h);
   }
 
+  /*  DIZAYN QAYDASI (26.10, CLAUDE.md): xeberdarliqlardan EN VACIB 2-si gorunur, qalani «Hamısına bax»
+      altinda (yerinde acilir - setirlerin kecidleri ozlerindedir).  sira = vaciblik sirasi.  */
+  function ilkIki(rows, id) {
+    if (rows.length <= 2) return rows.join("");
+    return rows.slice(0, 2).join("") +
+      '<div class="dqrest hide" id="' + id + 'R">' + rows.slice(2).join("") + "</div>" +
+      '<button type="button" class="gkm dqall" id="' + id + 'B" aria-expanded="false">Hamısına bax (' + rows.length + ") " + ic("down") + "</button>";
+  }
+  function ilkIkiBind(id) {
+    on(id + "B", "click", function () {
+      var r = $(id + "R"), b = $(id + "B");
+      if (r) r.classList.remove("hide");
+      if (b) b.remove();
+    });
+  }
   /*  Hesabatin «Nə etməli» setri ile qrup Icmalinin «Diqqət» setri EYNI
       movzunu desin (Sira 2 qaydasi: bir reqem - bir sorgu).  */
   function repTodo(rt) {
@@ -4306,12 +4330,7 @@
             return '<a href="#/s/' + esc(x.student_id) + "/" + esc(g.id) + '">' + esc(firstName(x.name) || x.name) + "</a>";
           }) + "</i></div>" + more("#/ht/" + esc(g.id), "Kim etməyib", "gkPendGo") + "</div>");
       }
-      if (hw && und.length) {
-        sat.push('<div class="gkd" id="gkHw"><span class="gkdn w">' + und.length + "</span>" +
-          '<div class="g"><b>Yazılı tapşırıq · ' + (Number(hw.done) || 0) + " / " + (Number(hw.total) || 0) + " etdi</b>" +
-          "<i>etməyən: " + nm(und, function (n) { return esc(firstName(n) || n); }) + "</i></div>" +
-          more("#/a/" + esc(g.id), "Tapşırıqlar", "gkHwGo") + "</div>");
-      }
+      //  26.10: vaciblik sirasi - etmeyenler, zeif movzu (Təkrar ver), sonra yazili tapsiriq
       if (todo) {
         var ws = todo.weak_students;
         sat.push('<div class="gkd" id="gkTodo"><span class="gkdn e">' + ws.length + "</span>" +
@@ -4321,12 +4340,19 @@
           }) + "</i></div>" +
           '<button type="button" class="btn sm go" id="gkTodoGo">' + ic("gen") + "Təkrar ver</button></div>");
       }
+      if (hw && und.length) {
+        sat.push('<div class="gkd" id="gkHw"><span class="gkdn w">' + und.length + "</span>" +
+          '<div class="g"><b>Yazılı tapşırıq · ' + (Number(hw.done) || 0) + " / " + (Number(hw.total) || 0) + " etdi</b>" +
+          "<i>etməyən: " + nm(und, function (n) { return esc(firstName(n) || n); }) + "</i></div>" +
+          more("#/a/" + esc(g.id), "Tapşırıqlar", "gkHwGo") + "</div>");
+      }
       //  bos qrupda «hər şey qaydasındadır» yalan olardi - evvel sagird lazimdir
       $("gkDiq").innerHTML = kh("warn", "Diqqət tələb edir") +
-        (sat.length ? sat.join("")
+        (sat.length ? ilkIki(sat, "gkDq")
           : !nS && rr[0] ? '<p class="muted gkp" id="gkNoStu">Qrupda hələ şagird yoxdur.</p>' +
               '<a class="btn sm" href="#/g/' + esc(g.id) + '/s">' + ic("plus") + "Şagird əlavə et</a>"
           : '<p class="gkok" id="gkOk">' + ic("check") + "Hər şey qaydasındadır — etməyən və zəif mövzu yoxdur.</p>");
+      ilkIkiBind("gkDq");
       on("gkTodoGo", "click", function () {
         remedialGen(g.id, [todo], null, (todo.weak_students || []).map(function (x) { return { id: x.id, name: x.name }; }));
       });

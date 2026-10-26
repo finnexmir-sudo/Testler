@@ -3200,3 +3200,10 @@ a.gkn.ylnk{color:inherit;text-decoration:none;min-height:44px}
     sagird 22 px, qrup 20 px (.gcompact).  Zolaq bosluqla yigilir, yazi ile yox.  */
 @media (min-width:601px){ .band.gtabb h1{font-size:26px} }
 @media (max-width:600px){ .band.yhome h1{font-size:22px;line-height:1.15} }
+.yns{margin:0 0 6px;font-size:13.5px;color:var(--fg-2)}
+.yns p{margin:0 0 2px}
+.yns b{color:var(--fg);font-weight:700}
+/*  «Hamısına bax (N)» - xeberdarliqlarin qalanini yerinde acir  */
+.gkm.dqall{background:none;border:0;padding:0 2px;cursor:pointer;font:inherit;font-size:14px;font-weight:600;color:var(--brand)}
+/*  setir alt yazisinda qalin reqem SETIR ICINDE qalir (.mrow .g b blokdur - «69%» ayrica setre dusurdu)  */
+.menu .mrow .g i b{display:inline;font-size:inherit;font-weight:700;letter-spacing:0;color:var(--fg)}

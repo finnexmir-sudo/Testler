@@ -91,7 +91,7 @@ with sync_playwright() as pw:
 
     print("D · Diqqət: səssiz şagirdlər")
     icmal(pg)
-    sus = pg.locator("#yDiq .mrow", has_text="səssizdir")
+    sus = pg.locator("#yDiq .mrow", has_text="son 7 gündə test işləməyib")
     if sus.count():
         n = int(re.search(r"(\d+) şagird", sus.first.inner_text()).group(1))
         sus.first.click(); pg.wait_for_selector("#suBox", timeout=20000); pg.wait_for_timeout(800)
@@ -99,6 +99,22 @@ with sync_playwright() as pw:
         ok(h(pg) == "#/sus" and k == n, "sətir %d deyir, #/sus %d ad göstərir" % (n, k))
     else:
         ok(pg.locator("#yDiqOk").count() == 1, "səssiz yoxdursa «Hər şey qaydasındadır»")
+
+    icmal(pg)
+    zr = pg.locator("#yDiq .mrow", has_text="zəif gedir")
+    if zr.count():
+        zt = zr.first.inner_text()
+        ok("qrupun bu mövzuda ortalaması" in zt and re.search(r"\d+%", zt), "zəif mövzu: faizin mənası və qrup yazılıb", zt.replace("\n", " "))
+    ys = pg.inner_text("#yNetSum") if pg.locator("#yNetSum").count() else ""
+    ok(len([l for l in ys.split("\n") if l.strip()]) == 2 and "bütün dövr" in ys and "Son 7 gün" in ys,
+       "ümumi orta və həftəlik dəyişmə iki sətirdə, dövrləri ilə", ys.replace("\n", " | "))
+
+    vis = pg.evaluate("[...document.querySelectorAll('#yDiq .mrow')].filter(e => e.offsetParent).length")
+    tot = pg.locator("#yDiq .mrow").count()
+    ok(vis == min(2, tot), "Diqqət: ilk görünüşdə %d sətir (cəmi %d)" % (vis, tot))
+    if tot > 2:
+        pg.click("#yDqB"); pg.wait_for_timeout(200)
+        ok(pg.evaluate("[...document.querySelectorAll('#yDiq .mrow')].filter(e => e.offsetParent).length") == tot, "«Hamısına bax» hamısını açır")
 
     print("E · keçidlər")
     icmal(pg)

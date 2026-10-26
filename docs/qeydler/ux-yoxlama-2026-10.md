@@ -105,6 +105,8 @@ Testlərdə tapılan: `e2e_tapsiriq_bos` sınanda bütün platforma testlərini 
 | İ2 | Zolaq | yığcam (qrup/şagird kimi), sağda «+ Test yığ» | `e2e_icmal` E, F | yox |
 | İ3 | Başlıq yazısı yığcam zolaqda kiçilmişdi (kompüter 26 → 22, İcmal telefonda 22 → 20) | Qaytarıldı: kompüterdə 26 px (qrup, şagird, İcmal), telefonda İcmal və şagird 22, qrup 20 | `e2e_icmal` F, `e2e_qrup_sekme`, `e2e_sagird_xulase` | yox |
 | İ4 | 360 px-də tor sütunu uzun mətnlə genişlənib səhifəni 11 px yana sürüşdürürdü | `minmax(0,1fr)` | `e2e_icmal` F | yox |
+| İ5 | İstifadəçi qeydləri: «səssizdir» qeyri-müəyyən; «66%» nəyin faizi, hansı qrup; orta və həftəlik dəyişmə bir sətirdə | «N şagird son 7 gündə test işləməyib» (server: aktiv, 7 gündən köhnə, son 7 gündə testi yoxdur); zəif mövzu: «{qrup} · qrupun bu mövzuda ortalaması X% · N şagird zəif» (#/zm-in sözü); «Ümumi orta: X% · bütün dövr» və «Son 7 gün: Y% · keçən həftəyə görə ±N bənd (əvvəlki 7 gün Z%)» iki sətirdə. «diqqət» nişanı çıxdı (qırmızı fon onsuz da deyir) | `e2e_icmal` D, `e2e_sira0` A, `e2e_sira2` C | yox (budaqda) |
+| İ6 | Dizayn qaydası (CLAUDE.md, 26.10): xəbərdarlıqdan ən vacib 2-si | İcmal və qrup səhifəsinin «Diqqət» kartında ilk 2 sətir, qalanı «Hamısına bax (N)» — yerində açılır. Qrupda sıra: etməyənlər, zəif mövzu (Təkrar ver), yazılı tapşırıq | `e2e_qrup_sekme` E2, `e2e_icmal` | yox (budaqda) |
 
 ### Açıq iş: konsolda 1 xəta (canlı, 26.10)
 İstifadəçinin DevTools şəklində qırmızı «1» (v=818, qrup səhifəsi, 360 px). Yerli bazada eyni səhifədə konsol xətası yoxdur (`pageerror`, `console.error`, ≥ 400 cavab yoxlandı). v=819 şəklində nişan görünmür. Səbəb bilinmir — canlıda Console sekməsinin şəkli lazımdır. Bağlanmayıb.
