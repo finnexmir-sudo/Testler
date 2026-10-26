@@ -4834,7 +4834,7 @@
       none.textContent = q && !tapildi ? "«" + $("stuQ").value.trim() + "» adlı şagird tapılmadı." : "";
       none.classList.toggle("hide", !(q && !tapildi));
       $("stuT").classList.toggle("hide", !!q && !tapildi);
-      $("stuCnt").textContent = q ? tapildi + " / " + say + " şagird tapıldı" : say + " şagird · əlifba sırası";
+      $("stuCnt").textContent = q ? tapildi + " nəticə · qrupda " + say + " şagird" : say + " şagird · əlifba sırası";
       var pg = !q && say > STU_SEH;
       $("stuPg").classList.toggle("hide", !pg);
       if (pg) {

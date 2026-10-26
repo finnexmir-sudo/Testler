@@ -118,7 +118,7 @@ with sync_playwright() as pw:
     pg.fill("#stuQ", k); pg.wait_for_timeout(300)
     g2 = gorunen(pg)
     ok(g2 and ad2 in g2 and len(g2) < n, "«%s» yalnız uyğun adlar" % k, g2)
-    ok(pg.inner_text("#stuCnt").strip() == "%d / %d şagird tapıldı" % (len(g2), n), "say sətri tapılanı deyir", pg.inner_text("#stuCnt"))
+    ok(pg.inner_text("#stuCnt").strip() == "%d nəticə · qrupda %d şagird" % (len(g2), n), "say sətri tapılanı deyir", pg.inner_text("#stuCnt"))
     pg.fill("#stuQ", "girm"); pg.wait_for_timeout(300)
     ok(all("girm" in x.lower() for x in gorunen(pg)), "axtarış yalnız adda gedir")
     pg.fill("#stuQ", "Zzqw"); pg.wait_for_timeout(300)
