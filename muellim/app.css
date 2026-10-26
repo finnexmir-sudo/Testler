@@ -3370,3 +3370,71 @@ body.bnav-on .afoot.mini .in{display:flex;padding:0 16px}
   #main.gpg .st3 .yta{display:inline}
   #main.gpg .gtvw > #btnStuOpen{width:100%}
 }
+
+/* ---------------------------------------------- Sagird profili (26.10, son maket)
+   Qrup sehifesinin basligi ve alt xetli sekmeleri; Xulase: Dövr cedveli · Növbəti addım ·
+   Son nəticələr cedveli · acilan setirler (Gözləyən / Valideyn / Giriş kodları).  */
+#main.gpg .sph .crumb a{white-space:nowrap}
+#main.gpg .segs.stabs{display:flex;background:none;border:0;border-bottom:1px solid #d6e3dd;border-radius:0;box-shadow:none;
+  padding:0;margin:8px 0 14px;gap:0}
+#main.gpg .stabs .seg{flex:1 1 0;min-height:44px;padding:0 6px;border-radius:0;background:none;box-shadow:none;
+  border-bottom:2px solid transparent;margin-bottom:-1px;font-size:15px;color:var(--fg-2)}
+#main.gpg .stabs .seg.on{background:none;box-shadow:none;color:var(--brand);font-weight:650;border-bottom-color:var(--brand)}
+@media (hover:hover){ #main.gpg .stabs .seg:not(.on):hover{background:none;color:var(--fg)} }
+/*  kicik cedveller (Dövr, Son nəticələr)  */
+#main.gpg .sxtab{border:1px solid #dfe8e4;border-radius:10px;overflow:hidden;background:#fff}
+#main.gpg .sxr{display:grid;align-items:center;gap:12px;min-height:44px;padding:6px 14px;border-top:1px solid #e3ebe7;font-size:14.5px}
+#main.gpg .sxr:first-child{border-top:0}
+#main.gpg .sxr.sxh{min-height:36px;background:#eef3f1;font-size:13px;font-weight:650;color:var(--fg-3)}
+#main.gpg .st3c .sxr{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr)}
+#main.gpg .st3c b{font-weight:700}
+#main.gpg .st3c b.pvh{color:var(--ok)} #main.gpg .st3c b.pvm{color:var(--warn)} #main.gpg .st3c b.pvl{color:var(--err)}
+#main.gpg .sxst{padding:12px}
+#main.gpg .sxgd{margin:10px 2px 0;font-size:13.5px;color:var(--fg-3)}
+#main.gpg .sxgd .rtr{display:inline;padding:0;background:none;font-size:13.5px}
+#main.gpg .sxgd .rtr b{font-size:13.5px;margin-right:6px}
+#main.gpg .sn3 .sxr{grid-template-columns:minmax(0,1fr) 90px 70px}
+#main.gpg .sxq{min-width:0}
+#main.gpg .sxq b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#main.gpg .sxq i{display:block;font-style:normal;font-size:13px;color:var(--fg-3)}
+#main.gpg .sxq i em{display:none;font-style:normal}
+#main.gpg .sxd{color:var(--fg-2)}
+/*  Növbəti addım  */
+#main.gpg .sxtov{background:#fcfdfb}
+#main.gpg .sxn1{margin:0 0 2px;font-size:16px;line-height:1.4}
+#main.gpg .sxn1 b{font-weight:700}
+/*  acilan setirler  */
+#main.gpg .sxlist{padding:0;overflow:hidden}
+#main.gpg details.sxrow{border-top:1px solid #e3ebe7;margin:0;background:none;box-shadow:none;border-radius:0}
+#main.gpg #stuMore > details.sxrow:first-child{border-top:0}
+#main.gpg details.sxrow > summary{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 16px;cursor:pointer;
+  list-style:none;font-size:15px;font-weight:600;color:var(--fg)}
+#main.gpg details.sxrow > summary::-webkit-details-marker{display:none}
+#main.gpg details.sxrow > summary > svg:first-child{width:18px;height:18px;flex:none;color:var(--fg-3)}
+#main.gpg details.sxrow > summary > span{flex:1;min-width:0}
+#main.gpg details.sxrow > summary b{font-weight:600;color:var(--fg-2)}
+#main.gpg details.sxrow > summary i{font-style:normal;font-weight:400;font-size:13px;color:var(--fg-3);margin-left:4px}
+#main.gpg details.sxrow > summary .ar{width:16px;height:16px;flex:none;color:var(--fg-3);transition:transform .15s}
+#main.gpg details.sxrow[open] > summary .ar{transform:rotate(90deg)}
+@media (hover:hover){ #main.gpg details.sxrow > summary:hover{background:#f4f8f6} }
+#main.gpg .sxbody{padding:2px 16px 14px}
+#main.gpg .stkart .sxbody{padding-top:4px}
+@media (max-width:600px){
+  #main.gpg .stabs .seg{font-size:14px;padding:0 2px}
+  #main.gpg .sxst{padding:10px}
+  #main.gpg .sxr{padding:6px 12px;gap:8px}
+  #main.gpg .sn3 .sxr{grid-template-columns:minmax(0,1fr) 56px}
+  #main.gpg .sn3 .sxd,#main.gpg .sn3 .sxh > span:nth-child(2){display:none}
+  #main.gpg .sxq i em{display:inline}
+  #main.gpg .sxq b{white-space:normal}
+  #main.gpg details.sxrow > summary{padding:0 12px}
+  #main.gpg .sxbody{padding:2px 12px 12px}
+}
+#main.gpg .card.yk.sxlist{padding:0}
+@media (max-width:600px){
+  /*  telefonda yol bir setirdir: «‹ Geri · qrup / Şagirdlər» (uzun qrup adi «…» ile)  */
+  #main.gpg .sph .crumb{flex-wrap:nowrap;min-width:0}
+  #main.gpg .sph .crumb .sCrQ{display:none}
+  #main.gpg .sph .crumb #sCrG{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;display:block;line-height:32px}
+  #main.gpg .sph .crumb #sCrS{flex:none}
+}

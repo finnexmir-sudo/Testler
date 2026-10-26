@@ -49,6 +49,9 @@ def page(ctx):
     p.on("pageerror", lambda e: fails.append("JS xetasi: " + str(e)[:160]))
     return p
 
+def stuSt(pg):
+    #  26.10 (son maket): sagird profilinde reqemler «Dövr | Orta nəticə | Test sayı» cedvelidir + «Gedişat:» setri
+    return re.sub(r"\s+", " ", pg.evaluate("(document.getElementById('stuSt') || {}).innerText || ''"))
 def rstat(pg):
     return pg.evaluate("(document.querySelector('.rstat') || {}).innerText || ''").replace("\n", " ")
 
@@ -86,18 +89,18 @@ with sync_playwright() as pw:
         rt = risk.inner_text().replace("\n", " ")
         mm = re.search(r"\((\d+)% → (\d+)%\)", rt)
         sid = risk.get_attribute("data-al"); cid = risk.get_attribute("data-g")
-        pg.goto(PANEL + "#/s/" + sid + "/" + cid); pg.wait_for_selector(".rstat", timeout=20000); pg.wait_for_timeout(400)
-        rs = rstat(pg)
+        pg.goto(PANEL + "#/s/" + sid + "/" + cid); pg.wait_for_selector("#stuSt", timeout=20000); pg.wait_for_timeout(400)
+        rs = stuSt(pg)
         ok(mm and ("son 3 test %s%%" % mm.group(2)) in rs and ("test %s%%" % mm.group(1)) in rs and "↘" in rs,
            "kartda «↘ … son 3 test Y% · əvvəlki N test X%» — Siqnaldakı X və Y", rt[:70] + " | " + rs)
 
     print("B · Şagird kartı və valideyn paneli: eyni «son 30 gün», eyni gedişat")
     st = db("""select s.id::text i, s.class_id::text c, s.parent_code p from public.students s
                 where s.account_id = %s::uuid and s.parent_code is not null limit 1""", (acc["i"],), one=True)
-    pg.goto(PANEL + "#/s/" + st["i"] + "/" + st["c"]); pg.wait_for_selector(".rstat", timeout=20000); pg.wait_for_timeout(400)
-    rs = rstat(pg)
-    ok("orta · bütün dövr" in rs, "orta bütün dövr kimi yazılır", rs)
-    m30 = re.search(r"(\d+)%\s*(?:orta · )?son 30 gün", rs)   #  23.10: «74% orta · son 30 gün» (Xülasə kartı)
+    pg.goto(PANEL + "#/s/" + st["i"] + "/" + st["c"]); pg.wait_for_selector("#stuSt", timeout=20000); pg.wait_for_timeout(400)
+    rs = stuSt(pg)
+    ok("Bütün dövr" in rs, "orta bütün dövr sətri var", rs)
+    m30 = re.search(r"Son 30 gün (\d+)%", rs)   #  26.10: cedvelin «Son 30 gün» setri
     mtr = re.search(r"son 3 test (\d+)% · əvvəlki (\d+) test (\d+)%", rs)
     pv = page(ctx)
     pv.goto(ROOT + "valideyn/?kod=" + st["p"]); pv.wait_for_selector(".card.sum", timeout=30000); pv.wait_for_timeout(500)
@@ -122,8 +125,9 @@ with sync_playwright() as pw:
     pg.locator("#sTabs [data-v='s'], #sTabs .seg").nth(2).click(); pg.wait_for_timeout(500)
     st_txt = pg.inner_text("#tab-s")
     m7 = re.search(r"(\d+)\s*gözləyir\s*(\d+)\s*təkrarda", st_txt.replace("\n", " "))
-    ok(m6 and m7 and m6.group(1) == m7.group(1) and (m6.group(2) or "0") == m7.group(2),
-       "Xülasədə «N gözləyir · M təkrarda» Səhvlər sekməsi ilə eynidir",
+    #  26.10 (son maket): Xulasede BIR tovsiye - sehv defterinin sayi yalniz Sehvler sekmesindedir (reqem bir yerde)
+    ok(m6 is None and m7 is not None,
+       "«N gözləyir · M təkrarda» yalnız Səhvlər sekmesində (Xülasədə təkrarlanmır)",
        "%s | %s" % (m6.group(0) if m6 else xt[:60], m7.group(0) if m7 else st_txt[:60]))
     pg.locator("#sTabs .seg").nth(1).click(); pg.wait_for_timeout(500)
     rows = pg.evaluate("""[...document.querySelectorAll('#tab-m .trow')].map(r => r.innerText.replace(/\\n/g, ' '))""")
@@ -149,7 +153,7 @@ with sync_playwright() as pw:
     pg.set_viewport_size({"width": 390, "height": 844})
     #  23.10: reqem setri Xulase sekmesindedir - sekme sessiya boyu yadda qalir, ona gore Xulase acilir
     pg.goto(PANEL + "#/s/" + st["i"] + "/" + st["c"]); pg.wait_for_selector("#sTabs", timeout=20000)
-    pg.locator("#sTabs [data-v='x']").click(); pg.wait_for_selector(".rstat", timeout=20000); pg.wait_for_timeout(600)
+    pg.locator("#sTabs [data-v='x']").click(); pg.wait_for_selector("#stuSt", timeout=20000); pg.wait_for_timeout(600)
     txt = pg.evaluate("(document.getElementById('vTxt') || {}).value || (document.getElementById('vTxt') || {}).textContent || ''")
     if m30 and txt:
         ok(("Ortalama: %s%%" % m30.group(1)) in txt or ("Ortalama nəticə: %s%%" % m30.group(1)) in txt,

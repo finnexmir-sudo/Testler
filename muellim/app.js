@@ -4245,6 +4245,11 @@
       mm.classList.add("hide");
       if ($("gMoreBtn")) $("gMoreBtn").setAttribute("aria-expanded", "false");
     }
+    var sm2 = $("stuAsgMenu");
+    if (sm2 && !sm2.classList.contains("hide") && !(e.target.closest && e.target.closest(".gtvw"))) {
+      sm2.classList.add("hide");
+      if ($("btnAsgStu")) $("btnAsgStu").setAttribute("aria-expanded", "false");
+    }
     var am = $("gAsgMenu");
     if (am && !am.classList.contains("hide") && !(e.target.closest && e.target.closest(".gtvw"))) {
       am.classList.add("hide");
@@ -6471,10 +6476,13 @@
       }
       //  Sagird girene qeder ACIQ (kodu gondermek lazimdir), girenden
       //  sonra yigilir - kohne siyahi ile eyni qayda.  Dayandirilmis da aciq.
-      b.innerHTML = '<details class="card stkart"' + ((!girib || !aktiv) ? " open" : "") + ">" +
-        "<summary>" + ic("key") + "Giriş kodları və hesab <i>" +
-          (!aktiv ? "dayandırılıb" : (girib ? "şagird girib" : "hələ girməyib")) +
-        "</i></summary>" + body + "</details>";
+      var vz = !aktiv ? "dayandırılıb" : (girib ? "şagird girib" : "hələ girməyib");
+      //  26.10: profilin sonundaki acilan setir («Giriş kodları ›») - qayda eyni: girene qeder acıq
+      b.innerHTML = YENI
+        ? '<details class="sxrow stkart"' + ((!girib || !aktiv) ? " open" : "") + "><summary>" + ic("key") +
+            "<span>Giriş kodları <i>" + vz + "</i></span>" + ic("right", "ar") + '</summary><div class="sxbody">' + body + "</div></details>"
+        : '<details class="card stkart"' + ((!girib || !aktiv) ? " open" : "") + ">" +
+          "<summary>" + ic("key") + "Giriş kodları və hesab <i>" + vz + "</i></summary>" + body + "</details>";
 
       var det = b.querySelector("details");
       det.addEventListener("click", function (ev) {
@@ -6581,6 +6589,9 @@
         add(n + " test gözləyir", basl.length ? basl.join(", ") : "hələ işləməyib", testMsgText(sname, n, basl, url));
       }
       //  23.10: basliq kartin ozundedir (Xulase «Gözləyən tapşırıqlar»); bos hal da yazilir
+      //  26.10: setirde say - yazili (1) + gozleyen testler (N); #/ht ile eyni menbe
+      var pN = (hw && und.indexOf(sname) >= 0 ? 1 : 0) + (mine ? Number(mine.n) || 1 : 0);
+      if ($("stuPendN")) $("stuPendN").textContent = pN ? "· " + pN : "· yoxdur";
       if (!rows.length) {
         box.innerHTML = '<p class="gkok" id="stuPendOk">' + ic("check") + "Gözləyən tapşırıq yoxdur.</p>";
         return;
@@ -6602,7 +6613,7 @@
     sb.rpc("rpc_student_report", { p_student_id: id }).then(function (r) {
       if (!live()) return;
       var s = r.student || {}, sm = r.summary || {};
-      bandHead({
+      if (!YENI) bandHead({
         back: { id: "btnB", label: backLabel("Geri") }, eye: "Şagird hesabatı",
         av: av(s.full_name), title: s.full_name,
         //  YENI: ad tekrari yox - gorunen ad tam addan ferqlidirse yazilir
@@ -6624,7 +6635,23 @@
           (tri.d > 0 ? "↗ +" + tri.d : (tri.d < 0 ? "↘ −" + Math.abs(tri.d) : "→ 0")) + " bənd</b>" +
           trendSoz(tri) + "</span>" : "";
       //  hec test yoxdursa «0 test · 0%» yazilmir - kartlar «Hələ test işləməyib» deyir
-      var rstatH = !YENI || !(Number(sm.attempts) || 0) ? ""
+      /*  26.10 (son maket): reqemler kicik cedveldir - «Dövr | Orta nəticə | Test sayı».  Son 30 gun
+          (valideyn metni ile eyni menbe) birinci setir, butun dovr ikinci; gedisat altinda bir setir.  */
+      var dovrB = dovrSoz(r).charAt(0).toUpperCase() + dovrSoz(r).slice(1);
+      var stRows = [];
+      if (YENI && (Number(sm.attempts) || 0)) {
+        if (!r.since && v30.dovr === "son 30 gün" && v30.n) stRows.push(["Son 30 gün", v30.avg, v30.n]);
+        stRows.push([dovrB, pct(sm.avg), Number(sm.attempts) || 0]);
+      }
+      var rstatH = YENI
+        ? (stRows.length
+          ? '<section class="card yk sxst" id="stuSt"><div class="sxtab st3c"><div class="sxr sxh"><span>Dövr</span><span>Orta nəticə</span><span>Test sayı</span></div>' +
+              stRows.map(function (x) {
+                return '<div class="sxr"><span>' + x[0] + '</span><span><b class="' + pvCls(x[1]) + '">' + x[1] + "%</b></span><span>" + x[2] + "</span></div>";
+              }).join("") + "</div>" +
+              (trH ? '<p class="sxgd">Gedişat: ' + trH + "</p>" : "") + "</section>"
+          : "")
+        : !(Number(sm.attempts) || 0) ? ""
         : (!r.since && v30.dovr === "son 30 gün" && v30.n
           ? '<div class="rstat r30"><span><b>' + v30.avg + "%</b>orta · son 30 gün</span>" + trH +
               '<span><b>' + v30.n + "</b>test · son 30 gün</span>" +
@@ -6815,14 +6842,16 @@
           return (ilkinMi(a, r) ? 1 : 0) - (ilkinMi(b, r) ? 1 : 0) || Number(a.ratio) - Number(b.ratio);
         })[0] || null;
         var kH = function (icon, t, sag) { return '<div class="gkh">' + ic(icon) + "<b>" + t + "</b>" + (sag || "") + "</div>"; };
-        var tovH = '<section class="card gk sxwide sxtov" id="stuTov">' + kH("gen", "Təkrar tövsiyəsi");
+        var kY = function (t, sag) { return '<div class="ykh"><div><b>' + t + "</b></div>" + (sag || "") + "</div>"; };
+        //  26.10 (son maket): «Növbəti addım» - BIR tovsiye.  Sehv defteri («N səhv düzəliş gözləyir», «Səhvlərdən
+        //  təkrar test») Sehvler sekmesindedir (#btnFix ve «Test tapşır» menyusu eyni isi gorur).
+        var tovH = '<section class="card yk sxtov" id="stuTov">' + kY("Növbəti addım");
         if (r.topics === null) {
           tovH += '<p class="muted gkp">Mövzu üzrə təhlil abunə ilə açılır.</p>';
         } else if (tov) {
-          tovH += '<div class="sxtr"><div class="g"><b class="gkt">' + esc(tov.name) + "</b>" +
+          tovH += '<div class="sxtr"><div class="g"><p class="sxn1"><b>' + esc(tov.name) + "</b> mövzusunu təkrar edin.</p>" +
               '<span class="gkres">Son nəticə: <b class="' + pvCls(pct(tov.ratio)) + '">' + pct(tov.ratio) + "%</b> · " +
-                Number(tov.total) + " sual əsasında" + (ilkinMi(tov, r) ? " · ilkin nəticə" : "") + "</span>" +
-              '<p class="muted gkp">Bu mövzunu möhkəmləndirmək üçün qısa təkrar verin.</p></div>' +
+                Number(tov.total) + " sual əsasında" + (ilkinMi(tov, r) ? " · ilkin nəticə" : "") + "</span></div>" +
             '<div class="sxb"><button type="button" class="btn go" id="vdTov">' + ic("gen") + "5 suallıq təkrar ver</button>" +
               "<s>Yalnız " + esc(fnm) + " üçün</s></div></div>" +
             (sweakAll.length > 1
@@ -6832,38 +6861,34 @@
         } else {
           tovH += '<p class="muted gkp">Şagird test işləyəndən sonra burada ən zəif mövzu görünəcək.</p>';
         }
-        if (vdN && r.weak !== null) {
-          tovH += '<div class="sxsehv"><span><b>' +
-              (Number(mk0.open) + Number(mk0.review) === vdN
-                ? (Number(mk0.open) || 0) + " səhv</b> düzəliş gözləyir" + (Number(mk0.review) ? " · " + Number(mk0.review) + " təkrarda" : "")
-                : vdN + " səhv</b> düzəliş gözləyir") + "</span>" +
-            (weak.length ? '<button type="button" class="btn sm" id="vdF">' + ic("gen") + "Səhvlərdən təkrar test</button>" : "") +
-            '</div><div id="vdFMsg"></div>';
-        }
         tovH += "</section>";
         var valH = "";
         if (r.topics !== null) {
-          valH = '<section class="card gk" id="stuVal">' + kH("person", "Valideyn üçün hesabat") +
-            '<p class="sxv" id="vSum">' + (v30.n
+          valH = '<details class="sxrow" id="stuVal"><summary>' + ic("person") + "<span>Valideyn üçün hesabat</span>" + ic("right", "ar") +
+            '</summary><div class="sxbody"><p class="sxv" id="vSum">' + (v30.n
               ? (v30.dovr === "son 30 gün" ? "Son 30 gündə " : "Bütün dövrdə ") + v30.n + " test işləyib. Orta nəticə " + v30.avg + "%."
               : "Hələ test işləməyib.") + "</p>" +
             (!v30.n ? "" : '<div class="sxvb"><button type="button" class="btn sm go" id="vCopy">' + ic("clip") + "Mətni kopyala</button>" +
               '<button type="button" class="btn sm ghost" id="vOpen" aria-expanded="false">' + ic("doc") + "Mətnə bax</button></div>") +
-            '<div id="vBox" hidden>' + vsH + "</div></section>";
+            '<div id="vBox" hidden>' + vsH + "</div></div></details>";
         }
-        var sonH = '<section class="card gk sxwide" id="stuSon">' +
-          kH("chart", "Son nəticələr", at.length
-            ? '<a class="gkm" href="#" id="vdTar">' + (at.length > 5 ? "Hamısına bax" : "Tarixçə") + " " + ic("right") + "</a>" : "") +
+        //  Son neticeler: son 3 test (Tarixçə sekmesi ile eyni setirler), cedvel Test | Tarix | Nəticə
+        var sonH = '<section class="card yk" id="stuSon">' +
+          kY("Son nəticələr", at.length
+            ? '<a class="gkm" href="#" id="vdTar">' + (at.length > 3 ? "Hamısına bax" : "Tarixçə") + " " + ic("right") + "</a>" : "") +
           (at.length
-            ? at.slice(0, 5).map(function (a) {
-                return '<div class="gkn"><div class="g"><b>' + esc(a.test) + "</b><i>" + dateAz(a.at) + " · " +
-                  a.score + " / " + a.max + "</i></div>" + pctChip(a.percent) + "</div>";
-              }).join("")
+            ? '<div class="sxtab sn3"><div class="sxr sxh"><span>Test</span><span>Tarix</span><span>Nəticə</span></div>' +
+              at.slice(0, 3).map(function (a) {
+                return '<div class="sxr"><span class="sxq"><b>' + esc(a.test) + "</b><i><em>" + dateAz(a.at) + " · </em>" +
+                  a.score + " / " + a.max + " düz</i></span><span class=\"sxd\">" + dateAz(a.at) + "</span><span>" + pctChip(a.percent) + "</span></div>";
+              }).join("") + "</div>"
             : '<p class="muted gkp">Hələ test işləməyib.</p>') + "</section>";
-        hX = rstatH + '<div class="gic sxg">' + tovH +
-          '<section class="card gk" id="stuDiq">' + kH("clip", "Gözləyən tapşırıqlar") +
-            '<div id="stuPend"><p class="muted gkp">Yüklənir…</p></div></section>' +
-          valH + sonH + "</div>";
+        //  Gozleyen / Valideyn / Giris kodlari - acilan setirler (maket: «Gözləyən tapşırıqlar · 1 ›»)
+        hX = rstatH + tovH + sonH +
+          '<section class="card yk sxlist" id="stuMore">' +
+            '<details class="sxrow" id="stuDiq"><summary>' + ic("clip") + '<span>Gözləyən tapşırıqlar <b id="stuPendN"></b></span>' + ic("right", "ar") +
+              '</summary><div class="sxbody" id="stuPend"><p class="muted gkp">Yüklənir…</p></div></details>' +
+            valH + '<div id="stuKart"></div></section>';
       }
 
       /* ---------------- MOVZULAR ---------------- */
@@ -7139,18 +7164,34 @@
         return t + (n ? ' <span class="tn' + (cls ? " " + cls : "") + '">' + n + "</span>" : "");
       }
       var asgMenu = YENI
-        ? '<div class="card pad0 menu" id="stuAsgMenu" hidden>' +
-            yRow({ ic: "clip", ad: "Hazır test", alt: "kitabxanadan seçin — yalnız bu şagirdə", href: "#" }).replace('<a class="mrow"', '<a data-am="t" class="mrow"') +
-            yRow({ ic: "chart", ad: "Diaqnostik test", alt: "nəyi bilmir? — bütün mövzulardan", href: "#" }).replace('<a class="mrow"', '<a data-am="d" class="mrow"') +
-            (weak.length ? yRow({ ic: "gen", ad: "Səhvlərdən təkrar", alt: "ən çox səhv edilən " + weak.length + " sualdan test", href: "#" }).replace('<a class="mrow"', '<a data-am="s" class="mrow"') : "") +
+        ? '<div class="gmenu hide" id="stuAsgMenu" role="menu">' +
+            '<a role="menuitem" href="#" data-am="t">' + ic("clip") + "Hazır test — yalnız bu şagirdə</a>" +
+            '<a role="menuitem" href="#" data-am="d">' + ic("chart") + "Diaqnostik test</a>" +
+            (weak.length ? '<a role="menuitem" href="#" data-am="s">' + ic("gen") + "Səhvlərdən təkrar (" + weak.length + " sual)</a>" : "") +
           "</div>" : "";
-      h += (YENI ? '<div id="stuKart"></div>' + asgMenu : "") +
-        '<div class="segs stabs" id="sTabs">' +
+      /*  26.10 (son maket): sagird profili qrup sehifesinin uslubunda - «Qruplar / qrup / Şagirdlər», ad,
+          «qrup · sinif», «+ Test tapşır» (menyu) ve disli (Giriş kodları).  Iri zolaq yoxdur.  */
+      var gc = GHEAD[classId] || {};
+      if (YENI) {
+        h += '<header class="phd gph sph" id="sHd"><div class="phd-t">' +
+            '<nav class="crumb" aria-label="Yol"><button type="button" class="cback" id="btnB">' + ic("back") + "Geri</button>" +
+              '<a href="#/gs" class="sCrQ">Qruplar</a>' +
+              (classId ? '<span aria-hidden="true" class="sCrQ">/</span><a href="#/g/' + esc(classId) + '" id="sCrG">' + esc(gc.name || "Qrup") + "</a>" +
+                '<span aria-hidden="true">/</span><a href="#/g/' + esc(classId) + '/s" id="sCrS">Şagirdlər</a>' : "") + "</nav>" +
+            '<h1 id="sName">' + esc(s.full_name) + "</h1>" +
+            '<p id="sMeta">' + esc(gc.name || "") + "</p></div>" +
+          '<div class="phd-a"><div class="gtvw"><button type="button" class="btn go" id="btnAsgStu" aria-haspopup="true" aria-expanded="false">' +
+              ic("plus") + "Test tapşır</button>" + asgMenu + "</div>" +
+            '<button type="button" class="btn icon gset" id="sSet" aria-label="Giriş kodları və hesab" title="Giriş kodları və hesab">' +
+              ic("gear") + "</button></div></header>";
+      }
+      //  YENI: sekmelerde say yoxdur (maket) - saylar sekmenin icindedir
+      h += '<div class="segs stabs" id="sTabs">' +
           seg("x", "Xülasə", STAB) +
-          //  YENI: «Movzular 2» = ZEIF movzu sayi (60%-den asagi) - nisan narinci, «Sehvler»den ferqlenir
-          seg("m", tabLbl("Mövzular", nWeakT, YENI ? "tw" : ""), STAB) +
-          seg("s", tabLbl("Səhvlər", nSehv), STAB) +
-          seg("t", tabLbl("Tarixçə", at.length), STAB) +
+          //  kohne: «Movzular 2» = ZEIF movzu sayi (60%-den asagi) - nisan narinci, «Sehvler»den ferqlenir
+          seg("m", YENI ? "Mövzular" : tabLbl("Mövzular", nWeakT, ""), STAB) +
+          seg("s", YENI ? "Səhvlər" : tabLbl("Səhvlər", nSehv), STAB) +
+          seg("t", YENI ? "Tarixçə" : tabLbl("Tarixçə", at.length), STAB) +
         "</div>" +
         '<div class="stab" id="tab-x"' + (STAB === "x" ? "" : " hidden") + ">" + hX + "</div>" +
         '<div class="stab" id="tab-m"' + (STAB === "m" ? "" : " hidden") + ">" + hM + "</div>" +
@@ -7160,8 +7201,26 @@
       show(h);
       //  24.10 (yigcamliq): zolaq bir setirde (Geri · ad · Test tapşır), kartlar yigcam
       if (YENI) {
-        main.classList.add("yig");
-        if ($("band")) { $("band").classList.add("gcompact"); $("band").classList.add("gtabb"); $("band").classList.add("sband"); }
+        setBand("");
+        main.classList.add("yig"); main.classList.add("yh"); main.classList.add("gpg");
+        topTitle.textContent = s.full_name || "Şagird";
+        if (classId) {
+          //  basliq altinda «qrup · sinif» (qrup basligi ile eyni sorgu)
+          Promise.all([sb.select("classes", { select: "id,name,level_id", eq: { id: classId } }), loadLevels().catch(function () {})])
+            .then(function (rr) {
+              var c = (rr[0] || [])[0];
+              if (!live() || !c) return;
+              var lv = levelName(c.level_id);
+              if ($("sCrG")) $("sCrG").textContent = c.name;
+              if ($("sMeta")) $("sMeta").textContent = c.name + (lv ? " · " + lv : "");
+            }).catch(function () {});
+        }
+        //  disli: Xulasedeki «Giriş kodları» setrini acir
+        on("sSet", "click", function () {
+          sTabTo("x");
+          var d = document.querySelector("#stuKart details");
+          if (d) { d.open = true; if (d.scrollIntoView) d.scrollIntoView({ block: "center" }); }
+        });
       }
       if (YENI) { stuKart(id, classId, live); loadStuPend(id, classId, s.full_name, live); }
       loadDiag(id, classId, at.length > 0);
@@ -7346,7 +7405,9 @@
       on("btnAsgStu", "click", function () {
         var m = $("stuAsgMenu");
         if (!YENI || !m) { nav("#/a/" + classId + "/" + id); return; }
-        m.hidden = !m.hidden;
+        var acik = m.classList.contains("hide");
+        m.classList.toggle("hide", !acik);
+        $("btnAsgStu").setAttribute("aria-expanded", acik ? "true" : "false");
       });
       on("stuAsgMenu", "click", function (ev) {
         var a = ev.target.closest ? ev.target.closest("[data-am]") : null;
@@ -7354,7 +7415,7 @@
         ev.preventDefault();
         var k = a.getAttribute("data-am"), to;
         if (k === "t") { nav("#/a/" + classId + "/" + id); return; }
-        $("stuAsgMenu").hidden = true;
+        $("stuAsgMenu").classList.add("hide");
         if (k === "d") {
           sTabTo(YENI ? "m" : "x");
           var dg = document.querySelector("#diagBox details.dgmore");

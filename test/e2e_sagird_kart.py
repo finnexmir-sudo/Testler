@@ -128,7 +128,7 @@ with sync_playwright() as pw:
     print("\nA · Siyahıdan şagird səhifəsinə")
     pg.goto(PANEL + "#/g/%s/s" % G); pg.reload(); pg.wait_for_timeout(3500)
     #  Iki sagird girmeyib (Aysel, Leyla) - Ayselin ozunu aciriq
-    hint = pg.locator("a.mrow", has_text="Aysel Məmmədova")
+    hint = pg.locator("#stu a.ytr", has_text="Aysel Məmmədova")
     ok(hint.count() == 1 and "kodu göndərin" in hint.first.inner_text(),
        "siyahida «hele girmeyib - kodu gonderin» setri var", hint.first.inner_text().replace("\n", " · ")[:70])
     hint.first.click(); pg.wait_for_selector("#stuKart .stkart", timeout=20000)
@@ -182,7 +182,7 @@ with sync_playwright() as pw:
     r1 = row(S0)
     ok(r1["full_name"] == "Nigar Quliyeva", "yeni ad bazada", r1["full_name"])
     ok(r1["display_name"] == "Nigar Q.", "qisa ad avtomatik yenilendi", r1["display_name"])
-    ok("Nigar Quliyeva" in pg.inner_text("#band"), "sehife basliginda yeni ad")
+    ok("Nigar Quliyeva" in pg.inner_text("#sHd"), "sehife basliginda yeni ad")
 
     print("\nF · Giriş kodunu yenilə")
     kohne_kod = r1["login_code"]
@@ -191,7 +191,8 @@ with sync_playwright() as pw:
     yeni_kod = row(S0)["login_code"]
     ok(yeni_kod != kohne_kod, "giris kodu deyisdi", "%s -> %s" % (kohne_kod, yeni_kod))
     ok(yeni_kod in pg.locator("#stuKart .code").all_inner_texts(), "kart YENI kodu gosterir")
-    ok(yeni_kod in pg.inner_text("#band"), "BASLIQDAKI kod da yenilendi (kohne kod qalmir)")
+    #  26.10: kod yalniz «Giriş kodları» setrindedir (basliqda kod yoxdur) - kohne kod hec yerde qalmir
+    ok(kohne_kod not in pg.inner_text("#main"), "kohne kod sehifede qalmir")
     ok(kohne_kod not in pg.inner_text("#main") + pg.inner_text("#band"), "kohne kod ekranda qalmir")
 
     print("\nG · Dayandır / davam etdir")

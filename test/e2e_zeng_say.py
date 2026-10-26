@@ -133,7 +133,7 @@ with sync_playwright() as pw:
         yox(nisan(p) == "1", "cavab oxundu - nisan «1» (indi: %r)" % nisan(p))
 
         #  --- SIQNAL saya TESIR ETMEMELIDIR.  Sessiz sagird yaradiriq:
-        #  Icmalda «N sagird sessizdir» sətri cixir, amma zeng qalir «1».
+        #  Siqnallarda «N şagird son 7 gündə test işləməyib» sətri cixir, amma zeng qalir «1».
         lev2 = q("select id from public.levels where code='3'", one=True)["id"]
         g2 = q("insert into public.classes (account_id,teacher_id,kind,name,"
                "join_code,level_id) values (%s,%s,'tutor_group','Sınaq',%s,%s)"
@@ -146,11 +146,14 @@ with sync_playwright() as pw:
               " values (%s,%s,%s,%s,%s,%s,true, now()-interval '20 days')",
               (acc["acc"], g2, acc["own"], ad, ad.split(" ")[0],
                "ZS%s%d" % (str(T)[-5:], i)))
+        #  26.10: qrupa aid xeberdarliq Icmalda deyil, Siqnallarda («N şagird son 7 gündə test işləməyib»)
+        p.goto(PANEL + sfx + "#/n"); p.reload()
+        p.wait_for_selector("#nSus", timeout=30000)
+        p.wait_for_timeout(1200)
+        yox("test işləməyib" in p.inner_text("#nSus"), "sessiz sagird sətri Siqnallarda GORUNUR")
         p.goto(PANEL + sfx + "#/"); p.reload()
         p.wait_for_selector("#adminMsg", state="attached", timeout=30000)
         p.wait_for_timeout(1800)
-        ekran = p.locator("#main").inner_text()
-        yox("səssiz" in ekran.lower(), "sessiz sagird sətri Icmalda GORUNUR")
         yox(nisan(p) == "1", "siqnal saya TESIR ETMIR - nisan hele «1» (indi: %r)"
             % nisan(p))
         p.screenshot(path=OUT + "/%s-siqnal-tesirsiz.png" % gor, full_page=True)
