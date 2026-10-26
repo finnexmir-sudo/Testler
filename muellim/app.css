@@ -3266,3 +3266,14 @@ a.gkn.ylnk{color:inherit;text-decoration:none;min-height:44px}
   #main.yh .ytr.yth.wk3 > span:nth-child(2){display:block}
 }
 #main.yh details.wkf:not([open]){display:none}
+/*  26.10: panelin footer-i bir kicik setirdir (iri tund footer yox)  */
+.afoot.mini{background:none;color:var(--fg-3);padding:18px 0 24px;margin-top:8px;border-top:1px solid #dfe8e4}
+.afoot.mini .in{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.afoot.mini .fmini{display:flex;align-items:center;gap:8px;font-size:13.5px}
+.afoot.mini .fmini a{color:var(--fg-2);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+@media (hover:hover){ .afoot.mini .fmini a:hover{color:var(--brand)} }
+.afoot.mini .fcopy{font-size:12.5px}
+body.bnav-on .afoot.mini .in{display:flex;padding:0 16px}
+/*  qrupsuz yeni muellim  */
+#main.yh .ybos p{margin:0 0 12px;font-size:14.5px;line-height:1.5;color:var(--fg-2)}
+#main.yh .ybos .btn{min-height:44px}

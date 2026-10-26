@@ -7,9 +7,10 @@
      başlıqdakı «N qrup · M şagird» sətirlərin cəmi ilə eyni; sətir qrupu açır
   C  «Bugünkü dərslər»: bugünkü dərslər rpc_week ilə eyni; sətir qrupu açır; «Bütün həftə» açılır;
      cədvəl yoxdursa ilk addım yazılır
-  D  «Qrup yarat» → Qruplar, ad sahəsi hazır; «Test yığ» → #/gen; «Nəticələr» → #/nt
+  D  «Qrup yarat» → Qruplar, ad sahəsi hazır; «Test yığ» → #/gen; «Nəticələr» keçidi YOXDUR (qrupun içindədir)
   E  İcmaldan köçənlər itmir: Siqnallarda «son 7 gündə test işləməyib» = #/sus adları
-  F  360 px: yana sürüşmə yoxdur, düymə ≥ 44 px, başlıq 22 px; 1280 px: başlıq 26 px
+  F  360 px: yana sürüşmə yoxdur, düymə ≥ 44 px, başlıq 22 px; 1280 px: başlıq 26 px; footer bir kiçik sətir
+  G  qrupsuz yeni müəllim: qısa izah + «İlk qrupunu yarat» (boş cədvəllər çıxmır)
 """
 import os, re, sys
 import psycopg2, psycopg2.extras
@@ -121,8 +122,7 @@ with sync_playwright() as pw:
     pg.click("#yGen"); pg.wait_for_selector("#btnMake, #gsub", timeout=20000)
     ok(pg.evaluate("location.hash") == "#/gen", "«Test yığ» → #/gen")
     icmal(pg)
-    pg.click("#yNetAll"); pg.wait_for_selector("#ntUst", timeout=20000)
-    ok(pg.evaluate("location.hash") == "#/nt", "«Nəticələr» → #/nt")
+    ok(pg.locator("#yNetAll, #yQrp a[href='#/nt']").count() == 0, "«Qruplarım»da «Nəticələr» keçidi yoxdur (nəticə qrupun içindədir)")
 
     print("E · İcmaldan köçənlər: Siqnallar")
     pg.goto(PANEL + "#/n"); pg.reload(); pg.wait_for_timeout(2500)
@@ -139,7 +139,7 @@ with sync_playwright() as pw:
     icmal(pg)
     sw = pg.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
     ok(sw[0] <= sw[1], "360: yana sürüşmə yoxdur", sw)
-    hh = pg.evaluate("""() => ['#yNewG', '#yGen', '#yNetAll', '#wkAll', '#yMenu .ytr', '#hWeek a.ytr']
+    hh = pg.evaluate("""() => ['#yNewG', '#yGen', '#wkAll', '.afoot .fmini a', '#yMenu .ytr', '#hWeek a.ytr']
         .map(s => document.querySelector(s)).filter(Boolean).map(e => [e.id || e.className, Math.round(e.getBoundingClientRect().height)])""")
     ok(hh and min(x[1] for x in hh) >= 44, "360: düymə və sətirlər ≥ 44 px", hh)
     ok(pg.evaluate("getComputedStyle(document.querySelector('#yHd h1')).fontSize") == "22px", "360: başlıq 22 px")
@@ -147,6 +147,33 @@ with sync_playwright() as pw:
     db("delete from public.class_schedule s using public.classes c where c.id = s.class_id and c.account_id = %s::uuid", (acc,))
     icmal(pg)
     ok(pg.locator("#wkNone").is_visible() and "Dəftər" in pg.inner_text("#wkNone"), "cədvəl yoxdursa: harada qurulduğu yazılır")
+    ft = pg.locator(".afoot").inner_text()
+    ok([a.strip() for a in pg.locator(".afoot .fmini a").all_inner_texts()] == ["Kömək", "Əlaqə", "Məxfilik"] and
+       pg.locator(".afoot").bounding_box()["height"] < 140, "footer: bir kiçik sətir «Kömək · Əlaqə · Məxfilik»",
+       (ft.replace("\n", " "), pg.locator(".afoot").bounding_box()["height"]))
+    for a, h in (("Kömək", "/komek/"), ("Əlaqə", "#/bize"), ("Məxfilik", "/mexfilik/")):
+        ok(h in (pg.locator(".afoot .fmini a", has_text=a).get_attribute("href") or "") , "footer «%s» → %s" % (a, h))
+    if SHOT: pg.screenshot(path=SHOT + "/icmal_360_cedvelsiz.png", full_page=True)
+
+    print("G · qrupsuz yeni müəllim")
+    import time as _t
+    c2 = br.new_context(viewport={"width": 390, "height": 844}); p2 = c2.new_page()
+    p2.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
+    p2.goto(PANEL); p2.wait_for_selector("#email", timeout=30000)
+    p2.click("#btnSwap"); p2.fill("#fname", "Yeni Müəllim"); p2.fill("#email", "ic%d@t.az" % int(_t.time() * 1000))
+    p2.fill("#pass", "parol1234"); p2.click("#btnAuth"); p2.wait_for_selector("#btnSetup", timeout=30000)
+    p2.fill("#aname", "Yeni hesab"); p2.click("#btnSetup")
+    p2.wait_for_selector("#yBos", timeout=30000); p2.wait_for_timeout(800)
+    ok(p2.locator("#yBos").is_visible() and "İlk qrupunu yarat" in p2.inner_text("#yFirstG"), "qısa izah və «İlk qrupunu yarat»")
+    ok(p2.locator("#hWeek").is_hidden() and p2.locator("#yQt").is_hidden() and p2.locator("#yBas .bsl").count() == 0,
+       "boş cədvəl, «cədvəl qurulmayıb» və 0/3 kartı eyni anda çıxmır")
+    bb = p2.locator("#yFirstG").bounding_box()
+    ok(bb and bb["height"] >= 44, "düymə ≥ 44 px", bb)
+    if SHOT: p2.screenshot(path=SHOT + "/icmal_390_qrupsuz.png", full_page=True)
+    p2.click("#yFirstG"); p2.wait_for_selector("#gForm", timeout=20000); p2.wait_for_timeout(500)
+    ok(p2.evaluate("location.hash") == "#/gs" and p2.evaluate("document.activeElement && document.activeElement.id") == "gname",
+       "«İlk qrupunu yarat» → Qruplar, ad sahəsi hazır")
+    c2.close()
     br.close()
 print("\n" + ("BUTUN YOXLAMALAR KECDI" if not fails else "SEHV (%d): %s" % (len(fails), " | ".join(fails))))
 sys.exit(1 if fails else 0)
