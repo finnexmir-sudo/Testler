@@ -176,6 +176,7 @@
     b.classList.remove("gcompact");   //  yalniz qrup menyusu telefonda sixilir - bagqa ekrana kecmesin
     b.classList.remove("gtabb");
     b.classList.remove("sband");
+    b.classList.remove("yhome");
     b.classList.toggle("hide", !html);
     main.classList.toggle("over", !!html);
   }
@@ -1366,23 +1367,44 @@
     bandHead({
       eye: "İcmal",
       title: "Xoş gəlmisiniz, " + (((CTX.profile && CTX.profile.full_name) || "").split(" ")[0] || "müəllim") + "!",
-      sub: "<span id=\"ySub\">Yüklənir…</span>", subId: null
+      sub: "<span id=\"ySub\">Yüklənir…</span>", subId: null,
+      right: '<button class="btn sm gtv" id="yGen">' + ic("plus") + "Test yığ</button>"
     });
     /*  22.09: «Bil10-dan mesaj» karti yalniz KOHNE Icmalda var idi
         (#adminMsg + loadAdminMsg).  Yeni Icmala kocurulmemisdi - yeni
         gorunus acilanda butun admin mesajlari gorunmez olardi.  */
-    show('<div id="adminMsg"></div><div id="yBas"></div><div id="yDiq"></div>' +
-         '<div class="card pad0 menu" id="yMenu"><div class="skel">Yüklənir…</div></div>' +
+    /*  26.10 (UX, GPT siyahisinda 2-ci): Icmal MENYU deyildi - bes iri setir (Qruplar, Test yığ,
+        Nəticələr, Sual bankı, Profil) yan/alt menyunun TEKRARI idi.  Indi qrup ve sagird
+        sehifesinin uslubu: yigcam zolaq + esas isler yuxarida:
+          Bugünkü dərslər (cedvel - loadWeek, qurulmayibsa cixmir) · Diqqət tələb edir ·
+          Yeni nəticələr (rpc_home.recent, «Hamısına bax» -> #/nt) · Qruplarım (rpc_groups_summary).
+        Sual bankına telefonda Test yığ ve Profil-den kecilir.  */
+    show('<div id="adminMsg"></div><div id="yBas"></div>' +
+         '<div class="gic sxg" id="yGrid">' +
+           '<div id="hWeek" class="sxwide"></div>' +
+           '<section class="card gk sxwide" id="yDiq"><div class="skel">Yüklənir…</div></section>' +
+           '<section class="card gk" id="yNet"><div class="skel">Yüklənir…</div></section>' +
+           '<section class="card gk" id="yQrp"><div class="gkh">' + ic("group") + "<b>Qruplarım</b>" +
+             '<a class="gkm" href="#/gs" id="yQrpAll">Hamısı ' + ic("right") + "</a></div>" +
+             '<div class="card pad0 menu" id="yMenu"><div class="skel">Yüklənir…</div></div></section>' +
+         "</div>" +
          '<div id="yBax"></div>');
+    if ($("band")) { $("band").classList.add("gcompact"); $("band").classList.add("gtabb"); $("band").classList.add("yhome"); }
+    main.classList.add("yig");
+    on("yGen", "click", function () { nav("#/gen"); });
     loadAdminMsg();
+    loadWeek();
     var live = guard();
-    homeData().then(function (v) {
+    Promise.all([homeData(), sb.rpc("rpc_groups_summary", {}).catch(function () { return null; })]).then(function (rr) {
+      var v = rr[0];
       if (!live() || !$("yMenu")) return;
-      yCiz(v || {});
+      yCiz(v || {}, rr[1]);
       //  Icmal ISLEK oldu - olcunun dayanacagi yer (180)
       suretYaz();
     }).catch(function () {
       if ($("yMenu")) $("yMenu").innerHTML = '<div class="skel">Məlumat alınmadı.</div>';
+      if ($("yDiq")) $("yDiq").innerHTML = '<div class="skel">Məlumat alınmadı.</div>';
+      if ($("yNet")) $("yNet").innerHTML = "";
     });
     on("yMenu", "click", function (e) {
       var a = e.target.closest ? e.target.closest("a[data-go]") : null;
@@ -1390,7 +1412,7 @@
     });
   }
 
-  function yCiz(v) {
+  function yCiz(v, gsum) {
     var st = v.stats || {};
     var nQ = Number(st.groups) || 0, nS = Number(st.students) || 0;
     var nT = Number(st.tests) || 0, nC = Number(st.attempts) || 0;
@@ -1455,33 +1477,39 @@
         ad: "Paketiniz " + gun + " gün sonra bitir",
         alt: "şagirdləriniz dayanmasın", cip: gun + " gün", cipCls: "pvl" }));
     }
-    $("yDiq").innerHTML = d.length
-      ? ySec("Bu həftə") + '<div class="card pad0 menu">' + d.join("") + "</div>" +
-        '<div class="spacer"></div>'
-      : "";
+    //  26.10: «Bu həftə» bolmesi KART oldu - «Diqqət tələb edir» (qrup sehifesi ile eyni ad); bos hal yazilir
+    $("yDiq").innerHTML = '<div class="gkh">' + ic("warn") + "<b>Diqqət tələb edir</b></div>" +
+      (d.length ? '<div class="card pad0 menu ydq">' + d.join("") + "</div>"
+        : (nQ && nS ? '<p class="gkok" id="yDiqOk">' + ic("check") + "Hər şey qaydasındadır — səssiz şagird, etməyən tapşırıq və zəif mövzu yoxdur.</p>"
+                    : '<p class="muted gkp">Şagirdlər test yazmağa başlayanda vaxtında görülməli işlər burada çıxacaq.</p>'));
 
-    //  ---- ESAS SIYAHI: forma hemise eynidir, sag teref deyisir
+    //  ---- YENI NETICELER: rpc_home.recent (Nəticələr · «Son cavablar» ile eyni siyahi), ilk 5
     //  932: «71% orta · keçən həftə 80%» butun dovrun ortasini KECEN HEFTE ile yan-yana
-    //  yazirdi - olmayan dusus kimi oxunurdu.  Indi Neticeler ekrani ile EYNI cumle:
-    //  bu hefte / kecen hefte ferqi (haftaFerq).
+    //  yazirdi - olmayan dusus kimi oxunurdu.  Indi Neticeler ekrani ile EYNI cumle (haftaFerq).
     var hf = haftaFerq(st);
-    var netAlt = nC
-      ? (avg + "% orta" + (hf ? " · " + hf : ""))
-      : "şagird test yazandan sonra dolur";
-    var m = [
-      yRow({ ic: "group", ad: "Qruplar", href: "#/gs",
-        alt: nQ ? nQ + " qrup · " + nS + " şagird"
-                : "qrup yaradın, şagirdləri bir yerə yığın" }),
-      yRow({ ic: "gen", ad: "Test yığ", href: "#/gen",
-        alt: "hazır bankdan bir dəqiqəyə" }),
-      yRow({ ic: "chart", ad: "Nəticələr", href: "#/nt", alt: netAlt,
-        cip: tp && tp.name ? "zəif mövzu var" : "", cipCls: "pvm" }),
-      yRow({ ic: "doc", ad: "Sual bankı", href: "#/b",
-        alt: nT ? nT + " öz testiniz · hazır suallar" : "hazır suallar və öz suallarınız" }),
-      yRow({ ic: "person", ad: "Profil", href: "#/me",
-        alt: plan ? (plan.name || "paket") + (gun !== null ? " · " + gun + " gün qalıb" : "")
-                  : "hesab və ayarlar" })
-    ];
+    var rc = (v.recent || []).slice(0, 5);
+    $("yNet").innerHTML = '<div class="gkh">' + ic("chart") + "<b>Yeni nəticələr</b>" +
+        '<a class="gkm" href="#/nt" id="yNetAll">' + (nC ? "Hamısına bax" : "Nəticələr") + " " + ic("right") + "</a></div>" +
+      (nC ? '<p class="muted gkp" id="yNetSum">' + avg + "% orta · bütün dövr" + (hf ? " · " + esc(hf) : "") + "</p>" : "") +
+      (rc.length
+        ? rc.map(function (x) {
+            return '<a class="gkn ylnk" href="#/s/' + esc(x.student_id) + "/" + esc(x.class_id) + '"><div class="g"><b>' + esc(x.student) + "</b>" +
+              "<i>" + esc(x.test) + " · " + esc(x["class"] || "") + " · " + dateAz(x.at) + "</i></div>" + pctChip(x.percent) + "</a>";
+          }).join("")
+        : '<p class="muted gkp">Şagird ilk testi yazandan sonra nəticələr burada görünəcək.</p>');
+
+    //  ---- QRUPLARIM: menyu tekrari deyil - her qrupun oz reqemi (rpc_groups_summary, Nəticələr · Qruplar ile eyni)
+    var m = [];
+    (gsum || []).forEach(function (g) {
+      var n = Number(g.attempts) || 0;
+      m.push(yRow({ ic: "group", ad: g.name, href: "#/g/" + esc(g.id),
+        alt: (Number(g.students) || 0) + " şagird" + (n ? " · " + n + " test" + (g.last_at ? " · son " + agoAz(g.last_at) : "") : " · hələ test yoxdur"),
+        cip: n ? pct(g.avg) + "%" : "", cipCls: n ? pvCls(pct(g.avg)) : "" }));
+    });
+    if (!m.length) {
+      m.push(yRow({ ic: "plus", ad: nQ ? "Qruplar" : "İlk qrupunuzu yaradın", href: "#/gs",
+        alt: nQ ? nQ + " qrup · " + nS + " şagird" : "qrup yaradın, şagirdləri bir yerə yığın" }));
+    }
     /*  Idareetme bendi KOHNE Icmalda var idi, yenisinde unudulmusdu -
         admin panele yalniz unvanla gire bilirdi (istifadeci tutdu:
         «admin səhifəsində admin panelə giriş üçün buton var idi, hanı o?»).
@@ -2590,7 +2618,7 @@
         if (!b) return;
         //  Defter sekmesi acilsin - davamiyyet orada goturulur
         GTAB = "d";
-        nav("#/g/" + b.getAttribute("data-wk"));
+        nav("#/g/" + b.getAttribute("data-wk") + (YENI ? "/d" : ""));
       });
     }).catch(function () {});
   }
