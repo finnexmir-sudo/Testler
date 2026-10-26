@@ -57,11 +57,13 @@ with sync_playwright() as pw:
     ctx = br.new_context(viewport={"width": 390, "height": 844})
     pg = page(ctx)
     pg.goto(PANEL + "#/demo"); pg.wait_for_selector("#demoBar", timeout=60000)
-    pg.wait_for_function("document.body.innerText.indexOf('Nəticələr') >= 0", timeout=30000); pg.wait_for_timeout(600)
+    #  26.10: Icmalda «Nəticələr» menyu setri yoxdur - «Yeni nəticələr» karti
+    pg.wait_for_selector("#yNet .gkh", timeout=30000); pg.wait_for_timeout(600)
     acc = db("select id::text i from public.accounts where is_demo and id <> app.demo_account() order by created_at desc limit 1", one=True)
 
     print("C · İcmal «Nəticələr» sətri = Nəticələr ekranı")
-    ic_txt = pg.evaluate("[...document.querySelectorAll('a.mrow')].map(a => a.innerText).find(t => t.indexOf('Nəticələr') === 0) || ''").replace("\n", " ")
+    #  26.10: cumle «Yeni nəticələr» kartinin alt setrindedir (#yNetSum) - menyu setri yoxdur
+    ic_txt = pg.inner_text("#yNetSum").replace("\n", " ") if pg.locator("#yNetSum").count() else ""
     ok("keçən həftə " not in re.sub(r"keçən həftə(yə| ilə)", "", ic_txt), "İcmal bütün dövrün ortasını keçən həftənin ortası ilə yan-yana yazmır", ic_txt[:90])
     m = re.search(r"(keçən həftəyə görə [+−]\d+ bənd|keçən həftə ilə eyni|son 7 gün: \d+%)", ic_txt)
     pg.goto(PANEL + "#/nt"); pg.wait_for_selector("#ntUst .rstat", timeout=20000)

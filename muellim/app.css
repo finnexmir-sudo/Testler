@@ -3174,3 +3174,29 @@ details.gklast[open]{padding-bottom:10px}
   .rstat.r30 > span.rall{order:4}
   .band.sband p > span:not(.code){display:none}
 }
+
+/* ---------------------------------------------- Icmal (26.10): qrup/sagird sehifesinin uslubu
+   Menyu tekrari yoxdur; Diqqət ve Qruplarım setirleri kartin ICINDE (ic-ice kart gorunmesin).  */
+#hWeek:empty{display:none}
+#main.yig #hWeek > .card{margin:0}
+#main.yig .gk > .card.menu{box-shadow:none;border:0;margin:0;border-radius:0;background:none;overflow:visible}
+#main.yig .gk > .card.menu .mrow{padding:10px 4px;border-radius:10px}
+#main.yig .gk > .card.menu .mrow.dq{padding:10px 10px}
+#main.yig .gk > .card.menu .mrow + .mrow{margin-top:2px}
+a.gkn.ylnk{color:inherit;text-decoration:none;min-height:44px}
+@media (hover:hover){ a.gkn.ylnk:hover b{color:var(--brand)} }
+/*  tor sutunu uzun metne gore GENISLENMESIN (360 px-de sehife 11 px yana surusurdu)  */
+.gic{grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){ .gic{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} }
+/*  kartin icindeki menyu setirleri ayrica kart kimi gorunmesin - nazik xett ile ayrilir  */
+#main.yig .gk > .card.menu .mrow{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none;margin:0;padding:10px 2px}
+#main.yig .gk > .card.menu .mrow:last-child{border-bottom:0}
+#main.yig .gk > .card.menu .mrow .mi{background:none;box-shadow:none}
+#main.yig .gk > .card.menu .mrow.dq{background:var(--err-tint);border-radius:10px;border-bottom:0;padding:10px 10px;margin-bottom:6px}
+/*  «Davamiyyət al» bir setirde qalir; qrup adi lazim olsa iki setre kecir  */
+#main.yig .wk .wkr .btn{white-space:nowrap;flex:none;min-height:44px}
+#main.yig .wk .wkn{white-space:normal;overflow:visible;text-overflow:clip}
+/*  26.10: yigcam zolaqda basliq ILKIN olcudedir - komputerde 26 px (base.css), telefonda Icmal ve
+    sagird 22 px, qrup 20 px (.gcompact).  Zolaq bosluqla yigilir, yazi ile yox.  */
+@media (min-width:601px){ .band.gtabb h1{font-size:26px} }
+@media (max-width:600px){ .band.yhome h1{font-size:22px;line-height:1.15} }

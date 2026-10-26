@@ -95,6 +95,20 @@ Testlərdə tapılan: `e2e_tapsiriq_bos` sınanda bütün platforma testlərini 
 | Y5 | 360 px (istifadəçi canlıda tutdu): kart başlığı «Son / tapşırıqlar · 2 / aktiv · Hamısına / bax» bölünürdü, «Diqqət» sətrində link/düymə mətni 3–4 sətrə sıxırdı. Dar ekranda başlıq bölünmür, «N aktiv» gizlənir, link və «Təkrar ver» mətnin altına keçir | 360 px əvvəl–sonra; `e2e_qrup_sekme`, `e2e_dord_is` | bəli, `main` v=819 |
 | Y6 | Ölçü yoxlaması (istifadəçi: «yığcamlıq yazı və düymənin kiçilməsi hesabına olmasın»): telefonda başlıq 23.10-da 20→18 (qrup), 22→18 (şagird) endirilmişdi — **qaytarıldı**; «Test ver» 40, «Təkrar ver» 32, «Kim etməyib» 36, şagird səhifəsinin düymələri 32 px idi — hamısı **44 px**. 360 px-də rəqəmlər kartında gedişat ayrıca sətirdə, şagird başlığında qısa ad gizlənir (kod qalır) | ölçülər əvvəl/sonra eyni səhifədə (`getComputedStyle`); `e2e_qrup_sekme` A2, `e2e_sagird_xulase` G (≥ 44 px, 20/22 px) | bəli, `main` v=819 |
 
+## İcmal (26.10, GPT siyahısında 2-ci)
+
+İstifadəçi: «qrup və şagird səhifəsindəki üslubu davam etdir: əsas işlər yuxarıda, əlavə məlumat aşağıda, rahat yazı və düymələr. Menyuda olan keçidləri iri kartlarla təkrarlama. Əvvəl mobil görünüşü göstər.»
+
+| # | Nə | Nə dəyişdi | Necə yoxlandı | Canlıda? |
+|---|---|---|---|---|
+| İ1 | İcmal beş iri menyu sətri idi (Qruplar, Test yığ, Nəticələr, Sual bankı, Profil) — yan/alt menyunun təkrarı | Çıxdı. Yerinə: **Bugünkü dərslər** (cədvəl — `loadWeek`, qurulmayıbsa çıxmır; «Davamiyyət al» qrupun Dəftər sekməsini açır), **Diqqət tələb edir** (əvvəlki «Bu həftə» sətirləri, boşdursa «Hər şey qaydasındadır»), **Yeni nəticələr** (`rpc_home.recent`, ilk 5, «Hamısına bax» → #/nt — Nəticələrə yeganə keçid buradadır), **Qruplarım** (`rpc_groups_summary`: şagird, test, son, orta). Sual bankına telefonda Test yığ və Profildən keçilir; admin üçün «İdarəetmə» Qruplarım kartının sonundadır | `e2e_icmal` A–E (5 nəticə Nəticələr · Son cavablar ilə, qrup faizləri Nəticələr · Qruplar ilə eyni; səssiz say = #/sus adları) | yox (budaqda) |
+| İ2 | Zolaq | yığcam (qrup/şagird kimi), sağda «+ Test yığ» | `e2e_icmal` E, F | yox |
+| İ3 | Başlıq yazısı yığcam zolaqda kiçilmişdi (kompüter 26 → 22, İcmal telefonda 22 → 20) | Qaytarıldı: kompüterdə 26 px (qrup, şagird, İcmal), telefonda İcmal və şagird 22, qrup 20 | `e2e_icmal` F, `e2e_qrup_sekme`, `e2e_sagird_xulase` | yox |
+| İ4 | 360 px-də tor sütunu uzun mətnlə genişlənib səhifəni 11 px yana sürüşdürürdü | `minmax(0,1fr)` | `e2e_icmal` F | yox |
+
+### Açıq iş: konsolda 1 xəta (canlı, 26.10)
+İstifadəçinin DevTools şəklində qırmızı «1» (v=818, qrup səhifəsi, 360 px). Yerli bazada eyni səhifədə konsol xətası yoxdur (`pageerror`, `console.error`, ≥ 400 cavab yoxlandı). v=819 şəklində nişan görünmür. Səbəb bilinmir — canlıda Console sekməsinin şəkli lazımdır. Bağlanmayıb.
+
 ## Sıra 1–5 — gözləyir
 
 1. **Testin düzgünlüyü** — 0.1, 0.2, 0.4 bağlandı (yuxarı). Qalan: tək pis sualı əvəz etmək (vərəqdə).

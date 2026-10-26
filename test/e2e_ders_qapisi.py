@@ -386,7 +386,9 @@ with sync_playwright() as pw:
     yox(p.locator('.plan details #plm-%s' % pid).count() == 0 and p.locator('#plm-%s' % pid).is_visible(), "nəticə qutusu <details>-dən kənardadır, görünür")
     print("\n=== 08.10 · qrupun kartından «testi yığ»: ara ekran yoxdur, test birbaşa həmin qrupa verilir ===")
     q("delete from public.assignments where class_id=%s", (gid,))
-    p.goto(PANEL + "?yeni=1#/g/" + str(gid)); p.wait_for_selector("#prepGen", timeout=30000)
+    #  24.10: «testi yığ» açılıb-bağlanan «Son keçilən dərs»in içindədir
+    p.goto(PANEL + "?yeni=1#/g/" + str(gid)); p.wait_for_selector("#gkLast summary", timeout=30000)
+    p.click("#gkLast summary"); p.wait_for_selector("#prepGen", timeout=10000)
     p.click("#prepGen"); p.wait_for_selector("#btnMake", timeout=30000)
     yox("qrupa ver" in p.inner_text("#btnMake"), "düymə «Testi yığ və qrupa ver»", p.inner_text("#btnMake"))
     yox("qayıdacaqsınız" not in p.inner_text("#main"), "«tapşırıq ekranına qayıdacaqsınız» yazısı yoxdur")
