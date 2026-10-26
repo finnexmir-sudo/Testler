@@ -136,12 +136,13 @@ with sync_playwright() as pw:
     pg.goto(PANEL + "#/a/" + GA + "/h"); pg.reload(); pg.wait_for_selector("#hwText", timeout=20000)
     pg.fill("#hwText", "12-ci paraqrafı oxu, çalışma 3–5-i həll et"); pg.fill("#hwDue", time.strftime("%Y-%m-%d")); pg.click("#btnHwAdd"); pg.wait_for_selector("#hwList .hwrow", timeout=15000)
 
-    print("\nA · İcmal sətri")
-    pg.goto(PANEL + "#/"); pg.reload()
-    sat = pg.locator("#yDiq .mrow.dq", has_text="yazılı tapşırığı etməyib")
+    #  26.10: Icmalda qrupa aid xeberdarliq yoxdur - yazili tapsiriq setri Siqnallardadir (zeng)
+    print("\nA · Siqnallar sətri")
+    pg.goto(PANEL + "#/n"); pg.reload()
+    sat = pg.locator("#nHw a.al.hw", has_text="etməyib")
     sat.wait_for(timeout=20000)
     st = sat.first.inner_text().replace("\n", " ")
-    ok("2 şagird yazılı tapşırığı etməyib" in st, "sətir dəqiq yazılıb", st[:70])
+    ok("2/2 etməyib" in st, "sətir dəqiq yazılıb", st[:90])
     ok(sat.first.get_attribute("href").endswith("#/ht/" + GA), "keçid #/ht/<qrup>", sat.first.get_attribute("href"))
     pg.screenshot(path="/tmp/claude-0/ht_icmal.png")
     sat.first.click(); pg.wait_for_selector("#htBox .udr", timeout=15000); pg.wait_for_timeout(600)
@@ -208,7 +209,8 @@ with sync_playwright() as pw:
     ok("2 test gözləyir: «" in c2 and c2.split("\n")[0].count("«") == 2, "2 test gözləyən: iki testin adı yazılır", c2.replace("\n", " | ")[:120])
 
     print("\nD · Geri")
-    pg.click("#htBack"); pg.wait_for_selector("#yDiq", timeout=15000)
+    #  sehife unvanla acilib (C2) - «Geri» susmaya gore Icmala
+    pg.click("#htBack"); pg.wait_for_selector("#yMenu", timeout=15000)
     ok(pg.url.endswith("#/") or pg.url.endswith("/muellim/") or pg.url.endswith("index.html"), "«Geri» İcmala qaytarır", pg.url[-25:])
 
     print("\nE · Boş hal: tapşırığı olmayan qrup")

@@ -104,7 +104,7 @@ with sync_playwright() as pw:
     p.wait_for_selector("#yMenu .mrow", timeout=30000); p.wait_for_timeout(1500)
     h = p.evaluate("document.body.scrollHeight")
     print("DOLU hesab: %d px = %.1f ekran" % (h, h / 844.0))
-    print("   diqqet:", p.locator("#yDiq").inner_text().replace("\n", " | ")[:140])
+    print("   dersler:", p.locator("#hWeek").inner_text().replace("\n", " | ")[:140])
     print("   menyu :", p.locator("#yMenu").inner_text().replace("\n", " | ")[:200])
     p.screenshot(path=OUT + "/dolu.png", full_page=True)
     #  ---- ders plani qururuq ki, «Bu gunun dersi» real gorunsun

@@ -58,17 +58,14 @@ with sync_playwright() as pw:
     pg = page(ctx)
     pg.goto(PANEL + "#/demo"); pg.wait_for_selector("#demoBar", timeout=60000)
     #  26.10: Icmalda «Nəticələr» menyu setri yoxdur - «Yeni nəticələr» karti
-    pg.wait_for_selector("#yNet .gkh", timeout=30000); pg.wait_for_timeout(600)
+    pg.wait_for_selector("#yMenu .ytr", timeout=30000); pg.wait_for_timeout(600)
     acc = db("select id::text i from public.accounts where is_demo and id <> app.demo_account() order by created_at desc limit 1", one=True)
 
-    print("C · İcmal «Nəticələr» sətri = Nəticələr ekranı")
-    #  26.10: cumle «Yeni nəticələr» kartinin alt setrindedir (#yNetSum) - menyu setri yoxdur
-    ic_txt = pg.inner_text("#yNetSum").replace("\n", " ") if pg.locator("#yNetSum").count() else ""
-    ok("keçən həftə " not in re.sub(r"keçən həftə(yə| ilə)", "", ic_txt), "İcmal bütün dövrün ortasını keçən həftənin ortası ilə yan-yana yazmır", ic_txt[:90])
-    m = re.search(r"(keçən həftəyə görə [+−]\d+ bənd|keçən həftə ilə eyni|son 7 gün: \d+%)", ic_txt)
+    print("C · Nəticələr ekranı həftə müqayisəsini fərq kimi yazır")
+    #  26.10: umumi Icmalda netice yoxdur - cumle yalniz Nəticələr ekranindadir
     pg.goto(PANEL + "#/nt"); pg.wait_for_selector("#ntUst .rstat", timeout=20000)
     nt_txt = pg.inner_text("#ntUst")
-    ok(m is not None and m.group(1) in nt_txt, "İcmal və Nəticələr eyni həftə cümləsini yazır", (m.group(1) if m else ic_txt[:60]) + " | " + nt_txt.replace("\n", " ")[:80])
+    ok(re.search(r"keçən həftəyə görə [+−]\d+ bənd|keçən həftə ilə eyni|son 7 gün: \d+%", nt_txt) is not None, "Nəticələr həftə cümləsini yazır", nt_txt.replace("\n", " ")[:90])
     ok("bütün dövr" in nt_txt and re.search(r"\d+\s*test", nt_txt) and "cavab" not in nt_txt, "Nəticələr: «orta · bütün dövr», say «test» adlanır", nt_txt.replace("\n", " ")[:80])
 
     print("A · Siqnallar «geriləyir» → şagird kartında eyni gedişat")

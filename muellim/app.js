@@ -142,7 +142,8 @@
     busy = false; main.innerHTML = html; main.scrollTop = 0;
     //  genis sutun yalniz idareetme ekranindadir - qalanlarinda sonur
     main.classList.remove("wideadm");
-    main.classList.remove("yig");   //  yigcam kartlar yalniz qrup sekmeleri ve sagird sehifesindedir (24.10)
+    main.classList.remove("yig");
+    main.classList.remove("yh");   //  yigcam kartlar yalniz qrup sekmeleri ve sagird sehifesindedir (24.10)
     //  yeni ekran hemise yuxaridan baslasin - zolaq (basliq) gorunsun
     try { window.scrollTo(0, 0); } catch (e) {}
     //  bandHead() show()-dan EVVEL cagirilibsa zolaq qalir
@@ -710,6 +711,12 @@
           "Geriləyən və ya zəif mövzuda ilişən şagird olanda burada görünəcək.</div></div>";
       } else if (al.length) {
         h += '<div class="card pad0" id="nAl">' + al.map(alertRow).join("") + "</div>";
+      }
+      //  26.10: «son 7 gunde test islemeyenler» Icmaldan bura kocdu (Icmalda qrupa aid xeberdarliq yoxdur)
+      var sus0 = Number((v.bugun || {}).susan) || 0;
+      if (sus0) {
+        h += '<div class="card pad0 menu" id="nSus">' + yRow({ ic: "warn", cls: "dq", href: "#/sus",
+          ad: sus0 + " şagird son 7 gündə test işləməyib", alt: "test göndərin və ya xatırladın" }) + "</div>";
       }
       //  "Son neticeler" burada tekrar idi (Icmalda var) - cixarildi
       show(h);
@@ -1362,71 +1369,78 @@
   }
   function ySec(t) { return '<div class="msec">' + esc(t) + "</div>"; }
 
+  /*  ICMAL (26.10, istifadecinin son maketi - «İcmal → Qrup → Şagird» merheleli baxis).
+      Ümumi İcmalda YALNIZ: salam + tarix, «Qrup yarat» / «Test yığ», bugünkü dərs cədvəli,
+      qruplarım cədvəli.  Qrupa aid netice ve xeberdarliqlar burada GOSTERILMIR - qrupun ve
+      sagirdin sehifesindedir.  Evvel burada olanlar itmir:
+        · yazili tapsiriq xeberdarligi, geriləyən / zeif movzu  -> Siqnallar (zeng);
+        · «son 7 gunde test islemeyenler» (#/sus)               -> Siqnallar;
+        · butun qruplarin neticeleri (#/nt)                     -> «Qruplarım» basliginda «Nəticələr».
+      Zolaq (yasil kart) yoxdur: sade sehife basligi, nazik cedvel xetleri.  */
+  var YNEWG = false;   //  «Qrup yarat» - Qruplar ekrani formani acsin (bir defelik)
+  function bakuBugun() {
+    var p = {};
+    try {
+      new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Baku", year: "numeric", month: "2-digit", day: "2-digit" })
+        .formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
+    } catch (e) {}
+    var d = p.year ? new Date(Number(p.year), Number(p.month) - 1, Number(p.day)) : new Date();
+    var ay = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avqust","sentyabr","oktyabr","noyabr","dekabr"];
+    return GUNTAM[d.getDay() === 0 ? 7 : d.getDay()] + ", " + d.getDate() + " " + ay[d.getMonth()];
+  }
   function screenHomeYeni() {
     topTitle.textContent = ACC.name;
-    bandHead({
-      eye: "İcmal",
-      title: "Xoş gəlmisiniz, " + (((CTX.profile && CTX.profile.full_name) || "").split(" ")[0] || "müəllim") + "!",
-      sub: "<span id=\"ySub\">Yüklənir…</span>", subId: null,
-      right: '<button class="btn sm gtv" id="yGen">' + ic("plus") + "Test yığ</button>"
-    });
+    var ad = (((CTX.profile && CTX.profile.full_name) || "").split(" ")[0] || "");
     /*  22.09: «Bil10-dan mesaj» karti yalniz KOHNE Icmalda var idi
         (#adminMsg + loadAdminMsg).  Yeni Icmala kocurulmemisdi - yeni
         gorunus acilanda butun admin mesajlari gorunmez olardi.  */
-    /*  26.10 (UX, GPT siyahisinda 2-ci): Icmal MENYU deyildi - bes iri setir (Qruplar, Test yığ,
-        Nəticələr, Sual bankı, Profil) yan/alt menyunun TEKRARI idi.  Indi qrup ve sagird
-        sehifesinin uslubu: yigcam zolaq + esas isler yuxarida:
-          Bugünkü dərslər (cedvel - loadWeek, qurulmayibsa cixmir) · Diqqət tələb edir ·
-          Yeni nəticələr (rpc_home.recent, «Hamısına bax» -> #/nt) · Qruplarım (rpc_groups_summary).
-        Sual bankına telefonda Test yığ ve Profil-den kecilir.  */
-    show('<div id="adminMsg"></div><div id="yBas"></div>' +
-         '<div class="gic sxg" id="yGrid">' +
-           '<div id="hWeek" class="sxwide"></div>' +
-           '<section class="card gk sxwide" id="yDiq"><div class="skel">Yüklənir…</div></section>' +
-           '<section class="card gk" id="yNet"><div class="skel">Yüklənir…</div></section>' +
-           '<section class="card gk" id="yQrp"><div class="gkh">' + ic("group") + "<b>Qruplarım</b>" +
-             '<a class="gkm" href="#/gs" id="yQrpAll">Hamısı ' + ic("right") + "</a></div>" +
-             '<div class="card pad0 menu" id="yMenu"><div class="skel">Yüklənir…</div></div></section>' +
-         "</div>" +
-         '<div id="yBax"></div>');
-    if ($("band")) { $("band").classList.add("gcompact"); $("band").classList.add("gtabb"); $("band").classList.add("yhome"); }
-    main.classList.add("yig");
+    show('<div id="adminMsg"></div>' +
+      '<header class="phd" id="yHd"><div class="phd-t">' +
+          "<h1>Salam" + (ad ? ", " + esc(ad) + " müəllim" : "") + "</h1>" +
+          '<p id="ySub">' + esc(bakuBugun()) + "</p></div>" +
+        '<div class="phd-a"><button type="button" class="btn" id="yNewG">' + ic("plus") + "Qrup yarat</button>" +
+          '<button type="button" class="btn go" id="yGen">' + ic("plus") + "Test yığ</button></div></header>" +
+      '<div id="yPkt"></div><div id="yBas"></div>' +
+      '<section class="card yk" id="hWeek"><div class="skel">Yüklənir…</div></section>' +
+      '<section class="card yk" id="yQrp"><div class="ykh"><div><b>Qruplarım</b><span class="muted" id="yQrpSub"></span></div>' +
+          '<a class="gkm" href="#/nt" id="yNetAll">Nəticələr ' + ic("right") + "</a></div>" +
+        '<div class="ysrch hide" id="yQs"><input type="search" id="yQq" placeholder="Qrup axtar" aria-label="Qrup axtar"></div>' +
+        '<div class="ytb" id="yQt"><div class="ytr yth"><span>Qrup</span><span>Sinif</span><span>Şagird</span><span></span></div>' +
+          '<div id="yMenu"><div class="skel">Yüklənir…</div></div></div>' +
+        '<p class="muted gkp hide" id="yQnone">Bu adda qrup yoxdur.</p></section>' +
+      '<div id="yAdm"></div><div id="yBax"></div>');
+    main.classList.add("yig"); main.classList.add("yh");
     on("yGen", "click", function () { nav("#/gen"); });
+    on("yNewG", "click", function () { YNEWG = true; nav("#/gs"); });
+    on("yQq", "input", function () {
+      var q = String($("yQq").value || "").toLocaleLowerCase("az").trim(), n = 0;
+      Array.prototype.forEach.call(document.querySelectorAll("#yMenu .ytr"), function (r) {
+        var hit = !q || String(r.getAttribute("data-ad") || "").indexOf(q) >= 0;
+        r.classList.toggle("hide", !hit); if (hit) n++;
+      });
+      $("yQnone").classList.toggle("hide", n > 0);
+    });
     loadAdminMsg();
-    loadWeek();
+    loadWeekYeni();
     var live = guard();
-    Promise.all([homeData(), sb.rpc("rpc_groups_summary", {}).catch(function () { return null; })]).then(function (rr) {
-      var v = rr[0];
+    Promise.all([homeData(), sb.rpc("rpc_groups_summary", {}).catch(function () { return null; }), loadLevels().catch(function () {})]).then(function (rr) {
       if (!live() || !$("yMenu")) return;
-      yCiz(v || {}, rr[1]);
+      yCiz(rr[0] || {}, rr[1]);
       //  Icmal ISLEK oldu - olcunun dayanacagi yer (180)
       suretYaz();
     }).catch(function () {
       if ($("yMenu")) $("yMenu").innerHTML = '<div class="skel">Məlumat alınmadı.</div>';
-      if ($("yDiq")) $("yDiq").innerHTML = '<div class="skel">Məlumat alınmadı.</div>';
-      if ($("yNet")) $("yNet").innerHTML = "";
-    });
-    on("yMenu", "click", function (e) {
-      var a = e.target.closest ? e.target.closest("a[data-go]") : null;
-      if (a) { e.preventDefault(); nav(a.getAttribute("data-go")); }
     });
   }
 
   function yCiz(v, gsum) {
     var st = v.stats || {};
-    var nQ = Number(st.groups) || 0, nS = Number(st.students) || 0;
-    var nT = Number(st.tests) || 0, nC = Number(st.attempts) || 0;
-    var avg = Number(st.avg) || 0, aw = st.avg_w, apw = st.avg_pw;
-    var bg = v.bugun || {}, tp = (v.topics || [])[0] || null;
-    var hw = v.hw_alerts || [], al = v.alerts || [];
+    var nQ = Number(st.groups) || 0, nS = Number(st.students) || 0, nC = Number(st.attempts) || 0;
     var plan = ACC && ACC.plan ? ACC.plan : null;
-    var gun = plan && plan.days_left !== null && plan.days_left !== undefined
-      ? Number(plan.days_left) : null;
-    //  ---- ust cumle
-    var sub = nQ ? (nQ + " qrup · " + nS + " şagird") : "Sistem işə düşsün deyə üç addım var.";
-    if ($("ySub")) $("ySub").textContent = sub;
+    var gun = plan && plan.days_left !== null && plan.days_left !== undefined ? Number(plan.days_left) : null;
+    if ($("yQrpSub")) $("yQrpSub").textContent = nQ ? nQ + " qrup · " + nS + " şagird" : "";
 
-    //  ---- BASLANGIC karti: uc addim bitmeyibse
+    //  ---- BASLANGIC karti: uc addim bitmeyibse (yeni muellime ilk addim - dizayn qaydasi 6)
     var ok = [nQ > 0, nS > 0, nC > 0];
     var bitdi = ok.filter(Boolean).length;
     var novbe = !ok[0] ? ["İlk qrupunuzu yaradın", "#/gs"]
@@ -1436,98 +1450,40 @@
       '<a class="card bsl" href="' + novbe[1] + '">' +
         '<span class="bh1"><span>Başlanğıc</span><b>' + bitdi + " / 3 tamamlandı</b></span>" +
         '<span class="gb"><i style="width:' + (bitdi * 100 / 3) + '%"></i></span>' +
-        '<span class="nv">' + esc(novbe[0]) + ic("right") + "</span></a>" +
-      '<div class="spacer"></div>';
+        '<span class="nv">' + esc(novbe[0]) + ic("right") + "</span></a>";
 
-    //  ---- DIQQET setirleri: yalniz is olanda cixir
-    var d = [];
-    if (hw.length) {
-      var h0 = hw[0], un = Number(h0.undone) || 0;
-      //  Setir «yazili» ev tapsirigini sayir - ad da bunu deyir, kecid ise
-      //  HEMIN sagirdlerin adlarini sadalayir (#/ht).  Evvel qrup menyusuna
-      //  aparirdi, adlar asagidaki kartda idi: say ve siyahi ust-uste dusmurdu.
-      d.push(yRow({ ic: "warn", cls: "dq", href: "#/ht/" + esc(h0.class_id),
-        ad: un + " şagird yazılı tapşırığı etməyib",
-        alt: (h0["class"] || "") + " · ev tapşırığı" }));
-    }
-    if (Number(bg.susan)) {
-      //  setir ADLARI ved edir - «#/sus» onlari sadalayir (evvel
-      //  «#/gs» idi: muellim «hanı 10 şagird?» deyirdi, hagli idi)
-      d.push(yRow({ ic: "warn", cls: "dq", href: "#/sus",
-        //  26.10 (istifadeci): «səssizdir» yox - NE olmadigi ve DOVR: server sayir aktiv, 7 gunden kohne,
-        //  son 7 gunde gonderilmis testi olmayan sagirdleri (rpc_home.bugun.susan)
-        ad: bg.susan + " şagird son 7 gündə test işləməyib",
-        alt: "test göndərin və ya xatırladın" }));
-    }
-    if (tp && tp.name) {
-      /*  Istifadeci: «ilkində say ver, açılanda həmin şagirdləri
-          göstərsin».  Setirde SAY yazilir, kecid ise hemin sagirdleri
-          sadalayan sehifeye gedir (#/zm).  Evvel qrup hesabatina
-          aparirdi: setir 5 deyirdi, orada 7 yazilirdi - iki ayri
-          qayda idi (220).  Indi ikisi de eyni sorgudan gelir.  */
-      var wn = (tp.weak || []).length || Number(tp.weak_n) || 0;
-      d.push(yRow({ ic: "refresh",
-        href: "#/zm/" + esc(tp.class_id || "") + "/" + esc(tp.id || ""),
-        ad: "«" + tp.name + "» zəif gedir",
-        //  23.10 (UX yoxlamasi): server bu reqemi «avg» adi ile verir (db/219),
-        //  «ratio» YOXDUR - setir hemise «0%» yazirdi, acilan #/zm ise 67% deyirdi.
-        //  26.10 (istifadeci): faiz NEYI gosterir ve HANSI qrupdur - cumlede yazilir (#/zm-in sozu ile)
-        altHtml: esc(tp["class"] || "") + " · qrupun bu mövzuda ortalaması <b>" + pct(tp.avg) + "%</b> · " +
-          wn + " şagird zəif" }));
-    }
-    if (gun !== null && gun <= 7) {
-      d.push(yRow({ ic: "star", cls: "dq", href: "#/me",
-        ad: "Paketiniz " + gun + " gün sonra bitir",
-        alt: "şagirdləriniz dayanmasın", cip: gun + " gün", cipCls: "pvl" }));
-    }
-    //  26.10: «Bu həftə» bolmesi KART oldu - «Diqqət tələb edir» (qrup sehifesi ile eyni ad); bos hal yazilir
-    $("yDiq").innerHTML = '<div class="gkh">' + ic("warn") + "<b>Diqqət tələb edir</b></div>" +
-      (d.length ? '<div class="card pad0 menu ydq">' + ilkIki(d, "yDq") + "</div>"
-        : (nQ && nS ? '<p class="gkok" id="yDiqOk">' + ic("check") + "Hər şey qaydasındadır — səssiz şagird, etməyən tapşırıq və zəif mövzu yoxdur.</p>"
-                    : '<p class="muted gkp">Şagirdlər test yazmağa başlayanda vaxtında görülməli işlər burada çıxacaq.</p>'));
+    //  ---- paket bitir - qrupa aid deyil, hesabin isidir: bir sakit setir
+    $("yPkt").innerHTML = gun !== null && gun <= 7
+      ? '<a class="ypkt" href="#/me">' + ic("star") + "<span>Paketiniz <b>" + gun + " gün</b> sonra bitir — şagirdləriniz dayanmasın.</span>" + ic("right") + "</a>"
+      : "";
 
-    ilkIkiBind("yDq");
-    //  ---- YENI NETICELER: rpc_home.recent (Nəticələr · «Son cavablar» ile eyni siyahi), ilk 5
-    //  932: «71% orta · keçən həftə 80%» butun dovrun ortasini KECEN HEFTE ile yan-yana
-    //  yazirdi - olmayan dusus kimi oxunurdu.  Indi Neticeler ekrani ile EYNI cumle (haftaFerq).
-    var hf = haftaFerq(st);
-    var rc = (v.recent || []).slice(0, 5);
-    $("yNet").innerHTML = '<div class="gkh">' + ic("chart") + "<b>Yeni nəticələr</b>" +
-        '<a class="gkm" href="#/nt" id="yNetAll">' + (nC ? "Hamısına bax" : "Nəticələr") + " " + ic("right") + "</a></div>" +
-      //  26.10 (istifadeci): umumi orta ve heftelik deyisme AYRI setirde, her birinin dovru ile
-      (nC ? '<div class="yns" id="yNetSum"><p>Ümumi orta: <b>' + avg + "%</b> · bütün dövr</p>" +
-          (aw !== null && aw !== undefined
-            ? "<p>Son 7 gün: <b>" + pct(aw) + "%</b>" +
-              (apw !== null && apw !== undefined ? " · " + esc(hf) + " (əvvəlki 7 gün " + pct(apw) + "%)" : "") + "</p>"
-            : "<p>Son 7 gündə test yazılmayıb</p>") + "</div>" : "") +
-      (rc.length
-        ? rc.map(function (x) {
-            return '<a class="gkn ylnk" href="#/s/' + esc(x.student_id) + "/" + esc(x.class_id) + '"><div class="g"><b>' + esc(x.student) + "</b>" +
-              "<i>" + esc(x.test) + " · " + esc(x["class"] || "") + " · " + dateAz(x.at) + "</i></div>" + pctChip(x.percent) + "</a>";
-          }).join("")
-        : '<p class="muted gkp">Şagird ilk testi yazandan sonra nəticələr burada görünəcək.</p>');
+    //  ---- QRUPLARIM cedveli: qrup · sinif · sagird sayi · «Qrupa keç» (netice YOX - qrupun sehifesindedir)
+    var gs = gsum || [];
+    var lvAd = function (code) {
+      var l = (LEVELS || []).filter(function (x) { return String(x.code) === String(code); })[0];
+      return l ? l.name : "";
+    };
+    $("yMenu").innerHTML = gs.length
+      ? gs.map(function (g) {
+          var sn = lvAd(g.level);
+          return '<a class="ytr mrow" href="#/g/' + esc(g.id) + '" data-ad="' + esc(String(g.name || "").toLocaleLowerCase("az")) + '">' +
+            '<span class="ytq"><b>' + esc(g.name) + "</b><i>" + esc(sn ? sn + " · " : "") + (Number(g.students) || 0) + " şagird</i></span>" +
+            '<span class="yts">' + esc(sn || "—") + "</span>" +
+            '<span class="ytn">' + (Number(g.students) || 0) + "</span>" +
+            '<span class="ytk">Qrupa keç ' + ic("right") + "</span></a>";
+        }).join("")
+      : yRow({ ic: "plus", ad: "İlk qrupunuzu yaradın", href: "#/gs", alt: "qrup yaradın, şagirdləri bir yerə yığın" });
+    if ($("yQt")) $("yQt").classList.toggle("bos", !gs.length);
+    //  axtaris yalniz qrup coxdursa (5+) - az qrupda artiq secim olardi
+    if ($("yQs")) $("yQs").classList.toggle("hide", gs.length < 5);
 
-    //  ---- QRUPLARIM: menyu tekrari deyil - her qrupun oz reqemi (rpc_groups_summary, Nəticələr · Qruplar ile eyni)
-    var m = [];
-    (gsum || []).forEach(function (g) {
-      var n = Number(g.attempts) || 0;
-      m.push(yRow({ ic: "group", ad: g.name, href: "#/g/" + esc(g.id),
-        alt: (Number(g.students) || 0) + " şagird" + (n ? " · " + n + " test" + (g.last_at ? " · son " + agoAz(g.last_at) : "") : " · hələ test yoxdur"),
-        cip: n ? pct(g.avg) + "%" : "", cipCls: n ? pvCls(pct(g.avg)) : "" }));
-    });
-    if (!m.length) {
-      m.push(yRow({ ic: "plus", ad: nQ ? "Qruplar" : "İlk qrupunuzu yaradın", href: "#/gs",
-        alt: nQ ? nQ + " qrup · " + nS + " şagird" : "qrup yaradın, şagirdləri bir yerə yığın" }));
-    }
     /*  Idareetme bendi KOHNE Icmalda var idi, yenisinde unudulmusdu -
         admin panele yalniz unvanla gire bilirdi (istifadeci tutdu:
         «admin səhifəsində admin panelə giriş üçün buton var idi, hanı o?»).
         Saygac deyil, GIRIS NOKTESIDIR - admin ucun her halda gorunur.  */
-    if (isAdmin()) {
-      m.push(yRow({ ic: "group", ad: "İdarəetmə", href: "#/adm",
-        altHtml: '<span id="yAdmSub">Hesablar və abunələr (admin)</span>' }));
-    }
-    $("yMenu").innerHTML = m.join("");
+    $("yAdm").innerHTML = isAdmin()
+      ? '<div class="card pad0 menu">' + yRow({ ic: "group", ad: "İdarəetmə", href: "#/adm",
+          altHtml: '<span id="yAdmSub">Hesablar və abunələr (admin)</span>' }) + "</div>" : "";
     if (isAdmin()) {
       sb.rpc("rpc_admin_feedback_count", {}).then(function (n) {
         var e = $("yAdmSub");
@@ -1542,6 +1498,49 @@
         yRow({ ic: "chart", ad: "Nümunə hesaba bax", href: "#/demo",
                alt: "dolu hesab — heç nə qurmadan görün" }) +
       "</div>";
+  }
+
+  /*  Bugünkü dərslər (yeni Icmal): saat · qrup · «Qrupa keç».  Cedvel qurulmayibsa ilk addim yazilir
+      (harada qurulur).  Davamiyyet qrupun ozunde (Dəftər) alinir; «alınıb ✓» burada da gorunur.  */
+  function loadWeekYeni() {
+    var live = guard();
+    sb.rpc("rpc_week", {}).then(function (w) {
+      if (!live()) return;
+      var box = $("hWeek");
+      if (!box) return;
+      var hd = function (sag) { return '<div class="ykh"><div><b>Bugünkü dərslər</b></div>' + (sag || "") + "</div>"; };
+      if (!w || !w.on) {
+        box.innerHTML = hd() + '<p class="muted gkp" id="wkNone">Dərs cədvəli qurulmayıb. Qrupun «Dəftər» bölməsində dərs günlərini və saatını yazın — bugünkü dərslər burada görünəcək.</p>';
+        return;
+      }
+      var gun = (w.days || []).filter(function (x) { return x.hal !== "moved_out"; });
+      var bugun = gun.filter(function (x) { return x.date === w.today; });
+      var sonra = gun.filter(function (x) { return x.date > w.today && x.hal !== "cancelled"; });
+      var h = hd(gun.length ? '<button type="button" class="gkm" id="wkAll" aria-expanded="false">Bütün həftə ' + ic("right") + "</button>" : "");
+      if (bugun.length) {
+        h += '<div class="ytb"><div class="ytr yth wk3"><span>Saat</span><span>Qrup</span><span></span></div>' +
+          bugun.map(function (x) {
+            var legv = x.hal === "cancelled";
+            return '<a class="ytr wk3' + (legv ? " off" : "") + '" href="#/g/' + esc(x.class_id) + '" data-wkg="' + esc(x.class_id) + '">' +
+              '<span class="ytt">' + esc(x.time) + "</span>" +
+              '<span class="ytq"><b>' + esc(x["class"]) + "</b>" +
+                (legv ? "<i>ləğv edilib</i>" : (x.hal === "moved_in" ? "<i>köçürülüb</i>" : (x.done ? '<i class="pok">davamiyyət alınıb ✓</i>' : ""))) + "</span>" +
+              '<span class="ytk">Qrupa keç ' + ic("right") + "</span></a>";
+          }).join("") + "</div>";
+      } else {
+        var n = sonra[0];
+        h += '<p class="muted gkp" id="wkToday">Bu gün dərs yoxdur.' + (n ? " Növbəti: <b>" + esc(haftaAz(n.date)) + " " + esc(n.time) + "</b> · " + esc(n["class"]) : "") + "</p>";
+      }
+      h += hefteFold(w, gun);
+      box.innerHTML = h;
+      on("wkAll", "click", function () {
+        var f = box.querySelector("details.wkf"), b = $("wkAll");
+        if (!f) return;
+        f.open = !f.open;
+        b.setAttribute("aria-expanded", f.open ? "true" : "false");
+        if (f.open && f.scrollIntoView) f.scrollIntoView({ block: "nearest" });
+      });
+    }).catch(function () { var b = $("hWeek"); if (b) b.innerHTML = ""; });
   }
 
   /*  NETICELER (#/nt) - yalniz yeni gorunusde.  Evvel Icmaldaki
@@ -2119,6 +2118,15 @@
       var sel = $("glevel");
       if (sel) sel.innerHTML = levelOptions(null);
     });
+    //  26.10: Icmaldaki «Qrup yarat» - forma gorunsun ve ad sahesi hazir olsun
+    if (YNEWG) {
+      YNEWG = false;
+      setTimeout(function () {
+        var f = $("gForm"), i = $("gname");
+        if (f && f.scrollIntoView) f.scrollIntoView({ block: "center" });
+        if (i) i.focus();
+      }, 150);
+    }
     loadGroups(lvReady);
   }
 
@@ -6026,7 +6034,9 @@
       etmeyib.  Toxununca Tapsiriqlar ekranina (orada siyahi + kim etdi). */
   function hwAlertRow(x) {
     var und = Number(x.undone) || 0, tot = Number(x.total) || 0;
-    return '<a class="al hw" href="#/a/' + esc(x.class_id) + '" data-hwa="' + esc(x.id) + '">' + ic("clip") +
+    //  26.10: setir «N/M etməyib» deyir - YENI-de hemin sagirdlerin ADLARI olan sehifeye (#/ht) aparir
+    //  (evvel bu yol Icmaldaki setirde idi; Icmalda qrupa aid xeberdarliq artiq yoxdur)
+    return '<a class="al hw" href="#/' + (YENI ? "ht/" : "a/") + esc(x.class_id) + '" data-hwa="' + esc(x.id) + '">' + ic("clip") +
       "<span><b>" + esc(x["class"] || "") + "</b> <span class=\"muted\">(" +
         (x.personal ? "fərdi · " : "") + "son tarix " + esc(hwDay(x.due)) + ")</span><br>" +
         esc(x.body || "") + " — <b>" + und + "/" + tot + " etməyib</b></span>" +
