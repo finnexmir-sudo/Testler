@@ -7,7 +7,10 @@
   B  Mövzu bir sətirdir — basanda siyahı + axtarış açılır; seçim sətirdə yazılır; çox mövzu seçmək qalır
   C  Sual sayı 5/10/15/20 = «Dəqiq sual sayı» (biri o birini yeniləyir); hovuz yoxlaması həmin sayı deyir
   D  Tövsiyə formanın ALTINDADIR və formanı doldurur (test özü yığılmır): mövzu, 10 sual, Kimə = həmin qrup
-  E  «Suallara bax» testi yığır, VERMİR; vərəqdə alıcı seçili, son tarix 7 gün sonra, cəhd 1; «Testi ver» verir
+  A2 Sinif seçilmədən test yığılmır («Əvvəl sinfi seçin», düymə bağlı); qrup seçiləndə onun sinfi özü seçilir
+  E  «Suallara bax» testi yığır, VERMİR; vərəqdə ardıcıllıq: SUALLAR (açıq) → alıcı və tarix → «Testi ver» →
+     «Digər əməliyyatlar» (bağlı: çap, ad, yenidən yığ, vaxt, sil); son tarix «2 noyabr 2026, bazar ertəsi» kimi
+     yazılır (7 gün sonra), cəhd 1; «Testi ver» verir, təsdiqdə tarix eyni sözlərlə
   F  Qrupdan gələndə: say 5, mövzu, Kimə = həmin qrup; şagirddən gələndə: Kimə = «yalnız Ad»
   G  390 / 360: yana sürüşmə yoxdur, düymə və sahələr ≥ 44 px, başlıq 22 px
 """
@@ -83,6 +86,18 @@ with sync_playwright() as pw:
     ok(rec_top >= form_bot, "tövsiyə formanın altındadır (formanı itələmir)", (round(form_bot), round(rec_top)))
     if SHOT: pg.screenshot(path=SHOT + "/gen_1280.png", full_page=True)
 
+    print("A2 · sinifsiz test yığılmır")
+    if pg.locator("#gLevs .chip.on").count() == 0:
+        ok(pg.evaluate("document.getElementById('btnMake').disabled") and "Əvvəl sinfi seçin" in pg.inner_text("#gPrev"),
+           "sinif seçilməyib: «Əvvəl sinfi seçin», düymə bağlı", pg.inner_text("#gPrev"))
+        pg.select_option("#gAsg", gid); pg.wait_for_timeout(1500)
+        lv = db("select l.code c from public.classes c join public.levels l on l.id = c.level_id where c.id = %s::uuid", (gid,), one=True)["c"]
+        ok(pg.evaluate("[...document.querySelectorAll('#gLevs .chip.on')].map(x => x.dataset.l)") == [lv] and not pg.evaluate("document.getElementById('btnMake').disabled"),
+           "qrup seçiləndə onun sinfi (%s) özü seçilir, düymə açılır" % lv)
+        gen(pg)
+    else:
+        ok(False, "nümunədə ilk açılışda sinif seçilməmiş olmalıdır (bir neçə sinif)")
+
     print("B · Mövzu sətri")
     pg.select_option("#gsub", "riyaziyyat"); pg.wait_for_timeout(600)
     pg.click("#gLevs [data-l='7']"); pg.wait_for_timeout(1500)
@@ -133,9 +148,26 @@ with sync_playwright() as pw:
     ok(pg.locator("#pCls").input_value() == gid and pg.locator("#pWho").input_value() == "" and pg.input_value("#pDate") == d7 and pg.locator("#pTry").input_value() == "1",
        "vərəqdə: qrup seçili, bütün qrup, son tarix 7 gün sonra, 1 cəhd", (pg.input_value("#pDate"), d7))
     ok("hələ verilməyib" in pg.inner_text("#main"), "mesaj: «Test hazırdır, hələ verilməyib…»")
-    pg.click("#qFold > summary"); pg.wait_for_timeout(300)
-    ok(pg.locator(".paper .pq").count() == 10 and pg.locator(".paper .pq").first.is_visible(), "suallar açılır (10)", pg.locator(".paper .pq").count())
+    ok(pg.evaluate("document.getElementById('qFold').open") and pg.locator(".paper .pq").count() == 10 and pg.locator(".paper .pq").first.is_visible(),
+       "suallar AÇIQ gəlir (10)", pg.locator(".paper .pq").count())
+    top = lambda s_: pg.evaluate("document.querySelector('%s').getBoundingClientRect().top" % s_)
+    ok(top("#qFold") < top("#pAsgH") < top("#btnPAsg") < top("#pMore"), "ardıcıllıq: suallar → alıcı və tarix → «Testi ver» → «Digər əməliyyatlar»")
+    ok(pg.evaluate("window.scrollY") < 50, "ekran yuxarıdan (suallardan) başlayır")
+    ok(not pg.evaluate("document.getElementById('pMore').open") and not pg.locator("#btnPrn").is_visible() and pg.locator("#btnGoAsg").count() == 0,
+       "çap, ad, sil «Digər əməliyyatlar» altında, bağlı; yuxarıda «Qrupa ver» yoxdur")
+    AY = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avqust","sentyabr","oktyabr","noyabr","dekabr"]
+    GUN = ["bazar ertəsi","çərşənbə axşamı","çərşənbə","cümə axşamı","cümə","şənbə","bazar"]
+    dd = datetime.date.today() + datetime.timedelta(days=7)
+    uzun = "%d %s %d, %s" % (dd.day, AY[dd.month - 1], dd.year, GUN[dd.weekday()])
+    ok(pg.inner_text("#pDateTxt").strip() == uzun, "son tarix sözlə: «%s»" % uzun, pg.inner_text("#pDateTxt"))
+    pg.fill("#pDate", ""); pg.wait_for_timeout(200)
+    ok("Seçilməyib" in pg.inner_text("#pDateTxt"), "tarix silinəndə «Seçilməyib — açıq qalır»")
+    pg.fill("#pDate", d7); pg.wait_for_timeout(200)
+    pg.click("#pMore > summary"); pg.wait_for_timeout(300)
+    ok(pg.locator("#btnPrn").is_visible() and pg.locator("#btnTRen").is_visible() and pg.locator("#btnTDel").is_visible() and pg.locator("#btnRegen").is_visible() and pg.locator("#pLim").is_visible(),
+       "«Digər əməliyyatlar» açılır: Çap, Adı dəyiş, Yenidən yığ, vaxt, Sil")
     pg.click("#btnPAsg"); pg.wait_for_selector(".pasgok", timeout=20000)
+    ok(("Son tarix: " + uzun) in pg.inner_text(".pasgok"), "təsdiqdə «Son tarix: %s»" % uzun, pg.inner_text(".pasgok")[:120])
     a = db("select count(*) n, max(max_attempts) m, max(closes_at)::date d from public.assignments where test_id = %s::uuid and class_id = %s::uuid and student_id is null", (tid, gid), one=True)
     ok(a["n"] == 1 and a["m"] == 1 and str(a["d"]) in (d7, (datetime.date.today() + datetime.timedelta(days=8)).isoformat()), "«Testi ver» → qrupa, 1 cəhd, son tarix 7 gün", a)
     gen(pg)

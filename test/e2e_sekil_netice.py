@@ -143,7 +143,7 @@ with sync_playwright() as pw:
 
         print("\n2 · Çap / PDF (%d px)" % W)
         tp.evaluate("window.print = function () { window.__cap = true; }")
-        tp.click("#btnPrn"); tp.wait_for_timeout(500)
+        tp.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); tp.click("#btnPrn"); tp.wait_for_timeout(500)
         ok(tp.evaluate("window.__cap === true"), "çap çağırıldı")
         sekil_var(tp, "#printBox", "çap (%d px)" % W, minn=NQ)
         tp.emulate_media(media="print"); tp.wait_for_timeout(300)

@@ -93,6 +93,9 @@ with sync_playwright() as pw:
     p.screenshot(path=OUT + "/secilmis.png", full_page=True)
 
     #  testi yig ve suallarin fennine bax
+    #  26.10: sinifsiz test yigilmir - ilk sinif secilir
+    yox(p.evaluate("document.getElementById('btnMake').disabled"), "sinif secilmeyib - «Suallara bax» bagli")
+    p.locator("#gLevs [data-l]").first.click(); p.wait_for_timeout(1500)
     p.click("#btnMake")
     p.wait_for_timeout(4000)
     t = q("select id, subject_id from public.tests where owner_type='educator'"

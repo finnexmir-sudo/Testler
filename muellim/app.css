@@ -3502,3 +3502,23 @@ body.bnav-on .afoot.mini .in{display:flex;padding:0 16px}
 #main.gpg .genw{max-width:760px}
 /*  sinif nisanlari - toxunma 44 px (yazi olcusu eyni)  */
 #main.gpg .genf #gLevs .chip{min-height:44px;min-width:44px;justify-content:center}
+#main.gpg .gprev .gneed{display:flex;align-items:center;gap:6px;margin:0;font-size:13.5px;color:var(--warn)}
+#main.gpg .gprev .gneed svg{width:16px;height:16px;flex:none}
+#main.gpg #btnMake:disabled{opacity:.55;cursor:not-allowed}
+/*  Test vereqi (26.10): son tarix sahesi - «2 noyabr 2026, bazar ertəsi», altinda brauzerin secicisi  */
+.dfld{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;margin:0 0 14px;
+  padding:0 12px 0 14px;border:1px solid var(--n-200,#cfdcd6);border-radius:10px;background:#fff;font-size:15px}
+.dfld svg{width:17px;height:17px;flex:none;color:var(--fg-3)}
+.dfld input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.dfld:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint)}
+/*  «Digər əməliyyatlar» - cap, ad, yeniden yig, vaxt, sil (ikinci derece)  */
+details.pmore{background:var(--surface,#fff);border:1px solid #d6e3dd;border-radius:14px;padding:0 16px}
+details.pmore > summary{display:flex;align-items:center;gap:10px;min-height:56px;cursor:pointer;list-style:none}
+details.pmore > summary::-webkit-details-marker{display:none}
+details.pmore > summary::before{display:none}
+details.pmore > summary > span{flex:1;min-width:0}
+details.pmore > summary b{display:block;font-size:15px;font-weight:650}
+details.pmore > summary i{display:block;font-style:normal;font-size:13px;color:var(--fg-3);margin-top:1px}
+details.pmore > summary .ar{width:16px;height:16px;flex:none;color:var(--fg-3);transition:transform .15s}
+details.pmore[open] > summary .ar{transform:rotate(90deg)}
+details.pmore[open]{padding-bottom:14px}

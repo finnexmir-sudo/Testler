@@ -85,10 +85,10 @@ with sync_playwright() as pw:
          where tq.test_id = %s and q.params is null""", (TID,))}
 
     print("B · Çap / PDF: bir basış = bir çap pəncərəsi")
-    pg.goto(PANEL + "#/t/" + TID); pg.wait_for_selector("#btnPrn", timeout=20000); pg.wait_for_timeout(500)
+    pg.goto(PANEL + "#/t/" + TID); pg.wait_for_selector("#btnPrn", state="attached", timeout=20000); pg.wait_for_timeout(500)
     pg.evaluate("() => { window.__prn = 0; window.print = function(){ window.__prn++ } }")
-    pg.check("#prnK")
-    pg.click("#btnPrn"); pg.wait_for_timeout(400)
+    pg.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); pg.check("#prnK")
+    pg.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); pg.click("#btnPrn"); pg.wait_for_timeout(400)
     ok(pg.evaluate("window.__prn") == 1, "window.print() bir dəfə çağırıldı", pg.evaluate("window.__prn"))
 
     print("C · Çap: variantlar qarışdırılıb, açar çap olunmuş sıraya uyğundur")
@@ -113,7 +113,7 @@ with sync_playwright() as pw:
             uygun += 1
     ok(yoxlanan >= 5 and uygun == yoxlanan, "açardakı hərf çap olunmuş sualda düz variantdır", "%d/%d" % (uygun, yoxlanan))
     pg.evaluate("() => { window.__prn = 0 }")
-    pg.click("#btnPrn"); pg.wait_for_timeout(400)
+    pg.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); pg.click("#btnPrn"); pg.wait_for_timeout(400)
     key2 = pg.evaluate("[...document.querySelectorAll('#printBox .ppkg span')].map(s => s.innerText)")
     ok(key2 == data["key"], "ikinci çap eyni açarı verir")
 
@@ -141,11 +141,11 @@ with sync_playwright() as pw:
     print("E · Çox sinifli test: vərəq və çap başlığında «9, 10 siniflər»")
     db("""update public.tests set gen_rule = coalesce(gen_rule, '{}'::jsonb) || '{"levels":["10","9"]}'::jsonb
            where id = %s""", (TID,))
-    pg.goto(PANEL + "#/t/" + TID); pg.reload(); pg.wait_for_selector("#btnPrn", timeout=20000); pg.wait_for_timeout(800)
+    pg.goto(PANEL + "#/t/" + TID); pg.reload(); pg.wait_for_selector("#btnPrn", state="attached", timeout=20000); pg.wait_for_timeout(800)
     top = pg.locator(".card p.muted").first.inner_text()
     ok("9, 10 siniflər" in top, "vərəq başlığı «9, 10 siniflər»", top[:80])
     pg.evaluate("() => { window.print = function(){} }")
-    pg.uncheck("#prnK"); pg.click("#btnPrn"); pg.wait_for_timeout(400)
+    pg.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); pg.uncheck("#prnK"); pg.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); pg.click("#btnPrn"); pg.wait_for_timeout(400)
     ppm = pg.evaluate("document.querySelector('#printBox .ppm').innerText")
     ok("9, 10 siniflər" in ppm and "10-cu sinif" not in ppm, "çap başlığı «9, 10 siniflər»", ppm)
 

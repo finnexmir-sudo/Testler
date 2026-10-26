@@ -168,7 +168,7 @@ with sync_playwright() as pw:
         pg.screenshot(path=SS + "muellim_verq_%s.png" % tel, full_page=True)
         #  HEQIQI cap gorunusu: window.print susdurulur, «cavab acari ile» isarelenir
         pg.evaluate("window.print = function () {}")
-        pg.check("#prnK"); pg.click("#btnPrn"); pg.wait_for_selector("#printBox .ppq", state="attached", timeout=8000)
+        pg.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); pg.check("#prnK"); pg.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); pg.click("#btnPrn"); pg.wait_for_selector("#printBox .ppq", state="attached", timeout=8000)
         ok(pg.locator("#printBox .ppb .kesr").count() >= 2, "cap vərəqində sual kəsrləri var", pg.locator("#printBox .ppb .kesr").count())
         ok(pg.locator("#printBox .kmix").count() >= 1, "cap vərəqində qarışıq ədəd var")
         pg.emulate_media(media="print")
@@ -178,7 +178,7 @@ with sync_playwright() as pw:
         ok(pg.locator("#printBox .kesr .kn").first.is_visible(), "çap rejimində kəsr görünür")
         pg.screenshot(path=SS + "muellim_cap_%s.png" % tel, full_page=True)
         pg.emulate_media(media="screen")
-        pg.uncheck("#prnK")
+        pg.evaluate("document.getElementById('pMore') && (document.getElementById('pMore').open = true)"); pg.uncheck("#prnK")
         #  sual banki: Riyaziyyat 5 -> Adi kesrler
         pg.goto(PANEL + "#/b"); pg.reload()
         pg.wait_for_selector("#bPool", timeout=20000)
