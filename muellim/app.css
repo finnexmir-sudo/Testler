@@ -3141,3 +3141,15 @@ details.gklast > .gkv{margin-top:-2px}
 details.gklast[open]{padding-bottom:10px}
 /*  gozleyen tapsiriq metni telefonda uc setre uzanirdi - iki setir, tam metn «Mesajı kopyala»dadir  */
 #main.yig .stp .stpr .g i{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/*  26.10 (istifadeci, 360 px): kart basligi «Son / tapşırıqlar · 2 / aktiv · Hamısına / bax» bolunurdu,
+    «Diqqət» setrinde sagdaki link/duyme metni 3-4 setre sixirdi.  Dar ekranda: baslik bolunmur, «N aktiv»
+    gizlenir (say Tapşırıqlar sekmesindedir); link ve duyme metnin ALTINA kecir - metn tam enle oxunur.  */
+#main.yig .gkh b,#main.yig .gkh .gkm,#main.yig .gkh .gka{white-space:nowrap}
+@media (max-width:420px){
+  #main.yig .gkh .gka{display:none}
+  #main.yig .gkd{display:grid;grid-template-columns:34px minmax(0,1fr);column-gap:12px;row-gap:2px;align-items:start}
+  #main.yig .gkd .gkdn{grid-row:1 / span 2}
+  #main.yig .gkd .g{grid-column:2}
+  #main.yig .gkd > .gkm,#main.yig .gkd > .btn{grid-column:2;justify-self:start;margin:0}
+  #main.yig .gkd > .gkm{min-height:36px}
+}
