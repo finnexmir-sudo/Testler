@@ -148,6 +148,10 @@ with sync_playwright() as pw:
     ok(sw(pg)[0] <= sw(pg)[1], "390: yana sürüşmə yoxdur", sw(pg))
     bb = pg.locator("#vdTov").bounding_box()
     ok(bb and bb["height"] >= 44, "390: təkrar düyməsi ≥ 44 px", bb)
+    hh = pg.evaluate("""() => ['#band .bback', '#btnAsgStu', '#vdF', '#vCopy', '#vOpen', '#stuPend [data-sp]', '#sTabs .seg']
+        .map(s => document.querySelector(s)).filter(Boolean).map(e => Math.round(e.getBoundingClientRect().height))""")
+    ok(hh and min(hh) >= 44, "390: bütün düymələr ≥ 44 px", hh)
+    ok(pg.evaluate("getComputedStyle(document.querySelector('#band h1')).fontSize") == "22px", "390: şagirdin adı 22 px (kiçilməyib)")
     if SHOT: pg.screenshot(path=SHOT + "/sagird_390.png", full_page=True)
     br.close()
 
