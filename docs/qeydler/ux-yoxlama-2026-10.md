@@ -93,6 +93,7 @@ Testlərdə tapılan: `e2e_tapsiriq_bos` sınanda bütün platforma testlərini 
 | Y3 | Kölgələr zəif (yalnız 1 px), panel fonu bir ton açıq (`--bg` #dfeee8 → #ecf5f1) | gözlə: 390/1280 | bəli, `main` v=818 |
 | Y4 | «Son keçilən dərs» açılıb-bağlanan: başlıqda tarix və faiz, içində mövzu və «testi yığ». Gözləyən tapşırıq mətni telefonda 2 sətir (tam mətn «Mesajı kopyala»da) | `e2e_qrup_sekme` D (bağlı gəlir, açılır) | bəli, `main` v=818 |
 | Y5 | 360 px (istifadəçi canlıda tutdu): kart başlığı «Son / tapşırıqlar · 2 / aktiv · Hamısına / bax» bölünürdü, «Diqqət» sətrində link/düymə mətni 3–4 sətrə sıxırdı. Dar ekranda başlıq bölünmür, «N aktiv» gizlənir, link və «Təkrar ver» mətnin altına keçir | 360 px əvvəl–sonra; `e2e_qrup_sekme`, `e2e_dord_is` | yox (budaqda) |
+| Y6 | Ölçü yoxlaması (istifadəçi: «yığcamlıq yazı və düymənin kiçilməsi hesabına olmasın»): telefonda başlıq 23.10-da 20→18 (qrup), 22→18 (şagird) endirilmişdi — **qaytarıldı**; «Test ver» 40, «Təkrar ver» 32, «Kim etməyib» 36, şagird səhifəsinin düymələri 32 px idi — hamısı **44 px**. 360 px-də rəqəmlər kartında gedişat ayrıca sətirdə, şagird başlığında qısa ad gizlənir (kod qalır) | ölçülər əvvəl/sonra eyni səhifədə (`getComputedStyle`); `e2e_qrup_sekme` A2, `e2e_sagird_xulase` G (≥ 44 px, 20/22 px) | yox (budaqda) |
 
 ## Sıra 1–5 — gözləyir
 

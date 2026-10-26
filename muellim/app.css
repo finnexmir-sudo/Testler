@@ -3094,7 +3094,7 @@ details.styd{margin-top:14px}
 .band.sband .br{flex:none}
 @media (max-width:600px){
   .band.sband .bh > .av{display:none}
-  .band.sband h1{font-size:18px;line-height:1.2}
+  .band.sband h1{line-height:1.15}   /*  26.10: olcu kicildilmir (22 px, base.css) - uzun ad iki setre kecir  */
   .band.sband p{font-size:12px}
   .band.sband .br .btn{padding:0 10px}
 }
@@ -3151,5 +3151,26 @@ details.gklast[open]{padding-bottom:10px}
   #main.yig .gkd .gkdn{grid-row:1 / span 2}
   #main.yig .gkd .g{grid-column:2}
   #main.yig .gkd > .gkm,#main.yig .gkd > .btn{grid-column:2;justify-self:start;margin:0}
-  #main.yig .gkd > .gkm{min-height:36px}
+}
+/*  26.10: toxunma sahesi telefonda HEC YERDE 44 px-den az deyil (yigcamliq duymeni kicilterek olmur) -
+    «Test ver» 40, «Təkrar ver» 32, «Kim etməyib» 36 px idi.  Yazi olcusu deyismir.  */
+@media (max-width:600px){
+  .band.gtabb .btn,#main.yig .btn,#main.yig .gkm,#main.yig .seg,#main.yig .gtab{min-height:44px}
+  #main.yig .gkd .btn.sm,#main.yig .sxsehv .btn.sm,#main.yig .stpr .btn.sm,#main.yig .sxvb .btn.sm{min-height:44px}
+}
+@media (max-width:600px){ .band .bandin .btn.gtv{min-height:44px} }
+/*  26.10: zolaq basliginin olcusu ILKIN haldadir - qrup 20 px (.gcompact), sagird 22 px (base.css).
+    23.10-da telefonda 18 px-e endirilmisdi; istifadeci: «yigcamliq yazinin kicilmesi hesabina olmasin».  */
+@media (max-width:600px){
+  .band.gtabb h1{font-size:20px;line-height:1.2}
+  .band.sband h1{font-size:22px;line-height:1.15}
+}
+/*  26.10 (360 px): uc reqem yanasi duranda «+28 bənd» ve izahlar uc setre bolunurdu.  Dar ekranda:
+    orta | test sayi yanasi, gedisat ayrica tam enli setirde; olculer deyismir.  Sagird basliginda
+    gorunen qisa ad («Aysel K.») telefonda gizlenir - kod qalir, «Giriş kodları»nda da var.  */
+@media (max-width:420px){
+  .rstat.r30 > span.rtr{order:3;flex:1 0 100%;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 8px;
+    border-left:0;border-top:1px solid var(--line);padding-top:8px}
+  .rstat.r30 > span.rall{order:4}
+  .band.sband p > span:not(.code){display:none}
 }

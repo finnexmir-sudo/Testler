@@ -178,6 +178,11 @@ with sync_playwright() as pw:
         ok(tabs_fit, "%d: sekmələr zolağa sığır" % w)
         hgt = pg.evaluate("""() => Math.min(...[...document.querySelectorAll('#gSek .gtab')].filter(e => e.offsetParent).map(e => e.getBoundingClientRect().height))""")
         ok(hgt >= 44, "%d: sekmə hündürlüyü ≥ 44" % w, hgt)
+        #  26.10: yigcamliq yazini ve duymeni kicilterek olmur - telefonda 44 px, basliq 20 px
+        hh = pg.evaluate("""() => ['#btnAsgs', '#band .bback', '#gkPendGo', '#gkTodoGo', '#gkAsgAll', '#gkNetAll']
+            .map(s => document.querySelector(s)).filter(Boolean).map(e => Math.round(e.getBoundingClientRect().height))""")
+        ok(hh and min(hh) >= 44, "%d: düymə və keçidlər ≥ 44 px" % w, hh)
+        ok(pg.evaluate("getComputedStyle(document.querySelector('#band h1')).fontSize") == "20px", "%d: başlıq 20 px (kiçilməyib)" % w)
     pg.click("#gMoreBtn"); pg.wait_for_timeout(200)
     items = pg.evaluate("""() => [...document.querySelectorAll('#gMoreMenu a')].filter(e => e.offsetParent).map(e => e.textContent.trim())""")
     ok(items == ["Dərs planı", "Dəftər", "Qrup ayarları"], "«Daha»: Dərs planı, Dəftər, Qrup ayarları", items)
