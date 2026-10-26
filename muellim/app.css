@@ -3340,3 +3340,33 @@ body.bnav-on .afoot.mini .in{display:flex;padding:0 16px}
 #main.gpg .rstat .rref{margin-left:auto;width:44px;min-height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center}
 #main.gpg .rstat .rref svg{width:17px;height:17px}
 #main.gpg .rfree{margin:0 0 6px;font-size:13.5px}
+
+/* ---------------------------------------------- Qrupun Sagirdler sekmesi (26.10, son maket)
+   Axtaris · «N şagird · əlifba sırası» · Şagird | Son fəaliyyət | «Profilə bax».  */
+#main.gpg .stcnt{margin:0 2px 10px;font-size:13.5px;color:var(--fg-3)}
+#main.gpg .ytr.st3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 130px}
+#main.gpg .st3 .sta{display:flex;align-items:center;gap:12px}
+#main.gpg .st3 .sta > span{min-width:0}
+#main.gpg .st3 .sta .av{flex:0 0 32px;width:32px;height:32px;font-size:13px}
+#main.gpg .st3 .sta i{display:none}
+#main.gpg .st3 .yts .qr,#main.gpg .st3 .sta i .qr{color:var(--warn);font-weight:600}
+#main.gpg .st3 .yta{display:none}
+#main.gpg .st3.soff .sta b{color:var(--fg-3)}
+#main.gpg .stqn{margin:4px 2px 0}
+#main.gpg .stpg{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 0}
+#main.gpg .stpg .btn{min-height:44px;background:#fff}
+#main.gpg .stpg span{font-size:14px;color:var(--fg-2);font-variant-numeric:tabular-nums}
+#main.gpg details.stoff{margin-top:12px;border-top:0}
+#main.gpg details.stoff .ytb{margin-top:6px}
+#main.gpg #stuForm{margin-bottom:12px}
+@media (max-width:600px){
+  #main.gpg .ytr.st3{grid-template-columns:minmax(0,1fr) auto}
+  #main.gpg .st3 .yts{display:none}
+  #main.gpg .st3 .sta i{display:block}
+  #main.gpg .ytr.st3.yth > span:nth-child(2){display:none}
+  #main.gpg .st3 .ytk{font-size:14px;gap:2px;color:var(--brand)}
+  #main.gpg .st3 .ytk svg{color:var(--brand)}
+  #main.gpg .st3 .ytl{display:none}
+  #main.gpg .st3 .yta{display:inline}
+  #main.gpg .gtvw > #btnStuOpen{width:100%}
+}

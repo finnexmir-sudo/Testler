@@ -136,7 +136,7 @@ with sync_playwright() as pw:
     pcs = pg.evaluate("""[...document.querySelectorAll('button.mrow[data-s] .pctv')].map(e => e.innerText.trim())""")
     nums = [int(x.rstrip('%')) for x in pcs if x.rstrip('%').isdigit()]
     ok(len(nums) >= 3 and nums == sorted(nums), "hesabatda şagirdlər faizə görə artan sıradadır", nums[:8])
-    pg.goto(PANEL + "#/g/" + st["c"] + "/s"); pg.wait_for_selector("#stu a.mrow", timeout=20000)
+    pg.goto(PANEL + "#/g/" + st["c"] + "/s"); pg.wait_for_selector("#stu a.ytr", timeout=20000)
     gl = pg.inner_text("#stu")
     ok(" test" in gl and " cavab" not in gl, "qrupun şagird siyahısında «N test» (cavab yox)")
 

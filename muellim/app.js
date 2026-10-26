@@ -4097,7 +4097,8 @@
     var f = $("stuForm"), b = $("btnStuOpen");
     if (!f) return;
     f.hidden = false;
-    if (b) b.classList.add("hide");   // .btn display qaydasi hidden atributunu ezir
+    //  .btn display qaydasi hidden atributunu ezir; basliqdaki duyme (26.10) yerinde qalir
+    if (b && !b.closest(".phd")) b.classList.add("hide");
     if (focus && $("sname")) $("sname").focus();
   }
   /* ================================================================
@@ -4178,11 +4179,14 @@
           '<a href="#/gs">Qruplar</a><span aria-hidden="true">/</span><span id="gCrumb">' + esc(c.name || "") + "</span></nav>" +
         '<h1 id="gName">' + esc(c.name || "…") + "</h1>" +
         '<p id="gMeta">' + esc(c.meta || "") + "</p></div>" +
-      '<div class="phd-a"><div class="gtvw"><button type="button" class="btn go" id="btnAsgs" aria-haspopup="true" aria-expanded="false">' +
+      //  Sagirdler sekmesinde (son maket) esas is sagird elave etmekdir - duyme onu deyir
+      '<div class="phd-a"><div class="gtvw">' + (act === "s"
+        ? '<button type="button" class="btn go" id="btnStuOpen">' + ic("plus") + "Şagird əlavə et</button>"
+        : '<button type="button" class="btn go" id="btnAsgs" aria-haspopup="true" aria-expanded="false">' +
           ic("plus") + "Tapşırıq ver</button>" +
           '<div class="gmenu hide" id="gAsgMenu" role="menu">' +
             '<a role="menuitem" href="#/a/' + esc(gid) + '/t" id="gAsgT">' + ic("clip") + "Test ver</a>" +
-            '<a role="menuitem" href="#/a/' + esc(gid) + '/h" id="gAsgH">' + ic("pen") + "Ev tapşırığı yaz</a></div></div>" +
+            '<a role="menuitem" href="#/a/' + esc(gid) + '/h" id="gAsgH">' + ic("pen") + "Ev tapşırığı yaz</a></div>") + "</div>" +
         '<a class="btn icon gset' + (act === "x" ? " on" : "") + '" id="gSet" href="#/g/' + esc(gid) + '/x" aria-label="Qrup ayarları" title="Qrup ayarları">' +
           ic("gear") + "</a></div></header>";
   }
@@ -4396,18 +4400,18 @@
       id: "gName", title: g.name, subId: "gMeta", sub: esc(levelName(g.level_id) || "")
     });
     if (bol === "s") {
-      show('<div id="stu" class="card pad0"><div class="skel">Yüklənir…</div></div>' +
-        '<button class="btn wide" id="btnStuOpen" style="margin-top:10px">' + ic("plus") +
-          "Şagird əlavə et</button>" +
-        '<div class="card" id="stuForm" hidden style="margin-top:10px">' +
+      /*  SAGIRDLER (26.10, son maket): axtaris, elifba sirasi ile siyahi, son fealiyyet,
+          profile aydin kecid.  «Şagird əlavə et» basliqdadir, forma siyahinin USTUNDE acilir.
+          Netice faizleri Hesabatdadir (Sagirdler sekmesi) ve sagirdin profilinde.  */
+      show('<div class="card yk" id="stuForm" hidden>' +
           '<label for="sname">Yeni şagird</label>' +
           '<input id="sname" placeholder="Ad Soyad — məs. Aysu Məmmədova">' +
           '<p class="muted" style="margin:-8px 0 14px">Əvvəl ad, sonra soyad. ' +
             "Lövhədə qısa ad belə yaranır: Aysu Məmmədova → Aysu M.</p>" +
           '<div id="sErr"></div>' +
           '<button class="btn go" id="btnStu">' + ic("plus") + "Şagird əlavə et</button>" +
-        "</div>");
-      on("btnStuOpen", "click", function () { openStuForm(true); });
+        "</div>" +
+        '<section class="card yk" id="stu"><div class="skel">Yüklənir…</div></section>');
       on("sname", "keydown", function (e) { if (e.key === "Enter") addStudent(g.id); });
       on("btnStu", "click", function () { addStudent(g.id); });
       loadStudents(g.id);
@@ -4451,6 +4455,7 @@
       loadLedger(g);
     }
     gTabsMount(g.id, bol);
+    if (bol === "s") on("btnStuOpen", "click", function () { openStuForm(true); });
     on("btnBack", "click", function () { goBack("#/g/" + g.id); });
   }
 
@@ -4557,7 +4562,8 @@
       .then(function () {
         $("sname").value = "";
         setBusy("btnStu", false, "Şagird əlavə et");
-        return refreshContext().then(function () { loadStudents(classId); });
+        //  basliqdaki «N şagird» de yenilenir - siyahinin sayi ile eyni qalsin
+        return refreshContext().then(function () { loadStudents(classId); if ($("gMeta")) gHeadFill(classId); });
       }).catch(function (e) {
         setBusy("btnStu", false, "Şagird əlavə et");
         $("sErr").innerHTML = msg("err", fail(e));
@@ -4774,6 +4780,75 @@
     }
   }
 
+  /*  SAGIRDLER SEKMESI (26.10, son maket): elifba sirasi, «Son fəaliyyət», «Profilə bax».
+      Setirde YALNIZ ad ve son fealiyyet - netice faizi Hesabatda ve profildedir.  Axtaris
+      5+ sagirdde; 20-den coxu sehifelere bolunur (axtaris butun siyahida gezir).  */
+  var STU_SEH = 20;
+  function azKicik(t) {
+    t = String(t || "");
+    try { return t.toLocaleLowerCase("az"); } catch (e) { return t.toLowerCase(); }
+  }
+  function stuFeal(s) {
+    if (s.is_active === false) return "dayandırılıb — yer tutmur";
+    var seen = s.seen_at || s.last_at, n = Number(s.attempts) || 0;
+    if (!seen) return '<span class="qr">hələ girməyib — kodu göndərin</span>';
+    if (!n) return "girib " + esc(agoAz(seen)) + ", hələ test işləməyib";
+    return (s.last_at ? "son test " + esc(agoAz(s.last_at)) + " · " : "") + n + " test";
+  }
+  function stuRowT(s, gid) {
+    var f = stuFeal(s);
+    return '<a class="ytr st3' + (s.is_active === false ? " soff" : "") + '" href="#/s/' + esc(s.id) + "/" + esc(gid) +
+        '" data-ad="' + esc(azKicik(s.full_name)) + '">' +
+      '<span class="ytq sta">' + av(s.full_name) + "<span><b>" + esc(s.full_name) + "</b><i>" + f + "</i></span></span>" +
+      '<span class="yts">' + f + "</span>" +
+      '<span class="ytk"><span class="ytl">Profilə bax</span><span class="yta">Bax</span>' + ic("right") + "</span></a>";
+  }
+  function stuYeniCiz(box, aktiv, dayan, gid) {
+    function cmp(a, b) { return String(a.full_name || "").localeCompare(String(b.full_name || ""), "az"); }
+    aktiv = aktiv.slice().sort(cmp); dayan = dayan.slice().sort(cmp);
+    box.innerHTML =
+      (aktiv.length >= 5
+        ? '<div class="ysrch"><input id="stuQ" type="search" placeholder="Şagird axtar…" autocomplete="off" aria-label="Şagird axtar"></div>'
+        : "") +
+      '<p class="stcnt" id="stuCnt">' + aktiv.length + " şagird · əlifba sırası</p>" +
+      '<div class="ytb" id="stuT"><div class="ytr st3 yth"><span>Şagird</span><span>Son fəaliyyət</span><span></span></div>' +
+        aktiv.map(function (s) { return stuRowT(s, gid); }).join("") + "</div>" +
+      '<p class="muted stqn hide" id="stuQNone"></p>' +
+      '<nav class="stpg hide" id="stuPg" aria-label="Səhifələr">' +
+        '<button type="button" class="btn ghost" id="stuPrev">' + ic("back") + "Əvvəlki</button>" +
+        '<span id="stuPgN"></span>' +
+        '<button type="button" class="btn ghost" id="stuNext">Sonrakı' + ic("right") + "</button></nav>" +
+      (dayan.length
+        ? '<details class="arxiv stoff"><summary>Dayandırılmış <span>' + dayan.length + "</span></summary>" +
+          '<div class="ytb">' + dayan.map(function (s) { return stuRowT(s, gid); }).join("") + "</div></details>"
+        : "");
+    var rows = box.querySelectorAll("#stuT a.ytr"), sehife = 0, say = rows.length;
+    function ciz() {
+      var q = $("stuQ") ? azKicik($("stuQ").value.trim()) : "", tapildi = 0;
+      Array.prototype.forEach.call(rows, function (r, i) {
+        var gor = q ? r.getAttribute("data-ad").indexOf(q) >= 0 : (i >= sehife * STU_SEH && i < (sehife + 1) * STU_SEH);
+        r.classList.toggle("hide", !gor);
+        if (gor) tapildi++;
+      });
+      var none = $("stuQNone");
+      none.textContent = q && !tapildi ? "«" + $("stuQ").value.trim() + "» adlı şagird tapılmadı." : "";
+      none.classList.toggle("hide", !(q && !tapildi));
+      $("stuT").classList.toggle("hide", !!q && !tapildi);
+      $("stuCnt").textContent = q ? tapildi + " / " + say + " şagird tapıldı" : say + " şagird · əlifba sırası";
+      var pg = !q && say > STU_SEH;
+      $("stuPg").classList.toggle("hide", !pg);
+      if (pg) {
+        var son = Math.ceil(say / STU_SEH) - 1;
+        $("stuPgN").textContent = (sehife * STU_SEH + 1) + "–" + Math.min(say, (sehife + 1) * STU_SEH) + " / " + say;
+        $("stuPrev").disabled = sehife <= 0;
+        $("stuNext").disabled = sehife >= son;
+      }
+    }
+    on("stuQ", "input", ciz);
+    on("stuPrev", "click", function () { if (sehife > 0) { sehife--; ciz(); } });
+    on("stuNext", "click", function () { if ((sehife + 1) * STU_SEH < say) { sehife++; ciz(); } });
+    ciz();
+  }
   function loadStudents(classId) {
     /*  205: siyahi netice ile gelir (son netice, cehd/tapsiriq, son
         giris).  Evvel students cedvelinden birbasa oxunurdu - ad + iki
@@ -4802,7 +4877,7 @@
       if (!box) return;
       if (!rows || !rows.length) {
         box.innerHTML = '<div class="empty"><div class="ic">' + ic("person") + "</div>" +
-          "<b>Hələ şagird yoxdur</b>Aşağıdan əlavə edin.</div>";
+          "<b>Hələ şagird yoxdur</b>" + (YENI ? "Yuxarıdakı formaya adını yazın." : "Aşağıdan əlavə edin.") + "</div>";
         return;
       }
       /*  Dayandirilmislar AYRICA bolmededir.  Sebeb: yer limiti yalniz
@@ -4828,7 +4903,7 @@
           "</div>"
         : "";
 
-      if (YENI && box.classList) box.classList.add("menu");
+      if (YENI) { stuYeniCiz(box, aktiv, dayan, classId); return; }
       box.innerHTML = sumH + aktiv.map(stuRow).join("") +
         (dayan.length
           ? '<details class="arxiv"><summary>Dayandırılmış <span>' + dayan.length +

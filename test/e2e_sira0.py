@@ -154,7 +154,7 @@ with sync_playwright() as pw:
                where c.account_id = %s::uuid group by c.id having count(*) > 10 order by count(*) desc limit 1""", (acc["i"],), one=True)
     pg.goto(PANEL + "#/g/" + g["i"] + "/s"); pg.wait_for_selector("#stuQ", timeout=20000); pg.wait_for_timeout(600)
     def gorunen():
-        return pg.evaluate("""[...document.querySelectorAll('#stu a.mrow, #stu .stu[data-row]')]
+        return pg.evaluate("""[...document.querySelectorAll('#stu a.ytr, #stu a.mrow, #stu .stu[data-row]')]
                                .filter(r => r.offsetParent !== null).map(r => (r.querySelector('b') || r).textContent.trim())""")
     hamisi = gorunen()
     adlar = [x for x in hamisi]
@@ -181,7 +181,7 @@ with sync_playwright() as pw:
         pg.fill("#stuQ", "Zzqw"); pg.wait_for_timeout(300); pg.screenshot(path="%s/axtar_bos_1280.png" % _S)
         pg.set_viewport_size({"width": 390, "height": 844}); pg.wait_for_timeout(300); pg.screenshot(path="%s/axtar_bos_390.png" % _S)
     pg.fill("#stuQ", ""); pg.wait_for_timeout(300)
-    ok(len(gorunen()) == len(hamisi) and pg.locator("#stuQNone").count() == 0, "sahə boşalanda bütün şagirdlər qayıdır, mesaj itir", len(gorunen()))
+    ok(len(gorunen()) == len(hamisi) and (pg.locator("#stuQNone").count() == 0 or pg.locator("#stuQNone").is_hidden()), "sahə boşalanda bütün şagirdlər qayıdır, mesaj itir", len(gorunen()))
     br.close()
 
 print()

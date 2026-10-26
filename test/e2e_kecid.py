@@ -141,9 +141,9 @@ with sync_playwright() as pw:
     p.screenshot(path=OUT + "/qrup.png", full_page=True)
     #  ---- sagirdler bolmesi
     p.goto(PANEL + "#/g/" + str(gid) + "/s"); p.reload()
-    p.wait_for_selector("#stu .mrow", timeout=30000); p.wait_for_timeout(900)
+    p.wait_for_selector("#stu a.ytr", timeout=30000); p.wait_for_timeout(900)
     h = p.evaluate("document.body.scrollHeight")
-    print("SAGIRDLER: %d px · %d setir" % (h, p.locator("#stu .mrow").count()))
+    print("SAGIRDLER: %d px · %d setir" % (h, p.locator("#stu a.ytr").count()))
     p.screenshot(path=OUT + "/sagirdler.png", full_page=True)
     #  ---- ders plani bolmesi
     p.goto(PANEL + "#/g/" + str(gid0) + "/p"); p.reload()
