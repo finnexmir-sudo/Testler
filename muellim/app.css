@@ -3522,3 +3522,7 @@ details.pmore > summary i{display:block;font-style:normal;font-size:13px;color:v
 details.pmore > summary .ar{width:16px;height:16px;flex:none;color:var(--fg-3);transition:transform .15s}
 details.pmore[open] > summary .ar{transform:rotate(90deg)}
 details.pmore[open]{padding-bottom:14px}
+/*  27.10 (istifadeci): daxil olmus muellimin ekranlarinda footer yoxdur - Kömək ve Əlaqə menyuda,
+    Məxfilik Profildedir.  Giris / qeydiyyat ekranlarinda (bnav-on yoxdur) footer qalir.  */
+body.bnav-on .afoot.mini{display:none}
+@media (min-width:601px){ body.bnav-on #main{padding-bottom:32px} }

@@ -139,7 +139,7 @@ with sync_playwright() as pw:
     icmal(pg)
     sw = pg.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
     ok(sw[0] <= sw[1], "360: yana sürüşmə yoxdur", sw)
-    hh = pg.evaluate("""() => ['#yNewG', '#yGen', '#wkAll', '.afoot .fmini a', '#yMenu .ytr', '#hWeek a.ytr']
+    hh = pg.evaluate("""() => ['#yNewG', '#yGen', '#wkAll', '#yMenu .ytr', '#hWeek a.ytr']
         .map(s => document.querySelector(s)).filter(Boolean).map(e => [e.id || e.className, Math.round(e.getBoundingClientRect().height)])""")
     ok(hh and min(x[1] for x in hh) >= 44, "360: düymə və sətirlər ≥ 44 px", hh)
     ok(pg.evaluate("getComputedStyle(document.querySelector('#yHd h1')).fontSize") == "22px", "360: başlıq 22 px")
@@ -147,12 +147,19 @@ with sync_playwright() as pw:
     db("delete from public.class_schedule s using public.classes c where c.id = s.class_id and c.account_id = %s::uuid", (acc,))
     icmal(pg)
     ok(pg.locator("#wkNone").is_visible() and "Dəftər" in pg.inner_text("#wkNone"), "cədvəl yoxdursa: harada qurulduğu yazılır")
-    ft = pg.locator(".afoot").inner_text()
-    ok([a.strip() for a in pg.locator(".afoot .fmini a").all_inner_texts()] == ["Kömək", "Əlaqə", "Məxfilik"] and
-       pg.locator(".afoot").bounding_box()["height"] < 140, "footer: bir kiçik sətir «Kömək · Əlaqə · Məxfilik»",
-       (ft.replace("\n", " "), pg.locator(".afoot").bounding_box()["height"]))
-    for a, h in (("Kömək", "/komek/"), ("Əlaqə", "#/bize"), ("Məxfilik", "/mexfilik/")):
-        ok(h in (pg.locator(".afoot .fmini a", has_text=a).get_attribute("href") or "") , "footer «%s» → %s" % (a, h))
+    #  27.10 (istifadeci): daxil olmus muellimde footer yoxdur - Kömək (Bələdçi) ve Əlaqə (Bizə yazın) menyuda,
+    #  Məxfilik Profilde; giris ekraninda footer qalir
+    ok(pg.locator(".afoot.mini").is_hidden(), "panelin içində footer yoxdur")
+    pg.goto(PANEL + "#/me"); pg.wait_for_selector("#meMex", timeout=20000)
+    ok("/mexfilik/" in (pg.locator("#meMex a").get_attribute("href") or "") and pg.locator("#meMex a").is_visible(), "Profildə «Məxfilik siyasəti» → /mexfilik/")
+    ok(pg.locator("#btnMeFb").is_visible() and pg.locator("a[href='../komek/#muellim']").count() >= 1, "Profildə «Bizə yazın» və Bələdçi qalır")
+    c0 = br.new_context(viewport={"width": 360, "height": 800}); p0 = c0.new_page()
+    p0.route("**/config.js*", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG))
+    p0.goto(PANEL); p0.wait_for_selector("#btnAuth", timeout=20000)
+    ok(p0.locator(".afoot.mini").is_visible() and [a.strip() for a in p0.locator(".afoot .fmini a").all_inner_texts()] == ["Kömək", "Əlaqə", "Məxfilik"],
+       "giriş ekranında footer qalır «Kömək · Əlaqə · Məxfilik»")
+    c0.close()
+    icmal(pg)
     if SHOT: pg.screenshot(path=SHOT + "/icmal_360_cedvelsiz.png", full_page=True)
 
     print("G · qrupsuz yeni müəllim")
