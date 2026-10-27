@@ -73,7 +73,7 @@ with sync_playwright() as pw:
     pg0.fill("#fname", "Fenn Test"); pg0.fill("#email", MAIL)
     pg0.fill("#pass", "pfparol123"); pg0.click("#btnAuth")
     pg0.wait_for_selector("#btnSetup", timeout=20000)
-    pg0.select_option("#atype", "tutor"); pg0.fill("#aname", "Fenn hesabi")
+    pg0.fill("#aname", "Fenn hesabi")
     pg0.click("#btnSetup"); pg0.wait_for_timeout(4500)
     uid = db("select id::text i from auth.users where email=%s", (MAIL,), one=True)["i"]
     acc = db("select id::text i from public.accounts where owner_id=%s::uuid", (uid,), one=True)["i"]

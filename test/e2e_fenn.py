@@ -60,7 +60,6 @@ with sync_playwright() as pw:
     ok(pg.locator("#setSubs [data-sub]").count() >= 2, "fenn nisanlari dolur",
        pg.locator("#setSubs [data-sub]").count())
     pg.locator("#setSubs [data-sub='riyaziyyat']").click()
-    pg.select_option("#atype", "tutor")
     pg.fill("#aname", "Fenn hesabi"); pg.click("#btnSetup")
     pg.wait_for_selector("#gForm", timeout=8000)
     r = db("select subjects from public.accounts", one=True)

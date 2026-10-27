@@ -152,7 +152,7 @@ with sync_playwright() as pw:
     mp.fill("#fname", "Sekil Muellim"); mp.fill("#email", "sekil@t.az")
     mp.fill("#pass", "sekilparol1"); mp.click("#btnAuth")
     mp.wait_for_selector("#btnSetup", timeout=20000)
-    mp.select_option("#atype", "tutor"); mp.fill("#aname", "Sekil hesabi")
+    mp.fill("#aname", "Sekil hesabi")
     mp.click("#btnSetup"); mp.wait_for_selector("#gForm", timeout=20000)
 
     #  Sual banki: hazir sual siyahida sekli ile gorunur

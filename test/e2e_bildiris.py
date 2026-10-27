@@ -67,7 +67,6 @@ with sync_playwright() as pw:
     pg.fill("#fname", "Bildiris Muellim"); pg.fill("#email", "bld@t.az")
     pg.fill("#pass", "parol1234"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=8000)
-    pg.select_option("#atype", "tutor")
     pg.fill("#aname", "Bildiris hesabi"); pg.click("#btnSetup")
     pg.wait_for_selector("#gForm", timeout=8000)
     UID = db("select id::text i from auth.users where email='bld@t.az'", one=True)["i"]

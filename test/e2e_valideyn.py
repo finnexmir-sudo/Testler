@@ -64,7 +64,7 @@ with sync_playwright() as pw:
     pg.fill("#fname", "Aygun Muellim"); pg.fill("#email", "v@t.az")
     pg.fill("#pass", "parol1234")
     pg.click("#btnAuth"); pg.wait_for_selector("#btnSetup", timeout=15000)
-    pg.select_option("#atype", "tutor"); pg.fill("#aname", "Riyaziyyat")
+    pg.fill("#aname", "Riyaziyyat")
     pg.click("#btnSetup"); pg.wait_for_selector("#btnGroup", timeout=15000)
 
     #  Qrup ve iki sagird - SQL ile, suite qisa qalsin

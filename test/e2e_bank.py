@@ -85,7 +85,7 @@ with sync_playwright() as pw:
     pg.click("#btnSwap")
     pg.fill("#fname", "Bank Muellim"); pg.fill("#email", "bank@t.az"); pg.fill("#pass", "parol1234")
     pg.click("#btnAuth"); pg.wait_for_selector("#btnSetup", timeout=8000)
-    pg.select_option("#atype", "tutor"); pg.fill("#aname", "Riyaziyyat")
+    pg.fill("#aname", "Riyaziyyat")
     pg.click("#btnSetup"); pg.wait_for_selector("#gForm", timeout=8000)
 
     print("A · Bank ekranı")
