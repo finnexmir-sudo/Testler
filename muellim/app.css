@@ -3267,7 +3267,7 @@ a.gkn.ylnk{color:inherit;text-decoration:none;min-height:44px}
 }
 #main.yh details.wkf:not([open]){display:none}
 /*  26.10: panelin footer-i bir kicik setirdir (iri tund footer yox)  */
-.afoot.mini{background:none;color:var(--fg-3);padding:18px 0 24px;margin-top:8px;border-top:1px solid #dfe8e4}
+.afoot.mini{background:none;color:var(--fg-3);padding:18px 0 24px;margin-top:8px;border-top:1px solid #D8C58F}
 .afoot.mini .in{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .afoot.mini .fmini{display:flex;align-items:center;gap:8px;font-size:13.5px}
 .afoot.mini .fmini a{color:var(--fg-2);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
