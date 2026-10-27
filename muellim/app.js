@@ -1024,6 +1024,9 @@
         '<p class="note" style="margin:4px 0 0">Qrup, şagird kodu, tapşırıq, hesabat — ' +
           "addım-addım, ekran şəkilləri ilə. " +
           '<a href="../komek/#muellim" target="_blank" rel="noopener">Bələdçini aç →</a></p>' +
+        //  27.10: panelin footer-i (Kömək · Əlaqə · Məxfilik) daxil olmus muellimde yoxdur - Kömək (Bələdçi) ve
+        //  Əlaqə («Bizə yazın») onsuz da menyuda ve burada var; Məxfilik yalniz footer-de idi, buraya kecdi
+        '<p class="note" style="margin:8px 0 0" id="meMex"><a href="../mexfilik/" target="_blank" rel="noopener">Məxfilik siyasəti →</a></p>' +
       "</div>");
     on("btnBack", "click", function () { goBack("#/"); });
     on("btnMeBank", "click", function () { nav("#/b"); });
