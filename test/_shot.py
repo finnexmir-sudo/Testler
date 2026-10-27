@@ -28,7 +28,7 @@ with sync_playwright() as pw:
     pg.click("#btnSwap"); pg.fill("#fname","Samir Hüseynov"); pg.fill("#email","sam@t.az")
     pg.fill("#pass","parol1234"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup",timeout=15000)
-    pg.select_option("#atype","tutor"); pg.fill("#aname","Samir müəllim")
+    pg.fill("#aname","Samir müəllim")
     pg.click("#btnSetup"); pg.wait_for_selector("#gForm",timeout=20000)
     acc=db("select a.id, a.owner_id from public.accounts a join auth.users u"
            " on u.id=a.owner_id where u.email='sam@t.az'",one=True)

@@ -22,7 +22,7 @@ with sync_playwright() as pw:
     p = page(1280, 800, 1)
     p.goto(PANEL); p.wait_for_selector("#btnAuth", timeout=15000); p.click("#btnSwap")
     p.fill("#fname", "Sevinc Əliyeva"); p.fill("#email", EMAIL); p.fill("#pass", "parol1234"); p.click("#btnAuth")
-    p.wait_for_selector("#btnSetup", timeout=15000); p.select_option("#atype", "tutor"); p.fill("#aname", "Sevinc müəllim"); p.click("#btnSetup")
+    p.wait_for_selector("#btnSetup", timeout=15000); p.fill("#aname", "Sevinc müəllim"); p.click("#btnSetup")
     p.wait_for_selector("#btnGroup", timeout=15000); p.wait_for_timeout(900)
     p.screenshot(path=OUT + "/onb1_d.png", full_page=True); print("onb1_d")
     p.fill("#gname", "7-ci sinif"); p.select_option("#glevel", "7"); p.click("#btnGroup")

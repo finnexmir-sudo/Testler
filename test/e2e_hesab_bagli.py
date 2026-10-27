@@ -77,7 +77,7 @@ with sync_playwright() as pw:
     pg.fill("#fname", "Bagli Muellim"); pg.fill("#email", EMAIL)
     pg.fill("#pass", "parol1234"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=15000)
-    pg.select_option("#atype", "tutor"); pg.fill("#aname", "Bagli hesabi"); pg.click("#btnSetup")
+    pg.fill("#aname", "Bagli hesabi"); pg.click("#btnSetup")
     pg.wait_for_selector("#adminMsg", state="attached", timeout=30000)
     acc = db("select a.id::text i, a.owner_id::text o from public.accounts a limit 1", one=True)
     lev = db("select l.id::text i from public.levels l join public.programs p on p.id = l.program_id where p.slug='ibtidai' and l.code='3'", one=True)["i"]

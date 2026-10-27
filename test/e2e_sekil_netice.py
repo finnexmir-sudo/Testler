@@ -84,7 +84,7 @@ with sync_playwright() as pw:
     pg.goto(PANEL); pg.wait_for_selector("#btnAuth", timeout=20000); pg.click("#btnSwap")
     pg.fill("#fname", "Sekil Muellim"); pg.fill("#email", "sekilnetice@t.az"); pg.fill("#pass", "sekilparol1"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=20000)
-    pg.select_option("#atype", "tutor"); pg.fill("#aname", "Sekil hesabi"); pg.click("#btnSetup")
+    pg.fill("#aname", "Sekil hesabi"); pg.click("#btnSetup")
     pg.wait_for_selector("#adminMsg", state="attached", timeout=30000)
     acc = db("select a.id::text i, a.owner_id::text o from public.accounts a limit 1", one=True)
     db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)

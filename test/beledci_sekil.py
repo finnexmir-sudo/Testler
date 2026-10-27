@@ -77,7 +77,7 @@ with sync_playwright() as p:
     t.click("#btnSwap"); t.fill("#fname", "Leyla Məmmədova"); t.fill("#email", "leyla%d@numune.az" % int(time.time()))
     t.fill("#pass", "parol1234"); t.click("#btnAuth")
     t.wait_for_selector("#btnSetup", timeout=15000)
-    t.select_option("#atype", "tutor"); t.fill("#aname", "Leyla müəllim — riyaziyyat")
+    t.fill("#aname", "Leyla müəllim — riyaziyyat")
     shot(t, "m2_hesab")
     t.set_viewport_size({"width": 430, "height": 1150})
     t.click("#btnSetup"); t.wait_for_selector("#btnGroup", timeout=15000)

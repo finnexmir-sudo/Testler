@@ -64,7 +64,7 @@ with sync_playwright() as pw:
     pg.fill("#fname", "Dəftər Müəllim"); pg.fill("#email", EMAIL)
     pg.fill("#pass", "parol1234"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=15000)
-    pg.select_option("#atype", "tutor"); pg.fill("#aname", "Dəftər hesabı"); pg.click("#btnSetup")
+    pg.fill("#aname", "Dəftər hesabı"); pg.click("#btnSetup")
     pg.wait_for_selector("#btnGroup", timeout=15000)
     pg.fill("#gname", "5-ci sinif"); pg.click("#btnGroup")
     pg.wait_for_selector("#groups .gcard", timeout=15000)

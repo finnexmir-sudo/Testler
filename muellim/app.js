@@ -536,13 +536,10 @@
     show(
       '<div class="card" style="margin-top:22px">' +
         "<h1>Hesabı quraşdırın</h1>" +
-        '<p class="note">Necə işlədiyinizi seçin. Sonradan dəyişmək olar.</p>' +
+        //  27.10 (istifadeci): «Repetitor / Məktəb müəllimi» secimi cixdi - «sonunda muellimdir», menasi yoxdur.
+        //  Yeni hesab hemise 'tutor' tipindedir (hediyye «Şagird başına»); kohne 'school' hesablari oldugu kimi qalir.
+        '<p class="note">Hesabın adını yazın, istəsəniz fənlərinizi seçin.</p>' +
         '<div id="setupErr"></div>' +
-        '<label for="atype">Hesab tipi</label>' +
-        '<select id="atype">' +
-          '<option value="tutor">Repetitor — öz qruplarım</option>' +
-          '<option value="school">Məktəb müəllimi — sinif</option>' +
-        "</select>" +
         '<label for="aname">Hesabın adı</label>' +
         '<input id="aname" placeholder="məsələn: Leyla müəllim — riyaziyyat">' +
         "<label>Tədris etdiyiniz fənlər (istəyə görə)</label>" +
@@ -562,7 +559,7 @@
         return;
       }
       setBusy("btnSetup", true, "Davam et");
-      sb.rpc("rpc_create_account", { p_type: $("atype").value, p_name: name })
+      sb.rpc("rpc_create_account", { p_type: "tutor", p_name: name })
         .then(function (r) {
           //  fenn secimi konu deyil - alinmasa da hesab yaranib
           var subs = chipVals("setSubs");

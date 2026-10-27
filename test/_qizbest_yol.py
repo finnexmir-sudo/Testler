@@ -67,7 +67,7 @@ with sync_playwright() as pw:
     pg.fill("#fname", "Qızbəst sınaq"); pg.fill("#email", MAIL)
     pg.fill("#pass", "yolparol123"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=20000)
-    pg.select_option("#atype", "tutor"); pg.fill("#aname", "Qızbəst müəllim-riyaziyyat")
+    pg.fill("#aname", "Qızbəst müəllim-riyaziyyat")
     pg.click("#btnSetup"); pg.wait_for_selector("#gForm", timeout=20000)
     pg.screenshot(path=OUT + "/01_ilk_ekran.png", full_page=True)
     print("   ilk ekran cekildi")

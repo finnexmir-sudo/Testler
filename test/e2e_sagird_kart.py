@@ -91,7 +91,7 @@ with sync_playwright() as pw:
     p0.goto(PANEL); p0.wait_for_timeout(600); p0.click("#btnSwap")
     p0.fill("#fname", "Kart Muellim"); p0.fill("#email", MAIL); p0.fill("#pass", "skparol123"); p0.click("#btnAuth")
     p0.wait_for_selector("#btnSetup", timeout=20000)
-    p0.select_option("#atype", "tutor"); p0.fill("#aname", "Kart hesabi"); p0.click("#btnSetup"); p0.wait_for_timeout(4500)
+    p0.fill("#aname", "Kart hesabi"); p0.click("#btnSetup"); p0.wait_for_timeout(4500)
     uid = db("select id::text i from auth.users where email=%s", (MAIL,), one=True)["i"]
     acc = db("select id::text i from public.accounts where owner_id=%s::uuid", (uid,), one=True)["i"]
     db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)

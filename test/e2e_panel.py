@@ -216,7 +216,6 @@ with sync_playwright() as pw:
     ok(pg.locator("#mailBar").count() == 0, "«Sonra» zolagi gizledir")
     ok(True, "qeydiyyatdan sonra quraşdirma ekrani acilir")
 
-    pg.select_option("#atype", "tutor")
     pg.fill("#aname", "Leyla muellim - riyaziyyat")
     pg.click("#btnSetup")
     pg.wait_for_selector("#btnGroup", timeout=8000)
@@ -653,7 +652,6 @@ with sync_playwright() as pw:
     pg2.evaluate("localStorage.clear()")
     signup(pg2, "ozge@test.az", "Ozge Muellim")
     pg2.wait_for_selector("#btnSetup", timeout=8000)
-    pg2.select_option("#atype", "school")
     pg2.fill("#aname", "Ozge - 4B sinfi")
     pg2.click("#btnSetup")
     pg2.wait_for_selector("#btnGroup", timeout=8000)

@@ -60,7 +60,7 @@ with sync_playwright() as pw:
     pg.fill("#fname", "Parol Muellim"); pg.fill("#email", "pr@t.az")
     pg.fill("#pass", "kohneparol1"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=8000)
-    pg.select_option("#atype", "tutor"); pg.fill("#aname", "Parol hesabi")
+    pg.fill("#aname", "Parol hesabi")
     pg.click("#btnSetup"); pg.wait_for_selector("#gForm", timeout=8000)
     pg.click("#btnOut")
     pg.wait_for_selector("#btnAuth", timeout=8000)

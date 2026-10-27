@@ -124,7 +124,7 @@ with sync_playwright() as pw:
     pg.fill("#fname", "Kod Muellim"); pg.fill("#email", "kod@t.az")
     pg.fill("#pass", "kodparol123"); pg.click("#btnAuth")
     pg.wait_for_selector("#btnSetup", timeout=20000)
-    pg.select_option("#atype", "tutor"); pg.fill("#aname", "Kod hesabi")
+    pg.fill("#aname", "Kod hesabi")
     pg.click("#btnSetup"); pg.wait_for_timeout(4500)   # yeni gorunusde #gForm ana sehifede yoxdur
 
     uid = db("select id::text i from auth.users where email='kod@t.az'", one=True)["i"]

@@ -35,7 +35,7 @@ with sync_playwright() as p:
     t.goto(PANEL); t.wait_for_selector("#btnAuth", timeout=15000)
     t.click("#btnSwap"); t.fill("#fname", "Sil Müəllim"); t.fill("#email", "sil%d@t.az" % int(time.time()))
     t.fill("#pass", "parol1234"); t.click("#btnAuth"); t.wait_for_selector("#btnSetup", timeout=15000)
-    t.select_option("#atype", "tutor"); t.fill("#aname", "Sil hesabı"); t.click("#btnSetup")
+    t.fill("#aname", "Sil hesabı"); t.click("#btnSetup")
     t.wait_for_selector("#btnGroup", timeout=15000)
     t.fill("#gname", "3-cü sinif"); t.select_option("#glevel", "3"); t.click("#btnGroup")
     t.wait_for_selector("#groups .gcard", timeout=15000)
