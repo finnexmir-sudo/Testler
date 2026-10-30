@@ -114,7 +114,8 @@ with sync_playwright() as pw:
     st = pg.inner_text(".styl").replace("\n", " ")
     #  «Əmin idi» -> «Bildiyini sanır»: tək sözlə anlaşılmırdı, sual
     #  yarandı.  Kartda və səhv siyahısındakı nişanda ad EYNİDİR.
-    ok("Tələsik səhv" in st and "Bildiyini sanır" in st, "kart var", st[:60])
+    #  30.10 (audit): «Bildiyini sanır» -> «Əmin olub səhv cavablayıb» (ne oldugu deqiq deyilir)
+    ok("Tələsik səhv" in st and "Əmin olub səhv cavablayıb" in st, "kart var", st[:60])
     nums = [int(b.inner_text()) for b in pg.locator(".styl .srow > b").all()]
     ok(nums == [NQ, 0, NQ - 1], "saylar: telesik=NQ, bilmeden duz=0, emin idi=NQ-1", nums)
     pg.click("#sTabs [data-v='s']")

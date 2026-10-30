@@ -195,7 +195,7 @@ with sync_playwright() as pw:
     ok(clip.startswith("Salam! ") and "ev tapşırığı gözləyir: «12-ci paraqrafı oxu»" in clip, "mesaj etməyənlər səhifəsi ilə EYNİ mətn", clip.replace("\n", " | ")[:100])
     #  26.10: Xulasede BIR tovsiye («Növbəti addım»); sehvlerden tekrar - Sehvler sekmesinde (#btnFix)
     tv = pg.inner_text("#stuTov")
-    ok("Növbəti addım" in tv and "mövzusunu təkrar edin" in tv and "Son nəticə:" in tv, "zəif mövzu «Növbəti addım» kartındadır", tv[:80].replace("\n", " "))
+    ok("Növbəti addım" in tv and "mövzusunu təkrar edin" in tv and "Mövzu üzrə nəticə:" in tv, "zəif mövzu «Növbəti addım» kartındadır", tv[:80].replace("\n", " "))
     ok(pg.locator("#vdF").count() == 0, "Xülasədə ikinci tövsiyə (səhvlərdən) yoxdur")
     ok(pg.locator("#vdT").count() == 0 and pg.locator("#vdS").count() == 0, "«Mövzular» / «Səhvlər» düymələri YOXDUR (sekmələr yuxarıdadır)")
     pg.locator("#sTabs [data-v='s']").click(); pg.wait_for_timeout(300)
