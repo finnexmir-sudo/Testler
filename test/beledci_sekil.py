@@ -23,7 +23,7 @@ DSN = "host=/tmp port=55432 user=postgres dbname=panel_e2e"
 BASE = "http://127.0.0.1:8010/"
 PANEL, STUDENT, PARENT = BASE + "muellim/index.html", BASE + "sagird/index.html", BASE + "valideyn/index.html"
 CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
-OUT = "/home/user/testler/komek/img"
+OUT = os.environ.get("OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "komek", "img")
 os.makedirs(OUT, exist_ok=True)
 CFG = """window.CFG = {
   SUPABASE_URL: "http://127.0.0.1:54321",
@@ -56,6 +56,18 @@ def page(ctx, w, h):
 
 ONLY = {x for x in os.environ.get("ONLY", "").split(",") if x}
 
+def el(pg, sel, name):
+    """Tek kartin sekli: sabit ust zolaq ve alt menyu (.top, .bnav) karta dusmesin."""
+    if ONLY and name not in ONLY:
+        return
+    pg.evaluate("document.querySelectorAll('.top,.bnav').forEach(e => e.style.visibility = 'hidden')")
+    pg.locator(sel).scroll_into_view_if_needed(); pg.wait_for_timeout(300)
+    #  kartin kenarinda 10 px bosluq - basliq (meselen «Diaqnostika») kenara yapismasin
+    b = pg.evaluate("""s => { const r = document.querySelector(s).getBoundingClientRect();
+        return {x: Math.max(0, r.left - 10), y: r.top + window.scrollY - 10, width: Math.min(innerWidth, r.width + 20), height: r.height + 20}; }""", sel)
+    pg.screenshot(path=f"{OUT}/{name}.png", full_page=True, clip=b); print("  ", name)
+    pg.evaluate("document.querySelectorAll('.top,.bnav').forEach(e => e.style.visibility = '')")
+
 def shot(pg, name, full=False):
     if ONLY and name not in ONLY:
         return
@@ -68,48 +80,65 @@ with sync_playwright() as p:
     br = p.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
     ctx = br.new_context(permissions=["clipboard-read", "clipboard-write"])
 
-    # ---------------- MUELLIM (430x900 - telefon, panel testleri ile eyni)
-    t = page(ctx, 430, 1150)
-    # giris ve hesab ekrani qisadir - hundur pencerede alt bos qalir
-    t.set_viewport_size({"width": 430, "height": 760})
+    # ---------------- MUELLIM (430 en - telefon).  30.10: yeni panel - qeydiyyat → bos Icmal →
+    # «İlk qrupunu yarat» → qrup acilir («İlk nəticəyə 4 addım») → sagirdler → kodlar → Test yig →
+    # vereq → «Testi ver».  Beledcideki addimlar bu sira ile gedir.
+    t = page(ctx, 430, 760)
+    #  «E-poçtunuz təsdiqlənməyib» zolagi (mock poct gondermir) her sekle dusurdu - «Sonra» basilmis kimi
+    t.add_init_script("try { sessionStorage.setItem('bil10_mailbar', '1'); } catch (e) {}")
     t.goto(PANEL); t.wait_for_selector("#btnAuth", timeout=15000)
     shot(t, "m1_giris")
     t.click("#btnSwap"); t.fill("#fname", "Leyla Məmmədova"); t.fill("#email", "leyla%d@numune.az" % int(time.time()))
     t.fill("#pass", "parol1234"); t.click("#btnAuth")
     t.wait_for_selector("#btnSetup", timeout=15000)
     t.fill("#aname", "Leyla müəllim — riyaziyyat")
+    t.wait_for_selector("#setSubs [data-sub='riyaziyyat']", timeout=15000)
+    t.click("#setSubs [data-sub='riyaziyyat']")
     shot(t, "m2_hesab")
-    t.set_viewport_size({"width": 430, "height": 1150})
-    t.click("#btnSetup"); t.wait_for_selector("#btnGroup", timeout=15000)
+    t.set_viewport_size({"width": 430, "height": 900})
+    t.click("#btnSetup"); t.wait_for_selector("#yFirstG", timeout=15000); t.wait_for_timeout(600)
+
+    t.click("#yFirstG"); t.wait_for_selector("#btnGroup", timeout=15000)
     t.fill("#gname", "3-cü sinif — şənbə qrupu"); t.select_option("#glevel", "3")
-    t.click("#btnGroup"); t.wait_for_selector("#groups .gcard", timeout=15000)
-    t.wait_for_timeout(500); shot(t, "m3_icmal")
-    t.click("#groups .gcard"); t.wait_for_selector("#gTabs", timeout=15000)
-    for nm in ("Aysu Məmmədova", "Kənan Əliyev", "Nigar Həsənova"):
-        try: t.wait_for_selector("#sname", state="visible", timeout=3000)   # 0 sagirdde forma ozu acilir
-        except Exception: t.click("#btnStuOpen")
-        t.fill("#sname", nm); t.click("#btnStu"); t.wait_for_timeout(700)
-    t.wait_for_selector(".stu", timeout=15000)
-    #  182: valideyn kodu sagird elave olunanda OZU yaranir
-    t.wait_for_selector(".stu .l3 .code", timeout=15000)
-    t.wait_for_timeout(400); shot(t, "m4_qrup_sagirdler")
+    t.click("#btnGroup"); t.wait_for_function("location.hash.indexOf('#/g/') === 0", timeout=15000)
+    t.wait_for_selector("#gkStart:not([hidden])", timeout=15000); t.wait_for_selector("#gFirstStu", timeout=15000)
+    t.wait_for_timeout(600); shot(t, "m3_qrup_yeni")
     gid = db("select id::text i from public.classes limit 1", one=True)["i"]
+    t.click("#gFirstStu"); t.wait_for_selector("#stuForm:not([hidden])", timeout=15000)
+    for nm in ("Aysu Məmmədova", "Kənan Əliyev", "Nigar Həsənova", "Murad Quliyev"):
+        t.fill("#sname", nm); t.click("#btnStu"); t.wait_for_timeout(1500)
+    t.goto(PANEL + "#/g/" + gid + "/s"); t.reload(); t.wait_for_selector("#stu a.ytr", timeout=15000); t.wait_for_timeout(600)
+
     code = db("select login_code c from public.students where full_name='Aysu Məmmədova'", one=True)["c"]
     pcode = db("select parent_code c from public.students where full_name='Aysu Məmmədova'", one=True)["c"]
-    # tapsiriq
-    t.click("#btnAsgs"); t.wait_for_selector("#fp", timeout=15000)
+    # «İlk nəticəyə 4 addım»: 1 ✓, 2-ci addimda kodlar ve «Mətni kopyala»
+    t.goto(PANEL + "#/g/" + gid); t.reload(); t.wait_for_selector("#gkStart .gkod", timeout=15000); t.wait_for_timeout(500)
+    el(t, "#gkStart", "m4_kodlar")
+    # 3-cu addim «Test yığ» → generator: Kimə = bu qrup, sinif qrupun sinfi
+    t.click("#gsGen"); t.wait_for_selector("#btnMake", timeout=15000)
+    t.wait_for_function("document.querySelector('#gLevs .chip.on') && document.getElementById('gAsg').value.length > 0", timeout=15000)
+    t.wait_for_timeout(800)
+    t.set_viewport_size({"width": 430, "height": 1150}); shot(t, "m8_test_yig"); t.set_viewport_size({"width": 430, "height": 900})
+    t.click("#btnMake"); t.wait_for_selector("#btnPAsg", timeout=30000); t.wait_for_timeout(600)
+    t.add_style_tag(content=".top,.bnav{display:none!important}")
+    if not ONLY or "m5_testi_ver" in ONLY:
+        # «Qrupa təyin et» basligindan «Testi ver» duymesine qeder (vereq uzundur)
+        box = t.evaluate("""() => { const a = document.getElementById('pAsgH').getBoundingClientRect(),
+            b = document.getElementById('btnPAsg').getBoundingClientRect();
+            return {x: 0, y: a.top + window.scrollY - 14, width: 430, height: b.bottom - a.top + 30}; }""")
+        t.screenshot(path=f"{OUT}/m5_testi_ver.png", full_page=True, clip=box); print("   m5_testi_ver")
+    t.click("#btnPAsg"); t.wait_for_selector(".pasgok", timeout=15000)
+    t.reload(); t.wait_for_timeout(800)
+    # hazir test: qrupun basligindaki «Tapşırıq ver» → «Test ver» (kohne forma, eyni ekran)
+    t.goto(PANEL + "#/a/" + gid + "/t"); t.reload(); t.wait_for_selector("#aList [data-t]", timeout=15000)
     t.wait_for_function("document.querySelectorAll('#aTest option').length > 0", timeout=15000)
     opts = t.locator("#aTest option").all_inner_texts()
     lbl = next(o for o in opts if "Vurma cədvəli" in o)
     t.click("#aList [data-t='" + t.evaluate("l => Array.from(document.querySelectorAll('#aTest option')).filter(o => o.textContent === l)[0].value", lbl) + "']")
     t.fill("#aDate", (datetime.date.today() + datetime.timedelta(days=7)).isoformat())
-    t.select_option("#aTry", "2")
-    shot(t, "m5_tapsiriq_ver")
-    t.click("#btnAsg"); t.wait_for_selector(".asg", timeout=15000)
-    shot(t, "m6_tapsiriq_siyahi")
-    # bank ve generator
-    t.goto(PANEL + "#/b"); t.wait_for_timeout(1800)
-    shot(t, "m7_bank")
+    t.select_option("#aTry", "2"); t.evaluate("document.activeElement && document.activeElement.blur()")
+
+    t.click("#btnAsg"); t.wait_for_timeout(1500)
     # sablon (parametrik) sual - redaktor, numune ile (db/132)
     t.goto(PANEL + "#/q/new"); t.wait_for_selector("#qbody", timeout=15000)
     t.fill("#qbody", "{a} + {b} neçə edər?")
@@ -119,7 +148,6 @@ with sync_playwright() as p:
     t.click("#qparTry"); t.wait_for_selector("#qparOut .qsample", timeout=15000)
     t.evaluate("document.querySelector('#qbody').scrollIntoView()")
     shot(t, "m13_sablon")
-    t.goto(PANEL + "#/gen"); t.wait_for_timeout(1200); shot(t, "m8_test_yig")
 
     # ---------------- SAGIRD (390x844)
     # 07_seed_tests-deki 'Genislendirilmis analiz testi' YERLI numunedir (is_free=false,
@@ -133,8 +161,8 @@ with sync_playwright() as p:
     # duzgun cavablarla bitir ki, netice guzel gorunsun (2 sehv buraxiriq)
     key = {r["q"]: r["o"] for r in db("""select q.id::text q, o.id::text o from public.questions q
         join public.question_options o on o.question_id=q.id and o.is_correct
-        join public.test_questions tq on tq.question_id=q.id join public.tests t on t.id=tq.test_id
-        where t.slug='riy-3-vurma-1'""")}
+        join public.test_questions tq on tq.question_id=q.id
+        where tq.test_id in (select test_id from public.assignments)""")}
     #  sekil: DUZ variant secili (ilk variant secilende "4 x 9 = 32" kimi
     #  sehv cavab secilmis gorunurdu - reklamda yanlis tesir)
     ids0 = s.locator(".opt").evaluate_all("els => els.map(e => e.getAttribute('data-o'))")
@@ -153,42 +181,32 @@ with sync_playwright() as p:
     s.wait_for_selector(".ring", timeout=15000); shot(s, "s4_netice", full=True)
     s.click("#btnHome"); s.wait_for_selector(".test", timeout=15000); shot(s, "s5_ev_ekrani", full=True)
     # movzu mesqi (db/133): ilk movzunu ac, bir sual - ekran
-    s.wait_for_selector("#adBox .arow", timeout=15000)
-    s.locator("#adBox .arow").first.click(); s.wait_for_selector(".adprog", timeout=15000)
-    shot(s, "s7_mesq")
-    s.click("#btnBack"); s.wait_for_selector(".test", timeout=15000)
+    #  30.10: mesq karti bu anda gorunmeye biler (abune hele yoxdur) - beledci sekli
+    #  ucun sert sert deyil, olmasa s7 kohne qalir
+    try:
+        s.wait_for_selector("#adBox .arow", timeout=6000)
+        s.locator("#adBox .arow").first.click(); s.wait_for_selector(".adprog", timeout=15000)
+        shot(s, "s7_mesq")
+        s.click("#btnBack"); s.wait_for_selector(".test", timeout=15000)
+    except Exception:
+        print("   (s7_mesq cekilmedi - movzu mesqi karti yoxdur)")
 
-    # ---------------- MUELLIM: hesabat
-    t.goto(PANEL + "#/r/" + gid); t.wait_for_timeout(1500); shot(t, "m9_hesabat")
-
-    # ---------------- MUELLIM: Icmal bolmeleri (tehluke zonasi, son
-    # neticeler, liderler).  Liderler ucun sagird basina 3+ cehd lazimdir
-    # ("en azi 3 test" qaydasi) - onlari burada yaradiriq.
-    if not ONLY or "m15_icmal" in ONLY:
-        db("""insert into public.attempts (student_id, test_id, status, percent, finished_at)
-              select s.id, (select id from public.tests order by created_at limit 1),
-                     'submitted',
-                     --  62..95 arasi: faiz 100-u asmasin (beledci sekli)
-                     62 + ((row_number() over (order by s.full_name) * 7 + g * 11) %% 34),
-                     now() - (g || ' days')::interval
-                from public.students s cross join generate_series(1, 3) g
-               where s.is_active""")
-        t.goto(PANEL + "#/"); t.reload()
-        t.wait_for_selector("#hTop5 .lrow", timeout=20000); t.wait_for_timeout(900)
-        #  alt menyu (.bnav) fixed-dir ve element sekline dusur -
-        #  sekil ucun muveqqeti gizledilir
-        t.evaluate("document.body.classList.remove('bnav-on')")
-        t.wait_for_timeout(300)
-        t.locator("#hTop5").screenshot(path=f"{OUT}/m15_icmal.png"); print("   m15_icmal")
-        t.evaluate("document.body.classList.add('bnav-on')")
+    # ---------------- MUELLIM: hesabat (qrupun «Hesabat» sekmesi)
+    t.goto(PANEL + "#/r/" + gid); t.reload(); t.wait_for_selector(".rstat", timeout=15000); t.wait_for_timeout(1500)
+    shot(t, "m9_hesabat")
+    # sagird profili: Xulase - dovr cedveli, «Növbəti addım», son testler
+    sid = db("select id::text i from public.students where full_name='Aysu Məmmədova'", one=True)["i"]
+    t.goto(PANEL + "#/s/" + sid + "/" + gid); t.reload(); t.wait_for_selector("#stuSt", timeout=15000); t.wait_for_timeout(1200)
+    shot(t, "m16_profil")
 
     # ---------------- DIAQNOSTIKA: muellim abune ile yaradir, sagird yazir
     # (xerite ucun 3 reng lazimdir: 1-ci fesil 0/3 zeif, 3-cu 1/3 zeif, 5-ci 2/3 orta, qalani yaxsi)
     db("""insert into public.subscriptions (account_id, plan_id, status, current_period_end)
           select a.id, p.id, 'active', now() + interval '30 days'
             from public.accounts a, public.plans p where p.slug = 'repetitor-25'""")
-    sid = db("select id::text i from public.students where full_name='Aysu Məmmədova'", one=True)["i"]
-    t.goto(PANEL + "#/s/" + sid + "/" + gid); t.wait_for_selector("#dgGo", timeout=15000)
+    t.goto(PANEL + "#/s/" + sid + "/" + gid); t.reload(); t.wait_for_selector("#sTabs", timeout=15000)
+    t.click("#sTabs [data-v='m']"); t.wait_for_selector("#dgGo", state="attached", timeout=15000)
+    t.evaluate("document.querySelectorAll('details.dgmore').forEach(d => d.open = true)")
     t.select_option("#dgSub", "riyaziyyat"); t.click("#dgGo")
     t.wait_for_selector("#diagBox:has-text('Gözlənilir')", timeout=20000)
     dt = db("select id::text i from public.tests where is_diagnostic order by created_at desc limit 1", one=True)["i"]
@@ -223,42 +241,38 @@ with sync_playwright() as p:
             const c = h.nextElementSibling.nextElementSibling; const a = h.getBoundingClientRect(), b = c.getBoundingClientRect();
             return {x: 0, y: a.top + window.scrollY - 12, width: 390, height: b.bottom - a.top + 24}; }""")
         s.wait_for_timeout(350); s.screenshot(path=f"{OUT}/s6_diaqnostika.png", full_page=True, clip=box); print("   s6_diaqnostika")
-    t.reload(); t.wait_for_selector("#dgMap", timeout=15000)
-    # element sekli uzun kart uzre suruslur - sabit ust zolaq ve alt menyu araya dusmesin deye gizledilir
-    t.add_style_tag(content=".top,.bnav{display:none!important}")
-    t.evaluate("document.getElementById('diagBox').scrollIntoView()"); t.wait_for_timeout(350)
-    if not ONLY or "m10_diaqnostika" in ONLY:
-        t.locator("#diagBox").screenshot(path=f"{OUT}/m10_diaqnostika.png"); print("   m10_diaqnostika")
+    t.reload(); t.wait_for_selector("#sTabs", timeout=15000)
+    t.click("#sTabs [data-v='m']"); t.wait_for_selector("#dgMap", timeout=15000)
+    el(t, "#diagBox", "m10_diaqnostika")
 
     # ---------------- «BU GUNUN DERSI»: plan qurulur, bir movzu kecilir, kart cekilir
     lev = db("select l.code c from public.classes c join public.levels l on l.id=c.level_id limit 1", one=True)["c"]
-    t.goto(PANEL + "#/g/" + gid); t.wait_for_selector("#gTabs", timeout=15000)
-    t.click("#gTabs [data-v='p']"); t.wait_for_selector("#btnPlOpen", timeout=15000); t.click("#btnPlOpen")
-    t.wait_for_function("document.querySelectorAll('#plSub option').length > 1", timeout=15000)
+    t.goto(PANEL + "#/g/" + gid + "/p"); t.reload(); t.wait_for_selector("#btnPlOpen", timeout=15000); t.click("#btnPlOpen")
+    t.wait_for_function("document.querySelector('#plSub option[value=riyaziyyat]')", timeout=15000)
     t.select_option("#plSub", "riyaziyyat"); t.select_option("#plLev", lev); t.click("#btnPlMk")
     t.wait_for_selector(".plcur [data-pldone]", timeout=15000)
-    t.locator("[data-pldone]").first.click(); t.wait_for_selector(".ploffer", timeout=15000)
-    t.wait_for_function("document.querySelector('#prep .prep') && document.querySelector('#prep .prep').textContent.indexOf('Son keçilən') >= 0", timeout=15000)
-    t.evaluate("document.getElementById('prep').scrollIntoView()"); t.wait_for_timeout(400)
-    if not ONLY or "m11_bu_gun" in ONLY:
-        t.locator("#prep .prep").screenshot(path=f"{OUT}/m11_bu_gun.png"); print("   m11_bu_gun")
+    t.locator("[data-pldone]").first.click(); t.wait_for_timeout(2500)
+    print("   plan: kecilen ders", db("select count(*) n from public.class_plan_items where done_at is not null", one=True)["n"])
+    # qrupun «İcmal» sekmesi: «Bugünkü dərs» karti (planda novbeti ders, Davamiyyət, 5 suallıq test)
+    t.goto(PANEL + "#/g/" + gid); t.reload(); t.wait_for_selector("#gkDers .gkt", timeout=15000); t.wait_for_timeout(600)
+    el(t, "#gkDers", "m11_bu_gun")
     # ders paketi (db/135): ilk movzunun isinmesi yigilib, cedvel
     pkid = db("select id::text i from public.class_plans limit 1", one=True)["i"]
     t.goto(PANEL + "#/pk/" + pkid); t.wait_for_selector(".pktab", timeout=15000)
-    t.locator(".pkr").first.locator("[data-pkwarm]").click(); t.wait_for_selector("#pkMsg .ok", timeout=25000)
+    t.wait_for_timeout(1200)
     shot(t, "m14_paket")
 
     # ---------------- DEFTER: cedvel + bu gun ders oldu, biri gelmeyib, biri odeyib
     #  177: «Dəftər» sekmesinin basinda artiq CEDVEL setri var.  Sekilde
     #  qurulmus halda gorunsun - «qurulmayıb» yazan bos setir beledciye
     #  hec ne oyretmir.
-    t.goto(PANEL + "#/g/" + gid); t.wait_for_selector("#gTabs", timeout=15000)
-    t.click("#gTabs [data-v='d']"); t.wait_for_selector("#schFold", timeout=15000)
+    t.goto(PANEL + "#/g/" + gid + "/d"); t.reload(); t.wait_for_selector("#schFold", timeout=15000)
     t.eval_on_selector("#schFold", "e => e.open = true"); t.wait_for_timeout(300)
-    t.locator("#schDays [data-w='3']").click(); t.wait_for_timeout(200)
-    t.select_option("#schTimes [data-t='3']", "16:00")
-    t.locator("#schDays [data-w='6']").click(); t.wait_for_timeout(200)
-    t.select_option("#schTimes [data-t='6']", "11:00")
+    #  gunlerden biri BU GUNdur (Baki) - Icmalda «Bugünkü dərslər» setri gorunsun
+    bugun = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=4)).isoweekday()
+    for w, saat in ((bugun, "16:00"), (6 if bugun != 6 else 3, "11:00")):
+        t.locator("#schDays [data-w='%d']" % w).click(); t.wait_for_timeout(200)
+        t.select_option("#schTimes [data-t='%d']" % w, saat)
     t.click("#schSave"); t.wait_for_timeout(1500)
     t.eval_on_selector("#schFold", "e => e.open = false"); t.wait_for_timeout(200)
     t.wait_for_selector("#ledOpen", timeout=15000); t.click("#ledOpen")
@@ -266,8 +280,15 @@ with sync_playwright() as p:
     t.locator("#ledChips [data-st]").nth(2).click(); t.click("#ledSave")
     t.wait_for_selector("#ledEdit", timeout=15000)
     t.locator("[data-pay]").first.click(); t.wait_for_selector(".pay.on", timeout=15000); t.wait_for_timeout(400)
-    if not ONLY or "m12_defter" in ONLY:
-        t.locator("#ledgerBox").screenshot(path=f"{OUT}/m12_defter.png"); print("   m12_defter")
+    el(t, "#ledgerBox", "m12_defter")
+
+    # ---------------- ICMAL (ana ekran): Bugünkü dərslər · Qruplarım · Siqnallar
+    db("update public.students set created_at = now() - interval '20 days'")
+    t.goto(PANEL + "#/"); t.reload(); t.wait_for_selector("#yMenu .ytr", timeout=15000); t.wait_for_timeout(1500)
+    shot(t, "m3_icmal", full=True)
+    # Siqnallar → «Son 7 gündə test işləməyənlər», her setirde «Xatırlat»
+    t.goto(PANEL + "#/sus"); t.reload(); t.wait_for_selector("#suBox .surow", timeout=15000); t.wait_for_timeout(600)
+    shot(t, "m15_xatirlat")
 
     # ---------------- VALIDEYN (390x844)
     v = page(ctx, 390, 844)
