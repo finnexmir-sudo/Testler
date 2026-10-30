@@ -117,7 +117,7 @@ with sync_playwright() as pw:
 
     print("B · Növbəti addım")
     tv = norm(pg.inner_text("#stuTov"))
-    mT = re.search(r"Növbəti addım (.+?) mövzusunu təkrar edin\. Son nəticə: (\d+)%", tv)
+    mT = re.search(r"Növbəti addım (.+?) mövzusunu təkrar edin\. Mövzu üzrə nəticə: (\d+)%", tv)
     ok(mT is not None and "Yalnız " + FN + " üçün" in tv, "mövzu, faiz və «Yalnız %s üçün»" % FN, tv[:120])
     ok(pg.locator("#stuTov .sxsehv, #tab-x #vdF").count() == 0, "Xülasədə bir tövsiyə (səhv dəftəri Səhvlərdə)")
     pg.locator("#sTabs [data-v='m']").click(); pg.wait_for_timeout(500)

@@ -140,6 +140,18 @@ Növbəti (istifadəçi maketi): dizayn.md cədvəlindəki qalan səhifələr (T
 | TY5 | **İstifadəçi qeydləri (26.10):** (1) sinif seçilmədən test yığılmır — «Əvvəl sinfi seçin», «Suallara bax» bağlı; konkret mövzu seçilibsə (hesabatdan, şagirddən) sinif tələb olunmur; Kimə-də qrup seçiləndə onun sinfi özü seçilir; çoxsinifli seçim qalır. (2) Vərəqdə ardıcıllıq: başlıq → mesaj → **Suallar** (yeni yığılmış testdə AÇIQ; köhnə test açılanda 08.10 qaydası ilə bağlı) → Kimə / Qrup / Son tarix / Cəhd → «Testi ver»; ekran yuxarıdan başlayır (əvvəl formaya sürüşürdü); yuxarıdakı «Qrupa ver» (sürüşmə) düyməsi çıxdı. (3) Çap / PDF, Adı dəyiş, Yenidən yığ, vaxt limiti, Sil — «Digər əməliyyatlar» altında, bağlı. (4) Son tarix sahədə «2 noyabr 2026, bazar ertəsi» kimi yazılır (brauzerin «11/02/2026» yazısı gizlidir, basanda eyni seçici açılır); təsdiqdə və «verilib» sətrində də tam tarix | `e2e_test_yig` A2, E; `e2e_test_duymeleri` (yeni düzülüş); `e2e_ders_qapisi`, `e2e_kesr`, `e2e_kod_setirleri`, `e2e_sekil_netice`, `e2e_sira0` — «Digər əməliyyatlar» açılır | bəli, `main` v=821 |
 | TY4 | Tövsiyə («Son keçilən mövzudan hazırla») formanın ALTINDADIR və formanı DOLDURUR — özü test yığmır; üstdə «Forma dolduruldu — …» qeydi | `e2e_test_yig` D | bəli, `main` v=821 |
 
+## Başlanğıc yolu — 30.10 audit (GPT, istifadəçi «başla»)
+
+| # | Nə dəyişdi | Necə yoxlandı | Canlıda? |
+|---|---|---|---|
+| BY1 | **Qrup yaranan kimi İÇİ açılır** (əvvəl siyahıda qalırdı). Boş qrupda başlıqdakı əsas düymə **«İlk şagirdi əlavə et»** (Şagirdlər, forma açıq, ad sahəsi fokusda); şagird olanda yenə «Tapşırıq ver» | `e2e_baslangic` A, B, C | yox |
+| BY2 | Qrupun İcmalında **«İlk nəticəyə 4 addım»**: Şagird əlavə edin → Giriş kodunu göndərin (girməyən şagirdlərin kodu + «Mətni kopyala», ən çox 6, qalanı Şagirdlər bölməsində) → İlk testi verin («Test yığ»: Kimə = bu qrup, sinif qrupun sinfi) → Nəticəyə baxın. İlk nəticə gələn kimi kart yoxdur. Dərs planı tələb olunmur («Dərs planını sonra da qura bilərsiniz»). Mənbə `rpc_class_students` (Şagirdlər siyahısı ilə eyni) | `e2e_baslangic` A–E, H | yox |
+| BY3 | Boş hesabatda «0% orta» yox — **«— hələ nəticə yoxdur»** (məlumatın olmaması sıfır nəticə deyil) | `e2e_baslangic` F | yox |
+| BY4 | «Səssiz şagirdlər» → **«Son 7 gündə test işləməyənlər»** (Siqnallar sətri ilə eyni ad); hər sətirdə **«Xatırlat»** — girməyənə kod mətni, girənə xatırlatma (ailənin oxuyacağı dildə, digər xatırlatmalar kimi); göndərməyi müəllim özü edir | `e2e_baslangic` G | yox |
+| BY5 | Adlar: «Öyrənmə tərzi» → «Cavab xüsusiyyətləri»; «Bildiyini sanır» → «Əmin olub səhv cavablayıb» (səhv sətrində «əmin olub səhv»); profildə «Son nəticə» → «Mövzu üzrə nəticə». Xırda: «0 / ∞» → «0 · limitsiz»; «3-ci / 4-cü rüb» qrammatikası; ana səhifədə «Köçürmək və nəticəni dəyişmək mümkün deyil» → «Doğru cavab şagirdin cihazına getmir: cavabları server yoxlayır və balı özü hesablayır» | `e2e_sagird_xulase`, `e2e_sagird_hesabat`, `e2e_inam` (mətn) | yox |
+
+Qalan (audit planı): Bələdçi yeni ekranlarla (2-ci addım); başlanğıc hunisi SQL-i (canlıda istifadəçi işlədir); şəkil yükləmə — müəllim sınağından sonra.
+
 ## Sıra 1–5 — gözləyir
 
 1. **Testin düzgünlüyü** — 0.1, 0.2, 0.4 bağlandı (yuxarı). Qalan: tək pis sualı əvəz etmək (vərəqdə).

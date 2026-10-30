@@ -3526,3 +3526,35 @@ details.pmore[open]{padding-bottom:14px}
     Məxfilik Profildedir.  Giris / qeydiyyat ekranlarinda (bnav-on yoxdur) footer qalir.  */
 body.bnav-on .afoot.mini{display:none}
 @media (min-width:601px){ body.bnav-on #main{padding-bottom:32px} }
+
+/* ---------------------------------------------- İlk nəticəyə 4 addım (30.10, audit)
+   Yeni qrupun Icmalinda: şagird -> kod -> test -> nəticə.  Ilk netice gelen kimi yoxdur.  */
+#main.gpg .gstart{border-color:#bfe0d4;background:#f7fcfa}
+#main.gpg .gstart .ykh .muted{font-size:13.5px}
+#main.gpg .gsteps{list-style:none;margin:4px 0 0;padding:0}
+#main.gpg .gstep{display:flex;gap:12px;padding:12px 0;border-top:1px solid #e3ebe7}
+#main.gpg .gstep:first-child{border-top:0;padding-top:4px}
+#main.gpg .gsn{flex:0 0 28px;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;background:#eef3f1;color:var(--fg-3)}
+#main.gpg .gsn svg{width:15px;height:15px}
+#main.gpg .gstep.cur .gsn{background:var(--brand);color:#fff}
+#main.gpg .gstep.done .gsn{background:var(--ok-tint,#e3f5ec);color:var(--ok)}
+#main.gpg .gstep > div{flex:1;min-width:0}
+#main.gpg .gstep b{display:block;font-size:15.5px;font-weight:650;color:var(--fg)}
+#main.gpg .gstep.done b{color:var(--fg-2)}
+#main.gpg .gstep i{display:block;font-style:normal;font-size:13.5px;color:var(--fg-3);margin-top:2px;line-height:1.45}
+#main.gpg .gstep .btn{margin-top:10px;min-height:44px}
+#main.gpg .gkods{margin-top:10px;border:1px solid #dfe8e4;border-radius:10px;background:#fff;overflow:hidden}
+#main.gpg .gkod{display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 12px;border-top:1px solid #e3ebe7}
+#main.gpg .gkod:first-child{border-top:0}
+#main.gpg .gkod > span{flex:1;min-width:0}
+#main.gpg .gkod b{font-size:14.5px;font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#main.gpg .gkod code{font-size:13px;color:var(--brand);letter-spacing:.04em}
+#main.gpg .gkod .btn{margin:0;flex:none;min-height:44px}
+#main.gpg .gkods .gkm{display:block;padding:10px 12px;border-top:1px solid #e3ebe7;font-size:13.5px}
+/*  Test isleyenler siyahisi: setir + «Xatırlat»  */
+.surow{display:flex;align-items:center;gap:8px;border-top:1px solid var(--n-100)}
+.surow:first-child{border-top:0}
+.surow > .mrow{flex:1;min-width:0;border:0}
+.surow .suxat{flex:none;margin-right:12px;min-height:44px}
+.surow .suxat span{white-space:nowrap}

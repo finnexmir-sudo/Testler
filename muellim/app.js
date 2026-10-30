@@ -762,7 +762,7 @@
                  ["sual", "Sual"], ["tesekkur", "Təşəkkür"]];
   var FB_ST = { "new": "Yeni", seen: "Baxılıb", planned: "Planda",
                 done: "Edilib", closed: "Bağlı" };
-  var FB_PAGE = { "": "İcmal", g: "Qrup", r: "Qrup hesabatı", a: "Tapşırıq", nt: "Nəticələr", sus: "Səssiz şagirdlər", zm: "Zəif şagirdlər",
+  var FB_PAGE = { "": "İcmal", g: "Qrup", r: "Qrup hesabatı", a: "Tapşırıq", nt: "Nəticələr", sus: "Test işləməyənlər", zm: "Zəif şagirdlər",
                   b: "Sual bankı", gen: "Test yığ", t: "Test vərəqi", p: "Paket",
                   adm: "İdarəetmə", n: "Siqnallar", q: "Sual", s: "Şagird hesabatı" };
   function fbKind(k) {
@@ -1240,7 +1240,7 @@
     var cls = pct >= 100 ? "bar full" : (pct >= 80 ? "bar warn" : "bar");
     return '<div class="bseat">' +
       '<div class="seat"><div><div class="num">' + used +
-        ' <s>/ ' + (lim > 1000000 ? "∞" : lim) + "</s></div>" +
+        ' <s>' + (lim > 1000000 ? "· limitsiz" : "/ " + lim) + "</s></div>" +
         '<div class="lbl">şagird yeri</div></div>' + pill + "</div>" +
       '<div class="' + cls + '"><i style="width:' + pct + '%"></i></div>' +
     "</div>";
@@ -1704,23 +1704,38 @@
       ADLARI ved edir - indi adlari verir.  Her setirden sagirdin oz
       hesabatina kecilir; orada kodu gondermek ve tapsiriq vermek var.  */
   function screenSilent() {
-    topTitle.textContent = "Səssiz şagirdlər";
+    //  30.10 (audit): ad Icmal/Siqnallar setri ile eyni («son 7 gündə test işləməyib»); her setirde hazir xatirlatma metni
+    topTitle.textContent = "Test işləməyənlər";
     bandHead({
       back: { id: "suBack", label: "Geri" }, eye: "Şagirdlər",
-      title: "Səssiz şagirdlər",
-      sub: "Son 7 gündə bir dənə də test işləməyənlər."
+      title: "Son 7 gündə test işləməyənlər",
+      sub: "Xatırlatma mətnini kopyalayıb WhatsApp-da göndərin."
     });
     show('<div id="suBox"><div class="card"><div class="skel">Yüklənir…</div></div></div>');
     on("suBack", "click", function () { goBack("#/"); });
     var live = guard();
-    sb.rpc("rpc_silent_students", {}).then(function (ls) {
+    Promise.all([
+      sb.rpc("rpc_silent_students", {}),
+      //  giris kodu (hele girmeyene kod metni gedir) - siyahi RPC-si kodu qaytarmir
+      sb.select("students", { select: "id,login_code", eq: { account_id: ACC.id, is_active: true } }).catch(function () { return []; })
+    ]).then(function (rr) {
+      var ls = rr[0];
       if (!live() || !$("suBox")) return;
       ls = ls || [];
+      var KOD = {};
+      (rr[1] || []).forEach(function (x) { KOD[x.id] = x.login_code; });
       if (!ls.length) {
         $("suBox").innerHTML = '<div class="card pad0"><div class="empty">' +
           '<div class="ic">' + ic("check") + "</div>" +
-          "<b>Səssiz şagird yoxdur</b>Hamı son bir həftədə nəsə işləyib.</div></div>";
+          "<b>Hamı test işləyib</b>Son 7 gündə hər şagird ən azı bir test işləyib.</div></div>";
         return;
+      }
+      var url = (window.CFG && window.CFG.STUDENT_URL) || "";
+      function xatirla(s) {
+        if (!(s.seen_at || s.last_at) && KOD[s.id]) return stuCodeText({ full_name: s.full_name, login_code: KOD[s.id] });
+        //  diger xatirlatmalar kimi - ailenin oxuyacagi dilde
+        return "Salam! " + (firstName(s.full_name) || s.full_name) + " son bir həftədə Bil10-da test işləməyib." +
+          (url ? "\nGirmək üçün: " + url : "") + "\nÖz kodu ilə daxil olsun — tapşırıqlar «Tapşırıqlar»da görünür.";
       }
       //  qruplara bolunur: muellim adətən bir qrupa tapsiriq verir
       var qr = [], say = {};
@@ -1729,6 +1744,7 @@
         if (!say[k]) { say[k] = { ad: s["class"] || "Qrupsuz", id: k, st: [] }; qr.push(say[k]); }
         say[k].st.push(s);
       });
+      var ALL = [];
       $("suBox").innerHTML = qr.map(function (g) {
         return ySec(g.ad + " · " + g.st.length + " nəfər") +
           '<div class="card pad0 menu">' + g.st.map(function (s) {
@@ -1738,16 +1754,22 @@
             var alt = s.last_at ? "son cavab: " + agoAz(s.last_at)
                     : (s.seen_at ? "girib, heç vaxt test işləməyib"
                                  : "hələ girməyib — kodu göndərin");
-            return '<a class="mrow" href="#/s/' + esc(s.id) + "/" + esc(s.class_id || "") + '">' +
+            ALL.push(s);
+            return '<div class="surow"><a class="mrow" href="#/s/' + esc(s.id) + "/" + esc(s.class_id || "") + '">' +
               av(s.full_name) +
               '<span class="g"><b>' + esc(s.full_name) + "</b><i>" +
               (s.seen_at || s.last_at ? esc(alt) : '<span class="qr">' + esc(alt) + "</span>") +
-              "</i></span>" + ic("right", "ar") + "</a>";
+              "</i></span>" + ic("right", "ar") + "</a>" +
+              '<button type="button" class="btn sm ghost suxat" data-sx="' + (ALL.length - 1) + '" aria-label="Xatırlatma mətnini kopyala">' +
+                ic("copy") + "<span>Xatırlat</span></button></div>";
           }).join("") + "</div>" +
           (g.id ? '<div class="suact"><a class="btn sm" href="#/a/' + esc(g.id) + (YENI ? "/t" : "") + '">' +
                   ic("clip") + "«" + esc(g.ad) + "» qrupuna tapşırıq ver</a></div>" : "") +
           '<div class="spacer"></div>';
       }).join("");
+      Array.prototype.forEach.call($("suBox").querySelectorAll("[data-sx]"), function (b) {
+        b.addEventListener("click", function () { copyText(xatirla(ALL[Number(b.getAttribute("data-sx"))]), b); });
+      });
     }, function (e) {
       if (!live() || !$("suBox")) return;
       $("suBox").innerHTML = '<div class="card">' + msg("warn", fail(e)) + "</div>";
@@ -2102,11 +2124,14 @@
             setBusy("btnGroup", false, "Qrup yarat");
             if (x.err && $("onbErr")) {
               $("onbErr").innerHTML = msg("err", (x.ok ? x.ok + " şagird əlavə olundu, qalanı yox: " : "") + fail(x.err));
+              return refreshContext().then(function () { loadGroups(); });
             }
-            return refreshContext().then(function () { loadGroups(); });
+            return refreshContext().then(function () { if (YENI) nav("#/g/" + r.id); else loadGroups(); });
           });
         }
         setBusy("btnGroup", false, "Qrup yarat");
+        //  30.10 (audit): qrup yaranan kimi ICI acilir - evvel siyahida qalirdi, novbeti addim bilinmirdi
+        if (YENI && r && r.id) { refreshContext().catch(function () {}).then(function () { nav("#/g/" + r.id); }); return; }
         loadGroups();
       }).catch(function (e) {
         setBusy("btnGroup", false, "Qrup yarat");
@@ -4171,7 +4196,8 @@
   /*  QRUPUN BASLIGI (26.10, son maket) - qrupun BUTUN sekmelerinde eyni: «Qruplar / ad», ad,
       «sinif · N şagird», «+ Tapşırıq ver» (Test ver / Ev tapşırığı yaz) ve disli (ayarlar).
       Iri yasil zolaq yoxdur.  «Geri» (08.10 qaydasi) yolun evvelindedir.  */
-  var GHEAD = {};   //  qrupun adi / sinfi / sagird sayi - sekmeler arasinda ani gorunsun
+  var GHEAD = {};
+  var STU_FOCUS = false;   //  «İlk şagirdi əlavə et»-den gelinib - ad sahesi hazir olsun   //  qrupun adi / sinfi / sagird sayi - sekmeler arasinda ani gorunsun
   function gHeadHtml(gid, act) {
     var c = GHEAD[gid] || {};
     return '<header class="phd gph" id="gHd"><div class="phd-t">' +
@@ -4206,6 +4232,12 @@
       if ($("gCrumb")) $("gCrumb").textContent = c.name;
       if ($("gMeta")) $("gMeta").textContent = GHEAD[gid].meta;
       topTitle.textContent = c.name;
+      //  30.10 (audit): bos qrupda esas is SAGIRDDIR - «Tapşırıq ver» yerine «İlk şagirdi əlavə et»
+      var ba = $("btnAsgs");
+      if (n === 0 && ba && ba.parentNode) {
+        ba.parentNode.innerHTML = '<a class="btn go" id="gFirstStu" href="#/g/' + esc(gid) + '/s">' + ic("plus") + "İlk şagirdi əlavə et</a>";
+        on("gFirstStu", "click", function (e) { e.preventDefault(); STU_FOCUS = true; tabGo("#/g/" + gid + "/s"); });
+      }
     }).catch(function () {});
   }
   //  Qrupun her sekme ekraninda: basliq + sekme zolagi #main-in basina; iri zolaq yoxdur
@@ -4290,6 +4322,60 @@
       .sort(function (a, b) { return b.weak_students.length - a.weak_students.length || Number(a.ratio) - Number(b.ratio); })[0] || null;
   }
 
+  /*  30.10 (audit): «İlk nəticəyə 4 addım» - yeni qrupda muellimi ilk NETICEYE aparir:
+      şagird əlavə et -> kodu göndər -> ilk testi ver -> nəticəyə bax.  Ilk netice gelen kimi kart yoxdur.
+      Ders plani ve diger imkanlar yerinde qalir, amma ilk netice ucun onlar lazim deyil.
+      Menbe: rpc_class_students (Sagirdler siyahisi ile eyni) - say, giris, tapsiriq, cehd.  */
+  function gStartLoad(g) {
+    var live = guard();
+    sb.rpc("rpc_class_students", { p_class_id: g.id }).then(function (d) {
+      var box = $("gkStart");
+      if (!live() || !box) return;
+      d = d || {};
+      var st = (d.students || []).filter(function (x) { return x.is_active !== false; });
+      var girmeyen = st.filter(function (x) { return !(x.seen_at || x.last_at); });
+      var nAtt = st.reduce(function (t, x) { return t + (Number(x.attempts) || 0); }, 0);
+      var nAsg = (Number(d.assigned) || 0) + st.reduce(function (t, x) { return t + (Number(x.assigned_own) || 0); }, 0);
+      if (nAtt > 0) { box.hidden = true; return; }       //  ilk netice var - kart lazim deyil
+      var s1 = st.length > 0, s2 = st.length > girmeyen.length, s3 = nAsg > 0;
+      var cur = !s1 ? 1 : (!s3 ? 3 : (!s2 ? 2 : 4));
+      if (s1 && !s2 && !s3) cur = 2;
+      function step(i, done, b, txt, act) {
+        return '<li class="gstep' + (done ? " done" : "") + (i === cur ? " cur" : "") + '">' +
+          '<span class="gsn">' + (done ? ic("check") : i) + "</span>" +
+          "<div><b>" + b + "</b><i>" + txt + "</i>" + (act || "") + "</div></li>";
+      }
+      var kodlar = girmeyen.slice(0, 6).map(function (x, i) {
+        return '<div class="gkod"><span><b>' + esc(x.full_name) + '</b><code>' + esc(x.login_code || "") + "</code></span>" +
+          '<button type="button" class="btn sm ghost" data-gk="' + i + '">' + ic("copy") + "Mətni kopyala</button></div>";
+      }).join("") + (girmeyen.length > 6
+        ? '<a class="gkm" href="#/g/' + esc(g.id) + '/s" id="gkKodAll">Daha ' + (girmeyen.length - 6) + " şagird — Şagirdlər bölməsində</a>" : "");
+      box.innerHTML = '<div class="ykh"><div><b>İlk nəticəyə 4 addım</b>' +
+          '<span class="muted">Dərs planını sonra da qura bilərsiniz.</span></div></div>' +
+        '<ol class="gsteps">' +
+          step(1, s1, "Şagird əlavə edin",
+            s1 ? st.length + " şagird əlavə olunub." : "Adını yazın — giriş kodu özü yaranır.",
+            s1 ? "" : '<a class="btn go" id="gsStu" href="#/g/' + esc(g.id) + '/s">' + ic("plus") + "Şagird əlavə et</a>") +
+          step(2, s2, "Giriş kodunu şagirdə göndərin",
+            s2 ? (st.length - girmeyen.length) + " şagird girib." + (girmeyen.length ? " " + girmeyen.length + " şagird hələ girməyib." : "")
+               : "Şagird bil10.az/sagird ünvanında öz kodu ilə girir. Mətni kopyalayıb WhatsApp-da göndərin.",
+            s1 && girmeyen.length && !s2 ? '<div class="gkods">' + kodlar + "</div>" : "") +
+          step(3, s3, "İlk testi verin",
+            s3 ? "Test verilib." : "Bankdan bir neçə sual seçin — test bir dəqiqəyə hazır olur.",
+            s1 && !s3 ? '<button type="button" class="btn' + (cur === 3 ? " go" : "") + '" id="gsGen">' + ic("gen") + "Test yığ</button>" : "") +
+          step(4, false, "Nəticəyə baxın",
+            s3 ? "Şagird testi işləyən kimi nəticə və zəif mövzular Hesabatda görünəcək." : "Şagird testi işləyəndən sonra nəticə burada görünəcək.", "") +
+        "</ol>";
+      box.hidden = false;
+      on("gsStu", "click", function (e) { e.preventDefault(); STU_FOCUS = true; tabGo("#/g/" + g.id + "/s"); });
+      on("gkKodAll", "click", function (e) { e.preventDefault(); tabGo("#/g/" + g.id + "/s"); });
+      on("gsGen", "click", function () { GEN_ENTRY = { id: g.id, name: g.name || "" }; nav("#/gen"); });
+      Array.prototype.forEach.call(box.querySelectorAll("[data-gk]"), function (b) {
+        b.addEventListener("click", function () { copyText(stuCodeText(girmeyen[Number(b.getAttribute("data-gk"))]), b); });
+      });
+    }).catch(function () {});
+  }
+
   function drawGroupYeni(g, bol) {
     if (GBOL[bol]) return drawGroupBolme(g, bol);
     topTitle.textContent = g.name;
@@ -4297,12 +4383,14 @@
     /*  QRUPUN ICMALI (26.10, son maket): bu dersin isi - bugünkü mövzu, davamiyyət, qısa test,
         son tapşırıqlar.  Genis tehlil (son neticeler, zeif movzular, «Nə etməli») HESABATDADIR -
         burada yalniz bir qeyd setri.  Xeberdarliq: en vacib 1-2 (etmeyenler, yazili).  */
-    show('<section class="card yk" id="gkDers"><div class="skel">Yüklənir…</div></section>' +
+    show('<section class="card yk gstart" id="gkStart" hidden></section>' +
+      '<section class="card yk" id="gkDers"><div class="skel">Yüklənir…</div></section>' +
       '<section class="card yk" id="gkAsg"><div class="skel">Yüklənir…</div></section>' +
       '<p class="gnote" id="gkNote">' + ic("info") + "<span>Şagird nəticələri və zəif mövzular " +
         '<a href="#/r/' + esc(g.id) + '" id="gkRep">Hesabat</a> bölməsindədir.</span></p>');
     gTabsMount(g.id, "");
     on("gkRep", "click", function (e) { e.preventDefault(); tabGo("#/r/" + g.id); });
+    gStartLoad(g);
 
     var live = guard();
     function hd(t, sag) { return '<div class="ykh"><div><b>' + t + "</b></div>" + (sag || "") + "</div>"; }
@@ -4877,7 +4965,8 @@
           off.classList.toggle("hide", !no);
         }
       }
-      if (!rows || !rows.length) openStuForm(false);
+      if (!rows || !rows.length) openStuForm(STU_FOCUS);
+      STU_FOCUS = false;
       var box = $("stu");
       if (!box) return;
       if (!rows || !rows.length) {
@@ -5180,13 +5269,15 @@
     return "https://wa.me/?text=" + encodeURIComponent(t);
   }
 
-  function waLink(s) {
+  function stuCodeText(s) {
     var url = (window.CFG && window.CFG.STUDENT_URL) || "";
-    var t = "Salam! " + s.full_name + " üçün test girişi:\n\n" +
-            "Link: " + url + "\n" +
-            "Giriş kodu: " + s.login_code + "\n\n" +
-            "Linki açıb kodu yazmaq kifayətdir.";
-    return "https://wa.me/?text=" + encodeURIComponent(t);
+    return "Salam! " + s.full_name + " üçün test girişi:\n\n" +
+           "Link: " + url + "\n" +
+           "Giriş kodu: " + s.login_code + "\n\n" +
+           "Linki açıb kodu yazmaq kifayətdir.";
+  }
+  function waLink(s) {
+    return "https://wa.me/?text=" + encodeURIComponent(stuCodeText(s));
   }
 
   /*  Tapsiriqdan sonra hazir WhatsApp metni.  Sagirde bildiris gondere
@@ -5504,7 +5595,9 @@
       var h = YENI
         ? (r.paid ? "" : '<p class="muted rfree">Son 7 günün məlumatı göstərilir.</p>') +
           '<div class="rstat"><span><b>' + (Number(sm.students) || 0) + "</b>şagird</span>" +
-            '<span><b>' + pct(sm.avg) + "%</b>orta · " + dovrSoz(r) + "</span>" +
+            //  30.10 (audit): netice yoxdursa 0% yazilmir - melumatin olmamasi sifir netice deyil
+            (Number(sm.attempts) ? '<span><b>' + pct(sm.avg) + "%</b>orta · " + dovrSoz(r) + "</span>"
+                                 : '<span><b>—</b>hələ nəticə yoxdur</span>') +
             '<span><b>' + (Number(sm.attempts) || 0) + "</b>test</span>" +
             '<button class="btn sm ghost icon rref" id="btnRef" title="Yenilə" aria-label="Yenilə">' + ic("refresh") + "</button></div>"
         : '<div class="stats">' +
@@ -6738,7 +6831,7 @@
             yalniz nisan varken lazimdir.  */
         var nMeta = Number(sty.n_meta) || 0;
         if (!hasty && !gok && !sw) {
-          hX += "<h2>" + (YENI ? "Öyrənmə tərzi" : "Cavab tərzi") + "</h2>" +
+          hX += "<h2>" + (YENI ? "Cavab xüsusiyyətləri" : "Cavab tərzi") + "</h2>" +
             '<div class="card tight"><p class="muted" style="margin:0">' +
               "Narahat edən nişan yoxdur — nə tələsik səhv, nə «bildiyini sanır»." +
             "</p></div>";
@@ -6750,10 +6843,11 @@
             return '<div class="srow' + (n ? cls : "") + '"><b>' + n + "</b><div>" + ad +
               ' <span class="of">' + nMeta + " sualdan</span><i>" + izah + "</i></div></div>";
           }
-          hX += '<details class="more styd"><summary>Öyrənmə tərzi <span class="fn">' +
-              (sw ? "bildiyini sanır: " + sw : (hasty ? "tələsik: " + hasty : "nişan var")) + "</span></summary>" +
+          //  30.10 (audit): «Öyrənmə tərzi / bildiyini sanır» - deqiq ad: ne olub (emin olub sehv cavablayib)
+          hX += '<details class="more styd"><summary>Cavab xüsusiyyətləri <span class="fn">' +
+              (sw ? "əmin olub səhv cavablayıb: " + sw : (hasty ? "tələsik: " + hasty : "nişan var")) + "</span></summary>" +
             '<div class="card tight styl" style="margin-top:10px">' +
-              sr(" bad", sw, "Bildiyini sanır", "cavabına əmin idi, amma səhv etdi — yanlış öyrənilib, ən vacib düzəliş yeri") +
+              sr(" bad", sw, "Əmin olub səhv cavablayıb", "«əminəm» deyib səhv cavab verib — yanlış öyrənilib, ən vacib düzəliş yeri") +
               sr(" mid", hasty, "Tələsik səhv", "5 saniyədən tez verilmiş səhv cavab — diqqətsizlikdir, bilik boşluğu deyil") +
               sr("", gok, "Bilmədən düz", "«Əmin deyiləm» deyib düz cavablayıb — mövzu oturmayıb") +
             "</div></details>";
@@ -6850,7 +6944,7 @@
           tovH += '<p class="muted gkp">Mövzu üzrə təhlil abunə ilə açılır.</p>';
         } else if (tov) {
           tovH += '<div class="sxtr"><div class="g"><p class="sxn1"><b>' + esc(tov.name) + "</b> mövzusunu təkrar edin.</p>" +
-              '<span class="gkres">Son nəticə: <b class="' + pvCls(pct(tov.ratio)) + '">' + pct(tov.ratio) + "%</b> · " +
+              '<span class="gkres">Mövzu üzrə nəticə: <b class="' + pvCls(pct(tov.ratio)) + '">' + pct(tov.ratio) + "%</b> · " +
                 Number(tov.total) + " sual əsasında" + (ilkinMi(tov, r) ? " · ilkin nəticə" : "") + "</span></div>" +
             '<div class="sxb"><button type="button" class="btn go" id="vdTov">' + ic("gen") + "5 suallıq təkrar ver</button>" +
               "<s>Yalnız " + esc(fnm) + " üçün</s></div></div>" +
@@ -6951,8 +7045,8 @@
               bildiyini SANIR.  Ən təhlükəli səhv budur, ona görə
               nişan qalır, sadəcə adı aydınlaşır.  */
           (Number(w.sure_wrong) > 0
-            ? '<span class="wtag wb-s" title="Şagird cavabına əmin idi, amma səhv etdi — ' +
-              'yəni mövzunu bildiyini sanır">bildiyini sanır</span>' : "") +
+            ? '<span class="wtag wb-s" title="Şagird «əminəm» deyib səhv cavab verib — ' +
+              'yanlış öyrənilib">əmin olub səhv</span>' : "") +
           (w.explanation ? "<i>" + qt(w.explanation) + "</i>" : "") +
           //  YENI: sagirdin YAZDIGI ve DUZ cavab (db/902 - yoxdursa bos qalir)
           (YENI ? '<div class="wans" data-qid="' + esc(w.qid || "") + '">' + wAns(w) + "</div>" : "") +
@@ -10457,6 +10551,10 @@
       CLS = rr[0] || [];
       GSTU = {};
       (rr[1] || []).forEach(function (x) { GSTU[x.class_id] = (GSTU[x.class_id] || 0) + 1; });
+      //  30.10: qrupdan gelinib (alici bilinir), sinif hele secilmeyib - qrupun sinfi secilir (yeniden sorusulmur)
+      var c1 = f.asg && !f.levels.length && !f.topics.length ? CLS.filter(function (c) { return c.id === f.asg; })[0] : null;
+      var l1 = c1 && c1.level_id ? levelCode(c1.level_id) : "";
+      if (l1) { f.levels = [l1]; genSync(); genFacets(); }
       kimDraw();
     }).catch(function () {});
 
@@ -11835,7 +11933,7 @@
     show(
       '<div class="card">' +
         '<div class="seat"><div>' +
-          '<div class="num">' + used + ' <s>/ ' + (lim > 100000 ? "∞" : lim) + "</s></div>" +
+          '<div class="num">' + used + ' <s>' + (lim > 100000 ? "· limitsiz" : "/ " + lim) + "</s></div>" +
           '<div class="lbl">öz sualınız</div></div>' +
           '<button class="btn go" id="btnNewQ">' + ic("plus") + "Yeni sual</button>" +
         "</div>" +
@@ -12466,7 +12564,7 @@
               [1, 2, 3, 4].map(function (n) {
                 return '<option value="' + n + '"' +
                   (String(q.quarter) === String(n) ? " selected" : "") + ">" +
-                  n + "-ci rüb</option>";
+                  n + (n > 2 ? "-cü" : "-ci") + " rüb</option>";
               }).join("") + "</select></div>" +
             '<div><label for="qm">Ay</label><select id="qm">' +
               '<option value="">—</option>' +
@@ -12887,7 +12985,7 @@
   var HIST = [], BACKING = false, CUR_I = 0;
   function routeTitle(h) {
     var k = (h || "#/").replace(/^#/, "").split("/").filter(Boolean)[0] || "";
-    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ", nt: "Nəticələr", sus: "Səssiz şagirdlər", zm: "Zəif şagirdlər",
+    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ", nt: "Nəticələr", sus: "Test işləməyənlər", zm: "Zəif şagirdlər",
              t: "Vərəq", pk: "Dərs paketi", adm: "İdarəetmə", me: "Profil", n: "Bildirişlər", bize: "Bizə yazın",
              q: "Sual", s: "Şagird", p: "Paket", demo: "Nümunə" }[k] || "Əsas səhifə";
   }
