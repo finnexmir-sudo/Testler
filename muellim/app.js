@@ -4212,7 +4212,8 @@
           ic("plus") + "Tapşırıq ver</button>" +
           '<div class="gmenu hide" id="gAsgMenu" role="menu">' +
             '<a role="menuitem" href="#/a/' + esc(gid) + '/t" id="gAsgT">' + ic("clip") + "Test ver</a>" +
-            '<a role="menuitem" href="#/a/' + esc(gid) + '/h" id="gAsgH">' + ic("pen") + "Ev tapşırığı yaz</a></div>") + "</div>" +
+            '<a role="menuitem" href="#/a/' + esc(gid) + '/h" id="gAsgH">' + ic("pen") + "Ev tapşırığı yaz</a>" +
+            '<a role="menuitem" href="#/a/' + esc(gid) + '/m" id="gAsgM">' + ic("doc") + "Məşq ver</a></div>") + "</div>" +
         '<a class="btn icon gset' + (act === "x" ? " on" : "") + '" id="gSet" href="#/g/' + esc(gid) + '/x" aria-label="Qrup ayarları" title="Qrup ayarları">' +
           ic("gear") + "</a></div></header>";
   }
@@ -7606,6 +7607,193 @@
   //  yeniden teklif olunur ve muellim «getdimi?» deye tereddud edir
   var NXT_SENT = false;
   var PREV_HASH = "", CUR_HASH = "";   // route() doldurur
+  /* ================================================================
+     936: DERS MESQI (2026-11-19, pilot riy 5)
+
+     Test kitabini evez edir: muellim «Məşq ver» deyir, dersi secir,
+     sagird suallari asandan cetine bir-bir isleyir, her cavabdan sonra
+     duz/sehv + izah gorur.  Test DEYIL - test siyahisina, ortalamaya,
+     zeif movzulara dusmur; oz hesabati var (#/mq/<id>).
+       #/a/<qrup>/m[/<sagird>]  vermek
+       #/mq/<mesq>               hesabat: kim basladi / bitirdi, duz %,
+                                 en cox sehv olunan suallar
+     ================================================================ */
+  var MQ_FLASH = "";
+  function mqPct(x) { return x === null || x === undefined ? "—" : Math.round(Number(x)) + "%"; }
+  function mqDue(d) { return d ? dateLongAz(String(d).slice(0, 10)).replace(/, .*$/, "") : ""; }
+  function screenMesqGive(gid, pre) {
+    var live = guard();
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    Promise.all([
+      sb.select("classes", { select: "id,name,level_id", eq: { id: gid } }),
+      sb.rpc("rpc_mesq_lessons", { p_class_id: gid }),
+      sb.select("students", { select: "id,full_name", eq: { class_id: gid, is_active: true }, order: "full_name" }).catch(function () { return []; })
+    ]).then(function (r) {
+      if (!live()) return;
+      var g = (r[0] || [])[0];
+      if (!g) throw new Error("Qrup tapılmadı.");
+      drawMesqGive(g, r[1] || {}, r[2] || [], pre || "");
+    }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+  function drawMesqGive(g, d, students, pre) {
+    topTitle.textContent = g.name;
+    bandHead({
+      back: { id: "btnBack", label: "Geri" },
+      eye: g.name,
+      title: "Məşq ver",
+      sub: "Dərs üzrə məşq — test kitabının yerinə. Suallar asandan çətinə gəlir, şagird hər cavabdan sonra düz/səhv və izahı görür."
+    });
+    on("btnBack", "click", function () { goBack("#/a/" + g.id); });
+    var items = d.items || [];
+    if (!items.length) {
+      show('<div class="card"><div class="empty"><b>Bu sinif üçün hələ məşq yoxdur</b>' +
+        (g.level_id ? "İlk məşqlər 5-ci sinif riyaziyyatdadır. Digər siniflər hazırlanır."
+                    : "Qrupun sinfi seçilməyib — «Qrup ayarları»nda sinfi seçin, məşqlər o sinfə görə çıxacaq.") +
+        "</div></div>");
+      return;
+    }
+    var bych = [], last = null;
+    items.forEach(function (x) {
+      var ch = (x.chapter || "") + (d.level ? "" : (x.level ? " · " + x.level : ""));
+      if (ch !== last) { bych.push({ ch: ch, l: [] }); last = ch; }
+      bych[bych.length - 1].l.push(x);
+    });
+    var d7 = new Date(Date.now() + 7 * 864e5), z = function (n) { return (n < 10 ? "0" : "") + n; };
+    var d7s = d7.getFullYear() + "-" + z(d7.getMonth() + 1) + "-" + z(d7.getDate());
+    show('<div class="card mqgive">' +
+        '<label>Dərs</label>' +
+        '<div class="tlist' + (items.length > 7 ? " scroll" : "") + '" id="mqList">' +
+          bych.map(function (b) {
+            return '<div class="tgh">' + esc(b.ch) + "</div>" + b.l.map(function (x) {
+              return '<div class="trw"><button type="button" class="trow" data-l="' + esc(x.id) + '">' + ic("check") +
+                "<span><b>" + esc(x.name) + "</b><small>" + Number(x.n) + " sual" +
+                  (Number(x.given) ? " · bu qrupa verilib" : "") + "</small></span></button></div>";
+            }).join("");
+          }).join("") + "</div>" +
+        (students.length
+          ? '<label for="mqWho">Kimə</label><select id="mqWho"><option value="">Bütün qrup (' + students.length + " şagird)</option>" +
+            students.map(function (st) {
+              return '<option value="' + esc(st.id) + '"' + (st.id === pre ? " selected" : "") + ">yalnız " + esc(st.full_name || "") + "</option>";
+            }).join("") + "</select>"
+          : "") +
+        '<label for="mqDate">Son tarix</label>' +
+        '<div class="dfld"><span id="mqDateTxt"></span>' + ic("cal") +
+          '<input type="date" id="mqDate" value="' + d7s + '" aria-describedby="mqDateTxt"></div>' +
+        '<p class="muted" style="margin:8px 0 14px">Şagird məşqi istədiyi vaxt davam etdirə bilər; son tarixdən sonra da açıq qalır. ' +
+          "Bu, test deyil — nəticəsi orta bala və zəif mövzulara düşmür.</p>" +
+        '<div id="mqErr"></div>' +
+        '<button class="btn go" id="btnMqGive" disabled>' + ic("plus") + "Məşqi ver</button>" +
+      "</div>");
+    var cur = "";
+    on("mqList", "click", function (ev) {
+      var b = ev.target.closest ? ev.target.closest("[data-l]") : null;
+      if (!b) return;
+      cur = b.getAttribute("data-l");
+      Array.prototype.forEach.call(document.querySelectorAll("#mqList .trow"), function (x) { x.classList.toggle("on", x === b); });
+      $("btnMqGive").disabled = false;
+      $("mqErr").innerHTML = "";
+    });
+    function dShow() {
+      var v = ($("mqDate") || {}).value;
+      $("mqDateTxt").textContent = v ? dateLongAz(v) : "Seçilməyib — açıq qalır";
+    }
+    dShow();
+    on("mqDate", "input", dShow);
+    on("mqDate", "change", dShow);
+    on("mqDate", "click", function () { try { if ($("mqDate").showPicker) $("mqDate").showPicker(); } catch (e) {} });
+    on("btnMqGive", "click", function () {
+      if (busy) return;
+      if (!cur) { $("mqErr").innerHTML = msg("warn", "Əvvəl dərsi seçin."); return; }
+      setBusy("btnMqGive", true, "Məşqi ver");
+      sb.rpc("rpc_mesq_assign", {
+        p_class_id: g.id, p_topic_id: cur,
+        p_student_id: ($("mqWho") || {}).value || null,
+        p_due: ($("mqDate") || {}).value || null
+      }).then(function (r) {
+        busy = false;
+        MQ_FLASH = "Məşq verildi — " + (Number(r.n) || 0) + " sual. Şagird öz ekranında «Məşq» bölməsində görür.";
+        nav("#/mq/" + r.id);
+      }).catch(function (e) {
+        setBusy("btnMqGive", false, "Məşqi ver");
+        $("btnMqGive").innerHTML = ic("plus") + "Məşqi ver";
+        $("mqErr").innerHTML = msg("err", fail(e));
+      });
+    });
+  }
+
+  //  Qrupun «Tapşırıqlar» sekmesinde: verilmis mesqler (bos olanda bolme yoxdur)
+  function mesqListInto(gid) {
+    var box = $("mqBox");
+    if (!box) return;
+    sb.rpc("rpc_mesq_list", { p_class_id: gid }).then(function (l) {
+      if (!$("mqBox")) return;
+      l = l || [];
+      if (!l.length) { box.innerHTML = ""; return; }
+      box.innerHTML = "<h2>Məşqlər</h2>" +
+        '<div class="card pad0 mqlist">' + l.map(function (x) {
+          var tg = Number(x.targets) || 0;
+          return '<a class="mqr" href="#/mq/' + esc(x.id) + '"><span class="b"><b>' + esc(x.lesson) + "</b><i>" +
+            [x.student ? "yalnız " + esc(x.student) : "bütün qrup",
+             x.due ? "son tarix " + esc(mqDue(x.due)) : "",
+             (Number(x.finished) || 0) + " / " + tg + " bitirib",
+             x.pct !== null && x.pct !== undefined ? "düz " + mqPct(x.pct) : ""].filter(Boolean).join(" · ") +
+            "</i></span>" + ic("right") + "</a>";
+        }).join("") + "</div>" + '<div class="spacer"></div>';
+    }).catch(function () { if ($("mqBox")) $("mqBox").innerHTML = ""; });
+  }
+
+  function screenMesqReport(id) {
+    var live = guard();
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_mesq_report", { p_id: id }).then(function (d) {
+      if (!live()) return;
+      drawMesqReport(d || {});
+    }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
+  }
+  function drawMesqReport(d) {
+    var s = d.summary || {}, n = Number(s.n) || 0, st = d.students || [], hard = d.hard || [];
+    topTitle.textContent = d.lesson || "Məşq";
+    bandHead({
+      back: { id: "btnBack", label: "Geri" },
+      eye: (d.class || "") + " · Məşq",
+      title: d.lesson || "Məşq",
+      sub: esc([d.chapter, n + " sual", d.student ? "yalnız " + d.student : "bütün qrup",
+                d.due ? "son tarix " + mqDue(d.due) : ""].filter(Boolean).join(" · "))
+    });
+    on("btnBack", "click", function () { goBack("#/a/" + d.class_id); });
+    var fl = MQ_FLASH; MQ_FLASH = "";
+    show((fl ? msg("ok", esc(fl)) : "") +
+      '<div class="card mqsum">' +
+        '<div><b id="mqStarted">' + (Number(s.started) || 0) + " / " + (Number(s.targets) || 0) + "</b><span>başlayıb</span></div>" +
+        '<div><b id="mqFinished">' + (Number(s.finished) || 0) + "</b><span>bitirib</span></div>" +
+        '<div><b id="mqPct">' + mqPct(s.pct) + "</b><span>düz cavab</span></div>" +
+      "</div>" +
+      "<h2>Şagirdlər</h2>" +
+      '<div class="card pad0 mqst" id="mqStu">' + (st.length ? st.map(function (x) {
+        var a = Number(x.answered) || 0, ok = Number(x.correct) || 0;
+        var done = n > 0 && a >= n;
+        return '<a class="mqr" href="#/s/' + esc(x.id) + "/" + esc(d.class_id) + '"><span class="b"><b>' + esc(x.name) + "</b>" +
+          (a ? "<i>" + a + " / " + n + " sual" + (done ? " · bitirib ✓" : "") + "</i>"
+             : '<i class="mq0">hələ başlamayıb</i>') + "</span>" +
+          '<span class="p">' + (a ? Math.round(ok * 100 / a) + "%" : "—") + "</span>" + ic("right") + "</a>";
+      }).join("") : '<div class="empty"><b>Qrupda şagird yoxdur</b></div>') + "</div>" +
+      "<h2>Ən çox səhv olunan suallar</h2>" +
+      '<div class="card pad0" id="mqHard">' + (hard.length ? hard.map(function (h) {
+        return '<div class="mqh"><span class="no">№ ' + Number(h.no) + "</span><span class=\"b\">" + qt(h.body || "") + "</span>" +
+          '<span class="w">' + Number(h.wrong) + " / " + Number(h.answered) + " səhv</span></div>";
+      }).join("") : '<div class="empty"><b>Hələ səhv yoxdur</b>Şagirdlər işlədikcə burada çətin suallar görünəcək.</div>') + "</div>" +
+      '<div class="spacer"></div>' +
+      '<details class="fold pmore" id="mqMore"><summary><span><b>Digər əməliyyatlar</b><i>məşqi sil</i></span>' + ic("right", "ar") + "</summary>" +
+        '<div style="padding:12px 0"><button class="btn ghost" id="btnMqDel">' + ic("x") + "Məşqi sil</button>" +
+        '<p class="muted" style="margin:8px 0 0">Şagirdlərin siyahısından çıxır, cavabları da silinir.</p></div></details>');
+    on("btnMqDel", "click", function () {
+      if (busy || !confirm("Məşq silinsin? Şagirdlərin cavabları da silinəcək.")) return;
+      setBusy("btnMqDel", true);
+      sb.rpc("rpc_mesq_del", { p_id: d.id }).then(function () { busy = false; nav("#/a/" + d.class_id); })
+        .catch(function (e) { busy = false; $("btnMqDel").disabled = false; alert(fail(e)); });
+    });
+  }
+
   function screenAssign(gid, sid) {
     var live = guard();
     /*  YENI: «Tapşırıqlar» = BAXIS (verilmis tapsiriqlar) + iki dugme.  Vermek
@@ -7766,7 +7954,9 @@
         '<div id="hwErr"></div><div id="hwList" class="card pad0"></div><div class="spacer"></div>'
       : "";
     var actHtml = '<div class="asgact"><button class="btn go" id="btnAsgT">' + ic("clip") + "Test ver</button>" +
-      (hwOn ? '<button class="btn" id="btnAsgH">' + ic("pen") + "Ev tapşırığı yaz</button>" : "") + "</div>" +
+      (hwOn ? '<button class="btn" id="btnAsgH">' + ic("pen") + "Ev tapşırığı yaz</button>" : "") +
+      //  936: ders mesqi - test kitabinin yerine
+      '<button class="btn" id="btnAsgM">' + ic("doc") + "Məşq ver</button>" + "</div>" +
       '<div class="spacer"></div>';
     var hwFlashHtml = HW_FLASH ? msg("ok", HW_FLASH) + '<div class="spacer"></div>' : "";
     HW_FLASH = "";
@@ -7776,8 +7966,9 @@
     } else if (Y && view === "h") {
       show(hwFormHtml);
     } else if (Y) {
-      show(flashHtml + hwFlashHtml + actHtml + '<div id="nextBox"></div>' + listHtml + hwListHtml);
+      show(flashHtml + hwFlashHtml + actHtml + '<div id="nextBox"></div>' + listHtml + '<div id="mqBox"></div>' + hwListHtml);
       gTabsMount(g.id, "a");
+      mesqListInto(g.id);
     } else {
       show('<div id="nextBox"></div>' + pickHtml + listHtml + restHtml);
     }
@@ -7788,6 +7979,7 @@
     if ($("nextBox")) nextTestCard(g, items, students);
     on("btnAsgT", "click", function () { nav("#/a/" + g.id + "/t"); });
     on("btnAsgH", "click", function () { nav("#/a/" + g.id + "/h"); });
+    on("btnAsgM", "click", function () { nav("#/a/" + g.id + "/m"); });
     //  Qutu ekranın altında qalırdı - muellim xeber vermeden cixirdi
     if (flash && !YENI && $("asgFlash") && $("asgFlash").scrollIntoView) {
       setTimeout(function () {
@@ -12985,7 +13177,7 @@
   var HIST = [], BACKING = false, CUR_I = 0;
   function routeTitle(h) {
     var k = (h || "#/").replace(/^#/, "").split("/").filter(Boolean)[0] || "";
-    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", b: "Suallar", gen: "Test yığ", nt: "Nəticələr", sus: "Test işləməyənlər", zm: "Zəif şagirdlər",
+    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", mq: "Məşq", b: "Suallar", gen: "Test yığ", nt: "Nəticələr", sus: "Test işləməyənlər", zm: "Zəif şagirdlər",
              t: "Vərəq", pk: "Dərs paketi", adm: "İdarəetmə", me: "Profil", n: "Bildirişlər", bize: "Bizə yazın",
              q: "Sual", s: "Şagird", p: "Paket", demo: "Nümunə" }[k] || "Əsas səhifə";
   }
@@ -13177,7 +13369,7 @@
       PREV_HASH = CUR_HASH; CUR_HASH = location.hash || "#/";
     }
     //  qrup, hesabat, tapsiriq ekranlari da «Qruplar» bendinin altindadir
-    bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", nt: "gs", sus: "gs", zm: "gs", ht: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
+    bnavShow({ gs: "gs", g: "gs", r: "gs", a: "gs", s: "gs", nt: "gs", sus: "gs", zm: "gs", ht: "gs", mq: "gs", b: "b", gen: "gen", p: "p", me: "me" }[m[0]] || "");
     if (m[0] === "nt") return YENI ? screenResults() : nav("#/");
     if (m[0] === "sus") return YENI ? screenSilent() : nav("#/");
     if (m[0] === "ht" && m[1]) return YENI ? screenUndone(m[1], m[2]) : nav("#/g/" + m[1]);
@@ -13185,6 +13377,9 @@
     if (m[0] === "gs") return screenGroups();
     if (m[0] === "g" && m[1]) return screenGroup(m[1], m[2]);
     if (m[0] === "r" && m[1]) return screenReport(m[1], false, m[2]);
+    //  936: ders mesqi - vermek (#/a/<qrup>/m) ve hesabat (#/mq/<mesq>)
+    if (m[0] === "a" && m[1] && m[2] === "m") return screenMesqGive(m[1], m[3]);
+    if (m[0] === "mq" && m[1]) return screenMesqReport(m[1]);
     if (m[0] === "a" && m[1]) return screenAssign(m[1], m[2]);
     if (m[0] === "b") return screenBank();
     if (m[0] === "gen") return screenGen();

@@ -486,6 +486,9 @@
       }).join("") + "</div>";
     }
 
+    //  936: ders mesqi - bir setir (muellim vermeyibse hec ne)
+    out += '<div id="mqLine"></div>';
+
     /* ---- son neticeler ---- */
     var res = d.results || [];
     if (res.length) {
@@ -587,6 +590,15 @@
 
     show(out);
     drawPush();
+    sb.rpc("rpc_parent_mesq", { p_token: TOKEN }).then(function (l) {
+      var box = $("mqLine");
+      if (!box || !l || !l.length) return;
+      var x = l[0], n = Number(x.n) || 0, a = Number(x.answered) || 0, ok = Number(x.correct) || 0;
+      box.innerHTML = '<div class="card tight mqline"><b>Məşq:</b> «' + esc(x.lesson || "") + "» — " +
+        (a ? a + " / " + n + " sual işləyib" + (a >= n ? " ✓" : "") + ", " + Math.round(ok * 100 / a) + "% düz"
+           : "hələ başlamayıb (" + n + " sual)") +
+        (l.length > 1 ? ' <i class="muted">· daha ' + (l.length - 1) + " məşq</i>" : "") + "</div>";
+    }).catch(function () {});
     on("kidAdd", "click", function (e) { e.preventDefault(); ADD_MODE = true; screenLogin(""); });
     on("famBack", "click", function (e) { e.preventDefault(); screenFamily(); });
     on("kids", "click", function (e) {

@@ -299,3 +299,7 @@ a.btn{text-decoration:none}
 .fk-conf{background:var(--err-tint);border:1px solid var(--err-line);border-radius:12px;padding:10px 12px;text-align:left;margin-top:8px}
 .fk-conf p{margin:0 0 10px;font-size:13.5px;line-height:1.45}
 .btn.danger{background:var(--err);color:#fff;border-color:var(--err)}
+
+/* 936: ders mesqi - bir setir */
+.mqline{margin-top:10px;font-size:14.5px;line-height:1.45}
+.mqline b{color:var(--brand,#0f7b6c)}

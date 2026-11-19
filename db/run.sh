@@ -181,6 +181,10 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 931_zeif_movzu_bir_qayda.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 932_gedisat_bir_dustur.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 933_siqnal_sirasi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 934_hedefli_tapsiriq.sql
+#  935/936: ders mesqi (pilot riy 5).  935 AYRI faylda - yeni enum deyeri eyni tranzaksiyada islenmir.
+#  Bank fayli 1470 (mesq suallari) bunlardan SONRA gelir.
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 935_mesq_status.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 936_mesq.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

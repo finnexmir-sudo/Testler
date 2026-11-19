@@ -119,7 +119,9 @@ declare
         --  rpc_push_claim / rpc_push_done BURADA OLMAMALIDIR - yalniz service_role.
         'rpc_push_subscribe','rpc_push_unsubscribe','rpc_family_status',
         --  Ailə yolu (920): usagin oz sehifesi - token ile
-        'rpc_student_family'];
+        'rpc_student_family',
+        --  Ders mesqi (936): sagird tokenle isleyir, valideyn bir setir gorur
+        'rpc_student_mesq_list','rpc_student_mesq_next','rpc_student_mesq_answer','rpc_parent_mesq'];
   fn text;
 begin
   --  a) artiq acilmis olani bagla.  "from public" VACIBDIR: Postgres
@@ -182,7 +184,9 @@ declare
         --  rpc_push_claim / rpc_push_done BURADA OLMAMALIDIR - yalniz service_role.
         'rpc_push_subscribe','rpc_push_unsubscribe','rpc_family_status',
         --  Ailə yolu (920): usagin oz sehifesi - token ile
-        'rpc_student_family'];
+        'rpc_student_family',
+        --  Ders mesqi (936): sagird tokenle isleyir, valideyn bir setir gorur
+        'rpc_student_mesq_list','rpc_student_mesq_next','rpc_student_mesq_answer','rpc_parent_mesq'];
   leak text;
   v_say int;
 begin

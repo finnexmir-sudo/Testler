@@ -1,0 +1,13 @@
+-- =====================================================================
+--  935 : MESQ SUALI STATUSU (2026-11-19, pilot riy 5)
+--
+--  Mesq sualı = test kitabini evez eden derse aid mesq: oxsar, asandan
+--  cetine.  Test mexanizmine QARISMIR: status 'published' deyil, ona gore
+--  butun `status = 'published'` filtrleri (test, generator, bank siyahisi,
+--  adaptiv mesq 133, gunun 5 suali) bu suallari gormur.
+--
+--  AYRICA FAYLDIR: Postgres yeni enum deyerini elave olundugu tranzaksiyada
+--  islətməyə icaze vermir.  Supabase-de: evvel BU fayl, sonra 936.
+--  Bank fayli 1470 (riy 5 mesq suallari) 936-dan SONRA.
+-- =====================================================================
+alter type public.content_status add value if not exists 'mesq';

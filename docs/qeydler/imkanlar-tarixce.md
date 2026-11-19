@@ -1056,3 +1056,33 @@ mötərizəyə almadım. SQL-də `AND` `OR`-dan güclü bağlayır, ona görə s
 - Marker ilə tətbiq olunur; qoruyucu nişan `215b: IKI MENBE MOTERIZEDE`
   (səhv nüsxə də köhnə nişanı daşıyırdı, ona görə nişan dəyişdirildi).
 - Canlıda: `db/215_giren_muellim_saygaci.sql`.
+
+## db/935–936 — Dərs məşqi: test kitabının yerinə (2026-11-19, pilot riy 5)
+
+**İstək (istifadəçi, rəhbər vasitəsilə — bil10-bank `plan/mesq_pilot.md`).** Müəllim «test kitabından 45–47-ci
+səhifələri işləyin» deyir. Sayt bunu əvəz etsin: dərs üzrə oxşar, asandan çətinə düzülmüş məşq sualları; müəllim
+«Məşq ver» deyir, şagird işləyir, dərhal düz/səhv + izah görür, müəllim kimin nə etdiyini görür.
+
+**Test mexanizminə qarışmır.** Məşq sualı `questions.status = 'mesq'` (935 — ayrı faylda, çünki yeni enum dəyəri
+əlavə olunduğu tranzaksiyada işlədilə bilmir). Bütün `status = 'published'` filtrləri olduğu kimi qalır → test,
+generator, bank siyahısı, adaptiv məşq (133), günün 5 sualı, dərs testi sayı (`ders_sual_sayi`) bu sualları görmür.
+Cavablar `attempts`-ə yazılmır → ortalama, zəif mövzu, siqnallar, «işlənmiş test» sayğacı dəyişmir; səhv dəftərinə də
+düşmür. Öz cədvəlləri: `mesq_assignments` (qrup / tək şagird, dərs = yarpaq mövzu, son tarix, **sualların sırası
+verilən an dondurulur** — `qids`), `mesq_answers` (şagird · sual · şablon rəqəmləri · düz/səhv · cavab mətni).
+
+**Yollar.**
+- Müəllim: qrupun «Tapşırıq ver» menyusu və «Tapşırıqlar» sekməsi → **«Məşq ver»** (`#/a/<qrup>/m`): yalnız məşq
+  sualı olan dərslər (qrupun sinfinə görə), Kimə, Son tarix (+7 gün) → «Məşqi ver» → hesabat (`#/mq/<id>`):
+  başlayıb / bitirib / düz %, şagird sətirləri (profilə keçir), ən çox səhv olunan 5 sual, «Digər əməliyyatlar → Məşqi sil».
+  «Tapşırıqlar» sekməsində «Məşqlər» bölməsi (yalnız məşq verilibsə görünür).
+- Şagird: ev ekranında «Məşq» kartı (irəliləmə zolağı, düz %) → sual-sual; cavabdan sonra «Düzdür!» / «Səhvdir.» + izah,
+  «Növbəti sual» / «Sonra davam et»; şablon sualda (132) hər şagirdə təzə rəqəm, səhifə yenilənəndə eyni rəqəm;
+  sonda «Məşq bitdi · 5 / 6 · 83%». Düz variant şagirdə **getmir** (ƏN VACİB QAYDA 1).
+- Valideyn: «Gözləyən tapşırıq»dan sonra bir sətir — «Məşq: «Dərs» — 6 / 6 sual işləyib ✓, 83% düz».
+
+**Canlı sırası:** `935_mesq_status.sql` → `936_mesq.sql` → `05_grants.sql` (cədvəl yaradır + 4 anon RPC ağ siyahıda)
+→ bank `1470` (məşq sualları). 1470 935-dən əvvəl işlədilsə enum xətası verir.
+
+- Test: `db/test/smoke_mesq.sql` (4 bölmə: sızma yoxdur · müəllim/hüquq/sıra · şagird/düz variant getmir/şablon ·
+  hesabat/valideyn/attempts toxunulmur), `test/e2e_mesq.py` (A–I: düymələr, boş hal, geri, şagird yolu, hesabat,
+  valideyn, 390/360 enlik, ≥ 44 px).

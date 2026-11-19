@@ -3558,3 +3558,32 @@ body.bnav-on .afoot.mini{display:none}
 .surow > .mrow{flex:1;min-width:0;border:0}
 .surow .suxat{flex:none;margin-right:12px;min-height:44px}
 .surow .suxat span{white-space:nowrap}
+
+/* =====================================================================
+   936: ders mesqi - «Məşq ver», qrupun «Məşqlər» siyahisi, hesabat
+   ===================================================================== */
+.asgact .btn:nth-child(3):last-child{grid-column:1 / -1}
+@media (min-width:700px){
+  .asgact:has(.btn:nth-child(3)){grid-template-columns:1fr 1fr 1fr}
+  .asgact .btn:nth-child(3):last-child{grid-column:auto}
+}
+.mqgive .tlist{margin-bottom:14px}
+.mqr{display:flex;align-items:center;gap:10px;min-height:44px;padding:12px 14px;border-bottom:1px solid var(--line);
+  color:inherit;text-decoration:none}
+.mqr:last-child{border-bottom:0}
+.mqr:hover{background:var(--n-25)}
+.mqr .b{flex:1;min-width:0}
+.mqr b{display:block;font-weight:600;overflow-wrap:anywhere}
+.mqr i{display:block;font-style:normal;font-size:12.5px;color:var(--fg-2);margin-top:3px}
+.mqr i.mq0{color:var(--warn)}
+.mqr .p{font-weight:700;color:var(--brand);min-width:44px;text-align:right}
+.mqr svg{flex:0 0 auto;width:18px;height:18px;color:var(--fg-3)}
+.mqsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.mqsum b{display:block;font-size:22px;font-weight:700;color:var(--fg)}
+.mqsum span{display:block;font-size:12.5px;color:var(--fg-2);margin-top:2px}
+.mqh{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.mqh:last-child{border-bottom:0}
+.mqh .no{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--fg-3);padding-top:2px}
+.mqh .b{flex:1;min-width:0;overflow-wrap:anywhere}
+.mqh .w{flex:0 0 auto;font-size:12.5px;font-weight:600;color:var(--err);white-space:nowrap;padding-top:2px}
+.mqgive select,.mqgive .btn{min-height:44px}

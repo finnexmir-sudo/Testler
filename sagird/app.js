@@ -679,6 +679,8 @@
          muellimin tapsirigi son tarixle onsuz da asagida durur.
          Sayğac serverden ayrica gelir - rpc_student_daily doldurur. */
       h += '<div id="dayBox"></div>';
+      //  936: muellimin verdiyi ders mesqi - tapsiriqlarin ustunde (bos olanda hec ne)
+      h += '<div id="msqBox"></div>';
 
       if (!(FAM && !(d.assigned || []).length && !(d.homework || []).length)) {
         h += '<h2 id="asgH">' + (FAM ? "Başlanğıc yoxlama" : "Tapşırıqlar") + "</h2>";
@@ -713,7 +715,7 @@
         //  ailə uşağında başlanğıc yoxlama yoxdursa bölmə göstərilmir
       } else if (!asg.length) {
         //  191: ev tapsirigi varsa «tapsiriq yoxdur» yalan olardi - «test» deyirik
-        h += '<div class="card pad0"><div class="empty"><div class="ic">' + ic("check") +
+        h += '<div class="card pad0" id="asgEmpty"><div class="empty"><div class="ic">' + ic("check") +
              "</div><b>" + (hw.length ? "Test tapşırığı yoxdur" : "Tapşırıq yoxdur") + "</b>" +
              (prac.length ? "Aşağıdakı testlərlə məşq edə bilərsən."
                           : "Müəllimin tapşırıq verməsini gözlə.") + "</div></div>";
@@ -927,6 +929,7 @@
         var ah = document.getElementById("asgH"); if (ah && ah.scrollIntoView) ah.scrollIntoView({ block: "start" });
       });
       loadDaily();
+      loadMesq();
       loadMistakes();
       drawPush();
       if (MOVZU_MESQ) loadPractice();
@@ -1827,6 +1830,152 @@
       } else {
         var ids = Array.prototype.map.call(main.querySelectorAll("[data-o].sel"), function (x) { return x.getAttribute("data-o"); });
         if (!ids.length) { $("pFb").innerHTML = msg("warn", "Əvvəl variant seç."); return; }
+        send(ids, null);
+      }
+    });
+  }
+
+  /* ================================================================
+     936: DERS MESQI - muellimin verdiyi mesq (test kitabinin yerine).
+     Suallar asandan cetine bir-bir gelir; cavabdan sonra duz/sehv + izah.
+     Duz variant serverden GELMIR (bal serverde).  Test deyil - netice
+     «işlənmiş test / ortalama» saylarina dusmur.
+     ================================================================ */
+  var MS = null;
+  function mqDate(d) { var p = String(d || "").split("-"); return p.length === 3 ? p[2] + "." + p[1] : ""; }
+  function loadMesq() {
+    var box = $("msqBox");
+    if (!box) return;
+    sb.rpc("rpc_student_mesq_list", { p_token: TOKEN }).then(function (l) {
+      if (!$("msqBox")) return;
+      l = l || [];
+      if (!l.length) { box.innerHTML = ""; return; }
+      //  test tapsirigi yoxdursa «Tapşırıq yoxdur — gözlə» mesqle ziddiyyet olardi
+      var ae = $("asgEmpty");
+      if (ae && l.some(function (x) { return !x.done; })) {
+        ae.innerHTML = '<div class="empty"><b>Test tapşırığı yoxdur</b>Yuxarıdakı məşqi işlə.</div>';
+      }
+      box.innerHTML = '<h2 id="msqH">Məşq</h2><div class="card pad0">' + l.map(function (x) {
+        var n = Number(x.n) || 0, a = Number(x.answered) || 0, ok = Number(x.correct) || 0;
+        return '<button class="test asg mqrow' + (x.done ? " done" : "") + '" data-mq="' + esc(x.id) + '">' +
+          '<div class="ic">' + ic(x.done ? "check" : "doc") + "</div>" +
+          '<div class="g"><b>' + esc(x.lesson || "") + (x.personal ? '<span class="solo">sənə</span>' : "") + "</b><i>" +
+            "<span>" + esc(x.subject || "Məşq") + "</span><span>·</span>" +
+            "<span>" + (x.done ? "bitib · " + n + " sual" : (a ? a + " / " + n + " sual" : n + " sual")) + "</span>" +
+            (!x.done && x.due ? "<span>·</span><span>son tarix " + esc(mqDate(x.due)) + "</span>" : "") +
+          "</i>" +
+          (a && !x.done ? '<span class="mqbar"><i style="width:' + Math.round(a * 100 / Math.max(1, n)) + '%"></i></span>' : "") +
+          "</div>" +
+          (a ? '<span class="best ' + pctCls(ok * 100 / a) + '">' + Math.round(ok * 100 / a) + "%</span>" : "") +
+          '<span class="arrow">' + ic("right") + "</span></button>";
+      }).join("") + "</div>";
+      Array.prototype.forEach.call(box.querySelectorAll("[data-mq]"), function (b) {
+        b.addEventListener("click", function () { screenMesq(b.getAttribute("data-mq")); });
+      });
+    }).catch(function () { if ($("msqBox")) $("msqBox").innerHTML = ""; });
+  }
+  function screenMesq(id) {
+    markScreen(false);
+    topTitle.textContent = "Məşq";
+    show('<div class="card"><div class="skel">Yüklənir…</div></div>');
+    sb.rpc("rpc_student_mesq_next", { p_token: TOKEN, p_id: id }).then(function (d) {
+      MS = { id: id, d: d };
+      if (d.done) mesqDone(d.n, d.correct); else drawMesq();
+    }).catch(function (e) { errScreen(e, function () { screenMesq(id); }); });
+  }
+  //  zolaq - cavablanan sual sayi; sayğac - indiki sualin nomresi (cavabdan sonra deyismir)
+  function mesqHead(d, answered, pos) {
+    var n = Number(d.n) || 0;
+    return '<div class="adhead"><b>' + esc(d.lesson || "") + "</b><span>Məşq" + (d.subject ? " · " + esc(d.subject) : "") + "</span></div>" +
+      '<div class="prog adprog mqprog"><div class="bar"><i style="width:' + Math.round(answered * 100 / Math.max(1, n)) + '%"></i></div>' +
+        '<span class="cnt">' + Math.min(n, pos) + " / " + n + "</span></div>";
+  }
+  function mesqDone(n, ok) {
+    n = Number(n) || 0; ok = Number(ok) || 0;
+    var p = n ? Math.round(ok * 100 / n) : 0;
+    show('<div class="card mqdone" style="text-align:center">' +
+      "<h1>Məşq bitdi " + (p >= 80 ? "🎉" : "👍") + "</h1>" +
+      '<p class="mqres"><b>' + ok + " / " + n + "</b> düz · " + p + "%</p>" +
+      '<p class="note">' + (p >= 80 ? "Əla! Dərsi yaxşı mənimsəmisən." : "Səhv etdiyin suallara izahda bax — növbəti dəfə daha yaxşı olacaq.") +
+        " Nəticəni müəllimin görür.</p>" +
+      '<button class="btn go wide" id="btnMqHome" style="margin-top:12px">Tapşırıqlara qayıt</button></div>');
+    on("btnMqHome", "click", screenTests);
+  }
+  function drawMesq() {
+    var d = MS.d, q = d.question || {};
+    var multi = q.kind === "multi";
+    show(
+      mesqHead(d, Number(d.answered) || 0, Number(d.pos) || 1) +
+      '<div class="q"><div class="body">' + qt(q.body || "") + "</div></div>" +
+      fig(q.media_url) +
+      (q.kind === "text"
+        ? '<div class="opts"><input id="mans" class="tans" maxlength="120" autocomplete="off" placeholder="Cavabı yaz"></div>'
+        : '<div class="opts" id="mopts">' + (q.options || []).map(function (o, k) {
+            return '<button class="opt" data-o="' + esc(o.id) + '">' +
+              '<span class="k">' + "ABCDEF".charAt(k) + "</span>" +
+              '<span class="t">' + qt(o.body) + "</span></button>";
+          }).join("") + "</div>") +
+      (multi ? '<p class="note">Bir neçə düz cavab ola bilər — seçib «Cavabla» bas.</p>' : "") +
+      ((multi || q.kind === "text") ? '<button class="btn go wide" id="btnMAns">Cavabla</button>' : "") +
+      '<div id="mFb"></div>'
+    );
+    function send(ids, txt) {
+      if (busy) return;
+      busy = true;
+      Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (x) { x.disabled = true; });
+      var ba = $("btnMAns"); if (ba) ba.disabled = true;
+      sb.rpc("rpc_student_mesq_answer", {
+        p_token: TOKEN, p_id: MS.id, p_question_id: q.id,
+        p_option_ids: ids && ids.length ? ids : null, p_text: txt || null
+      }).then(function (r) {
+        busy = false;
+        (ids || []).forEach(function (id) {
+          var b = main.querySelector('[data-o="' + id + '"]');
+          if (b) b.classList.add(r.correct ? "right" : "wrong");
+        });
+        var prog = main.querySelector(".mqprog");
+        if (prog) {
+          var tmp = document.createElement("div");
+          tmp.innerHTML = mesqHead(d, Number(r.answered) || 0, Number(d.pos) || 1);
+          prog.replaceWith(tmp.children[1]);
+        }
+        $("mFb").innerHTML =
+          '<div class="' + (r.correct ? "ok" : "warn") + '">' + ic(r.correct ? "check" : "info") +
+            "<span>" + (r.correct ? "<b>Düzdür!</b>" : "<b>Səhvdir.</b>") +
+            (r.explanation ? "<br><i>" + qt(r.explanation) + "</i>" : "") + "</span></div>" +
+          '<div class="row" style="margin-top:10px">' +
+            '<button class="btn go" id="btnMNext" style="flex:1">' + (r.done ? "Nəticəyə bax" : "Növbəti sual") + "</button>" +
+            '<button class="btn" id="btnMOut">Sonra davam et</button></div>';
+        on("btnMNext", "click", function () {
+          if (r.done) mesqDone(r.n, r.ok); else screenMesq(MS.id);
+        });
+        on("btnMOut", "click", screenTests);
+        var nx = $("btnMNext"); if (nx && nx.scrollIntoView) nx.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }).catch(function (e) {
+        busy = false;
+        Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (x) { x.disabled = false; });
+        if ($("btnMAns")) $("btnMAns").disabled = false;
+        $("mFb").innerHTML = msg("err", fail(e)) +
+          '<button class="btn wide" id="btnMNext" style="margin-top:8px">Növbəti sual</button>';
+        on("btnMNext", "click", function () { screenMesq(MS.id); });
+      });
+    }
+    Array.prototype.forEach.call(main.querySelectorAll("[data-o]"), function (b) {
+      b.addEventListener("click", function () {
+        if (busy) return;
+        if (multi) { b.classList.toggle("sel"); return; }
+        b.classList.add("sel");
+        send([b.getAttribute("data-o")], null);
+      });
+    });
+    on("btnMAns", "click", function () {
+      if (q.kind === "text") {
+        var v = ($("mans") || {}).value || "";
+        if (!v.trim()) { $("mFb").innerHTML = msg("warn", "Əvvəl cavabı yaz."); return; }
+        send(null, v.trim());
+      } else {
+        var ids = Array.prototype.map.call(main.querySelectorAll("[data-o].sel"), function (x) { return x.getAttribute("data-o"); });
+        if (!ids.length) { $("mFb").innerHTML = msg("warn", "Əvvəl variant seç."); return; }
         send(ids, null);
       }
     });
