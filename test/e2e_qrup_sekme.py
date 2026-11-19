@@ -9,7 +9,7 @@
      generator (5 sual, bu qrupa); xəbərdarlıq sətirləri #/ht ilə eyni say
   D  Son tapşırıqlar: «done / tot» Tapşırıqlar sətri ilə eyni; «Hamısına bax» → Tapşırıqlar sekməsi;
      nəticə və zəif mövzu bu səhifədə YOXDUR — qeyd sətri Hesabata aparır
-  E  «+ Tapşırıq ver» menyusu: Test ver / Ev tapşırığı yaz; dişli → ayarlar
+  E  «+ Tapşırıq ver» menyusu: Test ver / Ev tapşırığı yaz / Məşq ver (936); dişli → ayarlar
   F  Boş qrup; 360/390: yana sürüşmə yoxdur, düymə ≥ 44 px, başlıq kiçilməyib
 """
 import os, re, sys
@@ -158,7 +158,7 @@ with sync_playwright() as pw:
     icmal(pg, gid)
     pg.click("#btnAsgs"); pg.wait_for_timeout(200)
     items = [x.strip() for x in pg.locator("#gAsgMenu a").all_inner_texts()]
-    ok(pg.locator("#gAsgMenu").is_visible() and items == ["Test ver", "Ev tapşırığı yaz"], "menyu: Test ver / Ev tapşırığı yaz", items)
+    ok(pg.locator("#gAsgMenu").is_visible() and items == ["Test ver", "Ev tapşırığı yaz", "Məşq ver"], "menyu: Test ver / Ev tapşırığı yaz / Məşq ver", items)
     pg.mouse.click(700, 700); pg.wait_for_timeout(200)
     ok(pg.locator("#gAsgMenu").is_hidden(), "kənara basanda bağlanır")
     pg.click("#btnAsgs"); pg.click("#gAsgT"); pg.wait_for_selector("#pick", timeout=20000)

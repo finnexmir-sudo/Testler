@@ -164,6 +164,8 @@ Bankı ayrı sessiya doldurur. Nömrə bölgüsü belədir:
 Yeni **kod** faylı 100-dən başlayır. Bank faylına toxunma; bank
 sessiyası da 100+ aralığına girmir.
 
+**Aktual (2026-10-09):** kod sessiyası yeni miqrasiyanı **900–999** aralığında yazır (hazırda 928-ə qədər); 226–899 və **1000+** bank aralığıdır (riyaziyyat 1/3/4-cü sinif 1000–1049, 11-ci sinif 1100–1149). Hər fənnin öz aralığı: `bil10-bank/CLAUDE.md`. `db/run.sh`-də bank faylı `bank <ad>` sətri ilə əlavə olunur; `db/test/miqrasiya.sh` siyahını `run.sh`-dən özü çıxarır — ona toxunmaq lazım deyil.
+
 **2026-09-07 razılaşması:** kod faylları 140-a qədər doludur (121–140
 bu sessiya). Bank sessiyası **141–158** aralığını götürür (18 bank-content
 düzəlişi, faylın adında `_bank` olsun, yeri `bil10-bank/db/`, burada

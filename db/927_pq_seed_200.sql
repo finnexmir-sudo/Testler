@@ -12,7 +12,8 @@
 --  200 cehdde (14/15)^200 ~ 1e-6: praktik olaraq bitir.  Qiymet: sert olmayan sablonda
 --  ilk cehdde cixir, elave xerc yoxdur; yalniz cox sert sablon 200 dovr edir (ms).
 --
---  Yalniz dovr sayi deyisir; qalan gövde 132-den EYNEN.   ON SERT: 132.   Tekrar isledile biler.
+--  Yalniz dovr sayi deyisir; qalan govde 926_sablon_reqem.sql-deki pq_seed-den EYNEN (METN ve IZAH da yoxlanir).
+--  ON SERT: 132, 926_sablon_reqem.   Tekrar isledile biler.
 -- =====================================================================
 
 create or replace function app.pq_seed(p_params jsonb, p_qid uuid default null,
@@ -39,11 +40,13 @@ begin
         ok := app.pq_cond(p_params->>'cond', vars);
       end if;
       if ok and p_qid is not null then
+        perform app.pq_render(q.body, vars), app.pq_render(coalesce(q.explanation, ''), vars)
+           from public.questions q where q.id = p_qid;
         select count(distinct app.pq_render(o.body, vars)) = count(*) into ok
           from public.question_options o where o.question_id = p_qid;
       end if;
     exception when others then
-      ok := false;     -- meselen sifira bolme - basqa qiymet yoxlanir
+      ok := false;     -- sifira bolme, uzun kesr - basqa qiymet yoxlanir
     end;
     if ok then return vars; end if;
   end loop;

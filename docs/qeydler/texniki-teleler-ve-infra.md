@@ -242,6 +242,17 @@ Lokal `psql`-də işləyir, Supabase-də işləmir — ona görə testlərdə tu
 Əvəzinə **CTE** işlət: `with d as (values ...), ins as (insert ... returning ...) insert ...`
 `db/07_seed_tests.sql` bunun nümunəsidir.
 
+**2026-11-11 (rəhbər, canlıda bank fayllarından öyrənilənlər) — bizim SQL fayllarına da aiddir:**
+
+- **SQL Editor faylı əmr-əmr işlədir, bütöv tranzaksiya kimi yox.** Sondakı ayrıca `raise exception`
+  əvvəlki `update`-ləri **geri qaytarmır** — yoxlama düşür, dəyişiklik isə artıq yazılıb. Dəyişiklik və
+  onun yoxlaması **eyni `do $$ … $$` blokunda** olmalıdır (xəta olsa blok bütöv geri qayıdır).
+- **Müvəqqəti cədvəl yox, faylın öz `begin; … commit;` bloku da yox.** `create temp table … on commit drop`
+  və `begin/commit` Supabase-də «relation … does not exist» verir. Siyahını sorğunun içində
+  `(values …) d(…)` kimi yaz.
+- **Çoxsətirli `'…'` mətni Windows-da köçürüləndə sətir sonu `\r\n` olur** — md5 müqayisəsi pozulur.
+  Belə mətni `E'…\n…'` şəklində yaz.
+
 ---
 
 ## `run.sh` — bank faylı yoxdursa dayanmır (2026-09-07)

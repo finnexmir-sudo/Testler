@@ -171,6 +171,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 922_aile_afarin_3.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 923_aile_xeberdarliq.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 924_aile_personaj.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 925_aile_yoxlama_olcu.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 926_sablon_reqem.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 926_ders_sablon_sayi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 927_pq_seed_200.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 928_plan_kecilen_test.sql
@@ -180,6 +181,10 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 931_zeif_movzu_bir_qayda.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 932_gedisat_bir_dustur.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 933_siqnal_sirasi.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 934_hedefli_tapsiriq.sql
+#  935/936: ders mesqi (pilot riy 5).  935 AYRI faylda - yeni enum deyeri eyni tranzaksiyada islenmir.
+#  Bank fayli 1470 (mesq suallari) bunlardan SONRA gelir.
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 935_mesq_status.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 936_mesq.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql
@@ -389,6 +394,133 @@ bank 303_bank_riy9_ders_berabersizlik.sql
 bank 304_bank_riy9_ders_vektorlar.sql
 bank 305_bank_riy9_ders_silsile.sql
 bank 306_bank_riy9_ders_ehtimal.sql
+bank 307_bank_riy9_ders_funksiya_pilot.sql
+bank 308_bank_riy9_ders_funksiya_qrafik.sql
+bank 309_bank_riy7_ders_statistika.sql
+bank 310_bank_riy7_ders_rasional.sql
+bank 311_bank_riy7_ders_paralellik.sql
+bank 312_bank_riy7_ders_coxhedliler.sql
+bank 313_bank_riy7_ders_ucbucaqlar.sql
+bank 314_bank_riy7_ders_muxteser.sql
+bank 315_bank_riy7_ders_funksiya.sql
+bank 316_bank_riy7_ders_tenlikler_sistemi.sql
+bank 317_bank_riy7_ders_konqruyentlik.sql
+bank 318_bank_riy7_ders_situasiya.sql
+bank 319_bank_riy7_ders_nisan.sql
+bank 320_bank_riy7_paralellik_duzelis.sql
+bank 321_bank_riy7_coxhedliler_duzelis.sql
+bank 322_bank_riy7_ucbucaqlar_arxiv.sql
+bank 323_bank_riy7_muxteser_arxiv.sql
+bank 324_bank_riy7_funksiya_duzelis.sql
+bank 325_bank_riy7_tenlikler_sistemi_duzelis.sql
+bank 326_bank_riy7_konqruyentlik_duzelis.sql
+bank 327_bank_riy7_situasiya_duzelis.sql
+bank 328_bank_riy7_cetinlik.sql
+bank 329_bank_riy7_kohne_qusurlar.sql
+bank 330_bank_riy10_ders_triq_ifade.sql
+bank 340_bank_riy10_ders_nisan.sql
+bank 341_bank_riy10_triq_ifade_duzelis.sql
+bank 342_bank_riy10_triq_ifade_cetinlik.sql
+bank 336_bank_riy10_ders_triq_tenlik.sql
+bank 343_bank_riy10_triq_tenlik_ders_nisan.sql
+bank 344_bank_riy10_triq_tenlik_duzelis.sql
+bank 345_bank_riy10_triq_tenlik_cetinlik.sql
+bank 333_bank_riy10_ders_sinus_kosinus.sql
+bank 360_bank_riy10_sinus_kosinus_nisan.sql
+bank 361_bank_riy10_sinus_kosinus_duzelis.sql
+bank 338_bank_riy10_ders_ustlu_loqarifm_a.sql
+bank 331_bank_riy10_ders_funksiya_a.sql
+bank 381_bank_riy10_ders_funksiya_b.sql
+bank 350_bank_riy10_funksiya_ders_nisan.sql
+bank 351_bank_riy10_funksiya_duzelis.sql
+bank 352_bank_riy10_funksiya_cetinlik.sql
+bank 334_bank_riy10_ders_triq_qrafik.sql
+bank 353_bank_riy10_triq_qrafik_ders_nisan.sql
+bank 354_bank_riy10_triq_qrafik_duzelis.sql
+bank 355_bank_riy10_triq_qrafik_cetinlik.sql
+bank 380_bank_riy10_ders_ustlu_loqarifm_b.sql
+bank 346_bank_riy10_ustlu_loqarifm_ders_nisan.sql
+bank 347_bank_riy10_ustlu_loqarifm_duzelis.sql
+bank 348_bank_riy10_ustlu_loqarifm_cetinlik.sql
+bank 339_bank_riy10_ders_statistika.sql
+bank 362_bank_riy10_statistika_nisan.sql
+bank 363_bank_riy10_statistika_duzelis.sql
+bank 337_bank_riy10_ders_hecm.sql
+bank 364_bank_riy10_hecm_nisan.sql
+bank 365_bank_riy10_hecm_duzelis.sql
+bank 335_bank_riy10_ders_coxuzlu.sql
+bank 366_bank_riy10_coxuzlu_nisan.sql
+bank 367_bank_riy10_coxuzlu_duzelis.sql
+bank 332_bank_riy10_ders_feza.sql
+bank 368_bank_riy10_feza_nisan.sql
+bank 369_bank_riy10_feza_duzelis.sql
+bank 370_bank_riy10_ders_dar370.sql
+bank 371_bank_riy10_ders_dar371.sql
+bank 372_bank_riy10_ders_dar372.sql
+bank 390_bank_riy7_ders_tamamlama.sql
+bank 391_bank_riy9_ders_tamamlama.sql
+bank 1000_bank_riy1_ders_elamet_ededler10.sql
+bank 1001_bank_riy1_ders_muqayise.sql
+bank 1002_bank_riy1_ders_toplama10.sql
+bank 1100_bank_riy11_ders_coxhedli.sql
+bank 1120_bank_riy11_ders_nisan.sql
+bank 1121_bank_riy11_coxhedli_duzelis.sql
+bank 400_bank_inf10_ders_sebeke.sql
+bank 401_bank_inf11_ders_modellesdirme.sql
+bank 402_bank_inf11_ders_modellesdirme_a.sql
+bank 403_bank_inf10_ders_sebeke_a.sql
+bank 404_bank_inf10_ders_informasiya.sql
+bank 405_bank_inf9_ders_kodlasdirma.sql
+bank 406_bank_inf9_kodlasdirma_arxiv.sql
+bank 407_bank_inf_ders_nisan.sql
+bank 408_bank_inf_kohne_duzelis.sql
+bank 409_bank_inf9_ders_texnologiya.sql
+bank 410_bank_inf9_texnologiya_nisan.sql
+bank 411_bank_inf9_texnologiya_duzelis.sql
+bank 412_bank_inf9_ders_proqramlasdirma.sql
+bank 413_bank_inf9_proqramlasdirma_nisan.sql
+bank 414_bank_inf9_proqramlasdirma_duzelis.sql
+bank 850_izah_sablon_temizle.sql
+bank 425_bank_inf4_ders_alqoritm.sql
+bank 426_bank_inf_alqoritm4.sql
+bank 427_bank_inf_alqoritm4_duzelis.sql
+bank 428_bank_inf4_ders_mentiq.sql
+bank 429_bank_inf_mentiq4.sql
+bank 430_bank_inf_mentiq4_duzelis.sql
+bank 431_bank_inf4_ders_informasiya.sql
+bank 432_bank_inf_informasiya4.sql
+bank 433_bank_inf_informasiya4_duzelis.sql
+bank 650_movzular_az4.sql
+bank 651_bank_az4_ders_frazeologiya.sql
+bank 652_bank_az4_ders_mecaz_leksika.sql
+bank 653_bank_az4_ders_orfoqrafiya.sql
+bank 655_bank_az4_ders_frazeologiya_2.sql
+bank 656_bank_az4_ders_mecaz_leksika_2.sql
+bank 657_bank_az4_ders_orfoqrafiya_2.sql
+bank 665_bank_az4_ders_isim_sifet_zerf.sql
+bank 666_bank_az4_ders_evezlik.sql
+bank 667_bank_az4_ders_feil.sql
+bank 668_bank_az4_ders_komekci.sql
+bank 669_bank_az4_ders_metn.sql
+bank 670_bank_az4_ders_sual_evezlik_2.sql
+bank 671_bank_az4_ders_zerf_2.sql
+bank 672_bank_az4_ders_feil_2.sql
+bank 673_bank_az4_ders_komekci_2.sql
+bank 674_bank_az4_ders_metn_2.sql
+bank 680_bank_az4_ders_cumle.sql
+bank 681_bank_az4_ders_durgu.sql
+bank 682_bank_az4_ders_yazi.sql
+bank 685_bank_az4_ders_cumle_2.sql
+bank 686_bank_az4_ders_durgu_2.sql
+bank 687_bank_az4_ders_yazi_2.sql
+bank 688_bank_az4_ders_insa_2.sql
+bank 689_bank_az4_ders_cetin.sql
+bank 663_bank_az4_ders_sifet_asan.sql
+bank 675_bank_az4_ders_hallanma.sql
+bank 690_bank_az4_ders_asan_payi.sql
+bank 660_bank_az4_ders_nisan.sql
+bank 661_bank_az4_kohne_duzelis.sql
+bank 662_bank_az4_kohne_cetinlik.sql
 # Supabase-in default huquqlarini tekrarlayiriq ki, revoke-larin
 # hequiqeten isledigini yoxlaya bilek
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -f test/01_grants.sql
@@ -399,6 +531,247 @@ bank 306_bank_riy9_ders_ehtimal.sql
 #  davam etsin; smoke_hesab_bagli / e2e_hesab_bagli ozu acir ve geri qoyur.
 [ "$LOCAL" = "--local" ] && psql -v ON_ERROR_STOP=1 -q -d "$DB" -c "update public.app_state set val = jsonb_build_object('on', false) where key = 'hesab_bagli'"
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 05_grants.sql
+# --- 2026-11-11 (rehber, bil10-bank/plan/kod_run_sh_bank.txt): canlida isledilmis, run.sh-de olmayan 227 bank fayli,
+#     CANLI SIRASI ile - sonraki fayl evvelkinin deyisdirdiyi suallari yoxlayir, sira deyismir.
+#     1250/1251 (Az dili 7 movzu agaci) qesden yoxdur - yeni suallarla birlikde gelecek.
+# --- informatika
+bank 415_bank_inf9_ders_cedvel.sql
+bank 416_bank_inf9_cedvel_kohne.sql
+bank 417_bank_inf9_ders_komputer.sql
+bank 418_bank_inf9_komputer_kohne.sql
+bank 419_bank_inf9_ders_tamamlama.sql
+bank 420_bank_inf9_sablon_arxiv.sql
+bank 421_bank_inf123_kohne_generator.sql
+bank 422_bank_inf_kohne_generator_qaliq.sql
+bank 434_bank_inf4_ders_kompyuter.sql
+bank 435_bank_inf4_kompyuter_kohne.sql
+bank 436_bank_inf4_sablon_qaliq.sql
+bank 437_bank_inf4_qrafik_ders.sql
+bank 438_bank_inf4_qrafik_kohne.sql
+bank 1150_bank_inf10_ders_baza.sql
+bank 1151_bank_inf10_baza_kohne.sql
+bank 1153_bank_inf10_ders_model.sql
+bank 1154_bank_inf10_model_kohne.sql
+bank 1156_bank_inf10_ders_veb.sql
+bank 1157_bank_inf10_veb_kohne.sql
+bank 1158_bank_inf10_sablon_arxiv.sql
+bank 1160_bank_inf11_sistemler.sql
+bank 1161_bank_inf11_sistemler_kohne.sql
+bank 1163_bank_inf11_ders_komputer_veb.sql
+bank 1164_bank_inf11_komputer_veb_kohne.sql
+bank 1166_bank_inf11_ders_sebeke_baza.sql
+bank 1167_bank_inf11_sebeke_baza_kohne.sql
+bank 1170_bank_inf5_ders.sql
+bank 1171_bank_inf5_kohne.sql
+bank 1173_bank_inf5_kompyuter_ders.sql
+bank 1174_bank_inf5_kompyuter_kohne.sql
+bank 1176_bank_inf5_tetbiqi.sql
+bank 1177_bank_inf5_tetbiqi_kohne.sql
+bank 1179_bank_inf5_alqoritm_ders.sql
+bank 1180_bank_inf5_alqoritm_kohne.sql
+bank 1190_bank_inf6_ders.sql
+bank 1191_bank_inf6_kohne.sql
+bank 1193_bank_inf6_proqram_teminati.sql
+bank 1194_bank_inf6_proqram_teminati_kohne.sql
+bank 1196_bank_inf6_proqramlasdirma_ders.sql
+bank 1197_bank_inf6_proqramlasdirma_kohne.sql
+bank 1199_bank_inf6_internet_ders.sql
+bank 1200_bank_inf6_internet_kohne.sql
+bank 1210_bank_inf7_ders_informasiya_internet.sql
+bank 1211_bank_inf7_kohne.sql
+bank 1212_bank_inf7_internet_226_arxiv.sql
+bank 1213_bank_inf7_kompyuter_ders.sql
+bank 1214_bank_inf7_kompyuter_kohne.sql
+bank 1216_bank_inf7_proqramlasdirma_ders.sql
+bank 1217_bank_inf7_proqramlasdirma_kohne.sql
+bank 1219_bank_inf7_tetbiqi.sql
+bank 1220_bank_inf7_tetbiqi_kohne.sql
+bank 1230_bank_inf8_ders_informasiya_internet.sql
+bank 1231_bank_inf8_kohne.sql
+bank 1233_bank_inf8_multimedia_kompyuter.sql
+bank 1234_bank_inf8_multimedia_kompyuter_kohne.sql
+bank 1236_bank_inf8_proqramlasdirma_ders.sql
+bank 1237_bank_inf8_proqramlasdirma_kohne.sql
+bank 1239_bank_inf8_tetbiqi.sql
+bank 1240_bank_inf8_tetbiqi_kohne.sql
+bank 1270_bank_inf1_ders_a.sql
+bank 1271_bank_inf1_kohne.sql
+bank 1273_bank_inf1_ders_ardicilliq_imkanlar.sql
+bank 1274_bank_inf1_ardicilliq_imkanlar_kohne.sql
+bank 1276_bank_inf2_ders.sql
+bank 1277_bank_inf2_kohne.sql
+bank 1279_bank_inf2_alqoritm_proqramlar.sql
+bank 1280_bank_inf2_alqoritm_proqramlar_kohne.sql
+bank 1282_bank_inf3_ders.sql
+bank 1283_bank_inf3_kohne.sql
+bank 1285_bank_inf3_ders.sql
+bank 1286_bank_inf3_kohne.sql
+bank 1288_bank_inf13_cetinlik.sql
+bank 1289_bank_inf13_cetin.sql
+bank 1290_bank_inf46_cetinlik.sql
+bank 1291_bank_inf46_cetin.sql
+bank 1292_bank_inf79_cetinlik.sql
+bank 1293_bank_inf79_cetin.sql
+bank 1294_bank_inf1011_cetinlik.sql
+bank 1295_bank_inf1011_cetin.sql
+bank 1296_bank_inf_cetin3a.sql
+bank 1297_bank_inf79_cetin3.sql
+bank 1298_bank_inf_ikimenali.sql
+# --- Az dili / ingilis
+bank 695_bank_az123_kohne_generator.sql
+bank 696_bank_az56_kohne_generator.sql
+bank 697_bank_az8_11_kohne_generator.sql
+bank 700_bank_ing1_kohne_duzelis.sql
+bank 701_bank_ing2_kohne_duzelis.sql
+bank 702_bank_ing3_kohne_duzelis.sql
+bank 703_bank_ing4_kohne_duzelis.sql
+bank 704_bank_ing5_kohne_duzelis.sql
+bank 705_bank_ing6_kohne_duzelis.sql
+bank 706_bank_ing7_kohne_duzelis.sql
+bank 707_bank_ing8_kohne_duzelis.sql
+bank 708_bank_ing9_kohne_duzelis.sql
+bank 709_bank_ing10_kohne_duzelis.sql
+bank 710_bank_ing11_kohne_duzelis.sql
+bank 711_bank_ing8_latin_yazilis.sql
+bank 1260_bank_az7_kohne_generator.sql
+# --- riy 11
+bank 1101_bank_riy11_ders_feza_vektor.sql
+bank 1102_bank_riy11_ders_limit.sql
+bank 1103_bank_riy11_ders_firlanma.sql
+bank 1104_bank_riy11_ders_toreme.sql
+bank 1105_bank_riy11_ders_firlanma_hecm.sql
+bank 1106_bank_riy11_ders_arasdirma.sql
+bank 1107_bank_riy11_ders_inteqral.sql
+bank 1108_bank_riy11_ders_statistika.sql
+bank 1109_bank_riy11_ders_tenlikler.sql
+bank 1122_bank_riy11_ders_nisan.sql
+bank 1123_bank_riy11_feza_vektor_duzelis.sql
+bank 1124_bank_riy11_ders_nisan.sql
+bank 1125_bank_riy11_limit_duzelis.sql
+bank 1126_bank_riy11_ders_nisan.sql
+bank 1127_bank_riy11_firlanma_duzelis.sql
+bank 1128_bank_riy11_toreme_nisan.sql
+bank 1129_bank_riy11_toreme_duzelis.sql
+bank 1130_bank_riy11_ders_nisan.sql
+bank 1131_bank_riy11_firlanma_hecm_duzelis.sql
+bank 1132_bank_riy11_arasdirma_nisan.sql
+bank 1133_bank_riy11_arasdirma_duzelis.sql
+bank 1134_bank_riy11_ders_nisan.sql
+bank 1135_bank_riy11_inteqral_duzelis.sql
+bank 1136_bank_riy11_ders_nisan.sql
+bank 1137_bank_riy11_statistika_duzelis.sql
+bank 1138_bank_riy11_ders_nisan.sql
+bank 1139_bank_riy11_tenlikler_duzelis.sql
+bank 1140_bank_riy11_firlanma_tecili.sql
+# --- riy 7/10/11
+bank 1354_bank_riy7_cetinlik.sql
+bank 1355_bank_riy7_cetin.sql
+bank 1356_bank_riy10_cetinlik.sql
+bank 1357_bank_riy10_cetin.sql
+bank 1360_bank_riy10_cetin3.sql
+bank 1358_bank_riy11_cetinlik.sql
+bank 1359_bank_riy11_cetin.sql
+bank 1361_bank_riy11_cetin3.sql
+bank 1362_bank_riy11_sablon_cetinlik.sql
+bank 1364_bank_riy71011_ikimenali.sql
+# --- riy 5/6/8/9
+bank 396_bank_riy5_cetinlik.sql
+bank 397_bank_riy6_cetinlik.sql
+bank 398_bank_riy8_cetinlik.sql
+bank 399_bank_riy9_cetinlik.sql
+bank 382_bank_riy5_cetin.sql
+bank 383_bank_riy6_cetin.sql
+bank 384_bank_riy8_cetin.sql
+bank 385_bank_riy9_cetin.sql
+bank 386_bank_riy5_cetin2.sql
+bank 387_bank_riy6_cetin2.sql
+bank 388_bank_riy8_cetin2.sql
+bank 389_bank_riy9_cetin2.sql
+bank 1350_bank_riy5_cetin3.sql
+bank 1351_bank_riy6_cetin3.sql
+bank 1352_bank_riy8_cetin3.sql
+bank 1353_bank_riy9_cetin3.sql
+bank 1363_bank_riy5689_ikimenali.sql
+# --- riy 1
+bank 1003_bank_riy1_ders_cixma10.sql
+bank 1004_bank_riy1_ders_ededler20.sql
+bank 1005_bank_riy1_ders_fiqurlar.sql
+bank 1006_bank_riy1_ders_toplama20.sql
+bank 1007_bank_riy1_ders_cixma20.sql
+bank 1008_bank_riy1_ders_ededler100.sql
+bank 1009_bank_riy1_ders_olcme_melumat.sql
+bank 1300_bank_riy1_ders_nisan.sql
+bank 1301_bank_riy1_kohne_duzelis_1a.sql
+bank 1302_bank_riy1_ders_nisan.sql
+bank 1303_bank_riy1_kohne_duzelis_1b.sql
+bank 1304_bank_riy1_ders_nisan.sql
+bank 1305_bank_riy1_kohne_duzelis_1c.sql
+bank 1322_bank_riy1_cetinlik.sql
+bank 1344_bank_riy1_ikimenali.sql
+# --- riy 3
+bank 1010_bank_riy3_ders_ededler1000.sql
+bank 1011_bank_riy3_ders_toplama.sql
+bank 1306_bank_riy3_ders_nisan.sql
+bank 1307_bank_riy3_kohne_duzelis_3a.sql
+bank 1012_bank_riy3_ders_cixma.sql
+bank 1013_bank_riy3_ders_vurma_bolme.sql
+bank 1308_bank_riy3_ders_nisan.sql
+bank 1309_bank_riy3_kohne_duzelis_3b.sql
+bank 1014_bank_riy3_ders_ifade_tenlik.sql
+bank 1015_bank_riy3_ders_fiqurlar.sql
+bank 1016_bank_riy3_ders_vurma_bolme_2.sql
+bank 1310_bank_riy3_ders_nisan.sql
+bank 1311_bank_riy3_kohne_duzelis_3c.sql
+bank 1017_bank_riy3_ders_kesr_ededler10000.sql
+bank 1018_bank_riy3_ders_olcme.sql
+bank 1019_bank_riy3_ders_melumat.sql
+bank 1312_bank_riy3_ders_nisan.sql
+bank 1313_bank_riy3_kohne_duzelis_3d.sql
+bank 1323_bank_riy3_olcme_kocen_nisan.sql
+# --- riy 4
+bank 1020_bank_riy4_ders_coxreqemli.sql
+bank 1021_bank_riy4_ders_toplama_cixma.sql
+bank 1022_bank_riy4_ders_vurma_bolme.sql
+bank 1314_bank_riy4_ders_nisan.sql
+bank 1315_bank_riy4_kohne_duzelis_4a.sql
+bank 1023_bank_riy4_ders_ifade_tenlik.sql
+bank 1024_bank_riy4_ders_vurma_bolme_2.sql
+bank 1026_bank_riy4_ders_kesr.sql
+bank 1316_bank_riy4_ders_nisan.sql
+bank 1317_bank_riy4_kohne_duzelis_4b.sql
+bank 1025_bank_riy4_ders_fiqurlar.sql
+bank 1027_bank_riy4_ders_onluq_kesr_pullar.sql
+bank 1318_bank_riy4_ders_nisan.sql
+bank 1319_bank_riy4_kohne_duzelis_4c.sql
+bank 1028_bank_riy4_ders_olcme.sql
+bank 1029_bank_riy4_ders_melumat.sql
+bank 1320_bank_riy4_ders_nisan.sql
+bank 1321_bank_riy4_kohne_duzelis_4d.sql
+# --- riy 2
+bank 1330_movzular_riy2.sql
+bank 1331_bank_riy2_ders_nisan.sql
+bank 1333_bank_riy2_ders_ededler_100.sql
+bank 1334_bank_riy2_ders_toplama_100.sql
+bank 1335_bank_riy2_ders_cixma_100.sql
+bank 1324_bank_riy2_kohne_duzelis_2a.sql
+bank 1325_bank_riy2_kohne_duzelis_2b.sql
+bank 1336_bank_riy2_ders_vurma.sql
+bank 1337_bank_riy2_ders_fiqurlar.sql
+bank 1338_bank_riy2_ders_toplama_onluq.sql
+bank 1339_bank_riy2_toplama_cixma.sql
+bank 1340_bank_riy2_vurma_cedveli.sql
+bank 1326_bank_riy2_kohne_2c.sql
+bank 1332_bank_riy2_bolme_kocurme.sql
+bank 1341_bank_riy2_ders_ededler_500.sql
+bank 1342_bank_riy2_ders_olcu.sql
+bank 1343_bank_riy2_ders_melumat.sql
+bank 1327_bank_riy2_kohne_duzelis_2d.sql
+# --- riy 2/3/4 son
+bank 1328_bank_riy234_mesele_cetinlik.sql
+bank 1345_bank_riy2_ikimenali.sql
+bank 1346_bank_riy3_ikimenali.sql
+bank 1347_bank_riy4_ikimenali.sql
+
 # Statistika toplanir.  Teze qurulmus bazada planlayicinin hec bir
 # statistikasi olmur ve TAM BASQA plan secir: olcduk, rpc_bank_facets
 # 620 ms cekirdi, "analyze"den sonra 20 ms.  Yeni surat olcen her kes

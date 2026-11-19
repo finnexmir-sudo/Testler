@@ -652,3 +652,40 @@ Yoxlama: `db/test/smoke_ders_sablon.sql` (D1 10 şablon = 20 hazır, D2 9 şablo
 
 - **db/927 (08.10)**: `app.pq_seed` cehd sayi 40 -> 200 (sert shertli sablon yukleme/render zamani sinmasin; 40-da `a=b` tipli shertde 400-den 34 pozulma idi). Smoke: `smoke_pq_cehd.sql`.
 - **db/test/miqrasiya.sh (08.10)**: siyahi ikiye bolunub — SABIT (kohne commitde olan, bank fayllari 100-den evvel) + DINAMIK (run.sh-de olub kohnede/sabitde olmayan, run.sh sirasi ile). Yeni fayl run.sh-e elave olunanda miqrasiya.sh-e toxunmaq lazim deyil (188 ve 9xx evvel yox idi, 240 188-i gozleyib sinirdi).
+
+
+## Bank sessiyasından köçürülən qeydlər (08–09.10, `claude/bil10-question-bank-expansion-eu6vkn`)
+
+Bu sətirlər branşda köhnə (böyük) CLAUDE.md-yə yazılmışdı; CLAUDE.md qısaldıldığı üçün birləşmədə bura köçürüldü — mətn dəyişməyib.
+
+**Yoxlama üsulu (2026-10-07 sınandı, ~3 dəqiqə):** `bil10-bank/tools/mundericat.py`
+nüsxəsini `OUT` başqa qovluğa yönəldilmiş halda işlət, 111 kitabın yeni
+mündəricatını `bil10-bank/mundericat/` ilə `diff` et (`#` sətirləri çıxmaqla).
+2026-10-07: 111/111 eyni (baza 25–27.08.2026); 7-ci sinif riyaziyyatı
+2024–25 müəllim planı ilə də eyni çıxdı. Nəticə: dərslik ildən-ilə az
+dəyişir, hər il yalnız dəyişən dərslərə sual yazılır.
+**Qalsın (istifadəçi, 2026-10-07):** bunu skriptə çevirmək və 2027
+avqust sonuna xatırlatma qoymaq təklif edildi, hələ edilmir — avqust
+yaxınlaşanda xatırlat.
+
+- **Rəqəm formatı (db/926, 2026-10-08):** `3,5` (vergül), `−3` (bankdakı kimi «−»),
+  4 onluq rəqəmdən uzun nəticə (1/3) **xəta** — `pq_check` 12 nümunədə tutur, müəllif
+  şərt yazır (`a%b=0`); `pq_seed` sualın mətnini də render edib uyğunsuz qiyməti atır.
+  Yazılı (`text`) şablonda cavab mənfi və ya kəsr olmasın — şagird «-3», «3.5» yazar,
+  müqayisə hərfi-hərfidir.
+- Yoxlama: `smoke_parametrik.sql` (6), `test/e2e_parametrik.py`;
+- **Reqressiya testi:** `bil10-bank/tools/riy_ders/test_qurulus_yoxla.py` (29 hal; Claude rəyindən).
+  Yoxlayıcıya toxunanda əvvəl bu keçməlidir; yeni səhv sinfi → tutmalı/tutmamalı hal əlavə olunur.
+- **2026-09-24 vəziyyəti:** 38 fəsil (266–306) yenidən süzülüb, `bil10-bank` main-də. Canlıya
+  265→306 sırası ilə yüklənməlidir (`canli_bank_yoxla.sql` ilə yoxla).
+- **Qayda v2 təsdiqləndi (2026-09-24, 1bd1f94).** İstifadəçi: «suallarımız DİM-in hazırladığı suallar
+  kimi keyfiyyətli, faydalı, işə yarayan olsun». Qayda indi **bütün fənlər** üçündür: DİM səviyyəsi
+  bölməsi (fəsil spesifikasiyası: idrak B ≤ 20 %, A ≥ 30 %, ≥ 12 çətin, ≥ 4 tip), kitabdan yalnız
+  tip cədvəli, kor həll ayrı agent, rəyçi düzəlişi yenidən kor həlldən, VARIANT-LEAK. Alətlər
+  `FENN`/`PREF` mühit dəyişəni ilə hər fənn üçün işləyir.
+- **Hər fənn öz sessiyasında** (istifadəçi qərarı). Protokol və fənn üzrə nömrə aralıqları:
+  `bil10-bank/CLAUDE.md` — riyaziyyat 307–399, informatika 400–449, fizika 450–499, kimya 500–549,
+  biologiya 550–599, coğrafiya 600–649, Az dili 650–699, ingilis 700–749, tarix 750–799, ədəbiyyat
+  800–849, qalanı 850–899. **Kod sessiyası yeni miqrasiyanı 900–999 aralığında yazır** — `db/` siyahısındakı son
+  nömrədən sonrakını götürmə, 226–899 və **1000+** bank aralığıdır (2026-10-07: riyaziyyat 1/3/4-cü sinif
+  1000–1049, 11-ci sinif 1100–1149).
