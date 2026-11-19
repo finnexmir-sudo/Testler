@@ -64,8 +64,10 @@ set request.jwt.claim.sub = '11110000-0000-0000-0000-0000000000d2';
 do $$
 declare q uuid; ok1 boolean := false; ok2 boolean := false;
 begin
+  --  sagirdin cavabi ile EYNI sual (order by created_at): sirasiz «limit 1» bazanin
+  --  fiziki duzulusunden asili idi - teze qurulmus bazada basqa sual cixirdi, 3-cu bolme dusurdu
   select id into q from public.questions
-   where owner_type = 'platform' and status = 'published' limit 1;
+   where owner_type = 'platform' and status = 'published' order by created_at limit 1;
   perform public.rpc_report_question(q, 'cavab', 'Cavab B olmalidir');
   perform public.rpc_report_question(q, 'yazi', 'tekrar');
   begin
