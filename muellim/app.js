@@ -4397,7 +4397,9 @@
     function hd(t, sag) { return '<div class="ykh"><div><b>' + t + "</b></div>" + (sag || "") + "</div>"; }
     Promise.all([
       sb.rpc("rpc_class_assignments", { p_class_id: g.id }).catch(function () { return null; }),
-      sb.rpc("rpc_lesson_prep", { p_class_id: g.id }).catch(function () { return null; })
+      sb.rpc("rpc_lesson_prep", { p_class_id: g.id }).catch(function () { return null; }),
+      //  936: ders mesqi - «Son tapşırıqlar»da gorunsun (yoxsa muellim «hec ne verilmeyib» sanir)
+      sb.rpc("rpc_mesq_list", { p_class_id: g.id }).catch(function () { return []; })
     ]).then(function (rr) {
       if (!live() || !$("gkDers")) return;
       var asg = rr[0] || {}, d = rr[1] || {};
@@ -4473,8 +4475,20 @@
           '<span class="ytn">' + hd0 + " / " + ht0 + "</span>" +
           '<span class="ytk">Bax ' + ic("right") + "</span></a>");
       }
+      //  936: bitmemis ders mesqleri (en cox 2) - «dərs məşqi» nisani ile, oz hesabatina aparir
+      var mqs = (rr[2] || []).filter(function (m) { return !(Number(m.n) && Number(m.finished) >= Number(m.targets) && Number(m.targets)); }).slice(0, 2);
+      mqs.forEach(function (m) {
+        var f0 = Number(m.finished) || 0, t0 = Number(m.targets) || 0;
+        rows.push('<a class="ytr ga4 gkmq" href="#/mq/' + esc(m.id) + '">' +
+          '<span class="ytq"><b><em class="mqtag">dərs məşqi</em>' + esc(m.lesson) + "</b><i>" +
+            (m.student ? "yalnız " + esc(firstName(m.student) || m.student) : "bütün qrup") +
+            (m.due ? " · " + hwDayAz(m.due) : "") + " · " + f0 + "/" + t0 + " bitirib</i></span>" +
+          '<span class="yts">' + (m.due ? hwDayAz(m.due) : "—") + "</span>" +
+          '<span class="ytn">' + f0 + " / " + t0 + "</span>" +
+          '<span class="ytk">Bax ' + ic("right") + "</span></a>");
+      });
       $("gkAsg").innerHTML = hd("Son tapşırıqlar",
-          '<a class="gkm" href="#/a/' + esc(g.id) + '" id="gkAsgAll">' + (items.length || hw ? "Hamısına bax" : "Tapşırıqlar") + " " + ic("right") + "</a>") +
+          '<a class="gkm" href="#/a/' + esc(g.id) + '" id="gkAsgAll">' + (items.length || hw || mqs.length ? "Hamısına bax" : "Tapşırıqlar") + " " + ic("right") + "</a>") +
         (rr[0] === null ? '<p class="muted gkp">Tapşırıqlar yüklənmədi.</p>'
           : rows.length
             ? '<div class="ytb"><div class="ytr ga4 yth"><span>Tapşırıq</span><span>Son tarix</span><span>Tamamlayan</span><span></span></div>' +
@@ -7640,8 +7654,8 @@
     bandHead({
       back: { id: "btnBack", label: "Geri" },
       eye: g.name,
-      title: "Məşq ver",
-      sub: "Dərs üzrə məşq — test kitabının yerinə. Suallar asandan çətinə gəlir, şagird hər cavabdan sonra düz/səhv və izahı görür."
+      title: "Dərs məşqi ver",
+      sub: "Test kitabının yerinə. Test deyil: suallar asandan çətinə gəlir, şagird hər cavabdan sonra düz/səhv və izahı görür."
     });
     on("btnBack", "click", function () { goBack("#/a/" + g.id); });
     var items = d.items || [];
@@ -7711,7 +7725,7 @@
         p_due: ($("mqDate") || {}).value || null
       }).then(function (r) {
         busy = false;
-        MQ_FLASH = "Məşq verildi — " + (Number(r.n) || 0) + " sual. Şagird öz ekranında «Məşq» bölməsində görür.";
+        MQ_FLASH = "Dərs məşqi verildi — " + (Number(r.n) || 0) + " sual. Şagird öz ekranında «Dərs məşqi» bölməsində görür.";
         nav("#/mq/" + r.id);
       }).catch(function (e) {
         setBusy("btnMqGive", false, "Məşqi ver");
@@ -7729,7 +7743,7 @@
       if (!$("mqBox")) return;
       l = l || [];
       if (!l.length) { box.innerHTML = ""; return; }
-      box.innerHTML = "<h2>Məşqlər</h2>" +
+      box.innerHTML = "<h2>Dərs məşqləri</h2>" +
         '<div class="card pad0 mqlist">' + l.map(function (x) {
           var tg = Number(x.targets) || 0;
           return '<a class="mqr" href="#/mq/' + esc(x.id) + '"><span class="b"><b>' + esc(x.lesson) + "</b><i>" +
@@ -7755,7 +7769,7 @@
     topTitle.textContent = d.lesson || "Məşq";
     bandHead({
       back: { id: "btnBack", label: "Geri" },
-      eye: (d.class || "") + " · Məşq",
+      eye: (d.class || "") + " · Dərs məşqi",
       title: d.lesson || "Məşq",
       sub: esc([d.chapter, n + " sual", d.student ? "yalnız " + d.student : "bütün qrup",
                 d.due ? "son tarix " + mqDue(d.due) : ""].filter(Boolean).join(" · "))
@@ -7783,7 +7797,7 @@
           '<span class="w">' + Number(h.wrong) + " / " + Number(h.answered) + " səhv</span></div>";
       }).join("") : '<div class="empty"><b>Hələ səhv yoxdur</b>Şagirdlər işlədikcə burada çətin suallar görünəcək.</div>') + "</div>" +
       '<div class="spacer"></div>' +
-      '<details class="fold pmore" id="mqMore"><summary><span><b>Digər əməliyyatlar</b><i>məşqi sil</i></span>' + ic("right", "ar") + "</summary>" +
+      '<details class="fold pmore" id="mqMore"><summary><span><b>Digər əməliyyatlar</b><i>dərs məşqini sil</i></span>' + ic("right", "ar") + "</summary>" +
         '<div style="padding:12px 0"><button class="btn ghost" id="btnMqDel">' + ic("x") + "Məşqi sil</button>" +
         '<p class="muted" style="margin:8px 0 0">Şagirdlərin siyahısından çıxır, cavabları da silinir.</p></div></details>');
     on("btnMqDel", "click", function () {
@@ -7869,6 +7883,7 @@
           "<li><b>Ev tapşırığı</b> — dərs planında mövzunu «Keçildi» edəndə sistem özü təklif edir.</li>" +
           "<li><b>Diaqnostik test</b> — yeni şagird nəyi bilmir: şagirdin hesabatında.</li>" +
           "<li><b>Səhvlərdən təkrar</b> — şagirdin öz səhvlərindən: şagirdin hesabatında.</li>" +
+          "<li><b>Dərs məşqi</b> — test kitabının yerinə: «Məşq ver». Şagird hər cavabdan sonra düzünü görür; nəticəsi orta bala düşmür.</li>" +
         "</ul></details>" +
       '<div id="pick" class="card"><div class="skel">Testlər yüklənir…</div></div>' +
       '<div class="spacer"></div>' +
@@ -13177,7 +13192,7 @@
   var HIST = [], BACKING = false, CUR_I = 0;
   function routeTitle(h) {
     var k = (h || "#/").replace(/^#/, "").split("/").filter(Boolean)[0] || "";
-    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", mq: "Məşq", b: "Suallar", gen: "Test yığ", nt: "Nəticələr", sus: "Test işləməyənlər", zm: "Zəif şagirdlər",
+    return { g: "Qrup", gs: "Qruplar", r: "Hesabat", a: "Tapşırıqlar", mq: "Dərs məşqi", b: "Suallar", gen: "Test yığ", nt: "Nəticələr", sus: "Test işləməyənlər", zm: "Zəif şagirdlər",
              t: "Vərəq", pk: "Dərs paketi", adm: "İdarəetmə", me: "Profil", n: "Bildirişlər", bize: "Bizə yazın",
              q: "Sual", s: "Şagird", p: "Paket", demo: "Nümunə" }[k] || "Əsas səhifə";
   }

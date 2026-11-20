@@ -129,7 +129,7 @@ with sync_playwright() as pw:
     pg.click("#btnMqGive"); pg.wait_for_function("location.hash.indexOf('#/mq/') === 0", timeout=20000)
     pg.wait_for_selector("#mqStarted", timeout=20000); pg.wait_for_timeout(400)
     mid = hash_(pg).split("/")[-1]
-    ok(pg.inner_text("#mqStarted").strip() == "0 / 2" and "Məşq verildi — 6 sual" in pg.inner_text("#main"), "hesabat: 0 / 2 başlayıb, təsdiq yazısı")
+    ok(pg.inner_text("#mqStarted").strip() == "0 / 2" and "Dərs məşqi verildi — 6 sual" in pg.inner_text("#main"), "hesabat: 0 / 2 başlayıb, təsdiq yazısı")
     ok(pg.locator("#mqStu .mqr .mq0").count() == 2, "hər iki şagird «hələ başlamayıb»")
     ok("Hələ səhv yoxdur" in pg.inner_text("#mqHard"), "boş hal: «Hələ səhv yoxdur»")
     m = db("select cardinality(qids) n from public.mesq_assignments where id = %s::uuid", (mid,), one=True)
@@ -142,10 +142,18 @@ with sync_playwright() as pw:
         pg.wait_for_selector("#btnBack", timeout=10000); pg.click("#btnBack")
     pg.wait_for_function("location.hash === '#/a/%s'" % gid, timeout=10000)
     pg.wait_for_selector("#mqBox .mqr", timeout=20000)
-    ok("Natural ədədlər" in pg.inner_text("#mqBox") and "0 / 2 bitirib" in pg.inner_text("#mqBox"), "«Məşqlər» siyahısında", pg.inner_text("#mqBox").replace("\n", " "))
+    ok("Natural ədədlər" in pg.inner_text("#mqBox") and "0 / 2 bitirib" in pg.inner_text("#mqBox"), "«Dərs məşqləri» siyahısında", pg.inner_text("#mqBox").replace("\n", " "))
     pg.click("#mqBox .mqr"); pg.wait_for_selector("#mqStarted", timeout=20000)
     pg.go_back(); pg.wait_for_function("location.hash === '#/a/%s'" % gid, timeout=10000)
     ok(True, "brauzerin geri oxu hesabatdan Tapşırıqlara qaytardı")
+
+    print("B2 · qrupun İcmalı: «Son tapşırıqlar»da dərs məşqi")
+    pg.goto(PANEL + "#/g/" + gid); pg.reload(); pg.wait_for_selector("#gkAsg .ykh", timeout=20000)
+    pg.wait_for_selector("#gkAsg .gkmq", timeout=20000)
+    r0 = pg.locator("#gkAsg .gkmq").first
+    ok("dərs məşqi" in r0.inner_text() and "Natural ədədlər" in r0.inner_text() and r0.get_attribute("href") == "#/mq/" + mid,
+       "«Son tapşırıqlar»da «dərs məşqi» sətri, hesabata aparır", r0.inner_text().replace("\n", " "))
+    if SHOT: pg.screenshot(path=SHOT + "/mq_icmal_1280.png", full_page=True)
 
     print("D · boş hal")
     pg.goto(PANEL + "#/a/" + g7 + "/m"); pg.wait_for_selector(".empty", timeout=20000)
@@ -160,7 +168,18 @@ with sync_playwright() as pw:
     ok("Müəllimin tapşırıq verməsini gözlə" not in sp.inner_text("#main") and "Yuxarıdakı məşqi işlə" in sp.inner_text("#main"),
        "məşq varkən «tapşırıq yoxdur — gözlə» yazılmır")
     ok(sp.locator("#msqBox .mqrow .ic svg").count() == 1, "kartda ikon var")
-    if SHOT: sp.screenshot(path=SHOT + "/mq_sagird_ev_390.png", full_page=True)
+    ok(sp.inner_text("#msqH").strip() == "Dərs məşqi" and sp.locator("#msqBox .mqrow .mqtag").count() == 1
+       and "Hər cavabdan sonra düzünü görəcəksən" in sp.inner_text("#msqBox"), "kart testdən seçilir: «Dərs məşqi» başlığı, «məşq» nişanı, ipucu")
+    if SHOT:
+        sp.screenshot(path=SHOT + "/mq_sagird_ev_390.png", full_page=True)
+        #  tutusdurma sekli: eyni ev ekraninda HEM test HEM ders mesqi - ferq gorunsun (sonra test silinir)
+        db("""insert into public.assignments (class_id, test_id, assigned_by, closes_at, max_attempts)
+              select %s::uuid, t.id, %s::uuid, now() + interval '7 days', 1 from public.tests t
+               where t.owner_type = 'platform' and t.status = 'published' and t.is_free order by t.created_at limit 1""", (gid, acc["o"]))
+        sp.reload(); sp.wait_for_selector("#msqBox .mqrow", timeout=20000); sp.wait_for_selector(".test.asg:not(.mqrow)", timeout=20000); sp.wait_for_timeout(500)
+        sp.screenshot(path=SHOT + "/mq_vs_test_390.png", full_page=True)
+        db("delete from public.assignments where class_id = %s::uuid", (gid,))
+        sp.reload(); sp.wait_for_selector("#msqBox .mqrow", timeout=20000)
     def opts(): return sp.locator("#mopts [data-o]").evaluate_all("els => els.map(e => e.getAttribute('data-o'))")
     def cnt(): return sp.inner_text(".mqprog .cnt").strip()
     def answer(right):
@@ -173,6 +192,10 @@ with sync_playwright() as pw:
     ok("Düzdür!" in sp.inner_text("#mFb") and "üç yüz beş" in sp.inner_text("#mFb"), "düz → «Düzdür!» + izah")
     ok(cnt() == "1 / 6", "cavabdan sonra sayğac eyni sualda qalır (1 / 6)", cnt())
     if SHOT: sp.screenshot(path=SHOT + "/mq_sagird_duz_390.png", full_page=True)
+    #  Beledci sekli (komek/img/m17_mesq.png): BELEDCI_IMG=1 ile - ekranin ustunden «Növbəti sual»a qeder
+    if os.environ.get("BELEDCI_IMG"):
+        box = sp.evaluate("() => { const b = document.getElementById('btnMNext').getBoundingClientRect(); return {x: 0, y: 0, width: 390, height: b.bottom + window.scrollY + 18}; }")
+        sp.screenshot(path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "komek", "img", "m17_mesq.png"), full_page=True, clip=box)
     sp.click("#btnMNext"); sp.wait_for_function("document.querySelector('.mqprog .cnt') && document.querySelector('.mqprog .cnt').textContent.trim() === '2 / 6' && !document.querySelector('#mFb .ok, #mFb .warn')", timeout=15000)
     answer(False)
     ok("Səhvdir." in sp.inner_text("#mFb") and "74 > 47" in sp.inner_text("#mFb"), "səhv → «Səhvdir.» + izah")
@@ -236,6 +259,9 @@ with sync_playwright() as pw:
         bb = pg.evaluate("[...document.querySelectorAll('.asgact .btn')].map(e => [Math.round(e.getBoundingClientRect().width), Math.round(e.getBoundingClientRect().height)])")
         ok(len(bb) == 3 and min(b[1] for b in bb) >= 44, "%d: 3 düymə, ≥ 44 px" % w, bb)
         if SHOT: pg.screenshot(path=SHOT + "/mq_tapsiriqlar_%d.png" % w, full_page=True)
+        pg.goto(PANEL + "#/g/" + gid); pg.reload(); pg.wait_for_selector("#gkAsg .gkmq", timeout=20000); pg.wait_for_timeout(400)
+        s2 = sw(pg); ok(s2[0] <= s2[1], "%d: qrupun İcmalı — yana sürüşmə yoxdur" % w, s2)
+        if SHOT: pg.screenshot(path=SHOT + "/mq_icmal_%d.png" % w, full_page=True)
     for w in (360,):
         sp.set_viewport_size({"width": w, "height": 800})
         sp.goto(STUDENT); sp.wait_for_selector("#msqBox .mqrow", timeout=20000)

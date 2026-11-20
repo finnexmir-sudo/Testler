@@ -103,7 +103,9 @@
     cup:   '<path d="M5.5 3.5h8v3a4 4 0 0 1-8 0v-3z"/><path d="M5.5 5H3.8v1.2A2.2 2.2 0 0 0 6 8.4"/>' +
            '<path d="M13.5 5h1.7v1.2A2.2 2.2 0 0 1 13 8.4"/><path d="M9.5 10.5v3"/><path d="M6.5 15.5h6"/>',
     back:  '<path d="M11.5 4.5 6 10l5.5 5.5"/>',
-    right: '<path d="M7.5 4.5 13 10l-5.5 5.5"/>'
+    right: '<path d="M7.5 4.5 13 10l-5.5 5.5"/>',
+    //  936: ders mesqi - karandas (test kartinin «doc» ikonundan secilsin)
+    pen:   '<path d="M12.5 3.5l3 3L7 15H4v-3l8.5-8.5z"/><path d="M10.8 5.2l3 3"/>'
   };
   function ic(n, cls) {
     return '<svg class="' + (cls || "") + '" viewBox="0 0 19 19" fill="none" ' +
@@ -1855,15 +1857,16 @@
       if (ae && l.some(function (x) { return !x.done; })) {
         ae.innerHTML = '<div class="empty"><b>Test tapşırığı yoxdur</b>Yuxarıdakı məşqi işlə.</div>';
       }
-      box.innerHTML = '<h2 id="msqH">Məşq</h2><div class="card pad0">' + l.map(function (x) {
+      box.innerHTML = '<h2 id="msqH">Dərs məşqi</h2><div class="card pad0">' + l.map(function (x) {
         var n = Number(x.n) || 0, a = Number(x.answered) || 0, ok = Number(x.correct) || 0;
         return '<button class="test asg mqrow' + (x.done ? " done" : "") + '" data-mq="' + esc(x.id) + '">' +
-          '<div class="ic">' + ic(x.done ? "check" : "doc") + "</div>" +
-          '<div class="g"><b>' + esc(x.lesson || "") + (x.personal ? '<span class="solo">sənə</span>' : "") + "</b><i>" +
+          '<div class="ic">' + ic(x.done ? "check" : "pen") + "</div>" +
+          '<div class="g"><b><span class="mqtag">məşq</span>' + esc(x.lesson || "") + (x.personal ? '<span class="solo">sənə</span>' : "") + "</b><i>" +
             "<span>" + esc(x.subject || "Məşq") + "</span><span>·</span>" +
             "<span>" + (x.done ? "bitib · " + n + " sual" : (a ? a + " / " + n + " sual" : n + " sual")) + "</span>" +
             (!x.done && x.due ? "<span>·</span><span>son tarix " + esc(mqDate(x.due)) + "</span>" : "") +
           "</i>" +
+          (!a && !x.done ? '<i class="mqhint">Hər cavabdan sonra düzünü görəcəksən</i>' : "") +
           (a && !x.done ? '<span class="mqbar"><i style="width:' + Math.round(a * 100 / Math.max(1, n)) + '%"></i></span>' : "") +
           "</div>" +
           (a ? '<span class="best ' + pctCls(ok * 100 / a) + '">' + Math.round(ok * 100 / a) + "%</span>" : "") +
@@ -1876,7 +1879,7 @@
   }
   function screenMesq(id) {
     markScreen(false);
-    topTitle.textContent = "Məşq";
+    topTitle.textContent = "Dərs məşqi";
     show('<div class="card"><div class="skel">Yüklənir…</div></div>');
     sb.rpc("rpc_student_mesq_next", { p_token: TOKEN, p_id: id }).then(function (d) {
       MS = { id: id, d: d };
@@ -1886,7 +1889,7 @@
   //  zolaq - cavablanan sual sayi; sayğac - indiki sualin nomresi (cavabdan sonra deyismir)
   function mesqHead(d, answered, pos) {
     var n = Number(d.n) || 0;
-    return '<div class="adhead"><b>' + esc(d.lesson || "") + "</b><span>Məşq" + (d.subject ? " · " + esc(d.subject) : "") + "</span></div>" +
+    return '<div class="adhead"><b>' + esc(d.lesson || "") + "</b><span>Dərs məşqi" + (d.subject ? " · " + esc(d.subject) : "") + "</span></div>" +
       '<div class="prog adprog mqprog"><div class="bar"><i style="width:' + Math.round(answered * 100 / Math.max(1, n)) + '%"></i></div>' +
         '<span class="cnt">' + Math.min(n, pos) + " / " + n + "</span></div>";
   }
