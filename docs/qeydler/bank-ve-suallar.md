@@ -689,3 +689,28 @@ yaxınlaşanda xatırlat.
   800–849, qalanı 850–899. **Kod sessiyası yeni miqrasiyanı 900–999 aralığında yazır** — `db/` siyahısındakı son
   nömrədən sonrakını götürmə, 226–899 və **1000+** bank aralığıdır (2026-10-07: riyaziyyat 1/3/4-cü sinif
   1000–1049, 11-ci sinif 1100–1149).
+
+## db/937 — Test səviyyəsi: «Qarışıq / Daha asan / Daha çətin» (2026-11-20, istifadəçi)
+
+**Problem.** Test yığ-da «Asan / Orta / Çətin» **filtr** idi: «Çətin» yalnız `difficulty = 3` sualları götürürdü.
+Bazada 10-dan az çətin sualı olan fəsil çoxdur (İngilis dili 63, Azərbaycan dili 59, Həyat bilgisi 22, Riyaziyyat 21;
+Az 10–11-də çətin 0–1) — belə mövzuda «Çətin» test yığa bilmirdi.
+
+**Həll — filtr yox, sıralama** (`p_rule.level_mode`): `mixed` (susmaya görə, indiki balans) · `harder` (mövzu daxilində
+3 → 2 → 1, yuxarıdan lazım olan say) · `easier` (1 → 2 → 3). Mövzuda kifayət qədər sual varsa test **həmişə** yığılır;
+boz düymə və «tamamlandı» xəbərdarlığı yoxdur. Eyni səviyyə daxilində generatorun qaydaları olduğu kimi: səhvə bənzər öndə,
+bu qrupa verilmiş arxada, təsadüf; təkrar süzgəci (pg_trgm ≥ 0,95) və eyni düz cavab limiti seçim dövründə. Bir neçə mövzuda
+balans qalır (sıralama hər mövzunun içində). Köhnə `difficulty` massivi (filtr) daxili çağırışlar üçün qalır (paket,
+köhnə testlərin «Yenidən yığ»-ı).
+
+**Panel.** «Əlavə seçimlər» → «Səviyyə» seqmenti + bir sətir izah. Ön baxışda «Daha asan / çətin» üçün «Testdə: X çətin,
+Y orta, Z asan» (deterministik); «Qarışıq»da tərkib yalnız vərəqdə (təsadüfidir — ön baxış başqa rəqəm göstərərdi).
+Vərəqin başlığında həmişə faktiki tərkib (vərəqin öz suallarından sayılır).
+
+**Əvvəlki qaralama** (eyni gün, canlıya getməyib): «Çətin» çatmayanda orta ilə doldurmaq + boz düymə. İstifadəçi
+qərarı ilə bu qayda ilə əvəz olundu; `app.generate_pick_cetin` 937-də `drop`-la silinir.
+
+**Növbəti mərhələ (ayrıca):** sualın cavab sayı ≥ 30 olanda sıralamada etiket yerinə real düz cavab faizi (stats.p).
+
+- Test: `db/test/smoke_test_seviyyesi.sql` (9 bölmə), `test/e2e_test_seviyyesi.py` (Az 11, bank 1440–1459 işlənmiş baza).
+- Canlıda: `db/937_test_seviyyesi.sql` (yeni cədvəl yoxdur — `05_grants` lazım deyil).

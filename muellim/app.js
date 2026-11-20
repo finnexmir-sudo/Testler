@@ -3324,7 +3324,7 @@
         var f = genFilter();
         f.subject = d.subject || ""; f.levels = d.level ? [d.level] : [];
         f.topics = ls.topic_id ? [ls.topic_id] : []; f.remNames = [];
-        f.difficulty = []; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = ""; f.asgStus = [];
+        f.difficulty = []; f.mode = "mixed"; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = ""; f.asgStus = [];
         f.count = 10;
         //  08.10: qrupdan gelende tapsiriq ekranina qayitmaq YOXDUR - test yigilan kimi hemin qrupa verilir
         //  (son tarix 7 gun, 1 cehd).  Niyyet bir defelikdir: screenGen oxuyub silir.
@@ -4446,7 +4446,7 @@
         var f = genFilter();
         f.subject = d.subject || ""; f.levels = d.level ? [d.level] : [];
         f.topics = tf && tf.topic_id ? [tf.topic_id] : []; f.remNames = [];
-        f.difficulty = []; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = ""; f.asgStus = [];
+        f.difficulty = []; f.mode = "mixed"; f.cls = ""; f.title = ""; f.asg = ""; f.asgStu = ""; f.asgStus = [];
         f.count = 5; f.back = ""; f.backName = "";
         GEN_ENTRY = { id: g.id, name: g.name || "" };
         nav("#/gen");
@@ -8246,7 +8246,6 @@
       gondere bilmedi (a44785271), biri WhatsApp-da sorusdu (ISRA).
       Nisan bir defelikdir: veraq cizilen kimi silinir.  */
   var MADE = "";
-  var MADE_FILL = 0, PFILL = 0;   //  937: teze yigilmis testde nece «orta» sual «Çətin»in yerine qoyuldu
   /*  Tapsiriq verilenden SONRA bir defelik tesdiq.  Evvel ekran sadece
       yenilenirdi: muellim «verilib» setrini gorurdu, amma testin
       SAGIRDE NECE CATDIGI hec yerde yazilmirdi.  Qizbest muellime uc
@@ -8264,7 +8263,7 @@
   function genForClass(g) {
     var f = genFilter();
     //  Teze suzgec - kohne secimler yeni qrupa yapismasin
-    f.subject = ""; f.topics = []; f.difficulty = [];
+    f.subject = ""; f.topics = []; f.difficulty = []; f.mode = "mixed";
     f.title = ""; f.cls = ""; f.remNames = [];
     //  Teyinati generator DEYIL, tapsiriq ekrani verecek: orada son
     //  tarix, cehd sayi ve "tek sagird" secimi var.
@@ -10210,6 +10209,8 @@
                     //  COX SECIM: muellim 8 ve 7-ni birlikde secе bilir.
                     //  Bos = sinif suzgeci yoxdur (butun sinifler).
                     levels: [], topics: [], difficulty: [],
+                    //  937: test seviyyesi - siralama (filtr deyil): mixed | easier | harder
+                    mode: "mixed",
                     count: 10, title: "", asg: "",
                     //  «yalniz bu sagirde»: sagird hesabatindan zeif movzulara test yigilanda
                     asgStu: "", asgStuName: "", asgStus: [], asgMode: "some",
@@ -10278,6 +10279,7 @@
     }
     if (f.topics.length) r.topics = f.topics;
     if (f.difficulty.length) r.difficulty = f.difficulty;
+    if (f.mode === "harder" || f.mode === "easier") r.level_mode = f.mode;
     if (f.cls) r["class"] = f.cls;
     return r;
   }
@@ -10294,7 +10296,7 @@
     if (!stu && stus.length === 1) stu = stus[0];
     f.asgStus = stus.length > 1 ? stus : [];
     f.asgMode = "some";
-    f.difficulty = [];
+    f.difficulty = []; f.mode = "mixed";
     f.topics = weak.map(function (t) { return t.id; });
     f.remNames = weak.map(function (t) { return t.name; });
     f.cls = gid;
@@ -10487,13 +10489,13 @@
         if (on) b.classList.add("on"); else b.classList.remove("on");
       });
     }
-    var cd = $("gDiff");
-    if (cd) {
-      [].forEach.call(cd.querySelectorAll("[data-d]"), function (b) {
-        var on = f.difficulty.indexOf(Number(b.getAttribute("data-d"))) >= 0;
-        if (on) b.classList.add("on"); else b.classList.remove("on");
+    var cm = $("gMode");
+    if (cm) {
+      [].forEach.call(cm.querySelectorAll("[data-v]"), function (b) {
+        b.classList.toggle("on", b.getAttribute("data-v") === (f.mode || "mixed"));
       });
     }
+    if ($("gModeHint")) $("gModeHint").textContent = genModeHint(f);
     var h = $("gLevHint");
     if (h) h.textContent = genLevHint(f);
     var tb = $("gTopBox");
@@ -10538,10 +10540,22 @@
       return '<button type="button" class="seg' + (f.count === n ? " on" : "") + '" data-c="' + n + '">' + n + "</button>";
     }).join("");
   }
+  function genModeHint(f) {
+    return f.mode === "harder" ? "Əvvəl çətin suallar; çatmasa orta, sonra asan."
+         : f.mode === "easier" ? "Əvvəl asan suallar; çatmasa orta, sonra çətin."
+         : "Asan, orta və çətin suallar qarışıq.";
+  }
+  //  937: «Testdə: X çətin, Y orta, Z asan» - mix = {hard, mid, easy}
+  function genMixText(m) {
+    m = m || {};
+    return "Testdə: " + (Number(m.hard) || 0) + " çətin, " + (Number(m.mid) || 0) + " orta, " + (Number(m.easy) || 0) + " asan";
+  }
   function genMoreSum(f) {
     var x = [];
     x.push(f.pool === "mine" ? "öz suallarım" : (f.pool === "platform" ? "hazır suallar" : "bütün suallar"));
     if (f.difficulty.length) x.push(f.difficulty.slice().sort().map(function (d) { return DIFF[d].toLowerCase(); }).join(", "));
+    if (f.mode === "harder") x.push("daha çətin");
+    if (f.mode === "easier") x.push("daha asan");
     if (f.title) x.push("«" + f.title + "»");
     if (GCNTS.indexOf(f.count) < 0) x.push(f.count + " sual");
     return x.join(" · ");
@@ -10603,12 +10617,10 @@
           '<div class="gmoreb">' +
             '<label>Sual mənbəyi</label><div class="segs" id="gPool">' +
               seg("mine", "Öz suallarım", f.pool) + seg("platform", "Hazır suallar", f.pool) + seg("all", "Hamısı", f.pool) + "</div>" +
-            '<label>Çətinlik</label><div class="chips" id="gDiff">' +
-              [1, 2, 3].map(function (d) {
-                return '<button class="chip' + (f.difficulty.indexOf(d) >= 0 ? " on" : "") + '" data-d="' + d + '">' + DIFF[d] + "</button>";
-              }).join("") + "</div>" +
-            //  937: bu suzgecde cetin + orta sual testin sayina catmirsa «Çətin» boz, izah burada (xeta yox)
-            '<p class="gdnote" id="gDiffNote" hidden></p>' +
+            //  937: «Asan / Orta / Çətin» FILTRI evezine SEVIYYE (siralama): movzuda sual varsa test hemise yigilir
+            '<label>Səviyyə</label><div class="segs" id="gMode">' +
+              seg("mixed", "Qarışıq", f.mode || "mixed") + seg("easier", "Daha asan", f.mode || "mixed") + seg("harder", "Daha çətin", f.mode || "mixed") + "</div>" +
+            '<p class="muted gmhint" id="gModeHint">' + esc(genModeHint(f)) + "</p>" +
             '<div class="fieldrow"><div><label for="gTitle">Testin adı</label>' +
               '<input id="gTitle" maxlength="120" placeholder="boş qalsa: fənn · sinif · tarix" value="' + esc(f.title) + '"></div>' +
               '<div style="flex:0 0 140px"><label for="gCnt">Dəqiq sual sayı</label>' +
@@ -10650,12 +10662,10 @@
       f.subject = ""; f.levels = []; f.topics = [];
       screenGen();
     });
-    on("gDiff", "click", function (e) {
-      var b = e.target.closest ? e.target.closest("[data-d]") : null;
+    on("gMode", "click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-v]") : null;
       if (!b) return;
-      var d = Number(b.getAttribute("data-d"));
-      var i = f.difficulty.indexOf(d);
-      if (i >= 0) f.difficulty.splice(i, 1); else f.difficulty.push(d);
+      f.mode = b.getAttribute("data-v");
       genSync();
     });
     //  Dinleyici gTopBox-a baglanir: qutunun ICI genSync-de yeniden yazilir
@@ -10796,28 +10806,10 @@
         v = v || {};
         var found = Number(v.found) || 0, want = Number(v.want) || f.count;
         //  26.10: hər şey qaydasindadirsa bir kicik setir (yasil qutu yox) - problem olanda qutu
-        //  937: «Çətin» secilib, cetin sual azdir - server «orta» ile tamamlayir, muellim bunu evvelceden bilsin
-        var fill = Number(v.filled) || 0;
-        //  937: «Çətin» mumkundurmu (server testi yigan EYNI funksiya ile sayir: 3 + 2).  Mumkun deyilse
-        //  duyme boz, alti izah; secili idise sakitce cixarilir ve on baxis yeniden sayilir - xeta gorunmur.
-        var cok = v.cetin_ok !== false, c3 = document.querySelector('#gDiff [data-d="3"]'), dn = $("gDiffNote");
-        if (c3) { c3.disabled = !cok; c3.classList.toggle("off", !cok); c3.title = cok ? "" : "Bu mövzuda çətin və orta sual azdır"; }
-        if (dn) {
-          var cn = Number(v.cetin_n) || 0;
-          dn.hidden = cok;
-          dn.textContent = cok ? "" : (cn
-            ? "Bu mövzuda çətin və orta sual azdır (" + cn + ") — adi test yığın və ya sual sayını azaldın."
-            : "Bu mövzuda çətin və orta sual yoxdur — adi test yığın.");
-        }
-        if (!cok && f.difficulty.indexOf(3) >= 0) {
-          f.difficulty.splice(f.difficulty.indexOf(3), 1);
-          genSync();
-          return;
-        }
         box.innerHTML = v.enough
           ? '<p class="gok">' + ic("check") + "Hovuzda kifayət qədər sual var — " + want + " sual yığılacaq.</p>" +
-            (fill ? '<p class="gneed" id="gCetin">' + ic("info") + "Bu mövzuda çətin sual azdır — test orta suallarla tamamlanacaq (" +
-                    (want - fill) + " çətin, " + fill + " orta).</p>" : "")
+            //  937: «Daha asan / çətin»de terkib deterministikdir - evvelceden yazilir; «Qarışıq»da yalniz vereqde
+            (f.mode === "harder" || f.mode === "easier" ? '<p class="gmix" id="gMix">' + esc(genMixText(v.mix)) + ".</p>" : "")
           //  Yeni muellimin oz suali yoxdur - bu xeta deyil, yol
           //  gostermekdir (evvel ilk aciliska qirmizi xeta cixirdi)
           : (f.pool === "mine" && !(Number((FAC.usage || {}).used) || 0)
@@ -10886,7 +10878,7 @@
           ff.pool = "all";
           ff.subject = x.d.subject; ff.levels = x.d.level ? [x.d.level] : [];
           ff.topics = x.d.last.topic_id ? [x.d.last.topic_id] : [];
-          ff.difficulty = []; ff.cls = ""; ff.remNames = [x.d.last.topic || ""]; ff.asgStu = ""; ff.asgStuName = ""; ff.asgStus = [];
+          ff.difficulty = []; ff.mode = "mixed"; ff.cls = ""; ff.remNames = [x.d.last.topic || ""]; ff.asgStu = ""; ff.asgStuName = ""; ff.asgStus = [];
           ff.count = 10;
           ff.title = (x.d.last.group || x.d.last.topic) + " — ev tapşırığı";
           //  tapsiriq ekranindan gelinibse (hemin qrup) ora qayidis qalir; yoxsa alici - hemin qrup
@@ -10954,7 +10946,6 @@
           return;
         }
         MADE = v.test_id;
-        MADE_FILL = Number(v.filled) || 0;
         if (send) { send.test = v.test_id; PSEND = send; }
         nav("#/t/" + v.test_id);
       })
@@ -11295,7 +11286,6 @@
     ]).then(function (res) {
       if (!live()) return;
       var fresh = MADE === id; MADE = "";
-      PFILL = fresh ? MADE_FILL : 0; MADE_FILL = 0;
       //  26.10: Test yigdan gelen alici (bir defelik) - vereqde secili gelir
       PSEND_T = PSEND && PSEND.test === id ? PSEND : null; PSEND = null;
       var verildi = ASG; ASG = null;
@@ -11516,6 +11506,11 @@
           " · " + qs.length + " sual" +
           (t.time_limit_sec ? " · ⏱ " + Math.round(t.time_limit_sec / 60) + " dəq" : "") +
           (done ? " · " + done + " şagird işləyib" : "") + "</p>" +
+        //  937: faktiki terkib - vereqin oz suallarindan (hemise duz)
+        (qs.length ? '<p class="muted pmix" id="pMix">' + esc(genMixText({
+            hard: qs.filter(function (q) { return Number(q.difficulty) === 3; }).length,
+            mid:  qs.filter(function (q) { return Number(q.difficulty) === 2; }).length,
+            easy: qs.filter(function (q) { var d = Number(q.difficulty); return d !== 2 && d !== 3; }).length })) + "</p>" : "") +
         '<div id="pErr"></div>' +
       "</div>" +
       /*  26.10 (istifadeci): ardicilliq - SUALLAR -> alici ve tarix -> «Testi ver»; ikinci derece
@@ -11549,11 +11544,6 @@
           (xeta
             ? msg("warn", "Test yığıldı, amma «" + xeta.qrup + "» qrupuna tapşırıq " +
                 "verilə bilmədi: " + xeta.msg + " Aşağıdan özünüz verə bilərsiniz.")
-            : "") +
-          //  937: «Çətin» catmadi - qeyd qisa ve sarı, test yene hazirdir
-          (PFILL
-            ? '<div class="warn" id="pFill">' + ic("info") + "<span>Bu mövzuda çətin sual azdır — test orta suallarla tamamlandı (" +
-              (qs.length - PFILL) + " çətin, " + PFILL + " orta).</span></div>"
             : "") +
           (fresh && !verildi && !xeta && (freeCls.length || !classes.length)
             ? msg("ok", classes.length
@@ -12300,7 +12290,7 @@
       if (b.getAttribute("data-th") === "gen") {
         var g = genFilter();
         g.pool = f.pool; g.subject = tp.subject_slug; g.levels = tp.level ? [tp.level] : [];
-        g.topics = [tp.id]; g.difficulty = []; g.cls = ""; g.remNames = [];
+        g.topics = [tp.id]; g.difficulty = []; g.mode = "mixed"; g.cls = ""; g.remNames = [];
         g.title = ""; g.count = 10; g.asg = ""; g.asgStu = ""; g.asgStuName = ""; g.asgStus = [];
         g.back = ""; g.backName = "";
         nav("#/gen");

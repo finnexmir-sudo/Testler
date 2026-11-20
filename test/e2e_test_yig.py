@@ -78,7 +78,7 @@ with sync_playwright() as pw:
     ok(pg.inner_text("#genHd h1").strip() == "Test yığ" and pg.locator("#band").is_hidden(), "başlıq «Test yığ», iri zolaq yoxdur")
     labels = [x.strip() for x in pg.locator(".genf > label, #gKim > label").all_inner_texts()]
     ok(labels == ["Fənn", "Sinif", "Mövzu", "Sual sayı", "Kimə veriləcək?"], "əsas sahələr sırası", labels)
-    ok(not pg.evaluate("document.getElementById('gMore').open") and pg.locator("#gPool").is_hidden() and pg.locator("#gDiff").is_hidden() and pg.locator("#gTitle").is_hidden(),
+    ok(not pg.evaluate("document.getElementById('gMore').open") and pg.locator("#gPool").is_hidden() and pg.locator("#gMode").is_hidden() and pg.locator("#gTitle").is_hidden(),
        "sual mənbəyi, çətinlik, ad «Əlavə seçimlər» altında, bağlı")
     ok("Suallara bax" in pg.inner_text("#btnMake"), "əsas düymə «Suallara bax»")
     rec_top = pg.evaluate("(document.getElementById('gRec').getBoundingClientRect().top)")
