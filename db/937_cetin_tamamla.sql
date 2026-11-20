@@ -17,6 +17,9 @@
 --  rpc_generate_preview ve rpc_generate_test bunu cagirir ve 'filled' qaytarir -
 --  panel muellime qisa qeyd gosterir: «Bu mövzuda çətin sual azdır — test orta
 --  suallarla tamamlandı.»  Basqa cetinlik secimleri (asan, orta, bir nece) DEYISMIR.
+--  ASANLA DOLDURULMUR (istifadeci, 20.11): 3 + 2 birlikde catmirsa test yigilmir;
+--  rpc_generate_preview bunu 'cetin_ok' ile evvelceden deyir, panel «Çətin»i boz edir:
+--  «Bu mövzuda çətin və orta sual yoxdur — adi test yığın.»  Fayl tekrar isledile biler.
 --
 --  app.generate_pick-e TOXUNULMUR.  RPC govdeleri canli bazadaki versiyadan
 --  HERFEN kocurulub, yalniz secim setri ve qaytarilan 'filled' elave olunub.
@@ -65,11 +68,18 @@ declare
   v_acc  uuid := app.pick_account(p_account);
   v_ids  uuid[];
   v_fill int;
+  v_ck   uuid[];
   v_want int := least(greatest(coalesce((p_rule->>'count')::int, 10), 1), 100);
 begin
   --  937: «Cetin» secilib, cetin sual catmir - eyni suzgecden «orta» ile tamamlanir
   select o_ids, o_filled into v_ids, v_fill from app.generate_pick_cetin(p_rule, v_acc);
+  --  937: «Çətin» bu suzgecde mumkundurmu - testi yigan EYNI funksiya ile (3 + 2 testin sayina catirmi).
+  --  Catmirsa panel «Çətin»i boz gosterir (xeta yox).  Asanla doldurulmur.
+  select o_ids into v_ck from app.generate_pick_cetin(
+    p_rule || jsonb_build_object('difficulty', jsonb_build_array('3')), v_acc);
   return jsonb_build_object(
+    'cetin_ok', coalesce(cardinality(v_ck), 0) >= v_want,
+    'cetin_n',  coalesce(cardinality(v_ck), 0),
     'want',  v_want,
     'found', coalesce(array_length(v_ids, 1), 0),
     'enough', coalesce(array_length(v_ids, 1), 0) >= v_want,

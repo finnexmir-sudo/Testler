@@ -9,6 +9,8 @@
 --   4 · basqa secimler deyismir: «Asan» catmir -> xeta; «Orta + Çətin» catmir -> xeta
 --   5 · 3 + 2 birlikde de catmir -> evvelki xeta (test yigilmir)
 --   6 · «Yenidən yığ» (rpc_regenerate_test) eyni qaydani isledir
+--   7 · preview 'cetin_ok' (asanla DOLDURULMUR): 3 + 2 catirsa true, catmirsa false + cetin_n;
+--       qaydada cetinlik olmasa da hesablanir (panel «Çətin»i evvelceden boz edir)
 -- =====================================================================
 \set ON_ERROR_STOP on
 set client_min_messages = warning;
@@ -144,5 +146,20 @@ begin
   assert pg_temp.diffs(current_setting('smoke.tA')::uuid) = array[2,2,2,2,2,2,3,3], 'regenerate terkibi';
 end $$;
 \echo 'OK  5 · «Yenidən yığ» eyni tamamlamanı isledir'
+
+--  7. preview cetin_ok
+do $$
+declare p jsonb;
+begin
+  p := public.rpc_generate_preview(pg_temp.rule(1, '[]', 12));      --  A: 2 cetin + 10 orta = 12
+  assert (p->>'cetin_ok')::boolean and (p->>'cetin_n')::int = 12, 'A 12: ' || p::text;
+  p := public.rpc_generate_preview(pg_temp.rule(1, '[]', 13));
+  assert not (p->>'cetin_ok')::boolean and (p->>'cetin_n')::int = 12 and (p->>'enough')::boolean, 'A 13 (asan da var - adi test yigilir): ' || p::text;
+  p := public.rpc_generate_preview(pg_temp.rule(1, '["1"]', 6));     --  asan secilib - cetin_ok yene hesablanir
+  assert (p->>'cetin_ok')::boolean, 'A asan 6: ' || p::text;
+  p := public.rpc_generate_preview(pg_temp.rule(3, '[]', 10));      --  C: 9 orta, 0 cetin
+  assert not (p->>'cetin_ok')::boolean and (p->>'cetin_n')::int = 9, 'C 10: ' || p::text;
+end $$;
+\echo 'OK  6 · preview cetin_ok: 3 + 2 catirsa true, catmirsa false (asanla doldurulmur)'
 reset role; reset request.jwt.claim.sub;
 \echo 'CETIN TAMAMLA: HAMISI KECDI'

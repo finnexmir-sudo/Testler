@@ -3593,3 +3593,7 @@ body.bnav-on .afoot.mini{display:none}
 /* 937: «Çətin» orta ile tamamlanir - xeta deyil, melumatdir: qirmizi yox, tund sari (vereqdeki qutu ile eyni ton) */
 #main.gpg .gprev #gCetin{color:#8a5d00;align-items:flex-start}
 #main.gpg .gprev #gCetin svg{margin-top:2px}
+/* 937: «Çətin» bu movzuda mumkun deyil - boz, basilmir; izah xeta deyil (adi boz yazi) */
+#gDiff .chip.off,#gDiff .chip:disabled{background:var(--n-50,#f3f6f5);color:var(--fg-3,#9aa8a3);border-color:var(--line);
+  cursor:not-allowed;opacity:.75}
+.gdnote{margin:6px 0 12px;font-size:13px;color:var(--fg-2);line-height:1.4}

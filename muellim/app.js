@@ -10607,6 +10607,8 @@
               [1, 2, 3].map(function (d) {
                 return '<button class="chip' + (f.difficulty.indexOf(d) >= 0 ? " on" : "") + '" data-d="' + d + '">' + DIFF[d] + "</button>";
               }).join("") + "</div>" +
+            //  937: bu suzgecde cetin + orta sual testin sayina catmirsa «Çətin» boz, izah burada (xeta yox)
+            '<p class="gdnote" id="gDiffNote" hidden></p>' +
             '<div class="fieldrow"><div><label for="gTitle">Testin adı</label>' +
               '<input id="gTitle" maxlength="120" placeholder="boş qalsa: fənn · sinif · tarix" value="' + esc(f.title) + '"></div>' +
               '<div style="flex:0 0 140px"><label for="gCnt">Dəqiq sual sayı</label>' +
@@ -10796,6 +10798,22 @@
         //  26.10: hər şey qaydasindadirsa bir kicik setir (yasil qutu yox) - problem olanda qutu
         //  937: «Çətin» secilib, cetin sual azdir - server «orta» ile tamamlayir, muellim bunu evvelceden bilsin
         var fill = Number(v.filled) || 0;
+        //  937: «Çətin» mumkundurmu (server testi yigan EYNI funksiya ile sayir: 3 + 2).  Mumkun deyilse
+        //  duyme boz, alti izah; secili idise sakitce cixarilir ve on baxis yeniden sayilir - xeta gorunmur.
+        var cok = v.cetin_ok !== false, c3 = document.querySelector('#gDiff [data-d="3"]'), dn = $("gDiffNote");
+        if (c3) { c3.disabled = !cok; c3.classList.toggle("off", !cok); c3.title = cok ? "" : "Bu mövzuda çətin və orta sual azdır"; }
+        if (dn) {
+          var cn = Number(v.cetin_n) || 0;
+          dn.hidden = cok;
+          dn.textContent = cok ? "" : (cn
+            ? "Bu mövzuda çətin və orta sual azdır (" + cn + ") — adi test yığın və ya sual sayını azaldın."
+            : "Bu mövzuda çətin və orta sual yoxdur — adi test yığın.");
+        }
+        if (!cok && f.difficulty.indexOf(3) >= 0) {
+          f.difficulty.splice(f.difficulty.indexOf(3), 1);
+          genSync();
+          return;
+        }
         box.innerHTML = v.enough
           ? '<p class="gok">' + ic("check") + "Hovuzda kifayət qədər sual var — " + want + " sual yığılacaq.</p>" +
             (fill ? '<p class="gneed" id="gCetin">' + ic("info") + "Bu mövzuda çətin sual azdır — test orta suallarla tamamlanacaq (" +

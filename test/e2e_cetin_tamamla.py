@@ -11,7 +11,9 @@
      bazada: 10 sual, hamısı «orta», hamısı həmin mövzudan
   C  Qeyd yalnız TƏZƏ yığılmış vərəqdədir — vərəq yenidən açılanda yoxdur
   D  Çətin sualı bol mövzuda (riyaziyyat) «Çətin» — qeyd YOXDUR, hamısı 3
-  E  Orta sual da yoxdur («Fonetika və leksika»): əvvəlki kimi «yalnız 0 fərqli sual tapıldı»
+  E  Orta sual da yoxdur («Fonetika və leksika»): «Çətin» BOZ və basılmır, altında «Bu mövzuda çətin və orta
+     sual yoxdur — adi test yığın.»; xəta yoxdur, adi test yığılır (asanla doldurulmur)
+  H  «Çətin» seçili ikən belə mövzuya keçəndə «Çətin» səssizcə çıxır — xəta görünmür
   F  «Geri» (düymə və brauzer) vərəqdən Test yığ-a qaytarır
   G  390 / 360 / 1280: yana sürüşmə yoxdur; şəkillər (SHOT_DIR)
 """
@@ -74,7 +76,7 @@ def gen_form(pg, subj, lev, topic_name, count=10, diff=3):
     pg.click("#gCntS [data-c='%d']" % count); pg.wait_for_timeout(500)
     pg.evaluate("document.getElementById('gMore').open = true"); pg.wait_for_timeout(200)
     for c in pg.locator("#gDiff .chip.on").all(): c.click(); pg.wait_for_timeout(200)
-    pg.click("#gDiff [data-d='%d']" % diff)
+    if diff: pg.click("#gDiff [data-d='%d']" % diff)
     pg.wait_for_function("document.querySelector('#gPrev .gok, #gPrev .err, #gPrev .warn')", timeout=20000); pg.wait_for_timeout(1200)
 
 with sync_playwright() as pw:
@@ -134,11 +136,30 @@ with sync_playwright() as pw:
     r = db("select array_agg(distinct q.difficulty) d from public.test_questions tq join public.questions q on q.id = tq.question_id where tq.test_id = %s::uuid", (t2,), one=True)
     ok(r["d"] == [3], "hamısı çətin", r["d"])
 
-    print("E · orta da yoxdur")
+    print("E · orta da yoxdur — «Çətin» boz")
     f0 = db("select t.name from public.topics t where t.slug = 'az-11-fonetika-leksika'", one=True)
-    gen_form(pg, "az-dili", "11", f0["name"])
+    gen_form(pg, "az-dili", "11", f0["name"], diff=None)
+    pg.wait_for_function("!document.getElementById('gDiffNote').hidden", timeout=20000)
     pv = pg.inner_text("#gPrev").replace("\n", " ")
-    ok("fərqli sual tapıldı" in pv and pg.locator("#gCetin").count() == 0, "«%s»: əvvəlki xəta, qeyd yoxdur" % f0["name"], pv)
+    ok(pg.evaluate("document.querySelector('#gDiff [data-d=\"3\"]').disabled"), "«%s»: «Çətin» basılmır (disabled)" % f0["name"])
+    ok(pg.inner_text("#gDiffNote").strip() == "Bu mövzuda çətin və orta sual yoxdur — adi test yığın.", "izah", pg.inner_text("#gDiffNote"))
+    ok("10 sual yığılacaq" in pv and pg.locator("#gPrev .err").count() == 0 and "fərqli sual tapıldı" not in pv, "xəta yoxdur, adi test yığılır", pv)
+    bg = pg.evaluate("getComputedStyle(document.querySelector('#gDiff [data-d=\"3\"]')).color")
+    ok(bg != pg.evaluate("getComputedStyle(document.querySelector('#gDiff [data-d=\"1\"]')).color"), "boz rəng (Asan/Orta ilə fərqli)", bg)
+    if SHOT:
+        pg.evaluate("document.getElementById('gDiff').scrollIntoView({block: 'center'})"); pg.wait_for_timeout(300)
+        pg.screenshot(path=SHOT + "/cetin_boz_1280.png")
+
+    print("H · «Çətin» seçili ikən belə mövzuya keçid")
+    gen_form(pg, "az-dili", "11", t["name"])
+    ok("çətin" in pg.inner_text("#gMoreSum"), "«İşgüzar sənədlər»də «Çətin» seçildi")
+    pg.click("#gTopD > summary"); pg.wait_for_timeout(300)
+    pg.locator("#gTop [data-t]", has_text=t["name"]).first.click(); pg.wait_for_timeout(300)
+    pg.locator("#gTop [data-t]", has_text=f0["name"]).first.click(); pg.wait_for_timeout(300)
+    pg.click("#gTopD > summary")
+    pg.wait_for_function("!document.getElementById('gDiffNote').hidden && document.querySelector('#gPrev .gok')", timeout=20000); pg.wait_for_timeout(800)
+    ok(pg.locator("#gDiff [data-d='3'].on").count() == 0 and "çətin" not in pg.inner_text("#gMoreSum"), "«Çətin» səssizcə çıxdı", pg.inner_text("#gMoreSum"))
+    ok(pg.locator("#gPrev .err").count() == 0 and "10 sual yığılacaq" in pg.inner_text("#gPrev"), "xəta görünmür, adi test", pg.inner_text("#gPrev").replace("\n", " "))
 
     print("G · telefon / masaüstü")
     for w in (390, 360):
@@ -152,6 +173,13 @@ with sync_playwright() as pw:
         pg.wait_for_timeout(400)
         s2 = sw(pg); ok(s2[0] <= s2[1], "%d: vərəq — yana sürüşmə yoxdur" % w, s2)
         if SHOT: pg.screenshot(path=SHOT + "/cetin_vereq_%d.png" % w)
+        gen_form(pg, "az-dili", "11", f0["name"], diff=None)
+        pg.wait_for_function("!document.getElementById('gDiffNote').hidden", timeout=20000)
+        s2 = sw(pg); hh = pg.evaluate("Math.round(document.querySelector('#gDiff [data-d=\"3\"]').getBoundingClientRect().height)")
+        ok(s2[0] <= s2[1] and pg.locator("#gDiffNote").is_visible(), "%d: boz «Çətin» + izah görünür, yana sürüşmə yoxdur" % w, [s2, hh])
+        if SHOT:
+            pg.evaluate("document.getElementById('gDiff').scrollIntoView({block: 'center'})"); pg.wait_for_timeout(300)
+            pg.screenshot(path=SHOT + "/cetin_boz_%d.png" % w)
     br.close()
 
 print("\n" + ("BUTUN YOXLAMALAR KECDI" if not fails else "SEHV (%d): %s" % (len(fails), " | ".join(fails))))
