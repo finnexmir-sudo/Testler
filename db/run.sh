@@ -187,6 +187,8 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 935_mesq_status.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 936_mesq.sql
 #  937: test seviyyesi - Qarışıq / Daha asan / Daha çətin (generate_pick siralamasi)
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 937_test_seviyyesi.sql
+#  938: «Daha çətin / asan» n >= 30 olanda real p ile; statistikanin gunluk yenilenmesi; admin etiket siyahisi
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 938_stats_p.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

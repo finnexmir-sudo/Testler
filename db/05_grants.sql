@@ -121,7 +121,9 @@ declare
         --  Ailə yolu (920): usagin oz sehifesi - token ile
         'rpc_student_family',
         --  Ders mesqi (936): sagird tokenle isleyir, valideyn bir setir gorur
-        'rpc_student_mesq_list','rpc_student_mesq_next','rpc_student_mesq_answer','rpc_parent_mesq'];
+        'rpc_student_mesq_list','rpc_student_mesq_next','rpc_student_mesq_answer','rpc_parent_mesq',
+        --  938: sual statistikasinin gunluk yenilenmesi (is axini anon acarla; 20 saatda bir defe hesablayir)
+        'rpc_qstat_tick'];
   fn text;
 begin
   --  a) artiq acilmis olani bagla.  "from public" VACIBDIR: Postgres
@@ -186,7 +188,9 @@ declare
         --  Ailə yolu (920): usagin oz sehifesi - token ile
         'rpc_student_family',
         --  Ders mesqi (936): sagird tokenle isleyir, valideyn bir setir gorur
-        'rpc_student_mesq_list','rpc_student_mesq_next','rpc_student_mesq_answer','rpc_parent_mesq'];
+        'rpc_student_mesq_list','rpc_student_mesq_next','rpc_student_mesq_answer','rpc_parent_mesq',
+        --  938: sual statistikasinin gunluk yenilenmesi (is axini anon acarla; 20 saatda bir defe hesablayir)
+        'rpc_qstat_tick'];
   leak text;
   v_say int;
 begin

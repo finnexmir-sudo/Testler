@@ -714,3 +714,19 @@ qərarı ilə bu qayda ilə əvəz olundu; `app.generate_pick_cetin` 937-də `dr
 
 - Test: `db/test/smoke_test_seviyyesi.sql` (9 bölmə), `test/e2e_test_seviyyesi.py` (Az 11, bank 1440–1459 işlənmiş baza).
 - Canlıda: `db/937_test_seviyyesi.sql` (yeni cədvəl yoxdur — `05_grants` lazım deyil).
+
+## db/938 — «Daha çətin / asan» real çətinliyə görə (stats.p) + admin «Etiket və real çətinlik» (2026-11-20)
+
+- **Yoxlama (tapşırığın 1-ci şərti):** hazır (platforma) suallarda statistika hesablanır — `question_stats` (db/134)
+  bütün sualların cavablarından (sahib süzgəci yoxdur; nümunə hesabın cəhdləri çıxarılır, 139/207). Amma cədvəl yalnız
+  admin «Sual keyfiyyəti» ekranını açanda yenilənirdi (1 saatdan köhnədirsə).
+- **Təzəlik:** `rpc_qstat_tick` (anon, 20 saatda bir hesablayır, advisory lock) — gündəlik iş axını `oyaq-saxla.yml`
+  çağırır (938 canlıda yoxdursa 404 → addım atlanır). anon ağ siyahısı 35 RPC (`smoke_huquq`).
+- **Sıralama:** `app.qhard_p(difficulty, n, p)` — n ≥ 30 → real p; yoxsa etiketin zolaq ortası (bank qaydası
+  `plan/az_cetin_yeni_yol.md`: p < 40 → 3, 40–75 → 2, > 75 → 1; ortası 20 / 57,5 / 87,5). «Daha çətin» p-si ən aşağı
+  olandan. «Testdə: X çətin…» tərkibi **etiketlə** qalır (vərəq də etiketi göstərir) — bank etiketi düzəldəndə uyğunlaşır.
+- **Admin:** «İdarəetmə» → «Etiket və real çətinlik»: n ≥ 30 hazır suallarda etiket ≠ zolaq (fərqi böyük olan əvvəl);
+  `cetin-namized` nişanlılar ayrıca, son etiket təklifi ilə; n < 30 namizəd «gözləyir» sayılır. «Siyahını kopyala» —
+  TSV `ext_key, etiket, teklif, n, p` (bank ext_key ilə düzəldir).
+- Test: `db/test/smoke_stats_p.sql` (5), `test/e2e_etiket_admin.py`.
+- Canlıda: `db/938_stats_p.sql` → `db/05_grants.sql` (yeni anon RPC).

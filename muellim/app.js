@@ -9063,6 +9063,8 @@
       //  134: sual keyfiyyeti - cehdlerden siqnallar
       (qs ? admFold("Sual keyfiyyəti", Number((qs.counts || {}).all) || 0,
               qsSection(qs, true)) : "") +
+      //  938: etiket ↔ real cetinlik (stats.p) - ayrica yuklenir, kohne bazada bolme cixmir
+      '<div id="qlBox"></div>' +
       admFold("Bizə yazılanlar", fbs.length,
         '<div class="chips" id="fbF">' +
           [["new", "Yeni"], ["seen", "Baxılıb"], ["planned", "Planda"],
@@ -9117,6 +9119,7 @@
     bindAdm();
     bindRep();
     bindQs();
+    loadQl();
     loadHed();
     on("repF", "click", function (ev) {
       var b = ev.target.closest ? ev.target.closest(".chip") : null;
@@ -9891,6 +9894,52 @@
         var k = b.getAttribute("data-qf"), n = Number(k ? c[k] : c.all) || 0;
         b.textContent = (k ? QS_LBL[k][0] : "Hamısı") + (n ? " · " + n : "");
       });
+    }).catch(function () {});
+  }
+  /* ================================================================
+     938: ETIKET ↔ REAL CETINLIK.  n >= 30 cavabli platforma suallarinda etiket
+     (difficulty) real duz faizinin zolagina uymursa siyahida: p < 40 -> 3,
+     40-75 -> 2, > 75 -> 1.  'cetin-namized' nisanlilar AYRICA - teklif olunan son
+     etiketle; n < 30 olanlar «gözləyir».  Bank etiketi ext_key ile duzeldir -
+     «Siyahını kopyala» TSV verir: ext_key, etiket, teklif, n, p.
+     ================================================================ */
+  var QL_AD = { 1: "asan", 2: "orta", 3: "çətin" };
+  function qlRows(list) {
+    return list.map(function (x) {
+      return '<div class="qlr"><div class="b"><code>' + esc(x.ext_key || "—") + "</code><b>" + qt(x.body || "") + "</b>" +
+        "<i>" + esc(x.where || "") + "</i></div>" +
+        '<div class="qln"><span>' + esc(QL_AD[x.difficulty] || x.difficulty) + " → <b>" + esc(QL_AD[x.band] || "—") + "</b></span>" +
+        "<i>" + Math.round(Number(x.p) || 0) + "% düz · " + (Number(x.n) || 0) + " cavab</i></div></div>";
+    }).join("");
+  }
+  function qlTsv(list) {
+    return ["ext_key\tetiket\tteklif\tn\tp"].concat(list.map(function (x) {
+      return [x.ext_key || "", x.difficulty, x.band, x.n, x.p].join("\t");
+    })).join("\n");
+  }
+  function loadQl() {
+    var box = $("qlBox");
+    if (!box) return;
+    sb.rpc("rpc_admin_qlabels", { p_limit: 200 }).then(function (d) {
+      if (!$("qlBox") || !d) return;
+      var mm = d.mismatch || [], nm = d.namized || [], mn = Number(d.mismatch_n) || 0, wait = Number(d.namized_wait) || 0;
+      box.innerHTML = admFold("Etiket və real çətinlik", mn + nm.length,
+        '<p class="muted" style="margin:-4px 0 10px">' + (Number(d.min_n) || 30) + "+ cavabı olan hazır suallar (" + (Number(d.rated) || 0) +
+          "): etiket real düz faizinə uymursa burada. Zolaq: 40%-dən az — çətin, 40–75% — orta, 75%-dən çox — asan." +
+          (d.computed_at ? " Hesablanıb: " + esc(whenAz(d.computed_at)) + "." : "") + "</p>" +
+        "<h3 class=\"qlh\">Etiket uyğun deyil <span class=\"rcnt\">" + mn + "</span></h3>" +
+        (mm.length ? '<div class="card pad0 qllist" id="qlMis">' + qlRows(mm) + "</div>" +
+            '<button class="btn sm" id="qlCopyM">' + ic("copy") + "Siyahını kopyala</button>" +
+            (mn > mm.length ? '<p class="muted">İlk ' + mm.length + " göstərilir (fərqi böyük olanlar əvvəl).</p>" : "")
+          : '<p class="muted">Uyğunsuzluq yoxdur.</p>') +
+        "<h3 class=\"qlh\">Çətin namizədlər «cetin-namized» <span class=\"rcnt\">" + nm.length + "</span></h3>" +
+        '<p class="muted" style="margin:-4px 0 8px">' + (Number(d.min_n) || 30) + "+ cavabı olanlar — son etiket təklifi ilə; " +
+          wait + " namizəd hələ cavab gözləyir.</p>" +
+        (nm.length ? '<div class="card pad0 qllist" id="qlNam">' + qlRows(nm) + "</div>" +
+            '<button class="btn sm" id="qlCopyN">' + ic("copy") + "Siyahını kopyala</button>"
+          : '<p class="muted">Hələ 30+ cavabı olan namizəd yoxdur.</p>'), "qlSum");
+      on("qlCopyM", "click", function () { copyText(qlTsv(mm), $("qlCopyM")); });
+      on("qlCopyN", "click", function () { copyText(qlTsv(nm), $("qlCopyN")); });
     }).catch(function () {});
   }
   function bindQs() {

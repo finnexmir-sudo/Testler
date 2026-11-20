@@ -59,6 +59,20 @@ jobs:
             grep -q '"left":0' /tmp/gc.json && { echo "  temizdir"; break; }
           done
 
+      #  938: sual statistikasi (question_stats) - «Daha çətin / asan» n >= 30 olanda real p isledir.
+      #  RPC 20 saatda bir defe hesablayir, tez cagirilsa hec ne etmir.  938 canlida yoxdursa 404 - atlanir.
+      - name: Sual statistikasini yenile (db/938)
+        run: |
+          set -euo pipefail
+          URL=$(grep -oE 'SUPABASE_URL: *"[^"]+"' muellim/config.js | sed -E 's/.*"([^"]+)"/\1/')
+          KEY=$(grep -oE 'SUPABASE_ANON_KEY: *"[^"]+"' muellim/config.js | sed -E 's/.*"([^"]+)"/\1/')
+          code=$(curl -sS -o /tmp/qs.json -w '%{http_code}' -X POST \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
+            -d '{}' "$URL/rest/v1/rpc/rpc_qstat_tick")
+          echo "HTTP $code: $(cat /tmp/qs.json)"
+          [ "$code" = "404" ] && { echo "  db/938 hele tetbiq olunmayib, atlandi"; exit 0; }
+          [ "$code" = "200" ] || { echo "statistika yenilenmedi"; exit 1; }
+
       - name: Numune hesabi yeniden qur (db/136)
         run: |
           set -euo pipefail
