@@ -8246,6 +8246,7 @@
       gondere bilmedi (a44785271), biri WhatsApp-da sorusdu (ISRA).
       Nisan bir defelikdir: veraq cizilen kimi silinir.  */
   var MADE = "";
+  var MADE_FILL = 0, PFILL = 0;   //  937: teze yigilmis testde nece «orta» sual «Çətin»in yerine qoyuldu
   /*  Tapsiriq verilenden SONRA bir defelik tesdiq.  Evvel ekran sadece
       yenilenirdi: muellim «verilib» setrini gorurdu, amma testin
       SAGIRDE NECE CATDIGI hec yerde yazilmirdi.  Qizbest muellime uc
@@ -10793,8 +10794,12 @@
         v = v || {};
         var found = Number(v.found) || 0, want = Number(v.want) || f.count;
         //  26.10: hər şey qaydasindadirsa bir kicik setir (yasil qutu yox) - problem olanda qutu
+        //  937: «Çətin» secilib, cetin sual azdir - server «orta» ile tamamlayir, muellim bunu evvelceden bilsin
+        var fill = Number(v.filled) || 0;
         box.innerHTML = v.enough
-          ? '<p class="gok">' + ic("check") + "Hovuzda kifayət qədər sual var — " + want + " sual yığılacaq.</p>"
+          ? '<p class="gok">' + ic("check") + "Hovuzda kifayət qədər sual var — " + want + " sual yığılacaq.</p>" +
+            (fill ? '<p class="gneed" id="gCetin">' + ic("info") + "Bu mövzuda çətin sual azdır — test orta suallarla tamamlanacaq (" +
+                    (want - fill) + " çətin, " + fill + " orta).</p>" : "")
           //  Yeni muellimin oz suali yoxdur - bu xeta deyil, yol
           //  gostermekdir (evvel ilk aciliska qirmizi xeta cixirdi)
           : (f.pool === "mine" && !(Number((FAC.usage || {}).used) || 0)
@@ -10931,6 +10936,7 @@
           return;
         }
         MADE = v.test_id;
+        MADE_FILL = Number(v.filled) || 0;
         if (send) { send.test = v.test_id; PSEND = send; }
         nav("#/t/" + v.test_id);
       })
@@ -11271,6 +11277,7 @@
     ]).then(function (res) {
       if (!live()) return;
       var fresh = MADE === id; MADE = "";
+      PFILL = fresh ? MADE_FILL : 0; MADE_FILL = 0;
       //  26.10: Test yigdan gelen alici (bir defelik) - vereqde secili gelir
       PSEND_T = PSEND && PSEND.test === id ? PSEND : null; PSEND = null;
       var verildi = ASG; ASG = null;
@@ -11524,6 +11531,11 @@
           (xeta
             ? msg("warn", "Test yığıldı, amma «" + xeta.qrup + "» qrupuna tapşırıq " +
                 "verilə bilmədi: " + xeta.msg + " Aşağıdan özünüz verə bilərsiniz.")
+            : "") +
+          //  937: «Çətin» catmadi - qeyd qisa ve sarı, test yene hazirdir
+          (PFILL
+            ? '<div class="warn" id="pFill">' + ic("info") + "<span>Bu mövzuda çətin sual azdır — test orta suallarla tamamlandı (" +
+              (qs.length - PFILL) + " çətin, " + PFILL + " orta).</span></div>"
             : "") +
           (fresh && !verildi && !xeta && (freeCls.length || !classes.length)
             ? msg("ok", classes.length

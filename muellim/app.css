@@ -3590,3 +3590,6 @@ body.bnav-on .afoot.mini{display:none}
 /* 936: «dərs məşqi» nisani - testden secilsin (Son tapşırıqlar, siyahilar) */
 .mqtag{display:inline-block;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.02em;
   color:#7a5300;background:#fdf1cf;border:1px solid #f4c94f;border-radius:999px;padding:1px 8px;margin-right:6px;vertical-align:1px}
+/* 937: «Çətin» orta ile tamamlanir - xeta deyil, melumatdir: qirmizi yox, tund sari (vereqdeki qutu ile eyni ton) */
+#main.gpg .gprev #gCetin{color:#8a5d00;align-items:flex-start}
+#main.gpg .gprev #gCetin svg{margin-top:2px}
