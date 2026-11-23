@@ -360,9 +360,9 @@
       if (tv) {
         if (Number(tv.n) >= 4 && Number(tv.prevn) >= 2 && tv.last3 != null && tv.prev3 != null) {
           var l3 = Math.round(Number(tv.last3)), p3 = Math.round(Number(tv.prev3)), dt = l3 - p3;
-          out += '<p class="trend ' + (dt >= 0 ? "up" : "down") + '">Son 3 testdə ' + l3 + "% — " +
-            (dt > 0 ? "əvvəlki " + Number(tv.prevn) + " testdən " + dt + " bənd yaxşı."
-             : dt < 0 ? "əvvəlki " + Number(tv.prevn) + " testdən " + Math.abs(dt) + " bənd aşağı."
+          out += '<p class="trend ' + (dt >= 0 ? "up" : "down") + '">Son 3 testin ortası ' + l3 + "% — " +
+            (dt > 0 ? "əvvəlki " + Number(tv.prevn) + " testin ortasından " + dt + " bənd yuxarı."
+             : dt < 0 ? "əvvəlki " + Number(tv.prevn) + " testin ortasından " + Math.abs(dt) + " bənd aşağı."
              : "əvvəlki testlərlə eyni.") + "</p>";
         } else {
           out += '<p class="muted">Gedişatı görmək üçün ən azı 4 test lazımdır.</p>';

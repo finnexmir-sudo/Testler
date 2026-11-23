@@ -91,7 +91,7 @@ with sync_playwright() as pw:
         sid = risk.get_attribute("data-al"); cid = risk.get_attribute("data-g")
         pg.goto(PANEL + "#/s/" + sid + "/" + cid); pg.wait_for_selector("#stuSt", timeout=20000); pg.wait_for_timeout(400)
         rs = stuSt(pg)
-        ok(mm and ("son 3 test %s%%" % mm.group(2)) in rs and ("test %s%%" % mm.group(1)) in rs and "↘" in rs,
+        ok(mm and ("son 3 testin ortası %s%%" % mm.group(2)) in rs and ("testin ortası %s%%" % mm.group(1)) in rs and "↘" in rs,
            "kartda «↘ … son 3 test Y% · əvvəlki N test X%» — Siqnaldakı X və Y", rt[:70] + " | " + rs)
 
     print("B · Şagird kartı və valideyn paneli: eyni «son 30 gün», eyni gedişat")
@@ -101,14 +101,14 @@ with sync_playwright() as pw:
     rs = stuSt(pg)
     ok("Bütün dövr" in rs, "orta bütün dövr sətri var", rs)
     m30 = re.search(r"Son 30 gün (\d+)%", rs)   #  26.10: cedvelin «Son 30 gün» setri
-    mtr = re.search(r"son 3 test (\d+)% · əvvəlki (\d+) test (\d+)%", rs)
+    mtr = re.search(r"son 3 testin ortası (\d+)% · əvvəlki (\d+) testin ortası (\d+)%", rs)
     pv = page(ctx)
     pv.goto(ROOT + "valideyn/?kod=" + st["p"]); pv.wait_for_selector(".card.sum", timeout=30000); pv.wait_for_timeout(500)
     vt = pv.inner_text(".card.sum").replace("\n", " ")
     mv = re.search(r"^(\d+)%", vt.strip())
     ok(m30 and mv and m30.group(1) == mv.group(1), "«son 30 gün» müəllimdə və valideyndə eynidir", "%s / %s" % (m30 and m30.group(1), mv and mv.group(1)))
     if mtr:
-        ok(("Son 3 testdə %s%%" % mtr.group(1)) in vt and ("əvvəlki %s test" % mtr.group(2)) in vt,
+        ok(("Son 3 testin ortası %s%%" % mtr.group(1)) in vt and ("əvvəlki %s testin ortası" % mtr.group(2)) in vt,
            "valideyn eyni gedişatı yazır (son 3 test, əvvəlki N test)", vt[:120])
     else:
         ok("ən azı 4 test" in vt, "az testdə valideyn də müqayisə göstərmir", vt[:120])

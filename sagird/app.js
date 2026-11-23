@@ -379,6 +379,8 @@
     if (!tp.length) return "";
     var lbl = { ok: ["bh", "yaxşı"], mid: ["bm", "orta"], weak: ["bl", "zəif"] };
     return "<h2>Mövzu xəritən</h2>" +
+      '<p class="muted" style="margin:-4px 0 10px">İlkin yoxlama: hər mövzuya 3 sual. ' +
+        "«Zəif» o deməkdir ki, bu mövzu sənə hələ çətin gəlir — məşq etdikcə dəyişəcək.</p>" +
       (st.length
         ? '<div class="warn" style="margin-bottom:12px">' + ic("info") +
           "<span>Bundan başla: <b>" + st.map(esc).join(", ") + "</b></span></div>"

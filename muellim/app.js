@@ -5984,7 +5984,7 @@
     return "ilkin nəticə · " + Number(t.total) + " sual" + (t.last_at ? " · " + dateAz(t.last_at) : "");
   }
   function trendSoz(ti) {
-    return "son 3 test " + ti.to + "% · əvvəlki " + ti.pn + " test " + ti.from + "%";
+    return "son 3 testin ortası " + ti.to + "% · əvvəlki " + ti.pn + " testin ortası " + ti.from + "%";
   }
 
   function progData(r) {
@@ -6323,11 +6323,15 @@
             ? '<span class="dgdelta">əvvəlki (' + dateAz(d.prev_at) + "): " +
               d.weak_prev + " zəif → " + (d.weak_now || 0) + "</span>" : "") +
         "</div>" +
+        /*  GPT reyi (23.11): 3 sualdan «zeif» qeti hokm kimi oxunurdu.  Xerite ilkin
+            yoxlamadir - dil «cetinlik gorunub»; deqiqlesdirme ucun tekrar yoxlama.  */
+        '<p class="muted dgnote">İlkin yoxlama: hər mövzuya 3 sual. «Zəif» — bu yoxlamada ' +
+          "çətinlik görünüb; dəqiq demək üçün həmin mövzudan təkrar test verin.</p>" +
         (st.length
           ? '<div class="warn" style="margin:12px 0 0">' + ic("warn") +
             "<span>Bundan başla: <b>" + st.map(esc).join(", ") + "</b></span></div>"
           : '<div class="ok" style="margin:12px 0 0">' + ic("check") +
-            "<span>Bütün mövzular yaxşıdır.</span></div>") +
+            "<span>Bu yoxlamada bütün mövzular yaxşı çıxıb.</span></div>") +
         "</div>" +
         /*  Yaxsi movzular yigilmis: 12 setirlik xerite ekrani udurdu,
             asagida "Movzu uzre menimseme" de eyni movzulari sayirdi.
@@ -12781,7 +12785,7 @@
             'placeholder="a = 100..999, b = 100..999; şərt: a > b" value="' + esc(q.paramsText || "") + '">' +
           '<p class="muted" style="margin:8px 0 10px">Sualda və variantlarda ' +
             "<b>{a}</b>, <b>{b}</b>, <b>{a+b}</b> yazın — hər şagird başqa rəqəmlər görür, " +
-            "cavab əzbərlənmir. Məsələn sual «{a} + {b} neçə edər?», variantlar " +
+            "hazır cavabı köçürmək və əzbərləmək çətinləşir. Məsələn sual «{a} + {b} neçə edər?», variantlar " +
             "«{a+b}», «{a+b+10}», «{a-b}». Yazılı sualda cavab «{a*b}» kimi yazılır. " +
             "İfadədə yalnız + − × ÷ olar: + - * / % və mötərizə.</p>" +
           '<button type="button" class="btn sm ghost" id="qparTry">Nümunə göstər</button>' +
