@@ -487,3 +487,37 @@ NİYƏ: ölçüldü (`test/_suret.py`) — panelin soyuq açılışı zəif 3G-d
 Ümumi yük 241 KB → 160 KB (sıxışdırılmış).
 
 ---
+
+## Canlı bazanın ehtiyat nüsxəsi — ayda bir dəfə (2026-11-24)
+
+**Niyə:** pulsuz Supabase planında yüklənə bilən gündəlik ehtiyat yoxdur. Bazada şagird adları və müəllim
+e-poçtları var — nüsxə **heç vaxt** repoya, e-poçta, çata düşmür; yalnız şifrəli arxiv kimi saxlanır.
+Dump-ı istifadəçi **öz kompüterində** çıxarır (bulud sessiyasında parol yoxdur, konteyner müvəqqətidir).
+
+**Bir dəfə hazırlıq**
+- `pg_dump` (versiyası serverinkindən kiçik olmamalıdır — 17 götür):
+  Mac `brew install libpq && brew link --force libpq`; Windows — PostgreSQL 17 quraşdırıcısında yalnız «Command Line Tools».
+- 7-Zip (Windows) və ya `brew install p7zip` (Mac).
+- Qoşulma sətri: Supabase → layihə → **Connect** → **Session pooler** (port **5432**; 6543 «transaction» pooler
+  pg_dump üçün yaramır; birbaşa `db.<ref>.supabase.co` pulsuzda IPv6-dır, çox evdə açılmır).
+  Parol = **Database password** (unudulubsa Settings → Database → Reset; sayt API açarı ilə işləyir, reset onu sındırmır).
+
+**Hər ay (5 dəqiqə)**
+```bash
+# 1. nüsxə — paroldan sətirdə YAZMA, pg_dump özü soruşur (shell tarixçəsinə düşməsin)
+pg_dump "postgresql://postgres.trsgfmlfiuozscjzkkjp@<POOLER_HOST>:5432/postgres" \
+  -Fc --no-owner --no-privileges -f bil10_$(date +%F).dump
+# 2. yoxla — boş deyil, cədvəllər var
+pg_restore -l bil10_*.dump | grep -c "TABLE DATA"      # 100-dən çox olmalıdır
+ls -lh bil10_*.dump                                      # bir neçə MB-dan az olmamalıdır
+# 3. şifrələ (AES-256, fayl adları da gizli), parolu parol menecerində saxla
+7z a -p -mhe=on bil10_$(date +%Y-%m).7z bil10_*.dump
+# 4. şifrəsiz faylı sil
+rm bil10_*.dump
+```
+- `.7z`-ni **iki yerə** qoy: xarici disk/flaş + şəxsi bulud qovluğu (Google Drive və s. — yalnız şifrəli fayl).
+- Son 6 ayın nüsxəsi saxlanır, köhnələr silinir.
+- **Rübdə bir dəfə bərpa sınağı** (nüsxə açılmırsa, nüsxə deyil):
+  `createdb bil10_yoxla && pg_restore -d bil10_yoxla --no-owner bil10_….dump` — Supabase rollarına
+  (`supabase_admin`, `authenticated`…) aid xəbərdarlıqlar normaldır; sonra
+  `psql -d bil10_yoxla -c "select count(*) from public.students"` real sayı verməlidir.
