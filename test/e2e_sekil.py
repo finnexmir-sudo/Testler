@@ -121,6 +121,9 @@ with sync_playwright() as pw:
     print("C · Pis ünvan ekranda çəkilmir")
     #  Bazadaki qapini QESDLE acıb pis unvan yaziriq: ikinci qapinin
     #  (ekran suzgeci) heqiqeten islediyini gormek ucun.
+    #  939: CHECK-in CARI tərifi saxlanir ve eynisi geri qoyulur - evvel 188-in
+    #  kohne formasi elle yazilirdi, sonraki testlerde muellim sekli (939) sinirdi.
+    CK = db("select pg_get_constraintdef(oid) d from pg_constraint where conname = 'questions_media_ok'", one=True)["d"]
     db("alter table public.questions drop constraint questions_media_ok")
     db("""update public.questions set media_url = 'javascript:alert(1)'
            where id = any(%s::uuid[])""", (QIDS,))
@@ -131,14 +134,7 @@ with sync_playwright() as pw:
        pg.locator(".qfig").count())
     db("""update public.questions set media_url = app.svg_uri(%s)
            where id = any(%s::uuid[])""", (SVG, QIDS))
-    db("""alter table public.questions add constraint questions_media_ok check (
-            media_url is null or (owner_type = 'platform' and length(media_url) <= 24000
-            and (media_url like 'data:image/svg+xml,%%' or media_url like 'data:image/svg+xml;%%'
-                 or media_url like 'https://%%')
-            and position('script' in lower(media_url)) = 0
-            and position('onload' in lower(media_url)) = 0
-            and position('onerror' in lower(media_url)) = 0
-            and position('javascript:' in lower(media_url)) = 0))""")
+    db("alter table public.questions add constraint questions_media_ok " + CK.replace("%", "%%"))
     ctx.close()
 
     print("D · Müəllim panelində")

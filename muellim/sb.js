@@ -144,10 +144,16 @@
 
   function send(path, opt, retry) {
     var c = cfg();
+    var h = headers(opt.auth !== false);
+    //  939: fayl yuklemesi - govde xam Blob, oz tipi ile
+    if (opt.raw) {
+      h["Content-Type"] = opt.ctype || "application/octet-stream";
+      Object.keys(opt.headers || {}).forEach(function (k) { h[k] = opt.headers[k]; });
+    }
     return netFetch(c.SUPABASE_URL + path, {
       method: opt.method || "GET",
-      headers: headers(opt.auth !== false),
-      body: opt.body ? JSON.stringify(opt.body) : undefined
+      headers: h,
+      body: opt.raw ? opt.raw : (opt.body ? JSON.stringify(opt.body) : undefined)
     }).then(function (r) {
       return r.text().then(function (t) {
         var data = null;
@@ -290,6 +296,18 @@
       return request("/rest/v1/rpc/" + encodeURIComponent(fn), {
         method: "POST", body: args || {}
       });
+    },
+
+    /*  939: Storage.  path = "<hesab>/<uuid>.webp".  Fayl adi tekrar olunmur
+        (uuid), ona gore kes uzun: brauzer sekli bir defe yukleyir.  */
+    upload: function (bucket, path, blob) {
+      return request("/storage/v1/object/" + bucket + "/" + path, {
+        method: "POST", raw: blob, ctype: blob.type,
+        headers: { "cache-control": "max-age=31536000", "x-upsert": "false" }
+      });
+    },
+    removeFile: function (bucket, path) {
+      return request("/storage/v1/object/" + bucket + "/" + path, { method: "DELETE" });
     },
 
     /* select("students", {select:"id,full_name", eq:{class_id:x}, order:"full_name"}) */

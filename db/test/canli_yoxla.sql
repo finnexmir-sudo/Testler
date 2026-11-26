@@ -162,6 +162,11 @@ select * from (values
     (select exists (select 1 from f where proname='rpc_plan_test_done' and def like '%ders_tag%'))),
  ('929 generator: çox sinif süzgəci (levels) qayıdır',
     (select exists (select 1 from f where proname='generate_pick' and def like '%929: sinif suzgeci%'))),
+ ('939 müəllimin öz sualına şəkil (Storage: sual-sekil, 3 siyasət)',
+    (select exists (select 1 from f where proname='rpc_bank_question_media')
+        and exists (select 1 from storage.buckets where id = 'sual-sekil' and public)
+        and (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects'
+               and policyname like 'sual_sekil_%') = 3)),
  ('934 hədəfli tapşırıq: qrupun seçilmiş şagirdlərinə',
     (select exists (select 1 from f where proname='rpc_assign_test_many'))),
  ('933 siqnallar: növün içində ən ağır birinci',

@@ -175,7 +175,12 @@
       (iki qat: server yazmaga qoymur, ekran cizmir).  */
   function fig(u) {
     if (!u) return "";
-    if (!/^data:image\/svg\+xml[,;]/.test(u) && !/^https:\/\//.test(u)) return "";
+    //  939: muellimin oz sualinin sekli Storage-dedir, unvan NISBI saxlanir
+    //  (/storage/v1/object/public/sual-sekil/<hesab>/<uuid>.webp) - host
+    //  config-den qosulur.  Bazadaki CHECK-in eyni formasi.
+    if (/^\/storage\/v1\/object\/public\/sual-sekil\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(webp|jpg)$/.test(u)) {
+      u = ((window.CFG && window.CFG.SUPABASE_URL) || "") + u;
+    } else if (!/^data:image\/svg\+xml[,;]/.test(u) && !/^https:\/\//.test(u)) return "";
     return '<div class="qfig"><img src="' + esc(u) + '" alt="Sualın şəkli"></div>';
   }
   function show(html) {

@@ -189,6 +189,7 @@ psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 936_mesq.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 937_test_seviyyesi.sql
 #  938: «Daha çətin / asan» n >= 30 olanda real p ile; statistikanin gunluk yenilenmesi; admin etiket siyahisi
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 938_stats_p.sql
+psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 939_sual_sekli_muellim.sql
 psql -v ON_ERROR_STOP=1 -q -d "$DB" -f 07_seed_tests.sql
 bank 16_bank_riy4.sql
 bank 17_bank_sinif4.sql

@@ -132,7 +132,12 @@
       (iki qat: server yazmaga qoymur, ekran cizmir).  */
   function fig(u) {
     if (!u) return "";
-    if (!/^data:image\/svg\+xml[,;]/.test(u) && !/^https:\/\//.test(u)) return "";
+    //  939: muellimin oz sualinin sekli Storage-dedir, unvan NISBI saxlanir
+    //  (/storage/v1/object/public/sual-sekil/<hesab>/<uuid>.webp) - host
+    //  config-den qosulur.  Bazadaki CHECK-in eyni formasi.
+    if (/^\/storage\/v1\/object\/public\/sual-sekil\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(webp|jpg)$/.test(u)) {
+      u = ((window.CFG && window.CFG.SUPABASE_URL) || "") + u;
+    } else if (!/^data:image\/svg\+xml[,;]/.test(u) && !/^https:\/\//.test(u)) return "";
     return '<div class="qfig"><img src="' + esc(u) + '" alt="Sualın şəkli"></div>';
   }
   /* Yeni ekran cizilende "gozleyin" veziyyeti hemise sifirlanir -
@@ -9069,6 +9074,7 @@
               qsSection(qs, true)) : "") +
       //  938: etiket ↔ real cetinlik (stats.p) - ayrica yuklenir, kohne bazada bolme cixmir
       '<div id="qlBox"></div>' +
+      '<div id="skBox"></div>' +
       admFold("Bizə yazılanlar", fbs.length,
         '<div class="chips" id="fbF">' +
           [["new", "Yeni"], ["seen", "Baxılıb"], ["planned", "Planda"],
@@ -9124,6 +9130,7 @@
     bindRep();
     bindQs();
     loadQl();
+    loadSk();
     loadHed();
     on("repF", "click", function (ev) {
       var b = ev.target.closest ? ev.target.closest(".chip") : null;
@@ -9921,6 +9928,22 @@
       return [x.ext_key || "", x.difficulty, x.band, x.n, x.p].join("\t");
     })).join("\n");
   }
+  /*  939: muellim suallarinin sekilleri Storage-de - pulsuz plan 1 GB.
+      Bir setir: ne qeder dolub.  Kohne bazada (RPC yoxdur) bolme cixmir.  */
+  function loadSk() {
+    if (!$("skBox")) return;
+    sb.rpc("rpc_admin_sekil", {}).then(function (d) {
+      var box = $("skBox");
+      if (!box || !d) return;
+      var mb = (Number(d.bytes) || 0) / 1048576;
+      box.innerHTML = '<div class="card tight skbox"><b>Sual şəkilləri (Storage)</b>' +
+        '<p class="muted" style="margin:4px 0 0">' + (Number(d.files) || 0) + " fayl · " +
+        (mb < 10 ? mb.toFixed(1) : Math.round(mb)) + " MB / 1 GB (" + Math.round(mb / 10.24) + "%) · " +
+        (Number(d.accounts) || 0) + " hesab · " + (Number(d.used_q) || 0) + " şəkilli sual · hesaba limit " +
+        (Number(d.limit) || 0) + " fayl</p></div>";
+    }).catch(function () {});
+  }
+
   function loadQl() {
     var box = $("qlBox");
     if (!box) return;
@@ -12711,6 +12734,135 @@
      Serverde de eyni qaydalar var - bura yalniz erken xeberdarliqdir.
      ================================================================ */
   var QD = null;   // redakte olunan sual
+  /*  939: sualin sekli.  Fayl secilen kimi kicildilir ve Storage-e yuklenir
+      (IMG_PENDING), sual saxlananda media_url-e yazilir.  Saxlamadan
+      cixilsa ve ya sekil deyisdirilse, saxlanmamis fayl silinir - hesabin
+      fayl limiti bos yere dolmasin.  */
+  var IMG_PENDING = null;
+  var IMG_PRE = "/storage/v1/object/public/sual-sekil/";
+  function imgName(u) {
+    return u && u.indexOf(IMG_PRE) === 0 ? u.slice(IMG_PRE.length) : "";
+  }
+  function dropPending() {
+    if (!IMG_PENDING) return;
+    sb.removeFile("sual-sekil", IMG_PENDING).catch(function () {});
+    IMG_PENDING = null;
+  }
+  function uuid4() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    var b = new Uint8Array(16);
+    crypto.getRandomValues(b);
+    b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+    var h = Array.prototype.map.call(b, function (x) { return (x + 256).toString(16).slice(1); }).join("");
+    return h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20);
+  }
+  /*  Telefon sekli 3-5 MB olur.  <= 1000 px, WebP (bacarmayan brauzerde
+      JPEG), ~80 KB-a qeder sixilir.  Seffaf yer ag olur (cedvel/fiqur
+      sekilleri ag fonda oxunur).  Bucket 100 KB-dan boyuyunu qebul etmir.  */
+  function shrinkImg(file) {
+    return new Promise(function (ok, no) {
+      if (!file || !/^image\//.test(file.type || "")) { no(new Error("Şəkil faylı seçin (JPG, PNG və ya WebP).")); return; }
+      if (file.size > 30e6) { no(new Error("Fayl çox böyükdür (30 MB-dan çox).")); return; }
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onerror = function () { URL.revokeObjectURL(url); no(new Error("Bu şəkli açmaq olmadı. JPG və ya PNG seçin.")); };
+      im.onload = function () {
+        URL.revokeObjectURL(url);
+        var W = im.naturalWidth, H = im.naturalHeight, sides = [1000, 800, 640], qs = [0.82, 0.68, 0.55];
+        function enc(cv, q) {
+          return new Promise(function (r) {
+            cv.toBlob(function (b) {
+              if (b && b.type === "image/webp") return r(b);
+              cv.toBlob(function (j) { r(j); }, "image/jpeg", q);
+            }, "image/webp", q);
+          });
+        }
+        var last = null;
+        (function side(i) {
+          if (i >= sides.length) {
+            if (last && last.size <= 100 * 1024) ok(last);
+            else no(new Error("Şəkil çox iridir — kəsib yenidən yükləyin."));
+            return;
+          }
+          var k = Math.min(1, sides[i] / Math.max(W, H)), cv = document.createElement("canvas");
+          cv.width = Math.max(1, Math.round(W * k)); cv.height = Math.max(1, Math.round(H * k));
+          var cx = cv.getContext("2d");
+          cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height);
+          cx.drawImage(im, 0, 0, cv.width, cv.height);
+          (function qual(j) {
+            if (j >= qs.length) { side(i + 1); return; }
+            enc(cv, qs[j]).then(function (b) {
+              if (!b) { no(new Error("Şəkli hazırlamaq olmadı.")); return; }
+              last = b;
+              if (b.size <= 80 * 1024) ok(b); else qual(j + 1);
+            });
+          })(0);
+        })(0);
+      };
+      im.src = url;
+    });
+  }
+  function qImgHtml() {
+    var has = !!QD.media;
+    //  numune hesabda yukleme baglidir (server de qebul etmir - db/939)
+    if (ACC && ACC.is_demo) {
+      return "<label>Şəkil <span class=\"muted\">(istəyə bağlı)</span></label>" + (has ? fig(QD.media) : "") +
+        '<p class="muted" style="margin:4px 0 0">Öz hesabınızda suala şəkil (fiqur, qrafik, cədvəl) əlavə edə bilərsiniz. ' +
+        "Nümunə hesabda şəkil yüklənmir.</p>";
+    }
+    return "<label>Şəkil <span class=\"muted\">(istəyə bağlı)</span></label>" +
+      (has ? fig(QD.media) : "") +
+      '<input type="file" id="qImgIn" accept="image/*" hidden>' +
+      '<div class="qimgb">' +
+        '<button type="button" class="btn sm ghost" id="qImgPick">' + ic("plus") +
+          (has ? "Şəkli dəyiş" : "Şəkil əlavə et") + "</button>" +
+        (has ? '<button type="button" class="btn sm ghost" id="qImgDel">' + ic("x") + "Şəkli sil</button>" : "") +
+      "</div>" +
+      '<div id="qImgMsg"></div>' +
+      '<p class="muted" style="margin:8px 0 0">Fiqur, qrafik, cədvəl. Telefonla çəkilmiş şəkil də olar — özü kiçildilir. ' +
+        "Yalnız sualın şəklini yükləyin: uşaq üzü və şəxsi məlumat olan şəkil yox.</p>";
+  }
+  function drawImg() {
+    var c = $("qImgCard");
+    if (!c) return;
+    c.innerHTML = qImgHtml();
+    bindImg();
+  }
+  function bindImg() {
+    on("qImgPick", "click", function () { var i = $("qImgIn"); if (i) i.click(); });
+    on("qImgIn", "change", function () { var i = $("qImgIn"); pickImg(i && i.files && i.files[0]); });
+    on("qImgDel", "click", function () {
+      if (IMG_PENDING && imgName(QD.media) === IMG_PENDING) dropPending();
+      QD.media = "";
+      drawImg();
+    });
+  }
+  function pickImg(file) {
+    if (!file || !ACC) return;
+    var b = $("qImgPick"), m = $("qImgMsg");
+    if (b) b.disabled = true;
+    if (m) m.innerHTML = '<p class="muted" style="margin:8px 0 0">Şəkil hazırlanır…</p>';
+    sb.rpc("rpc_sekil_yer", { p_account: ACC.id }).then(function (y) {
+      if (y && Number(y.used) >= Number(y.limit)) {
+        throw new Error("Şəkil limiti dolub (" + y.limit + " fayl). Lazımsız şəkilli sualları silin və ya «Bizə yaz»-dan yazın.");
+      }
+      return shrinkImg(file);
+    }).then(function (blob) {
+      var name = ACC.id + "/" + uuid4() + (blob.type === "image/webp" ? ".webp" : ".jpg");
+      return sb.upload("sual-sekil", name, blob).then(function () { return name; });
+    }).then(function (name) {
+      //  yukleme gedende muellim basqa ekrana kecibse - fayl lazim deyil
+      if (!$("qImgCard")) { sb.removeFile("sual-sekil", name).catch(function () {}); return; }
+      dropPending();
+      IMG_PENDING = name;
+      QD.media = IMG_PRE + name;
+      drawImg();
+    }).catch(function (e) {
+      var b2 = $("qImgPick"), m2 = $("qImgMsg");
+      if (b2) b2.disabled = false;
+      if (m2) m2.innerHTML = msg("err", fail(e));
+      var i = $("qImgIn"); if (i) i.value = "";
+    });
+  }
 
   function screenQuestion(id) {
     var live = guard();
@@ -12737,13 +12889,14 @@
           return { body: o.body, correct: !!o.correct };
         }),
         used_in: Number(q.used_in) || 0, answered: Number(q.answered) || 0,
-        paramsText: paramsToStr(q.params), stats: q.stats || null
+        paramsText: paramsToStr(q.params), stats: q.stats || null,
+        media: q.media_url || "", media0: q.media_url || ""
       } : {
         id: null, body: "", kind: "single", explanation: "", difficulty: 2,
         subject: f.subject || "riyaziyyat", level: f.level || "",
         topic_id: "", quarter: "", month: "", tags: [],
         options: [{ body: "", correct: true }, { body: "", correct: false }],
-        used_in: 0, answered: 0, paramsText: ""
+        used_in: 0, answered: 0, paramsText: "", media: "", media0: ""
       };
       drawQuestion();
     }).catch(function (e) { if (live()) show(msg("err", fail(e))); });
@@ -12772,6 +12925,9 @@
         //  134: sualin statistikasi (10+ cavab olanda)
         (q.stats && Number(q.stats.n) >= 10 ? '<p class="muted qstat">' + qstatText(q.stats) + "</p>" : "") +
       "</div>" +
+      '<div class="spacer"></div>' +
+      //  939: sualin sekli (Storage) - fiqur, qrafik, cedvel
+      '<div class="card" id="qImgCard">' + qImgHtml() + "</div>" +
       '<div class="spacer"></div>' +
 
       /*  Sablon (parametrik) sual - db/132.  Deyisenler bir setirde
@@ -12878,6 +13034,7 @@
 
     on("btnBack", "click", function () { goBack("#/b"); });
     on("qparTry", "click", paramsPreview);
+    bindImg();
     drawOptions();
     bindOptions();
     kindNote();
@@ -13218,6 +13375,17 @@
       p_month: q.month ? Number(q.month) : null,
       p_tags: q.tags || [],
       p_params: pp.spec
+    }).then(function (r) {
+      //  939: sekil ayrica RPC ile - sual saxlanib, id belli olandan sonra.
+      //  Sekil alinmasa sual ITMIR: id yaddasda qalir, ikinci basis yenisini yaratmir.
+      if (r && r.id) QD.id = r.id;
+      if ((QD.media || "") === (QD.media0 || "")) return;
+      return sb.rpc("rpc_bank_question_media", { p_id: QD.id, p_media: QD.media || null }).then(function () {
+        var old = imgName(QD.media0);
+        IMG_PENDING = null;
+        QD.media0 = QD.media;
+        if (old) sb.removeFile("sual-sekil", old).catch(function () {});
+      });
     }).then(function () { nav("#/b"); })
       .catch(function (e) {
         setBusy("qSave", false, q.id ? "Dəyişikliyi saxla" : "Sualı yadda saxla");
@@ -13237,8 +13405,15 @@
           "nəticələri qorunacaq."
         : "Sual tamamilə silinsin?")) return;
     busy = true;
+    var gone = !arxiv && imgName(QD.media0);
     sb.rpc("rpc_bank_delete_question", { p_id: QD.id })
-      .then(function () { busy = false; nav("#/b"); })
+      .then(function () {
+        busy = false;
+        //  939: tamamile silinen sualin sekli de silinir (arxivlenende qalir)
+        if (gone) sb.removeFile("sual-sekil", gone).catch(function () {});
+        dropPending();
+        nav("#/b");
+      })
       .catch(function (e) {
         busy = false;
         $("qErr").innerHTML = msg("err", fail(e));
@@ -13421,6 +13596,8 @@
         ekranina atilardi.  Suzgec deyisiklikleri screenGen()-i
         birbasa cagirir, ora dusmur. */
     if (GF && m[0] !== "gen") { GF.back = ""; GF.backName = ""; }
+    //  939: sual redaktorundan saxlamadan cixildi - yuklenmis fayl silinir
+    if (IMG_PENDING && m[0] !== "q") dropPending();
     if (m[0] !== "me" && m[0] !== "adm" && m[0] !== "bize") FB_FROM = FB_PAGE[m[0] || ""] || (m[0] || "İcmal");
     //  "Geri" geldiyi yere qaytarsin deye evvelki unvan yadda saxlanir
     if ((location.hash || "#/") !== CUR_HASH) {

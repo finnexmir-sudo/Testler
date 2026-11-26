@@ -730,3 +730,23 @@ qərarı ilə bu qayda ilə əvəz olundu; `app.generate_pick_cetin` 937-də `dr
   TSV `ext_key, etiket, teklif, n, p` (bank ext_key ilə düzəldir).
 - Test: `db/test/smoke_stats_p.sql` (5), `test/e2e_etiket_admin.py`.
 - Canlıda: `db/938_stats_p.sql` → `db/05_grants.sql` (yeni anon RPC).
+
+## db/939 — müəllimin öz sualına şəkil (Supabase Storage, 2026-11-26)
+
+**Niyə:** rəqiblərdə (TestUp, Kampus) var idi, bizdə yox — 188-in CHECK-i şəkli yalnız platforma sualına buraxırdı.
+**Qərar (istifadəçi):** şəkil bazada yox, **Storage**-də. Ölçü: baza 233 MB / 500 (47%) — dar yer odur; Storage ayrıca 1 GB,
+brauzer şəkli bir dəfə yükləyib keşdə saxlayır (bazada olsa hər test açılanda yenidən gedərdi).
+
+- **Axın:** redaktorda «Şəkil əlavə et» → brauzer kiçildir (≤ 1000 px, WebP; bacarmayanda JPEG; ≤ 80 KB) →
+  `sual-sekil/<hesab>/<uuid>.webp` yüklənir → sual saxlananda `rpc_bank_question_media` `media_url`-ə **nisbi**
+  ünvan yazır (`/storage/v1/object/public/sual-sekil/...`); ekranın `fig()`-i `CFG.SUPABASE_URL`-i qoşur.
+- **Qoruyucular:** bucket public, ≤ 100 KB, yalnız webp/jpeg · RLS: yalnız öz hesabının qovluğu, ad yalnız `<uuid>.webp|jpg`,
+  hesaba ≤ `app.sekil_limit()` = 150 fayl · RPC yalnız öz qovluğundakı **real yüklənmiş** faylı qəbul edir · CHECK formatı yoxlayır.
+- **Silinmə:** şəkil dəyişəndə/silinəndə köhnə fayl, saxlamadan çıxanda yüklənmiş fayl, sual tamamilə silinəndə şəkli
+  tətbiq özü silir (arxivlənəndə qalır). Brauzer bağlanarsa fayl qala bilər — limit ona görə «fayl sayı»dır.
+- **Admin:** İdarəetmədə «Sual şəkilləri (Storage)» sətri: fayl, MB / 1 GB, hesab, şəkilli sual (`rpc_admin_sekil`).
+- **Test:** `smoke_sual_sekli_muellim.sql` (RLS, limit, RPC, CHECK, hüquq), `e2e_sual_sekli_muellim.py`
+  (yüklə → bank → vərəq → şagird testi → nəticə → sil → saxlamadan çıx; 390/1280). Lokal Storage təqlidi:
+  `db/test/00_supabase_stub.sql` (storage sxemi) + `test/mock_supabase.py` (POST/DELETE/GET public).
+- `e2e_sekil.py` CHECK-i söküb geri qoyanda indi **cari** tərifi bərpa edir (əvvəl 188-in köhnə formasını yazırdı — 939-u sındırardı).
+- **Canlıda:** `939_sual_sekli_muellim.sql`, sonra `05_grants.sql`. Yoxlama: `db/test/canli_yoxla.sql` → «939».

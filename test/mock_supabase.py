@@ -28,6 +28,7 @@ from psycopg2 import sql
 
 DSN = os.environ.get("MOCK_DSN", "host=/tmp port=55432 user=postgres dbname=t3")
 TOKENS = {}          # access_token -> uid
+STORE = {}           # 939: (bucket, ad) -> (bayt, content-type, cache-control)
 REFRESH = {}         # refresh_token -> uid
 PASSWORDS = {}       # email -> (uid, password)
 RECOVER = {}         # test ucun: son berpa sorgusunun tokenleri
@@ -76,7 +77,7 @@ class H(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers",
-                         "authorization, apikey, content-type, prefer")
+                         "authorization, apikey, content-type, prefer, cache-control, x-upsert")
         self.send_header("Access-Control-Allow-Methods",
                          "GET, POST, PATCH, DELETE, OPTIONS")
         self.end_headers()
@@ -104,6 +105,8 @@ class H(BaseHTTPRequestHandler):
     def do_POST(self):
         self.test_delay()
         u = urlparse(self.path)
+        if u.path.startswith("/storage/v1/object/"):
+            return self.storage_upload(unquote(u.path[len("/storage/v1/object/"):]))
         q = parse_qs(u.query)
         b = self.body()
 
@@ -330,9 +333,86 @@ class H(BaseHTTPRequestHandler):
         except Exception as e:
             return self.send(400, {"message": str(e)})
 
+    # ----------------------------------------------------------- storage
+    #  939: Supabase Storage-in bize lazim olan hissesi.  Yukleme ve silme
+    #  'authenticated' rolunda storage.objects-e yazilir - canlidaki RLS
+    #  siyasetleri (db/939) lokal da real Postgres-de isleyir.  Bucket-in
+    #  olcu ve tip hedleri Storage kimi burada yoxlanir.  Faylin ozu yaddasda.
+    def storage_upload(self, rest):
+        bucket, _, name = rest.partition("/")
+        n = int(self.headers.get("Content-Length") or 0)
+        data = self.rfile.read(n) if n else b""
+        ctype = (self.headers.get("Content-Type") or "").split(";")[0].strip()
+        uid = self.uid()
+        if not uid:
+            return self.send(400, {"statusCode": "403", "error": "Unauthorized", "message": "Invalid JWT"})
+        try:
+            with db() as c, c.cursor() as cur:
+                cur.execute("select public, file_size_limit, allowed_mime_types from storage.buckets where id = %s", (bucket,))
+                b = cur.fetchone()
+        except Exception as e:
+            return self.send(400, {"message": str(e)})
+        if not b:
+            return self.send(400, {"statusCode": "404", "error": "Bucket not found", "message": "Bucket not found"})
+        if b["file_size_limit"] and len(data) > b["file_size_limit"]:
+            return self.send(400, {"statusCode": "413", "error": "Payload too large",
+                                   "message": "The object exceeded the maximum allowed size"})
+        if b["allowed_mime_types"] and ctype not in b["allowed_mime_types"]:
+            return self.send(400, {"statusCode": "415", "error": "invalid_mime_type",
+                                   "message": "mime type %s is not supported" % ctype})
+        def go(cur):
+            cur.execute("""insert into storage.objects (bucket_id, name, owner, metadata)
+                           values (%s, %s, %s, jsonb_build_object('size', %s::bigint, 'mimetype', %s::text))""",
+                        (bucket, name, uid, len(data), ctype))
+        try:
+            self.run(go)
+        except psycopg2.Error as e:
+            if e.pgcode == "23505":
+                return self.send(400, {"statusCode": "409", "error": "Duplicate", "message": "The resource already exists"})
+            return self.send(400, {"statusCode": "403", "error": "Unauthorized",
+                                   "message": e.diag.message_primary or str(e)})
+        STORE[(bucket, name)] = (data, ctype, self.headers.get("Cache-Control") or "")
+        return self.send(200, {"Key": bucket + "/" + name})
+
+    def do_DELETE(self):
+        self.test_delay()
+        u = urlparse(self.path)
+        if not u.path.startswith("/storage/v1/object/"):
+            return self.send(404, {"message": "Yoxdur"})
+        bucket, _, name = unquote(u.path[len("/storage/v1/object/"):]).partition("/")
+        if not self.uid():
+            return self.send(400, {"statusCode": "403", "error": "Unauthorized", "message": "Invalid JWT"})
+        def go(cur):
+            cur.execute("delete from storage.objects where bucket_id = %s and name = %s returning name", (bucket, name))
+            return cur.fetchall()
+        try:
+            gone = self.run(go)
+        except psycopg2.Error as e:
+            return self.send(400, {"statusCode": "403", "error": "Unauthorized", "message": e.diag.message_primary or str(e)})
+        if not gone:
+            return self.send(400, {"statusCode": "404", "error": "not_found", "message": "Object not found"})
+        STORE.pop((bucket, name), None)
+        return self.send(200, {"message": "Successfully deleted"})
+
+    def storage_public(self, rest):
+        bucket, _, name = rest.partition("/")
+        f = STORE.get((bucket, name))
+        if not f:
+            return self.send(400, {"statusCode": "404", "error": "not_found", "message": "Object not found"})
+        data, ctype, cc = f
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", cc or "max-age=3600")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(data)
+
     def do_GET(self):
         self.test_delay()
         u = urlparse(self.path)
+        if u.path.startswith("/storage/v1/object/public/"):
+            return self.storage_public(unquote(u.path[len("/storage/v1/object/public/"):]))
         if u.path == "/test/recovery":
             t = RECOVER.get("last")
             if not t:
