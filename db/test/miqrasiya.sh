@@ -18,6 +18,9 @@ git -C .. worktree add -q -f "$WT" "$OLD" 2>/dev/null || \
 dropdb --if-exists miq_test 2>/dev/null || true; createdb miq_test
 ( cd "$WT/db" && ./run.sh miq_test >/dev/null 2>&1 )
 echo "kohne baza quruldu ($OLD)"
+#  939: Supabase-in OZ sxemleri (storage ve s.) canlida hemise cari halindadir - kohne
+#  commit-in stub-u ise storage-siz idi.  Cari stub tekrar isledile bilir (if not exists).
+psql -v ON_ERROR_STOP=1 -q -d miq_test -f test/00_supabase_stub.sql >/dev/null
 
 #  MIQRASIYA SIYAHISI IKI HISSEDIR (2026-10-08):
 #
